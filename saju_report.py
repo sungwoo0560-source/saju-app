@@ -108,17 +108,21 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str=""):
             # -- 폰트 등록: 한글/한자 지원 우선순위 --
 
             _FONT_CANDIDATES = [
-                ("Malgun", "C:/Windows/Fonts/malgun.ttf", None),
-                ("Batang", "C:/Windows/Fonts/batang.ttc", 0),
-                ("Gulim", "C:/Windows/Fonts/gulim.ttc", 0),
-                ("Dotum", "C:/Windows/Fonts/dotum.ttc", 0),
-                ("Malgun2", "C:/Windows/Fonts/malgunbd.ttf", None),
-                (
-                    "NanumGothic",
-                    os.path.expanduser("~/AppData/Local/Microsoft/Windows/Fonts/NanumGothic.ttf"),
-                    None,
-                ),
+                # Windows
+                ("Malgun",      "C:/Windows/Fonts/malgun.ttf",    None),
+                ("Batang",      "C:/Windows/Fonts/batang.ttc",     0),
+                ("Gulim",       "C:/Windows/Fonts/gulim.ttc",      0),
+                ("Dotum",       "C:/Windows/Fonts/dotum.ttc",      0),
+                ("Malgun2",     "C:/Windows/Fonts/malgunbd.ttf",   None),
+                ("NanumGothicW", os.path.expanduser("~/AppData/Local/Microsoft/Windows/Fonts/NanumGothic.ttf"), None),
                 ("NanumGothic2", "C:/Windows/Fonts/NanumGothic.ttf", None),
+                # Linux (Streamlit Cloud / Ubuntu)
+                ("NanumGothic",  "/usr/share/fonts/truetype/nanum/NanumGothic.ttf",      None),
+                ("NanumGothicB", "/usr/share/fonts/truetype/nanum/NanumGothicBold.ttf",  None),
+                ("UnDotum",      "/usr/share/fonts/truetype/unfonts-core/UnDotum.ttf",   None),
+                ("BaekmukGulim", "/usr/share/fonts/truetype/baekmuk/gulim.ttf",          None),
+                # 프로젝트 내 폰트 (repo에 추가 시)
+                ("LocalFont",    os.path.join(os.path.dirname(__file__), "fonts", "NanumGothic.ttf"), None),
             ]
 
             BASE_FONT = "Helvetica"
@@ -1069,7 +1073,7 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str=""):
 
                     is_cur = dw["시작연도"] <= current_year <= dw["종료연도"]
 
-                    is_yong = _get_yongshin_match(dw_ss, yongshin_ohs, ilgan_oh) == "yong"
+                    is_yong = get_yongshin_match(dw_ss, yongshin_ohs, ilgan_oh) == "yong"
 
                     cur_mark = " ◀현재" if is_cur else ""
 
@@ -1125,7 +1129,7 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str=""):
 
                     _ic = _dw["시작연도"] <= current_year <= _dw["종료연도"]
 
-                    _iy = _get_yongshin_match(_dss, yongshin_ohs, ilgan_oh) == "yong"
+                    _iy = get_yongshin_match(_dss, yongshin_ohs, ilgan_oh) == "yong"
 
                     _sc = min(100, _DW_SC.get(_dss, 60) + (20 if _iy else 0))
 
@@ -1244,7 +1248,7 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str=""):
 
                     _cdw_ss = TEN_GODS_MATRIX.get(ilgan, {}).get(_cdw["cg"], "-") if _cdw else "-"
 
-                    _is_yong_dw = _cdw and _get_yongshin_match(_cdw_ss, _yohs, _ioh) == "yong"
+                    _is_yong_dw = _cdw and get_yongshin_match(_cdw_ss, _yohs, _ioh) == "yong"
 
                     _sw_c_ss = _sw_c.get("십성_천간", "-")
 
@@ -1488,9 +1492,9 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str=""):
 
                         _fdw_ss = TEN_GODS_MATRIX.get(ilgan, {}).get(_fdw["cg"], "-") if _fdw else "-"
 
-                        _is_yong_y = _get_yongshin_match(_fsw_ss, _yohs3, _ioh3) == "yong"
+                        _is_yong_y = get_yongshin_match(_fsw_ss, _yohs3, _ioh3) == "yong"
 
-                        _is_gi_y = _get_yongshin_match(_fsw_ss, _yohs3, _ioh3) == "gi"
+                        _is_gi_y = get_yongshin_match(_fsw_ss, _yohs3, _ioh3) == "gi"
 
                         if _is_yong_y or _fsw_ss in _GOOD_SS:
                             _fcol = (0.05, 0.28, 0.05)

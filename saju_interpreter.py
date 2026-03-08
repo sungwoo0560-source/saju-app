@@ -42,6 +42,11 @@ def clean_hanja(text):
     return re.sub(r"\(.*?\)", "", text).strip()
 
 
+def get_yongshin_match(dw_cg_ss, yongshin_ohs, ilgan_oh):
+    """대운/세운 십성이 용신 오행과 맞는지 판단 → 'yong' | 'normal' (공개 함수)"""
+    return _get_yongshin_match(dw_cg_ss, yongshin_ohs, ilgan_oh)
+
+
 def _get_yongshin_match(dw_cg_ss, yongshin_ohs, ilgan_oh):
     """대운/세운 십성이 용신 오행과 맞는지 판단 → 'yong' | 'normal'"""
     GEN   = {"木": "火", "火": "土", "土": "金", "金": "水", "水": "木"}
