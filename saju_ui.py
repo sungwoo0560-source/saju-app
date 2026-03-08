@@ -273,6 +273,48 @@ h2, h3 {
         font-size: 15px !important;
     }
 }
+
+/* ═══════════════════════════════════
+   사이드바 스타일
+═══════════════════════════════════ */
+section[data-testid="stSidebar"] {
+    background: linear-gradient(180deg, #2d1f00, #1a1200) !important;
+    border-right: 1px solid #c9a84c !important;
+}
+
+section[data-testid="stSidebar"] .stRadio > div > label {
+    color: #f5e8c8 !important;
+    font-family: 'Noto Serif KR', serif !important;
+    font-size: 14px !important;
+    padding: 10px 16px !important;
+    border-radius: 8px !important;
+    border: none !important;
+    background: transparent !important;
+    transition: all 0.2s !important;
+    cursor: pointer;
+}
+
+section[data-testid="stSidebar"] .stRadio > div > label:hover {
+    background: rgba(201,168,76,0.2) !important;
+}
+
+section[data-testid="stSidebar"] .stRadio > div > label[data-checked="true"] {
+    background: linear-gradient(135deg, #c9a84c, #a07830) !important;
+    color: #fff8e8 !important;
+}
+
+section[data-testid="stSidebar"] h3 {
+    color: #c9a84c !important;
+    font-family: 'Noto Serif KR', serif !important;
+    letter-spacing: 0.1em !important;
+    padding: 16px 8px 8px !important;
+}
+
+@media (max-width: 768px) {
+    section[data-testid="stSidebar"] {
+        width: 200px !important;
+    }
+}
 </style>
 """,
         unsafe_allow_html=True,

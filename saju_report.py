@@ -1835,17 +1835,14 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str=""):
             _pdf_bytes = buf.read()
             _b64 = base64.b64encode(_pdf_bytes).decode()
             st.markdown(
-                f'''<a href="data:application/pdf;base64,{_b64}"
-                       download="{fname}"
-                       target="_blank"
-                       rel="noopener noreferrer"
-                       style="display:block;text-align:center;
-                              background:#c9a84c;color:#1a1a1a;
-                              padding:14px 24px;border-radius:8px;
-                              font-size:16px;font-weight:bold;
-                              text-decoration:none;margin:10px 0">
-                       📄 PDF 다운로드 (iOS/Android 지원)
-                    </a>''',
+                f'<a href="data:application/pdf;base64,{_b64}"'
+                f' download="{fname}"'
+                f' style="display:block;background:linear-gradient(135deg,#c9a84c,#a07830);'
+                f'color:#fff8e8;text-align:center;padding:14px 24px;border-radius:50px;'
+                f'font-size:16px;font-weight:700;text-decoration:none;'
+                f'margin:16px auto;max-width:300px;'
+                f'box-shadow:0 4px 15px rgba(201,168,76,0.4);">'
+                f'📄 PDF 다운로드</a>',
                 unsafe_allow_html=True,
             )
 
