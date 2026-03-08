@@ -4052,6 +4052,37 @@ def _nar_past(ctx):
         return "".join(result)
 
 
+def build_life_analysis(pils, gender):
+    """십성 2-조합으로 인생 전체를 읽는 핵심 엔진"""
+    ilgan = pils[1]["cg"]
+    ss_count = {}
+    for p in pils:
+        cg_ss = TEN_GODS_MATRIX.get(ilgan, {}).get(p["cg"], "")
+        jjg = JIJANGGAN.get(p["jj"], [])
+        jj_ss = TEN_GODS_MATRIX.get(ilgan, {}).get(jjg[-1] if jjg else "", "")
+        for ss in [cg_ss, jj_ss]:
+            if ss and ss not in ("-", ""):
+                ss_count[ss] = ss_count.get(ss, 0) + 1
+    top_ss = sorted(ss_count, key=ss_count.get, reverse=True)
+    matched = []
+    checked = set()
+    for i, a in enumerate(top_ss[:5]):
+        for b in top_ss[i + 1:5]:
+            k = frozenset([a, b])
+            if k in SIPSUNG_COMBO_LIFE and k not in checked:
+                matched.append((k, SIPSUNG_COMBO_LIFE[k]))
+                checked.add(k)
+    strength_info = get_ilgan_strength(ilgan, pils)
+    sn = strength_info["신강신약"]
+    return {
+        "조합_결과": matched[:2],
+        "전체_십성": ss_count,
+        "주요_십성": top_ss[:4],
+        "신강신약": sn,
+        "일간": ilgan,
+    }
+
+
 def build_rich_narrative(pils, birth_year, gender, name, section="report"):
     """각 메뉴별 5000~10000자 서술형 내러티브 생성"""
 
