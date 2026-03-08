@@ -1991,6 +1991,63 @@ def get_ohang_health_info(ilgan, pils):
     return results
 
 
+def get_yongshin_multilayer(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0, target_year=None):
+    """다층 용신 분석 (1순위~3순위 + 희신 + 기신 + 대운별 용신)"""
+    if target_year is None:
+        target_year = datetime.now().year
+    ys = get_yongshin(pils)
+    yong_list = ys.get("종합_용신", []) if isinstance(ys.get("종합_용신"), list) else []
+    ilgan = pils[1]["cg"]
+    ilgan_oh = OH.get(ilgan, "")
+    BIRTH = {"木": "火", "火": "土", "土": "金", "金": "水", "水": "木"}
+    CTRL  = {"木": "土", "火": "金", "土": "水", "金": "木", "水": "火"}
+    base_yong = yong_list[0] if yong_list else ""
+    hee_shin = BIRTH.get(base_yong, "")
+    gi_shin_list = []
+    for oh in ["木", "火", "土", "金", "水"]:
+        if CTRL.get(oh) == base_yong or CTRL.get(base_yong) == oh:
+            if oh != ilgan_oh and oh not in yong_list:
+                gi_shin_list.append(oh)
+    yong_2 = yong_list[1] if len(yong_list) > 1 else ""
+    try:
+        dw_list = SajuCoreEngine.get_daewoon(pils, birth_year, bm, bd, bh, bmi, gender=gender)
+    except Exception:
+        dw_list = []
+    cur_dw = next((d for d in dw_list if d["시작연도"] <= target_year <= d["종료연도"]), None)
+    dw_yong = ""
+    dw_note = ""
+    if cur_dw:
+        dw_oh = OH.get(cur_dw["cg"], "")
+        if dw_oh in yong_list:
+            dw_yong = dw_oh
+            dw_note = f"현재 {cur_dw['str']} 대운 = 용신 오행 → 황금기"
+        elif dw_oh == hee_shin:
+            dw_yong = hee_shin
+            dw_note = f"현재 {cur_dw['str']} 대운 = 희신 → 안정 성장기"
+        elif dw_oh in gi_shin_list:
+            dw_yong = ""
+            dw_note = f"현재 {cur_dw['str']} 대운 = 기신 → 방어 전략 필요"
+        else:
+            dw_yong = dw_oh
+            dw_note = f"현재 {cur_dw['str']} 대운 = 중립 → 평상 유지"
+    situation_yong = {
+        "재물": yong_list[0] if yong_list else "",
+        "직업": yong_list[1] if len(yong_list) > 1 else (yong_list[0] if yong_list else ""),
+        "건강": hee_shin or (yong_list[0] if yong_list else ""),
+        "인간관계": hee_shin or (yong_list[0] if yong_list else ""),
+    }
+    return {
+        "용신_1순위": base_yong,
+        "용신_2순위": yong_2,
+        "희신": hee_shin,
+        "기신": gi_shin_list[:2] if gi_shin_list else [],
+        "현재_대운_용신": dw_yong,
+        "대운_해석": dw_note,
+        "상황별_용신": situation_yong,
+        "전체_용신_목록": yong_list,
+    }
+
+
 def get_crossing_interpretation(pils, cur_year):
     """세운×대운 교차 해석 — 대운 십성과 세운 십성의 조합으로 핵심 키워드 반환"""
     try:
@@ -2924,19 +2981,31 @@ def _nar_report(ctx):
     yong_list = ys.get("종합_용신", [])
     yong_kr = clean_hanja(yong_list[0]) if isinstance(yong_list, list) and yong_list else "木"
 
-    # 상위 십성 추출
+    # 상위 십성 추출 — TEN_GODS_MATRIX 기반 (pils에 cg_ss/jj_ss 키 없음)
+    _ilgan_raw = pils[1]["cg"] if pils and len(pils) > 1 else ""
     ss_counts = {}
     for p in pils:
-        if p:
-            if p.get("cg_ss"):
-                ss_counts[p.get("cg_ss")] = ss_counts.get(p.get("cg_ss"), 0) + 1
-            if p.get("jj_ss"):
-                ss_counts[p.get("jj_ss")] = ss_counts.get(p.get("jj_ss"), 0) + 1
-    top_ss = [item[0] for item in sorted(ss_counts.items(), key=lambda x: -x[1])][:2]
+        if not p:
+            continue
+        cg_ss = TEN_GODS_MATRIX.get(_ilgan_raw, {}).get(p.get("cg", ""), "")
+        jjg = JIJANGGAN.get(p.get("jj", ""), [])
+        jj_ss = TEN_GODS_MATRIX.get(_ilgan_raw, {}).get(jjg[-1] if jjg else "", "")
+        if cg_ss:
+            ss_counts[cg_ss] = ss_counts.get(cg_ss, 0) + 1
+        if jj_ss and jj_ss != cg_ss:
+            ss_counts[jj_ss] = ss_counts.get(jj_ss, 0) + 1
+    # ctx의 build_life_analysis 결과로 보완
+    _ctx_top_ss = ctx.get("top_ss", [])
+    if ss_counts:
+        top_ss = [item[0] for item in sorted(ss_counts.items(), key=lambda x: -x[1])][:2]
+    elif _ctx_top_ss:
+        top_ss = _ctx_top_ss[:2]
+    else:
+        top_ss = []
 
     # 안전장치 (십성이 부족할 때)
-    top1 = top_ss[0] if len(top_ss) > 0 else "비견"
-    top2 = top_ss[1] if len(top_ss) > 1 else "식신"
+    top1 = top_ss[0] if len(top_ss) > 0 else (_ctx_top_ss[0] if _ctx_top_ss else "비견")
+    top2 = top_ss[1] if len(top_ss) > 1 else (_ctx_top_ss[1] if len(_ctx_top_ss) > 1 else "식신")
 
     # 운세 흐름 (대운/세운)
     cur_year = datetime.now().year
