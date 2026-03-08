@@ -23,6 +23,7 @@ from saju_data import (
     GEUNMYO_HWASIL,
 )
 from saju_ui import *
+from saju_report import menu_pdf
 
 from datetime import date, datetime, timedelta
 
@@ -17416,7 +17417,7 @@ def main():
 
             _tabs = st.tabs([
                 "📋 종합", "🌊 대운", "🎯 과거", "💰 재물", "💑 궁합",
-                "📅 월별", "☀️ 일일", "🤖 AI", "🔴 비방",
+                "📅 월별", "☀️ 일일", "🤖 AI", "🔴 비방", "📄 PDF",
             ])
             with _tabs[0]:
                 menu1_report(pils, name, birth_year, gender, _ss.get("in_occupation", ""))
@@ -17436,6 +17437,8 @@ def main():
                 menu7_ai(pils, name, birth_year, gender)
             with _tabs[8]:
                 menu8_bihang(pils, name, birth_year, gender)
+            with _tabs[9]:
+                menu_pdf(pils, birth_year, gender, name, str(_ss.get("in_birth_hour", "")))
 
     # ---- 맨 위로 플로팅 버튼 (window.parent 로 Streamlit iframe 대응) ----
     st.markdown(
