@@ -34,6 +34,37 @@ from saju_engine import *
 
 _saju_log = _logging.getLogger("saju")
 
+
+def clean_hanja(text):
+    """괄호 안 한글 독음 제거 유틸 (예: '식신(食神)' → '식신')"""
+    if not text:
+        return ""
+    return re.sub(r"\(.*?\)", "", text).strip()
+
+
+def _get_yongshin_match(dw_cg_ss, yongshin_ohs, ilgan_oh):
+    """대운/세운 십성이 용신 오행과 맞는지 판단 → 'yong' | 'normal'"""
+    GEN   = {"木": "火", "火": "土", "土": "金", "金": "水", "水": "木"}
+    CTRL  = {"木": "土", "火": "金", "土": "水", "金": "木", "水": "火"}
+    BIRTH_R = {"木": "水", "火": "木", "土": "火", "金": "土", "水": "金"}
+    SS_TO_OH = {
+        "비견": ilgan_oh,         "劫財": ilgan_oh,
+        "겁재": ilgan_oh,         "比肩": ilgan_oh,
+        "식신": GEN.get(ilgan_oh, ""),   "食神": GEN.get(ilgan_oh, ""),
+        "상관": GEN.get(ilgan_oh, ""),   "傷官": GEN.get(ilgan_oh, ""),
+        "편재": CTRL.get(ilgan_oh, ""),  "偏財": CTRL.get(ilgan_oh, ""),
+        "정재": CTRL.get(ilgan_oh, ""),  "正財": CTRL.get(ilgan_oh, ""),
+        "편관": next((k for k, v in CTRL.items() if v == ilgan_oh), ""),
+        "정관": next((k for k, v in CTRL.items() if v == ilgan_oh), ""),
+        "偏官": next((k for k, v in CTRL.items() if v == ilgan_oh), ""),
+        "正官": next((k for k, v in CTRL.items() if v == ilgan_oh), ""),
+        "편인": BIRTH_R.get(ilgan_oh, ""), "偏印": BIRTH_R.get(ilgan_oh, ""),
+        "정인": BIRTH_R.get(ilgan_oh, ""), "正印": BIRTH_R.get(ilgan_oh, ""),
+    }
+    dw_oh = SS_TO_OH.get(dw_cg_ss, "")
+    return "yong" if dw_oh in yongshin_ohs else "normal"
+
+
 # ── GYEOKGUK_NARRATIVE & STRENGTH_NARRATIVE ──
 # --------------------------------------------------
 
@@ -2801,6 +2832,12 @@ def _nar_ch20_prescription(ctx):
 
     sw_next = ctx.get("sw_next", {})
 
+    ilgan = ctx.get("ilgan", "")
+    ilp = ILGAN_PROFILE.get(ilgan, {})
+    ilp_rx   = ilp.get("처방", "")
+    gd = GYEOKGUK_DETAIL.get(gname, {})
+    gd_rx    = gd.get("처방", "")
+
     return "\n".join(
         [
             f"",
@@ -2837,6 +2874,12 @@ def _nar_ch20_prescription(ctx):
                 f'* 금(金): 오후 3~7시(신유시)' if '金' in yongshin_ohs else '',
                 f'* 수(水): 저녁 9~새벽 1시(해자시)' if '水' in yongshin_ohs else '',
             ])),
+            f"",
+            f"[일간 처방]",
+            f"* {ilp_rx}" if ilp_rx else "",
+            f"",
+            f"[격국 처방]",
+            f"* {gd_rx}" if gd_rx else f"* {gname}의 본래 기운을 따르는 것이 가장 빠른 길입니다.",
             f"",
             f"[절대 하면 안 되는 것 (Gishin 주의)]",
             f"",
@@ -3119,6 +3162,16 @@ def _nar_future(ctx):
 
             desc = DW_SS_DESC.get(dw_ss, f"{dw_ss} 十星 大運으로 {dw['str']}의 기운이 10년간 흐릅니다.")
 
+            # DAEWOON_INTERP 천간·지지 해석
+            dw_cg_interp = DAEWOON_INTERP.get(dw.get("cg", ""), "")
+            dw_jj_interp = DAEWOON_INTERP.get(dw.get("jj", ""), "")
+
+            interp_lines = []
+            if dw_cg_interp:
+                interp_lines.append(f"  천간 {dw.get('cg', '')}: {dw_cg_interp}")
+            if dw_jj_interp:
+                interp_lines.append(f"  지지 {dw.get('jj', '')}: {dw_jj_interp}")
+
             result.append(
                 "\n".join(
                     [
@@ -3126,7 +3179,9 @@ def _nar_future(ctx):
                         f"({dw['시작연도']}년 ~ {dw['종료연도']}년)",
                         f"{'* 用神 大運 - 인생의 황금기' if is_yong else ''}",
                         f"{desc}",
+                    ] + interp_lines + [
                         f"{'지금이 바로 큰 결정을 내려야 할 때입니다.' if is_yong and is_cur else '지금은 내실을 다지는 준비 기간입니다.' if not is_yong and is_cur else ''}",
+                        f"",
                     ]
                 )
             )
@@ -3293,6 +3348,13 @@ def _nar_future(ctx):
             if is_yong_sw:
                 result.append(f"* [용신운] 올해는 하늘의 도움이 따르는 해입니다.\n")
 
+            # 세운×대운 교차 분석 (연도별)
+            try:
+                cross_y = get_crossing_interpretation(pils, y) if pils else {}
+                if cross_y.get("summary"):
+                    result.append(f"  [교차분석] {cross_y['summary']}\n")
+            except Exception:
+                pass
 
             yd = YEAR_SS_DETAIL.get(
                 sw_ss,
@@ -3504,8 +3566,31 @@ def _nar_wealth(ctx):
 
     daewoon = ctx.get("daewoon", [])
 
+    # ── ILGAN_PROFILE / GYEOKGUK_DETAIL / SIPSONG_DETAIL 재물 데이터 ──
+    ilp = ILGAN_PROFILE.get(ilgan, {})
+    ilp_money = ilp.get("재물", "")
+    gd = GYEOKGUK_DETAIL.get(gname, {})
+    gd_money = gd.get("재물", "")
+    gd_job   = gd.get("직업", "")
+    gd_note  = gd.get("주의", "")
+    gd_rx    = gd.get("처방", "")
+
+    # 세운×대운 교차 해석 (재물 섹션용)
+    cross_money = {}
+    try:
+        cross_money = get_crossing_interpretation(pils, current_year) if pils else {}
+    except Exception:
+        pass
+
     if True:
         result = []
+
+        # ── 제1장: 재물 기질 완전 분석 ──
+        ss_money_lines = []
+        for ss in top_ss[:2]:
+            sd = SIPSONG_DETAIL.get(ss, {})
+            if sd.get("재물"):
+                ss_money_lines.append(f"  ■ {ss}({sd.get('한글','')}) 십성의 재물 스타일: {sd['재물']}")
 
         result.append(
             "\n".join(
@@ -3520,9 +3605,21 @@ def _nar_wealth(ctx):
                     f"",
                     f"[ 제1장 | 재물 기질 완전 분석 ]",
                     f"",
-                    f"{display_name}님의 재물 버는 방식을 십성 조합으로 분석합니다.",
-                    f"일간 {ilgan_kr} + {sn} + 주요 십성 {', '.join(top_ss)}",
+                    f"  {display_name}님의 재물 버는 방식 — 일간 {ilgan_kr} + {sn} + 주도 십성 {', '.join(top_ss[:3])}",
                     f"",
+                    f"  [일간 {ilgan_kr}의 재물 그릇]",
+                    f"  {ilp_money}" if ilp_money else "",
+                    f"",
+                    f"  [격국({gname})의 재물 운]",
+                    f"  {gd_money}" if gd_money else f"  격국에 맞는 방식으로 재물을 쌓아가십시오.",
+                    f"  적성 분야: {gd_job}" if gd_job else "",
+                    f"",
+                ] + ss_money_lines + [
+                    f"",
+                    f"  [재물 주의사항]",
+                    f"  {gd_note}" if gd_note else "  기신 오행이 강해지는 해에 무리한 투자를 자제하십시오.",
+                    f"  [재물 처방]",
+                    f"  {gd_rx}" if gd_rx else "  용신 오행이 강한 시기에 핵심 결정을 집중하십시오.",
                     f"",
                     f"",
                 ]
@@ -3546,6 +3643,20 @@ def _nar_wealth(ctx):
                         f"",
                     ]
                 )
+            )
+
+        # ── 세운×대운 교차 재물 분석 ──
+        if cross_money.get("summary") or cross_money.get("finance"):
+            result.append(
+                "\n".join([
+                    f"",
+                    f"[ 세운×대운 교차 재물 분석 ]",
+                    f"",
+                    f"  {cross_money.get('summary', '')}",
+                    f"  {cross_money.get('finance', '')}",
+                    f"  {cross_money.get('career', '')}",
+                    f"",
+                ])
             )
 
         result.append(
@@ -3790,6 +3901,13 @@ def _nar_health(ctx):
 
     daewoon = ctx.get("daewoon", [])
 
+    # ── get_relationship_reading() 연동 ──
+    rr = {}
+    try:
+        rr = get_relationship_reading(pils, gender) if pils else {}
+    except Exception:
+        pass
+
     if True:
         result = []
 
@@ -3907,13 +4025,23 @@ def _nar_health(ctx):
                     f"* {ILGAN_PROFILE.get(ilgan, {}).get('연애', char.get('연애_남', '') if gender == '남' else char.get('연애_여', ''))}",
                     f"",
                     f"배우자 자리 {iljj_kr}({iljj}) 심층 해석:",
-                    f"{iljj_kr}이(가) 배우자 자리에 있습니다. {'안정/신뢰/현실적 도움을 주는 파트너와 인연.' if iljj in ['丑', '辰', '戌', '未'] else '열정/활기/도전적 에너지를 가진 파트너와 인연.' if iljj in ['午', '巳'] else '지적 교감/논리/전문성을 가진 파트너와 인연.' if iljj in ['申', '酉'] else '성장/창의/새로운 에너지를 가진 파트너와 인연.' if iljj in ['寅', '卯'] else '깊은 감정/지혜/내면의 평화를 가진 파트너와 인연.' if iljj in ['亥', '子'] else '다양한 매력의 파트너와 인연.'}",
+                    f"  일지 십성: {rr.get('파트너_십성', '')} — {rr.get('파트너_기질', iljj_kr + '이(가) 배우자 자리에 있습니다.')}",
+                    f"",
+                    f"오행별 연애 스타일:",
+                    f"  {rr.get('연애_스타일', ILGAN_PROFILE.get(ilgan, {}).get('연애', ''))}",
                     f"",
                     f"이상적인 배우자의 오행:",
                     f"* 용신 {yong_kr} 오행이 강한 사람 — 이 분과 함께하면 삶이 더 풍요로워집니다",
                     f"* {ILGAN_PROFILE.get(ilgan, {}).get('처방', '자신의 부족한 점을 채워주는 파트너가 이상적입니다.')}",
                     f"",
-                    f"결혼 시기 분석:",
+                ] + ([
+                    f"  연애 관련 신살: {', '.join(rr['연애_신살'])}",
+                    f"  → 신살의 기운이 이성 인연을 강하게 활성화합니다. 적극적으로 나서십시오.",
+                    f"",
+                ] if rr.get("연애_신살") else []) + [
+                    f"  결혼 시기 힌트: {rr.get('결혼_힌트', '')}",
+                    f"",
+                    f"결혼 운기 분석:",
                     f"현재 {current_age}세 기준:",
                     f"* {'재성 대운 — 결혼 에너지가 활성화되어 있습니다.' if cur_dw and cur_dw_ss in (['정재', '편재'] if gender == '남' else ['정관', '편관']) else '관성 대운 — 결혼 에너지가 활성화되어 있습니다.' if cur_dw and cur_dw_ss in (['정관', '편관'] if gender == '남' else ['정재', '편재']) else '지금은 자기 개발에 집중하는 시기. 준비가 되면 인연이 옵니다.'}",
                     f"* 가장 강한 결혼 기회가 오는 세운: {'정재·편재 세운' if gender == '남' else '정관·편관 세운'}",
@@ -4034,7 +4162,10 @@ def _nar_past(ctx):
             )
         )
 
-        highlights = generate_engine_highlights(pils, birth_year, gender)
+        try:
+            highlights = generate_engine_highlights(pils, birth_year, gender)
+        except (NameError, Exception):
+            highlights = {"past_events": []}
 
         for event in highlights.get("past_events", []):
             result.append(f"### {event.get('age')}세 ({event.get('year')}년) | {event.get('title')}\n")
