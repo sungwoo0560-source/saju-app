@@ -10768,6 +10768,45 @@ def menu3_past(pils, birth_year, gender, name=""):
         unsafe_allow_html=True,
     )
 
+    # ── 인생 스토리 연결 ─────────────────────────
+    st.markdown('<div class="gold-section">📖 과거·현재·미래 인생 스토리</div>', unsafe_allow_html=True)
+    try:
+        _ilgan_s = pils[1]["cg"]
+        _ilp_s = ILGAN_PROFILE.get(_ilgan_s, {})
+        _gy_s = get_gyeokguk(pils)
+        _gname_s = _gy_s.get("격국명", "독특한 격국") if _gy_s else "독특한 격국"
+        _cur_year_s = datetime.now().year
+        _daewoon_s = SajuCoreEngine.get_daewoon(
+            pils, birth_year,
+            st.session_state.get("birth_month", 1),
+            st.session_state.get("birth_day", 1),
+            st.session_state.get("birth_hour", 12),
+            st.session_state.get("birth_minute", 0),
+            gender=gender,
+        )
+        _past_dws = [d for d in _daewoon_s if d.get("종료연도", 0) < _cur_year_s][-2:]
+        _cur_dw_s = next((d for d in _daewoon_s if d["시작연도"] <= _cur_year_s <= d["종료연도"]), None)
+        _future_dw_s = next((d for d in _daewoon_s if d.get("시작연도", 0) > _cur_year_s), None)
+        _past_str = " → ".join(d.get("str", "?") for d in _past_dws) if _past_dws else "초기 대운"
+        _cur_str = _cur_dw_s.get("str", "?") if _cur_dw_s else "?"
+        _future_str = _future_dw_s.get("str", "?") if _future_dw_s else "다음 대운"
+        _story_html = (
+            f"<div style='background:linear-gradient(145deg,#faf7f0,#f2ebe0);border:1px solid #c9a84c;"
+            f"border-radius:14px;padding:22px;margin:10px 0'>"
+            f"<div style='font-size:14px;color:#3d2800;line-height:2.2;font-family:Noto Serif KR,serif'>"
+            f"당신의 인생은 <b style='color:#c9a84c'>{_past_str} 대운</b>에 기반을 닦고,<br>"
+            f"현재 <b style='color:#c9a84c'>{_cur_str} 대운</b>에서 {"수확의 시기를 맞이하고" if _cur_dw_s and _cur_dw_s.get("시작나이", 0) >= 40 else "꽃을 피우며"} 있습니다.<br>"
+            f"그리고 곧 다가올 <b style='color:#c9a84c'>{_future_str} 대운</b>에서 새로운 장이 펼쳐질 것입니다.<br><br>"
+            f"<span style='font-size:13px;color:#5a3d1a'>"
+            f"{_gname_s} 격국을 타고난 {name if name else '당신'}님의 인생은 "
+            f"{_ilp_s.get('본질', '강인한 의지와 독특한 기질')[:30]}의 여정입니다. "
+            f"과거의 모든 경험은 현재의 내공이 되었고, 지금의 선택이 미래를 결정합니다."
+            f"</span></div></div>"
+        )
+        st.markdown(_story_html, unsafe_allow_html=True)
+    except Exception as _se:
+        _saju_log.debug("[silent except] %s", _se)
+
     tab_past_events(pils, birth_year, gender, name)
 
     # AI 정밀 분석 버튼
@@ -11158,19 +11197,138 @@ def menu4_future3(
 def menu5_money(pils, birth_year, gender, name="내담자"):
     """5️⃣ 재물/사업 특화 분석"""
 
-    # ── 로컬 엔진 항상 먼저 출력 ─────────────
+    ilgan = pils[1]["cg"]
+    ilgan_oh = OH.get(ilgan, "")
+    current_year = datetime.now().year
+    current_age = current_year - birth_year + 1
+    ys = get_yongshin(pils)
+    yongshin_ohs = ys.get("종합_용신", []) or []
+    gyeokguk = get_gyeokguk(pils)
+    gname = gyeokguk.get("격국명", "") if gyeokguk else ""
+    ilp = ILGAN_PROFILE.get(ilgan, {})
+    daewoon = SajuCoreEngine.get_daewoon(
+        pils, birth_year,
+        st.session_state.get("birth_month", 1),
+        st.session_state.get("birth_day", 1),
+        st.session_state.get("birth_hour", 12),
+        st.session_state.get("birth_minute", 0),
+        gender=gender,
+    )
+    cur_dw = next((d for d in daewoon if d["시작연도"] <= current_year <= d["종료연도"]), None) or {}
 
+    # ① 타고난 재물 그릇
+    st.markdown('<div class="gold-section">💎 ① 타고난 재물 그릇 분석</div>', unsafe_allow_html=True)
+    _GYEOK_MONEY = {
+        "식신격": ("중·대형", "꾸준히 먹고사는 복록. 부업·창작으로 자산을 늘림. 안정적 수입원이 다양함."),
+        "정관격": ("중형", "조직에서 안정적 수입. 재테크보다 직업적 성취로 자산 형성."),
+        "편관격": ("대형 또는 소형", "극단적 기복. 크게 성공하거나 손실도 큼. 도전적 투자 성향."),
+        "정재격": ("중·대형", "착실하게 쌓는 재물. 저축·부동산·안전 투자에 탁월."),
+        "편재격": ("대형", "큰 사업·투자로 자산 폭발. 기복이 크나 기회 포착 능력 최강."),
+        "상관격": ("중형", "기술·창의로 버는 재물. 자유업·전문직에서 수입 극대화."),
+        "건록격": ("중형", "노력으로 쌓는 재물. 사업보다 직업적 성취가 안정적."),
+    }
+    _bowl_size, _bowl_desc = "중형", "사주의 기운에 따라 꾸준히 쌓이는 재물 운."
+    for _gk, (_sz, _dc) in _GYEOK_MONEY.items():
+        if _gk in gname:
+            _bowl_size, _bowl_desc = _sz, _dc
+            break
+    _jaemul_profile = ilp.get("재물", "")
+    st.markdown(
+        f"<div style='background:linear-gradient(145deg,#faf7f0,#f2ebe0);border:1px solid #c9a84c;"
+        f"border-radius:14px;padding:20px;margin:10px 0'>"
+        f"<div style='font-size:15px;font-weight:800;color:#2d1f00;margin-bottom:10px'>"
+        f"재물 그릇 크기: <span style='color:#c9a84c;font-size:18px'>{_bowl_size}</span> ({gname or '격국 분석 중'})</div>"
+        f"<div style='font-size:14px;color:#3d2800;line-height:1.9'>{_bowl_desc}</div>"
+        f"<div style='margin-top:10px;font-size:13px;color:#5a3d1a;border-top:1px solid rgba(201,168,76,0.3);padding-top:8px'>"
+        f"일간({ilgan}) 재물 기질: {_jaemul_profile}</div></div>",
+        unsafe_allow_html=True,
+    )
+
+    # ② 직업 적성 정밀 분석
+    st.markdown('<div class="gold-section">💼 ② 직업 적성 정밀 분석</div>', unsafe_allow_html=True)
+    _jikup = ilp.get("직업", "")
+    _cur_dw_ss_hanja = TEN_GODS_MATRIX.get(ilgan, {}).get(cur_dw.get("cg", ""), "") if cur_dw else ""
+    _DW_INDUSTRY = {
+        "比肩": "독립 사업·프리랜서·스포츠·1인 창업",
+        "劫財": "경쟁업종·금융·영업·투자",
+        "食神": "외식·창작·콘텐츠·교육·서비스",
+        "傷官": "IT·엔지니어링·예술·컨설팅",
+        "偏財": "무역·사업·부동산·마케팅",
+        "正財": "금융·회계·공무원·안정 직종",
+        "偏官": "군인·경찰·의료·법조·스포츠",
+        "正官": "공기업·관리직·행정·교육",
+        "偏印": "역술·종교·예술·자유업·이동업종",
+        "正印": "교육·연구·출판·의료·상담",
+    }
+    _cur_industry = _DW_INDUSTRY.get(_cur_dw_ss_hanja, "현재 대운 기운에 맞는 업종 탐색 중")
+    st.markdown(
+        f"<div style='background:linear-gradient(145deg,#faf7f0,#f2ebe0);border:1px solid #c9a84c;"
+        f"border-radius:14px;padding:20px;margin:10px 0'>"
+        f"<div style='font-size:14px;color:#3d2800;line-height:2'>"
+        f"<b>🎯 일간({ilgan}) 최적 직군:</b> {_jikup}<br>"
+        f"<b>📈 현재 대운({_cur_dw_ss_hanja or '?'})에서 유리한 업종:</b> {_cur_industry}</div></div>",
+        unsafe_allow_html=True,
+    )
+
+    # ③ 재물운 타임라인
+    st.markdown('<div class="gold-section">📈 ③ 재물운 타임라인</div>', unsafe_allow_html=True)
+    _timeline_items = []
+    for _age_target, _label in [(25, "20대"), (35, "30대"), (45, "40대"), (55, "50대")]:
+        _target_year = birth_year + _age_target
+        _dw_match = next((d for d in daewoon if d["시작연도"] <= _target_year <= d["종료연도"]), None)
+        if _dw_match:
+            _dw_ss_h = TEN_GODS_MATRIX.get(ilgan, {}).get(_dw_match.get("cg", ""), "")
+            _money_level = "🟢 호황" if _dw_ss_h in ("偏財", "正財", "食神", "正官") else "🟡 보통" if _dw_ss_h in ("比肩", "正印", "傷官") else "🔴 주의"
+            _timeline_items.append(f"<div style='padding:8px 0;border-bottom:1px solid rgba(201,168,76,0.2)'>"
+                                   f"<b>{_label}</b> ({_dw_match['str']} 대운) — {_money_level} [{_dw_ss_h or '?'}]</div>")
+    _now_label = f"<div style='padding:8px 0;font-weight:700;color:#c9a84c'>현재({current_age}세) — {cur_dw.get('str','?')} 대운 진행 중</div>"
+    _future5_items = []
+    for _y in range(current_year + 1, current_year + 6):
+        try:
+            _yl = get_yearly_luck(pils, _y)
+            _y_ss = _yl.get("십성_천간", "-")
+            _y_gh = _yl.get("길흉", "보통")
+            _y_sw = _yl.get("세운", str(_y))
+            _future5_items.append(f"{_y}년[{_y_sw}] {_y_ss} {_y_gh}")
+        except Exception:
+            pass
+    st.markdown(
+        f"<div style='background:linear-gradient(145deg,#faf7f0,#f2ebe0);border:1px solid #c9a84c;"
+        f"border-radius:14px;padding:20px;margin:10px 0;font-size:13px;color:#3d2800;line-height:2'>"
+        f"{''.join(_timeline_items)}{_now_label}"
+        f"<div style='margin-top:8px;font-size:12px;color:#5a3d1a'><b>향후 5년:</b> "
+        f"{' / '.join(_future5_items)}</div></div>",
+        unsafe_allow_html=True,
+    )
+
+    # ④ 재물 개운법
+    st.markdown('<div class="gold-section">🌟 ④ 재물 개운법</div>', unsafe_allow_html=True)
+    _OH_MONEY_TIPS = {
+        "木": ("동쪽 방향 책상 배치, 초록색 지갑/식물 활용", "서·서북쪽 인테리어 강화 지양", ["동쪽 방향으로 책상 바꾸기", "초록색 지갑 사용하기", "나무·식물 키우기"]),
+        "火": ("남쪽 방향 활동, 붉은색 소품 활용", "북쪽 방향 침실 배치 지양", ["남향 창문 열어두기", "붉은 계열 소품 배치", "촛불·조명 밝히기"]),
+        "土": ("중앙·황금색 활용, 도자기·토기 소품", "습기·어두운 공간 지양", ["황색·갈색 지갑 사용", "도자기 소품 배치", "중심 잡힌 식습관 유지"]),
+        "金": ("서쪽·흰색 활용, 금속 소품·동전 모으기", "충동 구매·과한 지출 지양", ["흰색·실버 소품 배치", "금속 저금통 사용", "정리정돈 철저히"]),
+        "水": ("북쪽·검은색 활용, 수족관·물 인테리어", "지나친 음주·산만한 환경 지양", ["검은 지갑 사용", "물 관련 인테리어", "조용한 집중 환경 만들기"]),
+    }
+    _yong_oh = yongshin_ohs[0] if yongshin_ohs else ilgan_oh
+    _tip_enhance, _tip_avoid, _tip_now = _OH_MONEY_TIPS.get(_yong_oh, ("용신 오행 강화 활동", "기신 오행 약화 활동", ["용신 방향 활동", "긍정적 마음가짐", "꾸준한 저축"]))
+    st.markdown(
+        f"<div style='background:linear-gradient(145deg,#faf7f0,#f2ebe0);border:1px solid #c9a84c;"
+        f"border-radius:14px;padding:20px;margin:10px 0'>"
+        f"<div style='font-size:14px;color:#3d2800;line-height:2'>"
+        f"<b>✅ 재물 강화법 (용신 {_yong_oh} 기반):</b> {_tip_enhance}<br>"
+        f"<b>❌ 피해야 할 것:</b> {_tip_avoid}<br>"
+        f"<b>⚡ 지금 당장 할 수 있는 3가지:</b><br>"
+        f"{''.join(f'&nbsp;&nbsp;&nbsp;{i+1}. {t}<br>' for i, t in enumerate(_tip_now))}</div></div>",
+        unsafe_allow_html=True,
+    )
+
+    # ── 로컬 엔진 상세 분석 ─────────────
     try:
         _local_out = LocalSajuNarrator.money(pils, name, birth_year, gender)
-
         st.markdown(_local_out)
-
     except Exception as _e:
         _saju_log.debug("[silent except] %s", _e)
-
-    # if not api_key and not groq_key:
-
-    # return
 
     st.markdown("---")
 
@@ -11494,6 +11652,77 @@ def menu6_relations(pils, name, birth_year, gender, marriage_status="미혼"):
 </div>
 
 </div>""",
+        unsafe_allow_html=True,
+    )
+
+    # ① 배우자/인연 프로필
+    st.markdown('<div class="gold-section">💍 ① 배우자·인연 프로필</div>', unsafe_allow_html=True)
+    _ilgan = pils[1]["cg"]
+    _iljj = pils[1]["jj"]
+    _ilgan_oh = OH.get(_ilgan, "")
+    _ilp = ILGAN_PROFILE.get(_ilgan, {})
+    # 성별에 따라 배우자 십성 결정
+    if gender == "남":
+        _spouse_ss = ["正財", "偏財"]
+        _spouse_label = "배우자·여성 인연"
+    else:
+        _spouse_ss = ["正官", "偏官"]
+        _spouse_label = "배우자·남성 인연"
+    # 일지 분석
+    _JJ_SPOUSE = {
+        "子": "지적이고 총명한 배우자. 감정 표현이 적고 독립심이 강함.",
+        "丑": "듬직하고 성실한 배우자. 변화를 싫어하나 신뢰도가 높음.",
+        "寅": "활동적이고 리더십 강한 배우자. 자존심이 세고 독립적.",
+        "卯": "섬세하고 감수성 풍부한 배우자. 예술적 기질, 사교적.",
+        "辰": "포용력 있고 현실적인 배우자. 안정 지향, 재물 운 강함.",
+        "巳": "지혜롭고 카리스마 있는 배우자. 비밀이 많고 깊은 내면.",
+        "午": "열정적이고 화끈한 배우자. 매력이 강하나 감정 기복 있음.",
+        "未": "온화하고 배려 깊은 배우자. 예술·미적 감각이 뛰어남.",
+        "申": "총명하고 실행력 강한 배우자. 직설적이고 솔직한 성격.",
+        "酉": "세련되고 완벽주의적 배우자. 높은 기준, 우아한 품격.",
+        "戌": "의리 있고 충성스러운 배우자. 고집 있으나 믿음직스러움.",
+        "亥": "자유롭고 지적인 배우자. 창의적이나 정착이 어려운 면.",
+    }
+    _iljj_spouse = _JJ_SPOUSE.get(_iljj, "배우자 자리에 특별한 인연의 기운이 있습니다.")
+    _yeonae_style = _ilp.get("연애", "")
+    # 도화살 확인 (子·午·卯·酉 지지 중 해당)
+    _dohwa_jj = ["子", "午", "卯", "酉"]
+    _has_dohwa = any(p.get("jj") in _dohwa_jj for p in pils)
+    _dohwa_txt = "✨ 도화살이 있습니다 — 이성 매력이 강하고 인기가 많습니다." if _has_dohwa else "도화살 없음 — 이성보다 실력으로 인정받는 타입."
+    st.markdown(
+        f"<div style='background:linear-gradient(145deg,#faf7f0,#f2ebe0);border:1px solid #c9a84c;"
+        f"border-radius:14px;padding:20px;margin:10px 0'>"
+        f"<div style='font-size:14px;color:#3d2800;line-height:2'>"
+        f"<b>💑 {_spouse_label} 기운:</b> {', '.join(_spouse_ss)} 십성이 {_spouse_label}을 나타냅니다.<br>"
+        f"<b>🪑 일지(日支 {_iljj}) — 배우자 자리:</b> {_iljj_spouse}<br>"
+        f"<b>❤️ 연애 스타일:</b> {_yeonae_style}<br>"
+        f"<b>🌸 도화살:</b> {_dohwa_txt}</div></div>",
+        unsafe_allow_html=True,
+    )
+
+    # ② 결혼 타이밍 예측
+    st.markdown('<div class="gold-section">💒 ② 결혼·인연 타이밍 예측</div>', unsafe_allow_html=True)
+    _current_year = datetime.now().year
+    _marriage_years = []
+    for _y in range(_current_year, _current_year + 10):
+        try:
+            _yl = get_yearly_luck(pils, _y)
+            _y_ss = _yl.get("십성_천간", "")
+            if _y_ss in _spouse_ss or _yl.get("십성_지지", "") in _spouse_ss:
+                _marriage_years.append(f"{_y}년 [{_yl.get('세운', str(_y))}] — {_y_ss} 기운 (인연운 강함)")
+        except Exception:
+            pass
+    if _marriage_years:
+        _marriage_info = "\n".join(f"    🌸 {m}" for m in _marriage_years[:4])
+    else:
+        _marriage_info = "    향후 10년 내 특별한 인연운이 흐릅니다."
+    st.markdown(
+        f"<div style='background:linear-gradient(145deg,#faf7f0,#f2ebe0);border:1px solid #c9a84c;"
+        f"border-radius:14px;padding:20px;margin:10px 0;font-size:13px;color:#3d2800;line-height:2'>"
+        f"<b>향후 10년 인연·결혼 운 강한 해:</b><br>"
+        + "<br>".join(f"🌸 {m}" for m in _marriage_years[:4])
+        + (f"<br><span style='color:#888;font-size:12px'>특별한 인연운이 점차 다가옵니다</span>" if not _marriage_years else "")
+        + "</div>",
         unsafe_allow_html=True,
     )
 
@@ -14555,6 +14784,60 @@ def menu7_ai(pils, name, birth_year, gender):
 
     except Exception as _e:
         _saju_log.debug("[silent except] %s", _e)
+
+    # -- 빠른 질문 버튼 --
+    st.markdown('<div class="gold-section">🎯 빠른 질문 선택</div>', unsafe_allow_html=True)
+    _QUICK_QUESTIONS = [
+        ["💼 올해 직장운은?", "💰 재물운 언제 좋아져?", "❤️ 인연은 언제 와?"],
+        ["🏥 건강 주의사항은?", "📈 사업 시작해도 될까?", "🏠 이사/이직 시기는?"],
+        ["👨‍👩‍👧 가족관계 흐름은?", "🎯 내 적성은 뭔가?", "⚡ 지금 가장 조심할 것은?"],
+    ]
+    _qcols = st.columns(3)
+    for _qi, _qrow in enumerate(_QUICK_QUESTIONS):
+        for _qj, _q in enumerate(_qrow):
+            if _qcols[_qj].button(_q, key=f"qq_{_qi}_{_qj}", use_container_width=True):
+                st.session_state["ai_quick_input"] = _q
+    if st.session_state.get("ai_quick_input"):
+        _auto_q = st.session_state["ai_quick_input"]
+        st.markdown(
+            f"<div style='background:rgba(201,168,76,0.1);border:1px solid #c9a84c;border-radius:10px;"
+            f"padding:10px 16px;margin:8px 0;font-size:13px;color:#3d2800'>"
+            f"💬 선택한 질문: <b>{_auto_q}</b></div>",
+            unsafe_allow_html=True,
+        )
+        try:
+            _ilgan = pils[1]["cg"]
+            _ilp = ILGAN_PROFILE.get(_ilgan, {})
+            _daewoon = SajuCoreEngine.get_daewoon(
+                pils, birth_year,
+                st.session_state.get("birth_month", 1),
+                st.session_state.get("birth_day", 1),
+                st.session_state.get("birth_hour", 12),
+                st.session_state.get("birth_minute", 0),
+                gender=gender,
+            )
+            _cur_dw = next((d for d in _daewoon if d["시작연도"] <= datetime.now().year <= d["종료연도"]), {})
+            _gy = get_gyeokguk(pils)
+            _ys = get_yongshin(pils)
+            _sw = get_yearly_luck(pils, datetime.now().year)
+            _ctx_lines = [
+                f"[사주 컨텍스트] 이름:{name} / 일간:{_ilgan}({_ilp.get('한글','')}) / 격국:{_gy.get('격국명','?') if _gy else '?'}",
+                f"용신:{_ys.get('종합_용신',[])} / 현재대운:{_cur_dw.get('str','?')} / 올해세운:{_sw.get('세운','?')}({_sw.get('십성_천간','?')})",
+                f"[질문] {_auto_q}",
+            ]
+            _ai_resp = get_ai_interpretation("\n".join(_ctx_lines), pils, birth_year, gender)
+            if not _ai_resp:
+                _ai_resp = LocalSajuNarrator.quick_answer(_auto_q, pils, birth_year, gender) if hasattr(LocalSajuNarrator, "quick_answer") else ""
+            if _ai_resp:
+                st.markdown(
+                    f"<div style='background:linear-gradient(145deg,#faf7f0,#f2ebe0);border:1px solid #c9a84c;"
+                    f"border-radius:14px;padding:18px;margin:8px 0;font-size:14px;color:#3d2800;line-height:2'>"
+                    f"<div style='font-size:11px;font-weight:700;color:#c9a84c;margin-bottom:8px'>🔮 만신의 답</div>"
+                    f"{_ai_resp}</div>",
+                    unsafe_allow_html=True,
+                )
+        except Exception as _qe:
+            _saju_log.debug("[silent except] %s", _qe)
 
     # -- AI 상담 메인 (E-Version Chat) --
 

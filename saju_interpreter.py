@@ -2165,7 +2165,7 @@ CAREER_MATRIX = make_hanja_safe(CAREER_MATRIX)
 
 # ----------------- HANJA SAFE INJECT END -----------------
 def _nar_ch1_ilgan(ctx):
-    """1~2장: 일간 캐릭터 + 신강신약 (ILGAN_PROFILE 강화)"""
+    """1~5장: 일간 기질 + 신강신약 + 인생흐름 + 나이대분석 + 올해메시지 + 만신한마디"""
 
     ilgan = ctx.get("ilgan", "")
     ilgan_kr = ctx.get("ilgan_kr", "")
@@ -2177,15 +2177,24 @@ def _nar_ch1_ilgan(ctx):
     strength_info = ctx.get("strength_info", {})
     char = ctx.get("char", {})
     sn_narr = ctx.get("sn_narr", "")
+    current_age = ctx.get("current_age", 40)
+    current_year = ctx.get("current_year", 2026)
+    sw_now = ctx.get("sw_now", {}) or {}
+    cur_dw = ctx.get("cur_dw", {}) or {}
+    daewoon = ctx.get("daewoon", []) or []
 
-    # ILGAN_PROFILE 데이터 우선 활용
     ilp = ILGAN_PROFILE.get(ilgan, {})
     profile_bonzil = ilp.get("본질", char.get("성격_핵심", ""))
     profile_jangjeom = ilp.get("장점", char.get("장점", ""))
     profile_daknjeom = ilp.get("단점", char.get("단점", ""))
     profile_jikup = ilp.get("직업", "")
     profile_jaemul = ilp.get("재물", "")
+    profile_yeonae = ilp.get("연애", "")
+    profile_geongang = ilp.get("건강", "")
     profile_chobang = ilp.get("처방", "")
+
+    jangjeom_list = [j.strip() for j in profile_jangjeom.split(",") if j.strip()][:3]
+    daknjeom_list = [d.strip() for d in profile_daknjeom.split(".") if d.strip()][:3]
 
     sn_advice = (
         "신강한 사주는 직접 움직여야 기회가 옵니다. 수동적으로 기다리면 아무것도 이루지 못합니다."
@@ -2195,39 +2204,160 @@ def _nar_ch1_ilgan(ctx):
         "중화 사주는 꾸준함이 가장 큰 무기입니다. 한 분야를 깊이 파고드는 전략이 가장 효과적입니다."
     )
 
+    # 현재 나이대 분석
+    if current_age < 30:
+        age_stage, age_msg = "청년기 초반", (
+            f"지금은 기반을 닦는 가장 중요한 시기입니다. {ilgan_kr} 일간의 강점을 살려 방향을 확실히 잡아야 합니다. "
+            f"이 시기의 선택이 앞으로 20년의 궤도를 결정합니다. 재능을 아낌없이 펼치십시오. "
+            f"실패를 두려워 말고, 지금의 경험이 곧 자산임을 기억하십시오."
+        )
+    elif current_age < 40:
+        age_stage, age_msg = "청년기", (
+            f"인생에서 가장 역동적인 30대입니다. {ilgan_kr}의 기운이 본격적인 전성기를 맞이하고 있습니다. "
+            f"도전과 확장의 시기이나, 무리한 욕심은 금물입니다. 실력을 쌓으면서 기회를 잡으십시오. "
+            f"지금 맺는 인연과 쌓는 신뢰가 40대 이후의 가장 큰 자산이 됩니다."
+        )
+    elif current_age < 50:
+        age_stage, age_msg = "중년기", (
+            f"40대는 사주의 모든 에너지가 결실을 맺는 황금기입니다. {ilgan_kr}의 본성이 가장 강하게 발휘됩니다. "
+            f"지금까지 쌓아온 것들이 실제 열매로 맺히는 시기. 큰 그림을 그리되 내실을 더욱 단단히 하십시오. "
+            f"건강 관리를 시작하지 않으면 50대에 대가를 치릅니다. 지금이 바꿀 수 있는 마지막 기회입니다."
+        )
+    elif current_age < 60:
+        age_stage, age_msg = "중년기 후반", (
+            f"50대는 수확과 전환의 시기입니다. {ilgan_kr} 일간의 기운이 내면으로 깊어지는 때입니다. "
+            f"지나온 길을 돌아보고 남은 길을 재정비하십시오. 욕심을 줄이고 핵심에만 집중하는 것이 지혜입니다. "
+            f"건강 관리를 최우선 과제로 삼고, 가족과의 시간을 늘리십시오."
+        )
+    else:
+        age_stage, age_msg = "장년기", (
+            f"장년기는 지혜로 빛나는 시기입니다. {ilgan_kr}의 기운이 원숙함으로 완성되고 있습니다. "
+            f"후학을 이끌고 경험을 나누는 것이 이 시기의 가장 큰 복입니다. "
+            f"욕심보다 감사를, 경쟁보다 조화를 추구할 때 진정한 행복이 찾아옵니다."
+        )
+
+    # 인생 대운 흐름
+    def _dw_at(age):
+        for dw in daewoon:
+            s = dw.get("시작나이", 0)
+            if s <= age < s + 10:
+                return dw.get("str", "?")
+        return "?"
+
+    # 올해 세운 메시지
+    sw_ss = sw_now.get("십성_천간", "")
+    sw_gilhyung = sw_now.get("길흉", "보통")
+    _SW_MSG = {
+        "正官": f"{current_year}년 정관(正官) 세운 — 명예와 직위가 오르는 해. 조직 내 신뢰가 높아집니다.",
+        "偏官": f"{current_year}년 편관(偏官) 세운 — 도전과 극복의 해. 강인하게 버티면 크게 성장합니다.",
+        "正財": f"{current_year}년 정재(正財) 세운 — 안정적 수입이 늘어나는 해. 성실한 노력이 결실을 맺습니다.",
+        "偏財": f"{current_year}년 편재(偏財) 세운 — 예상치 못한 수입과 기회의 해. 적극적으로 움직이십시오.",
+        "食神": f"{current_year}년 식신(食神) 세운 — 표현력과 창의성이 빛나는 해. 부업·새 분야 도전에 좋습니다.",
+        "傷官": f"{current_year}년 상관(傷官) 세운 — 변화와 혁신의 에너지. 기존 틀을 깨는 도전이 성과를 냅니다.",
+        "比肩": f"{current_year}년 비견(比肩) 세운 — 독립과 자립의 해. 경쟁이 심해지나 자신감으로 돌파 가능합니다.",
+        "劫財": f"{current_year}년 겁재(劫財) 세운 — 재물 기복 주의. 충동적 지출과 투자를 자제하십시오.",
+        "偏印": f"{current_year}년 편인(偏印) 세운 — 이동과 변화의 해. 학습·이직·이사 기운이 강합니다.",
+        "正印": f"{current_year}년 정인(正印) 세운 — 학문과 귀인의 해. 배움과 자격증이 운명을 바꿉니다.",
+    }
+    sw_msg1 = _SW_MSG.get(sw_ss, f"{current_year}년은 {sw_gilhyung}의 기운이 흐르는 한 해입니다.")
+    sw_msg2 = (
+        "길(吉)한 기운이 강하니 상반기에 중요한 결정을 내리십시오."
+        if "길" in sw_gilhyung else
+        "흉(凶) 기운이 있으니 무리한 변화보다 내실을 다지는 한 해로 삼으십시오."
+        if "흉" in sw_gilhyung else
+        "평온하게 흐르는 한 해. 꾸준함이 가장 큰 무기입니다."
+    )
+
+    # 만신의 한마디
+    _MANSHIN = {
+        "甲": f"곧게 뻗은 나무가 아름답지만, 폭풍에는 휘는 대나무가 오래 삽니다. 유연함을 기르십시오.",
+        "乙": f"덩굴은 어디든 뿌리를 내립니다. 지금 있는 자리에서 최선을 다하면 반드시 꽃피웁니다.",
+        "丙": f"태양은 매일 뜨지만 소모되지 않습니다. 충전 없는 빛은 꺼집니다. 쉬는 것도 실력입니다.",
+        "丁": f"촛불은 어둠을 밝히다 자신을 태웁니다. 감정을 표현하고 속을 비워야 더 오래 빛납니다.",
+        "戊": f"산은 움직이지 않아도 세상 모든 것이 찾아옵니다. 변화를 두려워 말고 중심을 지키십시오.",
+        "己": f"비옥한 땅은 심은 것을 모두 키워냅니다. 걱정을 줄이고 씨앗 심는 데 집중하십시오.",
+        "庚": f"쇠는 불에 달구어야 날카로워집니다. 지금의 시련이 당신을 더욱 빛나게 하고 있습니다.",
+        "辛": f"완벽한 보석도 땅속에서는 빛나지 않습니다. 80%의 완성으로 세상에 나오십시오.",
+        "壬": f"큰 강은 모든 것을 받아들이지만 방향을 잃지 않습니다. 깊이 없는 넓음은 진흙이 됩니다.",
+        "癸": f"이슬 한 방울이 메마른 땅을 촉촉이 적십니다. 당신의 섬세함이 곧 천재성입니다.",
+    }
+    manshin = _MANSHIN.get(ilgan, f"당신의 운명은 선택으로 완성됩니다. 지금 이 순간이 가장 중요합니다.")
+
     lines = [
         f"",
-        f"    -----------------------------------------------------",
+        f"    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
         f"      {display_name}님의 사주 종합 리포트",
         f"      {birth_year}년생 | {ilgan_kr}({ilgan}) 일간 | {sn}",
-        f"    -----------------------------------------------------",
+        f"    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
         f"",
-        f"    [ 제1장 | 일간(日干) - 타고난 나의 기질과 본성 ]",
+        f"    ┌ 제1장 | 일간(日干) — 타고난 기질과 본성 ┐",
         f"",
-        f"일간(日干)은 사주의 핵심. {display_name}님의 일간은 {ilgan}({ilgan_kr})입니다.",
+        f"일간(日干)은 '나 자신'을 나타내는 사주의 핵심. {display_name}님의 일간은 {ilgan}({ilgan_kr})입니다.",
         f"",
         f"  {profile_bonzil}",
         f"",
-        f"  [장점]: {profile_jangjeom}",
-        f"  [단점]: {profile_daknjeom}",
+        f"  일간 {ilgan_kr}이(가) {iljj_kr}(日支) 위에 앉아 있습니다.",
+        f"  {iljj_kr}의 기운이 현실적 행동 패턴과 배우자 자리에 깊숙이 관여합니다.",
         f"",
+        f"  ▶ 타고난 장점 TOP 3",
     ]
+    for j in jangjeom_list:
+        lines.append(f"    ✓ {j}")
+    lines += [f"", f"  ▶ 주의해야 할 단점 TOP 3"]
+    for d in daknjeom_list:
+        if d:
+            lines.append(f"    △ {d}")
+    lines.append(f"")
     if profile_jikup:
-        lines.append(f"  [적성·직업]: {profile_jikup}")
+        lines.append(f"  [천직·적성] {profile_jikup}")
     if profile_jaemul:
-        lines.append(f"  [재물 운]: {profile_jaemul}")
+        lines.append(f"  [재물 그릇] {profile_jaemul}")
+    if profile_yeonae:
+        lines.append(f"  [연애 스타일] {profile_yeonae}")
+    if profile_geongang:
+        lines.append(f"  [건강 주의] {profile_geongang}")
+    if profile_chobang:
+        lines += [f"", f"  ◆ 핵심 처방: {profile_chobang}"]
     lines += [
         f"",
-        f"  일간 {ilgan_kr}이(가) {iljj_kr}(地支) 위에 앉아 있습니다. {iljj_kr}의 기운이 현실적 토대와 행동 패턴에 깊숙이 관여하며, 일지(日支)는 배우자 자리이기도 합니다.",
-        f"",
-        f"  [핵심 처방]: {profile_chobang}" if profile_chobang else "",
-        f"",
-        f"    [ 제2장 | 신강신약(身强弱) - 기운의 세기 ]",
+        f"    ┌ 제2장 | 신강신약(身强弱) — 기운의 세기 ┐",
         f"",
         f"  {sn_narr}",
+        f"  체력 점수: {strength_info.get('helper_score', 50)}점",
+        f"  → {sn_advice}",
         f"",
-        f"  체력 점수: {strength_info.get('helper_score', 50)}점 — {'강한 편' if '신강' in sn else '약한 편' if '신약' in sn else '균형'}",
-        f"  * {sn_advice}",
+        f"    ┌ 제3장 | 인생 전체 흐름 — 대운의 파도 ┐",
+        f"",
+        f"  [유년기~20대] {_dw_at(10)} 대운",
+        f"    기질이 형성되는 시기. 가정과 학업 환경이 성격의 틀을 잡습니다.",
+        f"    {ilgan_kr}의 씨앗이 심어지고 자라는 출발점.",
+        f"",
+        f"  [청년기~30대] {_dw_at(28)} 대운",
+        f"    사회로 나아가 자신을 증명하는 시기. 도전과 실패가 모두 자양분.",
+        f"    이 시기의 경험이 중년 이후의 내공을 결정합니다.",
+        f"",
+        f"  [중년기~40대] {_dw_at(45)} 대운",
+        f"    인생의 수확기. 쌓아온 것들이 현실로 결실을 맺습니다.",
+        f"    가장 강한 에너지가 흐르는 황금기. 큰 결정을 내리기에 최적의 시기.",
+        f"",
+        f"  [장년기~60대] {_dw_at(65)} 대운",
+        f"    완성과 전달의 시기. 지혜가 빛을 발하고 후학이 모여듭니다.",
+        f"    건강과 관계를 최우선으로. 욕심보다 여유가 복을 부릅니다.",
+        f"",
+        f"    ┌ 제4장 | 현재 나이대 집중 분석 ({current_age}세 / {age_stage}) ┐",
+        f"",
+        f"  {age_msg}",
+        f"  현재 {cur_dw.get('str', '?')} 대운이 흐르고 있습니다.",
+        f"  이 대운의 기운을 최대로 활용하는 것이 지금 가장 중요한 과제입니다.",
+        f"",
+        f"    ┌ 제5장 | 올해({current_year}년) 세운 핵심 메시지 ┐",
+        f"",
+        f"  {sw_msg1}",
+        f"  {sw_msg2}",
+        f"",
+        f"    ━━━━━ 🔮 만신의 한마디 ━━━━━",
+        f"",
+        f"  「 {display_name}님, {manshin} 」",
         f"",
     ]
     return "\n".join(lines)
@@ -2433,7 +2563,71 @@ def _nar_ch6_daewoon(ctx):
     lines.append(
         f"  용신이 겹치는 해는 최고의 기회, 기신이 겹치는 해는 최대의 위험. 두 방향이 같을 때 기운이 극대화됩니다."
     )
+
+    # 이 10년의 키워드 3개
+    _DW_KEYWORDS = {
+        "比肩": ["독립", "자립", "경쟁"],
+        "劫財": ["변동", "재물기복", "승부"],
+        "食神": ["창작", "복록", "표현"],
+        "傷官": ["혁신", "충돌", "기술"],
+        "偏財": ["사업", "확장", "인맥"],
+        "正財": ["안정", "성실", "저축"],
+        "偏官": ["도전", "극복", "단련"],
+        "正官": ["명예", "신뢰", "승진"],
+        "偏印": ["이동", "변화", "학습"],
+        "正印": ["학문", "귀인", "보호"],
+    }
+    kws = _DW_KEYWORDS.get(cur_dw_ss, ["성장", "변화", "결실"])
+    lines += [
+        f"",
+        f"  ▶ 이 10년의 핵심 키워드: #{kws[0]}  #{kws[1]}  #{kws[2]}",
+        f"",
+    ]
+
+    # 연도별 흐름 요약 (현재~5년후)
+    lines.append(f"  ▶ 향후 5년 연도별 흐름 요약")
+    for offset in range(6):
+        y = current_year + offset
+        try:
+            yl = get_yearly_luck(pils, y) if pils else {}
+            y_ss = yl.get("십성_천간", "-")
+            y_gh = yl.get("길흉", "보통")
+            y_sw = yl.get("세운", str(y))
+            _Y_HINT = {
+                "正官": "명예·승진 기운",  "偏官": "도전·극복 기운",
+                "正財": "수입 증가 기운",  "偏財": "기회·확장 기운",
+                "食神": "창의·복록 기운",  "傷官": "변화·혁신 기운",
+                "比肩": "자립·경쟁 기운",  "劫財": "재물 기복 기운",
+                "偏印": "이동·학습 기운",  "正印": "귀인·학문 기운",
+            }
+            hint = _Y_HINT.get(y_ss, "흐름 유지")
+            lines.append(f"    {y}년 [{y_sw}] {y_ss} — {hint} ({y_gh})")
+        except Exception:
+            lines.append(f"    {y}년 — 계산 중")
     lines.append(f"")
+
+    # 이 대운에서 반드시 해야 할 것 / 하지 말아야 할 것
+    _DW_DO = {
+        "比肩": ("독립 사업 또는 부업 시작, 자기 브랜드 구축", "타인에게 지나치게 의존하거나 경쟁을 회피"),
+        "劫財": ("적극적 사업 도전, 협업 파트너 확보", "충동적 투자·투기, 보증·연대"),
+        "食神": ("창의적 표현 활동, 부업·취미 사업화", "재능을 혼자 묻어두는 것, 과한 식음주"),
+        "傷官": ("새 기술·자격증 취득, 창업 준비", "윗사람과의 충돌, 법적 분쟁"),
+        "偏財": ("인맥 확장, 사업 투자, 이성 인연 적극 추구", "도박성 투자, 다수와의 금전 거래"),
+        "正財": ("저축·안정 자산 확보, 착실한 실력 축적", "무리한 확장, 큰 투기성 투자"),
+        "偏官": ("건강 관리, 체력 단련, 도전 과제 설정", "감정적 충돌, 무리한 과로"),
+        "正官": ("경력 개발, 자격증, 대외 신뢰도 구축", "원칙 어기기, 불필요한 이직·변동"),
+        "偏印": ("이사·이직·유학 등 큰 변화 실행", "한 자리에 고착, 변화 거부"),
+        "正印": ("학업·자격증·연구, 귀인 관계 돈독히", "독선적 행동, 스승·멘토 무시"),
+    }
+    do_txt, dont_txt = _DW_DO.get(cur_dw_ss, ("현재 기운에 집중", "무리한 변화 자제"))
+    lines += [
+        f"  ▶ 이 대운에서 반드시 해야 할 것",
+        f"    ✓ {do_txt}",
+        f"",
+        f"  ▶ 이 대운에서 하지 말아야 할 것",
+        f"    ✗ {dont_txt}",
+        f"",
+    ]
     return "\n".join(lines)
 
 
