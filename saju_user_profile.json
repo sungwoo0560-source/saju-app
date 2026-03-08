@@ -1,0 +1,17 @@
+{
+  "[{\"cg\": \"丙\", \"jj\": \"辰\", \"str\": \"丙辰\"}, {\"cg\": \"戊\", \"jj\": \"戌\", \"str\": \"戊戌\"}, {\"cg\": \"甲\", \"jj\": \"午\", \"str\": \"甲午\"}, {\"cg\": \"辛\", \"jj\": \"巳\", \"str\": \"辛巳\"}]": {
+    "saju_key": "[{\"cg\": \"丙\", \"jj\": \"辰\", \"str\": \"丙辰\"}, {\"cg\": \"戊\", \"jj\": \"戌\", \"str\": \"戊戌\"}, {\"cg\": \"甲\", \"jj\": \"午\", \"str\": \"甲午\"}, {\"cg\": \"辛\", \"jj\": \"巳\", \"str\": \"辛巳\"}]",
+    "main_concern": "",
+    "past_concerns": [],
+    "last_focus": "종합",
+    "last_visit": "2026-02-28",
+    "visit_count": 1,
+    "belief_level": 0.5,
+    "last_prediction": "",
+    "prediction_history": [],
+    "stress_pattern": "",
+    "persona": "balanced_type",
+    "first_visit": "2026-02-28",
+    "concern": ""
+  }
+}

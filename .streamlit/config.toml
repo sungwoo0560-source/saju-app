@@ -1,0 +1,25 @@
+# 만세력 사주 엔진 — 개인 사용 + GitHub/Streamlit Cloud 배포용
+# https://docs.streamlit.io/develop/api-reference/configuration
+
+[server]
+headless = true
+# enableCORS: XSRF 보호 사용 시 false 불가 → 제거 (기본값 사용)
+enableXsrfProtection = true
+maxUploadSize = 50
+
+[browser]
+gatherUsageStats = false
+serverAddress = "localhost"
+serverPort = 8501
+
+[client]
+showErrorDetails = true
+toolbarMode = "minimal"
+
+[theme]
+base = "light"
+primaryColor = "#d4af37"
+backgroundColor = "#faf8f5"
+secondaryBackgroundColor = "#fffef9"
+textColor = "#1a1a1a"
+font = "sans serif"

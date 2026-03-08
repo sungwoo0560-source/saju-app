@@ -1,0 +1,467 @@
+[
+  {
+    "name": "_JJ_HOUR_FULL",
+    "lineno": 79,
+    "end_lineno": 104
+  },
+  {
+    "name": "_JJ_HOUR_SHORT",
+    "lineno": 106,
+    "end_lineno": 131
+  },
+  {
+    "name": "_LUNAR_DATA",
+    "lineno": 147,
+    "end_lineno": 241
+  },
+  {
+    "name": "TERM_LONGITUDES",
+    "lineno": 450,
+    "end_lineno": 475
+  },
+  {
+    "name": "term_list",
+    "lineno": 494,
+    "end_lineno": 519
+  },
+  {
+    "name": "ref_times_all",
+    "lineno": 542,
+    "end_lineno": 567
+  },
+  {
+    "name": "_SIT",
+    "lineno": 1387,
+    "end_lineno": 1427
+  },
+  {
+    "name": "_LOTTO_SS",
+    "lineno": 1559,
+    "end_lineno": 1580
+  },
+  {
+    "name": "GJ60",
+    "lineno": 2644,
+    "end_lineno": 2885
+  },
+  {
+    "name": "guides",
+    "lineno": 3705,
+    "end_lineno": 3746
+  },
+  {
+    "name": "ss_advice",
+    "lineno": 4042,
+    "end_lineno": 4103
+  },
+  {
+    "name": "pools",
+    "lineno": 4471,
+    "end_lineno": 4492
+  },
+  {
+    "name": "EMOTIONS",
+    "lineno": 4745,
+    "end_lineno": 4823
+  },
+  {
+    "name": "KEYWORD_GROUPS",
+    "lineno": 4827,
+    "end_lineno": 4903
+  },
+  {
+    "name": "PATTERNS",
+    "lineno": 4907,
+    "end_lineno": 4945
+  },
+  {
+    "name": "prompt",
+    "lineno": 5095,
+    "end_lineno": 5159
+  },
+  {
+    "name": "rules",
+    "lineno": 5350,
+    "end_lineno": 5374
+  },
+  {
+    "name": "CHUNG_MAP",
+    "lineno": 6271,
+    "end_lineno": 6302
+  },
+  {
+    "name": "OH",
+    "lineno": 6323,
+    "end_lineno": 6346
+  },
+  {
+    "name": "ILGAN_DESC",
+    "lineno": 6422,
+    "end_lineno": 6703
+  },
+  {
+    "name": "TEN_GODS_MATRIX",
+    "lineno": 6728,
+    "end_lineno": 6849
+  },
+  {
+    "name": "UNSUNG_TABLE",
+    "lineno": 6920,
+    "end_lineno": 7061
+  },
+  {
+    "name": "GYEOKGUK_DESC",
+    "lineno": 7082,
+    "end_lineno": 7263
+  },
+  {
+    "name": "YONGSHIN_JOKHU",
+    "lineno": 7418,
+    "end_lineno": 7491
+  },
+  {
+    "name": "ILJU_DATA",
+    "lineno": 7757,
+    "end_lineno": 8118
+  },
+  {
+    "name": "NABJIN_MAP",
+    "lineno": 8126,
+    "end_lineno": 8269
+  },
+  {
+    "name": "ss_to_family",
+    "lineno": 8295,
+    "end_lineno": 8320
+  },
+  {
+    "name": "EXTRA_SINSAL_DATA",
+    "lineno": 8423,
+    "end_lineno": 8486
+  },
+  {
+    "name": "_JEOLGI_BASE",
+    "lineno": 8594,
+    "end_lineno": 8619
+  },
+  {
+    "name": "SOLAR_TERMS",
+    "lineno": 9229,
+    "end_lineno": 9254
+  },
+  {
+    "name": "term_names",
+    "lineno": 9346,
+    "end_lineno": 9371
+  },
+  {
+    "name": "term_names",
+    "lineno": 9436,
+    "end_lineno": 9461
+  },
+  {
+    "name": "STRENGTH_DESC",
+    "lineno": 9912,
+    "end_lineno": 9976
+  },
+  {
+    "name": "YEARLY_LUCK_NARRATIVE",
+    "lineno": 10071,
+    "end_lineno": 10182
+  },
+  {
+    "name": "MONTHLY_LUCK_DESC",
+    "lineno": 10226,
+    "end_lineno": 10326
+  },
+  {
+    "name": "_AI_FORBIDDEN_PHRASES",
+    "lineno": 10556,
+    "end_lineno": 10581
+  },
+  {
+    "name": "_AI_SANDBOX_HEADER",
+    "lineno": 10607,
+    "end_lineno": 10649
+  },
+  {
+    "name": "CHUNG_DOMAIN_DESC",
+    "lineno": 10744,
+    "end_lineno": 10769
+  },
+  {
+    "name": "SS_DOMAIN",
+    "lineno": 10773,
+    "end_lineno": 10798
+  },
+  {
+    "name": "HIGH_IMPACT",
+    "lineno": 10802,
+    "end_lineno": 10892
+  },
+  {
+    "name": "EVENT_DESC",
+    "lineno": 11276,
+    "end_lineno": 11399
+  },
+  {
+    "name": "SIPSUNG_COMBO_LIFE",
+    "lineno": 11558,
+    "end_lineno": 11759
+  },
+  {
+    "name": "PERSONALITY_COMBO_DB",
+    "lineno": 11828,
+    "end_lineno": 11870
+  },
+  {
+    "name": "OH_COMBO_DB",
+    "lineno": 11874,
+    "end_lineno": 11922
+  },
+  {
+    "name": "OH_BASE",
+    "lineno": 12168,
+    "end_lineno": 12189
+  },
+  {
+    "name": "OH_PSYCH",
+    "lineno": 12279,
+    "end_lineno": 12305
+  },
+  {
+    "name": "PROPHET_SYSTEM",
+    "lineno": 12543,
+    "end_lineno": 12579
+  },
+  {
+    "name": "data_block",
+    "lineno": 12595,
+    "end_lineno": 12701
+  },
+  {
+    "name": "past_rich_block",
+    "lineno": 12774,
+    "end_lineno": 12800
+  },
+  {
+    "name": "prompts",
+    "lineno": 12802,
+    "end_lineno": 13023
+  },
+  {
+    "name": "OHAENG_DIAGNOSIS",
+    "lineno": 13353,
+    "end_lineno": 13399
+  },
+  {
+    "name": "narratives",
+    "lineno": 13743,
+    "end_lineno": 13801
+  },
+  {
+    "name": "AGE_STAGE_FOCUS",
+    "lineno": 13805,
+    "end_lineno": 13861
+  },
+  {
+    "name": "card_html",
+    "lineno": 14178,
+    "end_lineno": 14224
+  },
+  {
+    "name": "WARYEONG_TABLE",
+    "lineno": 14553,
+    "end_lineno": 14624
+  },
+  {
+    "name": "YANGIN_DESC",
+    "lineno": 14696,
+    "end_lineno": 14767
+  },
+  {
+    "name": "SINSAL_12_TABLE",
+    "lineno": 14882,
+    "end_lineno": 14955
+  },
+  {
+    "name": "SINSAL_12_DESC",
+    "lineno": 14957,
+    "end_lineno": 15054
+  },
+  {
+    "name": "EXTRA_SINSAL",
+    "lineno": 15056,
+    "end_lineno": 15113
+  },
+  {
+    "name": "context",
+    "lineno": 15750,
+    "end_lineno": 15776
+  },
+  {
+    "name": "kits",
+    "lineno": 15993,
+    "end_lineno": 16029
+  },
+  {
+    "name": "data",
+    "lineno": 16356,
+    "end_lineno": 16389
+  },
+  {
+    "name": "simple_keys",
+    "lineno": 16416,
+    "end_lineno": 16442
+  },
+  {
+    "name": "snapshot",
+    "lineno": 16498,
+    "end_lineno": 16527
+  },
+  {
+    "name": "simple_keys",
+    "lineno": 16557,
+    "end_lineno": 16583
+  },
+  {
+    "name": "JIJANGGAN_FULL",
+    "lineno": 17558,
+    "end_lineno": 17616
+  },
+  {
+    "name": "HEALTH_OH",
+    "lineno": 17662,
+    "end_lineno": 17708
+  },
+  {
+    "name": "CAREER_MATRIX",
+    "lineno": 17858,
+    "end_lineno": 17957
+  },
+  {
+    "name": "HANGUL_OH",
+    "lineno": 18021,
+    "end_lineno": 18048
+  },
+  {
+    "name": "JUNGSUNG",
+    "lineno": 18084,
+    "end_lineno": 18106
+  },
+  {
+    "name": "JONGSUNG",
+    "lineno": 18108,
+    "end_lineno": 18137
+  },
+  {
+    "name": "html",
+    "lineno": 18903,
+    "end_lineno": 18929
+  },
+  {
+    "name": "PCMAP",
+    "lineno": 19116,
+    "end_lineno": 19137
+  },
+  {
+    "name": "ILGAN_CHAR_DESC",
+    "lineno": 19354,
+    "end_lineno": 19465
+  },
+  {
+    "name": "DW_DOMAIN_STAGE",
+    "lineno": 19978,
+    "end_lineno": 20149
+  },
+  {
+    "name": "YEAR_SS_DETAIL",
+    "lineno": 20299,
+    "end_lineno": 20380
+  },
+  {
+    "name": "ctx",
+    "lineno": 21271,
+    "end_lineno": 21316
+  },
+  {
+    "name": "_SS_DAILY_DEEP",
+    "lineno": 23436,
+    "end_lineno": 23507
+  },
+  {
+    "name": "DAILY_SS_MSG",
+    "lineno": 23628,
+    "end_lineno": 23695
+  },
+  {
+    "name": "DAILY_FULL",
+    "lineno": 23769,
+    "end_lineno": 23990
+  },
+  {
+    "name": "MONTHLY_SS_MEANING",
+    "lineno": 24157,
+    "end_lineno": 24202
+  },
+  {
+    "name": "BIHANG_DB",
+    "lineno": 24954,
+    "end_lineno": 25010
+  },
+  {
+    "name": "traits",
+    "lineno": 26794,
+    "end_lineno": 26815
+  },
+  {
+    "name": "health_map",
+    "lineno": 26946,
+    "end_lineno": 26967
+  },
+  {
+    "name": "SS_WARN_DESC",
+    "lineno": 27373,
+    "end_lineno": 27394
+  },
+  {
+    "name": "SS_ADVICE",
+    "lineno": 27524,
+    "end_lineno": 27602
+  },
+  {
+    "name": "CG_DETAIL",
+    "lineno": 27726,
+    "end_lineno": 27807
+  },
+  {
+    "name": "JJ_12b",
+    "lineno": 29315,
+    "end_lineno": 29340
+  },
+  {
+    "name": "right_panel_html",
+    "lineno": 29427,
+    "end_lineno": 29451
+  },
+  {
+    "name": "_UNSUNG_DESC",
+    "lineno": 29618,
+    "end_lineno": 29692
+  },
+  {
+    "name": "_EMOJI_MAP",
+    "lineno": 29908,
+    "end_lineno": 29934
+  },
+  {
+    "name": "_SYMBOL_MAP",
+    "lineno": 29942,
+    "end_lineno": 29993
+  },
+  {
+    "name": "_DO_LIST",
+    "lineno": 31215,
+    "end_lineno": 31253
+  }
+]

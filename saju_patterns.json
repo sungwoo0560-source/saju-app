@@ -1,0 +1,22 @@
+{
+  "total": 2,
+  "hit_rate": 50,
+  "best_sections": [
+    "wolji_0"
+  ],
+  "weak_sections": [],
+  "by_section": {
+    "wolji_1": {
+      "hit": 0,
+      "miss": 1,
+      "total": 1,
+      "rate": 0
+    },
+    "wolji_0": {
+      "hit": 1,
+      "miss": 0,
+      "total": 1,
+      "rate": 100
+    }
+  }
+}

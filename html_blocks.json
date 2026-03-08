@@ -1,0 +1,492 @@
+[
+  {
+    "lineno": 3621,
+    "end_lineno": 3650,
+    "snippet": "  <div style=\"background: linear-gradient(135deg, #121212, #2c3e50); padding: 18px; border-radius: 1..."
+  },
+  {
+    "lineno": 4504,
+    "end_lineno": 5352,
+    "snippet": "  <style>    @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700;90..."
+  },
+  {
+    "lineno": 10114,
+    "end_lineno": 10117,
+    "snippet": "<div class=\"gold-section\">\ud83d\udd04 \ub300\uc6b4(\u5927\u904b) | 10\ub144 \uc8fc\uae30 \uc6b4\uba85\uc758 \ud070 \ud750\ub984</div>..."
+  },
+  {
+    "lineno": 10151,
+    "end_lineno": 10151,
+    "snippet": "<div class=\"gold-section\">\ud83d\udcca \uc6a9\uc2e0 \ub300\uc6b4 \ud0c0\uc784\ub77c\uc778</div>..."
+  },
+  {
+    "lineno": 10304,
+    "end_lineno": 10307,
+    "snippet": "<div class=\"gold-section\">\ud83d\udc68\u200d\ud83d\udc69\u200d\ud83d\udc67\u200d\ud83d\udc66 \uc721\uce5c\ub860(\u516d\u89aa\u8ad6) - \uac00\uc871\uacfc \uc778\uc5f0</div>..."
+  },
+  {
+    "lineno": 10309,
+    "end_lineno": 10326,
+    "snippet": "  <div class=\"card\" style=\"background:#ffffff;border:1px solid #c8b8e8;margin-bottom:12px\">  <div st..."
+  },
+  {
+    "lineno": 10394,
+    "end_lineno": 10397,
+    "snippet": "<div class=\"gold-section\">\ud83d\udc91 \ubc30\uc6b0\uc790 \uc790\ub9ac (\uc77c\uc9c0) \ubd84\uc11d</div>..."
+  },
+  {
+    "lineno": 10443,
+    "end_lineno": 10446,
+    "snippet": "<div class=\"gold-section\">\ud83d\udc91 \uad81\ud569(\u5bae\u5408) - \ub450 \uc0ac\uc8fc\uc758 \uc870\ud654</div>..."
+  },
+  {
+    "lineno": 10448,
+    "end_lineno": 10459,
+    "snippet": "  <div class=\"card\" style=\"background:#fff0f8;border:1px solid #d5a8c8\">  <div style=\"font-size:13px..."
+  },
+  {
+    "lineno": 12579,
+    "end_lineno": 12582,
+    "snippet": "<div class=\"gold-section\">\ud83d\udcca \ub370\uc774\ud130 \uae30\ubc18 \ud328\ud134 \ubd84\uc11d</div>..."
+  },
+  {
+    "lineno": 13845,
+    "end_lineno": 13848,
+    "snippet": "<div class=\"gold-section\">[\ub370\uc774\ud130] \uacfc\uac70 \uc801\uc911 - \uc5d4\uc9c4\uc774 \uacc4\uc0b0\ud55c \ub2f9\uc2e0\uc758 \uacfc\uac70</div>..."
+  },
+  {
+    "lineno": 13879,
+    "end_lineno": 13882,
+    "snippet": "<div style=\"background:#f5f5f5;border:1px solid #ddd;border-radius:10px;padding:12px 16px;margin-bot..."
+  },
+  {
+    "lineno": 13889,
+    "end_lineno": 13889,
+    "snippet": "<div class=\"gold-section\">[\ubd84\uc11d] \uc131\ud5a5 \ud310\ub3c5</div>..."
+  },
+  {
+    "lineno": 13891,
+    "end_lineno": 13894,
+    "snippet": "<div style='font-size:12px;color:#000000;margin-bottom:8px'>\uc5d4\uc9c4 \uacc4\uc0b0: \uc77c\uac04 + \uc77c\uc9c0 + \uc2e0\uac15\uc2e0\uc57d + \uc624\ud589 \uacfc\ub2e4/\ubd80\uc871 \uc870\ud569 \uacf5\uc2dd \uc801..."
+  },
+  {
+    "lineno": 13922,
+    "end_lineno": 13925,
+    "snippet": "<div style=\"font-size:12px;color:#000000;margin:6px 0\">\uc774 \uc131\ud5a5\uc774 \ub9de\ub098\uc694?</div>..."
+  },
+  {
+    "lineno": 13940,
+    "end_lineno": 13943,
+    "snippet": "<div class=\"gold-section\">[\ud3ec\uc778\ud2b8] \uacfc\uac70 \uc801\uc911 \ud3ec\uc778\ud2b8</div>..."
+  },
+  {
+    "lineno": 13945,
+    "end_lineno": 13948,
+    "snippet": "<div style='font-size:12px;color:#000000;margin-bottom:10px'>\ucda9/\ud569/\uc2ed\uc131 \uad50\ucc28\ub97c \uc218\ud559 \uacc4\uc0b0\uc73c\ub85c \ubf51\uc740 \uacfc\uac70 \uc0ac\uac74 \uc2dc\uc810\uc785\ub2c8\ub2e4.<br><..."
+  },
+  {
+    "lineno": 14016,
+    "end_lineno": 14019,
+    "snippet": "<div style=\"font-size:13px;font-weight:800;color:#000000;margin:16px 0 8px;border-left:3px solid #00..."
+  },
+  {
+    "lineno": 14025,
+    "end_lineno": 14028,
+    "snippet": "<div style=\"font-size:13px;font-weight:800;color:#000000;margin:16px 0 8px;border-left:3px solid #00..."
+  },
+  {
+    "lineno": 14034,
+    "end_lineno": 14037,
+    "snippet": "<div style=\"font-size:13px;font-weight:800;color:#000000;margin:16px 0 8px;border-left:3px solid #00..."
+  },
+  {
+    "lineno": 14054,
+    "end_lineno": 14057,
+    "snippet": "<div class=\"gold-section\">[\ubd84\uc11d] \uc6d4\uc9c0(Wolji) \ucda9 - \uc0b6\uc758 \uae30\ubc18\uc774 \ud754\ub4e4\ub9b0 \uc2dc\uc810</div>..."
+  },
+  {
+    "lineno": 14092,
+    "end_lineno": 14095,
+    "snippet": "<div class=\"gold-section\">[\uc7ac\ubb3c] \ub3c8\uc774 \uc624\ub294 \uc2dc\uae30</div>..."
+  },
+  {
+    "lineno": 14115,
+    "end_lineno": 14118,
+    "snippet": "<div class=\"gold-section\">[\uc778\uc5f0] \uc778\uc5f0\uc774 \uc624\ub294 \uc2dc\uae30</div>..."
+  },
+  {
+    "lineno": 14147,
+    "end_lineno": 14150,
+    "snippet": "<div class=\"gold-section\">[\uc8fc\uc758] \uc870\uc2ec\ud574\uc57c \ud560 \uad6c\uac04</div>..."
+  },
+  {
+    "lineno": 14174,
+    "end_lineno": 14191,
+    "snippet": "  <div style=\"background:linear-gradient(135deg,#1a1a1a,#2c2c2c);border-radius:14px; padding:16px 20..."
+  },
+  {
+    "lineno": 14279,
+    "end_lineno": 14282,
+    "snippet": "<div style='background:#fafafa;color:#666;padding:14px;border-radius:10px;text-align:center;font-siz..."
+  },
+  {
+    "lineno": 14288,
+    "end_lineno": 14291,
+    "snippet": "<div class=\"gold-section\">[\ubd84\uc11d] \ub300\uc6b4/\uc138\uc6b4 \uad50\ucc28 \ubd84\uc11d - \uc6b4\uba85\uc758 \uad50\ucc28\uc810</div>..."
+  },
+  {
+    "lineno": 14293,
+    "end_lineno": 14304,
+    "snippet": "  <div class=\"card\" style=\"background:#f5f5ff;color:#000000;padding:14px;font-size:13px;line-height:..."
+  },
+  {
+    "lineno": 14394,
+    "end_lineno": 14397,
+    "snippet": "<div class=\"gold-section\">[\uacbd\uace0] \uc6d0\uad6d \ud569(Hap)\uc774 \uc6b4\uc5d0\uc11c \uae68\uc9c0\ub294 \uacbd\uace0</div>..."
+  },
+  {
+    "lineno": 14416,
+    "end_lineno": 14419,
+    "snippet": "<div class=\"gold-section\">[\ubd84\uc11d] \uc6d0\uad6d\uacfc\uc758 \uad50\ucc28 \uc0ac\uac74</div>..."
+  },
+  {
+    "lineno": 14447,
+    "end_lineno": 14450,
+    "snippet": "<div class=\"gold-section\">\ud83d\udcc5 \ud5a5\ud6c4 10\ub144 \uc6b4\uc138 \ud0c0\uc784\ub77c\uc778</div>..."
+  },
+  {
+    "lineno": 14504,
+    "end_lineno": 14507,
+    "snippet": "<div class=\"gold-section\">[\uc7ac\ubb3c\ub860] \uc7ac\ubb3c\ub860(\u8ca1\u7269\u8ad6) - \ub3c8\uc774 \ubaa8\uc774\ub294 \uad6c\uc870 \ubd84\uc11d</div>..."
+  },
+  {
+    "lineno": 14540,
+    "end_lineno": 14543,
+    "snippet": "<div class=\"gold-section\">[\uc0c1\uc2b9] \uc7ac\ubb3c \uc0c1\uc2b9\uae30 \ub300\uc6b4</div>..."
+  },
+  {
+    "lineno": 14559,
+    "end_lineno": 14562,
+    "snippet": "<div class=\"gold-section\">[\ubd84\uc11d] \uc9c1\uc5c5\ub860(Career) - \ucc9c\ubd80\uc801 \uc801\uc131\uacfc \ucd5c\uc801 \uc9c1\uc5c5</div>..."
+  },
+  {
+    "lineno": 14576,
+    "end_lineno": 14576,
+    "snippet": "<div class=\"gold-section\">[\ub370\uc774\ud130] \ucd5c\uc801 \uc9c1\uc5c5\uad70</div>..."
+  },
+  {
+    "lineno": 14591,
+    "end_lineno": 14594,
+    "snippet": "<div class=\"gold-section\">[\uc548\ub0b4] \uc720\ub9ac\ud55c \uc9c1\uc5c5\uad70</div>..."
+  },
+  {
+    "lineno": 16345,
+    "end_lineno": 16345,
+    "snippet": "<div class=\"gold-section\">\ud83d\udcca \uc0ac\uc8fc\uc6d0\uad6d (\u516b\u5b57)</div>..."
+  },
+  {
+    "lineno": 16364,
+    "end_lineno": 16364,
+    "snippet": "<div class=\"gold-section\">\ud83c\udf08 \uc624\ud589 \ubd84\ud3ec</div>..."
+  },
+  {
+    "lineno": 16371,
+    "end_lineno": 16371,
+    "snippet": "<div class=\"gold-section\">\u2696\ufe0f \uc2e0\uac15\uc2e0\uc57d</div>..."
+  },
+  {
+    "lineno": 16408,
+    "end_lineno": 16408,
+    "snippet": "<div class=\"gold-section\">\ud83e\udde0 \uc131\ud5a5 \ud310\ub3c5</div>..."
+  },
+  {
+    "lineno": 16434,
+    "end_lineno": 16434,
+    "snippet": "<div class=\"gold-section\">\ud83c\udfc6 \uaca9\uad6d (\u683c\u5c40)</div>..."
+  },
+  {
+    "lineno": 16481,
+    "end_lineno": 16481,
+    "snippet": "<div class=\"gold-section\">- \uc6a9\uc2e0 (\u7528\u795e)</div>..."
+  },
+  {
+    "lineno": 16543,
+    "end_lineno": 16546,
+    "snippet": "<div class=\"gold-section\">\ud83d\udd2e \uc2ed\uc131(\u5341\u661f) \uc870\ud569 - \ub2f9\uc2e0\uc758 \uc778\uc0dd \uc124\uacc4\ub3c4</div>..."
+  },
+  {
+    "lineno": 16548,
+    "end_lineno": 16557,
+    "snippet": "  <div style=\"font-size:12px;color:#000000;margin-bottom:12px\">      \uc6d0\uad6d\uc5d0 \ub098\ud0c0\ub09c \uc2ed\uc131\uc758 \uc870\ud569\uc744 \ubd84\uc11d\ud569\ub2c8\ub2e4. \uc870\ud569\ub9cc \uc54c\uba74 \uadf8..."
+  },
+  {
+    "lineno": 16712,
+    "end_lineno": 16715,
+    "snippet": "<div class=\"gold-section\">\ud83d\udcbc \uc9c1\uc5c5 \uc801\ud569\ub3c4 \ubd84\uc11d</div>..."
+  },
+  {
+    "lineno": 16730,
+    "end_lineno": 16733,
+    "snippet": "<div class=\"gold-section\">\ud83d\udcdc \uc885\ud569 \uc0ac\uc8fc \ud574\uc124 - \ub9cc\uc2e0\uc758 \ud480\uc774</div>..."
+  },
+  {
+    "lineno": 16782,
+    "end_lineno": 16785,
+    "snippet": "<div class=\"gold-section\">\ud83d\udcc5 \uc62c\ud574 \uae38\ud749\uc6d4 \ubd84\uc11d (\u5927\u904b\u00b7\u6b72\u904b\u00b7\u6708\u904b \uad50\ucc28)</div>..."
+  },
+  {
+    "lineno": 17065,
+    "end_lineno": 17068,
+    "snippet": "<div class=\"gold-section\" style=\"font-size:18px; font-weight:700; margin-bottom:15px\">\ud83d\udcca \u5927\u904b \ud750\ub984 \uadf8\ub798\ud504</d..."
+  },
+  {
+    "lineno": 17194,
+    "end_lineno": 17197,
+    "snippet": "<div class=\"gold-section\" style=\"font-size:18px; font-weight:700\">\ud83d\udd04 \u5927\u904b \u8a73\u89e3</div>..."
+  },
+  {
+    "lineno": 17206,
+    "end_lineno": 17209,
+    "snippet": "<div class=\"gold-section\" style=\"font-size:18px; font-weight:700\">\ud83d\udd00 \u5927\u904b x \u4e16\u904b \u4ea4\u53c9 \u5206\u6790</div>..."
+  },
+  {
+    "lineno": 17224,
+    "end_lineno": 17227,
+    "snippet": "<div class=\"gold-section\" style=\"font-size:18px; font-weight:700\">\ud83d\udcdc \u5927\u904b 100\u5e74 \u5b8c\u5168 \u89e3\u8aaa</div>..."
+  },
+  {
+    "lineno": 17325,
+    "end_lineno": 17342,
+    "snippet": "  <div style=\"background:#fff0f8;border:2px solid #e91e8c55;border-radius:12px; padding:14px 18px;ma..."
+  },
+  {
+    "lineno": 17386,
+    "end_lineno": 17401,
+    "snippet": "  <div style=\"background:#f0fff8;border:2px solid #27ae6055;border-radius:12px; padding:14px 18px;ma..."
+  },
+  {
+    "lineno": 17611,
+    "end_lineno": 17611,
+    "snippet": "<div class=\"gold-section\">\ud83d\udc91 \uc778\uc5f0/\ubc30\uc6b0\uc790\uc6b4 (3\ub144)</div>..."
+  },
+  {
+    "lineno": 17652,
+    "end_lineno": 17652,
+    "snippet": "<div class=\"gold-section\">\ud83d\udcc5 \uc6d4\ubcc4 \uc138\uc6b4 (\uc62c\ud574)</div>..."
+  },
+  {
+    "lineno": 17663,
+    "end_lineno": 17666,
+    "snippet": "<div class=\"gold-section\">\ud83d\udcdc \ubbf8\ub798 3\ub144 \uc644\uc804 \ud574\uc124 - \ub9cc\uc2e0\uc758 \ud480\uc774</div>..."
+  },
+  {
+    "lineno": 17752,
+    "end_lineno": 17767,
+    "snippet": "  <div style=\"background:#f5fff0;border:2px solid #2e7d3255;border-radius:12px; padding:14px 18px;ma..."
+  },
+  {
+    "lineno": 17784,
+    "end_lineno": 17787,
+    "snippet": "<div class=\"gold-section\">\ud83d\udc8e \uc2ed\uc131 \uc870\ud569\uc73c\ub85c \ubcf4\ub294 \uc7ac\ubb3c \uae30\uc9c8</div>..."
+  },
+  {
+    "lineno": 17878,
+    "end_lineno": 17881,
+    "snippet": "<div style=\"font-size:13px;font-weight:800;color:#000000;margin:16px 0 8px;border-left:3px solid #00..."
+  },
+  {
+    "lineno": 17923,
+    "end_lineno": 17923,
+    "snippet": "<div class=\"gold-section\">\ud83d\udcc8 \ub3c8\uc774 \ud130\uc9c0\ub294 \uc2dc\uae30</div>..."
+  },
+  {
+    "lineno": 17967,
+    "end_lineno": 17970,
+    "snippet": "<div class=\"gold-section\">\ud83d\udcb0 \uc7ac\ubb3c\ub860 \uc0c1\uc138 (\uc7a5\uc0dd/12\uc6b4\uc131)</div>..."
+  },
+  {
+    "lineno": 17985,
+    "end_lineno": 17988,
+    "snippet": "<div class=\"gold-section\">\ud83d\udcdc \uc7ac\ubb3c/\uc0ac\uc5c5 \uc644\uc804 \ud574\uc124 - \ub9cc\uc2e0\uc758 \ud480\uc774</div>..."
+  },
+  {
+    "lineno": 18056,
+    "end_lineno": 18071,
+    "snippet": "  <div style=\"background:#fdf0ff;border:2px solid #9b59b655;border-radius:12px; padding:14px 18px;ma..."
+  },
+  {
+    "lineno": 18073,
+    "end_lineno": 18076,
+    "snippet": "<div class=\"gold-section\">\ud83d\udc6b \uc721\uce5c\ub860 - \uc8fc\ubcc0 \uc778\ubb3c \ubd84\uc11d</div>..."
+  },
+  {
+    "lineno": 18085,
+    "end_lineno": 18085,
+    "snippet": "<div class=\"gold-section\">\ud83d\udc91 \uad81\ud569 \ubd84\uc11d</div>..."
+  },
+  {
+    "lineno": 18096,
+    "end_lineno": 18099,
+    "snippet": "<div class=\"gold-section\">\ud83d\udcdc \uc721\uce5c/\uc778\uac04\uad00\uacc4 \uc644\uc804 \ud574\uc124 - \ub9cc\uc2e0\uc758 \ud480\uc774</div>..."
+  },
+  {
+    "lineno": 18479,
+    "end_lineno": 18482,
+    "snippet": "<div class=\"gold-section\" style=\"margin-top:20px\">\u23f0 \uc624\ub298\uc758 \uae38\ud55c \uc2dc\uac04 (\uc6a9\uc2e0 \uae30\ubc18)</div>..."
+  },
+  {
+    "lineno": 18890,
+    "end_lineno": 18893,
+    "snippet": "<div class=\"gold-section\" style=\"margin-top:22px\">\ud83d\udcc6 \uc8fc\uac04\ubcc4 \uae30\uc6b4 \ud750\ub984</div>..."
+  },
+  {
+    "lineno": 18931,
+    "end_lineno": 18934,
+    "snippet": "<div class=\"gold-section\" style=\"margin-top:18px\">[!]\ufe0f \uc774\ubc88 \ub2ec \uc870\uc2ec\ud574\uc57c \ud558\ub294 \ub0a0 (\ud749\uc77c)</div>..."
+  },
+  {
+    "lineno": 18997,
+    "end_lineno": 19012,
+    "snippet": "  <div style=\"padding:18px 20px;color:#2e7d32;background:linear-gradient(135deg,#e8f5e9,#f1f8e9); bo..."
+  },
+  {
+    "lineno": 19017,
+    "end_lineno": 19020,
+    "snippet": "<div class=\"gold-section\" style=\"margin-top:18px\">\u2705 \uc774\ubc88 \ub2ec \ud589\uc6b4\uc758 \ub0a0 (\uae38\uc77c)</div>..."
+  },
+  {
+    "lineno": 19434,
+    "end_lineno": 19463,
+    "snippet": "  <div style=\"background:linear-gradient(135deg,#ffdcdc,#ffdce4,#ffdcdc); border:1px solid #8B0000;b..."
+  },
+  {
+    "lineno": 19660,
+    "end_lineno": 19671,
+    "snippet": "  <div style=\"background:#ffffff;; border:2px solid #4a3080;border-radius:14px;padding:20px;margin:1..."
+  },
+  {
+    "lineno": 21087,
+    "end_lineno": 21102,
+    "snippet": "  <div style=\"background:linear-gradient(135deg,#fff8e1,#fffde7);border:2px solid #d4af3755;border-r..."
+  },
+  {
+    "lineno": 21106,
+    "end_lineno": 21109,
+    "snippet": "<div style=\"background:#e8f5e8;color:#2e7d32;padding:6px 12px;border-radius:8px;font-size:11px;margi..."
+  },
+  {
+    "lineno": 21205,
+    "end_lineno": 21208,
+    "snippet": "<div class=\"section-label\">\ud83c\udfaf \ud575\uc2ec \uc9c1\uc5c5 \uc131\ud5a5</div>..."
+  },
+  {
+    "lineno": 21229,
+    "end_lineno": 21232,
+    "snippet": "<div class=\"section-label\">\ud83d\udcca \uc9c1\uad70\ubcc4 \uc801\ud569\ub3c4</div>..."
+  },
+  {
+    "lineno": 21264,
+    "end_lineno": 21264,
+    "snippet": "<div class=\"gold-section\">\ud83d\udee1\ufe0f \ucee4\ub9ac\uc5b4 \uc131\uacf5 \uc804\ub7b5</div>..."
+  },
+  {
+    "lineno": 21325,
+    "end_lineno": 21328,
+    "snippet": "<div class=\"section-label\">\ud83e\ude7a \uc624\ud589 \uac74\uac15 \ubc38\ub7f0\uc2a4</div>..."
+  },
+  {
+    "lineno": 21335,
+    "end_lineno": 21338,
+    "snippet": "<div class=\"section-label\">[!]\ufe0f \uc911\uc810 \uad00\ub9ac \ubd80\uc704</div>..."
+  },
+  {
+    "lineno": 21361,
+    "end_lineno": 21364,
+    "snippet": "<div class=\"gold-section\">\ud83c\udf75 \ucd94\ucc9c \uc0dd\ud65c \uc2b5\uad00 (\uc591\uc0dd\ubc95)</div>..."
+  },
+  {
+    "lineno": 21402,
+    "end_lineno": 21421,
+    "snippet": "  <div style='background:#000;color:#fff;border-radius:12px; padding:16px 20px;margin-bottom:14px'> ..."
+  },
+  {
+    "lineno": 21593,
+    "end_lineno": 21596,
+    "snippet": "<div class=\"gold-section\" style=\"margin-top:24px\">- \uc774\ubc88 \ub2ec \ub2f9\uc2e0\uc758 \uc0ac\uc8fc \ub9de\ucda4 \uae38\uc77c \ucd94\ucc9c</div>..."
+  },
+  {
+    "lineno": 21722,
+    "end_lineno": 21725,
+    "snippet": "<div class=\"gold-section\" style=\"margin-top:8px\">[!]\ufe0f \uc774\ubc88 \ub2ec \ub2f9\uc2e0\uc758 \uc0ac\uc8fc \ub9de\ucda4 \uc870\uc2ec\uc77c</div>..."
+  },
+  {
+    "lineno": 21858,
+    "end_lineno": 21861,
+    "snippet": "<div class=\"gold-section\" style=\"margin-top:20px\">\ud83d\udd2e \uc624\ub298 \uc77c\uc9c4\uc73c\ub85c \ubcf4\ub294 \ub9cc\uc2e0\uc758 \ub9de\ucda4 \uc870\uc5b8</div>..."
+  },
+  {
+    "lineno": 22069,
+    "end_lineno": 22326,
+    "snippet": "  <style>      @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700;900&..."
+  },
+  {
+    "lineno": 22330,
+    "end_lineno": 22341,
+    "snippet": "  <div class=\"main-header\">  <h1 class=\"gold-gradient\">\u842c\u795e \uc0ac\uc8fc \ucc9c\uba85\ud480\uc774</h1>  <p>\u56db\u67f1\u516b\u5b57 / \u5929\u547d\uc744 \ubc1d\ud788\ub2e4</p>  </div..."
+  },
+  {
+    "lineno": 22818,
+    "end_lineno": 22818,
+    "snippet": "<div style=\"margin-top:28px\"></div>..."
+  },
+  {
+    "lineno": 22828,
+    "end_lineno": 22839,
+    "snippet": "  <div style=\"margin:16px 0 8px; border-bottom:1.5px solid rgba(212,175,55,0.3); padding-bottom:5px;..."
+  },
+  {
+    "lineno": 22968,
+    "end_lineno": 22971,
+    "snippet": "<div style=\"margin:16px 0 8px; border-bottom:1.5px solid rgba(212,175,55,0.3); padding-bottom:5px;\">..."
+  },
+  {
+    "lineno": 22994,
+    "end_lineno": 22994,
+    "snippet": "<div style=\"margin-top:32px\"></div>..."
+  },
+  {
+    "lineno": 23005,
+    "end_lineno": 23005,
+    "snippet": "<div style=\"margin-top:8px\"></div>..."
+  },
+  {
+    "lineno": 23078,
+    "end_lineno": 23081,
+    "snippet": "<div style=\"font-size:16px;font-weight:900;color:#d4af37;margin:20px 0 10px\">\ud83d\uddc2\ufe0f \uc6d0\ud558\uc2dc\ub294 \ubd84\uc11d \uba54\ub274\ub97c \uc120\ud0dd\ud558\uc138\uc694</d..."
+  },
+  {
+    "lineno": 23621,
+    "end_lineno": 23621,
+    "snippet": "<div style=\"margin-top:8px\"></div>..."
+  },
+  {
+    "lineno": 23764,
+    "end_lineno": 23775,
+    "snippet": "  <div style=\"background:linear-gradient(135deg, #1f1c2c, #928dab);border-radius:16px; padding:20px ..."
+  },
+  {
+    "lineno": 23793,
+    "end_lineno": 23796,
+    "snippet": "<div style=\"font-size:18px;font-weight:700;color:#333;margin-bottom:12px\">\ud83d\udccc \uc2dc\uae30\ubcc4 12\uc6b4\uc131</div>..."
+  },
+  {
+    "lineno": 23832,
+    "end_lineno": 23835,
+    "snippet": "<div style=\"font-size:18px;font-weight:700;color:#333;margin-bottom:12px\">\ud83d\udcd6 12\uc6b4\uc131 \uc0c1\uc138 \ud480\uc774</div>..."
+  },
+  {
+    "lineno": 23874,
+    "end_lineno": 23885,
+    "snippet": "  <div style=\"background:linear-gradient(135deg,#1a1a1a,#333);border-radius:16px; padding:20px 24px;..."
+  }
+]
