@@ -17405,37 +17405,27 @@ def main():
 
             quick_consult_bar(pils, name, birth_year, gender)
 
-            with st.sidebar:
-                st.markdown("### 🔮 만신 사주")
-                _menu = st.radio("메뉴 선택", [
-                    "📋 종합운세",
-                    "🌊 대운",
-                    "🎯 과거",
-                    "💰 재물",
-                    "💑 궁합",
-                    "📅 월별운세",
-                    "☀️ 일일운세",
-                    "🤖 AI상담",
-                    "🔴 비방록",
-                ], label_visibility="collapsed")
-
-            if _menu == "📋 종합운세":
+            _tabs = st.tabs([
+                "📋 종합", "🌊 대운", "🎯 과거", "💰 재물", "💑 궁합",
+                "📅 월별", "☀️ 일일", "🤖 AI", "🔴 비방",
+            ])
+            with _tabs[0]:
                 menu1_report(pils, name, birth_year, gender, _ss.get("in_occupation", ""))
-            elif _menu == "🌊 대운":
+            with _tabs[1]:
                 menu2_lifeline(pils, birth_year, gender, name)
-            elif _menu == "🎯 과거":
+            with _tabs[2]:
                 menu3_past(pils, birth_year, gender, name)
-            elif _menu == "💰 재물":
+            with _tabs[3]:
                 menu5_money(pils, birth_year, gender, name)
-            elif _menu == "💑 궁합":
+            with _tabs[4]:
                 menu6_relations(pils, name, birth_year, gender, _ss.get("in_marriage", "미혼"))
-            elif _menu == "📅 월별운세":
+            with _tabs[5]:
                 menu_monthly(pils, birth_year, gender)
-            elif _menu == "☀️ 일일운세":
+            with _tabs[6]:
                 menu_daily(pils, birth_year, gender)
-            elif _menu == "🤖 AI상담":
+            with _tabs[7]:
                 menu7_ai(pils, name, birth_year, gender)
-            elif _menu == "🔴 비방록":
+            with _tabs[8]:
                 menu8_bihang(pils, name, birth_year, gender)
 
     # ---- 맨 위로 플로팅 버튼 (window.parent 로 Streamlit iframe 대응) ----

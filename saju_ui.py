@@ -51,8 +51,8 @@ def inject_global_css():
    메인 컨테이너
 ═══════════════════════════════════ */
 .main .block-container {
-    max-width: 960px !important;
-    padding: 2rem 1.5rem !important;
+    max-width: 860px !important;
+    padding: 1.5rem 1rem !important;
     background: transparent;
 }
 
@@ -90,13 +90,13 @@ h2, h3 {
     background: transparent !important;
     color: #5a3d1a !important;
     font-family: 'Noto Serif KR', serif !important;
-    font-size: 13px !important;
+    font-size: 12px !important;
     font-weight: 600 !important;
-    padding: 10px 16px !important;
+    padding: 8px 10px !important;
     border-radius: 8px 8px 0 0 !important;
     border: none !important;
     transition: all 0.25s ease !important;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.03em;
     white-space: nowrap;
 }
 
