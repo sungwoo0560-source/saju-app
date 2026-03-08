@@ -16070,14 +16070,6 @@ def main():
 
     }
 
-    /* 콘텐츠 가로 폭 제한 */
-    section.main .block-container {
-        max-width: 900px;
-        margin-left: auto;
-        margin-right: auto;
-        padding-left: 1.5rem;
-        padding-right: 1.5rem;
-    }
 
     
 

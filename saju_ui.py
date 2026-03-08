@@ -51,7 +51,7 @@ def inject_global_css():
    메인 컨테이너
 ═══════════════════════════════════ */
 .main .block-container {
-    max-width: 860px !important;
+    max-width: 760px !important;
     padding: 1.5rem 1rem !important;
     background: transparent;
 }
