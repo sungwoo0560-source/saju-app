@@ -2479,12 +2479,34 @@ class IntentEngine:
     """🎯 질문 의도 해석 엔진 (5-Layer Intent Detection)"""
 
     # Layer 1: Emotion Categories
-
+    EMOTIONS = {
+        "불안": ["불안", "걱정", "두렵", "무섭", "초조", "떨려", "겁", "위기"],
+        "절망": ["힘들", "지쳐", "포기", "끝났", "망했", "죽겠", "못하겠", "한계"],
+        "혼란": ["모르겠", "헷갈", "뭘", "어떻게", "왜", "이상해", "혼란", "갈팡"],
+        "기대": ["될까", "가능", "기회", "잘될", "좋아질", "언제쯤", "희망", "바뀔"],
+        "분노": ["화나", "짜증", "억울", "열받", "불공평", "왜이렇", "싫어", "미치겠"],
+        "슬픔": ["슬퍼", "눈물", "외로워", "혼자", "허전", "그리워", "상실", "아파"],
+    }
 
     # Layer 2: Keyword Groups
-
+    KEYWORD_GROUPS = {
+        "CAREER": ["직장", "직업", "취업", "이직", "승진", "사업", "창업", "커리어", "일자리", "퇴직", "출세", "직위"],
+        "WEALTH": ["돈", "재물", "투자", "주식", "부동산", "수입", "월급", "빚", "대출", "재테크", "재산", "벌이"],
+        "LOVE": ["연애", "사랑", "남자친구", "여자친구", "남편", "아내", "결혼", "이별", "짝사랑", "소개팅", "인연", "궁합"],
+        "RELATION": ["친구", "가족", "부모", "형제", "동료", "상사", "갈등", "관계", "인간관계", "싸움", "화해", "사람"],
+        "SELF": ["나", "성격", "적성", "운명", "팔자", "본인", "자신", "내면", "가치", "방향", "정체성", "천명"],
+        "TIMING": ["언제", "시기", "때", "올해", "내년", "이번달", "곧", "금방", "조만간", "타이밍", "기회", "전환"],
+    }
 
     # Layer 3: Situation Patterns
+    PATTERNS = {
+        "CAREER": ["직장을 옮", "이직할까", "사업 시작", "창업해도", "승진이 될", "취직이 될", "직장 그만"],
+        "WEALTH": ["돈이 들어", "재물운이", "투자해도 될", "빚을 갚", "수입이 늘", "재산이 늘", "손해를 볼"],
+        "LOVE": ["만날 수 있", "결혼할 수", "이 사람이 내 인연", "헤어져야", "다시 만날", "고백해도", "사랑받을"],
+        "RELATION": ["관계가 나빠", "사람 때문에", "상사가 힘들", "가족과 갈등", "친구 사이", "화해할 수"],
+        "SELF": ["내 팔자가", "내 운명이", "나는 왜", "내 성격이", "본인이 잘", "내 적성이"],
+        "TIMING": ["언제 좋아질", "언제 풀릴", "이번 해가", "내년이 되면", "지금 해도 될", "시기가 맞"],
+    }
 
 
     # Layer 5: Counseling Directions
@@ -9243,9 +9265,9 @@ def render_future_10years(pils, birth_year, gender, yongshin_ohs, year_sel, ilga
                 kw_html = "<div style='display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px'>"
                 for kw in det["keywords"]:
                     kw_html += (
-                        f"<span style='background:#1a1a1a;color:#f7e695;"
-                        f"font-size:11px;font-weight:700;padding:4px 10px;"
-                        f"border-radius:20px'>{kw}</span>"
+                        f"<span style='background:#f0e8d5;border:1px solid #c9a84c;"
+                        f"border-radius:20px;padding:3px 10px;font-size:12px;"
+                        f"color:#5a3d1a;margin:2px;font-weight:600'>{kw}</span>"
                     )
                 kw_html += "</div>"
                 st.markdown(kw_html, unsafe_allow_html=True)
