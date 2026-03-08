@@ -1340,6 +1340,48 @@ class LocalSajuNarrator:
 
         # 주의: 여기엔 b가 없으니 예외처리 필요. 간단히 기존 1/2부로 된 yearly 사용.
 
+    @staticmethod
+    def quick_answer(question: str, pils: list, birth_year: int, gender: str) -> str:
+        """빠른 질문에 대한 로컬 엔진 즉시 답변"""
+        try:
+            ilgan = pils[1]["cg"]
+            ilp = ILGAN_PROFILE.get(ilgan, {})
+            cur_year = datetime.now().year
+            sw = get_yearly_luck(pils, cur_year)
+            sw_ss = sw.get("십성_천간", "")
+            sw_gh = sw.get("길흉", "보통")
+            ys = get_yongshin(pils)
+            yong = ys.get("종합_용신", [])
+            gy = get_gyeokguk(pils)
+            gname = gy.get("격국명", "") if gy else ""
+
+            _Q_MAP = {
+                "직장": (f"올해 {sw_ss} 세운이 흐릅니다. {sw_gh} 기운으로 직장 안정도는 "
+                         f"{'높습니다. 승진·인정의 기운이 강합니다.' if sw_gh == '길' else '변화 가능성이 있습니다. 무리한 행동을 자제하세요.'}"),
+                "재물": (f"{ilp.get('재물','재물 운이 꾸준히 흐르고 있습니다.')} "
+                         f"올해 {sw_ss} 세운으로 재물 흐름은 {sw_gh}입니다."),
+                "인연": (f"올해 {sw_ss} 기운이 인연 운에 영향을 줍니다. "
+                         f"{ilp.get('연애','인연은 준비된 자에게 찾아옵니다.')}"),
+                "건강": (f"{ilp.get('건강','건강 관리에 유의하세요.')} "
+                         f"용신 오행({', '.join(yong)})을 강화하는 생활 습관이 중요합니다."),
+                "사업": (f"{gname} 격국으로 사업 성향을 분석하면: {ilp.get('재물','')} "
+                         f"올해 {sw_ss} 세운은 사업 기운이 {sw_gh}입니다."),
+                "이사": (f"올해 {sw_ss} 세운이 이동·변화 기운과 연관됩니다. "
+                         f"{'이동·이사에 좋은 시기입니다.' if sw_ss in ('偏印','偏財','傷官') else '신중하게 결정하십시오.'}"),
+                "가족": (f"일간 {ilgan}({ilp.get('한글','')})의 가족 관계 기운: "
+                         f"올해는 {sw_gh} 기운으로 가족과의 소통이 {'원활합니다.' if sw_gh == '길' else '주의가 필요합니다.'}"),
+                "적성": (f"천직·적성: {ilp.get('직업','다양한 분야에서 능력을 발휘합니다.')} "
+                         f"{gname} 격국으로 {ilp.get('본질','')[:30]}의 성향을 가지고 있습니다."),
+                "조심": (f"올해 {sw_ss}({sw_gh}) 세운에서 가장 주의할 것: "
+                         f"{'재물 지출과 인간관계 마찰' if '흉' in sw_gh else '과도한 확장과 무리한 투자'}입니다."),
+            }
+            for key, answer in _Q_MAP.items():
+                if key in question:
+                    return answer
+            return f"일간 {ilgan}({ilp.get('한글','')}) 기준으로 분석하면: {ilp.get('본질','')} 올해({cur_year}) {sw_ss} 세운은 {sw_gh}입니다."
+        except Exception:
+            return ""
+
 
 def detect_structure(ilgan, wolji_jj):
 

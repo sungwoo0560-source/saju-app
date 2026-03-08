@@ -14825,7 +14825,7 @@ def menu7_ai(pils, name, birth_year, gender):
                 f"용신:{_ys.get('종합_용신',[])} / 현재대운:{_cur_dw.get('str','?')} / 올해세운:{_sw.get('세운','?')}({_sw.get('십성_천간','?')})",
                 f"[질문] {_auto_q}",
             ]
-            _ai_resp = get_ai_interpretation("\n".join(_ctx_lines), pils, birth_year, gender)
+            _ai_resp = get_ai_interpretation("\n".join(_ctx_lines))
             if not _ai_resp:
                 _ai_resp = LocalSajuNarrator.quick_answer(_auto_q, pils, birth_year, gender) if hasattr(LocalSajuNarrator, "quick_answer") else ""
             if _ai_resp:
@@ -14890,6 +14890,15 @@ def menu13_career(pils, name, birth_year, gender):
 
             if item["jj_ss"] in ss_names:
                 counts[ss_names[item["jj_ss"]]] += 1
+
+        # 직업 성향 딕셔너리
+        traits = {
+            "비겁": ("독립 개척형", "스스로 길을 여는 창업가·독립 사업가 기질. 남 밑에서보다 내 사업이 맞습니다."),
+            "식상": ("표현 창조형", "창의적 아이디어와 표현 능력이 뛰어남. 창작·교육·서비스·콘텐츠 분야에서 빛납니다."),
+            "재성": ("실무 경영형", "재물 감각과 현실적 판단이 탁월. 사업·금융·무역·영업에서 성과를 냅니다."),
+            "관성": ("조직 리더형", "규율과 책임감이 강한 조직인. 공무원·관리직·법조·군인 등 체계적 조직에서 두각."),
+            "인성": ("학문 전문형", "깊은 사고와 학습 능력이 강점. 교육·연구·의료·상담·종교 등 전문직에 적합."),
+        }
 
         # 분석 결과 도출
 
