@@ -9406,6 +9406,29 @@ def menu_daily(pils, birth_year, gender):
     )
     st.markdown(_card, unsafe_allow_html=True)
 
+    # 일진 천간 vs 일간 관계 분석 (생/극/비화)
+    ilgan_oh = OH.get(ilgan, "木")
+    _SANG = {"木": "火", "火": "土", "土": "金", "金": "水", "水": "木"}  # 상생: A→B
+    _GKEK = {"木": "土", "火": "金", "土": "水", "金": "木", "水": "火"}  # 상극: A→B
+
+    if day_oh == ilgan_oh:
+        _rel = "비화(比和)"
+        _advice = f"오늘은 내 일간({ilgan})과 같은 오행의 날입니다. 비슷한 기운의 사람과 의기투합하기 좋으나, 경쟁·분쟁에는 주의하세요."
+    elif _SANG.get(day_oh) == ilgan_oh:
+        _rel = "일진이 일간을 生"
+        _advice = f"일진({day_cg})이 내 일간({ilgan})을 생해주는 날로, 귀인의 도움과 좋은 에너지가 들어옵니다. 새로운 시도나 만남에 적극적으로 나서세요."
+    elif _SANG.get(ilgan_oh) == day_oh:
+        _rel = "일간이 일진을 生"
+        _advice = f"내 일간({ilgan})이 오늘 일진({day_cg})을 생해주는 날로, 에너지가 빠져나갈 수 있습니다. 베풀기보다 자신을 챙기는 날로 삼으세요."
+    elif _GKEK.get(day_oh) == ilgan_oh:
+        _rel = "일진이 일간을 剋"
+        _advice = f"일진({day_cg})이 내 일간({ilgan})을 극하는 날로, 외부 압박이나 스트레스가 생길 수 있습니다. 중요한 결정은 미루고 안정을 유지하세요."
+    else:
+        _rel = "일간이 일진을 剋"
+        _advice = f"내 일간({ilgan})이 오늘 일진({day_cg})을 극하는 날로, 주도적으로 움직이기 좋습니다. 계획한 일을 추진하면 성과를 기대할 수 있습니다."
+
+    st.info(f"🔗 **일진-일간 관계 [{_rel}]** — {_advice}")
+
 
 def tab_jaemul(pils, birth_year, gender="남"):
 
@@ -9912,6 +9935,36 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
 
     except Exception as _lne:
         st.warning(f"로컬 해석 오류: {_lne}")
+
+    # ── 발동 중인 신살 강조 (세운 지지 기준) ─────────────────
+    try:
+        _SINSAL_ADVICE = {
+            "겁살(劫殺)":   "변동·손재 위험 시기, 투자·보증·동업을 피하고 현금을 지켜라.",
+            "재살(災殺)":   "사고·관재 주의, 이동 중 안전 점검과 보험 확인을 먼저 하라.",
+            "천살(天殺)":   "상하 관계 마찰 주의, 윗사람과 충돌 전 한 템포 쉬고 말하라.",
+            "지살(地殺)":   "이사·이직의 시기, 변화를 두려워 말고 더 좋은 환경으로 과감히 옮겨라.",
+            "년살(도화살)": "대인관계·이성운 활성화, 외모 관리와 네트워킹이 최고의 투자다.",
+            "월살(고초살)": "고통을 동반한 정착 시기, 기초를 다지면 이후 안정이 찾아온다.",
+            "망신살":       "구설·스캔들 주의, 언행을 절제하고 SNS 노출을 최소화하라.",
+            "장성살":       "리더십 발휘의 적기, 맡은 일을 주도적으로 끌고 나가면 인정받는다.",
+            "반안살":       "꾸준함이 결실을 맺는 시기, 지금 쌓는 노력이 중년의 토대가 된다.",
+            "역마살":       "이동·이사·출장 시기, 변화에 올라타면 기회가 열린다.",
+            "육해살":       "가까운 사람과 신뢰 균열 주의, 돈거래·보증을 끊고 인간관계를 재정비하라.",
+            "화개살":       "고독과 영감의 시기, 혼자 깊이 생각하는 시간이 창의성의 씨앗이 된다.",
+        }
+        _sw_jj = get_yearly_luck(pils, datetime.now().year).get("jj", "")
+        _ss12 = get_12sinsal(pils)
+        _active = [s for s in _ss12 if s.get("해당지지") == _sw_jj]
+        if _active:
+            st.markdown("#### 🔥 올해 발동 중인 신살")
+            for _s in _active:
+                _sname = _s.get("이름", "")
+                _icon  = _s.get("icon", "")
+                _pos   = ", ".join(_s.get("위치", []))
+                _advice = _SINSAL_ADVICE.get(_sname, _s.get("caution", ""))
+                st.info(f"{_icon} **{_sname}** 발동 중 ({_pos}) — {_advice}")
+    except Exception:
+        pass
 
     # if not api_key and not groq_key:
 
@@ -10572,6 +10625,43 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
 
 <div style="display:flex;gap:4px;align-items:flex-end;height:80px">{_bar_html}</div>
 
+</div>""",
+            unsafe_allow_html=True,
+        )
+
+        # ④ 월별 달력 뷰
+        _cur_month = datetime.now().month
+        _CAL_BG = {
+            "대길": ("#e8f5e9", "#2e7d32", "#a5d6a7"),
+            "길":   ("#f1f8e9", "#388e3c", "#c5e1a5"),
+            "평길": ("#fffde7", "#f57f17", "#ffe082"),
+            "평":   ("#fafafa", "#555555", "#e0e0e0"),
+            "흉":   ("#fff3e0", "#e65100", "#ffcc80"),
+            "흉흉": ("#fce4ec", "#b71c1c", "#ef9a9a"),
+        }
+        _cal_cells = ""
+        for _md in _months_data:
+            _lv   = _md["길흉"]
+            _bg, _tc, _bc = _CAL_BG.get(_lv, ("#fafafa", "#555", "#e0e0e0"))
+            _is_now = (_md["월"] == _cur_month)
+            _border = f"3px solid {_tc}" if _is_now else f"1px solid {_bc}"
+            _now_badge = "<div style='font-size:9px;font-weight:700;color:#fff;background:#e53935;border-radius:4px;padding:1px 4px;display:inline-block;margin-bottom:2px'>TODAY</div><br>" if _is_now else ""
+            _em = _LEVEL_EMOJI.get(_lv, "")
+            _cal_cells += (
+                f"<div style='background:{_bg};border:{_border};border-radius:10px;"
+                f"padding:10px 6px;text-align:center;min-width:0'>"
+                f"{_now_badge}"
+                f"<div style='font-size:18px;font-weight:900;color:{_tc}'>{_md['월']}월</div>"
+                f"<div style='font-size:12px;font-weight:700;color:{_tc};margin:2px 0'>{_md['간']}{_md['지']}</div>"
+                f"<div style='font-size:11px;color:#444'>{_md['십성']}</div>"
+                f"<div style='font-size:11px;font-weight:700;color:{_tc};margin-top:3px'>{_em} {_lv}</div>"
+                f"<div style='font-size:10px;color:#666;margin-top:4px;line-height:1.4'>{_md.get('short','')[:16]}</div>"
+                f"</div>"
+            )
+        st.markdown(
+            f"""<div style="background:#fff;border:1px solid #e0d8c0;border-radius:14px;padding:16px;margin-top:12px">
+<div style="font-size:12px;font-weight:700;color:#8b6200;margin-bottom:10px">📅 {_cur_year}년 월별 달력</div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">{_cal_cells}</div>
 </div>""",
             unsafe_allow_html=True,
         )
