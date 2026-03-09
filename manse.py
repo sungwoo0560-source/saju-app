@@ -5281,7 +5281,6 @@ def generate_saju_summary(pils, name, birth_year, gender):
     return "\n".join(lines)
 
 
-@st.cache_data
 # ==================================================
 
 #  메인 탭별 렌더링 함수
@@ -5295,6 +5294,7 @@ def generate_saju_summary(pils, name, birth_year, gender):
 # tab_12unsung: 제거됨 - 미호출 함수
 
 
+@st.cache_data
 def get_daewoon_narrative(d_ss_cg, d_ss_jj, dw_str, age_start):
     """대운 천간/지지 십성별 상세 해석 생성 (나이 단계 분기 포함)"""
 

@@ -2651,42 +2651,82 @@ def _nar_ch5_sipsong(ctx):
     lines = [
         f"[ 제5장 | 십성(十星) 조합 - {display_name}님의 인생 코드 ]",
         f"",
-        f"  사주 원국에서 가장 강한 십성은 세상을 바라보는 방식이자 가장 자연스럽게 발휘하는 능력입니다.",
+        f"  십성(十星)은 일간(나)과 나머지 7글자의 관계를 나타내는 에너지 코드입니다.",
+        f"  가장 강한 십성은 내가 세상을 바라보는 방식이자 가장 자연스럽게 발휘하는 능력입니다.",
+        f"  반면 없거나 약한 십성은 내가 힘들어하는 영역이며, 의식적으로 보완해야 할 과제입니다.",
         f"",
     ]
+
     if top_ss:
-        lines.append(f"  주도 십성: {' / '.join(top_ss)}")
+        lines.append(f"  ◆ {display_name}님의 주도 십성: {' / '.join(top_ss)}")
         lines.append(f"")
-        for ss in top_ss[:2]:
+
+        for ss in top_ss[:3]:
             sd = SIPSONG_DETAIL.get(ss, {})
             if sd:
                 lines.append(f"  ■ {ss}({sd.get('한글', '')}) — {sd.get('핵심', '')}")
+                lines.append(f"")
                 if sd.get("직업"):
-                    lines.append(f"    [적성]: {sd['직업']}")
+                    lines.append(f"    [적성·직업]")
+                    lines.append(f"    {sd['직업']}")
+                    lines.append(f"")
                 if sd.get("재물"):
-                    lines.append(f"    [재물]: {sd['재물']}")
+                    lines.append(f"    [재물 패턴]")
+                    lines.append(f"    {sd['재물']}")
+                    lines.append(f"")
                 if sd.get("연애"):
-                    lines.append(f"    [연애]: {sd['연애']}")
+                    lines.append(f"    [연애·결혼 성향]")
+                    lines.append(f"    {sd['연애']}")
+                    lines.append(f"")
+                if sd.get("건강"):
+                    lines.append(f"    [건강 주의점]")
+                    lines.append(f"    {sd['건강']}")
+                    lines.append(f"")
                 if sd.get("처방"):
-                    lines.append(f"    [처방]: {sd['처방']}")
+                    lines.append(f"    [핵심 처방]")
+                    lines.append(f"    {sd['처방']}")
+                    lines.append(f"")
+                lines.append(f"  {'─'*50}")
                 lines.append(f"")
             else:
                 lines.append(f"  * {ss}: 이 기운이 삶을 이끄는 주된 에너지입니다.")
                 lines.append(f"")
+
+    # 십성 분포 분석
     if ss_dist:
         strong = [k for k, v in ss_dist.items() if isinstance(v, (int, float)) and v >= 2]
+        weak_or_none = [k for k, v in ss_dist.items() if isinstance(v, (int, float)) and v == 0]
         if strong:
-            lines.append(f"  집중 십성(2개 이상): {', '.join(strong)}")
-            lines.append(f"  → 이 기운들이 {display_name}님의 삶을 가장 강하게 끌어당깁니다.")
+            lines.append(f"  ◆ 집중 십성(원국 2개 이상): {', '.join(strong)}")
+            lines.append(f"  → 이 기운들이 {display_name}님의 삶을 가장 강하게 지배합니다.")
+            lines.append(f"     강점이자 동시에 과다 시 부작용이 나타나는 영역입니다.")
             lines.append(f"")
+        if weak_or_none:
+            lines.append(f"  ◆ 없거나 약한 십성: {', '.join(weak_or_none)}")
+            lines.append(f"  → 이 영역에서 유난히 힘들거나 서툰 이유가 여기에 있습니다.")
+            lines.append(f"     의식적인 노력으로 보완해야 할 인생의 과제입니다.")
+            lines.append(f"")
+
+    # 십성 조합 해석
     if combos:
-        lines.append(f"  주요 십성 조합:")
+        lines.append(f"  ◆ 주요 십성 조합 해석:")
         for c in combos[:3]:
             if isinstance(c, str):
                 lines.append(f"  * {c}")
         lines.append(f"")
-    lines.append(f"  황금률: 강한 십성을 살리되, 부족한 십성이 요구하는 영역을 의식적으로 보완하면 균형 잡힌 인생이 열립니다.")
-    lines.append(f"")
+
+    # 인생 패턴 종합
+    lines += [
+        f"  ◆ {display_name}님의 인생 패턴 종합:",
+        f"",
+        f"  강한 십성이 많을수록 그 에너지를 집중하는 분야에서 두드러진 성과를 냅니다.",
+        f"  반면 그 에너지가 과다해지면 역효과가 나타납니다.",
+        f"  황금률: 강한 십성은 직업과 사회활동에 활용하고,",
+        f"          약한 십성이 지배하는 영역(재물·관계·건강 등)은",
+        f"          의식적으로 시간과 에너지를 투자하여 균형을 맞출 것.",
+        f"",
+    ]
+
     return "\n".join(lines)
 
 
@@ -2918,126 +2958,278 @@ def _nar_ch7_health(ctx):
 
 
 def _nar_ch8_flow(ctx):
-    """8장: 현재 운기 + 내년 세운 전망"""
+    """8장: 현재 운기 + 세운 전망 — 대운/세운 교차 분석 및 구체적 행동 지침"""
 
     current_year = ctx.get("current_year", datetime.now().year)
-
     cur_dw = ctx.get("cur_dw", {})
-
     cur_dw_ss = ctx.get("cur_dw_ss", "")
-
     sw_now = ctx.get("sw_now", {})
-
     sw_next = ctx.get("sw_next", {})
-
     yongshin_ohs = ctx.get("yongshin_ohs", [])
-
     ilgan_oh = ctx.get("ilgan_oh", "")
+    display_name = ctx.get("display_name", "내담자")
 
-    return (
-        "\n".join(
-            [
-                f"",
-                f"",
-                f"[ 제8장 | 현재 운기(Flow) - {current_year}년 상황 ]",
-                f"",
-                f"현재 {cur_dw['str'] if cur_dw else '-'} 대운이 진행 중입니다.",
-                f"    ({cur_dw_ss} 십성 대운 | {cur_dw['시작연도'] if cur_dw else '-'}년부터 {cur_dw['종료연도'] if cur_dw else '-'}년까지)",
-                f"",
-                f"올해 {sw_now.get('세운', '')} 세운 ({sw_now.get('십성_천간', '')} / {sw_now.get('길흉', '')})",
-                f"",
-                f"{'이 시기는 용신 대운이 들어오는 황금기입니다. 적극적으로 움직이고 도전하십시오. 지금 준비하면 반드시 결실이 옵니다.' if cur_dw and _get_yongshin_match(cur_dw_ss, yongshin_ohs, ilgan_oh) == 'yong' else '이 시기는 주의가 필요한 대운입니다. 무리한 확장보다 내실을 다지고 건강 관리에 집중하십시오. 지금의 인내가 다음 황금기를 준비하는 것입니다.'}",
-                f"",
-                f"",
-            ]
-        )
-        + f"    내년 {sw_next.get('세운', '')} 세운 전망: {sw_next.get('십성_천간', '')} 십성 | {sw_next.get('길흉', '')}\n"
-    )
+    dw_str = cur_dw.get("str", "-") if cur_dw else "-"
+    dw_start = cur_dw.get("시작연도", "-") if cur_dw else "-"
+    dw_end = cur_dw.get("종료연도", "-") if cur_dw else "-"
+    sw_ganji = sw_now.get("세운", "")
+    sw_ss_cg = sw_now.get("십성_천간", "")
+    sw_oh_cg = sw_now.get("오행_천간", "")
+    sw_gilhyung = sw_now.get("길흉", "")
+    sw_next_ganji = sw_next.get("세운", "")
+    sw_next_ss = sw_next.get("십성_천간", "")
+    sw_next_gilhyung = sw_next.get("길흉", "")
+
+    is_yong = cur_dw and _get_yongshin_match(cur_dw_ss, yongshin_ohs, ilgan_oh) == "yong"
+    is_sw_gil = sw_gilhyung in ["길", "대길"]
+    is_next_gil = sw_next_gilhyung in ["길", "대길"]
+
+    # 대운/세운 교차 등급 판정
+    if is_yong and is_sw_gil:
+        cross_grade = "최상 (대운·세운 동시 용신 — 10년에 한 번 오는 황금기)"
+        cross_action = "지금 당장 준비한 모든 것을 실행하라. 이 시기를 놓치면 다음 기회는 수년 후다."
+    elif is_yong and not is_sw_gil:
+        cross_grade = "상 (대운은 용신이나 세운이 불안 — 큰 흐름은 좋지만 올해는 신중하게)"
+        cross_action = "방향은 맞다. 단, 올해 결정적 행동보다 내년을 준비하는 해로 삼아라."
+    elif not is_yong and is_sw_gil:
+        cross_grade = "중상 (대운은 어렵지만 세운이 길 — 올해만큼은 기회가 있다)"
+        cross_action = "올해 한 해의 기회를 정확히 포착하라. 세운이 지나면 다시 수성 모드로 전환된다."
+    else:
+        cross_grade = "하 (대운·세운 모두 주의 필요 — 최대한 보수적으로 움직여야 하는 시기)"
+        cross_action = "지금은 싸울 때가 아니다. 건강·재물·관계를 지키는 데만 집중하라."
+
+    lines = [
+        f"",
+        f"[ 제8장 | 현재 운기(Flow) - {current_year}년 운기 정밀 분석 ]",
+        f"",
+        f"━━━ 대운(大運) ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+        f"  현재 대운: {dw_str}  ({cur_dw_ss} 십성)",
+        f"  대운 기간: {dw_start}년 ~ {dw_end}년",
+        f"",
+        f"  {dw_str} 대운의 의미:",
+    ]
+
+    # 대운 십성별 해석
+    _dw_ss_desc = {
+        "比肩": "자립·독립의 시기. 새로운 길을 스스로 개척해야 한다. 주변의 경쟁이 심화되나 실력으로 돌파 가능.",
+        "劫財": "도전과 변동의 시기. 재물 기복 주의. 충동적 결정을 자제하고 검증된 파트너와 협력할 것.",
+        "食神": "안정과 창의의 시기. 재능을 펼치기 좋은 대운. 꾸준히 노력하면 복록이 따라온다.",
+        "傷官": "혁신과 표현의 시기. 창의적 활동에서 두각. 관재구설 주의, 권위에 도전하기 전 전략을 세울 것.",
+        "偏財": "활동·사업의 시기. 외부 활동과 인맥으로 재물 창출. 투기·보증은 반드시 피할 것.",
+        "正財": "성실·축적의 시기. 꾸준한 노력으로 안정적 재물 형성. 장기 투자에 유리.",
+        "偏官": "도전·명예의 시기. 강한 추진력으로 목표 달성 가능. 건강 관리와 과로 방지 필수.",
+        "正官": "명예·안정의 시기. 사회적 인정과 승진 기회. 원칙을 지키며 정도를 걸을 것.",
+        "偏印": "학습·준비의 시기. 내실을 다지고 실력을 쌓는 대운. 새로운 분야 탐구에 좋음.",
+        "正印": "귀인·학문의 시기. 스승이나 귀인의 도움을 받을 수 있다. 자격·학업·자기계발에 집중.",
+    }
+    dw_desc = _dw_ss_desc.get(cur_dw_ss, "이 대운의 기운을 충분히 파악하여 흐름에 맞게 움직일 것.")
+    lines.append(f"  {dw_desc}")
+    lines.append(f"")
+
+    lines += [
+        f"━━━ 세운(歲運) ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+        f"  올해 세운: {sw_ganji}  ({sw_ss_cg} / {sw_oh_cg} / {sw_gilhyung})",
+        f"",
+    ]
+
+    if is_sw_gil:
+        lines += [
+            f"  ▶ 올해는 길운(吉運)입니다.",
+            f"    대외 활동·계약·발표·도전에 유리한 해.",
+            f"    상반기(1~6월): 씨앗을 뿌리고 인맥을 확보하는 시기.",
+            f"    하반기(7~12월): 결실을 수확하고 다음 준비를 시작하는 시기.",
+        ]
+    else:
+        lines += [
+            f"  ▶ 올해는 흉운(凶運) 또는 혼조세입니다.",
+            f"    큰 결정·투자·이동은 최대한 보류할 것.",
+            f"    상반기(1~6월): 에너지 과소비 방지, 건강 체크 필수.",
+            f"    하반기(7~12월): 내년 준비에 집중. 조용히 실력 축적.",
+        ]
+
+    lines += [
+        f"",
+        f"━━━ 대운×세운 교차 분석 ━━━━━━━━━━━━━━━━━━━━━━━━",
+        f"  종합 운기 등급: {cross_grade}",
+        f"",
+        f"  → {cross_action}",
+        f"",
+        f"━━━ 내년 세운 전망 ({current_year + 1}년) ━━━━━━━━━━━━━━━━━━━━━━━",
+        f"  {sw_next_ganji} 세운 ({sw_next_ss} / {sw_next_gilhyung})",
+        f"",
+    ]
+
+    if is_next_gil:
+        lines.append(f"  ▶ 내년은 전진의 해. 올해 준비한 것을 실행할 무대가 열린다.")
+        lines.append(f"    올해 안에 기반(자금·인맥·실력)을 반드시 마련해 두어라.")
+    else:
+        lines.append(f"  ▶ 내년도 신중함이 필요한 해. 올해와 연속으로 수성 모드.")
+        lines.append(f"    2년 연속 내실 강화 — 오히려 후년의 대약진을 위한 축복이다.")
+
+    lines += [f"", f""]
+    return "\n".join(lines)
 
 
 def _nar_ch20_prescription(ctx):
-    """20장: 맞춤 인생 처방전"""
+    """20장: 맞춤 인생 처방전 — 색상/방위/음식/보석/금기 종합 처방"""
 
     display_name = ctx.get("display_name", "내담자")
-
     current_year = ctx.get("current_year", datetime.now().year)
-
     gname = ctx.get("gname", "")
-
     yongshin_ohs = ctx.get("yongshin_ohs", [])
-
     yong_kr = ctx.get("yong_kr", "")
-
     top_ss = ctx.get("top_ss", [])
-
     sw_next = ctx.get("sw_next", {})
-
     ilgan = ctx.get("ilgan", "")
     ilp = ILGAN_PROFILE.get(ilgan, {})
-    ilp_rx   = ilp.get("처방", "")
+    ilp_rx = ilp.get("처방", "")
     gd = GYEOKGUK_DETAIL.get(gname, {})
-    gd_rx    = gd.get("처방", "")
+    gd_rx = gd.get("처방", "")
 
-    return "\n".join(
-        [
-            f"",
-            f"",
-            f"[ 제20장 | {display_name}님에게만 드리는 맞춤 인생 처방전 ]",
-            f"",
-            f"20개 장의 분석을 종합한 최종 처방입니다.",
-            f"",
-            f"[지금 당장 해야 할 것 (Yongshin 강화)]",
-            f"",
-            f"색상 처방:",
-            chr(10).join(filter(None, [
-                f'* 목(木) 용신: 청색, 녹색 계열' if '木' in yongshin_ohs else '',
-                f'* 화(火) 용신: 적색, 주황색 계열' if '火' in yongshin_ohs else '',
-                f'* 토(土) 용신: 황색, 베이지, 갈색 계열' if '土' in yongshin_ohs else '',
-                f'* 금(金) 용신: 백색, 은색, 금색 계열' if '金' in yongshin_ohs else '',
-                f'* 수(水) 용신: 흘색, 남색, 회색 계열' if '水' in yongshin_ohs else '',
-            ])),
-            f"",
-            f"방위 처방:",
-            chr(10).join(filter(None, [
-                f'* 목(木): 동쪽' if '木' in yongshin_ohs else '',
-                f'* 화(火): 남쪽' if '火' in yongshin_ohs else '',
-                f'* 토(土): 중앙, 북동, 북서' if '土' in yongshin_ohs else '',
-                f'* 금(金): 서쪽' if '金' in yongshin_ohs else '',
-                f'* 수(水): 북쪽' if '水' in yongshin_ohs else '',
-            ])),
-            f"",
-            f"시간 처방:",
-            chr(10).join(filter(None, [
-                f'* 목(木): 새벽 3~7시(인묘시)' if '木' in yongshin_ohs else '',
-                f'* 화(火): 오전 9~13시(사오시)' if '火' in yongshin_ohs else '',
-                f'* 토(土): 진술축미시' if '土' in yongshin_ohs else '',
-                f'* 금(金): 오후 3~7시(신유시)' if '金' in yongshin_ohs else '',
-                f'* 수(水): 저녁 9~새벽 1시(해자시)' if '水' in yongshin_ohs else '',
-            ])),
-            f"",
-            f"[일간 처방]",
-            f"* {ilp_rx}" if ilp_rx else "",
-            f"",
-            f"[격국 처방]",
-            f"* {gd_rx}" if gd_rx else f"* {gname}의 본래 기운을 따르는 것이 가장 빠른 길입니다.",
-            f"",
-            f"[절대 하면 안 되는 것 (Gishin 주의)]",
-            f"",
-            f"* 기신 운이 강한 해에 큰 투자, 이사, 창업, 결혼 서두르지 않기",
-            f"* {gname}에 맞지 않는 사업 방향 피하기",
-            f"* {'보증, 연대책임 절대 금지' if '겁재' in str(top_ss) or '비견' in str(top_ss) else '감정적 충동 결정 자제'}",
-            f"* 건강 경고 신호 무시하지 않기",
-            f"",
-            f"[ {current_year + 1}년 행동 계획 ]",
-            f"",
-            f"내년 세운: {sw_next.get('세운', '')} ({sw_next.get('십성_천간', '')} / {sw_next.get('길흉', '')})",
-            f"{'[확인] 적극적으로 움직여야 할 해. 준비한 것을 실행하고 귀인의 도움을 요청하십시오.' if sw_next.get('길흉', '') in ['길', '대길'] else '[주의] 신중하게 내실을 다지는 해. 현재를 안정화하는 데 집중하십시오.'}",
-            f"",
-            f'"운명은 사주가 정하지만, 운명을 만드는 것은 당신입니다."',
-            f"",
-            f"",
+    # 오행별 개운 처방 데이터
+    _OH_RX = {
+        "木": {
+            "색상": "청색·녹색·청록색 계열 — 지갑, 명함지갑, 소품 활용",
+            "방위": "동쪽 — 침실 머리 방향, 책상 방향, 중요 미팅 좌석",
+            "시간": "새벽 3~7시(인시·묘시) — 중요한 결정과 시작은 이 시간대에",
+            "음식": "봄나물·쑥·신맛 채소·녹즙·매실·녹차 — 간 기운 보강",
+            "보석": "에메랄드·비취·녹색 옥(玉)·말라카이트 — 목기 강화",
+            "수목": "대나무·소나무·활엽수 근처에 자주 머물 것 — 산림욕 권장",
+            "금기": "금기운이 강한 가을(申酉월)에 큰 결정 자제, 흰색·금색 과다 사용 피할 것",
+        },
+        "火": {
+            "색상": "적색·주황색·자주색·진홍 계열 — 속옷, 지갑 내부, 핵심 소품",
+            "방위": "남쪽 — 침실 머리 방향 또는 중요 공간 입구",
+            "시간": "오전 9~13시(사시·오시) — 중요 계약, 면접, 발표는 이 시간대에",
+            "음식": "붉은 육류·대추·구기자·고추·삼계탕·심장 강화 식품",
+            "보석": "루비·가닛·레드코랄·홍옥수 — 화기 강화, 자신감 상승",
+            "촛불": "붉은 초·주황빛 조명을 서재나 작업 공간에 활용",
+            "금기": "수기운이 강한 겨울(亥子월)에 무리한 도전 자제, 검정·남색 과다 피할 것",
+        },
+        "土": {
+            "색상": "황색·베이지·황토색·카키·갈색 계열 — 침구, 쿠션, 바닥 소재",
+            "방위": "중앙·북동·남서 — 거실 중심부, 식탁 위치",
+            "시간": "진시(7~9시)·술시(19~21시)·축미시 — 환절기 건강 관리 집중",
+            "음식": "황색 곡물·단호박·고구마·참마·꿀·미숫가루 — 비장·위장 강화",
+            "보석": "황수정·호박(琥珀)·황금색 타이거아이·토파즈(황색)",
+            "흙기운": "도자기 소품, 황토 벽재, 천연 석재 인테리어 활용",
+            "금기": "과식·과로 금지, 목기운 강한 봄(寅卯월)에 신경계 조심",
+        },
+        "金": {
+            "색상": "백색·은색·금색·아이보리 계열 — 명함, 인장, 핵심 액세서리",
+            "방위": "서쪽 — 금고·귀중품 보관 방향, 재물 에너지 집중",
+            "시간": "오후 3~7시(신시·유시) — 재물 관련 결정·계약 적합",
+            "음식": "흰 쌀밥·연근·배·도라지·흰 콩·율무·폐 강화 식품",
+            "보석": "다이아몬드·백수정·문스톤·진주·흰색 사파이어",
+            "금속": "금·은 액세서리 착용, 금속 소재 소품 활용",
+            "금기": "화기운 강한 여름(巳午월)에 무리한 확장 자제, 붉은색 과다 피할 것",
+        },
+        "水": {
+            "색상": "흑색·남색·진회색·군청색 계열 — 지갑, 수첩, 핵심 필기구",
+            "방위": "북쪽 — 침실 머리 방향, 서재 위치, 수조·어항 배치",
+            "시간": "저녁 9시~새벽 1시(해시·자시) — 창의적 작업·명상·수련",
+            "음식": "검은 콩·흑임자·미역·다시마·굴·새우·신장 강화 식품",
+            "보석": "사파이어·아쿠아마린·라피스라줄리·흑진주·흑옥(Jet)",
+            "수기운": "수족관·분수·물 소품·어항 — 북쪽이나 현관에 배치",
+            "금기": "토기운 강한 환절기(辰戌丑未월)에 소화기 조심, 황색 과다 피할 것",
+        },
+    }
+
+    # 용신 오행별 처방 조합
+    lines = [
+        f"",
+        f"[ 제20장 | {display_name}님에게만 드리는 맞춤 인생 처방전 ]",
+        f"",
+        f"  20개 장의 분석을 종합한 {display_name}님 전용 맞춤 처방입니다.",
+        f"  이 처방은 타고난 명식의 부족한 기운을 채우고, 넘치는 기운을 조절하여",
+        f"  운명의 흐름을 최적화하는 실전 개운법(開運法)입니다.",
+        f"",
+        f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+        f"  ◆ 1. 용신(用神) 강화 처방 — {yong_kr} 기운을 높여라",
+        f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+        f"",
+    ]
+
+    # 용신 오행별 상세 처방 출력
+    for oh in yongshin_ohs:
+        rx = _OH_RX.get(oh, {})
+        if rx:
+            oh_kr_map = {"木": "목(木)", "火": "화(火)", "土": "토(土)", "金": "금(金)", "水": "수(水)"}
+            lines.append(f"  ■ {oh_kr_map.get(oh, oh)} 용신 처방")
+            lines.append(f"    색상: {rx.get('색상', '')}")
+            lines.append(f"    방위: {rx.get('방위', '')}")
+            lines.append(f"    시간: {rx.get('시간', '')}")
+            lines.append(f"    음식: {rx.get('음식', '')}")
+            lines.append(f"    보석: {rx.get('보석', '')}")
+            for k in ["수목", "촛불", "흙기운", "금속", "수기운"]:
+                if k in rx:
+                    lines.append(f"    환경: {rx[k]}")
+            lines.append(f"    금기: {rx.get('금기', '')}")
+            lines.append(f"")
+
+    lines += [
+        f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+        f"  ◆ 2. 일간(日干) 처방 — {ilgan} 일간의 타고난 과제",
+        f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+        f"",
+        f"  {ilp_rx}" if ilp_rx else f"  {ilgan} 일간의 기운을 충분히 표현하는 삶을 살 것.",
+        f"",
+        f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+        f"  ◆ 3. 격국(格局) 처방 — {gname}의 인생 전략",
+        f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+        f"",
+        f"  {gd_rx}" if gd_rx else f"  {gname}의 본래 기운을 따르는 것이 가장 빠른 길입니다.",
+        f"",
+        f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+        f"  ◆ 4. 절대 금기 사항 — 기신(忌神) 회피법",
+        f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+        f"",
+        f"  * 기신 운이 강한 해에 큰 투자·이사·창업·결혼 서두르지 말 것",
+        f"  * {gname}에 맞지 않는 사업 방향 단호히 거절할 것",
+        f"  * {'보증·연대책임·동업 절대 금지. 피를 말리는 손실로 이어진다.' if '겁재' in str(top_ss) or '비견' in str(top_ss) else '감정적 충동 결정 자제. 흥분 상태에서는 어떠한 계약도 서명하지 말 것.'}",
+        f"  * 건강 경고 신호(피로·통증·수면 장애)를 절대 무시하지 말 것",
+        f"  * 기신 색상·방위를 핵심 공간에 과다 배치하지 말 것",
+        f"",
+        f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+        f"  ◆ 5. {current_year + 1}년 행동 계획",
+        f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+        f"",
+        f"  내년 세운: {sw_next.get('세운', '')} ({sw_next.get('십성_천간', '')} / {sw_next.get('길흉', '')})",
+        f"",
+    ]
+
+    gilhyung = sw_next.get("길흉", "")
+    if gilhyung in ["길", "대길"]:
+        lines += [
+            f"  ▶ 황금기 행동 지침:",
+            f"    1분기(1~3월): 준비하고 기다려온 계획의 첫 발을 내딛어라.",
+            f"    2분기(4~6월): 귀인과의 만남·네트워킹에 적극 투자하라.",
+            f"    3분기(7~9월): 성과를 수확하고 다음 도약의 씨앗을 뿌려라.",
+            f"    4분기(10~12월): 재물을 안전 자산으로 전환하고 내년을 설계하라.",
+            f"    → 길한 해에 주저하면 10년을 잃는다. 지금 움직여라.",
         ]
-    )
+    else:
+        lines += [
+            f"  ▶ 수성기(守成期) 행동 지침:",
+            f"    1분기(1~3월): 불필요한 지출·투자 동결. 현금 유동성 확보 최우선.",
+            f"    2분기(4~6월): 사람 관계 정리. 소모적인 인간관계에서 에너지 빼지 말 것.",
+            f"    3분기(7~9월): 실력과 내공을 쌓는 시기. 자격증·학습·건강 집중.",
+            f"    4분기(10~12월): 내년 황금기를 위한 씨앗 심기. 기초 공사 완료.",
+            f"    → 흉한 해의 인내가 다음 대길의 발판이 된다. 버텨라.",
+        ]
+
+    lines += [
+        f"",
+        f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+        f"",
+        f'  "운명은 사주가 설계하지만, 그 설계도를 완성하는 것은 오직 당신입니다."',
+        f'  \u201c하늘이 주신 명(命)을 알고, 땅의 이치(理)를 따르며, 사람의 덕(德)을 쌓으면',
+        f'  어떤 팔자도 반드시 빛나게 됩니다.\u201d',
+        f"",
+        f"",
+    ]
+
+    return "\n".join(lines)
 
 
 def _nar_report(ctx):
