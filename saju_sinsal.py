@@ -427,7 +427,7 @@ def get_oigyeok(pils):
 
     ilgan_oh = OH.get(ilgan, "")
 
-    # ✅ BUG FIX: 외부 함수(calc_ohaeng_strength/get_ilgan_strength) 호출 예외처리
+    # ✅ BUG FIX: 외부함수 호출 예외처리 추가
     try:
         oh_strength = calc_ohaeng_strength(ilgan, pils)
     except Exception:

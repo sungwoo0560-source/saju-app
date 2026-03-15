@@ -26,9 +26,9 @@ from saju_ui import *
 from saju_report import menu_pdf
 
 # ── saju_ui / saju_report 없을 경우 폴백 정의 ─────────────────────
-try:
-    render_quick_consult_header
-except NameError:
+# ✅ BUG FIX: try: 함수명 단독 참조 → Streamlit이 st.help()로 화면에 렌더링하는 문제
+# globals() 체크 방식으로 교체 (화면 노출 완전 차단)
+if "render_quick_consult_header" not in globals():
     def render_quick_consult_header():
         """퀵 상담창 헤더 (saju_ui 폴백)"""
         import streamlit as _st
@@ -41,9 +41,7 @@ except NameError:
             unsafe_allow_html=True,
         )
 
-try:
-    render_quick_consult_response
-except NameError:
+if "render_quick_consult_response" not in globals():
     def render_quick_consult_response(response: str):
         """퀵 상담 응답 출력 (saju_ui 폴백)"""
         import streamlit as _st
@@ -61,9 +59,7 @@ except NameError:
             unsafe_allow_html=True,
         )
 
-try:
-    menu_pdf
-except NameError:
+if "menu_pdf" not in globals():
     def menu_pdf(pils, birth_year, gender, name, birth_hour=""):
         """PDF 리포트 (saju_report 폴백)"""
         import streamlit as _st
@@ -8986,13 +8982,13 @@ def get_turning_countdown(pils, birth_year, gender) -> dict:
 
             # 대운 호출 시 실제 생년월일시 반영
 
-            _bm = st.session_state.get("birth_month", 1)
+            _bm  = max(1, min(12, int(st.session_state.get("birth_month") or 1)))
 
-            _bd = st.session_state.get("birth_day", 1)
+            _bd  = max(1, min(31, int(st.session_state.get("birth_day")   or 1)))
 
-            _bh = st.session_state.get("birth_hour", 12)
+            _bh  = max(0, min(23, int(st.session_state.get("birth_hour")  or 12)))
 
-            _bmi = st.session_state.get("birth_minute", 0)
+            _bmi = max(0, min(59, int(st.session_state.get("birth_minute") or 0)))
 
             dw_list = SajuCoreEngine.get_daewoon(pils, birth_year, _bm, _bd, _bh, _bmi, gender)
 
@@ -10793,8 +10789,8 @@ def infer_current_worry(pils, birth_year, gender):
                 if k in CHUNG_MAP:
                     has_chung = True
                     break
-        except Exception:
-            _saju_log.warning("[infer_current_worry] 오류: %%s", str(e)[:60])
+        except Exception as e:
+            _saju_log.warning("[infer_current_worry] 오류: %s", str(e)[:60])
 
         # 합(合) 감지
         has_hap = False
@@ -10806,8 +10802,8 @@ def infer_current_worry(pils, birth_year, gender):
                    frozenset([p["cg"], sw_cg]) in TG_HAP_MAP:
                     has_hap = True
                     break
-        except Exception:
-            _saju_log.warning("[infer_current_worry] 오류: %%s", str(e)[:60])
+        except Exception as e:
+            _saju_log.warning("[infer_current_worry] 오류: %s", str(e)[:60])
 
         # 도화살 감지
         has_dowhwa = False
@@ -10902,8 +10898,7 @@ def render_worry_inference(pils, birth_year, gender):
         f"대운 <b>{dw_cg_ss}·{dw_jj_ss}</b>"
     )
 
-    # ✅ BUG FIX: f-string 내 들여쓰기(4칸+) → Markdown이 코드블록으로 렌더링하는 문제
-    # 해결: HTML을 문자열 연결(+)로 구성하여 줄바꿈/들여쓰기 완전 제거
+    # ✅ BUG FIX: f-string 들여쓰기 → Markdown 코드블록 렌더링 방지
     _worry_html = (
         "<div style='background:linear-gradient(135deg,#1a1a2e,#16213e);"
         "border:1.5px solid rgba(212,175,55,0.5);"
@@ -10932,7 +10927,7 @@ def render_worry_inference(pils, birth_year, gender):
                 f'<div style="color:#d0d0d0;padding:5px 0;font-size:13px;">{a}</div>'
                 for a in solution.get("즉각행동", [])
             )
-            # ✅ BUG FIX: 동일 들여쓰기 코드블록 버그 수정
+            # ✅ BUG FIX: f-string 들여쓰기 코드블록 렌더링 방지
             _remedy_html = (
                 "<div style='background:#1a1a1a;border:1px solid #f7e695;border-radius:12px;padding:20px'>"
                 "<div style='color:#f7e695;font-size:15px;font-weight:700;margin-bottom:6px'>⚡ 핵심 처방</div>"
@@ -11820,9 +11815,9 @@ def menu2_lifeline(pils, birth_year, gender, name="내담자"):
 
     ilgan        = pils[1]["cg"]
     current_year = datetime.now().year
-    birth_month  = st.session_state.get("birth_month", 1)
-    birth_day    = st.session_state.get("birth_day",   1)
-    birth_hour   = st.session_state.get("birth_hour",  12)
+    birth_month  = max(1, min(12, int(st.session_state.get("birth_month") or 1)))
+    birth_day    = max(1, min(31, int(st.session_state.get("birth_day")   or 1)))
+    birth_hour   = max(0, min(23, int(st.session_state.get("birth_hour")  or 12)))
     birth_minute = max(0, min(59, int(st.session_state.get("birth_minute") or 0)))
 
     daewoon = SajuCoreEngine.get_daewoon(
@@ -16655,10 +16650,10 @@ def menu14_health(pils, name, birth_year, gender):
         sw_cg        = sw.get("세운", "")[:1]
         sw_oh        = OH.get(sw_cg, "")
 
-        bm  = st.session_state.get("birth_month", 1)
-        bd  = st.session_state.get("birth_day",   1)
-        bh  = st.session_state.get("birth_hour",  12)
-        bmn = st.session_state.get("birth_minute", 0)
+        bm  = max(1, min(12, int(st.session_state.get("birth_month") or 1)))
+        bd  = max(1, min(31, int(st.session_state.get("birth_day")   or 1)))
+        bh  = max(0, min(23, int(st.session_state.get("birth_hour")  or 12)))
+        bmn = max(0, min(59, int(st.session_state.get("birth_minute") or 0)))
 
         try:
             daewoon = SajuCoreEngine.get_daewoon(pils, birth_year, bm, bd, bh, bmn, gender)
@@ -18972,13 +18967,13 @@ def main():
 
             _sy = st.session_state.get("birth_year", 1990)
 
-            _sm = st.session_state.get("birth_month", 1)
+            _sm   = max(1, min(12, int(st.session_state.get("birth_month") or 1)))
 
-            _sd = st.session_state.get("birth_day", 1)
+            _sd   = max(1, min(31, int(st.session_state.get("birth_day")   or 1)))
 
-            _sh = st.session_state.get("birth_hour", 12)
+            _sh   = max(0, min(23, int(st.session_state.get("birth_hour")  or 12)))
 
-            _smin = st.session_state.get("birth_minute", 0)
+            _smin = max(0, min(59, int(st.session_state.get("birth_minute") or 0)))
 
             _sg = "f" if st.session_state.get("gender", "남") == "여" else "m"
 

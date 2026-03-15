@@ -1923,13 +1923,13 @@ def get_10year_luck_table(pils, birth_year, gender="남"):
 
     # 대운 호출 시 실제 생년월일시 반영
 
-    birth_month = st.session_state.get("birth_month", 1)
+    birth_month  = max(1, min(12, int(st.session_state.get("birth_month") or 1)))
 
-    birth_day = st.session_state.get("birth_day", 1)
+    birth_day    = max(1, min(31, int(st.session_state.get("birth_day")   or 1)))
 
-    birth_hour = st.session_state.get("birth_hour", 12)
+    birth_hour   = max(0, min(23, int(st.session_state.get("birth_hour")  or 12)))
 
-    birth_minute = st.session_state.get("birth_minute", 0)
+    birth_minute = max(0, min(59, int(st.session_state.get("birth_minute") or 0)))
 
     daewoon = SajuCoreEngine.get_daewoon(
         pils,
@@ -1974,13 +1974,13 @@ def get_daewoon_sewoon_cross(pils, birth_year, gender, target_year=None):
 
     # 대운 호출 시 실제 생년월일시 반영
 
-    _bm = st.session_state.get("birth_month", 1)
+    _bm  = max(1, min(12, int(st.session_state.get("birth_month") or 1)))
 
-    _bd = st.session_state.get("birth_day", 1)
+    _bd  = max(1, min(31, int(st.session_state.get("birth_day")   or 1)))
 
-    _bh = st.session_state.get("birth_hour", 12)
+    _bh  = max(0, min(23, int(st.session_state.get("birth_hour")  or 12)))
 
-    _bmi = st.session_state.get("birth_minute", 0)
+    _bmi = max(0, min(59, int(st.session_state.get("birth_minute") or 0)))
 
     daewoon_list = SajuCoreEngine.get_daewoon(pils, birth_year, _bm, _bd, _bh, _bmi, gender)
 

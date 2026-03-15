@@ -502,13 +502,13 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str=""):
 
             ilgan = pils[1]["cg"]
 
-            birth_month = st.session_state.get("birth_month", 1)
+            birth_month  = max(1, min(12, int(st.session_state.get("birth_month") or 1)))
 
-            birth_day = st.session_state.get("birth_day", 1)
+            birth_day    = max(1, min(31, int(st.session_state.get("birth_day")   or 1)))
 
-            birth_hour = st.session_state.get("birth_hour", 12)
+            birth_hour   = max(0, min(23, int(st.session_state.get("birth_hour")  or 12)))
 
-            birth_minute = st.session_state.get("birth_minute", 0)
+            birth_minute = max(0, min(59, int(st.session_state.get("birth_minute") or 0)))
 
             # == 1. 사주 기본 정보 ==
 

@@ -6087,13 +6087,13 @@ def build_rich_narrative(pils, birth_year, gender, name, section="report"):
 
         combos = life.get("조합_결과", [])
 
-        birth_month = st.session_state.get("birth_month", 1)
+        birth_month  = max(1, min(12, int(st.session_state.get("birth_month") or 1)))
 
-        birth_day = st.session_state.get("birth_day", 1)
+        birth_day    = max(1, min(31, int(st.session_state.get("birth_day")   or 1)))
 
-        birth_hour = st.session_state.get("birth_hour", 12)
+        birth_hour   = max(0, min(23, int(st.session_state.get("birth_hour")  or 12)))
 
-        birth_minute = st.session_state.get("birth_minute", 0)
+        birth_minute = max(0, min(59, int(st.session_state.get("birth_minute") or 0)))
 
         daewoon = SajuCoreEngine.get_daewoon(
             pils,
