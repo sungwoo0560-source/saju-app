@@ -1211,6 +1211,12 @@ class SajuCoreEngine:
 
         from datetime import datetime as py_datetime
 
+        # ✅ BUG FIX: month/day/hour/minute 범위 보정 (세션값 오염 방지)
+        month  = max(1, min(12, int(month  or 1)))
+        day    = max(1, min(31, int(day    or 1)))
+        hour   = max(0, min(23, int(hour   or 12)))
+        minute = max(0, min(59, int(minute or 0)))
+
         birth_dt = py_datetime(year, month, day, hour, minute)
 
         term_names = [
@@ -2061,5 +2067,3 @@ def get_daewoon_sewoon_cross(pils, birth_year, gender, target_year=None):
         "교차사건": cross_events,
         "교차해석": cross_desc,
     }
-
-

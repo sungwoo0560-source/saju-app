@@ -10902,35 +10902,26 @@ def render_worry_inference(pils, birth_year, gender):
         f"대운 <b>{dw_cg_ss}·{dw_jj_ss}</b>"
     )
 
-    st.markdown(
-        f"""
-<div style="background:linear-gradient(135deg,#1a1a2e,#16213e);
-            border:1.5px solid rgba(212,175,55,0.5);
-            border-radius:16px;padding:20px 24px;margin-bottom:12px;
-            box-shadow:0 4px 16px rgba(0,0,0,0.25)">
-  <div style="font-size:11px;font-weight:700;color:#d4af37;
-              letter-spacing:2px;margin-bottom:10px">🔮 만신의 첫 진단</div>
-  <div style="display:flex;align-items:flex-start;gap:16px">
-    <div style="font-size:44px;min-width:50px;text-align:center;
-                line-height:1">{icon}</div>
-    <div style="flex:1">
-      <div style="font-size:20px;font-weight:900;color:#fff;margin-bottom:6px">
-        {title}
-      </div>
-      <div style="font-size:13px;color:#ccc;line-height:1.8;margin-bottom:10px">
-        {message}
-      </div>
-      <div style="font-size:11px;color:#aaa;margin-bottom:8px">
-        {ss_html}
-      </div>
-      <div>{badge_html}</div>
-      {second_html}
-    </div>
-  </div>
-</div>
-""",
-        unsafe_allow_html=True,
+    # ✅ BUG FIX: f-string 내 들여쓰기(4칸+) → Markdown이 코드블록으로 렌더링하는 문제
+    # 해결: HTML을 문자열 연결(+)로 구성하여 줄바꿈/들여쓰기 완전 제거
+    _worry_html = (
+        "<div style='background:linear-gradient(135deg,#1a1a2e,#16213e);"
+        "border:1.5px solid rgba(212,175,55,0.5);"
+        "border-radius:16px;padding:20px 24px;margin-bottom:12px;"
+        "box-shadow:0 4px 16px rgba(0,0,0,0.25)'>"
+        "<div style='font-size:11px;font-weight:700;color:#d4af37;"
+        "letter-spacing:2px;margin-bottom:10px'>🔮 만신의 첫 진단</div>"
+        "<div style='display:flex;align-items:flex-start;gap:16px'>"
+        f"<div style='font-size:44px;min-width:50px;text-align:center;line-height:1'>{icon}</div>"
+        "<div style='flex:1'>"
+        f"<div style='font-size:20px;font-weight:900;color:#fff;margin-bottom:6px'>{title}</div>"
+        f"<div style='font-size:13px;color:#ccc;line-height:1.8;margin-bottom:10px'>{message}</div>"
+        f"<div style='font-size:11px;color:#aaa;margin-bottom:8px'>{ss_html}</div>"
+        f"<div>{badge_html}</div>"
+        f"{second_html}"
+        "</div></div></div>"
     )
+    st.markdown(_worry_html, unsafe_allow_html=True)
 
     # ── 개운법 expander ──────────────────────────────────────
     top_worry = result["top_worry"]
@@ -10941,41 +10932,32 @@ def render_worry_inference(pils, birth_year, gender):
                 f'<div style="color:#d0d0d0;padding:5px 0;font-size:13px;">{a}</div>'
                 for a in solution.get("즉각행동", [])
             )
-            st.markdown(
-                f"""
-<div style="background:#1a1a1a;border:1px solid #f7e695;border-radius:12px;padding:20px;">
-
-  <div style="color:#f7e695;font-size:15px;font-weight:700;margin-bottom:6px;">⚡ 핵심 처방</div>
-  <div style="color:#e0e0e0;font-size:13px;margin-bottom:16px;">{solution.get('핵심처방', '')}</div>
-
-  <div style="color:#f7e695;font-size:15px;font-weight:700;margin-bottom:6px;">✅ 지금 당장 할 것</div>
-  {actions_html}
-
-  <div style="display:flex;gap:12px;margin-top:16px;flex-wrap:wrap;">
-    <div style="flex:1;min-width:clamp(100px,35vw,120px);background:#2a2a1a;border-radius:8px;padding:12px;">
-      <div style="color:#f7e695;font-size:12px;font-weight:700;">🎨 행운색</div>
-      <div style="color:#e0e0e0;font-size:12px;margin-top:4px;">{solution.get('행운색', '')}</div>
-    </div>
-    <div style="flex:1;min-width:clamp(100px,35vw,120px);background:#2a2a1a;border-radius:8px;padding:12px;">
-      <div style="color:#f7e695;font-size:12px;font-weight:700;">🧭 행운방위</div>
-      <div style="color:#e0e0e0;font-size:12px;margin-top:4px;">{solution.get('행운방위', '')}</div>
-    </div>
-  </div>
-
-  <div style="margin-top:12px;background:#2a1a1a;border-radius:8px;padding:12px;">
-    <div style="color:#ff6b6b;font-size:12px;font-weight:700;">⚠️ 주의사항</div>
-    <div style="color:#e0e0e0;font-size:12px;margin-top:4px;">{solution.get('주의', '')}</div>
-  </div>
-
-  <div style="margin-top:10px;background:#1a2a1a;border:1px solid #4a7a4a;border-radius:8px;padding:12px;">
-    <div style="color:#7aff7a;font-size:12px;font-weight:700;">🌿 비방(祕方)</div>
-    <div style="color:#e0e0e0;font-size:12px;margin-top:4px;">{solution.get('비방', '')}</div>
-  </div>
-
-</div>
-""",
-                unsafe_allow_html=True,
+            # ✅ BUG FIX: 동일 들여쓰기 코드블록 버그 수정
+            _remedy_html = (
+                "<div style='background:#1a1a1a;border:1px solid #f7e695;border-radius:12px;padding:20px'>"
+                "<div style='color:#f7e695;font-size:15px;font-weight:700;margin-bottom:6px'>⚡ 핵심 처방</div>"
+                f"<div style='color:#e0e0e0;font-size:13px;margin-bottom:16px'>{solution.get('핵심처방', '')}</div>"
+                "<div style='color:#f7e695;font-size:15px;font-weight:700;margin-bottom:6px'>✅ 지금 당장 할 것</div>"
+                f"{actions_html}"
+                "<div style='display:flex;gap:12px;margin-top:16px;flex-wrap:wrap'>"
+                "<div style='flex:1;min-width:clamp(100px,35vw,120px);background:#2a2a1a;border-radius:8px;padding:12px'>"
+                "<div style='color:#f7e695;font-size:12px;font-weight:700'>🎨 행운색</div>"
+                f"<div style='color:#e0e0e0;font-size:12px;margin-top:4px'>{solution.get('행운색', '')}</div>"
+                "</div>"
+                "<div style='flex:1;min-width:clamp(100px,35vw,120px);background:#2a2a1a;border-radius:8px;padding:12px'>"
+                "<div style='color:#f7e695;font-size:12px;font-weight:700'>🧭 행운방위</div>"
+                f"<div style='color:#e0e0e0;font-size:12px;margin-top:4px'>{solution.get('행운방위', '')}</div>"
+                "</div></div>"
+                "<div style='margin-top:12px;background:#2a1a1a;border-radius:8px;padding:12px'>"
+                "<div style='color:#ff6b6b;font-size:12px;font-weight:700'>⚠️ 주의사항</div>"
+                f"<div style='color:#e0e0e0;font-size:12px;margin-top:4px'>{solution.get('주의', '')}</div>"
+                "</div>"
+                "<div style='margin-top:10px;background:#1a2a1a;border:1px solid #4a7a4a;border-radius:8px;padding:12px'>"
+                "<div style='color:#7aff7a;font-size:12px;font-weight:700'>🌿 비방(祕方)</div>"
+                f"<div style='color:#e0e0e0;font-size:12px;margin-top:4px'>{solution.get('비방', '')}</div>"
+                "</div></div>"
             )
+            st.markdown(_remedy_html, unsafe_allow_html=True)
 
 
 def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):

@@ -20,6 +20,7 @@ from saju_data import (
     GEUNMYO_HWASIL,
 )
 
+@st.cache_data
 def get_sam_hap(pils):
 
     jjs = set(p["jj"] for p in pils)
@@ -167,6 +168,7 @@ GONGMANG_JJ_DESC = {
 }
 
 
+@st.cache_data
 def get_gongmang(pils):
     """공망(空亡) 계산"""
 
@@ -206,6 +208,7 @@ def get_gongmang(pils):
 
 
 
+@st.cache_data
 def get_nabjin(cg, jj):
 
     pillar = cg + jj
@@ -342,6 +345,7 @@ _HYUNG_JJ = {"丑", "刑", "巳", "申", "寅"}  # 삼형살 지지
 _GIL_JJ = {"子", "卯", "午", "酉", "亥", "寅"}  # 귀인 지지 포함
 
 
+@st.cache_data
 def get_waryeong(pils):
 
     wol_jj = pils[2]["jj"] if len(pils) > 2 else ""
@@ -398,6 +402,7 @@ YANGIN_MAP = {
 
 
 
+@st.cache_data
 def get_yangin(pils):
 
     ilgan = pils[1]["cg"]
@@ -415,17 +420,24 @@ def get_yangin(pils):
     }
 
 
+@st.cache_data
 def get_oigyeok(pils):
 
     ilgan = pils[1]["cg"]
 
     ilgan_oh = OH.get(ilgan, "")
 
-    oh_strength = calc_ohaeng_strength(ilgan, pils)
+    # ✅ BUG FIX: 외부 함수(calc_ohaeng_strength/get_ilgan_strength) 호출 예외처리
+    try:
+        oh_strength = calc_ohaeng_strength(ilgan, pils)
+    except Exception:
+        oh_strength = {"木": 20, "火": 20, "土": 20, "金": 20, "水": 20}
 
-    strength_info = get_ilgan_strength(ilgan, pils)
-
-    sn = strength_info["신강신약"]
+    try:
+        strength_info = get_ilgan_strength(ilgan, pils)
+        sn = strength_info.get("신강신약", "신약(身弱)") if strength_info else "신약(身弱)"
+    except Exception:
+        sn = "신약(身弱)"
 
     CTRL = {"木": "土", "火": "金", "土": "水", "金": "木", "水": "火"}
 
