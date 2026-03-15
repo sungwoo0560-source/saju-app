@@ -1036,7 +1036,8 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str=""):
                                                 )
 
                                     except Exception as e:
-                                        print(f"[WARN] {e}")
+                                        import logging as _rlog
+                                        _rlog.getLogger("saju").warning("[PDF 오류] %s", e)
 
                                 y -= 4 * mm
 

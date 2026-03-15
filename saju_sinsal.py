@@ -170,7 +170,7 @@ GONGMANG_JJ_DESC = {
 def get_gongmang(pils):
     """공망(空亡) 계산"""
 
-    nyon_cg = pils[3]["cg"]
+    nyon_cg = pils[3]["cg"] if len(pils) > 3 else ""
 
     gong_pair = GONGMANG_TABLE.get(nyon_cg, ("", ""))
 
@@ -344,7 +344,7 @@ _GIL_JJ = {"子", "卯", "午", "酉", "亥", "寅"}  # 귀인 지지 포함
 
 def get_waryeong(pils):
 
-    wol_jj = pils[2]["jj"]
+    wol_jj = pils[2]["jj"] if len(pils) > 2 else ""
 
     result = {}
 
@@ -517,7 +517,7 @@ def get_oigyeok(pils):
 @st.cache_data
 def get_12sinsal(pils):
 
-    nyon_jj = pils[3]["jj"]
+    nyon_jj = pils[3]["jj"] if len(pils) > 3 else ""
 
     pil_jjs = [p["jj"] for p in pils]
 
@@ -769,5 +769,3 @@ def get_geunmyo_hwasil(pils):
             "desc": meta.get("desc", ""),
         })
     return result
-
-

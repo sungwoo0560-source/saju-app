@@ -348,6 +348,8 @@ def render_quick_consult_response(response: str):
     """퀵 상담 응답 렌더링"""
     if not response:
         return
+    # \n → <br> 변환 (HTML에서 줄바꿈 표시)
+    _html_resp = response.replace('\n', '<br>')
     st.markdown(
         f"""
 <div style="background:linear-gradient(135deg,#fffbf0,#fff8e0);
@@ -357,7 +359,7 @@ def render_quick_consult_response(response: str):
             box-shadow:0 4px 12px rgba(212,175,55,0.15)">
   <div style="font-size:11px;font-weight:700;color:#b38728;
               letter-spacing:2px;margin-bottom:10px">📜 만신의 답</div>
-  {response}
+  {_html_resp}
 </div>
 """,
         unsafe_allow_html=True,
