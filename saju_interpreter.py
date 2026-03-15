@@ -36,6 +36,7 @@ from saju_engine import *
 _saju_log = _logging.getLogger("saju")
 
 
+@st.cache_data
 def clean_hanja(text):
     """괄호 안 한글 독음 제거 유틸 (예: '식신(食神)' → '식신')"""
     if not text:
@@ -43,11 +44,13 @@ def clean_hanja(text):
     return re.sub(r"\(.*?\)", "", text).strip()
 
 
+@st.cache_data
 def get_yongshin_match(dw_cg_ss, yongshin_ohs, ilgan_oh):
     """대운/세운 십성이 용신 오행과 맞는지 판단 → 'yong' | 'normal' (공개 함수)"""
     return _get_yongshin_match(dw_cg_ss, yongshin_ohs, ilgan_oh)
 
 
+@st.cache_data
 def _get_yongshin_match(dw_cg_ss, yongshin_ohs, ilgan_oh):
     """대운/세운 십성이 용신 오행과 맞는지 판단 → 'yong' | 'normal'"""
     GEN   = {"木": "火", "火": "土", "土": "金", "金": "水", "水": "木"}
@@ -134,6 +137,7 @@ _HANJA_WORD_KR = {
 }
 
 
+@st.cache_data
 def hanja_plain_replace(text: str) -> str:
     """출력 텍스트에서 한자 용어를 쉬운 한글 풀이로 자동 변환"""
     if not text:
@@ -2979,6 +2983,7 @@ class LocalSajuNarrator:
             return ""
 
 
+@st.cache_data
 def detect_structure(ilgan, wolji_jj):
 
     jijang = JIJANGGAN.get(wolji_jj, [])
@@ -3115,6 +3120,7 @@ BANG_HAP_MAP = {
 }
 
 
+@st.cache_data
 def get_yongshin(pils):
     """용신(用神) 종합 분석 - 억부+조후+통관"""
 
@@ -3272,6 +3278,7 @@ TG_HAP_MAP = {
 }
 
 
+@st.cache_data
 def get_yukjin(ilgan, pils, gender="남"):
 
 
@@ -3391,6 +3398,7 @@ def get_yukjin(ilgan, pils, gender="남"):
 
 
 
+@st.cache_data
 def get_special_stars(pils):
     """신살 계산 (tab_special_stars에서 분리)"""
 
@@ -3517,6 +3525,7 @@ def get_special_stars(pils):
     return result
 
 
+@st.cache_data
 def get_ohang_health_info(ilgan, pils):
     """오행 신체 건강 분석 — 부족/과다 오행 기준 취약 장기 반환"""
     try:
@@ -3613,6 +3622,7 @@ def get_yongshin_multilayer(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0, 
     }
 
 
+@st.cache_data
 def get_crossing_interpretation(pils, cur_year):
     """세운×대운 교차 해석 — 대운 십성과 세운 십성의 조합으로 핵심 키워드 반환"""
     try:
@@ -3680,6 +3690,7 @@ def get_crossing_interpretation(pils, cur_year):
         return {"summary": "", "finance": "", "career": "", "health": "", "relation": ""}
 
 
+@st.cache_data
 def get_relationship_reading(pils, gender="남", marriage_status="미혼"):
     """결혼/연애운 해석 — 일주·십성·신살 기반 종합 연애·결혼 분석"""
     try:
@@ -3768,6 +3779,7 @@ def get_relationship_reading(pils, gender="남", marriage_status="미혼"):
         return {}
 
 
+@st.cache_data
 def get_health_reading(pils):
     """건강운 종합 해석 — 오행 불균형·일간·대운 기반 신체 분석"""
     try:
@@ -3839,6 +3851,7 @@ class HanjaSafeDict(dict):
         return default
 
 
+@st.cache_data
 def make_hanja_safe(d):
     if not isinstance(d, dict):
         return d
@@ -3859,6 +3872,7 @@ CAREER_MATRIX = make_hanja_safe(CAREER_MATRIX)
 
 
 # ----------------- HANJA SAFE INJECT END -----------------
+@st.cache_data
 def _nar_ch1_ilgan(ctx):
     """1~5장: 일간 기질 + 신강신약 + 인생흐름 + 나이대분석 + 올해메시지 + 만신한마디"""
 
@@ -4058,6 +4072,7 @@ def _nar_ch1_ilgan(ctx):
     return "\n".join(lines)
 
 
+@st.cache_data
 def _nar_ch3_gyeokguk(ctx):
     """3~4장: 격국 + 용신 (GYEOKGUK_DETAIL 강화)"""
 
@@ -4212,6 +4227,7 @@ def _nar_ch5_sipsong(ctx):
     return "\n".join(lines)
 
 
+@st.cache_data
 def _nar_ch6_daewoon(ctx):
     """6장: 대운 흐름 + 세운 예측 — 인생의 타임라인 (DAEWOON_INTERP 강화)"""
     display_name = ctx.get("display_name", "내담자")
@@ -4366,6 +4382,7 @@ def _nar_ch6_daewoon(ctx):
     return "\n".join(lines)
 
 
+@st.cache_data
 def _nar_ch7_health(ctx):
     """7장: 건강운 — 오행 불균형 진단 (get_health_reading 강화)"""
     display_name = ctx.get("display_name", "내담자")
@@ -4439,6 +4456,7 @@ def _nar_ch7_health(ctx):
     return "\n".join(lines)
 
 
+@st.cache_data
 def _nar_ch8_flow(ctx):
     """8장: 현재 운기 + 세운 전망 — 대운/세운 교차 분석 및 구체적 행동 지침"""
 
@@ -4552,6 +4570,7 @@ def _nar_ch8_flow(ctx):
     return "\n".join(lines)
 
 
+@st.cache_data
 def _nar_ch20_prescription(ctx):
     """20장: 맞춤 인생 처방전 — 색상/방위/음식/보석/금기 종합 처방"""
 
@@ -4714,6 +4733,7 @@ def _nar_ch20_prescription(ctx):
     return "\n".join(lines)
 
 
+@st.cache_data
 def _nar_report(ctx):
     pils, birth_year, gender, name = (
         ctx["pils"],
@@ -4892,6 +4912,7 @@ def _nar_report(ctx):
     return report
 
 
+@st.cache_data
 def _nar_future(ctx):
     """미래 운세 섹션 (future / lifeline)"""
 
@@ -5335,6 +5356,7 @@ def _nar_future(ctx):
         return "".join(result)
 
 
+@st.cache_data
 def _nar_wealth(ctx):
     """재물/사업 섹션 (money)"""
 
@@ -5670,6 +5692,7 @@ def _nar_wealth(ctx):
         return "".join(result)
 
 
+@st.cache_data
 def _nar_health(ctx):
     """인간관계/육친 섹션 (relations)"""
 
@@ -5911,6 +5934,7 @@ def _nar_health(ctx):
         return "".join(result)
 
 
+@st.cache_data
 def _nar_past(ctx):
     """과거 적중 섹션 (past)"""
 
@@ -6009,6 +6033,7 @@ def _nar_past(ctx):
         return "".join(result)
 
 
+@st.cache_data
 def build_life_analysis(pils, gender):
     """십성 2-조합으로 인생 전체를 읽는 핵심 엔진"""
     ilgan = pils[1]["cg"]
@@ -6087,13 +6112,13 @@ def build_rich_narrative(pils, birth_year, gender, name, section="report"):
 
         combos = life.get("조합_결과", [])
 
-        birth_month  = max(1, min(12, int(st.session_state.get("birth_month") or 1)))
+        birth_month = st.session_state.get("birth_month", 1)
 
-        birth_day    = max(1, min(31, int(st.session_state.get("birth_day")   or 1)))
+        birth_day = st.session_state.get("birth_day", 1)
 
-        birth_hour   = max(0, min(23, int(st.session_state.get("birth_hour")  or 12)))
+        birth_hour = st.session_state.get("birth_hour", 12)
 
-        birth_minute = max(0, min(59, int(st.session_state.get("birth_minute") or 0)))
+        birth_minute = st.session_state.get("birth_minute", 0)
 
         daewoon = SajuCoreEngine.get_daewoon(
             pils,

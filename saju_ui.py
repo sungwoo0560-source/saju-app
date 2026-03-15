@@ -466,41 +466,27 @@ def render_daewoon_card(
         _dw_html += f"<span style='{_badge_style}background:{_bg};color:{_fg}'>{_ch}</span>"
     _dw_kr = "".join(_GZ_KR.get(c, c) for c in dw_str)
 
-    st.markdown(
-        f"""
-<div style="{bg2}{bdr}border-radius:14px;padding:18px 20px;
-            margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,0.06)">
-  {badge}
-  <div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:12px">
-    <div style="font-size:32px;min-width:40px;text-align:center">{icon}</div>
-    <div style="flex:1">
-      <div style="font-size:16px;font-weight:900;color:#333;margin-bottom:4px">
-        {_dw_html}
-        <span style="font-size:13px;color:#888;font-weight:400">({_dw_kr})</span>
-        <span style="font-size:14px;font-weight:700;color:#555;margin-left:4px">대운</span>
-        <span style="font-size:12px;color:#888;font-weight:400;margin-left:8px">
-          {start_age}세 ({start_year}~{end_year}년)
-        </span>
-      </div>
-      <div style="font-size:12px;color:#666;margin-top:2px">
-        천간 {emoji_cg} {oh_cg} / {d_ss_cg} &nbsp;|&nbsp;
-        지지 {emoji_jj} {oh_jj} / {d_ss_jj}
-      </div>
-      <div style="font-size:13px;font-weight:700;color:#8b6200;margin-top:4px">
-        {title}
-      </div>
-    </div>
-  </div>
-  <div style="font-size:13px;color:#333;line-height:1.9;margin-bottom:10px">
-    {narrative}
-  </div>
-  <div style="background:rgba(212,175,55,0.08);border-left:3px solid #d4af37;
-              padding:8px 12px;border-radius:6px;font-size:12px;
-              color:#7a5c00;margin-bottom:8px">
-    💊 <b>처방:</b> {prescription}
-  </div>
-  {alert_html if alert_html else ""}
-</div>
-""",
-        unsafe_allow_html=True,
+    _card_html = (
+        f"<div style='{bg2}{bdr}border-radius:14px;padding:18px 20px;"
+        "margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,0.06)'>"
+        f"{badge}"
+        "<div style='display:flex;align-items:flex-start;gap:14px;margin-bottom:12px'>"
+        f"<div style='font-size:32px;min-width:40px;text-align:center'>{icon}</div>"
+        "<div style='flex:1'>"
+        "<div style='font-size:16px;font-weight:900;color:#333;margin-bottom:4px'>"
+        f"{_dw_html}"
+        f"<span style='font-size:13px;color:#888;font-weight:400'>({_dw_kr})</span>"
+        "<span style='font-size:14px;font-weight:700;color:#555;margin-left:4px'>대운</span>"
+        f"<span style='font-size:12px;color:#888;font-weight:400;margin-left:8px'>{start_age}세 ({start_year}~{end_year}년)</span>"
+        "</div>"
+        f"<div style='font-size:12px;color:#666;margin-top:2px'>천간 {emoji_cg} {oh_cg} / {d_ss_cg} &nbsp;|&nbsp; 지지 {emoji_jj} {oh_jj} / {d_ss_jj}</div>"
+        f"<div style='font-size:13px;font-weight:700;color:#8b6200;margin-top:4px'>{title}</div>"
+        "</div></div>"
+        f"<div style='font-size:13px;color:#333;line-height:1.9;margin-bottom:10px'>{narrative}</div>"
+        "<div style='background:rgba(212,175,55,0.08);border-left:3px solid #d4af37;"
+        "padding:8px 12px;border-radius:6px;font-size:12px;color:#7a5c00;margin-bottom:8px'>"
+        f"💊 <b>처방:</b> {prescription}</div>"
+        f"{alert_html if alert_html else ''}"
+        "</div>"
     )
+    st.markdown(_card_html, unsafe_allow_html=True)

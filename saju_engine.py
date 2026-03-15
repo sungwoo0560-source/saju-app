@@ -675,6 +675,7 @@ class ManseCalendarEngine:
 # ==================================================
 
 
+@st.cache_data
 def calc_gunghap(pils_a, pils_b, name_a="나", name_b="상대"):
 
     # [년, 월, 일, 시] 순서에서 일간은 index 2
@@ -821,6 +822,7 @@ def calc_gunghap(pils_a, pils_b, name_a="나", name_b="상대"):
 # ==================================================
 
 
+@st.cache_data
 def get_good_days(pils, year, month):
 
     import calendar
@@ -1211,12 +1213,6 @@ class SajuCoreEngine:
 
         from datetime import datetime as py_datetime
 
-        # ✅ BUG FIX: month/day/hour/minute 범위 보정 (세션값 오염 방지)
-        month  = max(1, min(12, int(month  or 1)))
-        day    = max(1, min(31, int(day    or 1)))
-        hour   = max(0, min(23, int(hour   or 12)))
-        minute = max(0, min(59, int(minute or 0)))
-
         birth_dt = py_datetime(year, month, day, hour, minute)
 
         term_names = [
@@ -1511,6 +1507,7 @@ def calc_sipsung(ilgan, pils):
     return result
 
 
+@st.cache_data
 def calc_12unsung(ilgan, pils):
     """12운성 계산 (Bug 5 Fix: 양/음 배열 수정)"""
 
