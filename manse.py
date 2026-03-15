@@ -26,9 +26,7 @@ from saju_ui import *
 from saju_report import menu_pdf
 
 # ── saju_ui / saju_report 없을 경우 폴백 정의 ─────────────────────
-try:
-    render_quick_consult_header
-except NameError:
+if "render_quick_consult_header" not in dir():
     def render_quick_consult_header():
         """퀵 상담창 헤더 (saju_ui 폴백)"""
         import streamlit as _st
@@ -41,9 +39,7 @@ except NameError:
             unsafe_allow_html=True,
         )
 
-try:
-    render_quick_consult_response
-except NameError:
+if "render_quick_consult_response" not in dir():
     def render_quick_consult_response(response: str):
         """퀵 상담 응답 출력 (saju_ui 폴백)"""
         import streamlit as _st
@@ -61,9 +57,7 @@ except NameError:
             unsafe_allow_html=True,
         )
 
-try:
-    menu_pdf
-except NameError:
+if "menu_pdf" not in dir():
     def menu_pdf(pils, birth_year, gender, name, birth_hour=""):
         """PDF 리포트 (saju_report 폴백)"""
         import streamlit as _st
@@ -8986,11 +8980,11 @@ def get_turning_countdown(pils, birth_year, gender) -> dict:
 
             # 대운 호출 시 실제 생년월일시 반영
 
-            _bm = max(1, min(12, int(st.session_state.get("birth_month") or 1)))
+            _bm = st.session_state.get("birth_month", 1)
 
-            _bd = max(1, min(31, int(st.session_state.get("birth_day") or 1)))
+            _bd = st.session_state.get("birth_day", 1)
 
-            _bh = max(0, min(23, int(st.session_state.get("birth_hour") or 12)))
+            _bh = st.session_state.get("birth_hour", 12)
 
             _bmi = st.session_state.get("birth_minute", 0)
 
@@ -10793,8 +10787,8 @@ def infer_current_worry(pils, birth_year, gender):
                 if k in CHUNG_MAP:
                     has_chung = True
                     break
-        except Exception as e:
-            _saju_log.warning("[infer_current_worry] 오류: %s", str(e)[:60])
+        except Exception:
+            _saju_log.warning("[infer_current_worry] 오류: %%s", str(e)[:60])
 
         # 합(合) 감지
         has_hap = False
@@ -10806,8 +10800,8 @@ def infer_current_worry(pils, birth_year, gender):
                    frozenset([p["cg"], sw_cg]) in TG_HAP_MAP:
                     has_hap = True
                     break
-        except Exception as e:
-            _saju_log.warning("[infer_current_worry] 오류: %s", str(e)[:60])
+        except Exception:
+            _saju_log.warning("[infer_current_worry] 오류: %%s", str(e)[:60])
 
         # 도화살 감지
         has_dowhwa = False
@@ -10815,8 +10809,8 @@ def infer_current_worry(pils, birth_year, gender):
             ss12 = get_12sinsal(pils)
             if any("도화" in s.get("이름", "") for s in ss12):
                 has_dowhwa = True
-        except Exception as e:
-            _saju_log.warning("[infer_current_worry] 오류: %s", str(e)[:60])
+        except Exception:
+            _saju_log.warning("[infer_current_worry] 오류: %%s", str(e)[:60])
 
         # 특수 조건 보정
         if has_chung:
@@ -10902,24 +10896,35 @@ def render_worry_inference(pils, birth_year, gender):
         f"대운 <b>{dw_cg_ss}·{dw_jj_ss}</b>"
     )
 
-    _worry_html = (
-        "<div style='background:linear-gradient(135deg,#1a1a2e,#16213e);"
-        "border:1.5px solid rgba(212,175,55,0.5);"
-        "border-radius:16px;padding:20px 24px;margin-bottom:12px;"
-        "box-shadow:0 4px 16px rgba(0,0,0,0.25)'>"
-        "<div style='font-size:11px;font-weight:700;color:#d4af37;"
-        "letter-spacing:2px;margin-bottom:10px'>🔮 만신의 첫 진단</div>"
-        "<div style='display:flex;align-items:flex-start;gap:16px'>"
-        f"<div style='font-size:44px;min-width:50px;text-align:center;line-height:1'>{icon}</div>"
-        "<div style='flex:1'>"
-        f"<div style='font-size:20px;font-weight:900;color:#fff;margin-bottom:6px'>{title}</div>"
-        f"<div style='font-size:13px;color:#ccc;line-height:1.8;margin-bottom:10px'>{message}</div>"
-        f"<div style='font-size:11px;color:#aaa;margin-bottom:8px'>{ss_html}</div>"
-        f"<div>{badge_html}</div>"
-        f"{second_html}"
-        "</div></div></div>"
+    st.markdown(
+        f"""
+<div style="background:linear-gradient(135deg,#1a1a2e,#16213e);
+            border:1.5px solid rgba(212,175,55,0.5);
+            border-radius:16px;padding:20px 24px;margin-bottom:12px;
+            box-shadow:0 4px 16px rgba(0,0,0,0.25)">
+  <div style="font-size:11px;font-weight:700;color:#d4af37;
+              letter-spacing:2px;margin-bottom:10px">🔮 만신의 첫 진단</div>
+  <div style="display:flex;align-items:flex-start;gap:16px">
+    <div style="font-size:44px;min-width:50px;text-align:center;
+                line-height:1">{icon}</div>
+    <div style="flex:1">
+      <div style="font-size:20px;font-weight:900;color:#fff;margin-bottom:6px">
+        {title}
+      </div>
+      <div style="font-size:13px;color:#ccc;line-height:1.8;margin-bottom:10px">
+        {message}
+      </div>
+      <div style="font-size:11px;color:#aaa;margin-bottom:8px">
+        {ss_html}
+      </div>
+      <div>{badge_html}</div>
+      {second_html}
+    </div>
+  </div>
+</div>
+""",
+        unsafe_allow_html=True,
     )
-    st.markdown(_worry_html, unsafe_allow_html=True)
 
     # ── 개운법 expander ──────────────────────────────────────
     top_worry = result["top_worry"]
@@ -10930,31 +10935,41 @@ def render_worry_inference(pils, birth_year, gender):
                 f'<div style="color:#d0d0d0;padding:5px 0;font-size:13px;">{a}</div>'
                 for a in solution.get("즉각행동", [])
             )
-            _remedy_html = (
-                "<div style='background:#1a1a1a;border:1px solid #f7e695;border-radius:12px;padding:20px'>"
-                "<div style='color:#f7e695;font-size:15px;font-weight:700;margin-bottom:6px'>⚡ 핵심 처방</div>"
-                f"<div style='color:#e0e0e0;font-size:13px;margin-bottom:16px'>{solution.get('핵심처방', '')}</div>"
-                "<div style='color:#f7e695;font-size:15px;font-weight:700;margin-bottom:6px'>✅ 지금 당장 할 것</div>"
-                f"{actions_html}"
-                "<div style='display:flex;gap:12px;margin-top:16px;flex-wrap:wrap'>"
-                "<div style='flex:1;min-width:clamp(100px,35vw,120px);background:#2a2a1a;border-radius:8px;padding:12px'>"
-                "<div style='color:#f7e695;font-size:12px;font-weight:700'>🎨 행운색</div>"
-                f"<div style='color:#e0e0e0;font-size:12px;margin-top:4px'>{solution.get('행운색', '')}</div>"
-                "</div>"
-                "<div style='flex:1;min-width:clamp(100px,35vw,120px);background:#2a2a1a;border-radius:8px;padding:12px'>"
-                "<div style='color:#f7e695;font-size:12px;font-weight:700'>🧭 행운방위</div>"
-                f"<div style='color:#e0e0e0;font-size:12px;margin-top:4px'>{solution.get('행운방위', '')}</div>"
-                "</div></div>"
-                "<div style='margin-top:12px;background:#2a1a1a;border-radius:8px;padding:12px'>"
-                "<div style='color:#ff6b6b;font-size:12px;font-weight:700'>⚠️ 주의사항</div>"
-                f"<div style='color:#e0e0e0;font-size:12px;margin-top:4px'>{solution.get('주의', '')}</div>"
-                "</div>"
-                "<div style='margin-top:10px;background:#1a2a1a;border:1px solid #4a7a4a;border-radius:8px;padding:12px'>"
-                "<div style='color:#7aff7a;font-size:12px;font-weight:700'>🌿 비방(祕方)</div>"
-                f"<div style='color:#e0e0e0;font-size:12px;margin-top:4px'>{solution.get('비방', '')}</div>"
-                "</div></div>"
+            st.markdown(
+                f"""
+<div style="background:#1a1a1a;border:1px solid #f7e695;border-radius:12px;padding:20px;">
+
+  <div style="color:#f7e695;font-size:15px;font-weight:700;margin-bottom:6px;">⚡ 핵심 처방</div>
+  <div style="color:#e0e0e0;font-size:13px;margin-bottom:16px;">{solution.get('핵심처방', '')}</div>
+
+  <div style="color:#f7e695;font-size:15px;font-weight:700;margin-bottom:6px;">✅ 지금 당장 할 것</div>
+  {actions_html}
+
+  <div style="display:flex;gap:12px;margin-top:16px;flex-wrap:wrap;">
+    <div style="flex:1;min-width:clamp(100px,35vw,120px);background:#2a2a1a;border-radius:8px;padding:12px;">
+      <div style="color:#f7e695;font-size:12px;font-weight:700;">🎨 행운색</div>
+      <div style="color:#e0e0e0;font-size:12px;margin-top:4px;">{solution.get('행운색', '')}</div>
+    </div>
+    <div style="flex:1;min-width:clamp(100px,35vw,120px);background:#2a2a1a;border-radius:8px;padding:12px;">
+      <div style="color:#f7e695;font-size:12px;font-weight:700;">🧭 행운방위</div>
+      <div style="color:#e0e0e0;font-size:12px;margin-top:4px;">{solution.get('행운방위', '')}</div>
+    </div>
+  </div>
+
+  <div style="margin-top:12px;background:#2a1a1a;border-radius:8px;padding:12px;">
+    <div style="color:#ff6b6b;font-size:12px;font-weight:700;">⚠️ 주의사항</div>
+    <div style="color:#e0e0e0;font-size:12px;margin-top:4px;">{solution.get('주의', '')}</div>
+  </div>
+
+  <div style="margin-top:10px;background:#1a2a1a;border:1px solid #4a7a4a;border-radius:8px;padding:12px;">
+    <div style="color:#7aff7a;font-size:12px;font-weight:700;">🌿 비방(祕方)</div>
+    <div style="color:#e0e0e0;font-size:12px;margin-top:4px;">{solution.get('비방', '')}</div>
+  </div>
+
+</div>
+""",
+                unsafe_allow_html=True,
             )
-            st.markdown(_remedy_html, unsafe_allow_html=True)
 
 
 def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
@@ -11000,8 +11015,8 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
                 _pos   = ", ".join(_s.get("위치", []))
                 _advice = _SINSAL_ADVICE.get(_sname, _s.get("caution", ""))
                 st.info(f"{_icon} **{_sname}** 발동 중 ({_pos}) — {_advice}")
-    except Exception as e:
-        _saju_log.warning("[menu1_report] 오류: %s", str(e)[:60])
+    except Exception:
+        _saju_log.warning("[menu1_report] 오류: %%s", str(e)[:60])
 
     # if not api_key and not groq_key:
 
@@ -11797,14 +11812,15 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
             _col = _tc1 if _idx % 2 == 0 else _tc2
             with _col:
                 st.markdown(
-                    (
-                        "<div style='background:#fafafa;border:1.5px solid #e0d8c0;"
-                        "border-radius:12px;padding:12px 14px;margin:4px 0'>"
-                        f"<div style='font-size:13px;font-weight:900;color:#2d1f00;margin-bottom:6px'>{_emoji} {_dom} 타이밍</div>"
-                        f"<div style='font-size:12px;color:#27ae60;margin-bottom:3px'>✅ 최적: <b>{', '.join(_peak_ms) + '월' if _peak_ms else '해당 없음'}</b></div>"
-                        f"<div style='font-size:12px;color:#c0392b'>⛔ 주의: <b>{', '.join(_caut_ms) + '월' if _caut_ms else '없음'}</b></div>"
-                        "</div>"
-                    ),
+                    f"""<div style='background:#fafafa;border:1.5px solid #e0d8c0;
+                    border-radius:12px;padding:12px 14px;margin:4px 0;'>
+                    <div style='font-size:13px;font-weight:900;color:#2d1f00;
+                    margin-bottom:6px'>{_emoji} {_dom} 타이밍</div>
+                    <div style='font-size:12px;color:#27ae60;margin-bottom:3px;'>
+                    ✅ 최적: <b>{", ".join(_peak_ms) + "월" if _peak_ms else "해당 없음"}</b></div>
+                    <div style='font-size:12px;color:#c0392b;'>
+                    ⛔ 주의: <b>{", ".join(_caut_ms) + "월" if _caut_ms else "없음"}</b></div>
+                    </div>""",
                     unsafe_allow_html=True,
                 )
     except Exception as _mtr_e:
@@ -11816,9 +11832,9 @@ def menu2_lifeline(pils, birth_year, gender, name="내담자"):
 
     ilgan        = pils[1]["cg"]
     current_year = datetime.now().year
-    birth_month  = max(1, min(12, int(st.session_state.get("birth_month") or 1)))
-    birth_day    = max(1, min(31, int(st.session_state.get("birth_day") or 1)))
-    birth_hour   = max(0, min(23, int(st.session_state.get("birth_hour") or 12)))
+    birth_month  = st.session_state.get("birth_month", 1)
+    birth_day    = st.session_state.get("birth_day",   1)
+    birth_hour   = st.session_state.get("birth_hour",  12)
     birth_minute = max(0, min(59, int(st.session_state.get("birth_minute") or 0)))
 
     daewoon = SajuCoreEngine.get_daewoon(
@@ -11849,20 +11865,27 @@ def menu2_lifeline(pils, birth_year, gender, name="내담자"):
         _age     = current_year - birth_year + 1
 
         st.markdown(
-            (
-                f"<div style='background:{_gbg};border-radius:16px;padding:20px 24px;"
-                f"margin-bottom:20px;border:2px solid {_gc}33'>"
-                f"<div style='font-size:11px;color:{_gc};letter-spacing:2px;font-weight:700;margin-bottom:8px'>🔮 지금 당신의 대운</div>"
-                f"<div style='display:flex;justify-content:space-between;align-items:center;margin-bottom:12px'>"
-                f"<div><span style='font-size:32px;font-weight:900;color:#fff'>{cur_dw['str']}</span>"
-                f"<span style='font-size:16px;color:{_gc};margin-left:10px;font-weight:700'>[{_cdw_ss}]</span></div>"
-                f"<div style='background:{_gc}22;border:1px solid {_gc}66;border-radius:20px;padding:6px 16px;font-size:13px;font-weight:800;color:{_gc}'>{_grade}</div>"
-                "</div>"
-                f"<div style='font-size:14px;color:#fff;font-weight:800;margin-bottom:8px'>{_verdict}</div>"
-                f"<div style='font-size:12px;color:#aaa'>{cur_dw['시작연도']}~{cur_dw['종료연도']}년 (만 {_age}세) · "
-                f"<b style='color:{_gc}'>{_remain}년 남음</b></div>"
-                "</div>"
-            ),
+            f"""<div style='background:{_gbg};border-radius:16px;padding:20px 24px;
+            margin-bottom:20px;border:2px solid {_gc}33;'>
+            <div style='font-size:11px;color:{_gc};letter-spacing:2px;
+            font-weight:700;margin-bottom:8px'>🔮 지금 당신의 대운</div>
+            <div style='display:flex;justify-content:space-between;align-items:center;
+            margin-bottom:12px;'>
+            <div>
+              <span style='font-size:32px;font-weight:900;color:#fff'>
+              {cur_dw["str"]}</span>
+              <span style='font-size:16px;color:{_gc};margin-left:10px;font-weight:700'>
+              [{_cdw_ss}]</span>
+            </div>
+            <div style='background:{_gc}22;border:1px solid {_gc}66;border-radius:20px;
+            padding:6px 16px;font-size:13px;font-weight:800;color:{_gc}'>{_grade}</div>
+            </div>
+            <div style='font-size:14px;color:#fff;font-weight:800;
+            margin-bottom:8px'>{_verdict}</div>
+            <div style='font-size:12px;color:#aaa;'>
+            {cur_dw["시작연도"]}~{cur_dw["종료연도"]}년 (만 {_age}세) · 
+            <b style='color:{_gc}'>{_remain}년 남음</b></div>
+            </div>""",
             unsafe_allow_html=True,
         )
 
@@ -11989,9 +12012,9 @@ def menu3_past(pils, birth_year, gender, name=""):
         _cur_year_s = datetime.now().year
         _daewoon_s = SajuCoreEngine.get_daewoon(
             pils, birth_year,
-            max(1, min(12, int(st.session_state.get("birth_month") or 1))),
-            max(1, min(31, int(st.session_state.get("birth_day") or 1))),
-            max(0, min(23, int(st.session_state.get("birth_hour") or 12))),
+            st.session_state.get("birth_month", 1),
+            st.session_state.get("birth_day", 1),
+            st.session_state.get("birth_hour", 12),
             st.session_state.get("birth_minute", 0),
             gender=gender,
         )
@@ -12261,13 +12284,11 @@ def menu4_future3(
         _vcolor = "#c0392b" if "🔴" in _vt or "⚠️" in _vt else "#27ae60" if "💰" in _vt or "🌟" in _vt or "🏆" in _vt else "#2980b9"
 
         st.markdown(
-            (
-                f"<div style='background:#f8f9fa;border-left:4px solid {_vcolor};"
-                "border-radius:0 10px 10px 0;padding:10px 14px;margin:8px 0'>"
-                f"<div style='font-size:13px;font-weight:900;color:{_vcolor};margin-bottom:4px'>{_vt}</div>"
-                f"<div style='font-size:12px;color:#333;line-height:1.7'>{_vd}</div>"
-                "</div>"
-            ),
+            f"""<div style='background:#f8f9fa;border-left:4px solid {_vcolor};
+            border-radius:0 10px 10px 0;padding:10px 14px;margin:8px 0;'>
+            <div style='font-size:13px;font-weight:900;color:{_vcolor};margin-bottom:4px'>{_vt}</div>
+            <div style='font-size:12px;color:#333;line-height:1.7'>{_vd}</div>
+            </div>""",
             unsafe_allow_html=True,
         )
 
@@ -12414,13 +12435,12 @@ def menu4_future3(
         for _yr, _age, _ws in _danger_cards:
             for _wtitle, _wdesc, _wcolor in _ws:
                 st.markdown(
-                    (
-                        f"<div style='background:#fff5f5;border-left:5px solid {_wcolor};"
-                        "border-radius:10px;padding:14px 18px;margin:8px 0'>"
-                        f"<div style='font-size:14px;font-weight:900;color:{_wcolor};margin-bottom:6px'>{_yr}년(만 {_age}세) {_wtitle}</div>"
-                        f"<div style='font-size:13px;color:#333;line-height:1.9'>{_wdesc}</div>"
-                        "</div>"
-                    ),
+                    f"""<div style='background:#fff5f5;border-left:5px solid {_wcolor};
+                    border-radius:10px;padding:14px 18px;margin:8px 0;'>
+                    <div style='font-size:14px;font-weight:900;color:{_wcolor};margin-bottom:6px'>
+                    {_yr}년(만 {_age}세) {_wtitle}</div>
+                    <div style='font-size:13px;color:#333;line-height:1.9'>{_wdesc}</div>
+                    </div>""",
                     unsafe_allow_html=True,
                 )
     else:
@@ -12458,18 +12478,19 @@ def menu4_future3(
             if not _peak_str:
                 _peak_str = ", ".join([f"{m}월" for m, _ in _mt3["peak"][:3]])
             st.markdown(
-                (
-                    "<div style='background:#f8f9fa;border-radius:12px;"
-                    "padding:12px 16px;margin:6px 0;border-left:4px solid #c9a84c'>"
-                    f"<div style='font-size:14px;font-weight:900;color:#2d1f00;margin-bottom:6px'>📌 {_yr}년 {_focus_f3} 타이밍</div>"
-                    f"<div style='font-size:13px;color:#1a5c2a;margin-bottom:4px'>✅ <b>최적 달:</b> {_peak_str or '해당 없음'}</div>"
-                    f"<div style='font-size:13px;color:#c0392b'>⛔ <b>피할 달:</b> {_caution_str or '없음'}</div>"
-                    "</div>"
-                ),
+                f"""<div style='background:#f8f9fa;border-radius:12px;
+                padding:12px 16px;margin:6px 0;border-left:4px solid #c9a84c;'>
+                <div style='font-size:14px;font-weight:900;color:#2d1f00;
+                margin-bottom:6px'>📌 {_yr}년 {_focus_f3} 타이밍</div>
+                <div style='font-size:13px;color:#1a5c2a;margin-bottom:4px'>
+                ✅ <b>최적 달:</b> {_peak_str or "해당 없음"}</div>
+                <div style='font-size:13px;color:#c0392b;'>
+                ⛔ <b>피할 달:</b> {_caution_str or "없음"}</div>
+                </div>""",
                 unsafe_allow_html=True,
             )
         except Exception as _mte3:
-            _saju_log.warning("[menu4_future3] 오류: %s", str(_mte3)[:60])
+            _saju_log.warning("[menu4_future3] 오류: %%s", str(e)[:60])
 
     st.markdown(
         '<hr style="border:none;border-top:1px solid #e0d8c0;margin:20px 0">',
@@ -12558,9 +12579,9 @@ def menu5_money(pils, birth_year, gender, name="내담자"):
     ilp = ILGAN_PROFILE.get(ilgan, {})
     daewoon = SajuCoreEngine.get_daewoon(
         pils, birth_year,
-        max(1, min(12, int(st.session_state.get("birth_month") or 1))),
-        max(1, min(31, int(st.session_state.get("birth_day") or 1))),
-        max(0, min(23, int(st.session_state.get("birth_hour") or 12))),
+        st.session_state.get("birth_month", 1),
+        st.session_state.get("birth_day", 1),
+        st.session_state.get("birth_hour", 12),
         st.session_state.get("birth_minute", 0),
         gender=gender,
     )
@@ -12640,8 +12661,8 @@ def menu5_money(pils, birth_year, gender, name="내담자"):
             _y_gh = _yl.get("길흉", "보통")
             _y_sw = _yl.get("세운", str(_y))
             _future5_items.append(f"{_y}년[{_y_sw}] {_y_ss} {_y_gh}")
-        except Exception as e:
-            _saju_log.warning("[menu5_money] 오류: %s", str(e)[:60])
+        except Exception:
+            _saju_log.warning("[menu5_money] 오류: %%s", str(e)[:60])
     st.markdown(
         f"<div style='background:linear-gradient(145deg,#faf7f0,#f2ebe0);border:1px solid #c9a84c;"
         f"border-radius:14px;padding:20px;margin:10px 0;font-size:13px;color:#3d2800;line-height:2'>"
@@ -13060,8 +13081,8 @@ def menu6_relations(pils, name, birth_year, gender, marriage_status="미혼"):
             _y_ss = _yl.get("십성_천간", "")
             if _y_ss in _spouse_ss or _yl.get("십성_지지", "") in _spouse_ss:
                 _marriage_years.append(f"{_y}년 [{_yl.get('세운', str(_y))}] — {_y_ss} 기운 (인연운 강함)")
-        except Exception as e:
-            _saju_log.warning("[menu6_relations] 오류: %s", str(e)[:60])
+        except Exception:
+            _saju_log.warning("[menu6_relations] 오류: %%s", str(e)[:60])
     if _marriage_years:
         _marriage_info = "\n".join(f"    🌸 {m}" for m in _marriage_years[:4])
     else:
@@ -13642,27 +13663,26 @@ def menu9_daily(pils, name, birth_year, gender):
         _action_today = _ACTION_SS.get(today_ss, "오늘 하루 흐름에 맞게 꾸준히 움직이세요.")
 
         st.markdown(
-            (
-                "<div style='background:#f0fff4;border:1.5px solid #27ae60;border-radius:14px;padding:16px 20px;margin:8px 0'>"
-                f"<div style='font-size:13px;font-weight:900;color:#1a5c2a;margin-bottom:10px'>🌿 용신 오행({_oh_kr.get(_prim_oh,_prim_oh)}) 기반 오늘의 처방</div>"
-                "<div style='display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;color:#333'>"
-                f"<div>⏰ <b>길한 시간대:</b><br>{_guide['시간']}</div>"
-                f"<div>🗺️ <b>길한 방향:</b><br>{_guide['방향']}</div>"
-                f"<div>🎨 <b>행운 색상:</b><br>{_guide['색상']}</div>"
-                f"<div>🍱 <b>추천 음식:</b><br>{_guide['음식']}</div>"
-                "</div>"
-                "<div style='margin-top:10px;font-size:12px;color:#1a5c2a;font-weight:700;background:#e8f5e9;padding:8px 12px;border-radius:8px'>"
-                f"💡 {_guide['행동']}</div>"
-                "</div>"
-            ),
+            f"""<div style='background:#f0fff4;border:1.5px solid #27ae60;border-radius:14px;
+            padding:16px 20px;margin:8px 0;'>
+            <div style='font-size:13px;font-weight:900;color:#1a5c2a;margin-bottom:10px;'>
+            🌿 용신 오행({_oh_kr.get(_prim_oh,_prim_oh)}) 기반 오늘의 처방</div>
+            <div style='display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;color:#333;'>
+            <div>⏰ <b>길한 시간대:</b><br>{_guide["시간"]}</div>
+            <div>🗺️ <b>길한 방향:</b><br>{_guide["방향"]}</div>
+            <div>🎨 <b>행운 색상:</b><br>{_guide["색상"]}</div>
+            <div>🍱 <b>추천 음식:</b><br>{_guide["음식"]}</div>
+            </div>
+            <div style='margin-top:10px;font-size:12px;color:#1a5c2a;font-weight:700;
+            background:#e8f5e9;padding:8px 12px;border-radius:8px;'>
+            💡 {_guide["행동"]}</div>
+            </div>""",
             unsafe_allow_html=True,
         )
         st.markdown(
-            (
-                "<div style='background:#fff8e1;border-left:4px solid #f39c12;border-radius:8px;"
-                f"padding:12px 16px;margin:6px 0;font-size:13px;color:#7d6608'>"
-                f"🎯 <b>오늘의 행동 지침 [{today_ss}]:</b> {_action_today}</div>"
-            ),
+            f"""<div style='background:#fff8e1;border-left:4px solid #f39c12;border-radius:8px;
+            padding:12px 16px;margin:6px 0;font-size:13px;color:#7d6608;'>
+            🎯 <b>오늘의 행동 지침 [{today_ss}]:</b> {_action_today}</div>""",
             unsafe_allow_html=True,
         )
     except Exception as _dg_e:
@@ -15089,7 +15109,7 @@ def tab_ai_chat(pils, name, birth_year, gender):
 
 </div>
 
-<!-- 종합 밸런스 매트릭스 -->
+        <!-- 📊 종합 밸런스 매트릭스 -->
 
 <div style="display: flex; justify-content: space-around; background: rgba(0,0,0,0.03); padding: 10px; border-radius: 10px; margin-bottom: 12px;">
 
@@ -16278,8 +16298,8 @@ def menu7_ai(pils, name, birth_year, gender):
                 if kw in _interest_summary:
                     _interest_default = idx
                     break
-        except Exception as e:
-            _saju_log.warning("[menu7_ai] 오류: %s", str(e)[:60])
+        except Exception:
+            _saju_log.warning("[menu7_ai] 오류: %%s", str(e)[:60])
 
         focus_key = st.selectbox(
             "집중 상담 분야",
@@ -16335,14 +16355,14 @@ def menu7_ai(pils, name, birth_year, gender):
                     )
 
                     st.markdown(
-                        (
-                            "<div style='background:#fffdf5;border:2px solid #d4af37;"
-                            "border-radius:16px;padding:24px;margin:10px 0'>"
-                            "<div style='font-size:16px;font-weight:900;color:#8b6200;"
-                            "margin-bottom:16px;text-align:center'>🏛️ 【 명리학 전문가 8섹션 완전 분석 】</div>"
-                            f"<div style='font-size:13px;color:#111;line-height:2.2;white-space:pre-wrap'>{_result}</div>"
-                            "</div>"
-                        ),
+                        f"""<div style='background:#fffdf5;border:2px solid #d4af37;
+                        border-radius:16px;padding:24px;margin:10px 0;'>
+                        <div style='font-size:16px;font-weight:900;color:#8b6200;
+                        margin-bottom:16px;text-align:center;'>
+                        🏛️ 【 명리학 전문가 8섹션 완전 분석 】</div>
+                        <div style='font-size:13px;color:#111;line-height:2.2;
+                        white-space:pre-wrap;'>{_result}</div>
+                        </div>""",
                         unsafe_allow_html=True,
                     )
                 except Exception as _ee:
@@ -16433,9 +16453,9 @@ def menu7_ai(pils, name, birth_year, gender):
             _ilp = ILGAN_PROFILE.get(_ilgan, {})
             _daewoon = SajuCoreEngine.get_daewoon(
                 pils, birth_year,
-                max(1, min(12, int(st.session_state.get("birth_month") or 1))),
-                max(1, min(31, int(st.session_state.get("birth_day") or 1))),
-                max(0, min(23, int(st.session_state.get("birth_hour") or 12))),
+                st.session_state.get("birth_month", 1),
+                st.session_state.get("birth_day", 1),
+                st.session_state.get("birth_hour", 12),
                 st.session_state.get("birth_minute", 0),
                 gender=gender,
             )
@@ -16624,16 +16644,14 @@ def menu14_health(pils, name, birth_year, gender):
     """1️⃣4️⃣ 건강운 -- 오행(五行) 균형 및 질병 직격 경고"""
 
     st.markdown(
-        (
-            "<div style='background:linear-gradient(135deg,#fff5f5,#ffe8e8);padding:20px;"
-            "border-radius:16px;border-left:5px solid #c0392b;margin-bottom:20px;"
-            "box-shadow:0 4px 15px rgba(0,0,0,0.06)'>"
-            "<div style='color:#c0392b;font-size:22px;font-weight:900;letter-spacing:2px'>"
-            f"💊 {name}님의 건강 직격 경고</div>"
-            "<div style='color:#555;font-size:13px;margin-top:4px;font-weight:600'>"
-            "오행 과다·부족 + 대운·세운 교차 분석으로 지금 당신에게 올 수 있는 질병을 직격으로 알려드립니다</div>"
-            "</div>"
-        ),
+        f"""<div style="background:linear-gradient(135deg,#fff5f5,#ffe8e8);padding:20px;
+        border-radius:16px;border-left:5px solid #c0392b;margin-bottom:20px;
+        box-shadow:0 4px 15px rgba(0,0,0,0.06)">
+        <div style="color:#c0392b;font-size:22px;font-weight:900;letter-spacing:2px">
+        💊 {name}님의 건강 직격 경고</div>
+        <div style="color:#555;font-size:13px;margin-top:4px;font-weight:600">
+        오행 과다·부족 + 대운·세운 교차 분석으로 지금 당신에게 올 수 있는 질병을 직격으로 알려드립니다</div>
+        </div>""",
         unsafe_allow_html=True,
     )
 
@@ -16649,9 +16667,9 @@ def menu14_health(pils, name, birth_year, gender):
         sw_cg        = sw.get("세운", "")[:1]
         sw_oh        = OH.get(sw_cg, "")
 
-        bm  = max(1, min(12, int(st.session_state.get("birth_month") or 1)))
-        bd  = max(1, min(31, int(st.session_state.get("birth_day") or 1)))
-        bh  = max(0, min(23, int(st.session_state.get("birth_hour") or 12)))
+        bm  = st.session_state.get("birth_month", 1)
+        bd  = st.session_state.get("birth_day",   1)
+        bh  = st.session_state.get("birth_hour",  12)
         bmn = st.session_state.get("birth_minute", 0)
 
         try:
@@ -16757,13 +16775,12 @@ def menu14_health(pils, name, birth_year, gender):
         for rank, (disease_name, disease_desc) in enumerate(_oh_data["diseases"], 1):
             _rank_color = ["#c0392b", "#e67e22", "#f39c12"][rank - 1]
             st.markdown(
-                (
-                    f"<div style='background:#fff5f5;border-left:5px solid {_rank_color};"
-                    "border-radius:10px;padding:14px 18px;margin:8px 0'>"
-                    f"<div style='font-size:15px;font-weight:900;color:{_rank_color};margin-bottom:6px'>TOP{rank} &nbsp; {disease_name}</div>"
-                    f"<div style='font-size:13px;color:#333;line-height:1.9'>{disease_desc}</div>"
-                    "</div>"
-                ),
+                f"""<div style='background:#fff5f5;border-left:5px solid {_rank_color};
+                border-radius:10px;padding:14px 18px;margin:8px 0;'>
+                <div style='font-size:15px;font-weight:900;color:{_rank_color};margin-bottom:6px'>
+                TOP{rank} &nbsp; {disease_name}</div>
+                <div style='font-size:13px;color:#333;line-height:1.9'>{disease_desc}</div>
+                </div>""",
                 unsafe_allow_html=True,
             )
 
@@ -16776,12 +16793,12 @@ def menu14_health(pils, name, birth_year, gender):
                     "올해 세운의 건강 충격이 두드러지지 않습니다. 하지만 방심은 금물입니다.")
         )
         st.markdown(
-            (
-                "<div style='background:#fff8e1;border:1.5px solid #f39c12;border-radius:12px;padding:16px 20px;margin:8px 0'>"
-                f"<div style='font-size:14px;font-weight:900;color:#e67e22;margin-bottom:6px'>{current_year}년 [{sw_ss}] 세운 — {_sw_warn_title}</div>"
-                f"<div style='font-size:13px;color:#333;line-height:1.9'>{_sw_warn_desc}</div>"
-                "</div>"
-            ),
+            f"""<div style='background:#fff8e1;border:1.5px solid #f39c12;border-radius:12px;
+            padding:16px 20px;margin:8px 0;'>
+            <div style='font-size:14px;font-weight:900;color:#e67e22;margin-bottom:6px'>
+            {current_year}년 [{sw_ss}] 세운 — {_sw_warn_title}</div>
+            <div style='font-size:13px;color:#333;line-height:1.9'>{_sw_warn_desc}</div>
+            </div>""",
             unsafe_allow_html=True,
         )
 
@@ -16790,12 +16807,12 @@ def menu14_health(pils, name, birth_year, gender):
             dw_str = cur_dw.get("str", "")
             dw_end = cur_dw.get("종료연도", "")
             st.markdown(
-                (
-                    "<div style='background:#fce4ec;border:1.5px solid #c0392b;border-radius:12px;padding:16px 20px;margin:8px 0'>"
-                    f"<div style='font-size:14px;font-weight:900;color:#c0392b;margin-bottom:6px'>대운 [{dw_str}/{dw_ss}] ({dw_end}년까지) — {_dw_title}</div>"
-                    f"<div style='font-size:13px;color:#333;line-height:1.9'>{_dw_desc}</div>"
-                    "</div>"
-                ),
+                f"""<div style='background:#fce4ec;border:1.5px solid #c0392b;border-radius:12px;
+                padding:16px 20px;margin:8px 0;'>
+                <div style='font-size:14px;font-weight:900;color:#c0392b;margin-bottom:6px'>
+                대운 [{dw_str}/{dw_ss}] ({dw_end}년까지) — {_dw_title}</div>
+                <div style='font-size:13px;color:#333;line-height:1.9'>{_dw_desc}</div>
+                </div>""",
                 unsafe_allow_html=True,
             )
 
@@ -16832,16 +16849,16 @@ def menu14_health(pils, name, birth_year, gender):
 
         _oh_rx = _oh_data
         st.markdown(
-            (
-                "<div style='background:#f0fff4;border:1.5px solid #27ae60;border-radius:12px;padding:18px 20px;margin:8px 0'>"
-                f"<div style='font-size:14px;font-weight:900;color:#1a5c2a;margin-bottom:10px'>🎯 집중 관리 장기: {_oh_rx['organ']}</div>"
-                "<div style='font-size:13px;color:#333;line-height:2.0'>"
-                f"{'🔺 ' + _oh_rx['excess'] if oh_strength.get(_target_oh, 0) >= 30 else '🔻 ' + _oh_rx['lack']}<br><br>"
-                f"🍱 <b>추천 식품:</b> {_oh_rx['food']}<br>"
-                f"🚫 <b>반드시 피할 것:</b> {_oh_rx['avoid']}<br>"
-                f"🏥 <b>지금 바로 받아야 할 검사:</b> {_oh_rx['check']}"
-                "</div></div>"
-            ),
+            f"""<div style='background:#f0fff4;border:1.5px solid #27ae60;border-radius:12px;
+            padding:18px 20px;margin:8px 0;'>
+            <div style='font-size:14px;font-weight:900;color:#1a5c2a;margin-bottom:10px'>
+            🎯 집중 관리 장기: {_oh_rx["organ"]}</div>
+            <div style='font-size:13px;color:#333;line-height:2.0;'>
+            {"🔺 " + _oh_rx["excess"] if oh_strength.get(_target_oh, 0) >= 30 else "🔻 " + _oh_rx["lack"]}<br><br>
+            🍱 <b>추천 식품:</b> {_oh_rx["food"]}<br>
+            🚫 <b>반드시 피할 것:</b> {_oh_rx["avoid"]}<br>
+            🏥 <b>지금 바로 받아야 할 검사:</b> {_oh_rx["check"]}
+            </div></div>""",
             unsafe_allow_html=True,
         )
 
@@ -16860,12 +16877,10 @@ def menu14_health(pils, name, birth_year, gender):
                           "劫財": "외상·혈액 관련 이슈 주의. 안전사고 예방 최우선.",
                           "傷官": "신경계 과부하·만성 과로 주의. 수면 확보가 핵심."}[_ss_y]
                 st.markdown(
-                    (
-                        f"<div style='border-left:4px solid {_color};padding:8px 14px;"
-                        f"margin:4px 0;background:#fff5f5;border-radius:0 8px 8px 0;font-size:13px'>"
-                        f"<b style='color:{_color}'>{_yr}년 (만 {_age_y}세) {_lvl} [{_ss_y}]</b>"
-                        f"&nbsp;— {_msg}</div>"
-                    ),
+                    f"""<div style='border-left:4px solid {_color};padding:8px 14px;
+                    margin:4px 0;background:#fff5f5;border-radius:0 8px 8px 0;font-size:13px;'>
+                    <b style='color:{_color}'>{_yr}년 (만 {_age_y}세) {_lvl} [{_ss_y}]</b>
+                    &nbsp;— {_msg}</div>""",
                     unsafe_allow_html=True,
                 )
                 _danger_found = True
@@ -18969,11 +18984,11 @@ def main():
 
             _sy = st.session_state.get("birth_year", 1990)
 
-            _sm = max(1, min(12, int(st.session_state.get("birth_month") or 1)))
+            _sm = st.session_state.get("birth_month", 1)
 
-            _sd = max(1, min(31, int(st.session_state.get("birth_day") or 1)))
+            _sd = st.session_state.get("birth_day", 1)
 
-            _sh = max(0, min(23, int(st.session_state.get("birth_hour") or 12)))
+            _sh = st.session_state.get("birth_hour", 12)
 
             _smin = st.session_state.get("birth_minute", 0)
 
@@ -18998,23 +19013,40 @@ def main():
 
                 st.markdown(
                     f"""
-<button id="saju-cp-btn" onclick="(function(){{
-var url=window.location.origin+window.location.pathname+'?{_qstr}';
-if(navigator.clipboard&&navigator.clipboard.writeText){{
-  navigator.clipboard.writeText(url).then(function(){{
-    var b=document.getElementById('saju-cp-btn');
-    b.textContent='✅ 복사 완료!';
-    setTimeout(function(){{b.textContent='📋 링크 복사';}},2000);
-  }}).catch(function(){{var t=document.getElementById('saju-url-ta');t.style.display='block';t.select();}});
-}}else{{var t=document.getElementById('saju-url-ta');t.style.display='block';t.select();document.execCommand('copy');}}
-}})()" style="background:linear-gradient(135deg,#d4af37,#b8960a);color:#000;border:none;
-border-radius:8px;padding:9px 0;font-size:14px;font-weight:700;
-cursor:pointer;width:100%;margin-bottom:8px">📋 링크 복사</button>
-<textarea id="saju-url-ta" readonly onclick="this.select()"
-style="display:none;width:100%;font-size:10px;color:#aaa;background:#111;
-border:1px solid #333;padding:6px 8px;border-radius:5px;
-resize:none;height:44px;font-family:monospace">?{_qstr}</textarea>
-""",
+
+    <button id="saju-cp-btn" onclick="(function(){{
+
+        var url=window.location.origin+window.location.pathname+'?{_qstr}';
+
+        if(navigator.clipboard&&navigator.clipboard.writeText){{
+
+          navigator.clipboard.writeText(url).then(function(){{
+
+            var b=document.getElementById('saju-cp-btn');
+
+            b.textContent='✅ 복사 완료!';
+
+            setTimeout(function(){{b.textContent='📋 링크 복사';}},2000);
+
+          }}).catch(function(){{var t=document.getElementById('saju-url-ta');t.style.display='block';t.select();}});
+
+        }}else{{var t=document.getElementById('saju-url-ta');t.style.display='block';t.select();document.execCommand('copy');}}
+
+    }})()" style="background:linear-gradient(135deg,#d4af37,#b8960a);color:#000;border:none;
+
+ border-radius:8px;padding:9px 0;font-size:14px;font-weight:700;
+
+        cursor:pointer;width:100%;margin-bottom:8px">📋 링크 복사</button>
+
+    <textarea id="saju-url-ta" readonly onclick="this.select()"
+
+ style="display:none;width:100%;font-size:10px;color:#aaa;background:#111;
+
+             border:1px solid #333;padding:6px 8px;border-radius:5px;
+
+             resize:none;height:44px;font-family:monospace">?{_qstr}</textarea>
+
+    """,
                     unsafe_allow_html=True,
                 )
 
@@ -19033,7 +19065,7 @@ resize:none;height:44px;font-family:monospace">?{_qstr}</textarea>
 
         birth_day = max(1, min(31, int(st.session_state.get("birth_day") or 1)))
 
-        birth_hour2 = max(0, min(23, int(st.session_state.get("birth_hour") or 12)))
+        birth_hour2 = st.session_state.get("birth_hour", 12)
 
         if pils:
             # -- 🧠 기억 시스템 자동 업데이트 -----------------
@@ -19370,15 +19402,16 @@ resize:none;height:44px;font-family:monospace">?{_qstr}</textarea>
                     )
                     for _bn in _sinsal_banners:
                         st.markdown(
-                            (
-                                f"<div style='background:{_bn['bg']};border-left:5px solid {_bn['color']};"
-                                "border-radius:0 12px 12px 0;padding:12px 16px;margin:4px 0'>"
-                                f"<div style='font-size:14px;font-weight:900;color:{_bn['color']};margin-bottom:4px'>{_bn['icon']} {_bn['title']}</div>"
-                                f"<div style='font-size:12px;color:#333;line-height:1.8;margin-bottom:6px'>{_bn['desc']}</div>"
-                                f"<div style='font-size:11px;font-weight:700;color:{_bn['color']};"
-                                f"background:{_bn['color']}11;padding:4px 10px;border-radius:6px;display:inline-block'>{_bn['action']}</div>"
-                                "</div>"
-                            ),
+                            f"""<div style='background:{_bn["bg"]};border-left:5px solid {_bn["color"]};
+                            border-radius:0 12px 12px 0;padding:12px 16px;margin:4px 0;'>
+                            <div style='font-size:14px;font-weight:900;color:{_bn["color"]};
+                            margin-bottom:4px'>{_bn["icon"]} {_bn["title"]}</div>
+                            <div style='font-size:12px;color:#333;line-height:1.8;
+                            margin-bottom:6px'>{_bn["desc"]}</div>
+                            <div style='font-size:11px;font-weight:700;color:{_bn["color"]};
+                            background:{_bn["color"]}11;padding:4px 10px;border-radius:6px;
+                            display:inline-block'>{_bn["action"]}</div>
+                            </div>""",
                             unsafe_allow_html=True,
                         )
             except Exception as _sn_e:
