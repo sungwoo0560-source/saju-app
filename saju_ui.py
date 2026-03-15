@@ -231,36 +231,50 @@ h2, h3 {
 /* ═══════════════════════════════════
    모바일 반응형
 ═══════════════════════════════════ */
-/* ✅ BUG FIX: flex-wrap 전역 적용 — manse.py 41곳 개별 수정 대신 한 번에 해결 */
-.stApp [style*="display:flex"],
-.stApp [style*="display: flex"] {
-    flex-wrap: wrap !important;
-}
+/* ✅ SAFE FIX: 전역 flex-wrap 제거 (사주 기둥/카드 세로 나열 방지)
+   개별 클래스 타겟팅으로 교체 */
 @media (max-width: 768px) {
+    /* 사주 기둥 박스 — 가로 배열 유지 + 크기 적절히 축소 */
     .pillar-box {
-        font-size: 28px !important;
-        width: 60px !important;
-        height: 60px !important;
-        padding: 6px !important;
+        font-size: 20px !important;
+        min-width: 64px !important;
+        width: auto !important;
+        height: auto !important;
+        min-height: 64px !important;
+        padding: 6px 8px !important;
+        white-space: nowrap !important;
+        word-break: keep-all !important;
+    }
+    /* 탭 — 가로 스크롤 유지 (절대 세로 꺾이면 안됨) */
+    .stTabs [data-baseweb="tab-list"] {
+        overflow-x: auto !important;
+        flex-wrap: nowrap !important;
     }
     .stTabs [data-baseweb="tab"] {
         font-size: 11px !important;
-        padding: 6px 8px !important;
+        padding: 6px 7px !important;
+        white-space: nowrap !important;
     }
+    /* 컬럼 최소 너비 — 너무 좁아지면 텍스트 세로 나열됨 */
     [data-testid="column"] {
-        width: 100% !important;
-        min-width: 100% !important;
+        min-width: 100px !important;
     }
+    /* 텍스트 */
     .saju-narrative {
         padding: 12px !important;
         font-size: 14px !important;
     }
+    /* 버튼 — 한국어 글자 단위 줄바꿈 방지 */
     .stButton > button {
         width: 100% !important;
-        min-height: 48px !important;
-        font-size: 15px !important;
-        padding: 12px 16px !important;
+        min-height: 44px !important;
+        font-size: 13px !important;
+        padding: 8px 10px !important;
+        word-break: keep-all !important;
+        white-space: normal !important;
+        line-height: 1.4 !important;
     }
+    /* 스크롤 상단 버튼 */
     #scroll-top-btn {
         bottom: 70px !important;
         right: 12px !important;
@@ -268,44 +282,34 @@ h2, h3 {
         height: 44px !important;
         font-size: 18px !important;
     }
-    /* ✅ 고정 폰트 크기 상한 — 24px~48px 고정값 29곳 한 번에 해결 */
-    .stApp [style*="font-size:2"],
-    .stApp [style*="font-size: 2"],
-    .stApp [style*="font-size:3"],
-    .stApp [style*="font-size: 3"],
-    .stApp [style*="font-size:4"],
-    .stApp [style*="font-size: 4"] {
-        font-size: clamp(16px, 4vw, 28px) !important;
+    /* 메인 컨테이너 좌우 여백 축소 */
+    .main .block-container {
+        padding: 0.5rem 0.3rem !important;
     }
-    /* ✅ min-width 고정값 제거 — flex 자식 깨짐 방지 */
-    .stApp [style*="min-width"] {
-        min-width: 0 !important;
+    /* 카드 패딩 축소 */
+    .saju-card, .saju-card-dark {
+        padding: 16px !important;
+    }
+    /* 인라인 HTML div 내 한국어 단어 단위 줄바꿈 */
+    .stMarkdown div[style] {
+        word-break: keep-all !important;
     }
 }
 @media (max-width: 480px) {
     .pillar-box {
-        font-size: 22px !important;
-        width: 48px !important;
-        height: 48px !important;
+        font-size: 17px !important;
+        min-width: 56px !important;
     }
     .gold-section {
         font-size: 15px !important;
     }
-    /* 더 작은 화면에서 폰트 추가 제한 */
-    .stApp [style*="font-size:2"],
-    .stApp [style*="font-size: 2"],
-    .stApp [style*="font-size:3"],
-    .stApp [style*="font-size: 3"],
-    .stApp [style*="font-size:4"],
-    .stApp [style*="font-size: 4"] {
-        font-size: clamp(14px, 3.5vw, 22px) !important;
+    /* 3열 버튼이 너무 좁으면 2열로 허용 */
+    [data-testid="column"] {
+        min-width: 90px !important;
     }
-    /* 패딩 압박 완화 */
-    .stApp [style*="padding:20px"],
-    .stApp [style*="padding: 20px"],
-    .stApp [style*="padding:24px"],
-    .stApp [style*="padding: 24px"] {
-        padding: 12px !important;
+    .stButton > button {
+        font-size: 12px !important;
+        padding: 7px 8px !important;
     }
 }
 
