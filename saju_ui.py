@@ -146,7 +146,7 @@ h2, h3 {
     color: #fff8e8 !important;
     border: none !important;
     border-radius: 50px !important;
-    padding: 12px 32px !important;
+    padding: 12px 24px !important;
     font-family: 'Noto Serif KR', serif !important;
     font-size: 15px !important;
     font-weight: 700 !important;
@@ -231,6 +231,11 @@ h2, h3 {
 /* ═══════════════════════════════════
    모바일 반응형
 ═══════════════════════════════════ */
+/* ✅ BUG FIX: flex-wrap 전역 적용 — manse.py 41곳 개별 수정 대신 한 번에 해결 */
+.stApp [style*="display:flex"],
+.stApp [style*="display: flex"] {
+    flex-wrap: wrap !important;
+}
 @media (max-width: 768px) {
     .pillar-box {
         font-size: 28px !important;
@@ -254,6 +259,7 @@ h2, h3 {
         width: 100% !important;
         min-height: 48px !important;
         font-size: 15px !important;
+        padding: 12px 16px !important;
     }
     #scroll-top-btn {
         bottom: 70px !important;
@@ -261,6 +267,19 @@ h2, h3 {
         width: 44px !important;
         height: 44px !important;
         font-size: 18px !important;
+    }
+    /* ✅ 고정 폰트 크기 상한 — 24px~48px 고정값 29곳 한 번에 해결 */
+    .stApp [style*="font-size:2"],
+    .stApp [style*="font-size: 2"],
+    .stApp [style*="font-size:3"],
+    .stApp [style*="font-size: 3"],
+    .stApp [style*="font-size:4"],
+    .stApp [style*="font-size: 4"] {
+        font-size: clamp(16px, 4vw, 28px) !important;
+    }
+    /* ✅ min-width 고정값 제거 — flex 자식 깨짐 방지 */
+    .stApp [style*="min-width"] {
+        min-width: 0 !important;
     }
 }
 @media (max-width: 480px) {
@@ -271,6 +290,22 @@ h2, h3 {
     }
     .gold-section {
         font-size: 15px !important;
+    }
+    /* 더 작은 화면에서 폰트 추가 제한 */
+    .stApp [style*="font-size:2"],
+    .stApp [style*="font-size: 2"],
+    .stApp [style*="font-size:3"],
+    .stApp [style*="font-size: 3"],
+    .stApp [style*="font-size:4"],
+    .stApp [style*="font-size: 4"] {
+        font-size: clamp(14px, 3.5vw, 22px) !important;
+    }
+    /* 패딩 압박 완화 */
+    .stApp [style*="padding:20px"],
+    .stApp [style*="padding: 20px"],
+    .stApp [style*="padding:24px"],
+    .stApp [style*="padding: 24px"] {
+        padding: 12px !important;
     }
 }
 
@@ -427,28 +462,41 @@ def render_daewoon_card(
         _dw_html += f"<span style='{_badge_style}background:{_bg};color:{_fg}'>{_ch}</span>"
     _dw_kr = "".join(_GZ_KR.get(c, c) for c in dw_str)
 
-    # ✅ BUG FIX: f-string 들여쓰기 → Markdown 코드블록 렌더링 방지
-    _card_html = (
-        f"<div style='{bg2}{bdr}border-radius:14px;padding:18px 20px;"
-        "margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,0.06)'>"
-        f"{badge}"
-        "<div style='display:flex;align-items:flex-start;gap:14px;margin-bottom:12px'>"
-        f"<div style='font-size:32px;min-width:40px;text-align:center'>{icon}</div>"
-        "<div style='flex:1'>"
-        "<div style='font-size:16px;font-weight:900;color:#333;margin-bottom:4px'>"
-        f"{_dw_html}"
-        f"<span style='font-size:13px;color:#888;font-weight:400'>({_dw_kr})</span>"
-        "<span style='font-size:14px;font-weight:700;color:#555;margin-left:4px'>대운</span>"
-        f"<span style='font-size:12px;color:#888;font-weight:400;margin-left:8px'>{start_age}세 ({start_year}~{end_year}년)</span>"
-        "</div>"
-        f"<div style='font-size:12px;color:#666;margin-top:2px'>천간 {emoji_cg} {oh_cg} / {d_ss_cg} &nbsp;|&nbsp; 지지 {emoji_jj} {oh_jj} / {d_ss_jj}</div>"
-        f"<div style='font-size:13px;font-weight:700;color:#8b6200;margin-top:4px'>{title}</div>"
-        "</div></div>"
-        f"<div style='font-size:13px;color:#333;line-height:1.9;margin-bottom:10px'>{narrative}</div>"
-        "<div style='background:rgba(212,175,55,0.08);border-left:3px solid #d4af37;"
-        "padding:8px 12px;border-radius:6px;font-size:12px;color:#7a5c00;margin-bottom:8px'>"
-        f"💊 <b>처방:</b> {prescription}</div>"
-        f"{alert_html if alert_html else ''}"
-        "</div>"
+    st.markdown(
+        f"""
+<div style="{bg2}{bdr}border-radius:14px;padding:18px 20px;
+            margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,0.06)">
+  {badge}
+  <div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:12px">
+    <div style="font-size:32px;min-width:40px;text-align:center">{icon}</div>
+    <div style="flex:1">
+      <div style="font-size:16px;font-weight:900;color:#333;margin-bottom:4px">
+        {_dw_html}
+        <span style="font-size:13px;color:#888;font-weight:400">({_dw_kr})</span>
+        <span style="font-size:14px;font-weight:700;color:#555;margin-left:4px">대운</span>
+        <span style="font-size:12px;color:#888;font-weight:400;margin-left:8px">
+          {start_age}세 ({start_year}~{end_year}년)
+        </span>
+      </div>
+      <div style="font-size:12px;color:#666;margin-top:2px">
+        천간 {emoji_cg} {oh_cg} / {d_ss_cg} &nbsp;|&nbsp;
+        지지 {emoji_jj} {oh_jj} / {d_ss_jj}
+      </div>
+      <div style="font-size:13px;font-weight:700;color:#8b6200;margin-top:4px">
+        {title}
+      </div>
+    </div>
+  </div>
+  <div style="font-size:13px;color:#333;line-height:1.9;margin-bottom:10px">
+    {narrative}
+  </div>
+  <div style="background:rgba(212,175,55,0.08);border-left:3px solid #d4af37;
+              padding:8px 12px;border-radius:6px;font-size:12px;
+              color:#7a5c00;margin-bottom:8px">
+    💊 <b>처방:</b> {prescription}
+  </div>
+  {alert_html if alert_html else ""}
+</div>
+""",
+        unsafe_allow_html=True,
     )
-    st.markdown(_card_html, unsafe_allow_html=True)
