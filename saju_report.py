@@ -146,30 +146,63 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str=""):
 
             BASE_FONT = "Helvetica"
 
-            # 1순위: CID 내장 폰트 (Streamlit Cloud 호환) — 한글/한자 지원
-            try:
-                from reportlab.pdfbase.cidfonts import UnicodeCIDFont
-                pdfmetrics.registerFont(UnicodeCIDFont("STSong-Light"))
-                BASE_FONT = "STSong-Light"
-            except Exception:
-                pass
+            # 1순위: 로컬 TTF 폰트 (한글 전용)
+            for _fn, _fp, _fi in _FONT_CANDIDATES:
+                if os.path.exists(_fp):
+                    try:
+                        if _fi is not None:
+                            pdfmetrics.registerFont(TTFont(_fn, _fp, subfontIndex=_fi))
+                        else:
+                            pdfmetrics.registerFont(TTFont(_fn, _fp))
+                        BASE_FONT = _fn
+                        break
+                    except Exception:
+                        pass
 
-            # 2순위: 로컬 TTF 폰트
+            # 2순위: requests로 NanumGothic 런타임 다운로드 (Streamlit Cloud)
             if BASE_FONT == "Helvetica":
-                for _fn, _fp, _fi in _FONT_CANDIDATES:
-                    if os.path.exists(_fp):
-                        try:
-                            if _fi is not None:
-                                pdfmetrics.registerFont(TTFont(_fn, _fp, subfontIndex=_fi))
-                            else:
-                                pdfmetrics.registerFont(TTFont(_fn, _fp))
-                            BASE_FONT = _fn
-                            break
-                        except Exception:
-                            pass
+                try:
+                    import requests as _req, hashlib as _hs
+                    _cache_dir = os.path.join(os.path.dirname(__file__), ".font_cache")
+                    os.makedirs(_cache_dir, exist_ok=True)
+                    _font_path = os.path.join(_cache_dir, "NanumGothic.ttf")
+                    if not os.path.exists(_font_path):
+                        _font_urls = [
+                            "https://github.com/google/fonts/raw/main/ofl/nanumgothic/NanumGothic-Regular.ttf",
+                            "https://github.com/naver/nanumfont/raw/master/fonts/NanumGothic.ttf",
+                        ]
+                        for _url in _font_urls:
+                            try:
+                                _r = _req.get(_url, timeout=10)
+                                if _r.status_code == 200 and len(_r.content) > 100000:
+                                    with open(_font_path, "wb") as _ff:
+                                        _ff.write(_r.content)
+                                    break
+                            except Exception:
+                                continue
+                    if os.path.exists(_font_path):
+                        pdfmetrics.registerFont(TTFont("NanumGothic", _font_path))
+                        BASE_FONT = "NanumGothic"
+                except Exception:
+                    pass
+
+            # 3순위: streamlit secrets에 base64 폰트 (packages.txt 대안)
+            if BASE_FONT == "Helvetica":
+                try:
+                    import streamlit as _st2
+                    _font_b64 = _st2.secrets.get("NANUM_FONT_B64", "")
+                    if _font_b64:
+                        import base64 as _b64, tempfile as _tf
+                        _fd, _fp2 = _tf.mkstemp(suffix=".ttf")
+                        with os.fdopen(_fd, "wb") as _fh:
+                            _fh.write(_b64.b64decode(_font_b64))
+                        pdfmetrics.registerFont(TTFont("NanumGothic", _fp2))
+                        BASE_FONT = "NanumGothic"
+                except Exception:
+                    pass
 
             if BASE_FONT == "Helvetica":
-                st.warning("⚠️ 한글 폰트를 찾지 못했습니다. PDF에 한글이 정상 출력되지 않을 수 있습니다.")
+                st.warning("⚠️ 한글 폰트 로딩 실패. packages.txt에 fonts-nanum 추가 후 재배포하세요.")
 
             buf = io.BytesIO()
 
