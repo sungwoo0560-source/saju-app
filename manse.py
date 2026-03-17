@@ -14734,15 +14734,15 @@ def menu8_bihang(pils, name, birth_year, gender):
     st.markdown(
         """
 
-<div style="background:linear-gradient(135deg,#ffdcdc,#ffdce4,#ffdcdc); border:1px solid #8B0000;border-radius:16px;padding:22px 26px;margin-bottom:20px">
+<div style="background:linear-gradient(135deg,#1a0a00,#2e1500,#1a0a00);border:2px solid #d4af37;border-radius:16px;padding:22px 26px;margin-bottom:20px">
 
-<div style="color:#ff6060;font-size:11px;letter-spacing:4px;margin-bottom:8px">
+<div style="color:#ffaa00;font-size:11px;letter-spacing:4px;margin-bottom:8px">
 
             ⚠️ 극비(極秘) - 용신 기반 전통 비방 처방전
 
 </div>
 
-<div style="color:#8b6200;font-size:19px;font-weight:900;letter-spacing:2px;margin-bottom:10px">
+<div style="color:#f7e695;font-size:19px;font-weight:900;letter-spacing:2px;margin-bottom:10px">
 
             🔴 특급 비방록(特急 秘方錄)
 
@@ -14780,7 +14780,7 @@ def menu8_bihang(pils, name, birth_year, gender):
         y_tags = (
             " ".join(
                 [
-                    f"<span style='background:#000000;color:#000;font-weight:900;padding:6px 16px;border-radius:20px;font-size:14px'>{OH_EMOJI.get(o, '')} {OH_NAME.get(o, o)}</span>"
+                    f"<span style='background:#1a3a5c;color:#f7e695;font-weight:900;padding:6px 16px;border-radius:20px;font-size:14px'>{OH_EMOJI.get(o, '')} {OH_NAME.get(o, o)}</span>"
                     for o in yongshin_ohs
                 ]
             )
@@ -14791,9 +14791,9 @@ def menu8_bihang(pils, name, birth_year, gender):
         st.markdown(
             f"""
 
-<div style="background:#ffffff;border:2px solid #000000;border-radius:12px;padding:16px">
+<div style="background:#fff8e8;border:2px solid #c9a84c;border-radius:12px;padding:16px">
 
-<div style="font-size:11px;color:#000000;font-weight:700;margin-bottom:8px">
+<div style="font-size:12px;color:#8b5e00;font-weight:800;margin-bottom:8px">
 
                 🌟 용신 (이 기운을 강화하라)
 
@@ -14858,7 +14858,7 @@ def menu8_bihang(pils, name, birth_year, gender):
         st.markdown(
             f"""
 
-<div style="background: white; border: 1px solid #d4af37; border-radius: 12px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 25px;">
+<div style="background:#fffef9;border:2px solid #d4af37;border-radius:14px;padding:22px;box-shadow:0 4px 16px rgba(180,140,0,0.12);margin-bottom:20px">
 
 <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
 
@@ -14866,9 +14866,9 @@ def menu8_bihang(pils, name, birth_year, gender):
 
 <div>
 
-<div style="color: #d4af37; font-size: 11px; font-weight: 800; letter-spacing: 2px;">ELEMENTAL SECRET</div>
+<div style="color:#9b7200;font-size:11px;font-weight:800;letter-spacing:2px;margin-bottom:2px">ELEMENTAL SECRET</div>
 
-<div style="font-size: 20px; font-weight: 900;">{bd["오행명"]}의 처방</div>
+<div style="font-size:20px;font-weight:900;color:#1a1a1a">{bd["오행명"]}의 처방</div>
 
 </div>
 
@@ -14880,7 +14880,7 @@ def menu8_bihang(pils, name, birth_year, gender):
 
 <div style="font-size: 13px; font-weight: 800; color: #1a237e; margin-bottom: 8px;">📜 비방 (秘方)</div>
 
-<div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 3px solid #1a237e; font-size: 15px; line-height: 1.6;">
+<div style="background:#eef2ff;padding:14px;border-radius:8px;border-left:4px solid #1a237e;font-size:14px;line-height:1.9;color:#111;word-break:break-all">
 
                     "{bd["비방"]}"
 
@@ -14892,7 +14892,7 @@ def menu8_bihang(pils, name, birth_year, gender):
 
 <div style="font-size: 13px; font-weight: 800; color: #b71c1c; margin-bottom: 8px;">💰 재물 (財物)</div>
 
-<div style="background: #fff8f8; padding: 15px; border-radius: 8px; border-left: 3px solid #b71c1c; font-size: 15px; line-height: 1.6;">
+<div style="background:#fff0f0;padding:14px;border-radius:8px;border-left:4px solid #b71c1c;font-size:14px;line-height:1.9;color:#111;word-break:break-all">
 
                     "{bd["재물"]}"
 
@@ -14904,7 +14904,7 @@ def menu8_bihang(pils, name, birth_year, gender):
 
 <div style="font-size: 13px; font-weight: 800; color: #333; margin-bottom: 8px;">🚫 금기 (禁忌)</div>
 
-<div style="background: #f5f5f5; padding: 15px; border-radius: 8px; border-left: 3px solid #333; font-size: 14px; color: #666;">
+<div style="background:#f5f5f5;padding:14px;border-radius:8px;border-left:4px solid #555;font-size:14px;line-height:1.9;color:#333;word-break:break-all">
 
                     "{bd["금기"]}"
 
@@ -14932,11 +14932,11 @@ def menu8_bihang(pils, name, birth_year, gender):
         st.markdown(
             f"""
 
-<div style="background: #fff5f5; border: 1px solid #ff8888; border-radius: 12px; padding: 20px; margin-bottom: 25px;">
+<div style="background:#fff5f5;border:2px solid #e53935;border-radius:12px;padding:18px;margin-bottom:20px">
 
 <div style="font-size: 16px; font-weight: 900; color: #b71c1c; margin-bottom: 12px;">🚫 기신(忌神) 차단 - 돈 새는 구멍을 막아라</div>
 
-<div style="font-size: 13px; color: #555; line-height: 1.6;">
+<div style="font-size:13px;color:#333;line-height:1.9;word-break:break-all">
 
                 현재 사주에서 <b>{", ".join(gishin_ohs)}</b>의 기운이 재물을 밀어내고 있습니다. 
 
@@ -14960,9 +14960,9 @@ def menu8_bihang(pils, name, birth_year, gender):
     st.markdown(
         """
 
-<div style="background:#ffffff;; border:2px solid #4a3080;border-radius:14px;padding:20px;margin:16px 0">
+<div style="background:#f8f5ff;border:2px solid #7c5cbf;border-radius:14px;padding:20px;margin:16px 0">
 
-<div style="font-size:16px;font-weight:900;color:#c39bd3;margin-bottom:14px">
+<div style="font-size:16px;font-weight:900;color:#4a2080;margin-bottom:14px">
 
             🕯️ 신강신약별 공통 비방 - 만신 구전(口傳)
 
@@ -15014,9 +15014,9 @@ def menu8_bihang(pils, name, birth_year, gender):
         st.markdown(
             f"""
 
-<div style="background:#f5f5f5;border-left:3px solid {sn_color}; padding:10px 14px;border-radius:6px;margin:5px 0; font-size:13px;color:{desc_color};line-height:1.9">
+<div style="background:#fff;border-left:4px solid {sn_color};padding:12px 16px;border-radius:0 8px 8px 0;margin:6px 0;font-size:13px;color:#222;line-height:1.9;word-break:break-all;box-shadow:0 1px 3px rgba(0,0,0,0.06)">
 
-            * {r}
+            {r}
 
 </div>
 
@@ -15036,7 +15036,7 @@ def menu8_bihang(pils, name, birth_year, gender):
     st.markdown(
         f"""
 
-<div style="background:linear-gradient(135deg,#fff5e0,#fff0dc); border:2px solid #000000;border-radius:14px;padding:20px">
+<div style="background:linear-gradient(135deg,#fffbf0,#fff5e0);border:2px solid #c9a84c;border-radius:14px;padding:20px">
 
 <div style="font-size:16px;font-weight:900;color:#8b6200;margin-bottom:10px">
 
@@ -15127,7 +15127,7 @@ def menu8_bihang(pils, name, birth_year, gender):
     # ⑥ 신살별 비방 ─────────────────────────────────────
     st.markdown(
         """<div style="background:linear-gradient(135deg,#1a0030,#2a0050);border:1px solid #9b59b6;border-radius:14px;padding:20px;margin:16px 0">
-<div style="font-size:16px;font-weight:900;color:#c39bd3;margin-bottom:14px">🌟 신살(神殺)별 전통 비방</div>""",
+<div style="font-size:16px;font-weight:900;color:#4a2080;margin-bottom:14px">🌟 신살(神殺)별 전통 비방</div>""",
         unsafe_allow_html=True,
     )
     try:
@@ -15320,6 +15320,283 @@ def menu8_bihang(pils, name, birth_year, gender):
         st.info("월별 처방 계산 중 오류가 발생했습니다.")
     st.markdown("</div>", unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
+
+
+    # ══════════════════════════════════════════════════════
+    # ① 물상대체(物象代替) — 자연물로 기운 채우기
+    # ══════════════════════════════════════════════════════
+    st.markdown('<hr style="border:none;border-top:2px solid #d4af37;margin:28px 0">', unsafe_allow_html=True)
+    st.markdown("""
+<div style="background:linear-gradient(135deg,#0a1628,#1a2840);border:2px solid #4a90d9;border-radius:14px;padding:20px;margin-bottom:6px">
+<div style="color:#7ec8f5;font-size:11px;letter-spacing:3px;margin-bottom:6px">TRADITIONAL METHOD 01</div>
+<div style="color:#e8f4ff;font-size:18px;font-weight:900;margin-bottom:8px">🌊 물상대체(物象代替) 비방 — 자연물로 기운을 채운다</div>
+<div style="color:#aad4f0;font-size:13px;line-height:1.8">부족한 오행을 실제 자연물·환경으로 대체하는 가장 정통한 비방입니다.<br>
+옛 조상들이 실생활에서 써온 방법으로, 효과가 즉각적이고 지속적입니다.</div>
+</div>""", unsafe_allow_html=True)
+
+    try:
+        _MULSUNG2 = {
+            "木": [
+                ("🌿 식물 배치", "집 동쪽에 살아있는 초록 식물을 두십시오. 반드시 살아있는 것이어야 합니다. 조화(造花)는 효과 없습니다."),
+                ("🌲 숲·산 방문", "매주 1회 이상 숲이나 공원을 방문하여 나무 사이를 걸으십시오. 나무를 직접 손으로 만지며 기운을 받으십시오."),
+                ("🌱 새벽 기운", "새벽 5~7시(인묘시) 동쪽 창문을 열고 심호흡 10회. 목(木) 기운이 가장 강한 시간입니다."),
+                ("🍋 신맛 음식", "레몬·식초·매실·사과·귤 등 신맛 나는 음식을 매일 조금씩 드십시오. 간장·담낭을 강화합니다."),
+                ("📐 동쪽 방위", "책상·침대 머리를 동쪽으로 배치하십시오. 잠자는 동안 목 기운을 흡수합니다."),
+            ],
+            "火": [
+                ("🕯️ 촛불 의식", "매일 저녁 촛불 1개를 30분 이상 켜두십시오. 빨간 양초가 가장 효과적입니다."),
+                ("☀️ 일광욕", "오전 10시~12시(오시) 15분 이상 햇볕을 직접 쬐십시오. 화(火) 기운이 피부를 통해 흡수됩니다."),
+                ("🔴 붉은 소품", "현관이나 거실에 붉은 소품 1개를 반드시 두십시오. 입구에 붉은 기운이 있으면 재물운이 강화됩니다."),
+                ("🍅 쓴맛·붉은 음식", "토마토·당근·석류·딸기·커피(무가당) 등을 꾸준히 드십시오. 심장·소장을 보강합니다."),
+                ("🧭 남쪽 방위", "중요한 미팅·면접은 남쪽을 등지고 앉으십시오. 화 기운이 등을 밀어줍니다."),
+            ],
+            "土": [
+                ("🪨 황토·돌 소품", "황토 도자기나 돌 소품을 집 중앙에 두십시오. 흙의 기운이 공간을 안정시킵니다."),
+                ("🦶 맨발 흙 밟기", "주 3회 이상 맨발로 흙을 밟으십시오. 공원 흙길이나 황토방이 가장 좋습니다."),
+                ("🍠 단맛 음식", "고구마·꿀·대추·단호박·현미를 꾸준히 드십시오. 위장·비장을 보강합니다."),
+                ("🕐 환절기 행동", "새벽 1~3시(축시) 전에 취침하는 습관이 토 기운을 강화합니다."),
+                ("🏡 집 중앙 정리", "집 한가운데를 깨끗하게 비워두십시오. 중앙에 물건을 쌓으면 토 기운이 막힙니다."),
+            ],
+            "金": [
+                ("💍 금속 착용", "은·금 장신구를 매일 착용하십시오. 왼손 손목의 금속 팔찌가 특히 효과적입니다."),
+                ("🗻 서쪽 등산", "가을철(9~11월) 서쪽 방향의 바위산을 등산하고, 바위 위에서 20분 이상 쉬십시오. 금 기운을 직접 흡수합니다."),
+                ("🥬 매운맛 음식", "무·도라지·생강·마늘·배 등을 꾸준히 드십시오. 폐·대장을 보강합니다."),
+                ("🤫 말 줄이기", "금 기운은 절제에서 강화됩니다. 불필요한 말을 줄이고 침묵의 시간을 늘리십시오."),
+                ("🧭 서쪽 방위", "서쪽 방향에 금속 소품(쇠 조각상·동전 모음)을 배치하십시오."),
+            ],
+            "水": [
+                ("🐟 어항·분수", "집 북쪽에 작은 어항이나 탁상 분수를 두십시오. 흐르는 물소리가 수 기운을 강화합니다."),
+                ("🌊 바다·강 방문", "월 2회 이상 바다나 강을 찾아가 물을 직접 바라보십시오. 눈으로 물을 보는 것만으로도 기운이 흡수됩니다."),
+                ("💧 충분한 수분", "하루 물 2리터 마시기를 생활화하십시오. 수 기운이 부족하면 체내 전해질이 떨어집니다."),
+                ("🍖 짠맛 음식", "검은콩·미역·김·다시마·소금 등 짠맛 음식을 드십시오. 신장·방광을 보강합니다."),
+                ("🌙 북쪽 방위·야간", "침대 머리를 북쪽으로 하거나, 중요한 사색·독서는 밤 11시~1시(자시)에 하십시오."),
+            ],
+        }
+        _yong_oh_ms = yongshin_ohs[0] if yongshin_ohs else ""
+        _gi_oh_ms   = gishin_ohs[0]   if gishin_ohs   else ""
+
+        if _yong_oh_ms and _yong_oh_ms in _MULSUNG2:
+            pass
+        if _yong_oh_ms and _yong_oh_ms in _MULSUNG2:
+            pass
+
+        _OH_COLOR2 = {"木":"#2e7d32","火":"#c62828","土":"#e65100","金":"#546e7a","水":"#1565c0"}
+        _OH_BG2    = {"木":"#e8f5e9","火":"#ffebee","土":"#fff3e0","金":"#eceff1","水":"#e3f2fd"}
+        _OH_EMOJI2 = {"木":"🌿","火":"🔥","土":"⛰️","金":"⚔️","水":"💧"}
+
+        if _yong_oh_ms and _yong_oh_ms in _MULSUNG2:
+            _items = _MULSUNG2[_yong_oh_ms]
+            _c = _OH_COLOR2.get(_yong_oh_ms,"#333")
+            _bg = _OH_BG2.get(_yong_oh_ms,"#fafafa")
+            st.markdown(f"""<div style="background:{_bg};border:2px solid {_c};border-radius:12px;padding:18px;margin-bottom:12px">
+<div style="font-size:15px;font-weight:900;color:{_c};margin-bottom:12px">
+{_OH_EMOJI2.get(_yong_oh_ms,'')} 용신 {_yong_oh_ms}(오행) — 물상대체 5가지 처방</div>""", unsafe_allow_html=True)
+            for _title, _desc in _items:
+                st.markdown(f"""<div style="background:#fff;border-left:4px solid {_c};border-radius:0 8px 8px 0;
+padding:12px 14px;margin-bottom:8px">
+<div style="font-size:13px;font-weight:800;color:{_c};margin-bottom:4px">{_title}</div>
+<div style="font-size:13px;color:#222;line-height:1.9;word-break:break-all">{_desc}</div>
+</div>""", unsafe_allow_html=True)
+            st.markdown("</div>", unsafe_allow_html=True)
+    except Exception as _e_ms:
+        pass
+
+    # ══════════════════════════════════════════════════════
+    # ② 시간·방위 활용법
+    # ══════════════════════════════════════════════════════
+    st.markdown('<hr style="border:none;border-top:1px solid #d4af37;margin:20px 0">', unsafe_allow_html=True)
+    st.markdown("""
+<div style="background:linear-gradient(135deg,#1a0828,#2e1040);border:2px solid #9b59b6;border-radius:14px;padding:20px;margin-bottom:6px">
+<div style="color:#c39bd3;font-size:11px;letter-spacing:3px;margin-bottom:6px">TRADITIONAL METHOD 02</div>
+<div style="color:#f0e6ff;font-size:18px;font-weight:900;margin-bottom:8px">🧭 시간·방위 활용 비방 — 하늘의 시계를 읽어라</div>
+<div style="color:#c8a8e0;font-size:13px;line-height:1.8">용신 오행이 강한 시간과 방향을 활용하는 것만으로 운이 달라집니다.<br>
+중요한 결정·미팅·계약은 반드시 이 시간대를 활용하십시오.</div>
+</div>""", unsafe_allow_html=True)
+
+    try:
+        _TIME_MAP = {
+            "木": {"시간":"새벽 3~7시 (인묘시 寅卯時)","계절":"봄 (3~5월)","방위":"동(東)","날":"갑을일(甲乙日)·인묘일(寅卯日)","활용":"이 시간에 중요한 계획 수립, 새 프로젝트 시작, 계약서 작성 적합"},
+            "火": {"시간":"오전 9~13시 (사오시 巳午時)","계절":"여름 (6~8월)","방위":"남(南)","날":"병정일(丙丁日)·사오일(巳午日)","활용":"이 시간에 발표·면접·영업·협상 등 적극적인 활동에 적합"},
+            "土": {"시간":"환절기 오후 1~3시 (미시 未時)","계절":"환절기 (3·6·9·12월)","방위":"중앙","날":"무기일(戊己日)·진술축미일(辰戌丑未日)","활용":"이 시간에 중재·조율·계약 마무리·부동산 계약 적합"},
+            "金": {"시간":"오후 3~7시 (신유시 申酉時)","계절":"가을 (9~11월)","방위":"서(西)","날":"경신일(庚辛日)·신유일(申酉日)","활용":"이 시간에 결단·정리·매듭·마무리·투자 회수 결정 적합"},
+            "水": {"시간":"밤 11시~새벽 3시 (자축시 子丑時)","계절":"겨울 (11~1월)","방위":"북(北)","날":"임계일(壬癸日)·자해일(子亥日)","활용":"이 시간에 명상·독서·사색·전략 수립·자기성찰 적합"},
+        }
+        _gi_avoid = {
+            "木": "봄·새벽·동쪽 방향은 기신이므로 중요 결정 시 피하십시오",
+            "火": "여름·오전·남쪽 방향은 기신이므로 큰 지출·계약 자제하십시오",
+            "土": "환절기·중앙 배치는 기신이므로 집 중앙에 물건을 쌓지 마십시오",
+            "金": "가을·오후·서쪽 방향은 기신이므로 중요 결정을 이 시간에 내리지 마십시오",
+            "水": "겨울·밤·북쪽 방향은 기신이므로 야간 활동·투자를 자제하십시오",
+        }
+        if yongshin_ohs:
+            _vy = yongshin_ohs[0]
+            _tm = _TIME_MAP.get(_vy,{})
+            if _tm:
+                _tc = _OH_COLOR2.get(_vy,"#333") if '_OH_COLOR2' in dir() else "#1565c0"
+                _tbg = _OH_BG2.get(_vy,"#f0f8ff") if '_OH_BG2' in dir() else "#e3f2fd"
+                st.markdown(f"""<div style="background:{_tbg};border:2px solid {_tc};border-radius:12px;padding:16px;margin-bottom:12px">
+<div style="font-size:15px;font-weight:900;color:{_tc};margin-bottom:12px">⏰ 용신 {_vy} — 황금 시간·방위</div>
+<div style="display:grid;grid-template-columns:1fr;gap:8px">
+  <div style="background:#fff;padding:10px 14px;border-radius:8px;border-left:4px solid {_tc}">
+    <div style="font-size:11px;color:#888;font-weight:700">⏰ 용신 시간대</div>
+    <div style="font-size:14px;color:#111;font-weight:800;margin-top:2px">{_tm.get('시간','')}</div>
+  </div>
+  <div style="background:#fff;padding:10px 14px;border-radius:8px;border-left:4px solid {_tc}">
+    <div style="font-size:11px;color:#888;font-weight:700">🍂 용신 계절</div>
+    <div style="font-size:14px;color:#111;font-weight:800;margin-top:2px">{_tm.get('계절','')}</div>
+  </div>
+  <div style="background:#fff;padding:10px 14px;border-radius:8px;border-left:4px solid {_tc}">
+    <div style="font-size:11px;color:#888;font-weight:700">🧭 용신 방위</div>
+    <div style="font-size:14px;color:#111;font-weight:800;margin-top:2px">{_tm.get('방위','')}</div>
+  </div>
+  <div style="background:#fff;padding:10px 14px;border-radius:8px;border-left:4px solid {_tc}">
+    <div style="font-size:11px;color:#888;font-weight:700">📅 용신 일진</div>
+    <div style="font-size:14px;color:#111;font-weight:800;margin-top:2px">{_tm.get('날','')}</div>
+  </div>
+  <div style="background:{_tc}11;padding:10px 14px;border-radius:8px;border:1px solid {_tc}44">
+    <div style="font-size:11px;color:{_tc};font-weight:700">💡 활용법</div>
+    <div style="font-size:13px;color:#222;line-height:1.8;margin-top:2px;word-break:break-all">{_tm.get('활용','')}</div>
+  </div>
+</div></div>""", unsafe_allow_html=True)
+
+        if gishin_ohs:
+            _ga = gishin_ohs[0]
+            _avoid_txt = _gi_avoid.get(_ga,"")
+            if _avoid_txt:
+                st.markdown(f"""<div style="background:#fff5f5;border:2px solid #e53935;border-radius:10px;padding:14px;margin-bottom:12px">
+<div style="font-size:13px;font-weight:800;color:#c62828;margin-bottom:6px">⛔ 기신 {_ga} — 피해야 할 시간·방위</div>
+<div style="font-size:13px;color:#333;line-height:1.9;word-break:break-all">{_avoid_txt}</div>
+</div>""", unsafe_allow_html=True)
+    except Exception:
+        pass
+
+    # ══════════════════════════════════════════════════════
+    # ③ 직업·행동 개운법 — 십성 기반
+    # ══════════════════════════════════════════════════════
+    st.markdown('<hr style="border:none;border-top:1px solid #d4af37;margin:20px 0">', unsafe_allow_html=True)
+    st.markdown("""
+<div style="background:linear-gradient(135deg,#0a1a0a,#142814);border:2px solid #4caf50;border-radius:14px;padding:20px;margin-bottom:6px">
+<div style="color:#81c784;font-size:11px;letter-spacing:3px;margin-bottom:6px">TRADITIONAL METHOD 03</div>
+<div style="color:#e8ffe8;font-size:18px;font-weight:900;margin-bottom:8px">⚡ 행동 개운법 — 습관과 삶의 방식이 운을 바꾼다</div>
+<div style="color:#a5d6a7;font-size:13px;line-height:1.8">전문 명리학자들이 가장 중요하게 보는 비방입니다.<br>
+소품·색상보다 행동 변화가 운을 10배 더 빠르게 바꿉니다.</div>
+</div>""", unsafe_allow_html=True)
+
+    try:
+        _BEHAVIOR_MAP = {
+            "比肩": [("🤝 협력보다 독립","혼자 결정하고 실행하는 연습을 하십시오. 타인 의존이 줄수록 비견 기운이 강화됩니다."),
+                     ("💪 운동 루틴","매일 아침 30분 이상 단독 운동(등산·달리기)을 하십시오. 신체 기운을 독립적으로 강화합니다."),
+                     ("📝 결정 일지","오늘 내가 스스로 결정한 것 3가지를 매일 기록하십시오. 주체성이 재물운을 만듭니다.")],
+            "劫財": [("🏆 경쟁 도전","경쟁 상황을 피하지 말고 적극 참여하십시오. 겁재는 경쟁에서 강해집니다."),
+                     ("🤝 동업 신중","동업·보증은 반드시 계약서로 명문화하십시오. 겁재는 의리보다 문서가 우선입니다."),
+                     ("💰 비상금 확보","수입의 20%는 절대 건드리지 않는 비상금으로 유지하십시오.")],
+            "食神": [("🎨 재능 상품화","내 특기를 돈 버는 수단으로 연결하십시오. 식신은 재능이 재물입니다."),
+                     ("😊 먹고 즐기기","좋은 음식·여행·취미에 적절히 투자하십시오. 식신 기운은 즐거움에서 강화됩니다."),
+                     ("🌱 새 프로젝트","매 분기 새로운 창작 프로젝트를 시작하십시오.")],
+            "傷官": [("✍️ 표현력 강화","글·말·창작으로 내 생각을 적극 표현하십시오. 상관은 표현이 재물입니다."),
+                     ("🙏 윗사람 예의","직장 상사·어른에게 특별히 예의를 갖추십시오. 상관의 최대 위험은 윗사람 충돌입니다."),
+                     ("🚀 혁신 도전","기존 방식에 의문을 품고 새로운 방법을 시도하십시오.")],
+            "偏財": [("🏃 적극적 행동","가만히 앉아 있지 마십시오. 편재는 움직일수록 돈이 들어옵니다."),
+                     ("🤝 인맥 관리","매주 새로운 사람 1명을 만나십시오. 편재 재물은 사람을 통해 옵니다."),
+                     ("⚠️ 투기 금지","주식·코인 단기 투기는 절대 금지. 편재는 모험심이 강해 큰 손실을 부를 수 있습니다.")],
+            "正財": [("💰 저축 자동화","월급날 자동으로 30% 이상 저축되도록 설정하십시오."),
+                     ("📊 지출 기록","매일 지출을 기록하고 주 1회 검토하십시오. 정재는 꼼꼼한 관리가 재물입니다."),
+                     ("🏠 부동산 우선","여유 자금은 부동산·예금 위주로 운용하십시오.")],
+            "偏官": [("💪 체력 관리","규칙적인 운동으로 체력을 최우선으로 유지하십시오. 편관은 건강이 무너지면 모든 것이 무너집니다."),
+                     ("⚠️ 무리 금지","과로·무리한 새 사업 시작을 자제하십시오."),
+                     ("🎯 단기 목표","큰 목표를 작은 단계로 쪼개서 하나씩 완수하십시오.")],
+            "正官": [("📋 약속 철저","한번 한 약속은 반드시 지키십시오. 정관 기운은 신뢰에서 강화됩니다."),
+                     ("👔 외모 관리","단정한 외모와 깔끔한 언어를 유지하십시오. 정관은 이미지가 경쟁력입니다."),
+                     ("📚 자격증","공인 자격증·학위를 추가로 취득하십시오.")],
+            "偏印": [("📖 독서·연구","매일 1시간 이상 독서하십시오. 편인은 지식이 무기입니다."),
+                     ("🔍 전문 분야","하나의 분야를 깊이 파고드십시오. 편인은 넓이보다 깊이입니다."),
+                     ("🧘 명상","주 3회 명상으로 직관력을 강화하십시오.")],
+            "正印": [("🎓 배움 지속","평생 배움을 멈추지 마십시오. 정인은 배울수록 운이 좋아집니다."),
+                     ("🙏 감사 표현","어머니·스승·귀인에게 감사를 자주 표현하십시오."),
+                     ("📜 자격 취득","시험·자격증에 투자하는 것이 최고의 재테크입니다.")],
+        }
+        # 일간으로 일주 십성 계산
+        from saju_engine import TEN_GODS_MATRIX, JIJANGGAN
+        _ilgan_b = pils[1].get("cg","") if pils and len(pils)>1 else ""
+        _ilji_b  = pils[1].get("jj","") if pils and len(pils)>1 else ""
+        _main_ss_b = TEN_GODS_MATRIX.get(_ilgan_b,{}).get(_ilji_b,"")
+        if not _main_ss_b:
+            _jjg_b = JIJANGGAN.get(_ilji_b,[])
+            if _jjg_b:
+                _main_ss_b = TEN_GODS_MATRIX.get(_ilgan_b,{}).get(_jjg_b[-1],"")
+
+        _beh_items = _BEHAVIOR_MAP.get(_main_ss_b, [
+            ("🎯 집중력","하루 한 가지 일에만 집중하는 습관을 기르십시오. 분산된 에너지를 모으는 것이 개운의 시작입니다."),
+            ("🌅 아침 루틴","매일 같은 시간에 일어나는 것만으로도 운이 안정됩니다."),
+            ("🤝 인간관계","진심 어린 감사 인사를 하루 3번 실천하십시오."),
+        ])
+        _beh_color = "#2e7d32"
+        st.markdown(f"""<div style="background:#f1f8e9;border:2px solid {_beh_color};border-radius:12px;padding:16px;margin-bottom:12px">
+<div style="font-size:15px;font-weight:900;color:{_beh_color};margin-bottom:12px">
+🎯 {display_name}님 맞춤 행동 처방 ({_main_ss_b or '용신 기반'})</div>""", unsafe_allow_html=True)
+        for _bt, _bd2 in _beh_items:
+            st.markdown(f"""<div style="background:#fff;border-left:4px solid {_beh_color};border-radius:0 8px 8px 0;
+padding:12px 14px;margin-bottom:8px">
+<div style="font-size:13px;font-weight:800;color:{_beh_color};margin-bottom:4px">{_bt}</div>
+<div style="font-size:13px;color:#222;line-height:1.9;word-break:break-all">{_bd2}</div>
+</div>""", unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
+    except Exception:
+        pass
+
+    # ══════════════════════════════════════════════════════
+    # ④ 식이 개운법 — 오행별 음식 처방
+    # ══════════════════════════════════════════════════════
+    st.markdown('<hr style="border:none;border-top:1px solid #d4af37;margin:20px 0">', unsafe_allow_html=True)
+    st.markdown("""
+<div style="background:linear-gradient(135deg,#1a0a00,#2e1800);border:2px solid #ff8f00;border-radius:14px;padding:20px;margin-bottom:6px">
+<div style="color:#ffcc80;font-size:11px;letter-spacing:3px;margin-bottom:6px">TRADITIONAL METHOD 04</div>
+<div style="color:#fff8e1;font-size:18px;font-weight:900;margin-bottom:8px">🍽️ 식이(食餌) 개운법 — 먹는 것이 운이 된다</div>
+<div style="color:#ffe082;font-size:13px;line-height:1.8">황제내경(黃帝內經)에 기반한 오행 식이 처방입니다.<br>
+용신 오행의 맛을 가까이하고, 기신 오행의 맛을 줄이면 몸과 운이 함께 좋아집니다.</div>
+</div>""", unsafe_allow_html=True)
+
+    try:
+        _FOOD_MAP = {
+            "木": {"맛":"신맛(酸)","음식":"레몬·식초·매실·사과·귤·라임·요구르트·녹색 채소","장기":"간장·담낭","피할것":"너무 많은 단맛(토를 키워 목을 누름)","개운식":"아침 공복에 레몬수 1잔 — 간장을 깨우고 목 기운을 활성화"},
+            "火": {"맛":"쓴맛(苦)","음식":"커피(무가당)·쑥·쑥갓·도라지·홍고추·토마토·딸기·석류","장기":"심장·소장","피할것":"차가운 음식 과다(수가 화를 끔)","개운식":"매일 아침 쑥차 또는 홍차 1잔 — 심장을 깨우고 화 기운 강화"},
+            "土": {"맛":"단맛(甘)","음식":"고구마·감자·꿀·대추·현미·단호박·옥수수·찹쌀","장기":"위장·비장·췌장","피할것":"밀가루·인스턴트 과다(습토 유발)","개운식":"아침 식사 대신 찹쌀죽 — 위장을 다스리고 토 기운 강화"},
+            "金": {"맛":"매운맛(辛)","음식":"무·도라지·배·생강·마늘·파·고추냉이·양파","장기":"폐·대장","피할것":"차고 날 것 과다(폐 기운 약화)","개운식":"매일 생강 달인 물 1잔 — 폐를 따뜻하게 하고 금 기운 강화"},
+            "水": {"맛":"짠맛(鹹)","음식":"검은콩·미역·김·다시마·굴·새우·소금·검은깨","장기":"신장·방광","피할것":"짠 것 과다(신장 과부하)·야식(수 기운 교란)","개운식":"아침 공복에 검은콩 삶은 물 1잔 — 신장을 보강하고 수 기운 강화"},
+        }
+        _yong_food = yongshin_ohs[0] if yongshin_ohs else ""
+        _gi_food   = gishin_ohs[0]   if gishin_ohs   else ""
+
+        col_f1, col_f2 = st.columns([3,2])
+        with col_f1:
+            if _yong_food and _yong_food in _FOOD_MAP:
+                _fd = _FOOD_MAP[_yong_food]
+                _fc = _OH_COLOR2.get(_yong_food,"#333") if '_OH_COLOR2' in dir() else "#333"
+                _fb = _OH_BG2.get(_yong_food,"#f9f9f9") if '_OH_BG2' in dir() else "#f9f9f9"
+                st.markdown(f"""<div style="background:{_fb};border:2px solid {_fc};border-radius:12px;padding:16px">
+<div style="font-size:14px;font-weight:900;color:{_fc};margin-bottom:10px">✅ 용신 {_yong_food} — 먹어야 할 것</div>
+<div style="font-size:12px;color:#555;margin-bottom:6px"><b>맛:</b> {_fd['맛']}</div>
+<div style="font-size:12px;color:#555;margin-bottom:6px"><b>음식:</b> {_fd['음식']}</div>
+<div style="font-size:12px;color:#555;margin-bottom:6px"><b>강화 장기:</b> {_fd['장기']}</div>
+<div style="background:#fff;border-radius:8px;padding:10px;margin-top:8px;border-left:4px solid {_fc}">
+<div style="font-size:12px;font-weight:800;color:{_fc}">🌟 오늘 개운식</div>
+<div style="font-size:13px;color:#222;line-height:1.8;margin-top:4px;word-break:break-all">{_fd['개운식']}</div>
+</div></div>""", unsafe_allow_html=True)
+
+        with col_f2:
+            if _gi_food and _gi_food in _FOOD_MAP:
+                _gfd = _FOOD_MAP[_gi_food]
+                st.markdown(f"""<div style="background:#fff5f5;border:2px solid #e53935;border-radius:12px;padding:16px">
+<div style="font-size:14px;font-weight:900;color:#c62828;margin-bottom:10px">⛔ 기신 {_gi_food} — 줄여야 할 것</div>
+<div style="font-size:12px;color:#555;margin-bottom:6px"><b>맛:</b> {_gfd['맛']}</div>
+<div style="font-size:12px;color:#555;margin-bottom:6px"><b>피할 음식:</b> {_gfd['음식']}</div>
+<div style="background:#ffebee;border-radius:8px;padding:10px;margin-top:8px;border-left:4px solid #e53935">
+<div style="font-size:12px;font-weight:800;color:#c62828">⚠️ 특히 주의</div>
+<div style="font-size:13px;color:#333;line-height:1.8;margin-top:4px;word-break:break-all">{_gfd['피할것']}</div>
+</div></div>""", unsafe_allow_html=True)
+    except Exception:
+        pass
+
 
     st.caption("⚠️ 본 비방록은 전통 민속 문화 정보를 제공하는 참고 자료입니다. 실제 굿/부적 처방은 전문 무당/만신에게 문의하십시오.")
 
