@@ -9408,7 +9408,7 @@ def render_retention_widget(pils, birth_year, gender):
 
     html += "</div>"
 
-    html += "<div style='background:#f0f0f0; height:12px; border-radius:6px; overflow:hidden;'>"
+    html += "<div style='background:#f0f0f0; height:12px; border-radius:6px; '>"
 
     html += f"<div style='background:linear-gradient(90deg, #000000, #e65100); width:{progress}%; height:100%;'></div>"
 
@@ -16912,7 +16912,7 @@ def menu13_career(pils, name, birth_year, gender):
 
 </div>
 
-<div style="background:rgba(255,255,255,0.1); height:8px; border-radius:4px; overflow:hidden;">
+<div style="background:rgba(255,255,255,0.1); height:8px; border-radius:4px; ">
 
 <div style="background:linear-gradient(90deg, #d4af37, #f4e4bc); width:{score}%; height:100%;"></div>
 
@@ -18423,6 +18423,17 @@ def main():
         .gold-section { font-size: 15px; margin: 18px 0 10px; }
 
         .stButton>button { font-size: 13px !important; min-height: 44px !important; white-space: nowrap !important; word-break: keep-all !important; padding: 6px 8px !important; }
+
+        /* 모바일: 2열 그리드 → 1열 강제 */
+        [data-testid="stMarkdownContainer"] div[style*="grid-template-columns:1fr 1fr"],
+        [data-testid="stMarkdownContainer"] div[style*="grid-template-columns: 1fr 1fr"] {
+            grid-template-columns: 1fr !important;
+        }
+        /* flex 컨테이너 내 카드 — 가득 채우기 */
+        [data-testid="stMarkdownContainer"] div[style*="display:flex"] > div {
+            width: 100% !important;
+            box-sizing: border-box !important;
+        }
 
         div[data-testid="stExpander"], .custom-card { border-radius: 12px !important; }
 
@@ -20091,24 +20102,24 @@ padding:22px 26px;margin-bottom:20px;text-align:center">
         }
         _s, _g, _w, _a = _YY_DEEP2[_yy_key2]
         st.markdown(f"""
-<div style="background:#fff8f5;border:1px solid #c9a84c;border-radius:14px;padding:18px 20px;margin:12px 0;overflow:hidden;max-width:100%;box-sizing:border-box">
+<div style="background:#fff8f5;border:1px solid #c9a84c;border-radius:14px;padding:16px;margin:12px 0;box-sizing:border-box;width:100%">
 <div style="font-size:15px;font-weight:900;color:#8b4513;margin-bottom:12px">🔬 음양 심층 해석 — {name}님의 기운 프로파일</div>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-  <div style="background:#fff3e0;border-radius:10px;padding:12px">
-    <div style="font-size:11px;color:#e65100;font-weight:700">기질 성향</div>
-    <div style="font-size:13px;color:#4a2800;line-height:1.7;margin-top:4px">{_s}</div>
+<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px">
+  <div style="background:#fff3e0;border-radius:10px;padding:12px;box-sizing:border-box;width:100%">
+    <div style="font-size:11px;color:#e65100;font-weight:700;margin-bottom:4px">🧬 기질 성향</div>
+    <div style="font-size:13px;color:#4a2800;line-height:1.8;word-break:keep-all;overflow-wrap:break-word">{_s}</div>
   </div>
-  <div style="background:#e8f5e9;border-radius:10px;padding:12px">
-    <div style="font-size:11px;color:#2e7d32;font-weight:700">핵심 강점</div>
-    <div style="font-size:13px;color:#1b3a1e;line-height:1.7;margin-top:4px">{_g}</div>
+  <div style="background:#e8f5e9;border-radius:10px;padding:12px;box-sizing:border-box;width:100%">
+    <div style="font-size:11px;color:#2e7d32;font-weight:700;margin-bottom:4px">💪 핵심 강점</div>
+    <div style="font-size:13px;color:#1b3a1e;line-height:1.8;word-break:keep-all;overflow-wrap:break-word">{_g}</div>
   </div>
-  <div style="background:#fce4ec;border-radius:10px;padding:12px">
-    <div style="font-size:11px;color:#c62828;font-weight:700">보완 약점</div>
-    <div style="font-size:13px;color:#4a0000;line-height:1.7;margin-top:4px">{_w}</div>
+  <div style="background:#fce4ec;border-radius:10px;padding:12px;box-sizing:border-box;width:100%">
+    <div style="font-size:11px;color:#c62828;font-weight:700;margin-bottom:4px">⚠️ 보완 약점</div>
+    <div style="font-size:13px;color:#4a0000;line-height:1.8;word-break:keep-all;overflow-wrap:break-word">{_w}</div>
   </div>
-  <div style="background:#e3f2fd;border-radius:10px;padding:12px">
-    <div style="font-size:11px;color:#1565c0;font-weight:700">실천 조언</div>
-    <div style="font-size:13px;color:#0d2744;line-height:1.7;margin-top:4px">{_a}</div>
+  <div style="background:#e3f2fd;border-radius:10px;padding:12px;box-sizing:border-box;width:100%">
+    <div style="font-size:11px;color:#1565c0;font-weight:700;margin-bottom:4px">✅ 실천 조언</div>
+    <div style="font-size:13px;color:#0d2744;line-height:1.8;word-break:keep-all;overflow-wrap:break-word">{_a}</div>
   </div>
 </div>
 <div style="font-size:12px;color:#888;border-top:1px solid #e0d8c0;padding-top:8px">
@@ -20149,8 +20160,8 @@ padding:22px 26px;margin-bottom:20px;text-align:center">
             _s1_prose = str(_s1_prose) if _s1_prose else ''
         _s1_prose = _re_b1.sub(r'\*\*([^*]+)\*\*', r'<b>\1</b>', _s1_prose)
         st.markdown(f"""
-<div style="background:#fffdf5;border:1px solid #c9a84c;border-radius:12px;padding:16px 18px;word-break:keep-all;overflow-wrap:break-word;overflow:hidden;max-width:100%;box-sizing:border-box;margin:12px 0">
-<div style="font-size:13px;color:#4a2800;line-height:1.9;word-break:keep-all;overflow-wrap:break-word;overflow:hidden">{_s1_prose}</div>
+<div style="background:#fffdf5;border:1px solid #c9a84c;border-radius:12px;padding:16px 18px;word-break:keep-all;overflow-wrap:break-word;box-sizing:border-box;width:100%;margin:12px 0">
+<div style="font-size:13px;color:#4a2800;line-height:1.9;word-break:keep-all;overflow-wrap:break-word">{_s1_prose}</div>
 </div>""", unsafe_allow_html=True)
     except Exception:
         pass
@@ -20598,8 +20609,8 @@ padding:22px 26px;margin-bottom:20px;text-align:center">
             )
         if _hph_sentences:
             st.markdown(f"""
-<div style="background:#fffdf5;border:1px solid #c9a84c;border-radius:12px;padding:16px 18px;word-break:keep-all;overflow-wrap:break-word;overflow:hidden;max-width:100%;box-sizing:border-box;margin:10px 0">
-<div style="font-size:13px;color:#4a2800;line-height:1.9;word-break:keep-all;overflow-wrap:break-word;overflow:hidden">{'<br>'.join(_hph_sentences)}</div>
+<div style="background:#fffdf5;border:1px solid #c9a84c;border-radius:12px;padding:16px 18px;word-break:keep-all;overflow-wrap:break-word;box-sizing:border-box;width:100%;margin:10px 0">
+<div style="font-size:13px;color:#4a2800;line-height:1.9;word-break:keep-all;overflow-wrap:break-word">{'<br>'.join(_hph_sentences)}</div>
 </div>""", unsafe_allow_html=True)
     except Exception:
         pass
