@@ -12055,7 +12055,7 @@ def menu2_lifeline(pils, birth_year, gender, name="내담자"):
     try:
         _local_out = LocalSajuNarrator.lifeline(pils, name, birth_year, gender)
         if _local_out:
-            st.markdown(_local_out)
+            st.markdown(_local_out, unsafe_allow_html=True)
     except Exception as _le:
         st.warning(f"⚠️ 대운 분석 오류: {_le}")
 
@@ -12098,7 +12098,7 @@ def menu3_past(pils, birth_year, gender, name=""):
     try:
         _local_out = LocalSajuNarrator.past_analysis(pils, name, birth_year, gender)
         if _local_out:
-            st.markdown(_local_out)
+            st.markdown(_local_out, unsafe_allow_html=True)
     except Exception as _e:
         st.warning(f"⚠️ 과거 분석 오류: {_e}")
 
@@ -12185,7 +12185,7 @@ def menu4_future3(
 
         _local_out = LocalSajuNarrator.future3(pils, name, birth_year, gender, _marriage_v)
         if _local_out:
-            st.markdown(_local_out)
+            st.markdown(_local_out, unsafe_allow_html=True)
     except Exception as _e:
         st.warning(f"⚠️ 미래3년 분석 오류: {_e}")
 
@@ -12819,7 +12819,7 @@ def menu5_money(pils, birth_year, gender, name="내담자"):
     try:
         _local_out = LocalSajuNarrator.money(pils, name, birth_year, gender)
         if _local_out:
-            st.markdown(_local_out)
+            st.markdown(_local_out, unsafe_allow_html=True)
     except Exception as _e:
         st.warning(f"⚠️ 재물 분석 오류: {_e}")
 
@@ -13118,7 +13118,7 @@ def menu6_relations(pils, name, birth_year, gender, marriage_status="미혼"):
 
         _local_out = LocalSajuNarrator.relations(pils, name, birth_year, gender, _marriage_v2)
         if _local_out:
-            st.markdown(_local_out)
+            st.markdown(_local_out, unsafe_allow_html=True)
     except Exception as _e:
         st.warning(f"⚠️ 관계 분석 오류: {_e}")
 
@@ -13349,7 +13349,7 @@ def menu9_daily(pils, name, birth_year, gender):
     try:
         _local_out = LocalSajuNarrator.daily(pils, name, birth_year, gender)
         if _local_out:
-            st.markdown(_local_out)
+            st.markdown(_local_out, unsafe_allow_html=True)
     except Exception as _e:
         st.warning(f"⚠️ 일진 분석 오류: {_e}")
 
@@ -13879,7 +13879,7 @@ def menu10_monthly(pils, name, birth_year, gender):
     try:
         _local_out = LocalSajuNarrator.monthly(pils, name, birth_year, gender)
         if _local_out:
-            st.markdown(_local_out)
+            st.markdown(_local_out, unsafe_allow_html=True)
     except Exception as _e:
         st.warning(f"⚠️ 월별 분석 오류: {_e}")
 
@@ -14382,7 +14382,7 @@ def menu11_yearly(pils, name, birth_year, gender):
     try:
         _local_out = LocalSajuNarrator.yearly(pils, name, birth_year, gender)
 
-        st.markdown(_local_out)
+        st.markdown(_local_out, unsafe_allow_html=True)
 
     except Exception as _e:
         st.warning(f"⚠️ 오류: {str(_e)[:80]}")
