@@ -146,24 +146,30 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str=""):
 
             BASE_FONT = "Helvetica"
 
-            for _fn, _fp, _fi in _FONT_CANDIDATES:
-                if os.path.exists(_fp):
-                    try:
-                        if _fi is not None:
-                            pdfmetrics.registerFont(TTFont(_fn, _fp, subfontIndex=_fi))
+            # 1순위: CID 내장 폰트 (Streamlit Cloud 호환) — 한글/한자 지원
+            try:
+                from reportlab.pdfbase.cidfonts import UnicodeCIDFont
+                pdfmetrics.registerFont(UnicodeCIDFont("STSong-Light"))
+                BASE_FONT = "STSong-Light"
+            except Exception:
+                pass
 
-                        else:
-                            pdfmetrics.registerFont(TTFont(_fn, _fp))
-
-                        BASE_FONT = _fn
-
-                        break
-
-                    except Exception as e:
-                        pass  # 다음 폰트 시도
+            # 2순위: 로컬 TTF 폰트
+            if BASE_FONT == "Helvetica":
+                for _fn, _fp, _fi in _FONT_CANDIDATES:
+                    if os.path.exists(_fp):
+                        try:
+                            if _fi is not None:
+                                pdfmetrics.registerFont(TTFont(_fn, _fp, subfontIndex=_fi))
+                            else:
+                                pdfmetrics.registerFont(TTFont(_fn, _fp))
+                            BASE_FONT = _fn
+                            break
+                        except Exception:
+                            pass
 
             if BASE_FONT == "Helvetica":
-                st.warning("⚠️ 한글 폰트를 찾지 못했습니다. PDF에 한글이 정상 출력되지 않을 수 있습니다. malgun.ttf 또는 Batang 폰트를 설치해주세요.")
+                st.warning("⚠️ 한글 폰트를 찾지 못했습니다. PDF에 한글이 정상 출력되지 않을 수 있습니다.")
 
             buf = io.BytesIO()
 
