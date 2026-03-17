@@ -15375,11 +15375,6 @@ def menu8_bihang(pils, name, birth_year, gender):
         _yong_oh_ms = yongshin_ohs[0] if yongshin_ohs else ""
         _gi_oh_ms   = gishin_ohs[0]   if gishin_ohs   else ""
 
-        if _yong_oh_ms and _yong_oh_ms in _MULSUNG2:
-            pass
-        if _yong_oh_ms and _yong_oh_ms in _MULSUNG2:
-            pass
-
         _OH_COLOR2 = {"木":"#2e7d32","火":"#c62828","土":"#e65100","金":"#546e7a","水":"#1565c0"}
         _OH_BG2    = {"木":"#e8f5e9","火":"#ffebee","土":"#fff3e0","金":"#eceff1","水":"#e3f2fd"}
         _OH_EMOJI2 = {"木":"🌿","火":"🔥","土":"⛰️","金":"⚔️","水":"💧"}
@@ -15432,8 +15427,8 @@ padding:12px 14px;margin-bottom:8px">
             _vy = yongshin_ohs[0]
             _tm = _TIME_MAP.get(_vy,{})
             if _tm:
-                _tc = _OH_COLOR2.get(_vy,"#333") if '_OH_COLOR2' in dir() else "#1565c0"
-                _tbg = _OH_BG2.get(_vy,"#f0f8ff") if '_OH_BG2' in dir() else "#e3f2fd"
+                _tc = {"木":"#2e7d32","火":"#c62828","土":"#e65100","金":"#546e7a","水":"#1565c0"}.get(_vy,"#1565c0")
+                _tbg = {"木":"#e8f5e9","火":"#ffebee","土":"#fff3e0","金":"#eceff1","水":"#e3f2fd"}.get(_vy,"#e3f2fd")
                 st.markdown(f"""<div style="background:{_tbg};border:2px solid {_tc};border-radius:12px;padding:16px;margin-bottom:12px">
 <div style="font-size:15px;font-weight:900;color:{_tc};margin-bottom:12px">⏰ 용신 {_vy} — 황금 시간·방위</div>
 <div style="display:grid;grid-template-columns:1fr;gap:8px">
@@ -15455,7 +15450,7 @@ padding:12px 14px;margin-bottom:8px">
   </div>
   <div style="background:{_tc}11;padding:10px 14px;border-radius:8px;border:1px solid {_tc}44">
     <div style="font-size:11px;color:{_tc};font-weight:700">💡 활용법</div>
-    <div style="font-size:13px;color:#222;line-height:1.8;margin-top:2px;word-break:break-all">{_tm.get('활용','')}</div>
+    <div style="font-size:13px;color:#111;line-height:1.9;margin-top:2px;word-break:break-all">{_tm.get('활용','')}</div>
   </div>
 </div></div>""", unsafe_allow_html=True)
 
@@ -15571,16 +15566,16 @@ padding:12px 14px;margin-bottom:8px">
         with col_f1:
             if _yong_food and _yong_food in _FOOD_MAP:
                 _fd = _FOOD_MAP[_yong_food]
-                _fc = _OH_COLOR2.get(_yong_food,"#333") if '_OH_COLOR2' in dir() else "#333"
-                _fb = _OH_BG2.get(_yong_food,"#f9f9f9") if '_OH_BG2' in dir() else "#f9f9f9"
+                _fc = {"木":"#2e7d32","火":"#c62828","土":"#e65100","金":"#546e7a","水":"#1565c0"}.get(_yong_food,"#333")
+                _fb = {"木":"#e8f5e9","火":"#ffebee","土":"#fff3e0","金":"#eceff1","水":"#e3f2fd"}.get(_yong_food,"#f9f9f9")
                 st.markdown(f"""<div style="background:{_fb};border:2px solid {_fc};border-radius:12px;padding:16px">
 <div style="font-size:14px;font-weight:900;color:{_fc};margin-bottom:10px">✅ 용신 {_yong_food} — 먹어야 할 것</div>
-<div style="font-size:12px;color:#555;margin-bottom:6px"><b>맛:</b> {_fd['맛']}</div>
-<div style="font-size:12px;color:#555;margin-bottom:6px"><b>음식:</b> {_fd['음식']}</div>
-<div style="font-size:12px;color:#555;margin-bottom:6px"><b>강화 장기:</b> {_fd['장기']}</div>
+<div style="font-size:12px;color:#333;margin-bottom:6px"><b>맛:</b> {_fd['맛']}</div>
+<div style="font-size:12px;color:#333;margin-bottom:6px"><b>음식:</b> {_fd['음식']}</div>
+<div style="font-size:12px;color:#333;margin-bottom:6px"><b>강화 장기:</b> {_fd['장기']}</div>
 <div style="background:#fff;border-radius:8px;padding:10px;margin-top:8px;border-left:4px solid {_fc}">
 <div style="font-size:12px;font-weight:800;color:{_fc}">🌟 오늘 개운식</div>
-<div style="font-size:13px;color:#222;line-height:1.8;margin-top:4px;word-break:break-all">{_fd['개운식']}</div>
+<div style="font-size:13px;color:#111;line-height:1.9;margin-top:4px;word-break:break-all">{_fd['개운식']}</div>
 </div></div>""", unsafe_allow_html=True)
 
         with col_f2:
@@ -15588,8 +15583,8 @@ padding:12px 14px;margin-bottom:8px">
                 _gfd = _FOOD_MAP[_gi_food]
                 st.markdown(f"""<div style="background:#fff5f5;border:2px solid #e53935;border-radius:12px;padding:16px">
 <div style="font-size:14px;font-weight:900;color:#c62828;margin-bottom:10px">⛔ 기신 {_gi_food} — 줄여야 할 것</div>
-<div style="font-size:12px;color:#555;margin-bottom:6px"><b>맛:</b> {_gfd['맛']}</div>
-<div style="font-size:12px;color:#555;margin-bottom:6px"><b>피할 음식:</b> {_gfd['음식']}</div>
+<div style="font-size:12px;color:#333;margin-bottom:6px"><b>맛:</b> {_gfd['맛']}</div>
+<div style="font-size:12px;color:#333;margin-bottom:6px"><b>피할 음식:</b> {_gfd['음식']}</div>
 <div style="background:#ffebee;border-radius:8px;padding:10px;margin-top:8px;border-left:4px solid #e53935">
 <div style="font-size:12px;font-weight:800;color:#c62828">⚠️ 특히 주의</div>
 <div style="font-size:13px;color:#333;line-height:1.8;margin-top:4px;word-break:break-all">{_gfd['피할것']}</div>
@@ -18918,6 +18913,8 @@ def main():
     if "saju_pils" not in _ss:
         _ss["saju_pils"] = None
 
+    if "active_tab" not in _ss:
+        _ss["active_tab"] = 0
     if "in_name" not in _ss:
         _ss["in_name"] = ""
 
@@ -20095,35 +20092,105 @@ def main():
             # 🌌 MASTER QUICK CONSULT BAR (메뉴 바로 위 배치)
             quick_consult_bar(pils, name, birth_year, gender)
 
-            _tabs = st.tabs([
-                "📋종합", "🌊대운", "🎯과거", "🔮미래", "💰재물", "💑궁합",
-                "📅월별", "☀️일일", "🤖AI", "🔴비방", "☯️오행", "📜토정", "📄PDF",
-            ])
-            with _tabs[0]:
+            # ── 커스텀 탭 네비게이션 (버튼 방식) ─────────────────────
+            _TAB_DEFS = [
+                ("📋", "종합사주"),
+                ("🌊", "대운흐름"),
+                ("🎯", "과거분석"),
+                ("🔮", "미래3년"),
+                ("💰", "재물사업"),
+                ("💑", "궁합관계"),
+                ("📅", "월별운세"),
+                ("☀️", "일일운세"),
+                ("🤖", "AI상담"),
+                ("🔴", "비방처방"),
+                ("☯️", "음양오행"),
+                ("📜", "토정비결"),
+                ("📄", "PDF리포트"),
+            ]
+            _cur_tab = _ss.get("active_tab", 0)
+
+            # 버튼 CSS
+            st.markdown("""<style>
+.stButton > button {
+    background: #1a1a2e !important;
+    color: #e8e8e8 !important;
+    border: 1px solid #3a3a5e !important;
+    border-radius: 10px !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    padding: 6px 4px !important;
+    width: 100% !important;
+    min-height: 50px !important;
+    word-break: keep-all !important;
+    white-space: normal !important;
+    line-height: 1.4 !important;
+}
+.stButton > button[kind="primary"] {
+    background: #1a3a6e !important;
+    color: #f7e695 !important;
+    border: 2px solid #d4af37 !important;
+}
+.stButton > button:hover {
+    background: #2a2a5e !important;
+    border-color: #d4af37 !important;
+    color: #f7e695 !important;
+}
+</style>""", unsafe_allow_html=True)
+
+            # 버튼 행 1 (7개)
+            _btn_cols1 = st.columns(7)
+            for _bi, (_em, _nm) in enumerate(_TAB_DEFS[:7]):
+                _is_active = (_cur_tab == _bi)
+                _btn_style = "primary" if _is_active else "secondary"
+                with _btn_cols1[_bi]:
+                    if st.button(f"{_em} {_nm}", key=f"nav_{_bi}",
+                                 type=_btn_style, use_container_width=True):
+                        _ss["active_tab"] = _bi
+                        st.rerun()
+
+            st.markdown('<div style="height:4px"></div>', unsafe_allow_html=True)
+            # 버튼 행 2 (6개)
+            _btn_cols2 = st.columns(6)
+            for _bi, (_em, _nm) in enumerate(_TAB_DEFS[7:]):
+                _real_idx = _bi + 7
+                _is_active = (_cur_tab == _real_idx)
+                _btn_style = "primary" if _is_active else "secondary"
+                with _btn_cols2[_bi]:
+                    if st.button(f"{_em} {_nm}", key=f"nav_{_real_idx}",
+                                 type=_btn_style, use_container_width=True):
+                        _ss["active_tab"] = _real_idx
+                        st.rerun()
+
+            st.markdown('<div style="height:12px"></div>', unsafe_allow_html=True)
+
+            # ── 콘텐츠 렌더링 ──────────────────────────────────────────
+            _cur_tab = _ss.get("active_tab", 0)
+            if   _cur_tab == 0:
                 menu1_report(pils, name, birth_year, gender, _ss.get("in_occupation", ""))
-            with _tabs[1]:
+            elif _cur_tab == 1:
                 menu2_lifeline(pils, birth_year, gender, name)
-            with _tabs[2]:
+            elif _cur_tab == 2:
                 menu3_past(pils, birth_year, gender, name)
-            with _tabs[3]:
+            elif _cur_tab == 3:
                 menu4_future3(pils, birth_year, gender, _ss.get("in_marriage", "미혼"), name)
-            with _tabs[4]:
+            elif _cur_tab == 4:
                 menu5_money(pils, birth_year, gender, name)
-            with _tabs[5]:
+            elif _cur_tab == 5:
                 menu6_relations(pils, name, birth_year, gender, _ss.get("in_marriage", "미혼"))
-            with _tabs[6]:
+            elif _cur_tab == 6:
                 menu10_monthly(pils, name, birth_year, gender)
-            with _tabs[7]:
+            elif _cur_tab == 7:
                 menu9_daily(pils, name, birth_year, gender)
-            with _tabs[8]:
+            elif _cur_tab == 8:
                 menu7_ai(pils, name, birth_year, gender)
-            with _tabs[9]:
+            elif _cur_tab == 9:
                 menu8_bihang(pils, name, birth_year, gender)
-            with _tabs[10]:
+            elif _cur_tab == 10:
                 menu16_ohaeng_deep(pils, name, birth_year, gender)
-            with _tabs[11]:
+            elif _cur_tab == 11:
                 menu_tojeong(pils, name, birth_year, gender)
-            with _tabs[12]:
+            elif _cur_tab == 12:
                 menu_pdf(pils, birth_year, gender, name, str(_ss.get("in_birth_hour", "")))
 
     # ---- 맨 위로 플로팅 버튼 (window.parent 로 Streamlit iframe 대응) ----
