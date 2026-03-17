@@ -899,9 +899,13 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str=""):
                 try:
                     # 1순위: AI 캐시에서 과거 분석 텍스트 가져오기
 
-                    _sk = pils_to_cache_key(pils)
+                    _sk = "_".join(f"{p.get('cg','')}{p.get('jj','')}" for p in pils)
 
-                    _past_ai = get_ai_cache(_sk, "past") or ""
+                    _past_ai = ""
+                    try:
+                        _past_ai = get_ai_cache(_sk, "past") or ""
+                    except Exception:
+                        pass
 
                     if _past_ai:
                         _past_clean = _re2.sub(r"<[^>]+>", "", _past_ai)
@@ -1264,7 +1268,10 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str=""):
 
                     _sw_n2 = get_yearly_luck(pils, _cy + 2)
 
-                    _tp = calc_turning_point(pils, birth_year, gender, _cy)
+                    try:
+                        _tp = calc_turning_point(pils, birth_year, gender, _cy)
+                    except Exception:
+                        _tp = {}
 
                     _ys_c = get_yongshin(pils)
 
@@ -1671,11 +1678,14 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str=""):
                 y = section_title(c, "만신 종합 천명풀이 — 전문 사주 분석", y)
 
                 try:
-                    _saju_key = pils_to_cache_key(pils)
+                    _saju_key = "_".join(f"{p.get('cg','')}{p.get('jj','')}" for p in pils)
 
                     # 캐시 우선 (prophet > general > lifeline)
-
-                    _ai_raw = get_ai_cache(_saju_key, "prophet") or get_ai_cache(_saju_key, "general") or get_ai_cache(_saju_key, "lifeline") or ""
+                    _ai_raw = ""
+                    try:
+                        _ai_raw = get_ai_cache(_saju_key, "prophet") or get_ai_cache(_saju_key, "general") or get_ai_cache(_saju_key, "lifeline") or ""
+                    except Exception:
+                        pass
 
                     if _ai_raw:
                         y = _clean_narrative_for_pdf(c, _ai_raw, y)
@@ -1898,7 +1908,7 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str=""):
                     y -= 4*mm
 
                     # ── 오행 분포 ──
-                    y = write(c, "▶ 오행 분포", y, size=10)
+                    y = write(c, "2. 오행(五行) 분포 분석", y, size=11, color=(0.05,0.05,0.05))
                     _OH_KR = {"木":"목(木)","火":"화(火)","土":"토(土)","金":"금(金)","水":"수(水)"}
                     _OH_CG = {"甲":"木","乙":"木","丙":"火","丁":"Fire","戊":"土",
                                "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
@@ -1922,7 +1932,13 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str=""):
                     if y < 80*mm: y = new_page(c)
                     y = write(c, "3. 납음오행(納音五行) — 60갑자의 숨겨진 기운", y, size=11, color=(0.05,0.05,0.05))
                     try:
-                        from saju_data import NABJIN_MAP as _NM
+                        try:
+                            from saju_data import NABJIN_MAP as _NM
+                        except ImportError:
+                            try:
+                                from manse import NABJIN_MAP as _NM
+                            except ImportError:
+                                _NM = {}
                         _pil_keys = [
                             ("시주", pils[0].get("cg",""), pils[0].get("jj","")),
                             ("일주", pils[1].get("cg",""), pils[1].get("jj","")),
@@ -1967,14 +1983,30 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str=""):
                         _hae   = _chung_info.get("해", [])
                         if _chung:
                             for _ch in _chung[:3]:
-                                _ch_str = str(_ch)
+                                if isinstance(_ch, dict):
+                                    _ch_str = _ch.get('name', str(_ch))
+                                else:
+                                    _ch_str = str(_ch)
                                 _desc = next((v for k,v in _CHUNG_DESC.items() if k[:2] in _ch_str or k[2:] in _ch_str), "충돌 기운이 있습니다.")
                                 y = write(c, f"  충(沖): {_ch_str}", y, size=9)
                                 y = write(c, f"    → {_desc}", y, size=9)
                         if _hyung:
-                            y = write(c, f"  형(刑): {', '.join(str(x) for x in _hyung[:3])} — 규율·법적 문제에 주의", y, size=9)
+                            _hy_names = []
+                            for _hy in _hyung[:3]:
+                                if isinstance(_hy, dict):
+                                    _hy_names.append(_hy.get('name', str(_hy)))
+                                else:
+                                    _hy_names.append(str(_hy))
+                            y = write(c, f"  형(刑): {', '.join(_hy_names)} — 규율·법적 문제에 주의", y, size=9)
                         if _pa:
-                            y = write(c, f"  파(破): {', '.join(str(x) for x in _pa[:3])} — 계획 차질에 주의", y, size=9)
+                            for _pa_item in _pa[:3]:
+                                if isinstance(_pa_item, dict):
+                                    _pa_name = _pa_item.get('name', str(_pa_item))
+                                    _pa_desc = _pa_item.get('desc', '계획 차질에 주의')
+                                else:
+                                    _pa_name = str(_pa_item)
+                                    _pa_desc = '계획 차질에 주의'
+                                y = write(c, f"  파(破): {_pa_name} — {_pa_desc}", y, size=9)
                         if not _chung and not _hyung and not _pa:
                             y = write(c, "  충·형·파 없음 — 원국이 안정적인 구조입니다.", y, size=9)
                             y = write(c, "  각 기둥의 기운이 조화롭게 배치되어 안정된 삶의 흐름이 예상됩니다.", y, size=9)
@@ -2001,7 +2033,8 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str=""):
                                 _sname = _st.get("name","")
                                 _spos  = _st.get("pos","")
                                 _sdesc = next((v for k,v in _SINSAL_PDF_DESC.items() if k in _sname), "원국에 활성화된 신살입니다.")
-                                y = write(c, f"  ★ {_sname} [{_spos}]", y, size=9)
+                                _sp_str = f" [{_spos}]" if _spos else ""
+                                y = write(c, f"  ★ {_sname}{_sp_str}", y, size=9)
                                 y = write(c, f"    {_sdesc}", y, size=9)
                         else:
                             y = write(c, "  원국에 특별히 강한 신살이 없는 안정적인 구조입니다.", y, size=9)
