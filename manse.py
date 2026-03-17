@@ -15126,8 +15126,8 @@ def menu8_bihang(pils, name, birth_year, gender):
 
     # ⑥ 신살별 비방 ─────────────────────────────────────
     st.markdown(
-        """<div style="background:linear-gradient(135deg,#1a0030,#2a0050);border:1px solid #9b59b6;border-radius:14px;padding:20px;margin:16px 0">
-<div style="font-size:16px;font-weight:900;color:#4a2080;margin-bottom:14px">🌟 신살(神殺)별 전통 비방</div>""",
+        """<div style="background:#f5f0ff;border:2px solid #7c4dcc;border-radius:14px;padding:20px;margin:16px 0">
+<div style="font-size:16px;font-weight:900;color:#4a148c;margin-bottom:14px">🌟 신살(神殺)별 전통 비방</div>""",
         unsafe_allow_html=True,
     )
     try:
@@ -15146,11 +15146,11 @@ def menu8_bihang(pils, name, birth_year, gender):
                     if key in sname:
                         found_sinsal = True
                         st.markdown(
-                            f"""<div style="background:rgba(155,92,183,0.1);border:1px solid #9b59b6;border-radius:10px;padding:14px;margin-bottom:10px">
-<div style="font-size:14px;font-weight:900;color:#c39bd3;margin-bottom:6px">{rx['emoji']} {sname} — {rx['desc']}</div>
-<div style="font-size:13px;color:#e8d5f5;line-height:1.9;margin-bottom:6px">📜 {rx['비방']}</div>
-<div style="font-size:13px;color:#e8d5f5;line-height:1.9;margin-bottom:6px">✅ {rx['처방']}</div>
-<div style="font-size:12px;color:#ff8888">⛔ {rx['금기']}</div>
+                            f"""<div style="background:#fff;border:2px solid #7c4dcc;border-radius:10px;padding:14px;margin-bottom:10px">
+<div style="font-size:14px;font-weight:900;color:#4a148c;margin-bottom:8px">{rx['emoji']} {sname} — {rx['desc']}</div>
+<div style="background:#f3e5ff;border-left:4px solid #7c4dcc;border-radius:0 8px 8px 0;padding:10px 12px;margin-bottom:6px;font-size:13px;color:#1a1a1a;line-height:1.9;word-break:break-all">📜 {rx['비방']}</div>
+<div style="background:#e8f5e9;border-left:4px solid #2e7d32;border-radius:0 8px 8px 0;padding:10px 12px;margin-bottom:6px;font-size:13px;color:#1a1a1a;line-height:1.9;word-break:break-all">✅ {rx['처방']}</div>
+<div style="background:#ffebee;border-left:4px solid #c62828;border-radius:0 8px 8px 0;padding:8px 12px;font-size:13px;color:#b71c1c;font-weight:700;word-break:break-all">⛔ {rx['금기']}</div>
 </div>""", unsafe_allow_html=True)
                         break
         if not found_sinsal:
@@ -15179,7 +15179,7 @@ def menu8_bihang(pils, name, birth_year, gender):
         hrx = _HEALTH_RX.get(yoh, {})
         if hrx:
             st.markdown(
-                f"""<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                f"""<div style="display:grid;grid-template-columns:1fr;gap:8px">
 <div style="background:#e8f5e9;border-radius:8px;padding:12px"><div style="font-size:12px;font-weight:800;color:#2e7d32;margin-bottom:5px">⚠️ 취약 부위</div><div style="font-size:13px;color:#333">{hrx['취약']}</div></div>
 <div style="background:#e3f2fd;border-radius:8px;padding:12px"><div style="font-size:12px;font-weight:800;color:#1565c0;margin-bottom:5px">🏃 권장 운동</div><div style="font-size:13px;color:#333">{hrx['운동']}</div></div>
 <div style="background:#fff9c4;border-radius:8px;padding:12px"><div style="font-size:12px;font-weight:800;color:#f57f17;margin-bottom:5px">🥗 권장 음식</div><div style="font-size:13px;color:#333">{hrx['음식']}</div></div>
@@ -15208,9 +15208,9 @@ def menu8_bihang(pils, name, birth_year, gender):
     ]
     for item in _bihang_items:
         st.markdown(
-            f"<div style='display:flex;align-items:flex-start;gap:10px;background:rgba(255,255,255,0.05);border-radius:8px;padding:10px 14px;margin-bottom:6px'>"
-            f"<span style='color:#d4af37;font-size:16px;flex-shrink:0'>☐</span>"
-            f"<span style='font-size:13px;color:#e8e8e8;line-height:1.7;white-space:normal;word-break:break-all'>{item}</span></div>",
+            f"<div style='display:flex;align-items:flex-start;gap:10px;background:#1e1e2e;border:1px solid #3a3a5e;border-radius:8px;padding:10px 14px;margin-bottom:6px'>"
+            f"<span style='color:#d4af37;font-size:18px;flex-shrink:0;margin-top:1px'>☐</span>"
+            f"<span style='font-size:13px;color:#e8e8e8;line-height:1.9;white-space:normal;word-break:break-all;flex:1'>{item}</span></div>",
             unsafe_allow_html=True,
         )
     st.markdown("</div>", unsafe_allow_html=True)
@@ -15232,7 +15232,7 @@ def menu8_bihang(pils, name, birth_year, gender):
     for _yoh in _yong_ohs_bh[:1]:
         _fd = _FENG_SHUI.get(_yoh, {})
         if _fd:
-            st.markdown(f"""<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+            st.markdown(f"""<div style="display:grid;grid-template-columns:1fr;gap:8px;margin-top:10px">
 <div style="background:#fffbf0;border:1px solid #d4af37;border-radius:8px;padding:12px"><div style="font-size:12px;font-weight:800;color:#8b6200;margin-bottom:5px">🛏️ 침대 머리 방향</div><div style="font-size:13px;color:#333">{_fd['침대']}</div></div>
 <div style="background:#fffbf0;border:1px solid #d4af37;border-radius:8px;padding:12px"><div style="font-size:12px;font-weight:800;color:#8b6200;margin-bottom:5px">💼 책상 방향</div><div style="font-size:13px;color:#333">{_fd['책상']}</div></div>
 <div style="background:#fffbf0;border:1px solid #d4af37;border-radius:8px;padding:12px"><div style="font-size:12px;font-weight:800;color:#8b6200;margin-bottom:5px">🚪 현관 배치</div><div style="font-size:13px;color:#333">{_fd['현관']}</div></div>
