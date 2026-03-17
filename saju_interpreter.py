@@ -1641,18 +1641,6 @@ class LocalSajuNarrator:
 
         # ── 1. 사주 구조 소개 ─
 
-        lines.append(f"## 🌟 {name}님의 사주 종합 리포트")
-
-        lines.append(
-            (
-            f"**{birth_year}년생 {age}세 {g_str}** — "
-            f"{b.get('pillars',{}).get('년주','?')}년 "
-            f"{b.get('pillars',{}).get('월주','?')}월 "
-            f"{b.get('pillars',{}).get('일주','?')}일 "
-            f"{b.get('pillars',{}).get('시주','?')}시 생\n"
-        )
-        )
-
         ilgan = b.get("ilgan", "甲")
 
         # ── 사주 구조 소개 — 서술형 ──────────────────────────
