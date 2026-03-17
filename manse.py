@@ -8866,7 +8866,7 @@ def render_ai_opening_ment(saju_key: str, name: str):
 
     html = "<div style='background:linear-gradient(135deg,#f8f5ff,#ffffff);border-left:5px solid #7b5ea7;border-radius:0 12px 12px 0;padding:20px 18px;margin:15px 0;box-shadow:0 3px 10px rgba(0,0,0,0.05)'>"
 
-    html += f"<div style='font-size:15px;color:#2c1a4d;line-height:1.7;font-weight:600'>{ment}</div>"
+    html += f"<div style='font-size:15px;color:#2c1a4d;line-height:1.7;white-space:normal;word-break:break-all;font-weight:600'>{ment}</div>"
 
     html += "</div>"
 
@@ -10400,16 +10400,16 @@ def render_future_10years(pils, birth_year, gender, yongshin_ohs, year_sel, ilga
                 f"<div style='display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px'>"
                 f"<div style='background:#f0f4ff;border-radius:10px;padding:10px 12px'>"
                 f"<div style='font-size:12px;font-weight:700;color:#1565c0;margin-bottom:4px'>💼 직업·사업</div>"
-                f"<div style='font-size:12px;color:#333;line-height:1.7'>{det['career']}</div></div>"
+                f"<div style='font-size:12px;color:#333;line-height:1.7;white-space:normal;word-break:break-all'>{det['career']}</div></div>"
                 f"<div style='background:#f0fff4;border-radius:10px;padding:10px 12px'>"
                 f"<div style='font-size:12px;font-weight:700;color:#1a6b2e;margin-bottom:4px'>💰 재물·돈</div>"
-                f"<div style='font-size:12px;color:#333;line-height:1.7'>{det['finance']}</div></div>"
+                f"<div style='font-size:12px;color:#333;line-height:1.7;white-space:normal;word-break:break-all'>{det['finance']}</div></div>"
                 f"<div style='background:#fff0f6;border-radius:10px;padding:10px 12px'>"
                 f"<div style='font-size:12px;font-weight:700;color:#880e4f;margin-bottom:4px'>❤️ 관계·인연</div>"
-                f"<div style='font-size:12px;color:#333;line-height:1.7'>{det['relation']}</div></div>"
+                f"<div style='font-size:12px;color:#333;line-height:1.7;white-space:normal;word-break:break-all'>{det['relation']}</div></div>"
                 f"<div style='background:#fff8e1;border-radius:10px;padding:10px 12px'>"
                 f"<div style='font-size:12px;font-weight:700;color:#e65100;margin-bottom:4px'>🏥 건강</div>"
-                f"<div style='font-size:12px;color:#333;line-height:1.7'>{det['health']}</div></div>"
+                f"<div style='font-size:12px;color:#333;line-height:1.7;white-space:normal;word-break:break-all'>{det['health']}</div></div>"
                 f"</div>"
             )
             st.markdown(_grid, unsafe_allow_html=True)
@@ -12408,7 +12408,7 @@ def menu4_future3(
             f"""<div style='background:#f8f9fa;border-left:4px solid {_vcolor};
             border-radius:0 10px 10px 0;padding:10px 14px;margin:8px 0;'>
             <div style='font-size:13px;font-weight:900;color:{_vcolor};margin-bottom:4px'>{_vt}</div>
-            <div style='font-size:12px;color:#333;line-height:1.7'>{_vd}</div>
+            <div style='font-size:12px;color:#333;line-height:1.7;white-space:normal;word-break:break-all'>{_vd}</div>
             </div>""",
             unsafe_allow_html=True,
         )
@@ -13607,7 +13607,7 @@ def menu9_daily(pils, name, birth_year, gender):
 
 </div>
 
-<div style="font-size:14px; color:#555; line-height:1.7">{d["msg"]}</div>
+<div style="font-size:14px; color:#555; line-height:1.7;white-space:normal;word-break:break-all">{d["msg"]}</div>
 
 <div style="margin-top:12px; padding-top:12px; border-top:1px dashed #eee; display:flex; gap:10px">
 
@@ -13686,7 +13686,7 @@ def menu9_daily(pils, name, birth_year, gender):
 
 <div style="font-size:12px;font-weight:800;color:#2e7d32;margin-bottom:5px">🍀 오늘의 행운 키워드</div>
 
-<div style="font-size:13px;color:#111;line-height:1.7">{fp["lucky"]}</div>
+<div style="font-size:13px;color:#111;line-height:1.7;white-space:normal;word-break:break-all">{fp["lucky"]}</div>
 
 </div>
 
@@ -13694,7 +13694,7 @@ def menu9_daily(pils, name, birth_year, gender):
 
 <div style="font-size:12px;font-weight:800;color:#c62828;margin-bottom:5px">⚠️ 오늘 조심할 것</div>
 
-<div style="font-size:13px;color:#111;line-height:1.7">{fp["caution"]}</div>
+<div style="font-size:13px;color:#111;line-height:1.7;white-space:normal;word-break:break-all">{fp["caution"]}</div>
 
 </div>
 
@@ -15185,7 +15185,7 @@ def menu8_bihang(pils, name, birth_year, gender):
 <div style="background:#fff9c4;border-radius:8px;padding:12px"><div style="font-size:12px;font-weight:800;color:#f57f17;margin-bottom:5px">🥗 권장 음식</div><div style="font-size:13px;color:#333">{hrx['음식']}</div></div>
 <div style="background:#fce4ec;border-radius:8px;padding:12px"><div style="font-size:12px;font-weight:800;color:#c62828;margin-bottom:5px">⛔ 피해야 할 것</div><div style="font-size:13px;color:#333">{hrx['금기']}</div></div>
 </div>
-<div style="background:#f1f8e9;border:1px solid #8bc34a;border-radius:8px;padding:10px;margin-top:8px"><div style="font-size:12px;font-weight:800;color:#558b2f;margin-bottom:4px">💡 핵심 처방</div><div style="font-size:13px;color:#333;line-height:1.7">{hrx['처방']}</div></div>""",
+<div style="background:#f1f8e9;border:1px solid #8bc34a;border-radius:8px;padding:10px;margin-top:8px"><div style="font-size:12px;font-weight:800;color:#558b2f;margin-bottom:4px">💡 핵심 처방</div><div style="font-size:13px;color:#333;line-height:1.7;white-space:normal;word-break:break-all">{hrx['처방']}</div></div>""",
                 unsafe_allow_html=True,
             )
     st.markdown("</div>", unsafe_allow_html=True)
@@ -15210,7 +15210,7 @@ def menu8_bihang(pils, name, birth_year, gender):
         st.markdown(
             f"<div style='display:flex;align-items:flex-start;gap:10px;background:rgba(255,255,255,0.05);border-radius:8px;padding:10px 14px;margin-bottom:6px'>"
             f"<span style='color:#d4af37;font-size:16px;flex-shrink:0'>☐</span>"
-            f"<span style='font-size:13px;color:#e8e8e8;line-height:1.7'>{item}</span></div>",
+            f"<span style='font-size:13px;color:#e8e8e8;line-height:1.7;white-space:normal;word-break:break-all'>{item}</span></div>",
             unsafe_allow_html=True,
         )
     st.markdown("</div>", unsafe_allow_html=True)
@@ -18139,8 +18139,8 @@ def main():
 <style>
 
     /* 텍스트 줄바꿈 전역 강제 */
-    .stMarkdown * { word-break: keep-all !important; overflow-wrap: break-word !important; }
-    [data-testid="stMarkdownContainer"] * { word-break: keep-all !important; overflow-wrap: break-word !important; max-width:100% !important; }
+    .stMarkdown * { word-break: break-all !important; overflow-wrap: break-word !important; white-space: normal !important; }
+    [data-testid="stMarkdownContainer"] * { word-break: break-all !important; overflow-wrap: break-word !important; white-space: normal !important; max-width:100% !important; }
     /* 모든 HTML 삽입 div 박스 — 텍스트 넘침 방지 */
     [data-testid="stMarkdownContainer"] > div > div {
         max-width: 100% !important;
@@ -18423,6 +18423,18 @@ def main():
         .gold-section { font-size: 15px; margin: 18px 0 10px; }
 
         .stButton>button { font-size: 13px !important; min-height: 44px !important; white-space: nowrap !important; word-break: keep-all !important; padding: 6px 8px !important; }
+
+        /* 모바일: 텍스트 줄바꿈 전체 강제 */
+        * {
+            word-break: break-all !important;
+            overflow-wrap: break-word !important;
+            white-space: normal !important;
+        }
+        /* 버튼·배지는 줄바꿈 예외 */
+        button, .stButton button, [data-baseweb="tab"] {
+            white-space: nowrap !important;
+            word-break: keep-all !important;
+        }
 
         /* 모바일: 2열 그리드 → 1열 강제 */
         [data-testid="stMarkdownContainer"] div[style*="grid-template-columns:1fr 1fr"],
@@ -20107,19 +20119,19 @@ padding:22px 26px;margin-bottom:20px;text-align:center">
 <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px">
   <div style="background:#fff3e0;border-radius:10px;padding:12px;box-sizing:border-box;width:100%">
     <div style="font-size:11px;color:#e65100;font-weight:700;margin-bottom:4px">🧬 기질 성향</div>
-    <div style="font-size:13px;color:#4a2800;line-height:1.8;word-break:keep-all;overflow-wrap:break-word">{_s}</div>
+    <div style="font-size:13px;color:#4a2800;line-height:1.8;word-break:break-all;overflow-wrap:break-word;white-space:normal">{_s}</div>
   </div>
   <div style="background:#e8f5e9;border-radius:10px;padding:12px;box-sizing:border-box;width:100%">
     <div style="font-size:11px;color:#2e7d32;font-weight:700;margin-bottom:4px">💪 핵심 강점</div>
-    <div style="font-size:13px;color:#1b3a1e;line-height:1.8;word-break:keep-all;overflow-wrap:break-word">{_g}</div>
+    <div style="font-size:13px;color:#1b3a1e;line-height:1.8;word-break:break-all;overflow-wrap:break-word;white-space:normal">{_g}</div>
   </div>
   <div style="background:#fce4ec;border-radius:10px;padding:12px;box-sizing:border-box;width:100%">
     <div style="font-size:11px;color:#c62828;font-weight:700;margin-bottom:4px">⚠️ 보완 약점</div>
-    <div style="font-size:13px;color:#4a0000;line-height:1.8;word-break:keep-all;overflow-wrap:break-word">{_w}</div>
+    <div style="font-size:13px;color:#4a0000;line-height:1.8;word-break:break-all;overflow-wrap:break-word;white-space:normal">{_w}</div>
   </div>
   <div style="background:#e3f2fd;border-radius:10px;padding:12px;box-sizing:border-box;width:100%">
     <div style="font-size:11px;color:#1565c0;font-weight:700;margin-bottom:4px">✅ 실천 조언</div>
-    <div style="font-size:13px;color:#0d2744;line-height:1.8;word-break:keep-all;overflow-wrap:break-word">{_a}</div>
+    <div style="font-size:13px;color:#0d2744;line-height:1.8;word-break:break-all;overflow-wrap:break-word;white-space:normal">{_a}</div>
   </div>
 </div>
 <div style="font-size:12px;color:#888;border-top:1px solid #e0d8c0;padding-top:8px">
@@ -20161,7 +20173,7 @@ padding:22px 26px;margin-bottom:20px;text-align:center">
         _s1_prose = _re_b1.sub(r'\*\*([^*]+)\*\*', r'<b>\1</b>', _s1_prose)
         st.markdown(f"""
 <div style="background:#fffdf5;border:1px solid #c9a84c;border-radius:12px;padding:16px 18px;word-break:keep-all;overflow-wrap:break-word;box-sizing:border-box;width:100%;margin:12px 0">
-<div style="font-size:13px;color:#4a2800;line-height:1.9;word-break:keep-all;overflow-wrap:break-word">{_s1_prose}</div>
+<div style="font-size:13px;color:#4a2800;line-height:1.9;word-break:break-all;overflow-wrap:break-word;white-space:normal">{_s1_prose}</div>
 </div>""", unsafe_allow_html=True)
     except Exception:
         pass
@@ -20204,7 +20216,7 @@ padding:22px 26px;margin-bottom:20px;text-align:center">
                 html_np += (f"<div style='background:#fafafa;border:1px solid {np_color}44;border-left:4px solid {np_color};border-radius:8px;padding:10px'>"
                            f"<div style='font-size:10px;color:#888'>{lb} — {p['cg']}{p['jj']}</div>"
                            f"<div style='font-size:15px;font-weight:900;color:{np_color};margin:4px 0'>{np_name}</div>"
-                           f"<div style='font-size:11px;color:#555;line-height:1.7'>{np_desc}</div>"
+                           f"<div style='font-size:11px;color:#555;line-height:1.7;white-space:normal;word-break:break-all'>{np_desc}</div>"
                            f"</div>")
             else:
                 html_np += (f"<div style='background:#f5f5f5;border-radius:8px;padding:10px'>"
@@ -20282,7 +20294,7 @@ padding:22px 26px;margin-bottom:20px;text-align:center">
             _np_prose = _re_np2.sub(r'\*\*([^*]+)\*\*', r'<b>\1</b>', _np_prose_txt)
             st.markdown(f"""
 <div style="background:#fffdf5;border:1px solid #c9a84c;border-radius:12px;padding:16px 18px;word-break:keep-all;overflow-wrap:break-word;margin:10px 0">
-<div style="font-size:13px;color:#4a2800;line-height:1.9;word-break:keep-all;overflow-wrap:break-word">{_np_prose}</div>
+<div style="font-size:13px;color:#4a2800;line-height:1.9;word-break:break-all;overflow-wrap:break-word;white-space:normal">{_np_prose}</div>
 </div>""", unsafe_allow_html=True)
 
     except Exception as e:
@@ -20389,7 +20401,7 @@ padding:22px 26px;margin-bottom:20px;text-align:center">
         if _s3_sentences:
             st.markdown(f"""
 <div style="background:#fffdf5;border:1px solid #c9a84c;border-radius:12px;padding:16px 18px;word-break:keep-all;overflow-wrap:break-word;margin:10px 0">
-<div style="font-size:13px;color:#4a2800;line-height:1.9;word-break:keep-all;overflow-wrap:break-word">{'<br>'.join(_s3_sentences)}</div>
+<div style="font-size:13px;color:#4a2800;line-height:1.9;word-break:break-all;overflow-wrap:break-word;white-space:normal">{'<br>'.join(_s3_sentences)}</div>
 </div>""", unsafe_allow_html=True)
 
     except Exception as _e3:
@@ -20495,7 +20507,7 @@ padding:22px 26px;margin-bottom:20px;text-align:center">
             if _msgs3:
                 _h3 = '<div style="background:#fff8f0;border:1px solid #f57c00;border-radius:12px;padding:14px 16px;margin:10px 0"><div style="font-size:14px;font-weight:900;color:#e65100;margin-bottom:10px">⚡ 오행 불균형 인생 영향 분석</div>'
                 for _lbl, _oh, _c, _bg, _msg in _msgs3:
-                    _h3 += f'<div style="background:#{_bg};border-left:4px solid #{_c};border-radius:0 8px 8px 0;padding:10px 12px;margin-bottom:8px"><div style="font-size:12px;font-weight:700;color:#{_c}">{_lbl} — {_OH_KR3.get(_oh,_oh)}</div><div style="font-size:13px;line-height:1.7;margin-top:4px">{_msg}</div></div>'
+                    _h3 += f'<div style="background:#{_bg};border-left:4px solid #{_c};border-radius:0 8px 8px 0;padding:10px 12px;margin-bottom:8px"><div style="font-size:12px;font-weight:700;color:#{_c}">{_lbl} — {_OH_KR3.get(_oh,_oh)}</div><div style="font-size:13px;line-height:1.7;white-space:normal;word-break:break-all;margin-top:4px";word-break:break-all;overflow-wrap:break-word;white-space:normal">{__import__('re').sub(r'\*\*([^*]+)\*\*', r'<b>\1</b>', str(_msg))}</div></div>'
                 _h3 += '</div>'
                 st.markdown(_h3, unsafe_allow_html=True)
     except Exception:
@@ -20610,7 +20622,7 @@ padding:22px 26px;margin-bottom:20px;text-align:center">
         if _hph_sentences:
             st.markdown(f"""
 <div style="background:#fffdf5;border:1px solid #c9a84c;border-radius:12px;padding:16px 18px;word-break:keep-all;overflow-wrap:break-word;box-sizing:border-box;width:100%;margin:10px 0">
-<div style="font-size:13px;color:#4a2800;line-height:1.9;word-break:keep-all;overflow-wrap:break-word">{'<br>'.join(_hph_sentences)}</div>
+<div style="font-size:13px;color:#4a2800;line-height:1.9;word-break:break-all;overflow-wrap:break-word;white-space:normal">{'<br>'.join(_hph_sentences)}</div>
 </div>""", unsafe_allow_html=True)
     except Exception:
         pass
@@ -20802,7 +20814,7 @@ padding:22px 26px;margin-bottom:20px;text-align:center">
                 st.markdown(f"""
 <div style="background:#fffdf5;border:1px solid #c9a84c;border-radius:12px;padding:16px 18px;word-break:keep-all;overflow-wrap:break-word;margin:10px 0">
 <div style="font-size:14px;font-weight:800;color:#8b4513;margin-bottom:8px">📖 {name}님의 신살 종합 해석</div>
-<div style="font-size:13px;color:#4a2800;line-height:1.9;word-break:keep-all;overflow-wrap:break-word">{"<br><br>".join(_s5_parts)}</div>
+<div style="font-size:13px;color:#4a2800;line-height:1.9;word-break:break-all;overflow-wrap:break-word;white-space:normal">{"<br><br>".join(_s5_parts)}</div>
 </div>""", unsafe_allow_html=True)
     except Exception:
         pass
