@@ -1653,12 +1653,11 @@ class LocalSajuNarrator:
         _ys2 = b.get("yongshin",[])
         _ys_str = "·".join(_ys2[:2]) if _ys2 else ""
 
-        lines.append(f"## 🌟 {name}님의 사주 종합 리포트")
+        lines.append(f"# 🌟 {name}님의 사주 종합 리포트")
         lines.append(
-            f"{name}님은 **{birth_year}년생 {age}세 {g_str}**으로, "
-            f"**{_yn}년 {_mn}월 {_dn}일 {_hn}시**에 태어나셨습니다. "
-            f"이 네 기둥의 기운이 한데 모여 {name}님만의 고유한 팔자(八字)를 이룹니다.\n"
+            f"**{birth_year}년생 {age}세 {g_str}** — {_yn}년 {_mn}월 {_dn}일 {_hn}시 생"
         )
+        lines.append("")
 
         # ── 선천적 성격 — 정통사주 스타일 긴 서술 ───────────────
         lines.append("---")
