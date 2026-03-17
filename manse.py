@@ -15246,12 +15246,15 @@ def menu8_bihang(pils, name, birth_year, gender):
 <div style="font-size:16px;font-weight:900;color:#1a237e;margin-bottom:14px">🌊 현재 대운(大運) 맞춤 처방</div>""", unsafe_allow_html=True)
     try:
         _ss2 = st.session_state
-        _bm2 = max(1,min(12,int(_ss2.get("birth_month") or 1)))
-        _bd3 = max(1,min(31,int(_ss2.get("birth_day") or 1)))
-        _bh3 = max(0,min(23,int(_ss2.get("birth_hour") or 12)))
-        _bmn3 = max(0,min(59,int(_ss2.get("birth_minute") or 0)))
-        _dw_list3 = SajuCoreEngine.get_daewoon(pils, birth_year, _bm2, _bd3, _bh3, _bmn3, gender)
+        _bm2  = max(1, min(12, int(_ss2.get("birth_month")  or _ss2.get("in_birth_month",  1)  or 1)))
+        _bd3  = max(1, min(31, int(_ss2.get("birth_day")    or _ss2.get("in_birth_day",    1)  or 1)))
+        _bh3  = max(0, min(23, int(_ss2.get("birth_hour")   or _ss2.get("in_birth_hour",  12) or 12)))
+        _bmn3 = max(0, min(59, int(_ss2.get("birth_minute") or _ss2.get("in_birth_minute", 0)  or 0)))
+        _dw_list3 = SajuCoreEngine.get_daewoon(pils, birth_year, _bm2, _bd3, _bh3, _bmn3, gender) or []
         _cur_dw3 = next((d for d in _dw_list3 if d.get("시작연도",0) <= current_year <= d.get("종료연도",9999)), None)
+        # 현재 대운 못 찾으면 가장 가까운 대운 선택
+        if not _cur_dw3 and _dw_list3:
+            _cur_dw3 = min(_dw_list3, key=lambda d: abs(d.get("시작연도", current_year) - current_year))
         if _cur_dw3:
             _dw_ss3 = TEN_GODS_MATRIX.get(ilgan,{}).get(_cur_dw3.get("cg",""),"-")
             _DW_RX = {
@@ -15267,13 +15270,19 @@ def menu8_bihang(pils, name, birth_year, gender):
                 "劫財":("🔴 손재·경쟁의 대운","방어와 현상 유지가 전략이다.","투기·보증·동업 절대 금지."),
             }
             _rx3 = _DW_RX.get(_dw_ss3, (f"{_dw_ss3} 대운","흐름을 잘 읽고 신중하게 움직이게.","무리한 변화는 삼가게."))
-            st.markdown(f"""<div style="background:#1a3a00;border:2px solid #27ae60;border-radius:10px;padding:16px;color:#eee">
-<div style="font-size:14px;font-weight:900;color:#27ae60;margin-bottom:8px">{_rx3[0]} — {_cur_dw3['str']} ({_dw_ss3}) | {_cur_dw3['시작연도']}~{_cur_dw3['종료연도']}년</div>
-<div style="background:rgba(255,255,255,0.08);border-radius:8px;padding:10px;margin-bottom:8px;font-size:13px;line-height:1.8">✅ <b>해야 할 것:</b> {_rx3[1]}</div>
-<div style="background:rgba(255,80,80,0.1);border-radius:8px;padding:10px;font-size:13px;line-height:1.8">⛔ <b>하면 안 되는 것:</b> {_rx3[2]}</div>
+            st.markdown(f"""<div style="background:#f0fff4;border:2px solid #27ae60;border-radius:10px;padding:16px">
+<div style="font-size:14px;font-weight:900;color:#1b5e20;margin-bottom:10px">{_rx3[0]} — {_cur_dw3['str']} ({_dw_ss3}) | {_cur_dw3['시작연도']}~{_cur_dw3['종료연도']}년</div>
+<div style="background:#e8f5e9;border-left:4px solid #27ae60;border-radius:0 8px 8px 0;padding:12px 14px;margin-bottom:8px;font-size:13px;color:#1a1a1a;line-height:1.9;word-break:break-all">✅ <b>해야 할 것:</b> {_rx3[1]}</div>
+<div style="background:#ffebee;border-left:4px solid #e53935;border-radius:0 8px 8px 0;padding:12px 14px;font-size:13px;color:#1a1a1a;line-height:1.9;word-break:break-all">⛔ <b>하면 안 되는 것:</b> {_rx3[2]}</div>
 </div>""", unsafe_allow_html=True)
-    except Exception:
-        st.info("대운 처방 계산 중 오류가 발생했습니다.")
+    except Exception as _dw_e:
+        # 대운 계산 실패 시 기본 처방 출력
+        st.markdown("""<div style="background:#fff8e8;border:1px solid #c9a84c;border-radius:10px;padding:14px;margin:8px 0">
+<div style="font-size:13px;color:#5a3d00;line-height:1.9">
+대운 기간 계산을 위해 정확한 생년월일시가 필요합니다.<br>
+현재 대운의 기운을 파악하려면 <b>사주 입력 화면에서 생시(生時)를 다시 확인</b>해 주십시오.<br>
+용신 오행을 강화하는 비방을 우선 실천하십시오.
+</div></div>""", unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
     st.markdown('<hr style="border:none;border-top:1px solid #e0d8c0;margin:20px 0">', unsafe_allow_html=True)
 
