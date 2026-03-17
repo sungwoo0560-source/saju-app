@@ -18,16 +18,19 @@ import re
 import base64
 import logging as _logging
 from saju_data import *
-from saju_data import (
-    _JJ_HOUR_FULL, _JJ_HOUR_SHORT, _LUNAR_DATA, _SIT, _LOTTO_SS,
-    _JEOLGI_BASE, _AI_SANDBOX_HEADER, _SS_DAILY_DEEP,
-    _UNSUNG_DESC, _EMOJI_MAP, _SYMBOL_MAP, _DO_LIST,
-    PA_SAL_PAIRS, PA_SAL_DESC, HAE_SAL_PAIRS, HAE_SAL_DESC,
-    GOEGANG_ILJU, GOEGANG_DESC,
-    HAKDANG_GWIIN, HAKDANG_DESC,
-    AMROK_JJ, AMROK_DESC,
-    GEUNMYO_HWASIL,
-)
+try:
+    from saju_data import (
+        _JJ_HOUR_FULL, _JJ_HOUR_SHORT, _LUNAR_DATA, _SIT, _LOTTO_SS,
+        _JEOLGI_BASE, _AI_SANDBOX_HEADER, _SS_DAILY_DEEP,
+        _UNSUNG_DESC, _EMOJI_MAP, _SYMBOL_MAP, _DO_LIST,
+        PA_SAL_PAIRS, PA_SAL_DESC, HAE_SAL_PAIRS, HAE_SAL_DESC,
+        GOEGANG_ILJU, GOEGANG_DESC,
+        HAKDANG_GWIIN, HAKDANG_DESC,
+        AMROK_JJ, AMROK_DESC,
+        GEUNMYO_HWASIL,
+    )
+except ImportError:
+    pass
 from saju_engine import *
 from saju_sinsal import *
 from saju_interpreter import *
@@ -44,6 +47,20 @@ except ImportError:
     REPORTLAB_AVAILABLE = False
 
 _saju_log = _logging.getLogger("saju")
+
+# ── DAEWOON_PRESCRIPTION (PDF용 대운 처방 — manse.py와 동일) ──
+DAEWOON_PRESCRIPTION = {
+    "比肩": "독립 사업/협력 강화/새 파트너십 구축이 유리합니다.",
+    "劫財": "투자/보증/동업 금지. 지출 절제, 현상 유지가 최선입니다.",
+    "食神": "재능 발휘/창업/콘텐츠 창작을 적극 추진하십시오.",
+    "傷官": "직장 이직/창업/예술 활동에 좋으나 언행 극도 조심.",
+    "偏財": "사업 확장/투자/이동이 유리. 단, 과욕은 금물입니다.",
+    "正財": "저축/자산 관리/안정적 수입 구조 구축에 집중하십시오.",
+    "偏官": "건강검진 필수. 무리한 확장 자제. 인내와 정면 돌파가 최선.",
+    "正官": "승진/자격증/공식 계약을 적극 추진하십시오. 명예의 시기.",
+    "偏印": "학문/자격증/특수 분야 연구에 집중하기 좋은 시기입니다.",
+    "正印": "시험/학업/귀인과의 만남. 배움에 투자하십시오.",
+}
 
 def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str=""):
     """📄 PDF 출력 - 사주 천명 리포트 다운로드"""
@@ -90,6 +107,8 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str=""):
         include_fortune = st.checkbox("AI 종합운세 (전문 분석)", value=True, key="pdf_fortune")
 
         include_advice = st.checkbox("처방/조언", value=True, key="pdf_advice")
+
+        include_ohaeng = st.checkbox("☯️ 음양오행 심층 분석", value=True, key="pdf_ohaeng")
 
     if st.button("📥 PDF 생성 및 다운로드", use_container_width=True, key="pdf_gen_btn"):
         try:
@@ -1823,6 +1842,110 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str=""):
 
             c.setFillColorRGB(0.6, 0.6, 0.6)
 
+            # ══════════════════════════════════════════
+            # 음양오행 심층 분석 섹션 (추가)
+            # ══════════════════════════════════════════
+            if include_ohaeng:
+                y = section_title(c, "☯️ 음양오행 심층 분석", y)
+
+                try:
+                    # ── 음양 분석 ──
+                    _CG_YY = {"甲":"양","乙":"음","丙":"양","丁":"음","戊":"양",
+                               "己":"음","庚":"양","辛":"음","壬":"양","癸":"음"}
+                    _JJ_YY = {"子":"양","丑":"음","寅":"양","卯":"음","辰":"양","巳":"음",
+                               "午":"음","未":"음","申":"양","酉":"음","戌":"양","亥":"음"}
+                    _OH_MAP = {"甲":"木","乙":"木","丙":"火","丁":"Fire","戊":"土",
+                                "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
+                    _all_cg = [p.get("cg","") for p in pils if p.get("cg")]
+                    _all_jj = [p.get("jj","") for p in pils if p.get("jj")]
+                    _yang = sum(1 for c in _all_cg if _CG_YY.get(c)=="양") +                             sum(1 for j in _all_jj if _JJ_YY.get(j)=="양")
+                    _yin  = 8 - _yang
+                    y = write(c, f"▶ 음양 분포: 양기(陽氣) {_yang}개 / 음기(陰氣) {_yin}개", y, size=10)
+                    if _yang > _yin:
+                        y = write(c, "  → 양기가 강한 사주. 활동적·외향적·추진력이 강합니다.", y, size=9)
+                    elif _yin > _yang:
+                        y = write(c, "  → 음기가 강한 사주. 내성적·사려깊음·감수성이 풍부합니다.", y, size=9)
+                    else:
+                        y = write(c, "  → 음양이 균형잡힌 사주. 유연성과 적응력이 뛰어납니다.", y, size=9)
+                    y -= 3*mm
+
+                    # ── 오행 분포 ──
+                    y = write(c, "▶ 오행 분포", y, size=10)
+                    _OH_KR = {"木":"목(木)","火":"화(火)","土":"토(土)","金":"금(金)","水":"수(水)"}
+                    _OH_CG = {"甲":"木","乙":"木","丙":"火","丁":"Fire","戊":"土",
+                               "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
+                    _OH_CG2 = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
+                                "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
+                    _oh_cnt = {"木":0,"火":0,"土":0,"金":0,"水":0}
+                    for _p in pils:
+                        _o = _OH_CG2.get(_p.get("cg",""),"")
+                        if _o: _oh_cnt[_o] += 0.5
+                        from saju_engine import JIJANGGAN as _JJG2
+                        _jjg2 = _JJG2.get(_p.get("jj",""),[])
+                        for _g in _jjg2:
+                            _o2 = _OH_CG2.get(_g,"")
+                            if _o2: _oh_cnt[_o2] += 0.25
+                    for _oh, _cnt in sorted(_oh_cnt.items(), key=lambda x:-x[1]):
+                        _bar = "█" * int(_cnt * 2)
+                        y = write(c, f"  {_OH_KR.get(_oh,_oh)}: {_bar} ({_cnt:.1f})", y, size=9)
+                    y -= 3*mm
+
+                    # ── 납음오행 ──
+                    y = write(c, "▶ 납음오행(納音五行)", y, size=10)
+                    try:
+                        from manse import NABJIN_MAP as _NM
+                        _pil_keys = [
+                            (pils[3].get("cg",""), pils[3].get("jj","")),  # 년주
+                            (pils[2].get("cg",""), pils[2].get("jj","")),  # 월주
+                            (pils[1].get("cg",""), pils[1].get("jj","")),  # 일주
+                            (pils[0].get("cg",""), pils[0].get("jj","")),  # 시주
+                        ]
+                        _pil_labels = ["년주","월주","일주","시주"]
+                        for _pl, (_cg, _jj) in zip(_pil_labels, _pil_keys):
+                            _nv = _NM.get((_cg,_jj), _NM.get((_jj,_cg), None))
+                            if _nv:
+                                y = write(c, f"  {_pl}({_cg}{_jj}): {_nv[0]} — {_nv[1]}", y, size=9)
+                    except Exception:
+                        y = write(c, "  (납음 데이터 로딩 중)", y, size=9)
+                    y -= 3*mm
+
+                    # ── 형충파해 ──
+                    y = write(c, "▶ 형(刑)·충(沖)·파(破)·해(害) 분석", y, size=10)
+                    try:
+                        _chung_info = get_chung_hyung(pils)
+                        _chung = _chung_info.get("충", [])
+                        _hyung = _chung_info.get("형", [])
+                        if _chung:
+                            y = write(c, f"  충(沖): {', '.join(str(x) for x in _chung[:3])}", y, size=9)
+                        if _hyung:
+                            y = write(c, f"  형(刑): {', '.join(str(x) for x in _hyung[:3])}", y, size=9)
+                        if not _chung and not _hyung:
+                            y = write(c, "  충·형 없음 — 안정적인 구조입니다.", y, size=9)
+                    except Exception:
+                        y = write(c, "  (형충 계산 중)", y, size=9)
+                    y -= 3*mm
+
+                    # ── 용신 오행 개운법 ──
+                    y = write(c, "▶ 용신 기반 개운법", y, size=10)
+                    _ys_pdf = get_yongshin(pils)
+                    _ys_ohs = _ys_pdf.get("종합_용신", [])
+                    _OH_REMEDY_PDF = {
+                        "木": "초록·청색 착용, 동쪽 방향, 신맛 음식, 새벽 산책",
+                        "火": "빨강·주황 착용, 남쪽 방향, 쓴맛 음식, 햇빛 쬐기",
+                        "土": "황색·베이지 착용, 중앙 방향, 단맛 음식, 규칙적 식사",
+                        "金": "흰색·금색 착용, 서쪽 방향, 매운맛 음식, 정리정돈",
+                        "水": "검정·남색 착용, 북쪽 방향, 짠맛 음식, 독서·명상",
+                    }
+                    if _ys_ohs:
+                        for _ys_oh in _ys_ohs[:2]:
+                            _rem = _OH_REMEDY_PDF.get(_ys_oh, "")
+                            _oh_kr = {"木":"목(木)","火":"화(火)","土":"토(土)","金":"금(金)","水":"수(水)"}
+                            y = write(c, f"  {_oh_kr.get(_ys_oh,_ys_oh)} 강화: {_rem}", y, size=9)
+                    y -= 3*mm
+
+                except Exception as _oe:
+                    y = write(c, f"  (음양오행 분석 오류: {str(_oe)[:40]})", y, size=9)
+
             c.setFont(BASE_FONT, 8)
 
             c.drawCentredString(
@@ -1838,21 +1961,23 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str=""):
             fname = f"사주_{name}_{_dt.now().strftime('%Y%m%d_%H%M')}.pdf"
 
             _pdf_bytes = buf.read()
-            _b64 = base64.b64encode(_pdf_bytes).decode()
+
+            # ✅ st.download_button — iOS/Android 완전 호환
             st.markdown(
-                f'<div style="text-align:center;margin:20px 0;">'
-                f'<a href="data:application/pdf;base64,{_b64}"'
-                f' download="사주풀이_{name}.pdf"'
-                f' style="display:inline-block;'
-                f'background:linear-gradient(135deg,#c9a84c,#a07830);'
-                f'color:#fff8e8;padding:14px 32px;border-radius:50px;'
-                f'font-size:16px;font-weight:700;text-decoration:none;'
-                f'box-shadow:0 4px 15px rgba(201,168,76,0.4);">'
-                f'📄 PDF 다운로드</a></div>',
+                "<div style='text-align:center;margin:16px 0 8px;"
+                "font-size:14px;color:#888'>아래 버튼을 눌러 PDF를 저장하세요</div>",
                 unsafe_allow_html=True,
             )
-
-            st.success(f"✅ PDF 생성 완료! 위 링크로 다운로드하세요.")
+            st.download_button(
+                label="📄 PDF 다운로드",
+                data=_pdf_bytes,
+                file_name=fname,
+                mime="application/pdf",
+                use_container_width=True,
+                key="pdf_download_btn",
+            )
+            st.success(f"✅ {name}님의 사주 천명 리포트 PDF 생성 완료!")
+            st.caption("💡 iOS(아이폰): 다운로드 버튼 → 공유 → 파일에 저장 | Android: 다운로드 폴더 자동 저장")
 
         except ImportError:
             st.error("❌ reportlab 미설치. `pip install reportlab` 을 실행해주세요.")
