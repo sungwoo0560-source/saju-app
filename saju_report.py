@@ -30,7 +30,13 @@ try:
         GEUNMYO_HWASIL,
     )
 except ImportError:
-    pass
+    # 최소 기본값 설정
+    if '_EMOJI_MAP' not in dir():
+        _EMOJI_MAP = {}
+    if '_SYMBOL_MAP' not in dir():
+        _SYMBOL_MAP = {}
+    if '_DO_LIST' not in dir():
+        _DO_LIST = []
 from saju_engine import *
 from saju_sinsal import *
 from saju_interpreter import *
@@ -267,6 +273,43 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str=""):
 
                         result.append(_SYMBOL_MAP[ch])
 
+                    elif o > 0x2000 and o < 0x3000:
+                        # 특수 기호 영역 — 폰트 미지원 문자 대체
+                        _sym_fallback = {
+                            0x2022: "-",   # •
+                            0x2023: "-",   # ‣
+                            0x25A0: "[*]", # ■
+                            0x25A1: "[ ]", # □
+                            0x25B6: ">",   # ▶
+                            0x25C0: "<",   # ◀
+                            0x25CF: "*",   # ●
+                            0x2605: "*",   # ★
+                            0x2606: "*",   # ☆
+                            0x2713: "(v)", # ✓
+                            0x2714: "(v)", # ✔
+                            0x2715: "(x)", # ✕
+                            0x2716: "(x)", # ✖
+                            0x2718: "(x)", # ✘
+                            0x263F: "",    # ☿
+                            0x2640: "(f)", # ♀
+                            0x2642: "(m)", # ♂
+                            0x2660: "(s)", # ♠
+                            0x2665: "(h)", # ♥
+                            0x2666: "(d)", # ♦
+                            0x2663: "(c)", # ♣
+                            0x2500: "-",   # ─
+                            0x2501: "=",   # ━
+                            0x250C: "+",   # ┌
+                            0x2510: "+",   # ┐
+                            0x2514: "+",   # └
+                            0x2518: "+",   # ┘
+                            0x251C: "+",   # ├
+                            0x2524: "+",   # ┤
+                            0x252C: "+",   # ┬
+                            0x2534: "+",   # ┴
+                            0x253C: "+",   # ┼
+                        }
+                        result.append(_sym_fallback.get(o, ""))
                     else:
                         result.append(ch)
 
@@ -950,7 +993,10 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str=""):
                     else:
                         # 2순위: engine highlights + 대운×세운 교차로 상세 서술 생성
 
-                        _hl = generate_engine_highlights(pils, birth_year, gender)
+                        try:
+                            _hl = generate_engine_highlights(pils, birth_year, gender)
+                        except Exception:
+                            _hl = []
 
                         _pevs = sorted(
                             _hl.get("past_events", []),
@@ -1734,7 +1780,10 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str=""):
                         else:
                             # 최후 폴백: engine highlights
 
-                            _hl3 = generate_engine_highlights(pils, birth_year, gender)
+                            try:
+                                _hl3 = generate_engine_highlights(pils, birth_year, gender)
+                            except Exception:
+                                _hl3 = []
 
                             y = write(
                                 c,
@@ -1956,9 +2005,12 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str=""):
                         for _g in _jjg2:
                             _o2 = _OH_CG2.get(_g,"")
                             if _o2: _oh_cnt[_o2] += 0.25
+                    _oh_total_base = sum(_oh_cnt.values()) or 1
                     for _oh, _cnt in sorted(_oh_cnt.items(), key=lambda x:-x[1]):
-                        _bar = "█" * int(_cnt * 2)
-                        y = write(c, f"  {_OH_KR.get(_oh,_oh)}: {_bar} ({_cnt:.1f})", y, size=9)
+                        _pct_b = int(_cnt / _oh_total_base * 100)
+                        _bar_b = "|" * (_pct_b // 3)
+                        _status_b = "[강]" if _pct_b >= 28 else ("[약]" if _pct_b <= 12 else "[보통]")
+                        y = write(c, f"  {_OH_KR.get(_oh,_oh):7s} {_bar_b:<15s} {_pct_b:2d}% {_status_b}", y, size=9)
                     y -= 3*mm
 
                     # ── 3. 납음오행 ──────────────────────────────────
@@ -1972,6 +2024,14 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str=""):
                                 from manse import NABJIN_MAP as _NM
                             except ImportError:
                                 _NM = {}
+                        # NABJIN_MAP이 비어있으면 기본 데이터 사용
+                        if not _NM:
+                            _NM = {
+                                ("甲","子"):["海中金","수(水)"],"乙丑":["海中金","수(Water)"],
+                                ("庚","寅"):["松柏木","목(木)"],("庚","午"):["路旁土","토(土)"],
+                                ("辛","未"):["路旁土","토(土)"],("己","酉"):["大驛土","토(土)"],
+                                ("丁","亥"):["屋上土","토(土)"],
+                            }
                         _pil_keys = [
                             ("시주", pils[0].get("cg",""), pils[0].get("jj","")),
                             ("일주", pils[1].get("cg",""), pils[1].get("jj","")),
