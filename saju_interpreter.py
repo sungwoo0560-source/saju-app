@@ -8475,6 +8475,18 @@ def build_rich_narrative(pils, birth_year, gender, name, section="report"):
         except Exception:
             pass
 
+        # gisin 안전 초기화 — ys(get_yongshin 결과)에서 직접 추출
+        try:
+            _gisin_raw = ys.get("기신", [])
+            if isinstance(_gisin_raw, list):
+                _gisin_safe = _gisin_raw
+            elif isinstance(_gisin_raw, str):
+                _gisin_safe = [o for o in ["木","火","土","金","水"] if o in _gisin_raw]
+            else:
+                _gisin_safe = []
+        except Exception:
+            _gisin_safe = []
+
         ctx = {
             "pils": pils, "birth_year": birth_year, "gender": gender, "name": name,
             "display_name": display_name, "ilgan": ilgan, "ilgan_kr": ilgan_kr,
@@ -8492,7 +8504,7 @@ def build_rich_narrative(pils, birth_year, gender, name, section="report"):
             "pahae": pahae, "geunmyo": geunmyo,
             "ilgan_profile": ILGAN_PROFILE.get(ilgan, {}),
             "marriage": _marriage_val,
-            "gisin_ohs": gisin if isinstance(gisin, list) else [],
+            "gisin_ohs": _gisin_safe,
         }
 
         if section == "report":
