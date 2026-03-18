@@ -4219,12 +4219,13 @@ class LocalSajuNarrator:
         if _has_doha:
             _danger_msgs.append(
                 "🌹 **도화살 활성**: 타고난 매력으로 이성이 끊임없이 주변을 맴돕니다. "
-                "기혼이라면 배우자 외 이성 접촉을 극도로 조심하십시오."
+                "기혼이라면 이성과의 경계를 명확히 유지하고, 배우자와의 신뢰 관계를 더욱 돈독히 하십시오."
             )
         if gender == "여" and _peon_gwan_cnt >= 2:
             _danger_msgs.append(
-                f"⚡ **偏官(편관) 과다({_peon_gwan_cnt}개)**: 카리스마 강한 남성에게 끌리지만 "
-                "지배욕이나 바람기로 표출될 수 있습니다. 냉정하게 검증하십시오."
+                f"⚡ **偏官(편관) 과다({_peon_gwan_cnt}개)**: 강한 카리스마와 추진력의 남성에게 끌리는 경향이 있습니다. "
+                "편관이 많으면 직장·사회적 압박이 강하고, 배우자와의 관계에서 주도권 갈등이 생길 수 있습니다. "
+                "두 개 이상의 인연이 겹칠 수 있는 구조이므로, 관계의 경계를 명확히 하는 것이 중요합니다."
             )
         if gender == "남" and _geop_cnt >= 1:
             _danger_msgs.append(
@@ -4339,7 +4340,7 @@ class LocalSajuNarrator:
 
             else:
                 lines.append(
-                    "원국에 관성(남편성)이 겉으로 드러나지 않아, 조건을 따지기보다는 '코드와 대화가 통하는 사람'을 만나야 합니다. 연애보다 내 전문성과 경력이 먼저인 무관(無官) 사주 성향입니다."
+                    "관성(남편성)이 원국에 강하게 드러나지 않는 구조입니다. 이는 결혼을 못 한다는 의미가 아니라, 남편 인연이 대운이나 세운에서 들어오는 타입임을 나타냅니다. 오히려 배우자에 의존하지 않고 자신의 삶을 독립적으로 이끌어가는 강한 기질이 있습니다."
                 )
 
         else:  # 남성
@@ -5267,7 +5268,7 @@ TG_HAP_MAP = {
 }
 
 
-def get_yukjin(ilgan, pils, gender="남"):
+def get_yukjin(ilgan, pils, gender="남", marriage="미혼"):
 
 
     ss_to_family = {
@@ -5339,14 +5340,14 @@ def get_yukjin(ilgan, pils, gender="남"):
             (
                 "남편(正官)",
                 "정관",
-                "정관(남편 기운)이 있습니다. 안정적이고 믿음직한 남편 인연이 있습니다.",
-                "정관(남편 기운)이 없거나 약합니다. 결혼이 늦거나 편관으로 대체될 수 있습니다.",
+                "정관(남편 기운)이 있습니다. 안정적이고 믿음직하며 사회적으로 인정받는 남편 인연입니다. 공직·조직에서 일하는 안정적인 파트너와 인연이 깊습니다.",
+                "정관(남편 기운)이 원국에 드러나지 않습니다. 이는 남편이 없다는 의미가 아니라, 남편과의 인연이 대운이나 세운에서 들어오는 구조이거나 편관으로 대체되는 형태입니다. 원국에 없어도 현실에서 결혼한 분들이 많으며, 오히려 남편에 대한 의존도가 낮고 독립적으로 생활하는 경향을 나타냅니다.",
             ),
             (
                 "아들(食神)/딸(傷官)",
                 "식신",
-                "식상이 있습니다. 자녀 인연이 있으며 자녀로 인한 기쁨이 있습니다.",
-                "식상이 약합니다. 자녀와의 인연이 엷거나 늦을 수 있습니다.",
+                "식상이 있습니다. 자녀 인연이 있으며 자녀로 인한 기쁨이 있습니다. 자녀를 통해 삶이 풍요로워지는 구조입니다.",
+                "식상이 원국에 드러나지 않습니다. 이는 자녀가 없다는 의미가 아니라 자녀 인연이 대운에서 들어오거나, 자녀에 대한 의존보다 자신의 독립적 삶을 중시하는 성향을 나타냅니다. 현실에서 자녀가 있어도 이 배치인 경우가 많습니다.",
             ),
         ]
 
@@ -5363,15 +5364,25 @@ def get_yukjin(ilgan, pils, gender="남"):
 
     for fam_label, ss_key, yes_msg, no_msg in checks:
         has = ss_key in sipsung_all
-
         where = ", ".join(found.get(fam_label, []))
+
+        # 기혼인데 배우자성 없음 → 별도 처리
+        _is_married = marriage in ("기혼","유부남","유부녀","이혼","이혼/별거","사별","재혼")
+        _is_spouse = any(k in fam_label for k in ["남편","아내","배우자"])
+        if not has and _is_married and _is_spouse:
+            _adj_msg = (no_msg.split(". ")[0] +
+                f". 현재 결혼 상태이므로 배우자 인연은 대운·세운을 통해 이루어진 것입니다. "
+                f"원국에 드러나지 않는다는 것은 배우자와의 관계가 조용하고 내조형이거나, "
+                f"배우자에게 크게 의존하지 않는 독립적 성향을 나타냅니다.")
+        else:
+            _adj_msg = yes_msg if has else no_msg
 
         result.append(
             {
                 "관계": fam_label,
                 "위치": where if where else "없음",
                 "present": has,
-                "desc": yes_msg if has else no_msg,
+                "desc": _adj_msg,
             }
         )
 
@@ -7733,7 +7744,7 @@ def _nar_health(ctx):
     if True:
         result = []
 
-        yk = get_yukjin(ilgan, pils, gender)
+        yk = get_yukjin(ilgan, pils, gender, marriage=b.get("marriage","미혼") if b else "미혼")
 
         sipsung_data = calc_sipsung(ilgan, pils)
 
