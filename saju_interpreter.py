@@ -6447,195 +6447,400 @@ def _nar_ch7_health(ctx):
 
 
 def _nar_ch8_flow(ctx):
-    """8장: 현재 운기 + 세운 전망 — 대운/세운 교차 분석 및 구체적 행동 지침"""
+    """8장: 현재 운기 서술형 정밀 분석 — 재물/사고수/이성/직업 직격 판단"""
 
     current_year = ctx.get("current_year", datetime.now().year)
-    cur_dw = ctx.get("cur_dw", {})
-    cur_dw_ss = ctx.get("cur_dw_ss", "")
-    sw_now = ctx.get("sw_now", {})
-    sw_next = ctx.get("sw_next", {})
+    birth_year   = ctx.get("birth_year", 1970)
+    cur_dw       = ctx.get("cur_dw", {})
+    cur_dw_ss    = ctx.get("cur_dw_ss", "")
+    sw_now       = ctx.get("sw_now", {})
+    sw_next      = ctx.get("sw_next", {})
     yongshin_ohs = ctx.get("yongshin_ohs", [])
-    ilgan_oh = ctx.get("ilgan_oh", "")
+    gisin_ohs    = ctx.get("gisin_ohs", [])
+    ilgan_oh     = ctx.get("ilgan_oh", "")
     display_name = ctx.get("display_name", "내담자")
+    ilgan        = ctx.get("ilgan", "甲")
+    sn           = ctx.get("sn", "")
+    pils         = ctx.get("pils", [])
+    gender       = ctx.get("gender", "남")
+    gname        = ctx.get("gname", "")
+    sinsal_list  = ctx.get("sinsal_list", [])
 
-    dw_str = cur_dw.get("str", "-") if cur_dw else "-"
+    dw_str   = cur_dw.get("str", "-") if cur_dw else "-"
     dw_start = cur_dw.get("시작연도", "-") if cur_dw else "-"
-    dw_end = cur_dw.get("종료연도", "-") if cur_dw else "-"
+    dw_end   = cur_dw.get("종료연도", "-") if cur_dw else "-"
     sw_ganji = sw_now.get("세운", "")
     sw_ss_cg = sw_now.get("십성_천간", "")
+    sw_ss_jj = sw_now.get("십성_지지", sw_now.get("jj", ""))
     sw_oh_cg = sw_now.get("오행_천간", "")
     sw_gilhyung = sw_now.get("길흉", "")
-    sw_next_ganji = sw_next.get("세운", "")
-    sw_next_ss = sw_next.get("십성_천간", "")
+    sw_next_ganji  = sw_next.get("세운", "")
+    sw_next_ss     = sw_next.get("십성_천간", "")
     sw_next_gilhyung = sw_next.get("길흉", "")
 
-    is_yong = cur_dw and _get_yongshin_match(cur_dw_ss, yongshin_ohs, ilgan_oh) == "yong"
-    is_sw_gil = sw_gilhyung in ["길", "대길"]
-    is_next_gil = sw_next_gilhyung in ["길", "대길"]
-
-    # 대운×세운 교차 등급 + 상황 맞춤 분석
-    # 십성 조합별 현실 상황 매핑
-    _SS_CROSS_DETAIL = {
-        ("正財","偏官"): {
-            "상황": "안정적 수입 구조를 쌓는 중이지만 외부 압박(직장 갈등·법적 문제·경쟁자)이 강하게 치고 있습니다.",
-            "재물": "돈이 들어오는 구조는 맞는데 지출이 예상보다 크고, 생각지 못한 곳에서 비용이 나가는 시기입니다.",
-            "직업": "직장에서 인정은 받지만 상사나 주변과의 갈등이 생기기 쉽습니다. 승진 기회와 함께 시련도 옵니다.",
-            "관계": "파트너나 가족 중 누군가와 힘겨루기가 있을 수 있습니다. 주도권 문제로 갈등이 생기기 쉬운 시기입니다.",
-            "건강": "과로와 스트레스 누적. 허리·관절·혈압 주의. 정기 검진을 미루지 마십시오.",
-        },
-        ("正財","正官"): {
-            "상황": "명예와 재물이 동시에 움직이는 좋은 시기입니다. 승진·계약·자격 취득 등 공식적인 성취가 있습니다.",
-            "재물": "꾸준히 쌓아온 것이 결실을 맺는 시기. 부동산·저축·장기 투자에서 좋은 결과가 옵니다.",
-            "직업": "조직에서 인정받고 책임 있는 자리에 오르거나 중요한 프로젝트를 맡게 됩니다.",
-            "관계": "신뢰 관계가 강화되는 시기. 파트너나 주변인과의 관계가 안정적으로 발전합니다.",
-            "건강": "비교적 건강한 편이나 과로 주의. 규칙적인 식사와 수면이 건강 유지의 핵심입니다.",
-        },
-        ("偏財","偏官"): {
-            "상황": "큰 변동과 도전의 시기입니다. 재물 기회와 위험이 동시에 오는 격렬한 운기입니다.",
-            "재물": "투자·사업 기회가 있지만 손실 위험도 크습니다. 보증·동업·투기는 반드시 피하십시오.",
-            "직업": "이직·창업·독립 등 큰 변화를 모색하고 있거나, 외부 충격(구조조정·갑작스러운 변화)이 있을 수 있습니다.",
-            "관계": "새로운 이성 인연이나 중요한 만남이 있는 시기. 기혼이라면 관계 변화에 주의가 필요합니다.",
-            "건강": "사고수 주의. 무리한 활동이나 스트레스성 돌발 건강 문제 경계. 안전에 각별히 신경 쓰십시오.",
-        },
-        ("正印","偏官"): {
-            "상황": "공부·자격·학문과 직업·사회적 압박이 교차하는 시기입니다. 실력을 쌓으면서 외부 도전도 받는 구조입니다.",
-            "재물": "재물보다는 지식·자격이 앞서는 시기. 지금 투자하는 배움이 나중에 큰 재물로 돌아옵니다.",
-            "직업": "자격증·승진시험·중요한 심사가 있거나, 전문성을 인정받을 기회가 옵니다. 준비된 자에게 기회가 있습니다.",
-            "관계": "귀인과의 인연이 강화됩니다. 스승·선배·멘토가 중요한 도움을 줄 수 있는 시기입니다.",
-            "건강": "신경계·소화기 주의. 정신적 과부하를 줄이고 충분한 휴식을 취하십시오.",
-        },
-        ("劫財","正官"): {
-            "상황": "경쟁과 명예가 동시에 오는 시기. 치열한 경쟁 속에서 실력으로 인정받을 수 있는 운기입니다.",
-            "재물": "수입은 있지만 지출도 많은 시기. 경쟁자와의 관계에서 재물 손실이 생기지 않도록 주의하십시오.",
-            "직업": "직장에서 경쟁이 치열하지만 최종 결과는 좋은 편입니다. 원칙을 지키면 인정받습니다.",
-            "관계": "형제·동료·친구와의 관계에서 경쟁이나 갈등이 있을 수 있습니다. 감정 조절이 중요합니다.",
-            "건강": "과로 주의. 승부욕이 강해지는 시기이니 무리하지 말고 체력을 관리하십시오.",
-        },
-        ("食神","偏財"): {
-            "상황": "재능과 재물이 만나는 좋은 시기. 하고 싶은 일로 돈을 버는 구조가 활성화됩니다.",
-            "재물": "창의적 활동·콘텐츠·사업에서 예상치 못한 수입이 들어올 수 있습니다.",
-            "직업": "자신만의 전문성으로 독립하거나 새로운 프로젝트가 성공할 가능성이 높습니다.",
-            "관계": "즐겁고 풍요로운 인간관계. 새로운 인연이 사업 기회와 연결될 수 있습니다.",
-            "건강": "전반적으로 건강한 시기. 과식·과음만 주의하면 됩니다.",
-        },
-    }
-
-    # 십성 조합 키 생성
-    _ss_pair_key = (dw_cg_ss.split("(")[0] if "(" in dw_cg_ss else dw_cg_ss,
-                    sw_ss_cg.split("(")[0] if "(" in sw_ss_cg else sw_ss_cg)
-    _cross_detail = _SS_CROSS_DETAIL.get(_ss_pair_key, {})
-
-    # 나이대별 현실 상황 추가 맥락
     try:
-        _cur_age = datetime.now().year - birth_year + 1
+        _cur_age = current_year - birth_year + 1
     except Exception:
         _cur_age = 50
-    _age_context = (
-        "20~30대 — 직업 기반 구축과 결혼·인연이 최대 관심사인 시기입니다." if _cur_age < 35 else
-        "30~40대 — 직업 성취와 가정 안정, 재물 기반 구축이 핵심인 시기입니다." if _cur_age < 45 else
-        "40~50대 — 인생의 수확기. 쌓아온 것의 결실과 자녀 문제가 동시에 움직입니다." if _cur_age < 55 else
-        "50~60대 — 은퇴 준비와 건강, 자녀 독립이 동시에 진행되는 전환기입니다." if _cur_age < 65 else
-        "60대 이후 — 노후 안정과 건강이 최우선. 정리와 완성의 시기입니다."
-    )
 
-    if is_yong and is_sw_gil:
-        cross_grade = "최상 (대운·세운 동시 용신 — 10년에 한 번 오는 황금기)"
-        cross_action = "지금 당장 준비한 모든 것을 실행하라. 이 시기를 놓치면 다음 기회는 수년 후다."
-    elif is_yong and not is_sw_gil:
-        cross_grade = "상 (대운은 용신이나 세운이 불안 — 큰 흐름은 좋지만 올해는 신중하게)"
-        cross_action = "방향은 맞다. 단, 올해 결정적 행동보다 내년을 준비하는 해로 삼아라."
-    elif not is_yong and is_sw_gil:
-        cross_grade = "중상 (대운은 어렵지만 세운이 길 — 올해만큼은 기회가 있다)"
-        cross_action = "올해 한 해의 기회를 정확히 포착하라. 세운이 지나면 다시 수성 모드로 전환된다."
+    # 용신/기신 여부
+    is_yong_dw = cur_dw and _get_yongshin_match(cur_dw_ss, yongshin_ohs, ilgan_oh) == "yong"
+    is_sw_gil  = sw_gilhyung in ["길", "대길"]
+    is_sw_hung = sw_gilhyung in ["흉", "대흉"]
+    is_yong_sw = _get_yongshin_match(sw_ss_cg, yongshin_ohs, ilgan_oh) == "yong"
+
+    # ── 충(沖) 감지 ──────────────────────────────────────────
+    has_chung = False
+    chung_detail = []
+    try:
+        ch = get_chung_hyung(pils)
+        raw_chungs = ch.get("충", [])
+        if raw_chungs:
+            has_chung = True
+        sw_jj_v = sw_now.get("jj", "")
+        for p in pils:
+            k = frozenset([p.get("jj",""), sw_jj_v])
+            if k in CHUNG_MAP:
+                has_chung = True
+                chung_detail.append(f"{p.get('jj','')}·{sw_jj_v} 충")
+    except Exception:
+        pass
+
+    # ── 도화살 감지 ───────────────────────────────────────────
+    has_dowhwa = any("도화" in s.get("이름","") or "도화" in s.get("name","") for s in sinsal_list)
+
+    # ── 합(合) 감지 ───────────────────────────────────────────
+    has_hap = False
+    try:
+        sw_jj_v = sw_now.get("jj", "")
+        sw_cg_v = sw_now.get("cg", "")
+        for p in pils:
+            if frozenset([p.get("jj",""), sw_jj_v]) in SAM_HAP_MAP or                frozenset([p.get("cg",""), sw_cg_v]) in TG_HAP_MAP:
+                has_hap = True
+                break
+    except Exception:
+        pass
+
+    # ══════════════════════════════════════════════════════════
+    # 핵심 판단 로직 — 재물/사고수/이성 3대 직격 분석
+    # ══════════════════════════════════════════════════════════
+
+    # ── A. 올해 재물 직격 판단 ──────────────────────────────
+    _MONEY_SS_MAP = {
+        "偏財": ("💰 올해 편재(偏財) 기운이 강하게 들어옵니다. "
+                 "사업·투자·외부 활동에서 예상치 못한 수입이 생길 수 있는 해입니다. "
+                 "단, 편재는 들어오는 만큼 나가기도 하니 지출 관리가 핵심입니다. "
+                 "새로운 거래처·파트너십·부업에서 기회가 열립니다.", "🟢 재물 활성"),
+        "正財": ("💰 올해 정재(正財) 기운이 흐릅니다. "
+                 "꾸준한 노력이 안정적인 수입으로 연결되는 해입니다. "
+                 "큰 한방보다 성실하게 쌓은 것이 실제로 통장에 남는 시기입니다. "
+                 "부동산·저축·적금 등 안정 자산에서 좋은 결과가 옵니다.", "🟢 재물 안정"),
+        "食神": ("💰 올해 식신(食神) 기운입니다. "
+                 "재능과 전문성이 자연스럽게 재물로 이어지는 흐름입니다. "
+                 "하고 싶은 일을 하면서 돈이 따라오는 구조로, "
+                 "부업·프리랜서·콘텐츠 창작에서 수익이 생기기 좋은 해입니다.", "🟢 재물 순탄"),
+        "傷官": ("⚠️ 올해 상관(傷官) 기운입니다. "
+                 "창의적 활동은 활발하지만 재물 기복이 있는 해입니다. "
+                 "수입이 생겨도 예상치 못한 지출이 따라오는 패턴이 반복됩니다. "
+                 "권위자나 상사와의 갈등으로 직업 변동 가능성이 있습니다.", "🟡 재물 불안정"),
+        "劫財": ("🛑 올해 겁재(劫財) 기운이 강합니다. "
+                 "주변에서 내 재물을 탐내거나 손실이 생기기 쉬운 해입니다. "
+                 "동업·보증·금전 대여는 절대 피하십시오. "
+                 "친한 사람일수록 돈 거래를 하지 마십시오. "
+                 "기존 수입은 유지되더라도 지출이 예상보다 크게 늘어납니다.", "🔴 재물 위험"),
+        "比肩": ("💡 올해 비견(比肩) 기운입니다. "
+                 "경쟁이 심화되고 독립·자립 에너지가 강해지는 해입니다. "
+                 "재물보다는 자리와 위치를 지키는 것이 우선입니다. "
+                 "신규 사업·투자는 신중히, 현상 유지가 최선입니다.", "🟡 재물 보통"),
+        "偏官": ("⚠️ 올해 편관(偏官) 기운입니다. "
+                 "직업과 명예에 변동이 오는 해로 재물보다 생존이 먼저입니다. "
+                 "무리한 수익 목표를 낮추고 건강·자리를 지키는 것이 핵심입니다. "
+                 "법적 문제·관재·직장 갈등에 주의하십시오.", "🔴 재물 방어"),
+        "正官": ("🏅 올해 정관(正官) 기운입니다. "
+                 "명예와 사회적 인정이 재물로 연결되는 해입니다. "
+                 "승진·계약·공식 성취가 있고 안정적인 수입 구조가 유지됩니다. "
+                 "원칙대로 일하면 반드시 인정받는 해입니다.", "🟢 재물 안정"),
+        "偏印": ("📚 올해 편인(偏印) 기운입니다. "
+                 "재물보다 지식·자격·준비에 집중하는 해입니다. "
+                 "지금 배우고 쌓는 것이 1~2년 후 재물로 돌아옵니다. "
+                 "직업 변동이나 이동이 생기기 쉬운 해이니 충동적 결정을 자제하십시오.", "🟡 재물 준비기"),
+        "正印": ("📖 올해 정인(正印) 기운입니다. "
+                 "귀인과 자격이 재물을 가져오는 해입니다. "
+                 "시험·승인·허가 등 공식 인정을 받을 기회가 옵니다. "
+                 "스승이나 선배의 도움으로 기회가 열리는 시기입니다.", "🟢 재물 귀인"),
+    }
+
+    # 십성 한글 키 정리
+    _ss_clean = sw_ss_cg.replace("(편재)","").replace("(정재)","").replace("(식신)","")                         .replace("(상관)","").replace("(겁재)","").replace("(비견)","")                         .replace("(편관)","").replace("(정관)","").replace("(편인)","")                         .replace("(정인)","").strip()
+    # 한자만 추출
+    import re as _re
+    _ss_hanja = _re.sub(r"[^甲乙丙丁戊己庚辛壬癸子丑寅卯辰巳午未申酉戌亥比肩劫財食神傷官偏財正財偏官正官偏印正印]", "", sw_ss_cg)
+    money_desc, money_grade = _MONEY_SS_MAP.get(_ss_hanja, _MONEY_SS_MAP.get(sw_ss_cg.split("(")[0], ("", "")))
+
+    # 용신 여부 보정
+    if is_yong_sw and money_grade.startswith("🟡"):
+        money_grade = "🟢 재물 순탄 (용신 기운)"
+        money_desc += f" 용신({'/'.join(yongshin_ohs)}) 오행이 들어오는 해라 기본 흐름이 좋습니다."
+    elif is_yong_dw and is_sw_hung:
+        money_desc += f" 대운이 용신 대운({dw_str})이라 세운 흉기운을 어느 정도 완충합니다. 큰 손실보다는 수성(守城) 국면입니다."
+
+    # ── B. 사고수 직격 판단 ──────────────────────────────────
+    _SAGO_RISK = 0
+    _sago_reasons = []
+
+    # 편관 세운 = 사고수 기본
+    if "偏官" in sw_ss_cg:
+        _SAGO_RISK += 3
+        _sago_reasons.append("편관(偏官) 세운 — 외부 충격·갈등·사고 기운 기본 발동")
+
+    # 충(沖) 발동
+    if has_chung:
+        _SAGO_RISK += 3
+        _sago_reasons.append(f"충(沖) 기운 발동 — {', '.join(chung_detail) if chung_detail else '원국 충'}")
+
+    # 겁살 신살
+    if any("겁살" in s.get("이름","") or "겁살" in s.get("name","") for s in sinsal_list):
+        _SAGO_RISK += 2
+        _sago_reasons.append("겁살(劫殺) 활성 — 돌발 사고·수술·손재 위험")
+
+    # 백호대살
+    if any("백호" in s.get("이름","") or "백호" in s.get("name","") for s in sinsal_list):
+        _SAGO_RISK += 2
+        _sago_reasons.append("백호대살(白虎大殺) — 혈광·사고·수술 기운")
+
+    # 겁재 세운
+    if "劫財" in sw_ss_cg:
+        _SAGO_RISK += 1
+        _sago_reasons.append("겁재(劫財) 세운 — 재물 손실·구설 주의")
+
+    # 흉 세운
+    if is_sw_hung:
+        _SAGO_RISK += 1
+        _sago_reasons.append(f"세운 흉기운({sw_gilhyung})")
+
+    if _SAGO_RISK >= 7:
+        sago_level = "🔴 사고수 고위험"
+        sago_desc = (
+            f"올해는 사고수(事故數)가 강하게 발동하는 해입니다. "
+            f"{', '.join(_sago_reasons[:2])}이(가) 동시에 겹쳐 있습니다. "
+            f"교통사고·수술·낙상·화재 등 신체적 위험에 특히 주의하십시오. "
+            f"큰 수술이나 몸에 칼을 대는 일은 가급적 올해는 피하십시오. "
+            f"이사·여행·장거리 이동 시 반드시 안전 점검을 먼저 하십시오. "
+            f"법적 분쟁이나 관재(官災)에도 주의가 필요합니다."
+        )
+    elif _SAGO_RISK >= 4:
+        sago_level = "🟡 사고수 주의"
+        sago_desc = (
+            f"올해 사고수 기운이 일부 발동하고 있습니다. "
+            f"{_sago_reasons[0] if _sago_reasons else ''}이(가) 활성화되어 있습니다. "
+            f"특별히 조심해야 할 시기는 충(沖) 기운이 강한 달입니다. "
+            f"무리한 신체 활동이나 충동적 결정을 자제하고, "
+            f"건강 검진과 보험 정비를 미루지 마십시오."
+        )
     else:
-        cross_grade = "하 (대운·세운 모두 주의 필요 — 최대한 보수적으로 움직여야 하는 시기)"
-        cross_action = "지금은 싸울 때가 아니다. 건강·재물·관계를 지키는 데만 집중하라."
+        sago_level = "🟢 사고수 낮음"
+        sago_desc = (
+            f"올해는 큰 사고수 기운이 두드러지지 않습니다. "
+            f"일상적인 주의만으로 충분합니다. "
+            f"다만 건강 검진은 정기적으로 받는 것이 좋습니다."
+        )
 
+    # ── C. 이성·바람 직격 판단 ──────────────────────────────
+    _LOVE_RISK = 0
+    _love_reasons = []
+    _love_type = "중립"
+
+    # 성별별 배우자성 세운
+    if gender == "남":
+        if "偏財" in sw_ss_cg:
+            _LOVE_RISK += 3
+            _love_reasons.append("편재(偏財) 세운 — 이성 인연·여성 문제 직접 발동")
+        if "正財" in sw_ss_cg:
+            _LOVE_RISK += 1
+            _love_reasons.append("정재(正財) 세운 — 배우자 인연 강화")
+    else:  # 여성
+        if "偏官" in sw_ss_cg:
+            _LOVE_RISK += 3
+            _love_reasons.append("편관(偏官) 세운 — 강한 남성 에너지 유입, 이성 문제 주의")
+        if "正官" in sw_ss_cg:
+            _LOVE_RISK += 1
+            _love_reasons.append("정관(正官) 세운 — 인연 강화·결혼 기운")
+
+    if has_dowhwa:
+        _LOVE_RISK += 2
+        _love_reasons.append("도화살(桃花殺) 활성 — 이성 인기·매력 극대화")
+
+    if has_hap:
+        _LOVE_RISK += 2
+        _love_reasons.append("합(合) 기운 발동 — 새로운 인연이 강하게 끌림")
+
+    if "傷官" in sw_ss_cg:
+        _LOVE_RISK += 1
+        _love_reasons.append("상관(傷官) 세운 — 기혼이라면 부부 갈등·구설 주의")
+
+    # 기혼 여부에 따른 판단 분리
+    marriage = ctx.get("marriage", "미혼")
+    _is_married = marriage in ("기혼","유부남","유부녀","이혼","이혼/별거","사별","재혼")
+
+    if _is_married:
+        if _LOVE_RISK >= 5:
+            love_level = "🔴 이성 관계 위험"
+            love_desc = (
+                f"올해는 배우자 외 이성 문제가 발생할 수 있는 기운이 강하게 들어옵니다. "
+                f"{', '.join(_love_reasons[:2])}이(가) 겹쳐 있습니다. "
+                f"이성과의 단둘이 만남이나 깊어지는 관계는 지금 시기에 각별히 조심하십시오. "
+                f"배우자와의 대화를 늘리고, 불필요한 오해를 만들 상황을 사전에 차단하십시오. "
+                f"작은 오해가 큰 갈등으로 번지기 쉬운 해입니다."
+            )
+        elif _LOVE_RISK >= 3:
+            love_level = "🟡 부부 관계 주의"
+            love_desc = (
+                f"올해 부부 사이에 크고 작은 갈등이 생기기 쉬운 기운입니다. "
+                f"{_love_reasons[0] if _love_reasons else ''}이(가) 관계에 영향을 주고 있습니다. "
+                f"배우자의 말을 먼저 듣는 습관을 들이고, "
+                f"재물 문제나 주요 결정에서 배우자와 충분히 상의하십시오."
+            )
+        else:
+            love_level = "🟢 부부 관계 안정"
+            love_desc = (
+                f"올해 부부 관계는 비교적 안정적입니다. "
+                f"배우자와 공동의 목표를 세우고 함께 나아가는 것이 관계를 더욱 단단하게 합니다."
+            )
+    else:  # 미혼
+        if _LOVE_RISK >= 5:
+            love_level = "🌸 인연 강하게 활성"
+            love_desc = (
+                f"올해 이성 인연이 강하게 들어오는 해입니다. "
+                f"{', '.join(_love_reasons[:2])}이(가) 함께 발동하고 있습니다. "
+                f"마음에 드는 사람이 생기거나, 진지한 만남으로 발전하는 기회가 옵니다. "
+                f"지금 적극적으로 나서지 않으면 이 기운은 1~2년 후로 미뤄질 수 있습니다. "
+                f"만남의 자리를 적극적으로 만들고 주변 소개를 마다하지 마십시오."
+            )
+        elif _LOVE_RISK >= 2:
+            love_level = "🌼 인연 기운 일부 활성"
+            love_desc = (
+                f"올해 이성 인연 기운이 조금씩 움직이고 있습니다. "
+                f"평소보다 이성과의 접점이 늘어나는 시기입니다. "
+                f"조급해하지 말고 자연스럽게 관계를 발전시켜 나가십시오."
+            )
+        else:
+            love_level = "🔵 인연 기운 조용"
+            love_desc = (
+                f"올해 이성 인연 기운이 강하게 움직이지는 않습니다. "
+                f"내 일과 자기 성장에 집중하면 인연은 자연스럽게 따라옵니다. "
+                f"다음 세운에서 인연 기운이 활성화될 가능성이 있습니다."
+            )
+
+    # ── D. 나이대별 현재 상황 맥락 ──────────────────────────
+    if _cur_age < 35:
+        _age_ctx = f"{display_name}님은 지금 직업 기반을 다지고 인생의 방향을 설정하는 가장 중요한 시기입니다."
+    elif _cur_age < 45:
+        _age_ctx = f"{display_name}님은 지금 직업적 성취와 가정 안정을 동시에 이뤄야 하는 중요한 전환기입니다."
+    elif _cur_age < 55:
+        _age_ctx = f"{display_name}님은 지금 그동안 쌓아온 것의 결실을 거두고 인생 2막을 설계하는 수확기입니다."
+    elif _cur_age < 65:
+        _age_ctx = f"{display_name}님은 지금 은퇴 준비와 건강 관리가 재물만큼 중요한 시기입니다."
+    else:
+        _age_ctx = f"{display_name}님은 지금 여유와 완성의 시기입니다. 욕심보다 건강과 관계가 먼저입니다."
+
+    # ══════════════════════════════════════════════════════════
+    # 출력 구성 — 서술형 중심
+    # ══════════════════════════════════════════════════════════
     lines = [
         f"",
-        f"[ 제8장 | 현재 운기(Flow) - {current_year}년 운기 정밀 분석 ]",
+        f"[ 제8장 | {current_year}년 지금 이 순간 — {display_name}님의 현실 정밀 분석 ]",
         f"",
-        f"━━━ 대운(大運) ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
-        f"  현재 대운: {dw_str}  ({cur_dw_ss} 십성)",
-        f"  대운 기간: {dw_start}년 ~ {dw_end}년",
+        f"{_age_ctx}",
         f"",
-        f"  {dw_str} 대운의 의미:",
+        f"━━━ 대운·세운 흐름 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+        f"  현재 대운: {dw_str} ({cur_dw_ss}) | {dw_start}~{dw_end}년",
     ]
 
-    # 대운 십성별 해석
-    _dw_ss_desc = {
-        "比肩": "자립·독립의 시기. 새로운 길을 스스로 개척해야 한다. 주변의 경쟁이 심화되나 실력으로 돌파 가능.",
-        "劫財": "도전과 변동의 시기. 재물 기복 주의. 충동적 결정을 자제하고 검증된 파트너와 협력할 것.",
-        "食神": "안정과 창의의 시기. 재능을 펼치기 좋은 대운. 꾸준히 노력하면 복록이 따라온다.",
-        "傷官": "혁신과 표현의 시기. 창의적 활동에서 두각. 관재구설 주의, 권위에 도전하기 전 전략을 세울 것.",
-        "偏財": "활동·사업의 시기. 외부 활동과 인맥으로 재물 창출. 투기·보증은 반드시 피할 것.",
-        "正財": "성실·축적의 시기. 꾸준한 노력으로 안정적 재물 형성. 장기 투자에 유리.",
-        "偏官": "도전·명예의 시기. 강한 추진력으로 목표 달성 가능. 건강 관리와 과로 방지 필수.",
-        "正官": "명예·안정의 시기. 사회적 인정과 승진 기회. 원칙을 지키며 정도를 걸을 것.",
-        "偏印": "학습·준비의 시기. 내실을 다지고 실력을 쌓는 대운. 새로운 분야 탐구에 좋음.",
-        "正印": "귀인·학문의 시기. 스승이나 귀인의 도움을 받을 수 있다. 자격·학업·자기계발에 집중.",
+    # 대운 해석 서술형
+    _DW_NARR = {
+        "比肩":  f"지금 {dw_str} 대운은 독립과 자립의 10년입니다. 남의 밑에서보다 스스로의 힘으로 길을 개척할 때 기운이 열립니다. 경쟁이 심화되지만 실력으로 돌파할 수 있는 시기입니다.",
+        "劫財":  f"지금 {dw_str} 대운은 변동과 도전의 10년입니다. 재물 기복이 있고 주변에 경쟁자가 많아지는 시기입니다. 충동적 결정을 자제하고 검증된 파트너와 협력하는 것이 핵심입니다.",
+        "食神":  f"지금 {dw_str} 대운은 안정과 재능 발휘의 10년입니다. 꾸준히 노력하면 복록이 따라오는 시기로, 전문성을 쌓고 표현하는 활동에서 결실이 옵니다.",
+        "傷官":  f"지금 {dw_str} 대운은 혁신과 창의의 10년입니다. 기존 방식을 깨고 새로운 길을 여는 에너지가 강합니다. 관재구설에 주의하고 권위에 도전 전 전략을 먼저 세우십시오.",
+        "偏財":  f"지금 {dw_str} 대운은 활동과 사업의 10년입니다. 외부 활동과 인맥에서 재물이 창출되는 시기로, 움직이는 만큼 기회가 옵니다. 투기·보증은 반드시 피하십시오.",
+        "正財":  f"지금 {dw_str} 대운은 성실과 축적의 10년입니다. 꾸준히 노력한 것이 안정적 재물로 쌓이는 시기입니다. 장기 투자와 부동산 인연이 강화됩니다.",
+        "偏官":  f"지금 {dw_str} 대운은 도전과 명예의 10년입니다. 강한 추진력으로 목표를 달성할 수 있으나, 건강 관리와 과로 방지가 필수입니다. 법적 문제·갈등에 주의하십시오.",
+        "正官":  f"지금 {dw_str} 대운은 명예와 안정의 10년입니다. 사회적 인정과 승진 기회가 오는 시기로, 원칙을 지키며 정도를 걸으면 반드시 인정받습니다.",
+        "偏印":  f"지금 {dw_str} 대운은 학습과 준비의 10년입니다. 내실을 다지고 실력을 쌓는 시기로, 새로운 분야 탐구와 자격 취득에 투자하십시오. 지금의 준비가 다음 대운의 황금기를 만듭니다.",
+        "正印":  f"지금 {dw_str} 대운은 귀인과 학문의 10년입니다. 스승이나 귀인의 도움을 받을 수 있고, 자격·학업·자기계발에 집중하면 반드시 보상이 따릅니다.",
     }
-    dw_desc = _dw_ss_desc.get(cur_dw_ss, "이 대운의 기운을 충분히 파악하여 흐름에 맞게 움직일 것.")
-    lines.append(f"  {dw_desc}")
+    dw_narr = _DW_NARR.get(cur_dw_ss, f"{dw_str} 대운의 기운에 맞게 흐름을 타십시오.")
+    lines.append(f"  {dw_narr}")
+    lines.append(f"")
+    lines.append(f"  올해 세운: {sw_ganji} ({sw_ss_cg}) — {sw_gilhyung}")
+    lines.append(f"")
+
+    # ══════════════════════════════════════════════════════════
+    # 3대 직격 분석 출력
+    # ══════════════════════════════════════════════════════════
+
+    lines += [
+        f"━━━ 💰 올해 재물운 직격 분석 [{money_grade}] ━━━━━━━━━━━━━━━━━",
+        f"",
+        f"  {money_desc}",
+        f"",
+    ]
+
+    # 재물 추가 보정 — 신강신약
+    if sn == "신강" and "偏財" in sw_ss_cg:
+        lines.append("  → 신강(身强) 사주에 편재 세운: 돈이 들어오는 기운이 강합니다. 단 빠져나가는 속도도 빠르니 수입의 30% 이상은 반드시 묶어두십시오.")
+    elif sn == "신약" and "劫財" in sw_ss_cg:
+        lines.append("  → 신약(身弱) 사주에 겁재 세운: 이중으로 힘든 시기입니다. 어떤 금전 보증도 서지 마십시오. 현금 유동성 확보가 최우선입니다.")
+
+    lines += [
+        f"",
+        f"━━━ ⚡ 사고수(事故數) 직격 분석 [{sago_level}] ━━━━━━━━━━━━━━━",
+        f"",
+        f"  {sago_desc}",
+    ]
+    if _sago_reasons:
+        lines.append(f"  [발동 요인] {' / '.join(_sago_reasons[:3])}")
     lines.append(f"")
 
     lines += [
-        f"━━━ 세운(歲運) ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
-        f"  올해 세운: {sw_ganji}  ({sw_ss_cg} / {sw_oh_cg} / {sw_gilhyung})",
+        f"━━━ 💑 이성·관계 직격 분석 [{love_level}] ━━━━━━━━━━━━━━━━━━",
         f"",
+        f"  {love_desc}",
     ]
+    if _love_reasons:
+        lines.append(f"  [발동 요인] {' / '.join(_love_reasons[:3])}")
+    lines.append(f"")
 
-    if is_sw_gil:
-        lines += [
-            f"  ▶ 올해는 길운(吉運)입니다.",
-            f"    대외 활동·계약·발표·도전에 유리한 해.",
-            f"    상반기(1~6월): 씨앗을 뿌리고 인맥을 확보하는 시기.",
-            f"    하반기(7~12월): 결실을 수확하고 다음 준비를 시작하는 시기.",
-        ]
+    # ── 종합 등급 및 행동 지침 ──────────────────────────────
+    if is_yong_dw and is_sw_gil:
+        cross_grade = "최상 — 대운·세운 동시 용신. 10년에 한 번 오는 황금기입니다."
+        cross_action = f"지금 준비한 모든 것을 실행하십시오. {current_year}년에 심은 씨앗이 향후 3~5년의 결실을 결정합니다."
+    elif is_yong_dw and not is_sw_gil:
+        cross_grade = "상 — 대운은 용신, 세운은 불안. 큰 흐름은 좋지만 올해는 신중하게."
+        cross_action = f"방향은 맞습니다. 올해는 결정적 행동보다 내년을 준비하는 해로 삼으십시오. {current_year+1}년이 실행의 해입니다."
+    elif not is_yong_dw and is_sw_gil:
+        cross_grade = "중상 — 대운은 어렵지만 세운이 길. 올해만큼은 기회가 있습니다."
+        cross_action = f"올해 한 해의 기회를 정확히 포착하십시오. 세운이 지나면 다시 수성 모드로 전환됩니다."
     else:
-        lines += [
-            f"  ▶ 올해는 흉운(凶運) 또는 혼조세입니다.",
-            f"    큰 결정·투자·이동은 최대한 보류할 것.",
-            f"    상반기(1~6월): 에너지 과소비 방지, 건강 체크 필수.",
-            f"    하반기(7~12월): 내년 준비에 집중. 조용히 실력 축적.",
-        ]
+        cross_grade = "수비 — 대운·세운 모두 주의. 최대한 보수적으로 움직여야 할 시기입니다."
+        cross_action = f"지금은 싸울 때가 아닙니다. 건강·재물·관계를 지키는 것만으로도 잘하는 것입니다."
 
     lines += [
-        f"",
-        f"━━━ 대운×세운 교차 분석 ━━━━━━━━━━━━━━━━━━━━━━━━",
-        f"  종합 운기 등급: {cross_grade}",
+        f"━━━ 종합 운기 등급: {cross_grade} ━━━━━━━━━━━━━━━━━━━━━━━",
         f"",
         f"  → {cross_action}",
         f"",
-    ]
-
-    # 현실 상황 맞춤 분석 추가
-    if _cross_detail:
-        lines += [
-            f"━━━ {display_name}님 지금 이 순간 현실 분석 ━━━━━━━━━━━━━━━━━━",
-            f"  ▶ 현재 상황: {_cross_detail.get('상황', '')}",
-            f"  💰 재물: {_cross_detail.get('재물', '')}",
-            f"  💼 직업: {_cross_detail.get('직업', '')}",
-            f"  💑 관계: {_cross_detail.get('관계', '')}",
-            f"  🏃 건강: {_cross_detail.get('건강', '')}",
-            f"  📌 나이대 맥락: {_age_context}",
-            f"",
-        ]
-
-    lines += [
-        f"━━━ 내년 세운 전망 ({current_year + 1}년) ━━━━━━━━━━━━━━━━━━━━━━━",
+        f"━━━ 내년 세운 전망 ({current_year+1}년) ━━━━━━━━━━━━━━━━━━━━━━━━",
         f"  {sw_next_ganji} 세운 ({sw_next_ss} / {sw_next_gilhyung})",
         f"",
     ]
 
-    if is_next_gil:
-        lines.append(f"  ▶ 내년은 전진의 해. 올해 준비한 것을 실행할 무대가 열린다.")
-        lines.append(f"    올해 안에 기반(자금·인맥·실력)을 반드시 마련해 두어라.")
+    if sw_next_gilhyung in ["길", "대길"]:
+        lines.append(f"  ▶ 내년은 전진의 해입니다. 올해 준비한 것을 실행할 무대가 열립니다. 올해 안에 기반(자금·인맥·실력)을 반드시 마련해 두십시오.")
     else:
-        lines.append(f"  ▶ 내년도 신중함이 필요한 해. 올해와 연속으로 수성 모드.")
-        lines.append(f"    2년 연속 내실 강화 — 오히려 후년의 대약진을 위한 축복이다.")
+        lines.append(f"  ▶ 내년도 신중함이 필요한 해입니다. 2년 연속 내실 강화 — 오히려 그 후의 대약진을 위한 준비 기간입니다.")
 
-    lines += [f"", f""]
+    lines.append(f"")
     return "\n".join(lines)
 
 
@@ -7824,7 +8029,8 @@ def _nar_health(ctx):
     if True:
         result = []
 
-        yk = get_yukjin(ilgan, pils, gender, marriage=b.get("marriage","미혼") if b else "미혼")
+        _marriage_ctx = ctx.get("marriage", "미혼") if ctx else "미혼"
+        yk = get_yukjin(ilgan, pils, gender, marriage=_marriage_ctx)
 
         sipsung_data = calc_sipsung(ilgan, pils)
 
@@ -8261,6 +8467,14 @@ def build_rich_narrative(pils, birth_year, gender, name, section="report"):
         geunmyo = get_geunmyo_hwasil(pils) if pils else []
 
         # ctx 딕셔너리 조립 - 모든 섹션 함수 공통 전달
+        # marriage 정보 가져오기
+        _marriage_val = "미혼"
+        try:
+            import streamlit as _st_ctx
+            _marriage_val = _st_ctx.session_state.get("in_marriage", "미혼") or "미혼"
+        except Exception:
+            pass
+
         ctx = {
             "pils": pils, "birth_year": birth_year, "gender": gender, "name": name,
             "display_name": display_name, "ilgan": ilgan, "ilgan_kr": ilgan_kr,
@@ -8277,6 +8491,8 @@ def build_rich_narrative(pils, birth_year, gender, name, section="report"):
             "ilju_desc": ilju_desc, "OH_KR_MAP": OH_KR_MAP, "section": section,
             "pahae": pahae, "geunmyo": geunmyo,
             "ilgan_profile": ILGAN_PROFILE.get(ilgan, {}),
+            "marriage": _marriage_val,
+            "gisin_ohs": gisin if isinstance(gisin, list) else [],
         }
 
         if section == "report":
