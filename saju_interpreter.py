@@ -4206,6 +4206,190 @@ class LocalSajuNarrator:
             "억지로 거스르지 말고, 지금 이 시기의 기운에 맞게 움직이면 반드시 열립니다."
         )
 
+        # ── 12. 부동산 운 섹션 ───────────────────────────────────────
+        lines.append("\n### 🏠 부동산 운 — 매매·이사 길흉 정밀 분석")
+        lines.append(
+            f"🔮 {name}님의 사주 기운을 보면, 부동산 인연은 단순한 '돈'의 문제가 아니라 "
+            "오행의 흐름과 대운·세운의 타이밍이 맞아야 비로소 좋은 결과가 납니다. "
+            "신이 알려주는 부동산 운의 비밀을 들으십시오.\n"
+        )
+
+        # ─ 12-1. 부동산 매매 최적 시기 (대운 기반) ─────────────────
+        lines.append("**📅 부동산 매매 최적 대운 분석:**")
+
+        # 土 용신 여부 확인
+        _is_토_yong = "土" in yongshin
+
+        # 正財 대운 + 土 용신 조합 = 최강 부동산 타이밍
+        _best_jasan_dw, _caution_jasan_dw = [], []
+        for _dw_r in dw_list:
+            _ds_r  = _dw_r.get("시작연도", 9999)
+            _de_r  = _dw_r.get("종료연도", 0)
+            _str_r = _dw_r.get("str", "")
+            _dss_r = _dw_r.get("십성_천간", "")
+            _doh_r = _OH.get(_str_r[:1] if _str_r else "", "")
+            _is_yong_r = _doh_r in yongshin
+
+            if _dss_r == "正財" and _is_yong_r:
+                _tag = "🏆 최상" + (" + 土용신 완벽 조합" if _is_토_yong else "")
+                _best_jasan_dw.append(
+                    f"{_ds_r}~{_de_r}년 **{_str_r}대운** [{_dss_r}×용신] {_tag} "
+                    "— 정재×용신 대운, 부동산 취득·매입의 황금 타이밍."
+                )
+            elif _dss_r == "偏財" and _is_yong_r:
+                _best_jasan_dw.append(
+                    f"{_ds_r}~{_de_r}년 **{_str_r}대운** [{_dss_r}×용신] 🟢 좋음 "
+                    "— 편재×용신 대운, 큰 규모 투자·매매 유리."
+                )
+            elif _dss_r in ("劫財", "偏官") and not _is_yong_r:
+                _caution_jasan_dw.append(
+                    f"{_ds_r}~{_de_r}년 **{_str_r}대운** [{_dss_r}] ⚠️ 위험 "
+                    "— 이 대운 중 부동산 매매는 손실·분쟁 위험이 큽니다."
+                )
+
+        if _best_jasan_dw:
+            lines.append("- ✅ 매매 유리한 대운:")
+            for _t in _best_jasan_dw[:3]:
+                lines.append(f"  · {_t}")
+        else:
+            lines.append("- 평생 부동산 황금 대운이 아직 도래하지 않았거나 이미 지났습니다. 소규모 안전 자산으로 접근하십시오.")
+
+        if _caution_jasan_dw:
+            lines.append("- ⚠️ 매매 위험한 대운:")
+            for _t in _caution_jasan_dw[:2]:
+                lines.append(f"  · {_t}")
+        lines.append("")
+
+        # ─ 12-2. 올해 부동산 운 판단 (세운 기준) ──────────────────
+        lines.append(f"**🏡 올해({cur_year}년) 부동산 운 직격 판단:**")
+
+        # 충(沖) 발동 여부 계산 (pils 기반)
+        _has_chung_r = False
+        try:
+            _ch_r = get_chung_hyung(pils)
+            if _ch_r.get("충", []):
+                _has_chung_r = True
+        except Exception:
+            pass
+
+        _JASAN_SW_MAP = {
+            "正財": ("🟢 **매입 적기**. 정재 세운은 안정적 부동산 인연이 찾아오는 해입니다. "
+                     "검토 중인 물건이 있다면 올해 계약하는 것이 유리합니다."),
+            "偏財": ("🟢 **큰 거래 가능**. 편재 세운은 큰 규모의 부동산 거래가 성사되기 쉬운 해입니다. "
+                     "단, 들어오는 만큼 나갈 수도 있으니 무리한 레버리지는 주의하십시오."),
+            "食神": ("🟡 **소규모 매입·임대 수익 유리**. 식신 세운은 부동산보다 재능 수익화가 먼저입니다. "
+                     "소규모 임대·전세 투자는 가능하나 큰 매매는 내년으로 미루십시오."),
+            "正官": ("🟡 **자가(自家) 취득에 유리**. 직장·사회적 신용도가 높아지는 해로 "
+                     "주택 담보 대출 조건이 유리해집니다. 실거주 목적 매입에 좋습니다."),
+            "偏官": ("🔴 **매매 보류**. 편관 세운은 부동산 분쟁·등기 문제·예상치 못한 하자가 "
+                     "발생하기 쉬운 해입니다. 계약서를 특히 꼼꼼히 확인하십시오."),
+            "劫財": ("🔴 **매매 금지**. 겁재 세운은 부동산 거래에서 사기·손실·공동 분쟁이 "
+                     "생기기 가장 쉬운 해입니다. 올해는 현상 유지가 최선입니다."),
+            "傷官": ("🟡 **이사·리모델링은 가능**. 매매보다는 이사나 인테리어 개선에 유리한 해입니다. "
+                     "충동적 매매 결정은 자제하십시오."),
+            "比肩": ("🟡 **신중 검토 필요**. 경쟁자가 많아 좋은 물건 확보가 어렵습니다. "
+                     "조급하게 결정하지 말고 충분히 비교하십시오."),
+            "偏印": ("🟡 **준비 기간**. 부동산 정보 수집과 시장 조사에 집중하는 해입니다. "
+                     "실거래는 내년 이후로 미루십시오."),
+            "正印": ("🟢 **계약·등기 유리**. 정인 세운은 서류·허가·계약 기운이 좋아 "
+                     "등기 이전·재건축 인허가·전월세 계약에 유리합니다."),
+        }
+
+        _sw_ss_clean_r = re.sub(r"\(.*?\)", "", sw_ss).strip() if sw_ss else ""
+        _jasan_sw_desc = _JASAN_SW_MAP.get(_sw_ss_clean_r,
+            "무난한 시기입니다. 급하게 움직이지 말고 시장을 관망하십시오.")
+
+        lines.append(f"- {_jasan_sw_desc}")
+
+        if _has_chung_r:
+            lines.append(
+                "- ⚠️ **원국에 충(沖) 기운 발동**: 올해 충이 겹쳐 있어 부동산 매매 시 "
+                "예상치 못한 변수(가격 협상 결렬·하자 발생·계약 파기)가 생기기 쉽습니다. "
+                "계약 전 반드시 법무사·부동산 전문가 검토를 받으십시오."
+            )
+        lines.append("")
+
+        # ─ 12-3. 매매 좋은 해 / 나쁜 해 ───────────────────────────
+        lines.append("**📈 향후 매매 좋은 해 vs 나쁜 해 (대운×세운 교차):**")
+
+        _good_years, _bad_years = [], []
+        for _dw_y in dw_list:
+            _ds_y  = _dw_y.get("시작연도", 9999)
+            _de_y  = _dw_y.get("종료연도", 0)
+            _str_y = _dw_y.get("str", "")
+            _dss_y = _dw_y.get("십성_천간", "")
+            _doh_y = _OH.get(_str_y[:1] if _str_y else "", "")
+            try:
+                _ds_int = int(_ds_y)
+                _de_int = int(_de_y)
+            except Exception:
+                continue
+            if _ds_int <= cur_year:
+                continue  # 과거 대운 제외
+
+            if _dss_y in ("正財", "偏財") and _doh_y in yongshin:
+                _good_years.append(
+                    f"{_ds_int}~{_de_int}년 ({_str_y}대운) — 매입·매도 황금기"
+                )
+            elif _dss_y in ("劫財", "偏官") and _doh_y in gisin:
+                _bad_years.append(
+                    f"{_ds_int}~{_de_int}년 ({_str_y}대운) — 매매 손실 위험, 보유 유지 권고"
+                )
+
+        if _good_years:
+            lines.append("- ✅ 매매 좋은 기간:")
+            for _y in _good_years[:3]:
+                lines.append(f"  · {_y}")
+        if _bad_years:
+            lines.append("- ❌ 매매 나쁜 기간:")
+            for _y in _bad_years[:2]:
+                lines.append(f"  · {_y}")
+        if not _good_years and not _bad_years:
+            lines.append("- 향후 대운 기준 뚜렷한 부동산 황금기·위험기가 특정되지 않습니다. 세운별 매년 판단이 필요합니다.")
+        lines.append("")
+
+        # ─ 12-4. 이사 길한 방위 vs 피해야 할 방위 ─────────────────
+        lines.append("**🧭 이사 길한 방위 & 피해야 할 방위:**")
+
+        _OH_DIR = {
+            "木": ("동쪽(東)", "木 기운의 방위. 성장·시작의 에너지가 강해 새 출발에 최적입니다."),
+            "火": ("남쪽(南)", "火 기운의 방위. 명예·인정·활기가 살아나는 방위입니다."),
+            "土": ("중앙 또는 서남·동북", "土 기운의 방위. 안정·축적·정착의 기운이 강합니다."),
+            "金": ("서쪽(西)", "金 기운의 방위. 결실·완성·재물 축적의 에너지가 담긴 방위입니다."),
+            "水": ("북쪽(北)", "水 기운의 방위. 지혜·잠재력·새 시작의 기운이 흐르는 방위입니다."),
+        }
+        _GI_OH_DIR_LABEL = {
+            "木": "동쪽", "火": "남쪽", "土": "중앙·서남·동북", "金": "서쪽", "水": "북쪽"
+        }
+
+        _yong_dir = [_OH_DIR.get(y, ("?", "")) for y in yongshin[:2] if y in _OH_DIR]
+        _gisin_dir_labels = [_GI_OH_DIR_LABEL.get(g, "") for g in gisin[:2] if g in _GI_OH_DIR_LABEL]
+
+        if _yong_dir:
+            for _dir, _desc in _yong_dir:
+                lines.append(f"- ✅ 길한 방위: **{_dir}** — {_desc}")
+        else:
+            lines.append("- ✅ 이사 방위는 용신 오행 방위를 우선 선택하십시오.")
+
+        if _gisin_dir_labels:
+            lines.append(
+                f"- ❌ 피해야 할 방위: **{' · '.join(_gisin_dir_labels)}** "
+                "— 기신 오행 방위로 이사하면 건강·재물·관계에 부정적 영향이 생길 수 있습니다."
+            )
+        lines.append(
+            "- 📅 이사 날짜는 반드시 **손 없는 날**(음력 9·19·29일)을 택하고, "
+            "기신 오행 달은 피하십시오."
+        )
+        lines.append("")
+
+        lines.append(
+            f"🔮 만신이 전하는 부동산 말씀: {name}님, 집은 단순한 건물이 아니라 "
+            "기운이 모이는 그릇입니다. 용신 방위로 이사하고, "
+            "용신 오행 대운에 매입 결정을 내리면 "
+            "부동산이 평생 재물을 지키는 든든한 기반이 됩니다. "
+            "겁재·편관 세운에 충동적으로 움직이는 것은 반드시 삼가십시오."
+        )
+
         return "\n".join(lines)
 
         lines.append(f"*재물은 형태(어떤 방식으로 버는가)와 타이밍(언제 벌고 언제 조심하는가)을 아는 것이 중요합니다.*\n")
