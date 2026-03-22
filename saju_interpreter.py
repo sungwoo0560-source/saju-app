@@ -4693,6 +4693,59 @@ class LocalSajuNarrator:
             if _remedy:
                 lines.append(f"**용신({yongshin[0]}) 오늘 처방**: {_remedy}")
 
+        # ── 오늘의 개운(開運) 처방 ─────────────────────────────────
+        lines.append("\n### 🧭 오늘의 개운 처방 (방향·색상·시간·행동)")
+
+        # DAILY_FULL에서 방향/색상/주의 직접 출력
+        _ss_kor_map = {
+            "比肩": "비견", "劫財": "겁재", "食神": "식신", "傷官": "상관",
+            "偏財": "편재", "正財": "정재", "偏官": "편관", "正官": "정관",
+            "偏印": "편인", "正印": "정인",
+        }
+        _df_key = _ss_kor_map.get(sw_ss, "-")
+        _df = DAILY_FULL.get(_df_key, DAILY_FULL.get("-", {}))
+        if _df:
+            lines.append(f"- 🗺️ **길한 방향·색상·시간**: {_df.get('lucky', '무난한 하루')}")
+            lines.append(f"- 🚫 **오늘 조심할 것**: {_df.get('caution', '특이사항 없음')}")
+            # intro 중 1개 랜덤 출력 (만신 어투 한줄)
+            _intro_list = _df.get("intro", [])
+            if _intro_list:
+                lines.append(f"\n> 🔮 {random.choice(_intro_list)}")
+
+        # 일간 기반 행운 방향/색상 (ILGAN_DESC lucky 필드)
+        _ilg_info = ILGAN_DESC.get(b.get("ilgan", "甲"), {})
+        _lucky_str = _ilg_info.get("lucky", "")
+        if _lucky_str:
+            lines.append(f"\n**[내 일간 기본 행운 정보]** {_lucky_str}")
+
+        # 용신 오행 기반 오늘의 행동 처방
+        _yong = b.get("yongshin", [])
+        if _yong:
+            _oh_remedy_map = {
+                "木": "🌿 오늘은 동쪽을 향하거나 초록색 소품을 몸 가까이 두십시오. 나무·식물·새벽 산책이 기운을 끌어올립니다.",
+                "火": "🔥 남쪽이 길합니다. 빨간색·주황색 포인트 아이템을 활용하고 오전 중 햇빛을 쬐십시오.",
+                "土": "🏔️ 중앙·북동쪽이 유리합니다. 황색·베이지 계열로 안정감을 더하고 규칙적인 식사를 챙기십시오.",
+                "金": "⚙️ 서쪽이 길합니다. 흰색·은색·금속 소품이 행운을 부릅니다. 결단이 필요한 일은 오전에 처리하십시오.",
+                "水": "💧 북쪽이 유리합니다. 검정·남색 계열, 충분한 수분 섭취, 명상이나 조용한 독서가 도움이 됩니다.",
+            }
+            for _oh in _yong[:2]:
+                _remedy = _oh_remedy_map.get(_oh, "")
+                if _remedy:
+                    lines.append(f"- 용신({_oh}): {_remedy}")
+                    break  # 1개만
+
+        # ── 오늘 신살(신살) 경고 ─────────────────────────────────
+        try:
+            from saju_sinsal import get_12sinsal
+            _sinsal = get_12sinsal(b.get("ilgan", "甲"), pils)
+            _bad_sinsal = [s for s in _sinsal if s.get("type") == "흉" or "조심" in s.get("desc", "")]
+            if _bad_sinsal:
+                lines.append("\n### ⚠️ 오늘 활성 신살 경고")
+                for _s in _bad_sinsal[:2]:
+                    lines.append(f"- **{_s.get('name', '')}**: {_s.get('desc', '')[:60]}…")
+        except Exception:
+            _saju_log.warning("[daily 오류] %s", sys.exc_info()[1])
+
         return "\n".join(lines)
 
     @staticmethod
