@@ -18468,6 +18468,386 @@ def render_manse_grid(pils, birth_year, birth_month, birth_day, birth_hour, birt
                 )
 
 
+# ══════════════════════════════════════════════════════════════════
+#  🌟 천명 개운 처방전 탭
+# ══════════════════════════════════════════════════════════════════
+def menu_gaewoon(pils, name, birth_year, gender):
+    """🌟 천명 개운 처방전 — 용신 강화·신살 비방·풍수·재물인연 처방"""
+
+    st.markdown(
+        '<div class="gold-section">🌟 천명 개운 처방전(開運處方箋) — 하늘 기운을 내 편으로</div>',
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        f"{name}님의 팔자 원국과 현재 대운·세운을 분석하여 "
+        f"지금 당장 실천할 수 있는 맞춤 개운 처방을 드립니다.\n"
+    )
+
+    try:
+        _ys_gw   = get_yongshin(pils)
+        _yong_gw = _ys_gw.get("종합_용신", [])
+        _gis_gw  = _ys_gw.get("기신", [])
+        _sw_gw   = get_yearly_luck(pils, datetime.now().year)
+        _sw_ss_gw = _sw_gw.get("십성_천간", "")
+        _sinsal_gw = get_12sinsal(pils)
+        _marriage_gw = st.session_state.get("in_marriage", "미혼")
+    except Exception as _e_gw:
+        st.error(f"기본 데이터 오류: {_e_gw}")
+        return
+
+    # ──────────────────────────────────────────────────────────────
+    # 섹션 1: 용신 강화 처방
+    # ──────────────────────────────────────────────────────────────
+    st.markdown(
+        '<div class="gold-section">🎨 ① 용신 강화 처방 — 색상·방위·음식·보석</div>',
+        unsafe_allow_html=True,
+    )
+
+    _OH_RX_GW = {
+        "木": {
+            "색상": "초록·청록·파랑",       "방위": "동쪽(東)",
+            "음식": "신맛·새싹·채소·녹차",  "보석": "에메랄드·비취·녹수정",
+            "물상": "식물·나무·화분·숲",     "시간": "새벽 5~7시(인시)",
+            "행동": "산책·등산·식물 키우기·독서·계획 수립",
+            "색_hex": "#27ae60",
+        },
+        "火": {
+            "색상": "빨강·오렌지·자홍",      "방위": "남쪽(南)",
+            "음식": "쓴맛·고추·계피·홍차",   "보석": "루비·가넷·붉은 산호",
+            "물상": "촛불·조명·난로·햇빛",   "시간": "오전 9~11시(사시)",
+            "행동": "스트레칭·사람 만나기·발표·창작·밝은 환경 유지",
+            "색_hex": "#e74c3c",
+        },
+        "土": {
+            "색상": "황색·황토·베이지·갈색",  "방위": "중앙(中)",
+            "음식": "단맛·고구마·호박·현미",  "보석": "황수정·호박·황금",
+            "물상": "도자기·토기·황토방·도자",  "시간": "오후 1~3시(미시)",
+            "행동": "명상·요리·텃밭 가꾸기·규칙적 식사·대지 밟기",
+            "색_hex": "#d4a017",
+        },
+        "金": {
+            "색상": "흰색·은색·회색·금색",    "방위": "서쪽(西)",
+            "음식": "매운맛·무·배·대파·마늘",  "보석": "백수정·다이아·백금",
+            "물상": "금속 소품·동전·칼·시계",  "시간": "오후 5~7시(유시)",
+            "행동": "계획 점검·정리정돈·결단력 키우기·의리 지키기",
+            "색_hex": "#95a5a6",
+        },
+        "水": {
+            "색상": "검정·짙은 파랑·남색",    "방위": "북쪽(北)",
+            "음식": "짠맛·미역·김·콩·검은깨",  "보석": "사파이어·흑진주·라피스라줄리",
+            "물상": "어항·분수·물그릇·파도",   "시간": "밤 9~11시(해시)",
+            "행동": "수영·입욕·독서·지혜 쌓기·감사 일기 쓰기",
+            "색_hex": "#2980b9",
+        },
+    }
+
+    if not _yong_gw:
+        st.info("용신이 산출되지 않았습니다. 생년월일·시간을 정확히 입력해 주세요.")
+    else:
+        for _oh_gw in _yong_gw[:2]:
+            _rx = _OH_RX_GW.get(_oh_gw)
+            if not _rx:
+                continue
+            st.markdown(
+                f"""<div style="border:2px solid {_rx['색_hex']};border-radius:16px;
+                padding:16px 18px;margin-bottom:14px;
+                background:{_rx['색_hex']}11;">
+<div style="font-size:16px;font-weight:900;color:{_rx['색_hex']};margin-bottom:10px;">
+  ✨ 용신 {_oh_gw} 오행 처방</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px;color:#2d1f00;">
+  <div>🎨 <b>행운색</b>: {_rx['색상']}</div>
+  <div>🧭 <b>길한 방위</b>: {_rx['방위']}</div>
+  <div>🍽️ <b>권장 음식</b>: {_rx['음식']}</div>
+  <div>💎 <b>행운 보석</b>: {_rx['보석']}</div>
+  <div>🏠 <b>집 인테리어</b>: {_rx['물상']}</div>
+  <div>⏰ <b>황금 시간대</b>: {_rx['시간']}</div>
+</div>
+<div style="margin-top:10px;font-size:13px;color:#3d2b00;">
+  🏃 <b>일상 개운 행동</b>: {_rx['행동']}
+</div></div>""",
+                unsafe_allow_html=True,
+            )
+
+    if _gis_gw:
+        _gis_str = "·".join(_gis_gw)
+        _gis_colors = [_OH_RX_GW[o]["색상"] for o in _gis_gw if o in _OH_RX_GW]
+        st.warning(
+            f"⚠️ **기신({_gis_str}) 오행 주의**: "
+            f"{', '.join(_gis_colors)} 계열 색상·방위·음식은 기운을 소모시킵니다. "
+            "집 안에서도 기신 오행 소품을 최소화하세요."
+        )
+
+    # ──────────────────────────────────────────────────────────────
+    # 섹션 2: 올해 타이밍 처방 (월별 길흉)
+    # ──────────────────────────────────────────────────────────────
+    st.markdown(
+        '<div class="gold-section">📅 ② 올해 타이밍 처방 — 월별 최적 행동 캘린더</div>',
+        unsafe_allow_html=True,
+    )
+    try:
+        _cur_yr_gw = datetime.now().year
+        _MON_KR_GW = ["1월","2월","3월","4월","5월","6월",
+                      "7월","8월","9월","10월","11월","12월"]
+        _GH_RANK_GW = {"대길(大吉)":5,"길(吉)":4,"평길(平吉)":3,
+                       "평(平)":2,"흉(凶)":1,"흉흉(凶凶)":0}
+        _ACT_MAP_GW = {
+            "食神":  "새 프로젝트 시작·창업·자기계발",
+            "傷官":  "네트워킹·발표·예술활동",
+            "偏財":  "투자·영업·부업 활성화",
+            "正財":  "계약·저축·부동산 거래",
+            "偏官":  "변화 대비·이직 준비·법적 점검",
+            "正官":  "승진 도전·공식 활동·명예 쌓기",
+            "偏印":  "공부·자격증·내면 탐구",
+            "正印":  "인맥 활용·학업·상사 지원 받기",
+            "比肩":  "독립 행보·경쟁 도전·체력 강화",
+            "劫財":  "동업 주의·현금 보관·지출 절제",
+        }
+        _mon_data_gw = []
+        for _m in range(1, 13):
+            _ml = get_monthly_luck(pils, _cur_yr_gw, _m) or {}
+            _gh = _ml.get("길흉", "평(平)")
+            _ss_m = _ml.get("십성", "")
+            _rank = _GH_RANK_GW.get(_gh, 2)
+            _mon_data_gw.append((_m, _MON_KR_GW[_m-1], _gh, _rank, _ss_m))
+
+        _sorted_gw = sorted(_mon_data_gw, key=lambda x: -x[3])
+        _top3_gw   = _sorted_gw[:3]
+        _bot2_gw   = _sorted_gw[-2:]
+
+        st.markdown("**🏆 올해 최고의 달 TOP 3**")
+        for _m, _mkr, _gh, _, _ss_m in _top3_gw:
+            _act = _ACT_MAP_GW.get(_ss_m.replace("(","").split("(")[0], "긍정적 추진력 활용")
+            st.success(f"**{_mkr}** — {_gh} | 추천: {_act}")
+
+        st.markdown("**⚠️ 조심할 달**")
+        for _m, _mkr, _gh, _, _ss_m in _bot2_gw:
+            st.error(f"**{_mkr}** — {_gh} | 투자·계약·이동 최대한 자제")
+
+        # 월별 미니 캘린더
+        st.markdown("**📊 12개월 길흉 한눈에 보기**")
+        _cal_cols = st.columns(6)
+        for _i, (_m, _mkr, _gh, _rank, _ss_m) in enumerate(_mon_data_gw):
+            _bg = "#27ae60" if _rank >= 4 else ("#e74c3c" if _rank <= 1 else ("#f39c12" if _rank == 2 else "#3498db"))
+            _tc = "#fff"
+            with _cal_cols[_i % 6]:
+                st.markdown(
+                    f'<div style="background:{_bg};color:{_tc};border-radius:10px;'
+                    f'padding:8px 4px;text-align:center;margin:3px 0;font-size:12px;">'
+                    f'<b>{_mkr}</b><br><span style="font-size:10px">{_gh}</span></div>',
+                    unsafe_allow_html=True,
+                )
+    except Exception as _te_gw:
+        st.warning(f"월별 타이밍 분석 오류: {_te_gw}")
+
+    # ──────────────────────────────────────────────────────────────
+    # 섹션 3: 신살별 비방
+    # ──────────────────────────────────────────────────────────────
+    st.markdown(
+        '<div class="gold-section">🔮 ③ 신살별 비방(裨方) — 흉살 차단 처방</div>',
+        unsafe_allow_html=True,
+    )
+    _SINSAL_RX_GW = {
+        "삼재수(三災數)": {
+            "icon": "🔥", "color": "#c0392b",
+            "비방": [
+                "삼재부적을 몸에 지니거나 집 현관에 부착하세요.",
+                "동쪽 방향 여행·이사를 피하십시오.",
+                "동짓날 팥죽을 끓여 현관에 뿌리면 삼재 기운이 약해집니다.",
+                "3년간 큰 투자·사업 확장·이직은 신중하게 결정하세요.",
+            ],
+        },
+        "관재수(官災數)": {
+            "icon": "⚖️", "color": "#8e44ad",
+            "비방": [
+                "계약서·서류에 반드시 전문가 검토를 받으세요.",
+                "보증·연대보증은 절대 서지 마세요.",
+                "법적 분쟁의 소지가 있는 상황에서 즉각 물러나세요.",
+                "자수정·백수정을 지갑에 넣어 두면 관재 기운을 막아줍니다.",
+            ],
+        },
+        "사고수(事故數)": {
+            "icon": "⚡", "color": "#e67e22",
+            "비방": [
+                "운전 중 과속·졸음운전을 엄격히 자제하세요.",
+                "수술 시기는 용신 달로 미루는 것이 유리합니다.",
+                "안전 장비 점검(차량·가스·전기)을 정기적으로 하세요.",
+                "빨간 실을 손목에 묶거나 황동 팔찌를 착용하세요.",
+            ],
+        },
+        "상문살(喪門殺)": {
+            "icon": "🕯️", "color": "#7f8c8d",
+            "비방": [
+                "장례식장·병원 방문 후 반드시 소금 한 줌을 몸에 뿌리세요.",
+                "집 현관에 소금 단지를 두어 외부 나쁜 기운을 차단하세요.",
+                "조상 제사·차례를 정성껏 지내면 음덕이 보호해 줍니다.",
+                "검은색 계열 옷은 이 시기에 최소화하세요.",
+            ],
+        },
+        "년살(도화살)": {
+            "icon": "🌹", "color": "#e91e8c",
+            "비방": (
+                ["이성 관계에서 가볍게 이끌리는 감정을 경계하세요.",
+                 "기혼자는 이성과 단둘이 있는 상황을 만들지 마세요.",
+                 "SNS 노출을 최소화하고 스캔들 소지를 미리 차단하세요."]
+                if _marriage_gw in ("기혼","재혼")
+                else
+                ["도화살이 활성화된 지금이 인연 만들기 최적기입니다!",
+                 "외모에 투자하고 소셜 활동·모임에 적극 참여하세요.",
+                 "분홍·빨간 소품을 침실에 두면 인연 기운이 강화됩니다."]
+            ),
+        },
+        "역마살(驛馬殺)": {
+            "icon": "🚀", "color": "#16a085",
+            "비방": [
+                "역마살은 흉살이 아닙니다 — 이동과 변화를 적극 활용하세요.",
+                "이직·해외·이사 등 변화의 흐름에 올라타면 기회가 열립니다.",
+                "한 곳에 지나치게 정체하면 오히려 막힘이 생깁니다.",
+                "여행 중 새로운 인맥·사업 기회를 발견할 수 있는 시기입니다.",
+            ],
+        },
+    }
+
+    _active_sinsal_gw = [s.get("이름", "") for s in _sinsal_gw]
+    _found_gw = False
+    for _ss_name_gw, _rx_gw in _SINSAL_RX_GW.items():
+        # 이름 부분 매칭 (괄호 앞 키워드)
+        _key_gw = _ss_name_gw.split("(")[0]
+        if any(_key_gw in _an for _an in _active_sinsal_gw):
+            _found_gw = True
+            st.markdown(
+                f'<div style="border-left:5px solid {_rx_gw["color"]};'
+                f'background:{_rx_gw["color"]}11;border-radius:0 12px 12px 0;'
+                f'padding:12px 16px;margin-bottom:12px;">'
+                f'<div style="font-size:15px;font-weight:900;color:{_rx_gw["color"]};margin-bottom:8px;">'
+                f'{_rx_gw["icon"]} {_ss_name_gw} 발동 — 비방 처방</div>'
+                + "".join(f'<div style="font-size:13px;color:#2d1f00;margin-bottom:4px;">• {b}</div>'
+                          for b in _rx_gw["비방"])
+                + "</div>",
+                unsafe_allow_html=True,
+            )
+    if not _found_gw:
+        st.success("✅ 현재 원국에 주요 흉살이 발동 중이지 않습니다. 이 시기를 적극적으로 활용하세요!")
+
+    # ──────────────────────────────────────────────────────────────
+    # 섹션 4: 풍수·이사 처방
+    # ──────────────────────────────────────────────────────────────
+    st.markdown(
+        '<div class="gold-section">🏠 ④ 풍수·이사 처방 — 공간 개운법</div>',
+        unsafe_allow_html=True,
+    )
+    _DIR_MAP_GW = {"木":"동쪽","火":"남쪽","土":"중앙","金":"서쪽","水":"북쪽"}
+    _SPACE_GW = {
+        "木": ("현관에 초록 식물 배치, 동쪽 창 최대 활용",
+               "침실 동쪽 벽에 나무 소품·사진",
+               "서재 동쪽에 책상 방향 설정"),
+        "火": ("거실에 밝은 조명·촛불 인테리어",
+               "남쪽 창을 활짝 열어 햇빛 유입",
+               "빨강·오렌지 포인트 소품 배치"),
+        "土": ("황토색·베이지 쿠션·러그 배치",
+               "도자기·토기 소품으로 안정감 부여",
+               "중앙 공간을 항상 깔끔하게 정리"),
+        "金": ("금속 소품·은색 프레임 배치",
+               "서쪽 방향 창문 열기·서향 책상",
+               "흰색 계열 침구로 깔끔하게 유지"),
+        "水": ("어항·분수·물 오브제 북쪽 배치",
+               "검정·네이비 소품으로 포인트",
+               "욕실을 항상 청결하게 유지"),
+    }
+    if _yong_gw:
+        _y1_gw = _yong_gw[0]
+        _good_dir_gw = _DIR_MAP_GW.get(_y1_gw, "-")
+        _bad_dirs_gw  = [_DIR_MAP_GW.get(g, "") for g in _gis_gw if g in _DIR_MAP_GW]
+        _space_tips_gw = _SPACE_GW.get(_y1_gw, ("용신 소품 배치", "", ""))
+        st.markdown(
+            f"""<div style="border:1.5px solid #c9a84c;border-radius:14px;padding:16px 18px;background:#fffdf5;">
+<div style="font-weight:900;font-size:15px;color:#8b6200;margin-bottom:10px;">🧭 이사·방향 처방</div>
+<div style="font-size:13px;color:#2d1f00;margin-bottom:6px;">✅ <b>길한 이사 방향</b>: <b style="color:#27ae60">{_good_dir_gw}</b> — 용신 {_y1_gw} 오행 방위</div>
+<div style="font-size:13px;color:#2d1f00;margin-bottom:10px;">⚠️ <b>피할 방향</b>: <b style="color:#e74c3c">{', '.join(_bad_dirs_gw) or '없음'}</b> — 기신 방위</div>
+<div style="font-weight:800;font-size:13px;color:#8b6200;margin-bottom:6px;">🏠 집안 용신 소품 배치법</div>
+{"".join(f'<div style="font-size:13px;color:#3d2b00;margin-bottom:4px;">• {t}</div>' for t in _space_tips_gw if t)}
+</div>""",
+            unsafe_allow_html=True,
+        )
+
+    # ──────────────────────────────────────────────────────────────
+    # 섹션 5: 재물·인연 개운
+    # ──────────────────────────────────────────────────────────────
+    st.markdown(
+        '<div class="gold-section">💰 ⑤ 재물·인연 개운 처방</div>',
+        unsafe_allow_html=True,
+    )
+
+    # 횡재수 발동 조건
+    _HWANGJE_SS_GW = {"偏財", "食神", "傷官"}
+    _is_hwangje_gw = _sw_ss_gw and any(k in _sw_ss_gw for k in ["偏財", "食神", "傷官"])
+    _jaesbu_color_gw = _OH_RX_GW.get(_yong_gw[0], {}).get("색_hex", "#d4af37") if _yong_gw else "#d4af37"
+    _jaesbu_oh_gw    = _yong_gw[0] if _yong_gw else "木"
+
+    if _is_hwangje_gw:
+        st.success(
+            f"🎯 **횡재수 발동 중!** 올해 세운 십성 **{_sw_ss_gw}**이 흐르고 있습니다. "
+            "예상치 못한 수입·횡재 기회가 열려 있는 시기입니다. "
+            "로또·투자·부업·경품 등에 소액으로 적극 도전해 보세요."
+        )
+    else:
+        st.info(
+            f"올해 세운 십성은 **{_sw_ss_gw or '미산출'}**입니다. "
+            f"횡재수 발동 조건(偏財·食神·傷官)에 해당하지 않지만, "
+            f"용신 달({', '.join([_MON_KR_GW[m-1] for m, _, _, r, _ in _mon_data_gw if r >= 4][:3]) if '_mon_data_gw' in dir() else '-'})에는 작은 투자가 유리합니다."
+        )
+
+    # 재수부 처방
+    _wallet_color_gw = _OH_RX_GW.get(_jaesbu_oh_gw, {}).get("색상", "초록").split("·")[0]
+    _wallet_dir_gw   = _DIR_MAP_GW.get(_jaesbu_oh_gw, "동쪽")
+    st.markdown(
+        f"""<div style="border:1.5px solid {_jaesbu_color_gw};border-radius:14px;
+        padding:14px 16px;background:{_jaesbu_color_gw}11;margin-bottom:12px;">
+<div style="font-weight:900;font-size:14px;color:{_jaesbu_color_gw};margin-bottom:8px;">💳 재수부(財數符) 처방</div>
+<div style="font-size:13px;color:#2d1f00;margin-bottom:4px;">• 지갑 색상: <b>{_wallet_color_gw}</b> 계열 (용신 {_jaesbu_oh_gw} 오행)</div>
+<div style="font-size:13px;color:#2d1f00;margin-bottom:4px;">• 지갑 보관 방위: <b>{_wallet_dir_gw}</b> 방향 서랍/가방 속</div>
+<div style="font-size:13px;color:#2d1f00;margin-bottom:4px;">• 지갑에 황금 또는 용신 오행 보석 조각을 함께 넣어 두세요.</div>
+<div style="font-size:13px;color:#2d1f00;">• 매월 초하루 지갑을 깨끗이 닦고 새 돈(새 지폐)을 넣어두면 재수가 들어옵니다.</div>
+</div>""",
+        unsafe_allow_html=True,
+    )
+
+    # 인연 개운법
+    if _marriage_gw in ("미혼", "이혼", "이혼/별거", "사별"):
+        st.markdown("**💕 인연 개운법 (미혼·재혼 준비)**")
+        st.markdown(
+            f"- 용신 오행 **{_yong_gw[0] if _yong_gw else '木'}** 방향의 모임·커뮤니티에 적극 참여하세요.\n"
+            f"- 분홍·빨간 장미를 침실 {_wallet_dir_gw} 방향에 두면 인연 기운이 강화됩니다.\n"
+            "- 인연이 오는 달: 세운에서 관성(남성) 또는 재성(여성) 오행이 강한 달을 노리세요.\n"
+            "- 소개팅·앱·모임은 용신 달(최고의 달 TOP3)에 집중적으로 참여하세요."
+        )
+    else:
+        st.markdown("**💑 인연 개운법 (기혼)**")
+        st.markdown(
+            "- 배우자와 함께 용신 방위 방향으로 여행을 가면 부부 기운이 강화됩니다.\n"
+            f"- 침실에 {_wallet_color_gw} 계열 소품을 함께 배치하면 금슬이 좋아집니다.\n"
+            "- 부부 공동 목표(재테크·여행·건강)를 세우면 기신 충돌 에너지가 해소됩니다."
+        )
+
+    # 로또·투자 유리한 달
+    st.markdown("**🎰 로또·투자 유리한 달**")
+    try:
+        _lotto_mon_gw = [
+            _MON_KR_GW[m-1] for m, _, _, r, _ in _mon_data_gw if r >= 4
+        ][:4]
+        if _lotto_mon_gw:
+            st.success(f"📅 **{', '.join(_lotto_mon_gw)}** — 재물 기운이 강한 달. 소액 투자·복권 구매 타이밍입니다.")
+        else:
+            st.info("올해는 전반적으로 재물 기운이 안정적입니다. 꾸준한 저축이 최선의 전략입니다.")
+    except Exception:
+        pass
+
+    st.markdown(
+        f"\n🔮 **만신의 말씀**: {name}님, 개운(開運)은 하루아침에 이루어지지 않습니다. "
+        f"용신 기운을 일상에 조금씩 녹여 넣을 때 천명(天命)이 당신 편이 됩니다. "
+        "오늘부터 실천하십시오."
+    )
+
+
 def main():
 
     # -- 페이지 설정 ---------------------------------
@@ -20343,6 +20723,7 @@ def main():
                 ("☯️", "음양오행"),
                 ("📜", "토정비결"),
                 ("📄", "PDF리포트"),
+                ("🌟", "개운처방"),
             ]
             _cur_tab = _ss.get("active_tab", 0)
 
@@ -20386,8 +20767,8 @@ def main():
                         st.rerun()
 
             st.markdown('<div style="height:4px"></div>', unsafe_allow_html=True)
-            # 버튼 행 2 (6개)
-            _btn_cols2 = st.columns(6)
+            # 버튼 행 2 (7개)
+            _btn_cols2 = st.columns(7)
             for _bi, (_em, _nm) in enumerate(_TAB_DEFS[7:]):
                 _real_idx = _bi + 7
                 _is_active = (_cur_tab == _real_idx)
@@ -20428,6 +20809,8 @@ def main():
                 menu_tojeong(pils, name, birth_year, gender)
             elif _cur_tab == 12:
                 menu_pdf(pils, birth_year, gender, name, str(_ss.get("in_birth_hour", "")))
+            elif _cur_tab == 13:
+                menu_gaewoon(pils, name, birth_year, gender)
 
     # ---- 맨 위로 플로팅 버튼 (window.parent 로 Streamlit iframe 대응) ----
     st.markdown(
