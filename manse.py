@@ -19512,48 +19512,6 @@ def main():
     # -- 입력 창 (세션 바인딩 방식) --------------------
 
     with st.expander("📝 사주 정보 입력 (여기를 눌러 정보 입력/수정)", expanded=_ss["form_expanded"]):
-        # 🧪 가상 테스터 무작위 추출 버튼 (개발/테스트 전용 - 실제 사용자 데이터 초기화됨)
-
-        with st.expander("🧪 개발자 도구 (테스트 전용)", expanded=False):
-            st.warning("⚠️ 아래 버튼은 테스트 전용입니다. 클릭 시 현재 입력된 사주 정보와 대화 기록이 초기화됩니다.")
-
-            if st.button("🧪 가상 테스터 무작위 추출 (100명 관리 모드)", use_container_width=True):
-                user = VirtualUserEngine.pick_random()
-
-                # 세션 스테이트 업데이트 (Binding 방식에 맞춰 직접 수정)
-
-                st.session_state["in_name"] = user["name"]
-
-                st.session_state["in_gender"] = "남" if user["gender"] == "남성" else "여"
-
-                st.session_state["in_cal_type"] = user["calendar"]
-
-                if user["calendar"] == "양력":
-                    st.session_state["in_solar_date"] = date(user["year"], user["month"], user["day"])
-
-                else:
-                    st.session_state["in_lunar_year"] = user["year"]
-
-                    st.session_state["in_lunar_month"] = user["month"]
-
-                    st.session_state["in_lunar_day"] = user["day"]
-
-                st.session_state["in_birth_hour"] = user["hour"]
-                st.session_state["birth_hour"]    = user["hour"]  # 키 동기화
-
-                st.session_state["in_birth_minute"] = 0
-                st.session_state["birth_minute"]    = 0  # 키 동기화
-
-                st.session_state["in_unknown_time"] = False
-
-                # saju_pils 및 chat_history 초기화하여 데이터 무결성 보장
-
-                st.session_state["saju_pils"] = None
-
-                st.session_state["chat_history"] = []
-
-                st.rerun()
-
         col1, col2 = st.columns([3, 1])
 
         with col1:
