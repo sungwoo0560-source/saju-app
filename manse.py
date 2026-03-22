@@ -19985,9 +19985,6 @@ def main():
                 )
                 st.markdown(_share_html, unsafe_allow_html=True)
 
-                with st.expander("🔍 파라미터 보기", expanded=False):
-                    st.code(f"?{_qstr}", language=None)
-
         marriage_status = st.session_state.get("marriage_status", "미혼")
 
         occupation = st.session_state.get("occupation", "선택 안 함")
