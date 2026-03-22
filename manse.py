@@ -18841,10 +18841,421 @@ def menu_gaewoon(pils, name, birth_year, gender):
     except Exception:
         pass
 
+    # ──────────────────────────────────────────────────────────────
+    # 섹션 6: 개명(改名) 오행 분석
+    # ──────────────────────────────────────────────────────────────
     st.markdown(
-        f"\n🔮 **만신의 말씀**: {name}님, 개운(開運)은 하루아침에 이루어지지 않습니다. "
-        f"용신 기운을 일상에 조금씩 녹여 넣을 때 천명(天命)이 당신 편이 됩니다. "
-        "오늘부터 실천하십시오."
+        '<div class="gold-section">✍️ ⑥ 개명(改名) 오행 분석 — 이름에 용신 기운 심기</div>',
+        unsafe_allow_html=True,
+    )
+    # 오행별 획수 (수리오행: 1·2=木, 3·4=火, 5·6=土, 7·8=金, 9·10=水)
+    _OH_STROKE_GW = {
+        "木": [1, 2, 11, 12, 21, 22, 31, 32],
+        "火": [3, 4, 13, 14, 23, 24, 33, 34],
+        "土": [5, 6, 15, 16, 25, 26, 35, 36],
+        "金": [7, 8, 17, 18, 27, 28, 37, 38],
+        "水": [9, 10, 19, 20, 29, 30, 39, 40],
+    }
+    _OH_KR_GW2 = {"木":"木(나무)","火":"火(불)","土":"土(흙)","金":"金(쇠)","水":"水(물)"}
+    _OH_CHAR_GW = {
+        "木": "杰·松·林·柳·棟·樹·桂·植·楠·根·桓·栢·梓·桐·楓",
+        "火": "炫·煥·炅·炳·熙·燦·烈·炯·赫·熙·燮·煜·熙·炫·炳",
+        "土": "圭·培·坤·埈·坰·垠·均·城·基·垣·埴·堯·塤·坯·堅",
+        "金": "鎭·鍾·銀·錫·銑·鏞·鑄·鉉·鐸·鐘·錡·鈺·鑑·鑛·鑪",
+        "水": "沅·洙·泳·淵·澤·海·湖·洋·漢·泓·渙·涓·溟·濬·瀅",
+    }
+    _name_len = len(name.replace(" ", "")) if name else 0
+    st.markdown(
+        f"**{name}**님의 이름 분석 — 현재 이름 글자 수: **{_name_len}자**\n\n"
+        "사주 원국에서 **부족한 오행을 이름에 보강**하면 천명의 흐름이 더욱 강해집니다."
+    )
+    if _yong_gw:
+        for _yoh_gw in _yong_gw[:2]:
+            _strokes_gw = _OH_STROKE_GW.get(_yoh_gw, [])
+            _chars_gw   = _OH_CHAR_GW.get(_yoh_gw, "")
+            _stroke_str_gw = "·".join(str(s) for s in _strokes_gw[:6]) + "획 …"
+            st.markdown(
+                f"""<div style="border:2px solid {_OH_RX_GW.get(_yoh_gw,{}).get('색_hex','#c9a84c')};
+                border-radius:14px;padding:14px 16px;margin-bottom:10px;
+                background:{_OH_RX_GW.get(_yoh_gw,{}).get('색_hex','#c9a84c')}11;">
+<div style="font-weight:900;font-size:15px;color:{_OH_RX_GW.get(_yoh_gw,{}).get('색_hex','#888')};margin-bottom:8px;">
+  ✨ 이름에 넣으면 좋은 오행: <b>{_OH_KR_GW2.get(_yoh_gw,'')}</b></div>
+<div style="font-size:13px;color:#2d1f00;margin-bottom:6px;">
+  🔢 <b>길한 획수</b>: {_stroke_str_gw}</div>
+<div style="font-size:13px;color:#2d1f00;margin-bottom:6px;">
+  📝 <b>추천 한자</b>: {_chars_gw}</div>
+<div style="font-size:13px;color:#3d2b00;">
+  💡 이름 한 글자의 획수가 위 숫자 중 하나이거나, 위 한자를 포함하면
+  <b>{_OH_KR_GW2.get(_yoh_gw,'')} 오행</b>이 강화됩니다.</div>
+</div>""",
+                unsafe_allow_html=True,
+            )
+    if _gis_gw:
+        _gis_strokes_gw = []
+        for _goh in _gis_gw:
+            _gis_strokes_gw.extend(_OH_STROKE_GW.get(_goh, [])[:4])
+        st.warning(
+            f"⚠️ **개명 시 피해야 할 획수**: {', '.join(str(s) for s in _gis_strokes_gw[:8])}획 — "
+            f"기신 오행({'/'.join(_gis_gw)}) 획수입니다. 이름에 이 획수가 들어가면 기신 기운이 강화됩니다."
+        )
+    st.info(
+        "💬 **만신 조언**: 개명은 인생의 흐름을 바꾸는 강력한 개운법입니다. "
+        "이름 오행이 용신과 일치하면 사회적 활동 에너지가 눈에 띄게 달라집니다. "
+        "작명가 상담 시 반드시 사주 원국 용신을 먼저 확인하고 진행하십시오."
+    )
+
+    # ──────────────────────────────────────────────────────────────
+    # 섹션 7: 배우자·인연 오행 매칭
+    # ──────────────────────────────────────────────────────────────
+    st.markdown(
+        '<div class="gold-section">💑 ⑦ 배우자·인연 오행 매칭 — 내 운을 올려주는 상대</div>',
+        unsafe_allow_html=True,
+    )
+    _ILGAN_OH_GW = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
+                    "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
+    _OH_BIRTH_GW = {"木":"水","火":"木","土":"火","金":"土","水":"金"}
+    _OH_GEN_GW   = {"木":"火","火":"土","土":"金","金":"水","水":"木"}
+    _OH_CTRL_GW  = {"木":"土","火":"金","土":"水","金":"木","水":"火"}
+    _ILGAN_DETAIL_GW = {
+        "甲":("인(寅)·묘(卯)띠",  "법조·교육·건설·임업·기획"),
+        "乙":("인(寅)·묘(卯)띠",  "디자인·원예·심리·패션·교육"),
+        "丙":("사(巳)·오(午)띠",  "방송·연예·영업·마케팅·교육"),
+        "丁":("사(巳)·오(午)띠",  "예술·상담·종교·의료·교육"),
+        "戊":("진(辰)·술(戌)·축(丑)·미(未)띠", "부동산·건설·농업·행정·금융"),
+        "己":("진(辰)·술(戌)·축(丑)·미(未)띠", "회계·식품·요리·농업·의료"),
+        "庚":("신(申)·유(酉)띠",  "군인·경찰·법조·기계·금융"),
+        "辛":("신(申)·유(酉)띠",  "의료·미용·보석·회계·IT"),
+        "壬":("해(亥)·자(子)띠",  "외교·무역·철학·IT·금융"),
+        "癸":("해(亥)·자(子)띠",  "예술·상담·교육·심리·복지"),
+    }
+    _ILGAN_CHAR_GW = {
+        "甲":"리더십·원칙·고집·추진력",     "乙":"섬세·유연·공감·감수성",
+        "丙":"열정·활발·솔직·리더",          "丁":"자상·집중·헌신·예민",
+        "戊":"안정·포용·묵직·실용",          "己":"꼼꼼·실속·배려·현실적",
+        "庚":"의리·결단·강직·직설",          "辛":"완벽·예리·독립·세련",
+        "壬":"지혜·유연·전략·깊이",          "癸":"감수성·직관·적응·창의",
+    }
+    _ilgan_gw = pils[1]["cg"] if len(pils) > 1 else "甲"
+    _my_oh_gw = _ILGAN_OH_GW.get(_ilgan_gw, "木")
+
+    # 잘 맞는 상대 TOP3 (내 용신 오행 기준)
+    _good_ilgans_gw = [ig for ig, oh in _ILGAN_OH_GW.items()
+                       if oh in _yong_gw or oh == _OH_BIRTH_GW.get(_my_oh_gw)]
+    _bad_ilgans_gw  = [ig for ig, oh in _ILGAN_OH_GW.items()
+                       if oh in _gis_gw]
+    st.markdown("**✅ 내 운을 올려주는 상대 일간 (용신 기운)**")
+    for _ig_gw in list(dict.fromkeys(_good_ilgans_gw))[:6]:
+        _ig_oh_gw   = _ILGAN_OH_GW.get(_ig_gw, "")
+        _ig_띠_gw, _ig_직업_gw = _ILGAN_DETAIL_GW.get(_ig_gw, ("",""))
+        _ig_char_gw = _ILGAN_CHAR_GW.get(_ig_gw, "")
+        _hex_gw = _OH_RX_GW.get(_ig_oh_gw, {}).get("색_hex", "#888")
+        st.markdown(
+            f'<div style="border-left:4px solid {_hex_gw};padding:8px 14px;'
+            f'background:{_hex_gw}11;border-radius:0 10px 10px 0;margin-bottom:6px;">'
+            f'<b style="color:{_hex_gw}">{_ig_gw}일간</b> ({_ig_oh_gw} 오행) — '
+            f'띠: {_ig_띠_gw} | 성격: {_ig_char_gw} | 직업: {_ig_직업_gw}</div>',
+            unsafe_allow_html=True,
+        )
+    if _bad_ilgans_gw:
+        st.markdown("**⚠️ 조심해야 할 상대 일간 (기신 기운)**")
+        st.warning(
+            f"기신 오행({'/'.join(_gis_gw)})을 가진 **{'·'.join(list(dict.fromkeys(_bad_ilgans_gw))[:4])}일간** 상대와는 "
+            "처음에는 강하게 끌리지만 장기적으로 기운이 소모되는 관계가 됩니다. "
+            "신중하게 접근하되, 만나게 된다면 상대의 단점을 포용하는 훈련이 필요합니다."
+        )
+    st.info(
+        f"🔮 **만신 조언**: {name}님은 **{_OH_KR_GW2.get(_my_oh_gw,'')} 오행** 일간입니다. "
+        f"나를 생(生)해주는 **{_OH_KR_GW2.get(_OH_BIRTH_GW.get(_my_oh_gw,''),'')} 오행** 상대가 "
+        "가장 자연스럽게 내 기운을 채워줍니다. 이런 사람 곁에 있으면 이유 없이 운이 올라가는 것이 느껴질 것입니다."
+    )
+
+    # ──────────────────────────────────────────────────────────────
+    # 섹션 8: 이사 방위 정밀 계산
+    # ──────────────────────────────────────────────────────────────
+    st.markdown(
+        '<div class="gold-section">🧭 ⑧ 이사 방위 정밀 처방 — 방향이 운명을 바꾼다</div>',
+        unsafe_allow_html=True,
+    )
+    _DIR_DETAIL_GW = {
+        "木": ("동쪽(東, 90°)", "목 기운이 강해져 성장·도전 에너지가 폭발합니다."),
+        "火": ("남쪽(南, 180°)", "화 기운이 강해져 인기·명예·표현력이 극대화됩니다."),
+        "土": ("중앙 또는 동남", "토 기운이 강해져 안정·재물 축적이 이루어집니다."),
+        "金": ("서쪽(西, 270°)", "금 기운이 강해져 재물·결단·의리 에너지가 강화됩니다."),
+        "水": ("북쪽(北, 0°)", "수 기운이 강해져 지혜·직관·학문 에너지가 깊어집니다."),
+    }
+    _MOVE_MON_GW = {  # 이사 길한 달 (용신 오행별)
+        "木": [1, 2, 3], "火": [4, 5, 6], "土": [3, 6, 9, 12],
+        "金": [7, 8, 9], "水": [10, 11, 12],
+    }
+    # 손 없는 날 (음력 9·10·19·20·29·30일 — 귀신이 쉬는 날)
+    _sonup_days = "음력 9일·10일·19일·20일·29일·30일"
+
+    if _yong_gw:
+        _y1_gw2 = _yong_gw[0]
+        _dir_str_gw, _dir_desc_gw = _DIR_DETAIL_GW.get(_y1_gw2, ("-","-"))
+        _move_mons_gw = _MOVE_MON_GW.get(_y1_gw2, [])
+        _move_mon_str_gw = "·".join(f"{m}월" for m in _move_mons_gw)
+        _bad_dirs_gw2 = [_DIR_DETAIL_GW.get(g, ("-",))[0] for g in _gis_gw if g in _DIR_DETAIL_GW]
+        st.markdown(
+            f"""<div style="border:2px solid #c9a84c;border-radius:16px;padding:16px 18px;background:#fffdf5;">
+<div style="font-size:16px;font-weight:900;color:#8b6200;margin-bottom:12px;">🏡 {name}님 이사 처방전</div>
+<div style="font-size:14px;color:#2d1f00;margin-bottom:8px;">
+  ✅ <b>이사 길한 방향</b>: <b style="color:#27ae60;font-size:16px">{_dir_str_gw}</b><br>
+  <span style="font-size:12px;color:#555">{_dir_desc_gw}</span>
+</div>
+<div style="font-size:14px;color:#c0392b;margin-bottom:8px;">
+  🚫 <b>이사 절대 금지 방향</b>: <b>{' / '.join(_bad_dirs_gw2) or '없음'}</b>
+</div>
+<div style="font-size:13px;color:#2d1f00;margin-bottom:8px;">
+  📅 <b>이사 길한 달</b>: <b style="color:#27ae60">{_move_mon_str_gw}</b>
+</div>
+<div style="font-size:13px;color:#2d1f00;">
+  🗓️ <b>손 없는 날 이사 택일</b>: {_sonup_days}<br>
+  <span style="font-size:11px;color:#888">(귀신이 쉬는 날 = 이사 방해 기운이 없는 날)</span>
+</div>
+</div>""",
+            unsafe_allow_html=True,
+        )
+    st.markdown(
+        "💡 **이사 방위 계산법**: 현재 집을 중심으로 나침반 방향을 기준으로 "
+        "용신 방위 쪽 지역(동쪽이면 현재보다 동쪽 동네)으로 이사하는 것을 의미합니다. "
+        "같은 방향 내에서도 새 집이 더 크고 밝으면 기운이 배가됩니다."
+    )
+
+    # ──────────────────────────────────────────────────────────────
+    # 섹션 9: 직업·사업 오행 처방
+    # ──────────────────────────────────────────────────────────────
+    st.markdown(
+        '<div class="gold-section">💼 ⑨ 직업·사업 오행 처방 — 천직(天職)을 찾아라</div>',
+        unsafe_allow_html=True,
+    )
+    _JOB_LIST_GW = {
+        "木": ["교육자·교수·교사", "법조인(변호사·판사)", "건축가·설계사", "임업·조경",
+               "출판·작가·기자", "기획자·PD", "심리상담사", "의사(외과)", "NGO·사회운동가",
+               "IT개발자", "스타트업 창업자", "스포츠 트레이너", "조각가·목공예", "환경운동가",
+               "헤드헌터·커리어코치", "원예사·플로리스트", "사진작가", "탐정·조사관",
+               "여행작가·탐험가", "정치인·행정가"],
+        "火": ["방송인·MC·아나운서", "연예인·배우·가수", "마케터·광고기획", "강사·코치",
+               "디자이너(그래픽·패션)", "소방관·응급구조사", "요리사·셰프", "이벤트플래너",
+               "종교인·성직자", "사진작가·영상감독", "인플루언서·유튜버", "홍보전문가",
+               "스타일리스트·메이크업", "피트니스트레이너", "동기부여강사", "스포츠해설가",
+               "뮤지컬배우·무용가", "광고모델", "영업전문가", "소셜미디어전문가"],
+        "土": ["부동산개발·중개", "금융·은행가", "공무원·행정직", "농업·식품업",
+               "건설업·시공관리", "인사관리(HR)", "컨설턴트·경영분석", "회계사·세무사",
+               "의사(내과·소화기)", "치과의사", "한의사", "요양·복지사", "보험설계사",
+               "자산관리사(PB)", "사찰운영·종교행정", "도자기·공예가", "영양사·식이요법사",
+               "지방행정·시의원", "부동산펀드매니저", "음식점창업"],
+        "金": ["금융분석가·펀드매니저", "외과의사·정형외과", "군인·경찰·검사",
+               "기계공학·제조업", "보석세공·귀금속", "세금·법률전문가", "IT보안전문가",
+               "항공기조종사·엔지니어", "자동차·기계정비", "조각가·금속예술", "음악가(타악기)",
+               "헬스트레이너·격투기", "냉동·냉각설비", "정밀기기제조", "조선·해양엔지니어",
+               "무기체계전문가", "외환딜러·트레이더", "반도체·전자공학", "로봇공학자", "AI엔지니어"],
+        "水": ["외교관·국제무역", "철학자·작가·시인", "IT·소프트웨어", "심리학자·정신과의사",
+               "해양학자·수산업", "예술가·음악가(현악)", "번역가·어학강사", "역술가·점술사",
+               "유통·물류전문가", "여행업·호텔경영", "금융공학·수학자", "데이터과학자",
+               "프리랜서컨설턴트", "소설가·시나리오작가", "유체역학·기상학자", "수영코치",
+               "바리스타·소믈리에", "스파·힐링센터운영", "명상지도사", "해외영업전문가"],
+    }
+    _BIZ_GW = {
+        "木": "친환경·교육·출판·유기농·식물 관련 사업 / 온라인 강의 플랫폼",
+        "火": "요식업·카페·미용·뷰티·연예기획·마케팅 에이전시",
+        "土": "부동산·음식점·숙박업·농산물유통·건강식품",
+        "金": "금융·보험·귀금속·IT보안·제조·기계장비임대",
+        "水": "IT·무역·유통·교육콘텐츠·글로벌비즈니스·해외직구",
+    }
+    _occupation_gw = st.session_state.get("in_occupation", "선택 안 함")
+    if _yong_gw:
+        _y1_job_gw = _yong_gw[0]
+        _job_list_gw = _JOB_LIST_GW.get(_y1_job_gw, [])
+        _biz_gw = _BIZ_GW.get(_y1_job_gw, "")
+        _job_color_gw = _OH_RX_GW.get(_y1_job_gw, {}).get("색_hex", "#888")
+        st.markdown(
+            f"""<div style="border:2px solid {_job_color_gw};border-radius:14px;
+            padding:16px 18px;background:{_job_color_gw}11;margin-bottom:12px;">
+<div style="font-size:15px;font-weight:900;color:{_job_color_gw};margin-bottom:10px;">
+  💼 용신 {_y1_job_gw} 오행의 천직 리스트 20</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 16px;font-size:13px;color:#2d1f00;">
+{"".join(f'<div>✓ {j}</div>' for j in _job_list_gw[:20])}
+</div>
+<div style="margin-top:10px;font-size:13px;color:#3d2b00;">
+  🏪 <b>사업 아이템</b>: {_biz_gw}</div>
+<div style="margin-top:8px;font-size:13px;color:#3d2b00;">
+  🧭 <b>직장 위치</b>: 현 거주지 기준 <b>{_DIR_MAP_GW.get(_y1_job_gw,'동쪽')} 방향</b>에 있는 직장이 기운이 잘 맞습니다.</div>
+</div>""",
+            unsafe_allow_html=True,
+        )
+        if _occupation_gw and _occupation_gw != "선택 안 함":
+            st.info(
+                f"🔍 현재 직업 **'{_occupation_gw}'** — "
+                f"용신 {_y1_job_gw} 오행 천직과 에너지가 "
+                f"{'잘 맞습니다! 지금 하는 일이 천명과 일치합니다.' if any(_occupation_gw in j for j in _job_list_gw) else '다를 수 있습니다. 용신 직종으로 전환하거나, 부업으로 용신 분야를 병행하면 운이 올라갑니다.'}"
+            )
+
+    # ──────────────────────────────────────────────────────────────
+    # 섹션 10: 만신의 총체적 비방 처방전
+    # ──────────────────────────────────────────────────────────────
+    st.markdown(
+        '<div class="gold-section" style="color:#c0392b;font-size:20px;">🔴 ⑩ 만신의 총체적 비방 처방전 — 가장 급한 처방 TOP5</div>',
+        unsafe_allow_html=True,
+    )
+    # 급한 처방 자동 산출
+    _TOP5_GW = []
+    if _sinsal_gw:
+        _top_ss_gw = _sinsal_gw[0].get("이름", "신살")
+        _TOP5_GW.append(f"**{_top_ss_gw}** 발동 중 — 해당 비방을 즉시 실행하십시오")
+    if _gis_gw:
+        _TOP5_GW.append(f"기신 **{'/'.join(_gis_gw)} 오행** 강화 차단 — 기신 색상·음식·방위 즉각 제거")
+    _TOP5_GW.append(f"용신 **{'/'.join(_yong_gw[:2]) if _yong_gw else '미산출'} 오행** 보강 — 색상·음식·소품 생활 침투")
+    _TOP5_GW.append("재물 기운 누수 차단 — 지갑 정리·불필요한 지출 즉각 중단")
+    _TOP5_GW.append("귀인 기운 활성화 — 사람을 만나고 새로운 모임에 참여하라")
+
+    st.markdown(
+        '<div style="background:linear-gradient(135deg,#2d1f00,#4a3000);'
+        'border:2px solid #d4af37;border-radius:16px;padding:20px 22px;margin-bottom:16px;">'
+        + "".join(
+            f'<div style="color:#f7e695;font-size:14px;font-weight:700;'
+            f'margin-bottom:10px;padding:8px 12px;background:rgba(255,255,255,0.08);'
+            f'border-radius:8px;border-left:4px solid #d4af37;">'
+            f'🔥 TOP{i+1}. {t}</div>'
+            for i, t in enumerate(_TOP5_GW[:5])
+        )
+        + "</div>",
+        unsafe_allow_html=True,
+    )
+
+    _ilgan_gw2 = pils[1]["cg"] if len(pils) > 1 else "甲"
+    _yong1_gw = _yong_gw[0] if _yong_gw else "木"
+    _yong_rx_gw = _OH_RX_GW.get(_yong1_gw, {})
+    _yong_color_gw = _yong_rx_gw.get("색상", "초록").split("·")[0]
+    _yong_food_gw  = _yong_rx_gw.get("음식", "채소").split("·")[0]
+    _yong_dir_gw   = _yong_rx_gw.get("방위", "동쪽")
+
+    _TODAY3_GW = [
+        f"지금 바로 **{_yong_color_gw} 계열** 옷을 하나 꺼내 입거나, {_yong_color_gw} 소품을 눈에 띄는 곳에 두어라",
+        f"오늘 식사에 **{_yong_food_gw}** 계열 음식을 반드시 포함시켜라",
+        "핸드폰 지저분한 앱·사진 정리 — 막힌 기운을 뚫는 가장 빠른 방법이니라",
+    ]
+    _MONTH3_GW = [
+        f"현관에 **{_yong_color_gw} 식물·소품** 배치 완료하라",
+        f"지갑을 **{_yong_color_gw} 계열** 새 지갑으로 교체하고 새 지폐를 넣어라",
+        f"**{_yong_dir_gw}** 방향 여행·나들이를 한 번 다녀오면 기운이 환기된다",
+    ]
+    _YEAR3_GW = [
+        f"용신 분야({_BIZ_GW.get(_yong1_gw,'').split('·')[0]}) 부업 또는 전직을 진지하게 검토하라",
+        "집 구조·인테리어를 용신 오행 테마로 일부 개조하라",
+        "삼재·흉살 비방 처방을 꾸준히 실천하고 연간 기도·제사를 챙겨라",
+    ]
+    _LIFETIME_GW = [
+        f"**{_yong_color_gw} 계열** 색을 생활 기본 색조로 유지하라 — 평생 운이 떨어지지 않는다",
+        f"**{_yong_dir_gw}** 방향을 늘 의식하고, 중요한 결정은 그 방향을 바라보며 하라",
+        "매년 동짓날 팥죽을 끓여 집 곳곳에 뿌리고, 새해 첫날 욕실 대청소를 하라",
+    ]
+    _NEVER_GW = [
+        f"기신 **{'/'.join(_gis_gw) if _gis_gw else '흉'}** 색상으로 집 전체를 도배하지 마라 — 기운이 역류한다",
+        "보증·연대보증은 절대 서지 마라 — 이 팔자에는 반드시 후회가 따른다",
+        "대운·세운이 흉한 해에 큰 투자·사업 확장·이직은 금물이니라",
+    ]
+
+    for _title_gw, _items_gw, _color_gw in [
+        ("⚡ 오늘 당장 할 것 3가지", _TODAY3_GW, "#e74c3c"),
+        ("📅 이번 달 안에 할 것 3가지", _MONTH3_GW, "#e67e22"),
+        ("🗓️ 올해 안에 할 것 3가지", _YEAR3_GW, "#f39c12"),
+        ("♾️ 평생 지켜야 할 것 3가지", _LIFETIME_GW, "#27ae60"),
+        ("🚫 절대 하면 안 되는 것 3가지", _NEVER_GW, "#8e44ad"),
+    ]:
+        st.markdown(
+            f'<div style="margin-bottom:12px;">'
+            f'<div style="font-size:15px;font-weight:900;color:{_color_gw};'
+            f'margin-bottom:6px;padding:6px 12px;background:{_color_gw}11;'
+            f'border-radius:8px;border-left:4px solid {_color_gw};">{_title_gw}</div>'
+            + "".join(
+                f'<div style="font-size:13px;color:#2d1f00;padding:5px 14px;'
+                f'margin-bottom:3px;border-bottom:1px solid #f0e8d0;">{i+1}. {item}</div>'
+                for i, item in enumerate(_items_gw)
+            )
+            + "</div>",
+            unsafe_allow_html=True,
+        )
+
+    # ──────────────────────────────────────────────────────────────
+    # 섹션 11: 부적·기도 처방
+    # ──────────────────────────────────────────────────────────────
+    st.markdown(
+        '<div class="gold-section">🙏 ⑪ 부적·기도 처방 — 하늘에 직접 청하는 법</div>',
+        unsafe_allow_html=True,
+    )
+    _BUJEOK_GW = {
+        "木": ("청룡부적(靑龍符)", "갑목·을목 일간의 기운을 강화하고 성장·진급·시험 합격을 도움"),
+        "火": ("주작부적(朱雀符)", "명예·인기·발표·합격·이성운을 강화하는 붉은 기운의 부적"),
+        "土": ("황룡부적(黃龍符)", "재물·안정·중재·건강을 도모하는 황색 기운의 부적"),
+        "金": ("백호부적(白虎符)", "관재·소송 방어, 재물 수호, 의지력 강화에 효험"),
+        "水": ("현무부적(玄武符)", "지혜·학문·사업 성공·인맥 강화, 음기 차단 부적"),
+    }
+    _bujeok_name_gw, _bujeok_desc_gw = _BUJEOK_GW.get(_yong1_gw, ("부적", "용신 기운 강화"))
+    _pray_time_gw   = _yong_rx_gw.get("시간", "새벽 5시")
+    _pray_dir_gw    = _yong_rx_gw.get("방위", "동쪽")
+
+    # 삼재·관재 여부로 제사·천도재 필요 판단
+    _need_jesa_gw = any("삼재" in s.get("이름","") or "관재" in s.get("이름","") for s in _sinsal_gw)
+    _need_temple_gw = any("상문" in s.get("이름","") or "화개" in s.get("이름","") for s in _sinsal_gw)
+
+    st.markdown(
+        f"""<div style="border:2px solid #8b6200;border-radius:16px;padding:18px 20px;
+        background:linear-gradient(135deg,#fffdf5,#fdf0c8);">
+<div style="font-size:16px;font-weight:900;color:#8b6200;margin-bottom:14px;">
+  📿 {name}님 맞춤 부적·기도 처방</div>
+
+<div style="margin-bottom:12px;">
+<div style="font-size:14px;font-weight:800;color:#d4af37;margin-bottom:4px;">🔮 추천 부적</div>
+<div style="font-size:13px;color:#2d1f00;padding:8px 12px;background:rgba(212,175,55,0.1);border-radius:8px;">
+  <b>{_bujeok_name_gw}</b> — {_bujeok_desc_gw}<br>
+  <span style="font-size:11px;color:#888">부적은 작명가·도사에게 용신 오행 정보를 전달하고 맞춤 제작하십시오.</span>
+</div></div>
+
+<div style="margin-bottom:12px;">
+<div style="font-size:14px;font-weight:800;color:#d4af37;margin-bottom:4px;">🙏 기도 처방</div>
+<div style="font-size:13px;color:#2d1f00;">
+  • <b>기도 시간</b>: {_pray_time_gw} (용신 시간대 — 기운이 가장 맑을 때)<br>
+  • <b>기도 방향</b>: {_pray_dir_gw} 방향을 바라보고 기도<br>
+  • <b>기도 내용</b>: "하늘이시여, {name}의 용신 기운을 강하게 하시고 기신 기운을 약하게 하소서"<br>
+  • <b>횟수</b>: 매일 아침 3번 반복, 21일 연속 실천하면 기운이 확실히 전환됩니다.</div>
+</div>
+
+<div style="margin-bottom:12px;">
+<div style="font-size:14px;font-weight:800;color:#d4af37;margin-bottom:4px;">🏯 절·기도처 방문</div>
+<div style="font-size:13px;color:#2d1f00;">
+{"  ✅ <b>현재 상문살·화개살이 발동 중</b> — 가까운 절에서 천도재·위령재를 올리면 조상 음덕이 강하게 보호합니다." if _need_temple_gw else "  현재 특별히 절 방문이 급하지는 않습니다. 매년 생일 무렵 사찰 방문과 불공 드리는 것이 꾸준한 개운이 됩니다."}<br>
+  • 방문 시기: <b>용신 달({', '.join(f'{m}월' for m in _MOVE_MON_GW.get(_yong1_gw,[])[:2])})</b> 초하루·보름이 가장 효험이 좋습니다.
+</div></div>
+
+{"<div style='margin-bottom:12px;background:#c0392b11;border-radius:8px;padding:10px 12px;border-left:4px solid #c0392b;'><div style='font-size:14px;font-weight:800;color:#c0392b;margin-bottom:4px;'>⚠️ 삼재·관재 발동 — 제사·부적 즉시 시행</div><div style='font-size:13px;color:#2d1f00;'>삼재·관재수가 발동 중입니다. 조상 제삿날을 빠짐없이 챙기고, 시왕전(十王殿)에서 이름·생년월일을 적어 기도를 올리십시오.</div></div>" if _need_jesa_gw else ""}
+
+<div style="margin-bottom:0;">
+<div style="font-size:14px;font-weight:800;color:#d4af37;margin-bottom:4px;">🧂 빨간팥죽·소금·숯 활용법</div>
+<div style="font-size:13px;color:#2d1f00;">
+  • <b>빨간팥죽</b>: 동짓날 집 안 곳곳(현관·화장실·부엌)에 뿌려 1년 액운 차단<br>
+  • <b>굵은 소금</b>: 현관 양쪽 작은 그릇에 담아두면 외부 나쁜 기운 흡수. 매달 교체<br>
+  • <b>숯(참숯)</b>: 집 구석진 곳에 두면 음기·전자파·나쁜 기운을 정화. 3개월마다 새것으로<br>
+  • <b>소금 목욕</b>: 몸에 나쁜 기운이 붙었을 때(장례식·병원 방문 후) 굵은 소금으로 온몸을 씻으면 정화됨
+</div></div>
+</div>""",
+        unsafe_allow_html=True,
+    )
+
+    # ── 최종 마무리 ────────────────────────────────────────────────
+    st.markdown(
+        f"""<div style="background:linear-gradient(135deg,#2d1f00,#4a3000);
+        border:2px solid #d4af37;border-radius:16px;padding:20px 22px;margin-top:20px;">
+<div style="font-size:16px;font-weight:900;color:#f7e695;margin-bottom:12px;">
+  🔮 만신의 마지막 말씀</div>
+<div style="font-size:14px;color:#f5e8c8;line-height:2.0;">
+  {name}님, 팔자는 하늘이 짜놓은 설계도이지만, 개운(開運)은 당신이 직접 쓰는 이야기입니다.<br>
+  용신 기운을 매일 조금씩 몸에 두르고, 기신 기운을 조용히 밀어낼 때<br>
+  하늘의 흐름이 <b style="color:#d4af37">당신 편</b>으로 돌아섭니다.<br><br>
+  <b style="color:#d4af37">오늘부터 딱 21일만 실천하십시오.</b><br>
+  기운의 변화가 반드시 느껴질 것입니다. 이것이 만신이 수십 년 경험으로 드리는 마지막 처방이니라.
+</div></div>""",
+        unsafe_allow_html=True,
     )
 
 
