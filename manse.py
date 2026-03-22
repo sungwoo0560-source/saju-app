@@ -19985,6 +19985,30 @@ def main():
                 )
                 st.markdown(_share_html, unsafe_allow_html=True)
 
+                # 카카오톡 공유 버튼
+                try:
+                    _gk_sh  = get_gyeokguk(pils)
+                    _gk_name_sh = _gk_sh.get("격국명", "-") if _gk_sh else "-"
+                    _ys_sh  = get_yongshin(pils)
+                    _ys_str_sh = "/".join((_ys_sh.get("종합_용신", []) or [])[:2]) or "-"
+                    _share_text_sh = f"{name}님의 사주풀이 — {_gk_name_sh} | 용신: {_ys_str_sh} | 만세력 사주 천명풀이"
+                    _app_url_sh = "https://saju-manse.streamlit.app"
+                    _kakao_url_sh = (
+                        "https://sharer.kakao.com/talk/friends/picker/link?"
+                        + _upl.urlencode({"text": _share_text_sh, "url": _app_url_sh})
+                    )
+                    _kakao_html_sh = (
+                        f'<a href="{_kakao_url_sh}" target="_blank" '
+                        f'style="display:block;text-align:center;text-decoration:none;'
+                        f'background:#FEE500;color:#3C1E1E;border:none;'
+                        f'border-radius:8px;padding:9px 0;font-size:14px;font-weight:700;'
+                        f'cursor:pointer;width:100%;margin-bottom:8px;box-sizing:border-box;">'
+                        f'💬 카카오톡으로 공유</a>'
+                    )
+                    st.markdown(_kakao_html_sh, unsafe_allow_html=True)
+                except Exception:
+                    pass
+
         marriage_status = st.session_state.get("marriage_status", "미혼")
 
         occupation = st.session_state.get("occupation", "선택 안 함")
