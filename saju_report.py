@@ -30,7 +30,13 @@ try:
         GEUNMYO_HWASIL,
     )
 except ImportError:
-    pass
+    # 최소 기본값 설정
+    if '_EMOJI_MAP' not in dir():
+        _EMOJI_MAP = {}
+    if '_SYMBOL_MAP' not in dir():
+        _SYMBOL_MAP = {}
+    if '_DO_LIST' not in dir():
+        _DO_LIST = []
 from saju_engine import *
 from saju_sinsal import *
 from saju_interpreter import *
@@ -146,24 +152,63 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str=""):
 
             BASE_FONT = "Helvetica"
 
+            # 1순위: 로컬 TTF 폰트 (한글 전용)
             for _fn, _fp, _fi in _FONT_CANDIDATES:
                 if os.path.exists(_fp):
                     try:
                         if _fi is not None:
                             pdfmetrics.registerFont(TTFont(_fn, _fp, subfontIndex=_fi))
-
                         else:
                             pdfmetrics.registerFont(TTFont(_fn, _fp))
-
                         BASE_FONT = _fn
-
                         break
+                    except Exception:
+                        pass
 
-                    except Exception as e:
-                        pass  # 다음 폰트 시도
+            # 2순위: requests로 NanumGothic 런타임 다운로드 (Streamlit Cloud)
+            if BASE_FONT == "Helvetica":
+                try:
+                    import requests as _req, hashlib as _hs
+                    _cache_dir = os.path.join(os.path.dirname(__file__), ".font_cache")
+                    os.makedirs(_cache_dir, exist_ok=True)
+                    _font_path = os.path.join(_cache_dir, "NanumGothic.ttf")
+                    if not os.path.exists(_font_path):
+                        _font_urls = [
+                            "https://github.com/google/fonts/raw/main/ofl/nanumgothic/NanumGothic-Regular.ttf",
+                            "https://github.com/naver/nanumfont/raw/master/fonts/NanumGothic.ttf",
+                        ]
+                        for _url in _font_urls:
+                            try:
+                                _r = _req.get(_url, timeout=10)
+                                if _r.status_code == 200 and len(_r.content) > 100000:
+                                    with open(_font_path, "wb") as _ff:
+                                        _ff.write(_r.content)
+                                    break
+                            except Exception:
+                                continue
+                    if os.path.exists(_font_path):
+                        pdfmetrics.registerFont(TTFont("NanumGothic", _font_path))
+                        BASE_FONT = "NanumGothic"
+                except Exception:
+                    pass
+
+            # 3순위: streamlit secrets에 base64 폰트 (packages.txt 대안)
+            if BASE_FONT == "Helvetica":
+                try:
+                    import streamlit as _st2
+                    _font_b64 = _st2.secrets.get("NANUM_FONT_B64", "")
+                    if _font_b64:
+                        import base64 as _b64, tempfile as _tf
+                        _fd, _fp2 = _tf.mkstemp(suffix=".ttf")
+                        with os.fdopen(_fd, "wb") as _fh:
+                            _fh.write(_b64.b64decode(_font_b64))
+                        pdfmetrics.registerFont(TTFont("NanumGothic", _fp2))
+                        BASE_FONT = "NanumGothic"
+                except Exception:
+                    pass
 
             if BASE_FONT == "Helvetica":
-                st.warning("⚠️ 한글 폰트를 찾지 못했습니다. PDF에 한글이 정상 출력되지 않을 수 있습니다. malgun.ttf 또는 Batang 폰트를 설치해주세요.")
+                st.warning("⚠️ 한글 폰트 로딩 실패. packages.txt에 fonts-nanum 추가 후 재배포하세요.")
 
             buf = io.BytesIO()
 
@@ -228,6 +273,43 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str=""):
 
                         result.append(_SYMBOL_MAP[ch])
 
+                    elif o > 0x2000 and o < 0x3000:
+                        # 특수 기호 영역 — 폰트 미지원 문자 대체
+                        _sym_fallback = {
+                            0x2022: "-",   # •
+                            0x2023: "-",   # ‣
+                            0x25A0: "[*]", # ■
+                            0x25A1: "[ ]", # □
+                            0x25B6: ">",   # ▶
+                            0x25C0: "<",   # ◀
+                            0x25CF: "*",   # ●
+                            0x2605: "*",   # ★
+                            0x2606: "*",   # ☆
+                            0x2713: "(v)", # ✓
+                            0x2714: "(v)", # ✔
+                            0x2715: "(x)", # ✕
+                            0x2716: "(x)", # ✖
+                            0x2718: "(x)", # ✘
+                            0x263F: "",    # ☿
+                            0x2640: "(f)", # ♀
+                            0x2642: "(m)", # ♂
+                            0x2660: "(s)", # ♠
+                            0x2665: "(h)", # ♥
+                            0x2666: "(d)", # ♦
+                            0x2663: "(c)", # ♣
+                            0x2500: "-",   # ─
+                            0x2501: "=",   # ━
+                            0x250C: "+",   # ┌
+                            0x2510: "+",   # ┐
+                            0x2514: "+",   # └
+                            0x2518: "+",   # ┘
+                            0x251C: "+",   # ├
+                            0x2524: "+",   # ┤
+                            0x252C: "+",   # ┬
+                            0x2534: "+",   # ┴
+                            0x253C: "+",   # ┼
+                        }
+                        result.append(_sym_fallback.get(o, ""))
                     else:
                         result.append(ch)
 
@@ -519,7 +601,7 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str=""):
 
             y -= 3 * mm
 
-            ilgan = pils[1]["cg"]
+            ilgan = pils[1].get("cg", "甲") if len(pils) > 1 else "甲"
 
             birth_month  = max(1, min(12, int(st.session_state.get("birth_month") or 1)))
 
@@ -569,7 +651,7 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str=""):
 
                 # ── 오행 분포 바 차트 ──
 
-                _oh_s = calc_ohaeng_strength(pils[1]["cg"], pils)
+                _oh_s = calc_ohaeng_strength(ilgan, pils)
 
                 _oh_ord = ["木", "火", "土", "金", "水"]
 
@@ -893,9 +975,13 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str=""):
                 try:
                     # 1순위: AI 캐시에서 과거 분석 텍스트 가져오기
 
-                    _sk = pils_to_cache_key(pils)
+                    _sk = "_".join(f"{p.get('cg','')}{p.get('jj','')}" for p in pils)
 
-                    _past_ai = get_ai_cache(_sk, "past") or ""
+                    _past_ai = ""
+                    try:
+                        _past_ai = get_ai_cache(_sk, "past") or ""
+                    except Exception:
+                        pass
 
                     if _past_ai:
                         _past_clean = _re2.sub(r"<[^>]+>", "", _past_ai)
@@ -907,7 +993,10 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str=""):
                     else:
                         # 2순위: engine highlights + 대운×세운 교차로 상세 서술 생성
 
-                        _hl = generate_engine_highlights(pils, birth_year, gender)
+                        try:
+                            _hl = generate_engine_highlights(pils, birth_year, gender)
+                        except Exception:
+                            _hl = []
 
                         _pevs = sorted(
                             _hl.get("past_events", []),
@@ -1258,7 +1347,10 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str=""):
 
                     _sw_n2 = get_yearly_luck(pils, _cy + 2)
 
-                    _tp = calc_turning_point(pils, birth_year, gender, _cy)
+                    try:
+                        _tp = calc_turning_point(pils, birth_year, gender, _cy)
+                    except Exception:
+                        _tp = {}
 
                     _ys_c = get_yongshin(pils)
 
@@ -1665,11 +1757,14 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str=""):
                 y = section_title(c, "만신 종합 천명풀이 — 전문 사주 분석", y)
 
                 try:
-                    _saju_key = pils_to_cache_key(pils)
+                    _saju_key = "_".join(f"{p.get('cg','')}{p.get('jj','')}" for p in pils)
 
                     # 캐시 우선 (prophet > general > lifeline)
-
-                    _ai_raw = get_ai_cache(_saju_key, "prophet") or get_ai_cache(_saju_key, "general") or get_ai_cache(_saju_key, "lifeline") or ""
+                    _ai_raw = ""
+                    try:
+                        _ai_raw = get_ai_cache(_saju_key, "prophet") or get_ai_cache(_saju_key, "general") or get_ai_cache(_saju_key, "lifeline") or ""
+                    except Exception:
+                        pass
 
                     if _ai_raw:
                         y = _clean_narrative_for_pdf(c, _ai_raw, y)
@@ -1685,7 +1780,10 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str=""):
                         else:
                             # 최후 폴백: engine highlights
 
-                            _hl3 = generate_engine_highlights(pils, birth_year, gender)
+                            try:
+                                _hl3 = generate_engine_highlights(pils, birth_year, gender)
+                            except Exception:
+                                _hl3 = []
 
                             y = write(
                                 c,
@@ -1846,31 +1944,53 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str=""):
             # 음양오행 심층 분석 섹션 (추가)
             # ══════════════════════════════════════════
             if include_ohaeng:
+                y = new_page(c) if y < 120*mm else y
                 y = section_title(c, "☯️ 음양오행 심층 분석", y)
 
                 try:
-                    # ── 음양 분석 ──
                     _CG_YY = {"甲":"양","乙":"음","丙":"양","丁":"음","戊":"양",
                                "己":"음","庚":"양","辛":"음","壬":"양","癸":"음"}
                     _JJ_YY = {"子":"양","丑":"음","寅":"양","卯":"음","辰":"양","巳":"음",
                                "午":"음","未":"음","申":"양","酉":"음","戌":"양","亥":"음"}
-                    _OH_MAP = {"甲":"木","乙":"木","丙":"火","丁":"Fire","戊":"土",
+                    _OH_CG_M = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
                                 "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
+                    _OH_JJ_M = {"子":"水","丑":"土","寅":"木","卯":"木","辰":"土","巳":"火",
+                                "午":"火","未":"土","申":"金","酉":"金","戌":"土","亥":"水"}
+                    _OH_KR_M = {"木":"목(木)","火":"화(火)","土":"토(土)","金":"금(金)","水":"수(水)"}
+                    _ILGAN_OH_M = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
+                                   "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
                     _all_cg = [p.get("cg","") for p in pils if p.get("cg")]
                     _all_jj = [p.get("jj","") for p in pils if p.get("jj")]
                     _yang = sum(1 for c in _all_cg if _CG_YY.get(c)=="양") +                             sum(1 for j in _all_jj if _JJ_YY.get(j)=="양")
                     _yin  = 8 - _yang
-                    y = write(c, f"▶ 음양 분포: 양기(陽氣) {_yang}개 / 음기(陰氣) {_yin}개", y, size=10)
-                    if _yang > _yin:
-                        y = write(c, "  → 양기가 강한 사주. 활동적·외향적·추진력이 강합니다.", y, size=9)
-                    elif _yin > _yang:
-                        y = write(c, "  → 음기가 강한 사주. 내성적·사려깊음·감수성이 풍부합니다.", y, size=9)
+                    _ilgan_m = pils[1].get("cg","") if len(pils)>1 else ""
+
+                    # ── 1. 음양 분석 ──────────────────────────────────
+                    y = write(c, "1. 음양(陰陽) 분석", y, size=11, color=(0.05,0.05,0.05))
+                    y = write(c, f"  양기(陽氣): {_yang}개  /  음기(陰氣): {_yin}개", y, size=10)
+                    if _yang >= 6:
+                        _yy_desc = (f"{name}님은 양기(陽氣)가 {_yang}개로 강한 사주입니다. "
+                                   f"밖을 향해 뻗어나가는 에너지가 넘쳐 늘 바쁘게 움직이고 새로운 일에 먼저 "
+                                   f"뛰어드는 기질이 있습니다. 추진력과 행동력이 뛰어나지만, 때로는 속도를 "
+                                   f"줄이고 내면을 들여다보는 시간이 필요합니다.")
+                        _yy_tip = "개운 포인트: 음기 보충 — 명상·독서·물가 산책을 생활화하십시오."
+                    elif _yin >= 6:
+                        _yy_desc = (f"{name}님은 음기(陰氣)가 {_yin}개로 강한 사주입니다. "
+                                   f"깊이 사고하고 감수성이 풍부하여 예술·상담·연구 분야에서 뛰어난 능력을 "
+                                   f"발휘합니다. 다만 결정을 미루거나 소극적인 경향이 있으니, 양기를 "
+                                   f"보충하는 적극적인 행동이 필요합니다.")
+                        _yy_tip = "개운 포인트: 양기 보충 — 이른 아침 산책·활동적 운동을 생활화하십시오."
                     else:
-                        y = write(c, "  → 음양이 균형잡힌 사주. 유연성과 적응력이 뛰어납니다.", y, size=9)
-                    y -= 3*mm
+                        _yy_desc = (f"{name}님은 음양의 균형이 잘 잡힌 사주입니다. "
+                                   f"상황에 따라 적절하게 대응하는 유연성과 적응력이 강점입니다. "
+                                   f"큰 편중은 없으나 상황에 따라 조율이 필요합니다.")
+                        _yy_tip = "개운 포인트: 현재 균형을 유지하며 용신 오행을 중심으로 보강하십시오."
+                    y = write(c, _yy_desc, y, size=9)
+                    y = write(c, f"  ★ {_yy_tip}", y, size=9)
+                    y -= 4*mm
 
                     # ── 오행 분포 ──
-                    y = write(c, "▶ 오행 분포", y, size=10)
+                    y = write(c, "2. 오행(五行) 분포 분석", y, size=11, color=(0.05,0.05,0.05))
                     _OH_KR = {"木":"목(木)","火":"화(火)","土":"토(土)","金":"금(金)","水":"수(水)"}
                     _OH_CG = {"甲":"木","乙":"木","丙":"火","丁":"Fire","戊":"土",
                                "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
@@ -1885,66 +2005,193 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str=""):
                         for _g in _jjg2:
                             _o2 = _OH_CG2.get(_g,"")
                             if _o2: _oh_cnt[_o2] += 0.25
+                    _oh_total_base = sum(_oh_cnt.values()) or 1
                     for _oh, _cnt in sorted(_oh_cnt.items(), key=lambda x:-x[1]):
-                        _bar = "█" * int(_cnt * 2)
-                        y = write(c, f"  {_OH_KR.get(_oh,_oh)}: {_bar} ({_cnt:.1f})", y, size=9)
+                        _pct_b = int(_cnt / _oh_total_base * 100)
+                        _bar_b = "|" * (_pct_b // 3)
+                        _status_b = "[강]" if _pct_b >= 28 else ("[약]" if _pct_b <= 12 else "[보통]")
+                        y = write(c, f"  {_OH_KR.get(_oh,_oh):7s} {_bar_b:<15s} {_pct_b:2d}% {_status_b}", y, size=9)
                     y -= 3*mm
 
-                    # ── 납음오행 ──
-                    y = write(c, "▶ 납음오행(納音五行)", y, size=10)
+                    # ── 3. 납음오행 ──────────────────────────────────
+                    if y < 80*mm: y = new_page(c)
+                    y = write(c, "3. 납음오행(納音五行) — 60갑자의 숨겨진 기운", y, size=11, color=(0.05,0.05,0.05))
                     try:
-                        from manse import NABJIN_MAP as _NM
+                        try:
+                            from saju_data import NABJIN_MAP as _NM
+                        except ImportError:
+                            try:
+                                from manse import NABJIN_MAP as _NM
+                            except ImportError:
+                                _NM = {}
+                        # NABJIN_MAP이 비어있으면 기본 데이터 사용
+                        if not _NM:
+                            _NM = {
+                                ("甲","子"):["海中金","수(水)"],"乙丑":["海中金","수(Water)"],
+                                ("庚","寅"):["松柏木","목(木)"],("庚","午"):["路旁土","토(土)"],
+                                ("辛","未"):["路旁土","토(土)"],("己","酉"):["大驛土","토(土)"],
+                                ("丁","亥"):["屋上土","토(土)"],
+                            }
                         _pil_keys = [
-                            (pils[3].get("cg",""), pils[3].get("jj","")),  # 년주
-                            (pils[2].get("cg",""), pils[2].get("jj","")),  # 월주
-                            (pils[1].get("cg",""), pils[1].get("jj","")),  # 일주
-                            (pils[0].get("cg",""), pils[0].get("jj","")),  # 시주
+                            ("시주", pils[0].get("cg",""), pils[0].get("jj","")),
+                            ("일주", pils[1].get("cg",""), pils[1].get("jj","")),
+                            ("월주", pils[2].get("cg",""), pils[2].get("jj","")),
+                            ("년주", pils[3].get("cg",""), pils[3].get("jj","")),
                         ]
-                        _pil_labels = ["년주","월주","일주","시주"]
-                        for _pl, (_cg, _jj) in zip(_pil_labels, _pil_keys):
+                        _NABJIN_OH_DESC = {
+                            "木": "내면에 나무의 기운이 흐릅니다. 성장·창의·인내가 본질입니다.",
+                            "火": "내면에 불의 기운이 흐릅니다. 열정·표현·명예가 본질입니다.",
+                            "土": "내면에 흙의 기운이 흐릅니다. 안정·포용·신뢰가 본질입니다.",
+                            "金": "내면에 쇠의 기운이 흐릅니다. 의지·결단·원칙이 본질입니다.",
+                            "水": "내면에 물의 기운이 흐릅니다. 지혜·유연·직관이 본질입니다.",
+                        }
+                        for _pl, _cg, _jj in _pil_keys:
                             _nv = _NM.get((_cg,_jj), _NM.get((_jj,_cg), None))
                             if _nv:
-                                y = write(c, f"  {_pl}({_cg}{_jj}): {_nv[0]} — {_nv[1]}", y, size=9)
+                                _nv_oh = _nv[1][:1] if len(_nv)>1 else ""
+                                _nv_desc = _NABJIN_OH_DESC.get(_nv_oh,"")
+                                y = write(c, f"  {_pl}({_cg}{_jj}): {_nv[0] if isinstance(_nv,list) else _nv}", y, size=9)
+                                if _nv_desc and _pl == "일주":
+                                    y = write(c, f"    ★ 일주 납음: {_nv_desc}", y, size=9)
                     except Exception:
                         y = write(c, "  (납음 데이터 로딩 중)", y, size=9)
-                    y -= 3*mm
+                    y -= 4*mm
 
-                    # ── 형충파해 ──
-                    y = write(c, "▶ 형(刑)·충(沖)·파(破)·해(害) 분석", y, size=10)
+                    # ── 4. 형충파해 ──────────────────────────────────
+                    if y < 80*mm: y = new_page(c)
+                    y = write(c, "4. 형(刑)·충(沖)·파(破)·해(害) — 원국 갈등 구조", y, size=11, color=(0.05,0.05,0.05))
+                    _CHUNG_DESC = {
+                        "子午충":"자오충 — 감정·이성의 충돌. 변동이 잦고 이사·이직이 많습니다.",
+                        "丑未충":"축미충 — 가정·직장의 갈등. 안정보다 변화가 많은 삶입니다.",
+                        "寅申충":"인신충 — 사고수 주의. 충동적 결정을 경계하십시오.",
+                        "卯酉충":"묘유충 — 대인 갈등. 경쟁자·라이벌과의 마찰이 생깁니다.",
+                        "辰戌충":"진술충 — 재물·토지 분쟁. 부동산 거래 신중히 하십시오.",
+                        "巳亥충":"사해충 — 직업·이동 변동. 잦은 이직·이사가 있습니다.",
+                    }
                     try:
                         _chung_info = get_chung_hyung(pils)
                         _chung = _chung_info.get("충", [])
                         _hyung = _chung_info.get("형", [])
+                        _pa    = _chung_info.get("파", [])
+                        _hae   = _chung_info.get("해", [])
                         if _chung:
-                            y = write(c, f"  충(沖): {', '.join(str(x) for x in _chung[:3])}", y, size=9)
+                            for _ch in _chung[:3]:
+                                if isinstance(_ch, dict):
+                                    _ch_str = _ch.get('name', str(_ch))
+                                else:
+                                    _ch_str = str(_ch)
+                                _desc = next((v for k,v in _CHUNG_DESC.items() if k[:2] in _ch_str or k[2:] in _ch_str), "충돌 기운이 있습니다.")
+                                y = write(c, f"  충(沖): {_ch_str}", y, size=9)
+                                y = write(c, f"    → {_desc}", y, size=9)
                         if _hyung:
-                            y = write(c, f"  형(刑): {', '.join(str(x) for x in _hyung[:3])}", y, size=9)
-                        if not _chung and not _hyung:
-                            y = write(c, "  충·형 없음 — 안정적인 구조입니다.", y, size=9)
+                            _hy_names = []
+                            for _hy in _hyung[:3]:
+                                if isinstance(_hy, dict):
+                                    _hy_names.append(_hy.get('name', str(_hy)))
+                                else:
+                                    _hy_names.append(str(_hy))
+                            y = write(c, f"  형(刑): {', '.join(_hy_names)} — 규율·법적 문제에 주의", y, size=9)
+                        if _pa:
+                            for _pa_item in _pa[:3]:
+                                if isinstance(_pa_item, dict):
+                                    _pa_name = _pa_item.get('name', str(_pa_item))
+                                    _pa_desc = _pa_item.get('desc', '계획 차질에 주의')
+                                else:
+                                    _pa_name = str(_pa_item)
+                                    _pa_desc = '계획 차질에 주의'
+                                y = write(c, f"  파(破): {_pa_name} — {_pa_desc}", y, size=9)
+                        if not _chung and not _hyung and not _pa:
+                            y = write(c, "  충·형·파 없음 — 원국이 안정적인 구조입니다.", y, size=9)
+                            y = write(c, "  각 기둥의 기운이 조화롭게 배치되어 안정된 삶의 흐름이 예상됩니다.", y, size=9)
                     except Exception:
                         y = write(c, "  (형충 계산 중)", y, size=9)
-                    y -= 3*mm
+                    y -= 4*mm
 
-                    # ── 용신 오행 개운법 ──
-                    y = write(c, "▶ 용신 기반 개운법", y, size=10)
+                    # ── 5. 십이신살 ──────────────────────────────────
+                    if y < 80*mm: y = new_page(c)
+                    y = write(c, "5. 십이신살(十二神殺) — 원국 신살 분석", y, size=11, color=(0.05,0.05,0.05))
+                    try:
+                        _stars_pdf = get_special_stars(pils)
+                        _SINSAL_PDF_DESC = {
+                            "역마살": "이동·변화·출장의 기운. 가만히 있으면 손해, 움직이면 기회.",
+                            "도화살": "이성 인기와 매력의 기운. 연애·예술·방송 분야에 유리.",
+                            "겁살":   "강한 추진력이지만 사고수 주의. 수술·사고·손재 경계.",
+                            "천을귀인": "하늘이 내리는 귀인 기운. 위기마다 도움이 옵니다.",
+                            "문창귀인": "학문·문서 운. 시험·자격증·글쓰기에 탁월.",
+                            "화개살": "예술·종교·고독의 기운. 전문성이 빛나는 말년운.",
+                            "백호대살": "강렬한 에너지. 의료·법조·군경에 유리하지만 충돌 주의.",
+                        }
+                        if _stars_pdf:
+                            for _st in _stars_pdf[:5]:
+                                _sname = _st.get("name","")
+                                _spos  = _st.get("pos","")
+                                _sdesc = next((v for k,v in _SINSAL_PDF_DESC.items() if k in _sname), "원국에 활성화된 신살입니다.")
+                                _sp_str = f" [{_spos}]" if _spos else ""
+                                y = write(c, f"  ★ {_sname}{_sp_str}", y, size=9)
+                                y = write(c, f"    {_sdesc}", y, size=9)
+                        else:
+                            y = write(c, "  원국에 특별히 강한 신살이 없는 안정적인 구조입니다.", y, size=9)
+                    except Exception:
+                        y = write(c, "  (신살 계산 중)", y, size=9)
+                    y -= 4*mm
+
+                    # ── 6. 용신 오행 개운법 ──────────────────────────
+                    if y < 80*mm: y = new_page(c)
+                    y = write(c, "6. 용신 기반 개운법 — 실천 처방전", y, size=11, color=(0.05,0.05,0.05))
                     _ys_pdf = get_yongshin(pils)
-                    _ys_ohs = _ys_pdf.get("종합_용신", [])
-                    _OH_REMEDY_PDF = {
-                        "木": "초록·청색 착용, 동쪽 방향, 신맛 음식, 새벽 산책",
-                        "火": "빨강·주황 착용, 남쪽 방향, 쓴맛 음식, 햇빛 쬐기",
-                        "土": "황색·베이지 착용, 중앙 방향, 단맛 음식, 규칙적 식사",
-                        "金": "흰색·금색 착용, 서쪽 방향, 매운맛 음식, 정리정돈",
-                        "水": "검정·남색 착용, 북쪽 방향, 짠맛 음식, 독서·명상",
+                    _ys_ohs = _ys_pdf.get("종합_용신", []) if isinstance(_ys_pdf.get("종합_용신",[]), list) else []
+                    _gi_ohs = _ys_pdf.get("기신", "")
+                    _OH_REMEDY_FULL = {
+                        "木": {
+                            "색상": "초록·청색 소품·의류",
+                            "방위": "동쪽(침대 머리·책상)",
+                            "음식": "신맛 — 레몬·식초·매실·사과",
+                            "행동": "새벽 5~7시 동쪽 창문 열고 심호흡. 숲·공원 주 1회 방문",
+                            "물상": "집 동쪽에 살아있는 초록 식물 1개 배치",
+                        },
+                        "火": {
+                            "색상": "빨강·주황·분홍 소품·의류",
+                            "방위": "남쪽(침대 머리·책상)",
+                            "음식": "쓴맛 — 쑥·도라지·홍차·커피(무가당)",
+                            "행동": "오전 9~13시 햇빛 15분 이상 쬐기. 촛불 저녁 30분",
+                            "물상": "현관이나 거실에 붉은 소품 1개",
+                        },
+                        "土": {
+                            "색상": "황색·베이지·갈색 소품·의류",
+                            "방위": "중앙(집 중앙 정리정돈)",
+                            "음식": "단맛 — 고구마·꿀·대추·단호박",
+                            "행동": "규칙적 식사 시간 지키기. 주 3회 맨발로 흙 밟기",
+                            "물상": "황토 도자기·돌 소품을 집 중앙에",
+                        },
+                        "金": {
+                            "색상": "흰색·금색·은색 소품·의류",
+                            "방위": "서쪽(침대 머리·책상)",
+                            "음식": "매운맛 — 무·도라지·생강·배즙",
+                            "행동": "가을 서쪽 바위산 등산. 금속 장신구 매일 착용",
+                            "물상": "서쪽에 금속 소품·동전 모음 배치",
+                        },
+                        "水": {
+                            "색상": "검정·남색·파란색 소품·의류",
+                            "방위": "북쪽(침대 머리·책상)",
+                            "음식": "짠맛 — 미역·김·검은콩·다시마",
+                            "행동": "하루 물 2리터 마시기. 월 2회 바다·강 방문",
+                            "물상": "집 북쪽에 작은 어항이나 탁상 분수",
+                        },
                     }
                     if _ys_ohs:
                         for _ys_oh in _ys_ohs[:2]:
-                            _rem = _OH_REMEDY_PDF.get(_ys_oh, "")
-                            _oh_kr = {"木":"목(木)","火":"화(火)","土":"토(土)","金":"금(金)","水":"수(水)"}
-                            y = write(c, f"  {_oh_kr.get(_ys_oh,_ys_oh)} 강화: {_rem}", y, size=9)
-                    y -= 3*mm
+                            _rem = _OH_REMEDY_FULL.get(_ys_oh, {})
+                            y = write(c, f"  ▶ 용신 {_OH_KR_M.get(_ys_oh,_ys_oh)} 강화 처방:", y, size=10)
+                            for _k, _v in _rem.items():
+                                y = write(c, f"    • {_k}: {_v}", y, size=9)
+                            y -= 2*mm
+                    if _gi_ohs:
+                        _gi_str = str(_gi_ohs)
+                        y = write(c, f"  ▶ 기신({_gi_str}) 차단: 해당 색상·방향을 생활 속에서 줄이십시오.", y, size=9)
+                    y -= 4*mm
 
                 except Exception as _oe:
-                    y = write(c, f"  (음양오행 분석 오류: {str(_oe)[:40]})", y, size=9)
+                    y = write(c, f"  (음양오행 분석 오류: {str(_oe)[:50]})", y, size=9)
 
             c.setFont(BASE_FONT, 8)
 

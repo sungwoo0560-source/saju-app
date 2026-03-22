@@ -20,7 +20,14 @@ from saju_data import (
     GEUNMYO_HWASIL,
 )
 
-@st.cache_data
+# pils는 list[dict]로 직접 해시 불가. 천간+지지 튜플로 변환해 캐시 키 생성
+def _hash_pils(pils):
+    return hash(tuple((p.get("cg", ""), p.get("jj", "")) for p in pils))
+
+_PILS_HF = {list: _hash_pils}
+
+
+@st.cache_data(hash_funcs=_PILS_HF)
 def get_sam_hap(pils):
 
     jjs = set(p["jj"] for p in pils)
@@ -75,7 +82,7 @@ def get_sam_hap(pils):
 
 
 
-@st.cache_data
+@st.cache_data(hash_funcs=_PILS_HF)
 def get_chung_hyung(pils):
     """충/형/파/해/천간합 분석"""
 
@@ -168,7 +175,7 @@ GONGMANG_JJ_DESC = {
 }
 
 
-@st.cache_data
+@st.cache_data(hash_funcs=_PILS_HF)
 def get_gongmang(pils):
     """공망(空亡) 계산"""
 
@@ -229,7 +236,7 @@ def get_nabjin(cg, jj):
 # ==================================================
 
 
-@st.cache_data
+@st.cache_data(hash_funcs=_PILS_HF)
 def _get_extra_sinsal_v1(pils):
     """기본 신살 감지 (원진/귀문/백호/양인/화개) - 내부용. 전체버전은 get_extra_sinsal() 사용"""
 
@@ -333,19 +340,7 @@ def _get_extra_sinsal_v1(pils):
 
 # ==================================================
 
-# 24절기 기본 날짜 (연도별 미세 차이는 A단계 라이브러리로 정밀화)
-
-
-# 길일/흉일 기준 - 일진의 천간 기준 간단 판별
-
-_GIL_CG = {"甲", "丙", "戊", "庚", "壬"}  # 양간 = 기본 길일
-
-_HYUNG_JJ = {"丑", "刑", "巳", "申", "寅"}  # 삼형살 지지
-
-_GIL_JJ = {"子", "卯", "午", "酉", "亥", "寅"}  # 귀인 지지 포함
-
-
-@st.cache_data
+@st.cache_data(hash_funcs=_PILS_HF)
 def get_waryeong(pils):
 
     wol_jj = pils[2]["jj"] if len(pils) > 2 else ""
@@ -402,7 +397,7 @@ YANGIN_MAP = {
 
 
 
-@st.cache_data
+@st.cache_data(hash_funcs=_PILS_HF)
 def get_yangin(pils):
 
     ilgan = pils[1]["cg"]
@@ -420,7 +415,7 @@ def get_yangin(pils):
     }
 
 
-@st.cache_data
+@st.cache_data(hash_funcs=_PILS_HF)
 def get_oigyeok(pils):
 
     ilgan = pils[1]["cg"]
@@ -526,7 +521,7 @@ def get_oigyeok(pils):
 
 
 
-@st.cache_data
+@st.cache_data(hash_funcs=_PILS_HF)
 def get_12sinsal(pils):
 
     nyon_jj = pils[3]["jj"] if len(pils) > 3 else ""
@@ -607,7 +602,7 @@ def get_12sinsal(pils):
     return result
 
 
-@st.cache_data
+@st.cache_data(hash_funcs=_PILS_HF)
 def get_extra_sinsal(pils):
     """
 
@@ -733,7 +728,7 @@ def get_extra_sinsal(pils):
     return stars
 
 
-@st.cache_data
+@st.cache_data(hash_funcs=_PILS_HF)
 def get_pahae(pils):
     """파살(破殺)·해살(害殺) 감지.
     반환: {"파살": [...pairs...], "해살": [...pairs...], "items": [...{name, pair, desc}...]}
@@ -757,12 +752,12 @@ def get_pahae(pils):
     return result
 
 
-@st.cache_data
+@st.cache_data(hash_funcs=_PILS_HF)
 def get_geunmyo_hwasil(pils):
     """근묘화실(根苗花實) – 4기둥 각각의 궁 의미와 십성 분석.
     반환: list of {궁, pillar, 간지, 십성, desc}
     """
-    ilgan = pils[1]["cg"] if pils[1] else ""
+    ilgan = pils[1].get("cg", "") if len(pils) > 1 and pils[1] else ""
     pillar_order = [
         ("근(根)", 0), ("묘(苗)", 2), ("화(花)", 1), ("실(實)", 3)
     ]

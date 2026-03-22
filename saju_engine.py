@@ -455,7 +455,7 @@ except ImportError:
 
 # 길일/흉일 기준 상수 (ManseCalendarEngine.get_gil_hyung 에서 사용)
 _GIL_CG = {"甲", "丙", "戊", "庚", "壬"}        # 양간 = 기본 길일
-_HYUNG_JJ = {"丑", "刑", "巳", "申", "寅"}      # 삼형살 지지
+_HYUNG_JJ = {"丑", "戌", "巳", "申", "寅"}      # 삼형살 지지 (丑戌未·寅巳申 형살 기준)
 _GIL_JJ = {"子", "卯", "午", "酉", "亥", "寅"}  # 귀인 지지 포함
 
 
@@ -675,7 +675,6 @@ class ManseCalendarEngine:
 # ==================================================
 
 
-@st.cache_data
 def calc_gunghap(pils_a, pils_b, name_a="나", name_b="상대"):
 
     # [년, 월, 일, 시] 순서에서 일간은 index 2
@@ -822,7 +821,6 @@ def calc_gunghap(pils_a, pils_b, name_a="나", name_b="상대"):
 # ==================================================
 
 
-@st.cache_data
 def get_good_days(pils, year, month):
 
     import calendar
@@ -1213,6 +1211,15 @@ class SajuCoreEngine:
 
         from datetime import datetime as py_datetime
 
+        # ✅ 입력값 방어̀처리 — month/day/hour/minute 0/None 차단
+        try:
+            month  = max(1, min(12, int(month)  if month  else 1))
+            day    = max(1, min(31, int(day)    if day    else 1))
+            hour   = max(0, min(23, int(hour)   if hour   else 12))
+            minute = max(0, min(59, int(minute) if minute else 0))
+            year   = int(year) if year else 1990
+        except Exception:
+            month, day, hour, minute, year = 1, 1, 12, 0, 1990
         birth_dt = py_datetime(year, month, day, hour, minute)
 
         term_names = [
@@ -1507,7 +1514,6 @@ def calc_sipsung(ilgan, pils):
     return result
 
 
-@st.cache_data
 def calc_12unsung(ilgan, pils):
     """12운성 계산 (Bug 5 Fix: 양/음 배열 수정)"""
 
@@ -1920,13 +1926,10 @@ def get_10year_luck_table(pils, birth_year, gender="남"):
 
     # 대운 호출 시 실제 생년월일시 반영
 
-    birth_month  = max(1, min(12, int(st.session_state.get("birth_month") or 1)))
-
-    birth_day    = max(1, min(31, int(st.session_state.get("birth_day")   or 1)))
-
-    birth_hour   = max(0, min(23, int(st.session_state.get("birth_hour")  or 12)))
-
-    birth_minute = max(0, min(59, int(st.session_state.get("birth_minute") or 0)))
+    birth_month  = max(1, min(12, int(st.session_state.get("birth_month",  1) or 1)))
+    birth_day    = max(1, min(31, int(st.session_state.get("birth_day",    1) or 1)))
+    birth_hour   = max(0, min(23, int(st.session_state.get("birth_hour",  12) or 12)))
+    birth_minute = max(0, min(59, int(st.session_state.get("birth_minute", 0) or 0)))
 
     daewoon = SajuCoreEngine.get_daewoon(
         pils,
@@ -1971,13 +1974,10 @@ def get_daewoon_sewoon_cross(pils, birth_year, gender, target_year=None):
 
     # 대운 호출 시 실제 생년월일시 반영
 
-    _bm  = max(1, min(12, int(st.session_state.get("birth_month") or 1)))
-
-    _bd  = max(1, min(31, int(st.session_state.get("birth_day")   or 1)))
-
-    _bh  = max(0, min(23, int(st.session_state.get("birth_hour")  or 12)))
-
-    _bmi = max(0, min(59, int(st.session_state.get("birth_minute") or 0)))
+    _bm  = max(1, min(12, int(st.session_state.get("birth_month",  1) or 1)))
+    _bd  = max(1, min(31, int(st.session_state.get("birth_day",    1) or 1)))
+    _bh  = max(0, min(23, int(st.session_state.get("birth_hour",  12) or 12)))
+    _bmi = max(0, min(59, int(st.session_state.get("birth_minute", 0) or 0)))
 
     daewoon_list = SajuCoreEngine.get_daewoon(pils, birth_year, _bm, _bd, _bh, _bmi, gender)
 
