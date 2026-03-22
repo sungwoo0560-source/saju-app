@@ -3917,6 +3917,113 @@ class LocalSajuNarrator:
             "이 달에 중요한 계약·투자 결정을 집중시키고, 기신 오행 달에는 큰 움직임을 자제하십시오."
         )
 
+        # ── 10. 사고수 예방법 ────────────────────────────────────────
+        lines.append("\n### ⚡ 사고수(事故數) 발동 조건 & 예방법")
+
+        # 사고수 위험 점수 계산
+        _m_sago_risk  = 0
+        _m_sago_notes = []
+
+        if sw_ss == "偏官":
+            _m_sago_risk += 3
+            _m_sago_notes.append("편관(偏官) 세운 — 외부 충격·갈등·사고 기운 발동")
+        if sw_ss == "劫財":
+            _m_sago_risk += 1
+            _m_sago_notes.append("겁재(劫財) 세운 — 손재·구설 주의")
+
+        # 대운 십성이 편관이면 추가
+        if _dw_cur_ss == "偏官":
+            _m_sago_risk += 2
+            _m_sago_notes.append("편관(偏官) 대운 겹침 — 이중 사고 기운")
+
+        # 삼재 감지
+        _JJ_CYCLE_M = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"]
+        _nyon_jj_m   = pils[3].get("jj","") if len(pils) > 3 else ""
+        _sewoon_jj_m = _JJ_CYCLE_M[(cur_year - 4) % 12]
+        _SAMJAE_G_M  = [
+            (["寅","卯","辰"], {"申","子","辰"}),
+            (["巳","午","未"], {"亥","卯","未"}),
+            (["申","酉","戌"], {"寅","午","戌"}),
+            (["亥","子","丑"], {"巳","酉","丑"}),
+        ]
+        _is_samjae_m = False
+        _samjae_tp_m = ""
+        for _sy_m, _sa_m in _SAMJAE_G_M:
+            if _sewoon_jj_m in _sy_m and _nyon_jj_m in _sa_m:
+                _samjae_tp_m = ["들삼재","눌삼재","날삼재"][_sy_m.index(_sewoon_jj_m)]
+                _is_samjae_m = True
+                if _samjae_tp_m == "들삼재":
+                    _m_sago_risk += 3
+                    _m_sago_notes.append(f"들삼재(入三災) — 삼재 첫해, 최고 위험")
+                else:
+                    _m_sago_risk += 1
+                    _m_sago_notes.append(f"{_samjae_tp_m} — 삼재 기간 중")
+                break
+
+        # 발동 조건 출력
+        lines.append("**💥 사고수 발동 조건:**")
+        if _m_sago_notes:
+            for _note in _m_sago_notes:
+                lines.append(f"- {_note}")
+        else:
+            lines.append("- 현재 뚜렷한 사고수 발동 요인이 보이지 않습니다. 일상적 주의로 충분합니다.")
+
+        if _m_sago_risk >= 5:
+            lines.append(
+                f"\n⚠️ **사고수 고위험**: 여러 흉기운이 겹쳐 있습니다. "
+                "올해는 몸을 낮추고 충동적 결정을 피하는 것이 최선입니다."
+            )
+        elif _m_sago_risk >= 3:
+            lines.append("\n🟡 **사고수 주의**: 조심하면 충분히 피할 수 있는 기운입니다.")
+        lines.append("")
+
+        # 예방법
+        lines.append("**🛡️ 사고수 예방법:**")
+        lines.append("- 🚗 *신체*: 과속·음주운전 절대 금지. 고위험 스포츠·등산·낙상 주의. 칼·도구 다룰 때 집중.")
+        lines.append("- 🚫 *재물*: 보증·동업 절대 금지. 신규 투자 보류. 계약서 꼼꼼히 확인. 현금 비중 높이기.")
+        lines.append("- ⚖️ *관계*: 법적 분쟁 회피. 말조심·구설수 주의. 감정적 충돌 즉시 자리 피하기.")
+        lines.append("")
+
+        # 개운법
+        lines.append("**🌟 사고수 완화 개운법:**")
+        _yong_col_m = {"木":"초록색","火":"붉은색","土":"황색","金":"흰색","水":"검은색"}.get(
+            yongshin[0] if yongshin else "木", "붉은색")
+        lines.append(f"- 🧵 용신 색상 **{_yong_col_m}** 실을 왼손 손목에 묶어 사고 기운을 막으십시오.")
+        if _is_samjae_m:
+            lines.append(f"- 📜 삼재부(三災符)·사고예방부를 몸에 지니십시오 ({_samjae_tp_m} 해당).")
+        else:
+            lines.append("- 📜 사고예방부를 몸에 지니시면 흉한 기운을 막아줍니다.")
+        lines.append("- 🛕 절(사찰) 방문 및 사고예방 기도. 조상 제사를 정성껏 올리십시오.")
+        lines.append("- 🧂 소금물로 현관을 정화하고, 이사·여행 전 손 없는 날을 확인하십시오.")
+
+        # 월별 위험 타이밍
+        lines.append("\n**📅 월별 사고 위험 타이밍 (기신 오행 달 기준):**")
+        _JJ_MON_OH_M = {"寅":"木","卯":"木","巳":"火","午":"火","辰":"土","未":"土",
+                         "戌":"土","丑":"土","申":"金","酉":"金","亥":"水","子":"水"}
+        _JJ_BY_MON_M = {1:"寅",2:"卯",3:"辰",4:"巳",5:"午",6:"未",
+                         7:"申",8:"酉",9:"戌",10:"亥",11:"子",12:"丑"}
+        _MON_LBL_M   = {1:"1월",2:"2월",3:"3월",4:"4월",5:"5월",6:"6월",
+                         7:"7월",8:"8월",9:"9월",10:"10월",11:"11월",12:"12월"}
+        _danger_mm, _caution_mm = [], []
+        for _m_m, _jj_mm in _JJ_BY_MON_M.items():
+            _oh_mm      = _JJ_MON_OH_M.get(_jj_mm, "")
+            _is_gisin_mm = _oh_mm in gisin
+            try:
+                _is_chung_mm = any(frozenset([p.get("jj",""), _jj_mm]) in CHUNG_MAP for p in pils)
+            except Exception:
+                _is_chung_mm = False
+            if _is_chung_mm and _is_gisin_mm:
+                _danger_mm.append(_MON_LBL_M[_m_m])
+            elif _is_chung_mm or _is_gisin_mm:
+                _caution_mm.append(_MON_LBL_M[_m_m])
+
+        if _danger_mm:
+            lines.append(f"- 🔴 **최고 주의 달**: {' · '.join(_danger_mm)} — 충(沖)×기신 겹침. 큰 이동·수술·계약 금지.")
+        if _caution_mm:
+            lines.append(f"- 🟡 **주의 강화 달**: {' · '.join(_caution_mm[:4])} — 기신 오행 또는 충 활성. 몸을 낮추십시오.")
+        if not _danger_mm and not _caution_mm:
+            lines.append("- 특별히 위험한 달이 두드러지지 않습니다. 일상적 주의로 충분합니다.")
+
         return "\n".join(lines)
 
         lines.append(f"*재물은 형태(어떤 방식으로 버는가)와 타이밍(언제 벌고 언제 조심하는가)을 아는 것이 중요합니다.*\n")
@@ -6876,6 +6983,119 @@ def _nar_ch8_flow(ctx):
     if _sago_reasons:
         lines.append(f"  [발동 요인] {' / '.join(_sago_reasons[:3])}")
     lines.append(f"")
+
+    # ── B-2. 사고수 예방법 정밀 처방 ─────────────────────────────────
+    if _SAGO_RISK >= 3:
+        lines.append(f"━━━ 🛡️ 사고수 예방법 & 개운 처방 ━━━━━━━━━━━━━━━━━━━━━━━━")
+        lines.append(f"")
+
+        # 추가 신살 감지
+        _has_baekho_s  = any("백호" in s.get("이름","") or "백호" in s.get("name","") for s in sinsal_list)
+        _has_geobsal_s = any("겁살" in s.get("이름","") or "겁살" in s.get("name","") for s in sinsal_list)
+        _has_sangmun_s = any("상문" in s.get("이름","") or "상문" in s.get("name","") for s in sinsal_list)
+
+        # 삼재 감지
+        _JJ_CYCLE_S = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"]
+        _nyon_jj_s   = pils[3].get("jj","") if len(pils) > 3 else ""
+        _sewoon_jj_s = _JJ_CYCLE_S[(current_year - 4) % 12]
+        _SAMJAE_G_S  = [
+            (["寅","卯","辰"], {"申","子","辰"}),
+            (["巳","午","未"], {"亥","卯","未"}),
+            (["申","酉","戌"], {"寅","午","戌"}),
+            (["亥","子","丑"], {"巳","酉","丑"}),
+        ]
+        _is_samjae_s = False
+        _samjae_tp_s = ""
+        for _sy, _sa in _SAMJAE_G_S:
+            if _sewoon_jj_s in _sy and _nyon_jj_s in _sa:
+                _samjae_tp_s = ["들삼재","눌삼재","날삼재"][_sy.index(_sewoon_jj_s)]
+                _is_samjae_s = True
+                break
+
+        # 위험 등급별 무당 서술
+        _is_max_danger = (_SAGO_RISK >= 7 or
+                          (_is_samjae_s and _samjae_tp_s == "들삼재" and "偏官" in sw_ss_cg))
+        if _is_max_danger:
+            lines.append(
+                f"  ⚠️ {display_name}님, 신이 내려다보니 올해 사고수가 매우 강하게 겹쳐 있습니다. "
+                + (f"들삼재에 편관(偏官) 세운까지 겹쳐 " if _is_samjae_s and _samjae_tp_s == "들삼재" else "")
+                + (f"백호대살(白虎大殺)의 기운이 혈광(血光)을 몰고 오고 있으니 " if _has_baekho_s else "")
+                + "올해만큼은 몸을 낮추고 극히 조심하시는 것이 목숨을 지키는 길입니다."
+            )
+        else:
+            lines.append(
+                f"  {display_name}님, 올해 사고수 기운이 발동하고 있습니다. "
+                + (f"상문살(喪門殺)이 겹쳐 주변 이별·초상 기운도 조심하셔야 합니다. " if _has_sangmun_s else "")
+                + "무리하지 않고 평소보다 조심스럽게 행동하시면 피해갈 수 있는 기운입니다."
+            )
+        lines.append(f"")
+
+        # 신체 안전
+        lines.append("  **[신체 안전 예방법]**")
+        lines.append("  - 🚗 운전 시 과속·음주운전 절대 금지 — 올해 교통 기운이 불안정합니다.")
+        lines.append("  - 🏔️ 고위험 스포츠·암벽등반·번지점프 등 위험 레포츠를 자제하십시오.")
+        lines.append("  - 🪜 계단·욕실 낙상 주의 — 특히 어두운 시간대 이동 시 조심하십시오.")
+        lines.append("  - 🔪 칼·날카로운 도구를 다룰 때 집중력을 잃지 마십시오.")
+        if _has_baekho_s:
+            lines.append("  - 🔴 백호대살 발동: 수술·시술은 가급적 길한 달로 미루십시오. 꼭 필요하다면 반드시 택일(擇日)하십시오.")
+        lines.append(f"")
+
+        # 재물 안전
+        lines.append("  **[재물 안전 예방법]**")
+        lines.append("  - 🚫 보증·연대보증 절대 서지 마십시오 — 올해 한 번의 서명이 수년의 고통이 됩니다.")
+        lines.append("  - 📈 신규 투자·코인·주식 추가 매수를 보류하십시오.")
+        lines.append("  - 📋 계약서는 반드시 법률 전문가에게 확인받으십시오.")
+        lines.append("  - 💵 현금 비중을 높이고 유동성을 확보해 두십시오.")
+        lines.append(f"")
+
+        # 관계 안전
+        lines.append("  **[관계 안전 예방법]**")
+        lines.append("  - ⚖️ 법적 분쟁 자리에는 가지도 마십시오 — 올해는 말려들기만 해도 손해입니다.")
+        lines.append("  - 🤐 말조심·구설수 주의 — 감정이 올라올 때 2분만 참으십시오.")
+        lines.append("  - 😤 감정적 충돌이 생기면 즉시 자리를 피하십시오. 참는 것이 이기는 것입니다.")
+        lines.append(f"")
+
+        # 개운법
+        lines.append("  **[사고수 완화 개운법]**")
+        _yong_col_s = {"木":"초록색","火":"붉은색","土":"황색","金":"흰색","水":"검은색"}.get(
+            yongshin_ohs[0] if yongshin_ohs else "木", "붉은색")
+        lines.append(f"  - 🧵 {_yong_col_s} 실을 왼손 손목에 묶어 사고 기운을 막으십시오.")
+        lines.append("  - 🛕 절(사찰)에 방문하여 사고예방 기도를 올리십시오.")
+        if _is_samjae_s:
+            lines.append(f"  - 📜 삼재부(三災符)·사고예방부를 몸에 지니십시오 ({_samjae_tp_s} 해당).")
+        else:
+            lines.append("  - 📜 사고예방부를 몸에 지니시면 흉한 기운을 막아줍니다.")
+        lines.append("  - 🕯️ 조상 제사를 정성껏 지내면 조상이 사고 기운을 막아줍니다.")
+        lines.append("  - 🧂 현관 문지방에 소금을 뿌리고 정화한 후 쓸어 버리십시오.")
+        lines.append("  - 📅 이사·장거리 여행 전 반드시 '손 없는 날'을 확인하십시오.")
+        lines.append(f"")
+
+        # 월별 위험 타이밍
+        _JJ_MON_OH_S = {"寅":"木","卯":"木","巳":"火","午":"火","辰":"土","未":"土",
+                         "戌":"土","丑":"土","申":"金","酉":"金","亥":"水","子":"水"}
+        _JJ_BY_MON_S = {1:"寅",2:"卯",3:"辰",4:"巳",5:"午",6:"未",
+                         7:"申",8:"酉",9:"戌",10:"亥",11:"子",12:"丑"}
+        _MON_LABEL_S = {1:"1월(寅)",2:"2월(卯)",3:"3월(辰)",4:"4월(巳)",5:"5월(午)",
+                         6:"6월(未)",7:"7월(申)",8:"8월(酉)",9:"9월(戌)",
+                         10:"10월(亥)",11:"11월(子)",12:"12월(丑)"}
+        _danger_m, _caution_m = [], []
+        for _m, _jj_m in _JJ_BY_MON_S.items():
+            _oh_m       = _JJ_MON_OH_S.get(_jj_m, "")
+            _is_gisin_m = _oh_m in gisin_ohs
+            _is_chung_m = any(frozenset([p.get("jj",""), _jj_m]) in CHUNG_MAP for p in pils)
+            if _is_chung_m and _is_gisin_m:
+                _danger_m.append(_MON_LABEL_S[_m])
+            elif _is_chung_m or _is_gisin_m:
+                _caution_m.append(_MON_LABEL_S[_m])
+
+        lines.append("  **[월별 사고 위험 타이밍]**")
+        if _danger_m:
+            lines.append(f"  - 🔴 최고 주의 달: {' · '.join(_danger_m)} — 충(沖)×기신 겹침. 이 달 큰 이동·수술·계약 금지.")
+        if _caution_m:
+            lines.append(f"  - 🟡 주의 강화 달: {' · '.join(_caution_m[:4])} — 기신 오행 또는 충 활성. 몸을 낮추십시오.")
+        if not _danger_m and not _caution_m:
+            lines.append("  - 올해는 특별히 위험한 달이 두드러지지 않습니다. 일상적 주의로 충분합니다.")
+        lines.append(f"")
 
     lines += [
         f"━━━ 💑 이성·관계 직격 분석 [{love_level}] ━━━━━━━━━━━━━━━━━━",
