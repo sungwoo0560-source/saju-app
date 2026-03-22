@@ -9,6 +9,10 @@ import streamlit as st
 from datetime import date, datetime, timedelta
 import re
 from saju_data import *
+
+def _hash_pils(pils):
+    return hash(tuple((p.get("cg", ""), p.get("jj", "")) for p in pils))
+_PILS_HF = {list: _hash_pils}
 from saju_data import (
     _JJ_HOUR_FULL, _JJ_HOUR_SHORT, _LUNAR_DATA, _SIT, _LOTTO_SS,
     _JEOLGI_BASE, _AI_SANDBOX_HEADER, _SS_DAILY_DEEP,
@@ -19,13 +23,6 @@ from saju_data import (
     AMROK_JJ, AMROK_DESC,
     GEUNMYO_HWASIL,
 )
-
-# pils는 list[dict]로 직접 해시 불가. 천간+지지 튜플로 변환해 캐시 키 생성
-def _hash_pils(pils):
-    return hash(tuple((p.get("cg", ""), p.get("jj", "")) for p in pils))
-
-_PILS_HF = {list: _hash_pils}
-
 
 @st.cache_data(hash_funcs=_PILS_HF)
 def get_sam_hap(pils):
@@ -215,7 +212,7 @@ def get_gongmang(pils):
 
 
 
-@st.cache_data
+@st.cache_data(hash_funcs=_PILS_HF)
 def get_nabjin(cg, jj):
 
     pillar = cg + jj
@@ -339,6 +336,18 @@ def _get_extra_sinsal_v1(pils):
 #  일진 / 절기 / 길일흉일 계산
 
 # ==================================================
+
+# 24절기 기본 날짜 (연도별 미세 차이는 A단계 라이브러리로 정밀화)
+
+
+# 길일/흉일 기준 - 일진의 천간 기준 간단 판별
+
+_GIL_CG = {"甲", "丙", "戊", "庚", "壬"}  # 양간 = 기본 길일
+
+_HYUNG_JJ = {"丑", "戌", "巳", "申", "寅"}  # 삼형살 지지
+
+_GIL_JJ = {"子", "卯", "午", "酉", "亥", "寅"}  # 귀인 지지 포함
+
 
 @st.cache_data(hash_funcs=_PILS_HF)
 def get_waryeong(pils):
@@ -599,6 +608,70 @@ def get_12sinsal(pils):
                     }
                 )
 
+    # ── 상문살(喪門殺) / 조객살(弔客殺) ─────────────────────────
+    _SANGMUN_MAP = {
+        "子": "寅", "丑": "卯", "寅": "辰", "卯": "巳",
+        "辰": "午", "巳": "未", "午": "申", "未": "酉",
+        "申": "戌", "酉": "亥", "戌": "子", "亥": "丑",
+    }
+    _JOKAEK_MAP = {
+        "子": "戌", "丑": "亥", "寅": "子", "卯": "丑",
+        "辰": "寅", "巳": "卯", "午": "辰", "未": "巳",
+        "申": "午", "酉": "未", "戌": "申", "亥": "酉",
+    }
+    _nyon_jj = pils[3]["jj"] if len(pils) > 3 else ""
+    _pil_jjs = [p["jj"] for p in pils]
+    _labels  = ["시주", "일주", "월주", "년주"]
+
+    # 상문살
+    _sangmun_jj = _SANGMUN_MAP.get(_nyon_jj, "")
+    for _i, (_jj, _lbl) in enumerate(zip(_pil_jjs, _labels)):
+        if _sangmun_jj and _jj == _sangmun_jj:
+            result.append({
+                "이름": "상문살(喪門殺)",
+                "name": "상문살",
+                "icon": "⚰️",
+                "위치": _lbl,
+                "pos": _lbl,
+                "desc": (
+                    "상문살(喪門殺)이 있습니다. "
+                    "초상·죽음·이별의 기운이 드나드는 문이 열려 있는 신살입니다. "
+                    "주변 가까운 사람의 부고 소식을 접하거나, "
+                    "본인의 건강이 급격히 악화되는 시기가 옵니다. "
+                    "대운·세운에서 상문살이 겹칠 때는 특히 주의가 필요합니다."
+                ),
+                "remedy": (
+                    "처방: 병원 정기 검진을 미루지 마십시오. "
+                    "조상 제사와 기제사를 정성껏 지내면 흉기가 완화됩니다. "
+                    "장례식장·납골당 방문을 최소화하고, 문상 후 반드시 소금으로 정화하십시오."
+                ),
+            })
+            break  # 중복 방지
+
+    # 조객살
+    _jokaek_jj = _JOKAEK_MAP.get(_nyon_jj, "")
+    for _i, (_jj, _lbl) in enumerate(zip(_pil_jjs, _labels)):
+        if _jokaek_jj and _jj == _jokaek_jj:
+            result.append({
+                "이름": "조객살(弔客殺)",
+                "name": "조객살",
+                "icon": "🪦",
+                "위치": _lbl,
+                "pos": _lbl,
+                "desc": (
+                    "조객살(弔客殺)이 있습니다. "
+                    "상문살과 짝을 이루는 신살로, 문상을 자주 가거나 "
+                    "죽음·이별과 관련된 일이 주변에 많이 생기는 기운입니다. "
+                    "감정적으로 우울하고 무기력해지는 시기가 반복됩니다."
+                ),
+                "remedy": (
+                    "처방: 주변 사람들의 건강에 관심을 기울이십시오. "
+                    "본인도 정기 검진을 철저히 받으십시오. "
+                    "밝은 색상의 옷을 착용하고 긍정적인 기운의 환경을 만드십시오."
+                ),
+            })
+            break  # 중복 방지
+
     return result
 
 
@@ -748,6 +821,70 @@ def get_pahae(pils):
             desc = HAE_SAL_DESC.get(pair, "")
             result["해살"].append(pair)
             result["items"].append({"type": "해살", "pair": sorted(pair), "desc": desc})
+
+    # ── 상문살(喪門殺) / 조객살(弔客殺) ─────────────────────────
+    _SANGMUN_MAP = {
+        "子": "寅", "丑": "卯", "寅": "辰", "卯": "巳",
+        "辰": "午", "巳": "未", "午": "申", "未": "酉",
+        "申": "戌", "酉": "亥", "戌": "子", "亥": "丑",
+    }
+    _JOKAEK_MAP = {
+        "子": "戌", "丑": "亥", "寅": "子", "卯": "丑",
+        "辰": "寅", "巳": "卯", "午": "辰", "未": "巳",
+        "申": "午", "酉": "未", "戌": "申", "亥": "酉",
+    }
+    _nyon_jj = pils[3]["jj"] if len(pils) > 3 else ""
+    _pil_jjs = [p["jj"] for p in pils]
+    _labels  = ["시주", "일주", "월주", "년주"]
+
+    # 상문살
+    _sangmun_jj = _SANGMUN_MAP.get(_nyon_jj, "")
+    for _i, (_jj, _lbl) in enumerate(zip(_pil_jjs, _labels)):
+        if _sangmun_jj and _jj == _sangmun_jj:
+            result["items"].append({
+                "이름": "상문살(喪門殺)",
+                "name": "상문살",
+                "icon": "⚰️",
+                "위치": _lbl,
+                "pos": _lbl,
+                "desc": (
+                    "상문살(喪門殺)이 있습니다. "
+                    "초상·죽음·이별의 기운이 드나드는 문이 열려 있는 신살입니다. "
+                    "주변 가까운 사람의 부고 소식을 접하거나, "
+                    "본인의 건강이 급격히 악화되는 시기가 옵니다. "
+                    "대운·세운에서 상문살이 겹칠 때는 특히 주의가 필요합니다."
+                ),
+                "remedy": (
+                    "처방: 병원 정기 검진을 미루지 마십시오. "
+                    "조상 제사와 기제사를 정성껏 지내면 흉기가 완화됩니다. "
+                    "장례식장·납골당 방문을 최소화하고, 문상 후 반드시 소금으로 정화하십시오."
+                ),
+            })
+            break  # 중복 방지
+
+    # 조객살
+    _jokaek_jj = _JOKAEK_MAP.get(_nyon_jj, "")
+    for _i, (_jj, _lbl) in enumerate(zip(_pil_jjs, _labels)):
+        if _jokaek_jj and _jj == _jokaek_jj:
+            result["items"].append({
+                "이름": "조객살(弔客殺)",
+                "name": "조객살",
+                "icon": "🪦",
+                "위치": _lbl,
+                "pos": _lbl,
+                "desc": (
+                    "조객살(弔客殺)이 있습니다. "
+                    "상문살과 짝을 이루는 신살로, 문상을 자주 가거나 "
+                    "죽음·이별과 관련된 일이 주변에 많이 생기는 기운입니다. "
+                    "감정적으로 우울하고 무기력해지는 시기가 반복됩니다."
+                ),
+                "remedy": (
+                    "처방: 주변 사람들의 건강에 관심을 기울이십시오. "
+                    "본인도 정기 검진을 철저히 받으십시오. "
+                    "밝은 색상의 옷을 착용하고 긍정적인 기운의 환경을 만드십시오."
+                ),
+            })
+            break  # 중복 방지
 
     return result
 

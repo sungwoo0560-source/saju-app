@@ -11151,7 +11151,7 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
 
     st.markdown("---")
 
-    st.markdown("### 🔮 일진 심층 해석")
+    st.markdown("### 🤖 AI 심층 분석")
 
     try:
         ilgan = pils[1]["cg"]
@@ -13520,21 +13520,17 @@ def menu9_daily(pils, name, birth_year, gender):
         "金": "금(金)",
         "水": "수(水)",
     }.get(_today_oh_jj, _today_oh_jj)
-    _today_badge_html = color_ganzhi_badge(today_cg+today_jj, font_size="18px", padding="2px 7px")
-    _weekday_kr = ["월", "화", "수", "목", "금", "토", "일"][today.weekday()]
     st.markdown(
             f"""
 
 <div style="background:rgba(255,255,255,0.92);border:1.5px solid #d4af37; border-radius:20px;padding:24px;margin:10px 0 20px;box-shadow:0 8px 30px rgba(212,175,55,0.12)">
 
 <div style="font-size:17px;font-weight:900;color:#b38728;margin-bottom:12px">
-
-🔮 만신 일진 완전 해설 — {today.strftime("%Y년 %m월 %d일")} ({_weekday_kr}요일) ({_today_badge_html}일, {_animal}의 날)
+🔮 만신 일진 완전 해설 — {today.strftime("%Y년 %m월 %d일")} ({color_ganzhi_badge(today_cg+today_jj, font_size="18px", padding="2px 7px")}일, {_animal}의 날)
 </div>
 
 <div style="font-size:12px;color:#888;margin-bottom:14px">
 천간 오행: {_oh_cg_label} | 지지 오행: {_oh_jj_label} | 십성: {_today_ss_kr}
-
 </div>
 
 <div style="display:flex;flex-direction:column;gap:10px">
@@ -13607,7 +13603,7 @@ def menu9_daily(pils, name, birth_year, gender):
 
 <span style="font-size:32px">{d["emoji"]}</span>
 
-<span style="font-size:18px; font-weight:800; color:#333">{today_cg}{today_jj}일의 운기 ({today_ss} / {_today_ss_kr})</span>
+<span style="font-size:18px; font-weight:800; color:#333">{today_cg}{today_jj}일의 운기 ({today_ss})</span>
 
 <span style="background:{level_color}22; color:{level_color}; padding:2px 10px; border-radius:20px; font-size:11px; font-weight:800">{d["level"]}</span>
 
@@ -13626,6 +13622,37 @@ def menu9_daily(pils, name, birth_year, gender):
 """,
         unsafe_allow_html=True,
     )
+
+    # -- 길한 시간 (용신 기반) ----------------
+
+    st.markdown(
+        '<div class="gold-section" style="margin-top:20px">⏰ 오늘의 길한 시간 (용신 기반)</div>',
+        unsafe_allow_html=True,
+    )
+
+    ys = get_yongshin(pils)
+
+    y_ohs = ys.get("종합_용신", [])
+
+    OH_HOUR_MAP = {
+        "木": [("3~5시", "寅"), ("5~7시", "卯")],
+        "火": [("9~11시", "巳"), ("11~13시", "午")],
+        "土": [("7~9시", "辰"), ("13~15시", "未")],
+        "金": [("15~17시", "申"), ("17~19시", "酉")],
+        "水": [("21~23시", "亥"), ("23~1시", "子")],
+    }
+
+    good_hours = []
+
+    for oh in y_ohs:
+        good_hours.extend(OH_HOUR_MAP.get(oh, []))
+
+    if good_hours:
+        tags = "".join([f"<span style='background:#f1f8e9; color:#2e7d32; padding:4px 12px; border-radius:6px; font-size:12px; margin-right:5px'>✅ {t}({jj}시)</span>" for t, jj in good_hours[:3]])
+
+        st.markdown(f"<div>{tags}</div>", unsafe_allow_html=True)
+
+    # -- 300-400자 상세 처방 카드 (행운아이템 + 조심 + 조언) --
 
     # -- 300-400자 상세 처방 카드 (행운아이템 + 조심 + 조언) --
 
@@ -20242,18 +20269,7 @@ return false;">▲</a>
 
     total_lines = get_total_lines()
 
-    st.markdown(
-        f"""
 
-<div style="text-align:right; font-size:10px; color:#aaa; margin-top:20px; border-top:1px solid #eee; padding-top:10px">
-
-        [System Info] Total Engine Lines: {total_lines} | Version: Python 3.13 Stable
-
-</div>
-
-    """,
-        unsafe_allow_html=True,
-    )
 
 
 # ==========================================================
