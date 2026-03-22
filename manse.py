@@ -11953,6 +11953,57 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
     except Exception as _mtr_e:
         st.warning(f"⚠️ 월별 타이밍 분석 오류: {_mtr_e}")
 
+    # ── 카카오톡 공유 버튼 ─────────────────────────────────────────
+    try:
+        import urllib.parse as _uparse
+        _share_gyeok = gk_name if gk_name else "-"
+        _share_yong  = yong_str if yong_str else "-"
+        _cur_mon_k   = datetime.now().month
+        _mon_luck_k  = get_monthly_luck(pils, datetime.now().year, _cur_mon_k) or {}
+        _today_gihung = _mon_luck_k.get("길흉", "보통")
+        _share_text  = (
+            f"{name}님의 사주 — {_share_gyeok} "
+            f"| 용신: {_share_yong} "
+            f"| 이달의 운세: {_today_gihung}"
+        )
+        _app_url    = "https://saju-manse.streamlit.app"
+        _kakao_url  = (
+            "https://share.kakao.com/talk/message/link?"
+            + _uparse.urlencode({"text": _share_text, "url": _app_url}, quote_via=_uparse.quote)
+        )
+        st.markdown("---")
+        st.markdown(
+            f"""
+<div style="text-align:center;margin:16px 0 8px 0;">
+  <a href="{_kakao_url}" target="_blank" style="
+    display:inline-flex;align-items:center;gap:10px;
+    background:#FEE500;color:#3C1E1E;
+    font-size:15px;font-weight:800;
+    padding:12px 28px;border-radius:12px;
+    text-decoration:none;
+    box-shadow:0 2px 8px rgba(0,0,0,0.13);
+    border:none;cursor:pointer;
+  ">
+    <svg width="22" height="22" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="24" cy="20" rx="20" ry="15" fill="#3C1E1E"/>
+      <ellipse cx="24" cy="20" rx="18" ry="13" fill="#FEE500"/>
+      <path d="M14 26 Q16 34 24 36 Q32 34 34 26" fill="#FEE500"/>
+      <ellipse cx="18" cy="19" rx="2" ry="2.5" fill="#3C1E1E"/>
+      <ellipse cx="24" cy="19" rx="2" ry="2.5" fill="#3C1E1E"/>
+      <ellipse cx="30" cy="19" rx="2" ry="2.5" fill="#3C1E1E"/>
+    </svg>
+    카카오톡으로 공유하기
+  </a>
+</div>
+<div style="text-align:center;font-size:12px;color:#888;margin-bottom:4px;">
+  "{_share_text}"
+</div>
+""",
+            unsafe_allow_html=True,
+        )
+    except Exception as _kakao_e:
+        pass  # 공유 버튼 오류 시 조용히 무시
+
 
 def menu2_lifeline(pils, birth_year, gender, name="내담자"):
     """2️⃣ 인생 흐름 (대운 100년) - 프리미엄 글래스모피즘 UI"""
