@@ -19085,6 +19085,160 @@ def main():
 
     has_pils = _ss["saju_pils"] is not None
 
+    # ── 오늘의 운세 자동 브리핑 (모든 탭 공통 최상단) ────────────────────
+    try:
+        _today_b = datetime.now()
+        _today_str_b = _today_b.strftime("%Y년 %m월 %d일")
+        _weekday_kr_b = ["월", "화", "수", "목", "금", "토", "일"][_today_b.weekday()]
+
+        # 오늘 일진 계산 (사주 원국 기준 기간법)
+        _TG_B = ["甲","乙","丙","丁","戊","己","庚","辛","壬","癸"]
+        _JJ_B = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"]
+        _base_day_b = date(2024, 1, 1)   # 甲子일 기준점
+        _delta_b = (_today_b.date() - _base_day_b).days
+        _day_cg_b = _TG_B[_delta_b % 10]
+        _day_jj_b = _JJ_B[_delta_b % 12]
+
+        # 오행 매핑
+        _OH_B    = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
+                    "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
+        _JJOH_B  = {"子":"水","丑":"土","寅":"木","卯":"木","辰":"土",
+                    "巳":"火","午":"火","未":"土","申":"金","酉":"金",
+                    "戌":"土","亥":"水"}
+        _OH_COLOR_B = {"木":"#27ae60","火":"#e74c3c","土":"#d4a017",
+                       "金":"#7f8c8d","水":"#2980b9"}
+        _OHKR_B     = {"木":"木(나무)","火":"火(불)","土":"土(흙)",
+                       "金":"金(쇠)","水":"水(물)"}
+
+        _cg_oh_b = _OH_B.get(_day_cg_b, "木")
+        _jj_oh_b = _JJOH_B.get(_day_jj_b, "木")
+
+        # 십성 기반 오늘 키워드
+        _TEN_STAR_B = {
+            "甲": ("비견","독립·경쟁·추진력"), "乙": ("겁재","협력·경쟁·사교"),
+            "丙": ("식신","표현·창의·여유"), "丁": ("상관","재능·반항·예술"),
+            "戊": ("편재","활동적재물·변화"), "己": ("정재","안정재물·실속"),
+            "庚": ("편관","권위·압박·변화"), "辛": ("정관","규율·명예·책임"),
+            "壬": ("편인","직관·학습·독창"), "癸": ("정인","보호·학문·내면"),
+        }
+        _ss_name_b, _ss_desc_b = _TEN_STAR_B.get(_day_cg_b, ("비견","균형·평상"))
+
+        # 행운색 (일진 천간 오행 기준)
+        _LUCK_COLOR_B = {
+            "木": ("초록·청록", "#27ae60"),
+            "火": ("빨강·오렌지", "#e74c3c"),
+            "土": ("황토·노란", "#d4a017"),
+            "金": ("흰색·은색", "#95a5a6"),
+            "水": ("검정·파랑", "#2980b9"),
+        }
+        _lc_name_b, _lc_hex_b = _LUCK_COLOR_B.get(_cg_oh_b, ("흰색", "#bdc3c7"))
+
+        # 재물/건강/관계 아이콘 판정 (개인 사주 있으면 월운 연동, 없으면 일진 오행 기준)
+        _pils_b = _ss.get("saju_pils")
+        _birth_year_b = _ss.get("in_solar_date", date(1990,1,1))
+        _birth_year_b = _birth_year_b.year if hasattr(_birth_year_b, "year") else 1990
+        _gender_b = _ss.get("in_gender", "남")
+
+        if _pils_b:
+            _ml_b = get_monthly_luck(_pils_b, _today_b.year, _today_b.month) or {}
+            _gil_b = _ml_b.get("길흉", "평(平)")
+            _ss_mon_b = _ml_b.get("십성", "")
+            # 재물
+            _money_icon_b  = "💰 좋음" if "재" in _ss_mon_b or "길" in _gil_b else ("⚠️ 주의" if "흉" in _gil_b else "➖ 보통")
+            # 건강
+            _health_icon_b = "💪 양호" if "인" in _ss_mon_b or "대길" in _gil_b else ("🤒 주의" if "흉흉" in _gil_b else "➖ 보통")
+            # 관계
+            _rel_icon_b    = "❤️ 원만" if "관" in _ss_mon_b or "식" in _ss_mon_b else ("⚡ 마찰" if "흉" in _gil_b else "➖ 평온")
+            _briefing_b    = (
+                f"이달은 **{_gil_b}** 운입니다. "
+                f"오늘 일진 **{_day_cg_b}{_day_jj_b}**({_OHKR_B.get(_cg_oh_b,'')})의 기운이 흐르는 날, "
+                f"{_ss_name_b}({_ss_desc_b}) 에너지를 잘 활용하면 흐름이 열립니다."
+            )
+        else:
+            # 개인 사주 없을 때: 일진 오행만으로 판정
+            _OH_GOOD_B  = {"木":("재물","건강"), "火":("관계","재물"), "土":("건강","재물"),
+                           "金":("재물","관계"), "水":("건강","직관")}
+            _good_b     = _OH_GOOD_B.get(_cg_oh_b, ())
+            _money_icon_b  = "💰 좋음" if "재물" in _good_b else "➖ 보통"
+            _health_icon_b = "💪 양호" if "건강" in _good_b else "➖ 보통"
+            _rel_icon_b    = "❤️ 원만" if "관계" in _good_b else "➖ 보통"
+            _briefing_b = (
+                f"오늘 일진 **{_day_cg_b}{_day_jj_b}**({_OHKR_B.get(_cg_oh_b,'')})의 기운이 흐르는 날입니다. "
+                f"**{_ss_name_b}({_ss_desc_b})** 에너지가 강한 하루 — "
+                f"사주를 입력하시면 개인 맞춤 운세가 제공됩니다."
+            )
+
+        _cg_color_b = _OH_COLOR_B.get(_cg_oh_b, "#888")
+        _jj_color_b = _OH_COLOR_B.get(_jj_oh_b, "#888")
+
+        with st.expander(
+            f"☀️ 오늘의 운세 브리핑 — {_today_str_b} ({_weekday_kr_b}요일)  "
+            f"일진: {_day_cg_b}{_day_jj_b}",
+            expanded=True,
+        ):
+            st.markdown(
+                f"""
+<div style="
+  border:1.5px solid #c9a84c;
+  border-radius:16px;
+  padding:16px 18px 12px 18px;
+  background:linear-gradient(135deg,#fffdf5 0%,#fdf6e3 100%);
+  box-shadow:0 2px 12px rgba(201,168,76,0.13);
+  margin-bottom:4px;
+">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+    <span style="
+      font-size:22px;font-weight:900;letter-spacing:2px;
+      background:linear-gradient(135deg,#c9a84c,#a07830);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+    ">{_day_cg_b}{_day_jj_b}</span>
+    <span style="font-size:12px;color:#888;">일진</span>
+    <span style="
+      background:{_cg_color_b}22;color:{_cg_color_b};
+      font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;
+      border:1px solid {_cg_color_b}55;
+    ">{_OHKR_B.get(_cg_oh_b,'')}</span>
+    <span style="
+      background:{_jj_color_b}22;color:{_jj_color_b};
+      font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;
+      border:1px solid {_jj_color_b}55;
+    ">{_OHKR_B.get(_jj_oh_b,'')}</span>
+  </div>
+  <div style="font-size:14px;color:#3d2b00;line-height:1.8;margin-bottom:12px;">
+    {_briefing_b}
+  </div>
+  <div style="
+    display:grid;grid-template-columns:repeat(4,1fr);gap:8px;
+    border-top:1px solid #e8d9a0;padding-top:10px;
+  ">
+    <div style="text-align:center;padding:8px 4px;background:#fffdf5;border-radius:10px;border:1px solid #e8d9a0;">
+      <div style="font-size:18px;">💰</div>
+      <div style="font-size:11px;color:#555;font-weight:700;">재물운</div>
+      <div style="font-size:12px;color:#2d6a2d;font-weight:800;">{_money_icon_b}</div>
+    </div>
+    <div style="text-align:center;padding:8px 4px;background:#fffdf5;border-radius:10px;border:1px solid #e8d9a0;">
+      <div style="font-size:18px;">💪</div>
+      <div style="font-size:11px;color:#555;font-weight:700;">건강운</div>
+      <div style="font-size:12px;color:#2d6a2d;font-weight:800;">{_health_icon_b}</div>
+    </div>
+    <div style="text-align:center;padding:8px 4px;background:#fffdf5;border-radius:10px;border:1px solid #e8d9a0;">
+      <div style="font-size:18px;">❤️</div>
+      <div style="font-size:11px;color:#555;font-weight:700;">관계운</div>
+      <div style="font-size:12px;color:#2d6a2d;font-weight:800;">{_rel_icon_b}</div>
+    </div>
+    <div style="text-align:center;padding:8px 4px;background:{_lc_hex_b}22;border-radius:10px;border:1px solid {_lc_hex_b}55;">
+      <div style="font-size:18px;">🎨</div>
+      <div style="font-size:11px;color:#555;font-weight:700;">행운색</div>
+      <div style="font-size:12px;color:{_lc_hex_b};font-weight:800;">{_lc_name_b}</div>
+    </div>
+  </div>
+</div>
+""",
+                unsafe_allow_html=True,
+            )
+    except Exception as _brief_e:
+        pass  # 브리핑 오류 시 조용히 무시
+
     # ---- 즐겨찾기 (메인 화면) ----
 
     with st.expander("⭐ 즐겨찾기", expanded=False):
