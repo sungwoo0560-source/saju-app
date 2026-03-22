@@ -19416,68 +19416,6 @@ def main():
 🔗 같은 사주를 공유하려면 **정보 수정** 아래 입력 폼 안 **이 사주 공유하기**에서 링크 복사.
         """)
 
-    # -- 로컬 전용 (AI API 미사용) ----------------
-    with st.expander("⚙️ 앱 설정 (정밀도 및 시뮬레이션)", expanded=False):
-        st.markdown("**🛡️ 정밀도 설정**")
-        premium_on = st.checkbox(
-            "- 프리미엄 보정 (KASI 기반 초단위 보정 및 경도 반영)",
-            value=_ss.get("in_premium_correction", True),
-            key="in_premium_correction",
-            help="동경 127.0도(서울) 기준 경도 보정 및 한국 천문연구원(KASI) 데이터 기반 절기 초단위 보정을 적용합니다.",
-        )
-
-        if premium_on:
-            st.info("✅ 현재 '프리미엄 정밀 보정' 모드가 활성화되어 있습니다. 보조 홈페이지 결과와 비교해 보세요.")
-
-        st.markdown("---")
-
-        st.markdown("**🧪 대규모 테스트 도구 (Batch Simulation)**")
-
-        bs_col1, bs_col2 = st.columns(2)
-
-        with bs_col1:
-            if st.button("📊 100인 전체 동시 분석 실행", use_container_width=True):
-                with st.spinner("100명의 사주를 일괄 분석 중..."):
-                    stats = BatchSimulationEngine.run_full_scan()
-
-                    st.success(f"100인 분석 완료! ({stats['processing_time']}초)")
-
-                    st.json(stats["ilgan_dist"])
-
-        with bs_col2:
-            if st.button("📅 30일(3,000회) 시뮬레이션", use_container_width=True):
-                with st.spinner("30일간의 테스트 트래픽 시뮬레이션 중..."):
-                    # 30일 동안 매일 100명씩 사용한 것으로 기록 조작 (테스트용)
-
-                    st.session_state["sim_stats_30"] = {
-                        "total_users": 3000,
-                        "avg_luck": 64.5,
-                        "top_performers": ["김민호_02", "박서연_45", "이주원_88"],
-                        "status": "Stable (100% Load Success)",
-                    }
-
-                    st.info("30일간 매일 100명이 접속하는 대규모 트래픽 시뮬레이션을 성황리에 마쳤습니다. 시스템은 100% 안정적입니다.")
-
-        if "sim_stats_30" in st.session_state:
-            s30 = st.session_state["sim_stats_30"]
-
-            st.markdown(
-                f"""
-
-<div style="background:rgba(0,0,0,0.2); padding:10px; border-radius:8px; border:1px solid #d4af37; font-size:12px">
-
-<b>[30일 시뮬레이션 결과]</b><br>
-
-                총 테스트 인원: {s30["total_users"]}명 | 평균 행운 점수: {s30["avg_luck"]}점<br>
-
-                시스템 상태: <span style="color:#d4af37">{s30["status"]}</span>
-
-</div>
-
-            """,
-                unsafe_allow_html=True,
-            )
-
     # -- 섀도우 키 저장 콜백 (양력/음력 전환 시 입력값 보존) --
 
     def _sv_solar():
