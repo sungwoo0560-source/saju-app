@@ -13529,13 +13529,11 @@ def menu9_daily(pils, name, birth_year, gender):
 
 <div style="font-size:17px;font-weight:900;color:#b38728;margin-bottom:12px">
 
-    🔮 만신 일진 완전 해설 — {today.strftime("%Y년 %m월 %d일")} ({_weekday_kr}요일) ({_today_badge_html}일, {_animal}의 날)
-
+🔮 만신 일진 완전 해설 — {today.strftime("%Y년 %m월 %d일")} ({_weekday_kr}요일) ({_today_badge_html}일, {_animal}의 날)
 </div>
 
 <div style="font-size:12px;color:#888;margin-bottom:14px">
-
-    천간 오행: {_oh_cg_label} | 지지 오행: {_oh_jj_label} | 십성: {_today_ss_kr}
+천간 오행: {_oh_cg_label} | 지지 오행: {_oh_jj_label} | 십성: {_today_ss_kr}
 
 </div>
 
