@@ -11972,16 +11972,10 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
         _cur_mon_k   = datetime.now().month
         _mon_luck_k  = get_monthly_luck(pils, datetime.now().year, _cur_mon_k) or {}
         _today_gihung = _mon_luck_k.get("길흉", "보통")
-        _share_text  = (
-            f"{name}님의 사주 — {_share_gyeok} "
-            f"| 용신: {_share_yong} "
-            f"| 이달의 운세: {_today_gihung}"
-        )
+        _share_text  = f"{name}님의 사주풀이 | 만세력 사주 천명풀이"
         _app_url    = "https://saju-manse.streamlit.app"
-        _kakao_url  = (
-            "https://share.kakao.com/talk/message/link?"
-            + _uparse.urlencode({"text": _share_text, "url": _app_url}, quote_via=_uparse.quote)
-        )
+        _encoded_k  = _uparse.quote(f"{_share_text}\n{_app_url}")
+        _kakao_url  = f"kakaotalk://msg/send?text={_encoded_k}"
         st.markdown("---")
         st.markdown(
             f"""
