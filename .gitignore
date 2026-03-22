@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.env
+.env
+*.log
+saju_save.json
+history_memory.json
+usage_stats.json
+lotto_data.json
