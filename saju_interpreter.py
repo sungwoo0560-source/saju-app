@@ -4981,6 +4981,199 @@ class LocalSajuNarrator:
         except Exception:
             _saju_log.warning("[relations 오류] %s", sys.exc_info()[1])
 
+        # ── 궁합 점수화 섹션 ─────────────────────────────────────────
+        lines.append("\n### 💯 궁합 점수화 — 천생연분 정밀 분석")
+        lines.append(
+            f"🔮 {name}님의 사주 기운을 토대로, 어떤 오행의 파트너와 "
+            "가장 깊은 천생연분을 이루는지 점수로 살펴보겠습니다.\n"
+        )
+
+        _OH_KR_G = {"木":"목(木)","火":"화(火)","土":"토(土)","金":"금(金)","水":"수(水)"}
+        _ilg_oh_g = _OH.get(ilgan, "木")
+        _OH_BIRTH_G = {"木":"水","火":"木","土":"火","金":"土","水":"金"}
+        _OH_GEN_G   = {"木":"火","火":"土","土":"金","金":"水","水":"木"}
+        _OH_CTRL_G  = {"木":"土","火":"金","土":"水","金":"木","水":"火"}
+        _OH_CTRL_R  = {"木":"金","火":"水","土":"木","金":"火","水":"土"}
+
+        # ─ 1. 파트너 오행별 궁합 기본 점수 (0~100) ─────────────────
+        lines.append("**📊 파트너 오행별 궁합 점수:**")
+        _P_SCORES = {}
+        for _poh in ["木","火","土","金","水"]:
+            _sc = 50
+            if _OH_BIRTH_G.get(_ilg_oh_g) == _poh:   _sc += 25  # 나를 생해줌 (인성)
+            elif _OH_GEN_G.get(_ilg_oh_g) == _poh:   _sc += 15  # 내가 생함 (식상)
+            elif _OH_CTRL_G.get(_ilg_oh_g) == _poh:  _sc += 10  # 내가 극함 (재성)
+            if _OH_CTRL_R.get(_ilg_oh_g) == _poh:    _sc -= 10  # 나를 극함 (관성)
+            if _poh == _ilg_oh_g:                     _sc -= 5   # 같은 오행 (비겁)
+            if _poh in yongshin:                      _sc += 20  # 용신 오행 보너스
+            if _poh in gisin:                         _sc -= 15  # 기신 오행 감점
+            _P_SCORES[_poh] = max(0, min(100, _sc))
+
+        _SORTED_G = sorted(_P_SCORES.items(), key=lambda x: -x[1])
+        for _poh, _sc in _SORTED_G:
+            _bar = "█" * (_sc // 10) + "░" * (10 - _sc // 10)
+            _gr = ("🏆 천생연분" if _sc >= 80 else "🟢 좋음" if _sc >= 65
+                   else "🟡 보통" if _sc >= 50 else "🟠 주의" if _sc >= 35 else "🔴 흉")
+            lines.append(f"- {_OH_KR_G.get(_poh,_poh)} 파트너: `{_bar}` {_sc}점 {_gr}")
+        lines.append("")
+
+        # ─ 2. 일지(배우자 자리) 합·충·형·파·해 분석 ────────────────
+        lines.append("**🔍 일지(배우자 자리) 합·충·형 분석:**")
+        _iljj_g = pils[1].get("jj","") if len(pils) > 1 and pils[1] else ""
+        _iljj_sc, _iljj_notes = 0, []
+
+        if _iljj_g:
+            # 삼합 여부
+            for combo, (cn, coh, _) in SAM_HAP_MAP.items():
+                _other_jjs = {p.get("jj","") for i,p in enumerate(pils) if i != 1}
+                if _iljj_g in combo and combo.issubset(_other_jjs | {_iljj_g}):
+                    _iljj_sc += 20
+                    _iljj_notes.append(f"✅ 일지 삼합({cn}) — 인연 기운 강화")
+                    break
+            # 천간합 (일간과 월간)
+            _tg_k = frozenset([ilgan, pils[1].get("cg","") if len(pils) > 1 else ""])
+            if _tg_k in TG_HAP_MAP:
+                _tn, _, _ = TG_HAP_MAP[_tg_k]
+                _iljj_sc += 15
+                _iljj_notes.append(f"✅ 일주 천간합({_tn}) — 자연스러운 결합 기운")
+            # 충 여부 (일지 vs 타 기둥 지지)
+            for i, p in enumerate(pils):
+                if i == 1:
+                    continue
+                _ck = frozenset([_iljj_g, p.get("jj","")])
+                if _ck in CHUNG_MAP:
+                    _cn2, _, _ = CHUNG_MAP[_ck]
+                    _iljj_sc -= 20
+                    _iljj_notes.append(f"⚠️ 일지 충({_cn2}) — 배우자 자리 불안정. 결혼 후 갈등 조심")
+            # 형살 여부
+            _HYUNG_PAIRS = {
+                "寅":("巳","申"),"巳":("寅","申"),"申":("寅","巳"),
+                "丑":("戌","未"),"戌":("丑","未"),"未":("丑","戌"),
+            }
+            _other_jjs2 = {p.get("jj","") for i,p in enumerate(pils) if i != 1}
+            for _hj in _HYUNG_PAIRS.get(_iljj_g, ()):
+                if _hj in _other_jjs2:
+                    _iljj_sc -= 10
+                    _iljj_notes.append(f"⚠️ 일지 형살({_iljj_g}·{_hj}) — 배우자와 마찰 주의")
+                    break
+
+        if _iljj_notes:
+            for _n in _iljj_notes:
+                lines.append(f"- {_n}")
+        else:
+            lines.append(f"- 일지({_iljj_g}) 합·충·형 특이사항 없음 — 배우자 자리 안정")
+        lines.append("")
+
+        # ─ 3. 성격 궁합 10×10 일간 매트릭스 ──────────────────────
+        lines.append("**💑 성격 궁합 — 일간×일간 베스트 조합:**")
+        _ILGAN_COMPAT_G = {
+            "甲":[("己","상호 보완·안정","토가 목을 담아주는 최고 조합"),
+                  ("癸","지혜로운 지지","수생목의 자연스러운 흐름"),
+                  ("丁","서로를 빛내는","목이 화를 살리는 따뜻한 인연")],
+            "乙":[("庚","강함과 섬세함의 조화","금이 목을 다듬는 귀한 인연"),
+                  ("壬","깊은 이해","수생목의 부드러운 지지"),
+                  ("戊","든든한 땅","토 위에 자라는 나무처럼 안정")],
+            "丙":[("壬","열정과 지혜의 만남","수가 화를 제어해 균형"),
+                  ("癸","따뜻한 품","적당한 제어로 균형 유지"),
+                  ("甲","무한 에너지","목생화의 응원자 인연")],
+            "丁":[("甲","영원한 응원자","목생화로 항상 힘을 줌"),
+                  ("壬","신비로운 끌림","정임합의 운명적 결합"),
+                  ("乙","섬세함의 공명","목생화 부드러운 연결")],
+            "戊":[("癸","신비로운 결합","무계합의 강렬한 운명 인연"),
+                  ("甲","생동감 부여","자극이 곧 성장 원동력"),
+                  ("丙","따뜻한 생명력","화생토로 힘을 주는 인연")],
+            "己":[("甲","서로 보완","목극토, 자극이 성장"),
+                  ("丙","포근한 온기","화생토로 힘을 받음"),
+                  ("壬","신비로운 만남","깊은 연결의 인연")],
+            "庚":[("乙","섬세한 보완","을경합의 자연스러운 결합"),
+                  ("丁","열정이 나를 단련","화극금으로 강하게 이끄는 인연"),
+                  ("壬","나의 재능 발현","금생수로 능력을 세상에")],
+            "辛":[("丙","강렬한 끌림","병신합의 운명적 인연"),
+                  ("壬","나를 표현해주는","금생수의 흐름"),
+                  ("甲","자극과 성장","나를 날카롭게 하는 인연")],
+            "壬":[("丁","따뜻한 안식","정임합의 깊은 결합"),
+                  ("甲","내 능력을 꽃피우는","수생목으로 이어지는"),
+                  ("庚","든든한 원천","금생수의 지지자")],
+            "癸":[("戊","안정과 현실","무계합의 운명적 결합"),
+                  ("庚","힘을 주는 원천","금생수의 지지"),
+                  ("甲","내 능력의 꽃","수생목으로 이어지는 인연")],
+        }
+        _compat_g = _ILGAN_COMPAT_G.get(ilgan, [])
+        if _compat_g:
+            lines.append(f"일간 **{ilgan}** 기준 궁합 베스트 파트너:")
+            for _i, (_pt, _title, _desc) in enumerate(_compat_g, 1):
+                _oh_p = _OH.get(_pt, "")
+                lines.append(f"  {_i}위. **{_pt}({_OH_KR_G.get(_oh_p,_oh_p)}) 일간** — {_title}: {_desc}")
+        lines.append("")
+
+        # ─ 4. 재물 궁합 ─────────────────────────────────────────────
+        lines.append("**💰 재물 궁합 분석:**")
+        _jae_cnt_g = sum(1 for s in ss_list
+                         if "財" in s.get("cg_ss","") or "財" in s.get("jj_ss",""))
+        _sik_cnt_g = sum(1 for s in ss_list
+                         if any(k in s.get("cg_ss","") for k in ("食神","傷官")))
+        if _jae_cnt_g >= 2:
+            lines.append(
+                f"- {name}님 사주에 재성 {_jae_cnt_g}개 — **재물을 다루는 힘이 강합니다.** "
+                "파트너는 지출을 관리해주는 알뜰한 분이 이상적입니다."
+            )
+        elif _jae_cnt_g == 1:
+            lines.append(
+                "- 재성 1개 — 안정적 재물 구조. 파트너도 재물 감각이 있다면 "
+                "두 사람이 힘을 모아 자산을 크게 불릴 수 있습니다."
+            )
+        else:
+            lines.append(
+                "- 재성이 약한 구조 — **재물 복이 강한 파트너**(편재·정재 많은 분)와 만나면 "
+                "두 사람이 결합할 때 재물이 크게 열립니다. 재물 복 있는 분이 천생연분입니다."
+            )
+        if _sik_cnt_g >= 1:
+            lines.append(
+                "- 식상(식신·상관)이 있어 재능이 돈이 되는 구조. "
+                "파트너가 그 재능을 알아봐주고 응원해주면 두 배의 시너지가 납니다."
+            )
+        lines.append("")
+
+        # ─ 5. 최종 궁합 등급 종합 ──────────────────────────────────
+        lines.append("**🏆 최종 궁합 종합 등급:**")
+        _top_oh_g, _top_sc_g = _SORTED_G[0]
+        _iljj_total_g = max(0, min(100, 50 + _iljj_sc))
+        _final_sc_g   = int(_top_sc_g * 0.5 + _iljj_total_g * 0.3 + 50 * 0.2)
+        _final_bar_g  = "█" * (_final_sc_g // 10) + "░" * (10 - _final_sc_g // 10)
+        _FINAL_GRADE_G = ("💘 천생연분" if _final_sc_g >= 80 else
+                          "💚 좋음" if _final_sc_g >= 65 else
+                          "💛 보통" if _final_sc_g >= 50 else
+                          "🟠 주의" if _final_sc_g >= 35 else "🔴 흉")
+        lines.append(f"- 최적 파트너 오행: **{_OH_KR_G.get(_top_oh_g,_top_oh_g)}** ({_top_sc_g}점)")
+        lines.append(f"- 일지 안정도 보정: {'+' if _iljj_sc >= 0 else ''}{_iljj_sc}점")
+        lines.append(f"- 종합 궁합 지수: `{_final_bar_g}` **{_final_sc_g}점 {_FINAL_GRADE_G}**")
+        lines.append("")
+
+        # ─ 6. 부족한 부분 보완법 ────────────────────────────────────
+        lines.append("**🌟 궁합 보완법:**")
+        _worst_oh_g, _worst_sc_g = _SORTED_G[-1]
+        lines.append(
+            f"- 궁합이 어려운 **{_OH_KR_G.get(_worst_oh_g,_worst_oh_g)} 오행 파트너**와 "
+            "인연을 맺었다면: 상극은 갈등의 씨앗이지만 동시에 서로를 성장시키는 에너지입니다. "
+            "다름을 '틀림'이 아닌 '보완'으로 받아들이는 훈련이 필요합니다."
+        )
+        if yongshin:
+            _yong_g = _OH_KR_G.get(yongshin[0],"")
+            lines.append(
+                f"- 용신 오행 **{_yong_g}** 기운의 파트너가 가장 이상적입니다. "
+                "집 인테리어에 용신 색상을 사용하면 두 사람의 기운이 더욱 조화를 이룹니다."
+            )
+        lines.append(
+            "- 결혼 날짜는 반드시 **용신 오행이 강한 달·날**을 택일(擇日)하십시오. "
+            "좋은 날에 시작한 인연은 그 기운이 평생 이어집니다."
+        )
+        lines.append(
+            f"\n🔮 만신의 말씀: {name}님, 완벽한 궁합은 없습니다. "
+            "서로의 부족한 기운을 채워주고 넘치는 기운을 나누는 것이 진정한 인연입니다. "
+            f"**{_OH_KR_G.get(_top_oh_g,'')} 오행**의 기운을 가진 분과 만나면 "
+            "자연스럽게 서로를 완성시키는 천생연분의 흐름이 열립니다."
+        )
+
         return "\n".join(lines)
 
         lines.append(f"*사주에서 인연은 나에게 부족한 기운을 채워주는 사람, 혹은 내 기운이 자연스럽게 흘러가는 사람을 의미합니다.*\n")
