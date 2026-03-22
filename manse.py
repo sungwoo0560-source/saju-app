@@ -19965,44 +19965,25 @@ def main():
             with st.expander("🔗 이 사주 공유하기", expanded=False):
                 st.caption("링크를 열면 같은 사주가 자동으로 불러집니다 (이름·생년월일·성별·결혼·직업 포함)")
 
-                st.markdown(
-                    f"""
-
-    <button id="saju-cp-btn" onclick="(function(){{
-
-        var url=window.location.origin+window.location.pathname+'?{_qstr}';
-
-        if(navigator.clipboard&&navigator.clipboard.writeText){{
-
-          navigator.clipboard.writeText(url).then(function(){{
-
-            var b=document.getElementById('saju-cp-btn');
-
-            b.textContent='✅ 복사 완료!';
-
-            setTimeout(function(){{b.textContent='📋 링크 복사';}},2000);
-
-          }}).catch(function(){{var t=document.getElementById('saju-url-ta');t.style.display='block';t.select();}});
-
-        }}else{{var t=document.getElementById('saju-url-ta');t.style.display='block';t.select();document.execCommand('copy');}}
-
-    }})()" style="background:linear-gradient(135deg,#d4af37,#b8960a);color:#000;border:none;
-
- border-radius:8px;padding:9px 0;font-size:14px;font-weight:700;
-
-        cursor:pointer;width:100%;margin-bottom:8px">📋 링크 복사</button>
-
-    <textarea id="saju-url-ta" readonly onclick="this.select()"
-
- style="display:none;width:100%;font-size:10px;color:#aaa;background:#111;
-
-             border:1px solid #333;padding:6px 8px;border-radius:5px;
-
-             resize:none;height:44px;font-family:monospace">?{_qstr}</textarea>
-
-    """,
-                    unsafe_allow_html=True,
+                _share_html = (
+                    f'<button id="saju-cp-btn" onclick="(function(){{'
+                    f'var url=window.location.origin+window.location.pathname+\'?{_qstr}\';'
+                    f'if(navigator.clipboard&&navigator.clipboard.writeText){{'
+                    f'navigator.clipboard.writeText(url).then(function(){{'
+                    f'var b=document.getElementById(\'saju-cp-btn\');'
+                    f'b.textContent=\'✅ 복사 완료!\';'
+                    f'setTimeout(function(){{b.textContent=\'📋 링크 복사\';}},2000);'
+                    f'}}).catch(function(){{var t=document.getElementById(\'saju-url-ta\');t.style.display=\'block\';t.select();}});'
+                    f'}}else{{var t=document.getElementById(\'saju-url-ta\');t.style.display=\'block\';t.select();document.execCommand(\'copy\');}}'
+                    f'}})()" style="background:linear-gradient(135deg,#d4af37,#b8960a);color:#000;border:none;'
+                    f'border-radius:8px;padding:9px 0;font-size:14px;font-weight:700;'
+                    f'cursor:pointer;width:100%;margin-bottom:8px">📋 링크 복사</button>'
+                    f'<textarea id="saju-url-ta" readonly onclick="this.select()" '
+                    f'style="display:none;width:100%;font-size:10px;color:#aaa;background:#111;'
+                    f'border:1px solid #333;padding:6px 8px;border-radius:5px;'
+                    f'resize:none;height:44px;font-family:monospace">?{_qstr}</textarea>'
                 )
+                st.markdown(_share_html, unsafe_allow_html=True)
 
                 with st.expander("🔍 파라미터 보기", expanded=False):
                     st.code(f"?{_qstr}", language=None)
