@@ -8572,6 +8572,10 @@ def save_to_favorites(label: str):
         "cal_type": _ss.get("cal_type"),
         "lunar_info": _ss.get("lunar_info", ""),
         "saju_memory": _ss.get("saju_memory", {}),
+        # ── 메타데이터 (개선된 즐겨찾기용) ──────────────────
+        "saved_at": datetime.now().isoformat(timespec="seconds"),
+        "last_viewed": datetime.now().isoformat(timespec="seconds"),
+        "star": 0,   # 별점 0~5
     }
 
     favorites = list(_ss.get("favorites", []))
@@ -8645,6 +8649,13 @@ def load_from_favorite(idx: int):
         _ss["saju_memory"] = data["saju_memory"]
 
     _ss["form_expanded"] = False
+
+    # 마지막 열람 시간 업데이트
+    favorites = list(_ss.get("favorites", []))
+    if 0 <= idx < len(favorites):
+        favorites[idx]["last_viewed"] = datetime.now().isoformat(timespec="seconds")
+        _ss["favorites"] = favorites
+        _write_favorites_to_file(favorites)
 
 
 def delete_favorite(idx: int):
@@ -19239,45 +19250,162 @@ def main():
     except Exception as _brief_e:
         pass  # 브리핑 오류 시 조용히 무시
 
-    # ---- 즐겨찾기 (메인 화면) ----
+    # ---- 즐겨찾기 (메인 화면) — 개선판 ----
 
     with st.expander("⭐ 즐겨찾기", expanded=False):
-        favorites = _ss.get("favorites", [])
+        favorites = list(_ss.get("favorites", []))
+
+        # ── 상단 컨트롤: 정렬 / 검색 / 내보내기 / 불러오기 ────────
+        _fav_c1, _fav_c2, _fav_c3 = st.columns([3, 3, 2])
+        with _fav_c1:
+            _fav_sort = st.selectbox(
+                "정렬",
+                ["최근 열람 순", "별점 높은 순", "이름 순", "저장 순"],
+                key="fav_sort_mode",
+                label_visibility="collapsed",
+            )
+        with _fav_c2:
+            _fav_search = st.text_input(
+                "검색",
+                placeholder="이름 검색...",
+                key="fav_search_q",
+                label_visibility="collapsed",
+            )
+        with _fav_c3:
+            import json as _json_fav
+            _fav_export_data = _json_fav.dumps(
+                favorites, ensure_ascii=False, indent=2, default=str
+            ).encode("utf-8")
+            st.download_button(
+                "📤 내보내기",
+                data=_fav_export_data,
+                file_name=f"즐겨찾기_{datetime.now().strftime('%Y%m%d')}.json",
+                mime="application/json",
+                use_container_width=True,
+                key="fav_export_btn",
+            )
+
+        # 불러오기 (JSON 업로드)
+        _uploaded_fav = st.file_uploader(
+            "📥 즐겨찾기 불러오기 (JSON)",
+            type=["json"],
+            key="fav_import_file",
+            label_visibility="visible",
+        )
+        if _uploaded_fav is not None:
+            try:
+                _imp_data = _json_fav.loads(_uploaded_fav.read().decode("utf-8"))
+                if isinstance(_imp_data, list):
+                    # 기존 즐겨찾기와 병합 (label 중복 제거)
+                    _existing_labels = {f.get("label") for f in favorites}
+                    _added = 0
+                    for _imp_fav in _imp_data:
+                        if isinstance(_imp_fav, dict) and _imp_fav.get("label") not in _existing_labels:
+                            favorites.append(_imp_fav)
+                            _existing_labels.add(_imp_fav.get("label"))
+                            _added += 1
+                    _ss["favorites"] = favorites
+                    _write_favorites_to_file(favorites)
+                    st.success(f"✅ {_added}개 항목을 불러왔습니다.")
+                else:
+                    st.error("올바른 즐겨찾기 JSON 파일이 아닙니다.")
+            except Exception as _ie:
+                st.error(f"불러오기 오류: {_ie}")
+
+        st.markdown("---")
 
         if not favorites:
             st.caption("저장된 사주가 없습니다.\n\n입력 폼 하단 ⭐ 저장 버튼으로 추가하세요.")
-
         else:
-            for i, fav in enumerate(favorites):
-                lbl = fav.get("label") or fav.get("in_name") or f"사주 {i + 1}"
+            # ── 검색 필터 ─────────────────────────────────────────
+            _q_fav = (_fav_search or "").strip()
+            _filtered_fav = [
+                (orig_i, f) for orig_i, f in enumerate(favorites)
+                if not _q_fav or _q_fav in (f.get("label","") + f.get("in_name",""))
+            ]
 
-                yr = fav.get("birth_year") or str(fav.get("in_solar_date", ""))[:4]
+            # ── 정렬 ──────────────────────────────────────────────
+            def _fav_sort_key(item):
+                _, f = item
+                if _fav_sort == "별점 높은 순":
+                    return -(f.get("star", 0))
+                elif _fav_sort == "이름 순":
+                    return (f.get("label") or f.get("in_name") or "")
+                elif _fav_sort == "저장 순":
+                    return f.get("saved_at", "")
+                else:  # 최근 열람 순
+                    return -(len(f.get("last_viewed", "") or ""))  # fallback
+            if _fav_sort == "최근 열람 순":
+                _filtered_fav = sorted(
+                    _filtered_fav,
+                    key=lambda x: x[1].get("last_viewed") or x[1].get("saved_at") or "",
+                    reverse=True,
+                )
+            elif _fav_sort == "별점 높은 순":
+                _filtered_fav = sorted(_filtered_fav, key=lambda x: -(x[1].get("star", 0)))
+            elif _fav_sort == "이름 순":
+                _filtered_fav = sorted(
+                    _filtered_fav,
+                    key=lambda x: x[1].get("label") or x[1].get("in_name") or "",
+                )
+            # 저장 순은 원래 순서 유지
 
-                gd = fav.get("in_gender", "")
+            if not _filtered_fav:
+                st.caption(f'"{_q_fav}" 검색 결과가 없습니다.')
+            else:
+                for _orig_i, fav in _filtered_fav:
+                    lbl = fav.get("label") or fav.get("in_name") or f"사주 {_orig_i + 1}"
+                    yr  = fav.get("birth_year") or str(fav.get("in_solar_date", ""))[:4]
+                    gd  = fav.get("in_gender", "")
+                    _star_val = int(fav.get("star", 0))
+                    _star_disp = "★" * _star_val + "☆" * (5 - _star_val)
+                    _lv_str = fav.get("last_viewed", "") or fav.get("saved_at", "")
+                    _lv_disp = _lv_str[:10] if _lv_str else "-"
+                    info = f"{gd} · {yr}" if yr else gd
 
-                info = f"{gd} · {yr}" if yr else gd
-
-                display = f"{lbl}  ({info})" if info else lbl
-
-                f_col1, f_col2 = st.columns([4, 1])
-
-                with f_col1:
-                    st.button(
-                        display,
-                        key=f"fav_load_{i}",
-                        use_container_width=True,
-                        on_click=load_from_favorite,
-                        args=(i,),
-                    )
-
-                with f_col2:
-                    st.button(
-                        "🗑",
-                        key=f"fav_del_{i}",
-                        use_container_width=True,
-                        on_click=delete_favorite,
-                        args=(i,),
-                    )
+                    # 카드 레이아웃: [불러오기 버튼] [별점변경] [삭제]
+                    _fc1, _fc2, _fc3, _fc4 = st.columns([4, 3, 2, 1])
+                    with _fc1:
+                        st.button(
+                            f"{lbl}  ({info})\n{_star_disp}  열람: {_lv_disp}",
+                            key=f"fav_load_{_orig_i}",
+                            use_container_width=True,
+                            on_click=load_from_favorite,
+                            args=(_orig_i,),
+                        )
+                    with _fc2:
+                        _new_star = st.selectbox(
+                            "별점",
+                            options=[0, 1, 2, 3, 4, 5],
+                            index=_star_val,
+                            key=f"fav_star_{_orig_i}",
+                            format_func=lambda s: "★" * s + "☆" * (5 - s) if s else "별점",
+                            label_visibility="collapsed",
+                        )
+                        if _new_star != _star_val:
+                            favorites[_orig_i]["star"] = _new_star
+                            _ss["favorites"] = favorites
+                            _write_favorites_to_file(favorites)
+                            st.rerun()
+                    with _fc3:
+                        # 삭제 확인 팝업 (세션 상태 토글 방식)
+                        _del_key = f"fav_del_confirm_{_orig_i}"
+                        if st.button("🗑 삭제", key=f"fav_del_btn_{_orig_i}", use_container_width=True):
+                            _ss[_del_key] = True
+                        if _ss.get(_del_key):
+                            st.warning(f"**{lbl}** 을(를) 삭제하시겠습니까?")
+                            _dc1, _dc2 = st.columns(2)
+                            with _dc1:
+                                if st.button("✅ 확인", key=f"fav_del_yes_{_orig_i}", use_container_width=True):
+                                    delete_favorite(_orig_i)
+                                    _ss.pop(_del_key, None)
+                                    st.rerun()
+                            with _dc2:
+                                if st.button("❌ 취소", key=f"fav_del_no_{_orig_i}", use_container_width=True):
+                                    _ss.pop(_del_key, None)
+                                    st.rerun()
+                    with _fc4:
+                        pass  # 여백
 
         st.markdown("""
 **📌 사용 방법**
