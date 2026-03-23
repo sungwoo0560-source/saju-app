@@ -8150,34 +8150,47 @@ def _nar_ch8_flow(ctx):
                 if _cm not in _active_chung_msgs:
                     _active_chung_msgs.append(_cm)
 
-    # ── E. 5중 조합 종합 점수 (재물/사고수/이성/직업/건강 1~10) ──────────
-    _MONEY_SCORE_MAP = {
-        "偏財": 8, "正財": 7, "食神": 7, "傷官": 5,
-        "劫財": 3, "比肩": 4, "偏官": 4, "正官": 6,
-        "偏印": 5, "正印": 6
-    }
-    _score_money = _MONEY_SCORE_MAP.get(_ss_hanja, 5)
-    if is_yong_sw: _score_money = min(10, _score_money + 1)
-    if is_sw_hung: _score_money = max(1, _score_money - 1)
-    if sn == "신약" and "劫財" in sw_ss_cg: _score_money = max(1, _score_money - 2)
+    # ── E. 5대 지표 점수 (재물/사고수/이성/직업/건강 1~10) ──────────
+    # 사전 신살 감지 (점수 계산용)
+    _sc_has_geobsal = any("겁살" in s.get("이름","") or "겁살" in s.get("name","") for s in sinsal_list)
+    _sc_has_baekho  = any("백호" in s.get("이름","") or "백호" in s.get("name","") for s in sinsal_list)
 
-    _score_sago = round(max(1, min(10, 10 - _SAGO_RISK * 1.2)))
+    # 재물 (base 5, 높을수록 좋음)
+    _score_money = 5
+    if is_yong_sw: _score_money = min(10, _score_money + 3)
+    if "正財" in sw_ss_cg or "偏財" in sw_ss_cg: _score_money = min(10, _score_money + 2)
+    if "劫財" in sw_ss_cg: _score_money = max(1, _score_money - 3)
+    if is_sw_hung: _score_money = max(1, _score_money - 2)
 
-    _score_love = round(min(10, max(1, 3 + _LOVE_RISK * 1.5))) if _LOVE_RISK > 0 else 5
+    # 사고수 (base 0, 높을수록 위험)
+    _score_sago = 0
+    if has_chung:          _score_sago += 3
+    if "偏官" in sw_ss_cg: _score_sago += 2
+    if _sc_has_geobsal:    _score_sago += 2
+    if _sc_has_baekho:     _score_sago += 2
+    _score_sago = min(10, max(1, _score_sago)) if _score_sago > 0 else 2
 
-    _JOB_SCORE_MAP = {
-        "正官": 8, "偏官": 7, "正財": 7, "食神": 7,
-        "偏財": 6, "正印": 6, "比肩": 5, "傷官": 4,
-        "劫財": 4, "偏印": 5
-    }
-    _score_job = _JOB_SCORE_MAP.get(_ss_hanja, 5)
-    if is_yong_dw: _score_job = min(10, _score_job + 1)
-    if has_chung: _score_job = max(1, _score_job - 1)
+    # 이성 (base 3, 높을수록 활성)
+    _score_love = 3
+    if has_dowhwa: _score_love = min(10, _score_love + 3)
+    if has_hap:    _score_love = min(10, _score_love + 2)
+    if gender == "남" and ("偏財" in sw_ss_cg or "正財" in sw_ss_cg): _score_love = min(10, _score_love + 2)
+    if gender == "여" and ("偏官" in sw_ss_cg or "正官" in sw_ss_cg): _score_love = min(10, _score_love + 2)
+    _score_love = max(1, _score_love)
 
-    _HEALTH_PENALTY = {"偏官": 2, "傷官": 1, "劫財": 1}
-    _score_health = 7 - _HEALTH_PENALTY.get(_ss_hanja, 0)
-    if has_chung: _score_health = max(1, _score_health - 2)
-    if _SAGO_RISK >= 5: _score_health = max(1, _score_health - 1)
+    # 직업 (base 5, 높을수록 좋음)
+    _score_job = 5
+    if is_yong_dw: _score_job = min(10, _score_job + 3)
+    if "正官" in sw_ss_cg or "偏官" in sw_ss_cg: _score_job = min(10, _score_job + 2)
+    if "劫財" in cur_dw_ss: _score_job = max(1, _score_job - 2)
+    _score_job = max(1, _score_job)
+
+    # 건강 (base 7, 높을수록 좋음)
+    _score_health = 7
+    _gisin_cnt_sc = sum(1 for _p_sc in pils if _p_sc.get("오행","") in gisin_ohs)
+    if _gisin_cnt_sc >= 3: _score_health = max(1, _score_health - 2)
+    if has_chung:          _score_health = max(1, _score_health - 2)
+    if _sc_has_baekho:     _score_health = max(1, _score_health - 3)
     _score_health = min(10, _score_health)
 
     def _score_bar(s):
@@ -8981,8 +8994,9 @@ def _nar_ch8_flow(ctx):
         )
 
     # 이번 달 최우선 주의사항
+    # 사고수는 높을수록 위험 → 안전 점수로 변환해서 min 비교
     _all_scores = {
-        "재물": _score_money, "사고 안전": _score_sago,
+        "재물": _score_money, "사고 안전": 10 - _score_sago,
         "이성·관계": _score_love, "직업": _score_job, "건강": _score_health
     }
     _lowest_cat = min(_all_scores, key=_all_scores.get)
@@ -8993,7 +9007,19 @@ def _nar_ch8_flow(ctx):
         "직업":     "직장·사업에서 충동적 결정을 자제하십시오. 상사·파트너와의 마찰을 최소화하는 것이 최선의 전략입니다.",
         "건강":     "수면과 식이를 최우선으로 챙기십시오. 피로가 쌓이면 다음 달이 더 힘들어집니다.",
     }
-    _monthly_warn_msg = _MONTHLY_WARN.get(_lowest_cat, "언행을 조심하고 무리한 결정을 자제하십시오.")
+    # 트리거 기반 구체적 메시지 (우선 적용)
+    _monthly_specific = ""
+    if _score_sago >= 7:
+        _monthly_specific = "이번달 교통안전·수술일정 재검토 필수 — 사고수가 매우 높습니다."
+    elif "劫財" in sw_ss_cg:
+        _monthly_specific = "이번달 금전거래·보증 절대 금지 — 겁재(劫財) 세운 발동 중입니다."
+    elif has_chung:
+        _monthly_specific = "이번달 건강검진·안전점검 최우선 — 충(沖) 발동으로 기운이 불안정합니다."
+    elif _score_money <= 3:
+        _monthly_specific = "이번달 지출 점검·신규 투자 보류 — 재물 기운이 취약합니다."
+    elif _score_health <= 4:
+        _monthly_specific = "이번달 수면·식이 관리 최우선 — 건강운이 저하되어 있습니다."
+    _monthly_warn_msg = _monthly_specific or _MONTHLY_WARN.get(_lowest_cat, "언행을 조심하고 무리한 결정을 자제하십시오.")
 
     # ══════════════════════════════════════════════════════════
     # 출력 구성 — 서술형 중심
@@ -9001,6 +9027,9 @@ def _nar_ch8_flow(ctx):
     lines = [
         f"",
         f"[ 제8장 | {current_year}년 지금 이 순간 — {display_name}님의 현실 정밀 분석 ]",
+        f"",
+        f"  지금 {display_name}님의 상황을 사주로 정밀 분석했습니다.",
+        f"  아래 내용이 현재 상황과 얼마나 맞는지 확인해보세요.",
         f"",
         f"━━━ 지금 이 순간, 당신의 상황이 이렇지 않나요? ━━━━━━━━━━━━━━━",
         f"",
@@ -9038,11 +9067,11 @@ def _nar_ch8_flow(ctx):
     lines += [
         f"",
         f"━━━ {current_year}년 운기 5대 지표 점수 ━━━━━━━━━━━━━━━━━━━━━━━━",
-        f"  💰 재물운   {_score_bar(_score_money)}",
-        f"  ⚡ 사고안전 {_score_bar(_score_sago)}",
-        f"  💑 이성관계 {_score_bar(_score_love)}",
-        f"  💼 직업운   {_score_bar(_score_job)}",
-        f"  🏥 건강운   {_score_bar(_score_health)}",
+        f"  💰 재물운   {_score_bar(_score_money)}  (높을수록 좋음)",
+        f"  ⚡ 사고수   {_score_bar(_score_sago)}  (높을수록 위험)",
+        f"  💑 이성운   {_score_bar(_score_love)}  (높을수록 활성)",
+        f"  💼 직업운   {_score_bar(_score_job)}  (높을수록 좋음)",
+        f"  🏥 건강운   {_score_bar(_score_health)}  (높을수록 좋음)",
         f"",
         f"━━━ 대운·세운 흐름 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
         f"  현재 대운: {dw_str} ({cur_dw_ss}) | {dw_start}~{dw_end}년",
@@ -9439,6 +9468,15 @@ def _nar_ch8_flow(ctx):
         f"",
         f"  지금 5대 지표 중 가장 취약한 영역: 【{_lowest_cat}】",
         f"  ▶ {_monthly_warn_msg}",
+        f"",
+        f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+        f"",
+        f"  🔮 만신의 한마디:",
+        f"  허허, {display_name}님.",
+        f"  하늘의 기운이 이리 흐르고 있으니,",
+        f"  아는 자와 모르는 자의 결과가 달라지는 법이니라.",
+        f"  지금 이 분석을 가슴에 새기고 움직이면,",
+        f"  팔자도 바꿀 수 있는 것이 인간의 의지이니라.",
         f"",
     ]
     return "\n".join(lines)
