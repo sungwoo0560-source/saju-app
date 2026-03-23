@@ -11135,10 +11135,9 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
     except Exception as _lne:
         st.warning(f"로컬 해석 오류: {_lne}")
 
-    # ── 현재 운기 직격 분석 (재물/사고수/이성) ───────────────
+    # ── 현재 운기 직격 분석 ──────────────────────────────
     try:
-        from datetime import datetime as _dt
-        _cur_year = _dt.now().year
+        _cur_year = datetime.now().year
         _cur_age  = _cur_year - birth_year + 1
         _sw_now   = get_yearly_luck(pils, _cur_year)
         _sw_next  = get_yearly_luck(pils, _cur_year + 1)
@@ -11151,18 +11150,18 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
         _sn       = _sn_info.get("신강신약", "중화") if _sn_info else "중화"
         _daewoon  = SajuCoreEngine.get_daewoon(
             pils, birth_year,
-            st.session_state.get("birth_month",1),
-            st.session_state.get("birth_day",1),
-            st.session_state.get("birth_hour",12),
-            st.session_state.get("birth_minute",0),
+            st.session_state.get("birth_month", 1),
+            st.session_state.get("birth_day", 1),
+            st.session_state.get("birth_hour", 12),
+            st.session_state.get("birth_minute", 0),
             gender=gender
         )
-        _cur_dw   = next((d for d in _daewoon if d["시작연도"] <= _cur_year <= d["종료연도"]), None)
-        _cur_dw_ss = TEN_GODS_MATRIX.get(_ilgan,{}).get(_cur_dw["cg"],"-") if _cur_dw else "-"
+        _cur_dw = next((d for d in _daewoon if d["시작연도"] <= _cur_year <= d["종료연도"]), None)
+        _cur_dw_ss = TEN_GODS_MATRIX.get(_ilgan, {}).get(_cur_dw["cg"], "-") if _cur_dw else "-"
         _sinsal   = get_12sinsal(pils) if pils else []
-        _marriage = st.session_state.get("in_marriage","미혼") or "미혼"
-        _gisin_raw = _ys.get("기신",[])
-        _gisin_ohs = _gisin_raw if isinstance(_gisin_raw,list) else []
+        _marriage = st.session_state.get("in_marriage", "미혼") or "미혼"
+        _gisin_raw = _ys.get("기신", [])
+        _gisin_ohs = _gisin_raw if isinstance(_gisin_raw, list) else []
 
         _ctx8 = {
             "pils": pils, "birth_year": birth_year, "gender": gender,
@@ -11174,35 +11173,20 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
             "yongshin_ohs": _yong_ohs, "gisin_ohs": _gisin_ohs,
             "sn": _sn, "sinsal_list": _sinsal,
             "marriage": _marriage,
-            "gname": get_gyeokguk(pils).get("격국명","") if pils else "",
+            "gname": get_gyeokguk(pils).get("격국명", "") if pils else "",
         }
         _ch8_text = _nar_ch8_flow(_ctx8)
         if _ch8_text and len(_ch8_text) > 100:
-            st.markdown('<hr style="border:none;border-top:2px solid #d4af37;margin:32px 0">', unsafe_allow_html=True)
-            _ch8_header = (
-                '<div style="background:linear-gradient(135deg,#0d0d1a,#1a1535);'
-                'border:2px solid #d4af37;border-radius:16px;'
-                'padding:14px 22px;margin-bottom:12px;text-align:center">'
-                '<div style="font-size:18px;font-weight:900;color:#f7e695;letter-spacing:2px">'
-                '🎯 현재 운기 정밀 분석</div>'
-                '<div style="font-size:12px;color:#aaa;margin-top:4px">'
-                f'{_cur_year}년 대운·세운·용신 5중 교차 — 재물·사고·이성·직업·건강 직격</div>'
-                '</div>'
+            st.markdown("---")
+            st.markdown("### 🎯 현재 운기 정밀 분석 — 재물·사고·이성 직격")
+            st.markdown(
+                f'<div style="background:#1a1a2e;border:1.5px solid #d4af37;'
+                f'border-radius:16px;padding:24px;color:#e0e0e0;'
+                f'font-size:13px;line-height:2;white-space:pre-wrap;'
+                f'font-family:Nanum Gothic,sans-serif;">{_ch8_text}</div>',
+                unsafe_allow_html=True
             )
-            st.markdown(_ch8_header, unsafe_allow_html=True)
-            _ch8_safe = _ch8_text.replace("<", "&lt;").replace(">", "&gt;")
-            _ch8_card = (
-                '<div style="background:#0f0f1e;border:1.5px solid #3a3060;'
-                'border-radius:14px;padding:22px 24px;'
-                'color:#d8d8e8;font-size:13px;line-height:2.1;'
-                'white-space:pre-wrap;word-break:keep-all;'
-                'font-family:\'Nanum Gothic\',\'맑은 고딕\',sans-serif;'
-                'overflow-x:auto">'
-                + _ch8_safe +
-                '</div>'
-            )
-            st.markdown(_ch8_card, unsafe_allow_html=True)
-    except Exception as _ch8_e:
+    except Exception:
         pass
 
     # ── 발동 중인 신살 강조 (세운 지지 기준) ─────────────────
