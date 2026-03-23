@@ -1653,7 +1653,10 @@ def _local_saju_engine(pils, name, birth_year, gender, query):
                 out.append(f"* {dw['시작나이']}~{dw['시작나이'] + 9}세: {dw['str']} ({dw_ss}) {dw_grade}{cur_m}\n")
 
         elif is_past:
-            hl = generate_engine_highlights(pils, birth_year, gender, bm, bd, bh, bmn)
+            try:
+                hl = generate_engine_highlights(pils, birth_year, gender, bm, bd, bh, bmn)
+            except Exception:
+                hl = []
 
             pevs = sorted(
                 hl.get("past_events", []),
@@ -5547,7 +5550,7 @@ def get_cached_ai_interpretation(
 
     # * Brain 2 AI 캐시 확인 (동일 사주 재요청 시 즉시 반환)
 
-    saju_key = pils_to_cache_key(pils)
+    saju_key = "_".join(p.get("cg","") + p.get("jj","") for p in (pils or []))
 
     cached_ai = get_ai_cache(saju_key, prompt_type)
 
@@ -5638,7 +5641,10 @@ def get_cached_ai_interpretation(
 
     # -- 엔진 하이라이트 계산 (핵심) -------------------
 
-    hl = generate_engine_highlights(pils, birth_year, gender)
+    try:
+        hl = generate_engine_highlights(pils, birth_year, gender)
+    except Exception:
+        hl = []
 
     # 과거 사건 블록 - 🔴부터 먼저
 
@@ -9969,7 +9975,10 @@ def tab_past_events(pils, birth_year, gender, name=""):
 
     # ── 데이터 계산
     with st.spinner("과거 사건 계산 중..."):
-        hl = generate_engine_highlights(pils, birth_year, gender)
+        try:
+            hl = generate_engine_highlights(pils, birth_year, gender)
+        except Exception:
+            hl = []
 
     def _parse_age_int(age_str):
         try:
@@ -10807,81 +10816,59 @@ WORRY_TITLE = {
 WORRY_MESSAGE = {
     "직장_직업": [
         "지금 직장 때문에 숨이 막히시죠? 사람이 문제인지, 일이 문제인지… 아마 둘 다일 겁니다. 관살(官殺) 기운이 강하게 치고 있습니다.",
-        "매일 아침 출근이 무거우시죠? 상사와의 갈등, 또는 일 자체가 버거운 시기입니다. 지금 사주에서 관성(官星)이 강하게 발동하고 있어 조직 내 마찰이 표면화되는 시기입니다.",
+        "승진이 막혔거나, 이직을 고민하고 계시죠. 지금 사주에서 관성(官星)이 강하게 발동하고 있어 조직 내 갈등이나 상사 문제가 표면화되는 시기입니다.",
         "직장에서 버티는 건지, 나가야 하는 건지 갈림길에 서 계십니다. 충동적 결정보다 최소 3개월 더 관찰하는 것이 현명합니다.",
-        "직장인이라면 승진이 막혔거나, 부당한 대우를 받고 있다는 느낌이 드는 시기입니다. 자영업자라면 매출 정체나 인건비 압박이 현실적인 고민일 겁니다.",
-        "지금 이직을 심각하게 고민하고 있거나, 전혀 다른 분야로 전환을 꿈꾸고 계시죠. 대운이 직업 전환의 시기를 알리고 있습니다. 단, 재정 준비 없는 이직은 위험합니다.",
-        "프리랜서나 1인 사업자라면 일감이 줄어드는 것 같은 불안감을 느끼시죠. 지금 방향 재설정이 필요한 시기입니다. 기존 고객 관리에 집중하십시오.",
-        "조직 내 정치 싸움에 휘말리거나, 나를 음해하는 사람이 있다는 느낌이 드시죠? 지금 내 편을 만들기보다 조용히 실력을 쌓는 것이 최선입니다.",
+        "지금 직업 적성이나 미래 방향에 대한 확신이 흔들리고 있습니다. 지금 대운이 직업 전환의 시기를 알리고 있습니다.",
     ],
     "돈_재물": [
         "돈이 새는 느낌이 드시죠? 열심히 하는데 통장이 안 차는 시기입니다. 재성(財星) 기운이 들어오지만 나가는 기운도 강합니다.",
-        "이달 들어 카드값, 생활비, 예상 못한 지출이 겹치면서 현금이 부족하신가요? 작은 누수들이 쌓여 큰 금액이 빠져나가고 있을 가능성이 큽니다.",
         "지금 큰 재물 변동이 생기거나 생길 예정인 시기입니다. 투자·보증·동업은 신중하게, 고정 자산 비중을 높이십시오.",
-        "직장인이라면 수입은 그대로인데 지출이 늘어난 느낌, 자영업자라면 매출 대비 이익이 남지 않는 느낌이 드시죠. 지금 지출 구조부터 점검해야 합니다.",
-        "주변에 돈을 빌려달라는 사람이 생기거나, 투자 권유를 받고 있지는 않으신가요? 지금 시기는 어떤 금전 거래에서도 문서화가 필수입니다.",
-        "월급 외 수입원을 찾고 계시죠? 부업·재테크 고민이 깊어지는 시기입니다. 지금 사주에서 재물 기운이 움직이고 있으니 방향만 잘 잡으면 기회가 옵니다.",
+        "수입과 지출의 균형이 무너지고 있군요. 지금 작은 누수들이 쌓여 큰 금액이 빠져나가고 있을 가능성이 큽니다.",
+        "재물운이 흔들리는 시기입니다. 지금 당장 지출 내역을 점검하고 불필요한 지출을 차단하십시오.",
     ],
     "사업_창업": [
         "사업 자금이 부족하거나, 매출이 기대에 못 미치고 있죠. 편재(偏財) 운이 흔들리고 있습니다.",
-        "창업을 진지하게 고민 중이시군요. 지금 재물 기운이 크게 움직이고 있지만, 자금·거래처·상품 준비 없는 창업은 손실로 이어질 수 있습니다. 준비 기간이 성공을 결정합니다.",
-        "사업의 방향이 흔들리는 시기입니다. 신규 아이템·채널 추가 욕심이 생기지만, 지금은 핵심 사업에 집중하고 확장은 내년으로 미루십시오.",
-        "거래처·파트너와의 관계에서 신뢰 문제가 생기거나 계약 분쟁이 일어날 수 있는 시기입니다. 구두 약속은 없다고 생각하고 계약서를 꼼꼼히 확인하십시오.",
-        "요즘 사업 파트너나 직원 때문에 마음고생이 크시죠? 사람 문제가 사업 최대 리스크가 되는 시기입니다. 핵심 인재는 붙잡고, 문제 인재는 과감히 정리하십시오.",
-        "온라인 사업·부업을 시작했거나 고민 중이시죠. 지금 재물 기운이 활발하게 움직이는 시기라 방향을 잘 잡으면 새 수입원이 생길 수 있습니다.",
+        "창업을 고민 중이시군요. 지금 재물 기운이 크게 움직이고 있지만, 준비 없는 창업은 손실로 이어질 수 있습니다.",
+        "사업의 방향이 흔들리는 시기입니다. 핵심 사업에 집중하고 무리한 사업 확장·신규 진입은 내년으로 미루십시오.",
+        "거래처·파트너와의 관계에서 신뢰 문제가 생기거나 계약 분쟁이 일어날 수 있는 시기입니다. 계약서를 꼼꼼히 확인하십시오.",
     ],
     "연애_결혼": [
         "마음에 두신 분이 있거나, 현재 관계가 흔들리고 계시군요. 도화(桃花)나 합(合)의 기운이 강하게 들어오고 있습니다.",
-        "결혼을 서두르고 싶은데 상대방이 망설이고 있거나, 반대로 본인이 확신이 없으신가요? 결혼 시기를 둘러싼 갈등이 생기기 쉬운 시기입니다.",
-        "인연이 올 것 같은데 막상 만남이 이어지지 않아 답답하신가요? 지금 당신의 에너지가 인연을 끌어당기고 있습니다. 만남의 자리를 스스로 만들어야 할 시기입니다.",
-        "기혼이라면 배우자와의 대화가 줄어들거나 작은 갈등이 반복되고 있지 않으신가요? 지금 배우자와의 관계를 재정비할 필요가 있습니다.",
-        "이별을 고민하거나 이별을 맞은 직후의 아픔이 있으시죠? 지금 헤어짐의 기운이 들어오는 시기이지만, 이 시기가 지나면 더 맞는 인연이 옵니다.",
-        "오래 만난 연인과의 관계가 정체기에 접어든 느낌이 드시죠. 새로운 자극이나 공동의 목표가 관계에 생기를 불어넣을 것입니다.",
-        "주변의 결혼 소식에 조급해지거나, 가족·부모님의 압박이 부담스러우신가요? 남들의 시간표가 아닌 당신의 인연 타이밍을 믿으십시오.",
+        "결혼 문제로 고민이 깊으시죠. 결혼 시기가 맞아떨어지거나, 반대로 관계의 위기가 오는 시기입니다.",
+        "인연이 올 것 같은데 안 오는 느낌이 드시죠? 지금 당신의 에너지가 인연을 끌어당기고 있습니다. 조금만 더 기다리십시오.",
+        "기혼이라면 배우자와의 관계를 재정비할 필요가 있습니다. 작은 오해가 쌓이지 않도록 대화를 늘리십시오.",
     ],
     "건강": [
         "몸이 예전 같지 않으시죠? 무리하고 계신 것 같습니다. 지금 사주에서 건강 기운이 약해지는 시기입니다.",
         "최근 몸에서 신호가 오고 있군요. 미루지 말고 정기 검진을 받으십시오. 초기에 잡는 것이 핵심입니다.",
         "스트레스가 몸으로 나오고 있습니다. 소화기·혈압·수면 중 하나 이상에서 문제가 생기고 있지 않으신가요?",
         "지금 과로가 쌓여 면역력이 저하되는 시기입니다. 운동보다 충분한 수면이 더 중요한 때입니다.",
-        "작은 통증이나 불편함을 '참으면 낫겠지' 하고 넘기고 계시죠? 지금 사주에서 건강 신호가 오는 시기이니 꼭 확인하십시오.",
-        "정신적 피로가 극에 달한 느낌이 드시죠. 번아웃이 시작되고 있습니다. 지금 당장 하루 이틀이라도 완전히 쉬는 시간을 만드십시오.",
     ],
     "대인_갈등": [
         "가족이나 가까운 사람과 갈등이 생겼거나 생길 조짐이 있군요. 충(沖) 기운이 인간관계를 흔들고 있습니다.",
         "배신이나 오해로 마음이 상한 시기입니다. 지금은 용서보다 거리두기가 먼저입니다.",
         "인간관계에서 소모되는 에너지가 너무 큽니다. 나를 먼저 챙기고, 불필요한 관계는 정리하십시오.",
         "주변에서 당신에게 의존하거나 부탁이 많아지는 시기입니다. '노'라고 말하는 연습이 필요합니다.",
-        "직장 동료나 친구 중 뒤에서 험담하는 사람이 있다는 느낌이 드시죠? 지금 시기는 주변 사람 중 진짜 내 편이 누구인지 가려지는 때입니다.",
-        "부모님 또는 자녀와의 갈등이 폭발하거나 쌓여가고 있지는 않으신가요? 가족 관계에서 한발 물러서서 상대방의 입장을 먼저 이해하는 노력이 필요합니다.",
     ],
     "학업_진로": [
         "어느 방향으로 가야 할지 갈피를 못 잡고 계시군요. 정인(正印) 운이 발동해 배움과 자격을 요구하는 시기입니다.",
-        "공부나 시험 준비가 부담스럽지만 지금 이 기간이 이후 10년의 방향을 결정합니다. 지금 쌓는 것이 나중에 무기가 됩니다.",
+        "공부나 시험 준비가 부담스럽지만 지금 이 기간이 이후 10년의 방향을 결정합니다.",
         "지금 자격증·시험·진학 등 무언가를 준비 중이시죠. 방향은 맞습니다. 포기하지 마십시오.",
-        "취업이 안 되거나 취업 준비가 너무 길어지는 느낌이 드시죠? 지금 학업·진로 기운이 강하게 발동하는 시기입니다. 한 가지를 깊이 파고드는 것이 돌파구입니다.",
-        "지금 하는 공부나 일이 맞는 건지 확신이 없으신가요? 지금 시기는 그 불확실함을 인정하되, 일단 한 걸음 더 나아가는 것이 답입니다.",
     ],
     "자녀": [
         "자녀 때문에 걱정이 많으시죠? 식상(食傷) 기운이 강하게 움직이며 자녀 관련 이슈가 표면화됩니다.",
         "자녀의 진로·교육·건강이 마음에 걸리는 시기입니다. 아이의 의견을 먼저 듣는 것이 중요합니다.",
         "자녀로 인한 기쁜 소식이 있거나, 반대로 걱정거리가 생기는 시기입니다. 과도한 관여보다 신뢰가 먼저입니다.",
-        "아이와 대화가 줄어들거나 사춘기 갈등이 심해지고 있지 않으신가요? 지금 자녀와의 소통 방식을 바꿔야 할 타이밍입니다.",
-        "자녀의 학업·성적·친구 관계가 부모로서 마음에 걸리는 시기입니다. 아이가 스스로 해결할 수 있는 기회를 주는 것도 중요한 교육입니다.",
     ],
     "독립_변화": [
         "이유 없이 불안하고 허전한 느낌이 드시죠? 지금 삶의 전환점에 서 계십니다. 변화는 이미 시작됐습니다.",
         "무언가를 잃은 것 같은 공허함이 있으시죠. 이 시기는 끝이 아니라 새로운 시작을 준비하는 과도기입니다.",
         "살던 곳·하던 일·맺어온 관계 중 하나가 크게 흔들리는 시기입니다. 버릴 것과 지킬 것을 구분하십시오.",
-        "지금까지와 다른 삶을 살고 싶다는 욕구가 강해지고 있죠? 대운이 변화와 이동을 요구하는 시기입니다. 충동적 결정보다 단계별 전환이 안전합니다.",
-        "이사·이직·유학·귀농 등 환경 자체를 바꾸고 싶다는 생각이 자꾸 드시죠? 지금 역마(驛馬) 기운이 강하게 발동하고 있습니다. 방향만 잘 잡으면 좋은 변화가 됩니다.",
     ],
     "법적_관재": [
         "법적인 문제나 관재수가 걱정되는 시기입니다. 언행에 각별히 주의하세요.",
-        "권위자나 기관과의 마찰이 생길 수 있는 시기군요. 세금·허가·규정 문제를 미리 정비해 두십시오.",
+        "권위자나 기관과의 마찰이 생길 수 있는 시기군요.",
         "계약·서류 문제에서 꼼꼼하게 확인하지 않으면 손해가 생길 수 있습니다.",
-        "SNS나 온라인에서의 발언이 문제가 될 수 있는 시기입니다. 감정적 글 올리기를 자제하십시오.",
-        "주변에서 나를 고소·협박하거나 분쟁에 끌어들이려 하는 기운이 있습니다. 어떤 자리에서도 서명·결제·보증은 반드시 확인 후 진행하십시오.",
     ],
 }
 
@@ -10943,67 +10930,20 @@ def infer_current_worry(pils, birth_year, gender):
         except Exception:
             _saju_log.warning("[infer_current_worry] 오류: %s", str(e)[:60])
 
-        # 도화살·신살 감지 및 점수 반영
+        # 도화살 감지
         has_dowhwa = False
         try:
             ss12 = get_12sinsal(pils)
-            for _ss in ss12:
-                _sn = _ss.get("이름", "")
-                if "도화" in _sn:
-                    has_dowhwa = True
-                    scores["연애_결혼"] = scores.get("연애_결혼", 0) + 2
-                elif "겁살" in _sn:
-                    scores["대인_갈등"] = scores.get("대인_갈등", 0) + 2
-                    scores["법적_관재"] = scores.get("법적_관재", 0) + 2
-                elif "역마" in _sn:
-                    scores["독립_변화"] = scores.get("독립_변화", 0) + 1
-                elif "상문" in _sn:
-                    scores["건강"]      = scores.get("건강", 0) + 2
-                    scores["대인_갈등"] = scores.get("대인_갈등", 0) + 1
-            # 삼재 감지
-            _JJ_CYCLE_W = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"]
-            _year_jj_w  = pils[3].get("jj","") if len(pils) > 3 else ""
-            _sw_jj_w    = _JJ_CYCLE_W[(datetime.now().year - 4) % 12]
-            _SAMJAE_GW  = [
-                (["寅","卯","辰"], {"申","子","辰"}),
-                (["巳","午","未"], {"亥","卯","未"}),
-                (["申","酉","戌"], {"寅","午","戌"}),
-                (["亥","子","丑"], {"巳","酉","丑"}),
-            ]
-            for _sy, _sa in _SAMJAE_GW:
-                if _sw_jj_w in _sy and _year_jj_w in _sa:
-                    scores["건강"]      = scores.get("건강", 0) + 3
-                    scores["독립_변화"] = scores.get("독립_변화", 0) + 2
-                    break
+            if any("도화" in s.get("이름", "") for s in ss12):
+                has_dowhwa = True
         except Exception:
-            pass
-
-        # 나이대·성별·혼인 보정
-        try:
-            _age_w = datetime.now().year - birth_year + 1
-            if _age_w < 30:
-                scores["학업_진로"] = scores.get("학업_진로", 0) + 2
-            elif _age_w < 40:
-                scores["직장_직업"] = scores.get("직장_직업", 0) + 2
-                scores["연애_결혼"] = scores.get("연애_결혼", 0) + 1
-            elif _age_w < 50:
-                scores["돈_재물"]   = scores.get("돈_재물", 0) + 2
-                scores["자녀"]      = scores.get("자녀", 0) + 1
-            elif _age_w < 60:
-                scores["건강"]      = scores.get("건강", 0) + 2
-                scores["돈_재물"]   = scores.get("돈_재물", 0) + 1
-            else:
-                scores["건강"]      = scores.get("건강", 0) + 3
-            if gender == "여":
-                scores["연애_결혼"] = scores.get("연애_결혼", 0) + 1
-        except Exception:
-            pass
+            _saju_log.warning("[infer_current_worry] 오류: %s", str(e)[:60])
 
         # 특수 조건 보정
         if has_chung:
             top_cat = max(scores, key=scores.get) if scores else None
             if top_cat:
-                scores[top_cat] = int(scores[top_cat] * 2.0)  # 충 발동 시 2배 가중
+                scores[top_cat] = int(scores[top_cat] * 1.5)
         if has_dowhwa or has_hap:
             scores["연애_결혼"] = scores.get("연애_결혼", 0) + 4
 
@@ -11194,6 +11134,76 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
 
     except Exception as _lne:
         st.warning(f"로컬 해석 오류: {_lne}")
+
+    # ── 현재 운기 직격 분석 (재물/사고수/이성) ───────────────
+    try:
+        from datetime import datetime as _dt
+        _cur_year = _dt.now().year
+        _cur_age  = _cur_year - birth_year + 1
+        _sw_now   = get_yearly_luck(pils, _cur_year)
+        _sw_next  = get_yearly_luck(pils, _cur_year + 1)
+        _ys       = get_yongshin(pils)
+        _yong_ohs = _ys.get("종합_용신", [])
+        if not isinstance(_yong_ohs, list): _yong_ohs = []
+        _ilgan    = pils[1]["cg"]
+        _ilgan_oh = OH.get(_ilgan, "")
+        _sn_info  = get_ilgan_strength(_ilgan, pils)
+        _sn       = _sn_info.get("신강신약", "중화") if _sn_info else "중화"
+        _daewoon  = SajuCoreEngine.get_daewoon(
+            pils, birth_year,
+            st.session_state.get("birth_month",1),
+            st.session_state.get("birth_day",1),
+            st.session_state.get("birth_hour",12),
+            st.session_state.get("birth_minute",0),
+            gender=gender
+        )
+        _cur_dw   = next((d for d in _daewoon if d["시작연도"] <= _cur_year <= d["종료연도"]), None)
+        _cur_dw_ss = TEN_GODS_MATRIX.get(_ilgan,{}).get(_cur_dw["cg"],"-") if _cur_dw else "-"
+        _sinsal   = get_12sinsal(pils) if pils else []
+        _marriage = st.session_state.get("in_marriage","미혼") or "미혼"
+        _gisin_raw = _ys.get("기신",[])
+        _gisin_ohs = _gisin_raw if isinstance(_gisin_raw,list) else []
+
+        _ctx8 = {
+            "pils": pils, "birth_year": birth_year, "gender": gender,
+            "name": name, "display_name": name or "내담자",
+            "ilgan": _ilgan, "ilgan_oh": _ilgan_oh,
+            "current_year": _cur_year, "current_age": _cur_age,
+            "cur_dw": _cur_dw, "cur_dw_ss": _cur_dw_ss,
+            "sw_now": _sw_now, "sw_next": _sw_next,
+            "yongshin_ohs": _yong_ohs, "gisin_ohs": _gisin_ohs,
+            "sn": _sn, "sinsal_list": _sinsal,
+            "marriage": _marriage,
+            "gname": get_gyeokguk(pils).get("격국명","") if pils else "",
+        }
+        _ch8_text = _nar_ch8_flow(_ctx8)
+        if _ch8_text and len(_ch8_text) > 100:
+            st.markdown('<hr style="border:none;border-top:2px solid #d4af37;margin:32px 0">', unsafe_allow_html=True)
+            _ch8_header = (
+                '<div style="background:linear-gradient(135deg,#0d0d1a,#1a1535);'
+                'border:2px solid #d4af37;border-radius:16px;'
+                'padding:14px 22px;margin-bottom:12px;text-align:center">'
+                '<div style="font-size:18px;font-weight:900;color:#f7e695;letter-spacing:2px">'
+                '🎯 현재 운기 정밀 분석</div>'
+                '<div style="font-size:12px;color:#aaa;margin-top:4px">'
+                f'{_cur_year}년 대운·세운·용신 5중 교차 — 재물·사고·이성·직업·건강 직격</div>'
+                '</div>'
+            )
+            st.markdown(_ch8_header, unsafe_allow_html=True)
+            _ch8_safe = _ch8_text.replace("<", "&lt;").replace(">", "&gt;")
+            _ch8_card = (
+                '<div style="background:#0f0f1e;border:1.5px solid #3a3060;'
+                'border-radius:14px;padding:22px 24px;'
+                'color:#d8d8e8;font-size:13px;line-height:2.1;'
+                'white-space:pre-wrap;word-break:keep-all;'
+                'font-family:\'Nanum Gothic\',\'맑은 고딕\',sans-serif;'
+                'overflow-x:auto">'
+                + _ch8_safe +
+                '</div>'
+            )
+            st.markdown(_ch8_card, unsafe_allow_html=True)
+    except Exception as _ch8_e:
+        pass
 
     # ── 발동 중인 신살 강조 (세운 지지 기준) ─────────────────
     try:
@@ -16600,7 +16610,10 @@ def tab_ai_chat(pils, name, birth_year, gender):
                         out.append(f"* {dw['시작나이']}~{dw['시작나이'] + 9}세: {dw['str']} ({dw_ss}) {dw_grade2}{cur_m}\n")
 
                 elif is_past:
-                    hl = generate_engine_highlights(pils, birth_year, gender, bm, bd, bh, bmn)
+                    try:
+                        hl = generate_engine_highlights(pils, birth_year, gender, bm, bd, bh, bmn)
+                    except Exception:
+                        hl = []
 
                     pevs = sorted(
                         hl.get("past_events", []),
