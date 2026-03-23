@@ -19337,7 +19337,7 @@ def menu_gaewoon(pils, name, birth_year, gender):
             from reportlab.lib import colors
             from reportlab.lib.units import mm
             from reportlab.platypus import (SimpleDocTemplate, Paragraph, Spacer,
-                                            HRFlowable, PageBreak)
+                                            HRFlowable, PageBreak, KeepTogether)
             from reportlab.lib.styles import ParagraphStyle
             from reportlab.pdfbase import pdfmetrics
             from reportlab.pdfbase.ttfonts import TTFont
@@ -19346,6 +19346,7 @@ def menu_gaewoon(pils, name, birth_year, gender):
             return None
 
         _buf = _io.BytesIO()
+        # ── 폰트 로딩 ──
         _FONT_CANDS = [
             ("Malgun",      "C:/Windows/Fonts/malgun.ttf",  None),
             ("Batang",      "C:/Windows/Fonts/batang.ttc",  0),
@@ -19369,146 +19370,337 @@ def menu_gaewoon(pils, name, birth_year, gender):
             leftMargin=20*mm, rightMargin=20*mm,
             topMargin=20*mm, bottomMargin=20*mm,
         )
-        GOLD = colors.HexColor("#d4af37")
-        DARK = colors.HexColor("#2d1f00")
-        BROWN= colors.HexColor("#4a3000")
+        GOLD  = colors.HexColor("#d4af37")
+        DARK  = colors.HexColor("#2d1f00")
+        BROWN = colors.HexColor("#4a3000")
+        GREEN = colors.HexColor("#27ae60")
+        RED   = colors.HexColor("#c0392b")
 
-        _sT = ParagraphStyle("T", fontName=_BASE, fontSize=22, leading=32,
-                              textColor=GOLD, alignment=1, spaceAfter=8)
-        _sS = ParagraphStyle("S", fontName=_BASE, fontSize=13, leading=22,
-                              textColor=DARK, alignment=1, spaceAfter=6)
-        _sC = ParagraphStyle("C", fontName=_BASE, fontSize=15, leading=24,
-                              textColor=GOLD, spaceBefore=12, spaceAfter=6)
-        _sB = ParagraphStyle("B", fontName=_BASE, fontSize=11, leading=18,
-                              textColor=DARK, spaceAfter=4)
-        _sI = ParagraphStyle("I", fontName=_BASE, fontSize=10, leading=16,
-                              textColor=BROWN, leftIndent=12, spaceAfter=3)
+        _sT  = ParagraphStyle("pT",  fontName=_BASE, fontSize=22, leading=34,
+                               textColor=GOLD,  alignment=1, spaceAfter=8)
+        _sS  = ParagraphStyle("pS",  fontName=_BASE, fontSize=13, leading=22,
+                               textColor=DARK,  alignment=1, spaceAfter=6)
+        _sC  = ParagraphStyle("pC",  fontName=_BASE, fontSize=15, leading=26,
+                               textColor=GOLD,  spaceBefore=10, spaceAfter=6)
+        _sB  = ParagraphStyle("pB",  fontName=_BASE, fontSize=11, leading=19,
+                               textColor=DARK,  spaceAfter=4)
+        _sI  = ParagraphStyle("pI",  fontName=_BASE, fontSize=10, leading=17,
+                               textColor=BROWN, leftIndent=10, spaceAfter=3)
+        _sOk = ParagraphStyle("pOk", fontName=_BASE, fontSize=10, leading=17,
+                               textColor=GREEN, leftIndent=10, spaceAfter=3)
+        _sWn = ParagraphStyle("pWn", fontName=_BASE, fontSize=10, leading=17,
+                               textColor=RED,   leftIndent=10, spaceAfter=3)
+
+        def _hr(): return HRFlowable(width="100%", thickness=0.5, color=GOLD, spaceAfter=3*mm)
+        def _sp(n=3): return Spacer(1, n*mm)
 
         story = []
 
-        # ── 표지 ──
-        story.append(Spacer(1, 28*mm))
-        story.append(Paragraph("천명 개운처방전(天命 開運處方箋)", _sT))
+        # ════════════════════════════════════════════════════
+        # 표지
+        # ════════════════════════════════════════════════════
+        story.append(_sp(28))
+        story.append(Paragraph("천명 개운처방전", _sT))
+        story.append(Paragraph("天命 開運處方箋", _sT))
+        story.append(_sp(4))
+        story.append(HRFlowable(width="100%", thickness=1.5, color=GOLD, spaceAfter=4*mm))
         story.append(Paragraph(f"{name}님 전용 맞춤 처방", _sS))
-        story.append(Spacer(1, 5*mm))
-        story.append(HRFlowable(width="100%", thickness=1, color=GOLD, spaceAfter=4*mm))
         story.append(Paragraph(f"성별: {gender}  |  생년: {birth_year}년", _sS))
-        _yong_str = " · ".join(_yong_gw) if _yong_gw else "미산출"
-        _gis_str  = " · ".join(_gis_gw)  if _gis_gw  else "없음"
-        story.append(Paragraph(f"용신: {_yong_str}  |  기신: {_gis_str}", _sS))
-        story.append(Spacer(1, 5*mm))
-        story.append(HRFlowable(width="100%", thickness=1, color=GOLD, spaceAfter=4*mm))
-        story.append(Spacer(1, 18*mm))
+        _yong_str_p = "  ".join(_yong_gw) if _yong_gw else "미산출"
+        _gis_str_p  = "  ".join(_gis_gw)  if _gis_gw  else "없음"
+        story.append(Paragraph(f"용신(用神): {_yong_str_p}", _sS))
+        story.append(Paragraph(f"기신(忌神): {_gis_str_p}", _sS))
+        story.append(HRFlowable(width="100%", thickness=1.5, color=GOLD, spaceAfter=4*mm))
+        story.append(_sp(16))
         story.append(Paragraph("이 처방전은 하늘의 기운을 내 편으로 돌리는", _sS))
         story.append(Paragraph("실천 가능한 개운 처방을 담고 있습니다.", _sS))
         story.append(PageBreak())
 
-        # ── 1장: 용신 강화 처방 ──
+        # ════════════════════════════════════════════════════
+        # 제1장 : 용신 강화 처방 — 보유 용신 전부 출력
+        # ════════════════════════════════════════════════════
         story.append(Paragraph("제1장  용신 강화 처방 — 색상·방위·음식·보석", _sC))
-        story.append(HRFlowable(width="100%", thickness=0.5, color=GOLD, spaceAfter=3*mm))
+        story.append(_hr())
         if not _yong_gw:
             story.append(Paragraph("용신이 산출되지 않았습니다.", _sB))
         else:
-            for _oh in _yong_gw[:2]:
+            for _oh in _yong_gw:           # ← 전부 출력 (슬라이싱 없음)
                 _rx = _OH_RX_GW.get(_oh)
                 if not _rx:
                     continue
-                story.append(Paragraph(f"[{_oh} 용신]", _sB))
-                for _k in ["색상", "방위", "음식", "보석", "물상", "행동"]:
+                story.append(Paragraph(f"[ {_oh} 용신 처방 ]", _sB))
+                for _k in ["색상", "방위", "음식", "보석", "물상", "시간", "행동"]:
                     story.append(Paragraph(f"  {_k}: {_rx.get(_k, '')}", _sI))
-                story.append(Spacer(1, 3*mm))
-
-        # ── 2장: 월별 타이밍 ──
+                story.append(_sp(3))
+        if _gis_gw:
+            story.append(_sp(2))
+            story.append(Paragraph("[ 기신 오행 — 피해야 할 것 ]", _sB))
+            for _goh in _gis_gw:
+                _grx = _OH_RX_GW.get(_goh)
+                if _grx:
+                    story.append(Paragraph(
+                        f"  {_goh} 기신: {_grx.get('색상','')} 색상·{_grx.get('방위','')} 방위·"
+                        f"{_grx.get('음식','')} 음식 자제", _sWn))
         story.append(PageBreak())
-        story.append(Paragraph("제2장  월별 타이밍 — 용신·기신 달력", _sC))
-        story.append(HRFlowable(width="100%", thickness=0.5, color=GOLD, spaceAfter=3*mm))
-        _yong1_p = _yong_gw[0] if _yong_gw else ""
-        _gis1_p  = _gis_gw[0]  if _gis_gw  else ""
-        _MONTH_OH_P = {1:"水",2:"水",3:"木",4:"木",5:"火",6:"土",
-                       7:"火",8:"土",9:"金",10:"金",11:"水",12:"水"}
-        for _m in range(1, 13):
-            _moh = _MONTH_OH_P.get(_m, "")
-            if _moh == _yong1_p:
-                _tag = "✅ 용신달 — 적극 행동"
-            elif _moh == _gis1_p:
-                _tag = "⚠️ 기신달 — 신중히"
-            else:
-                _tag = "— 보통"
-            story.append(Paragraph(f"  {_m}월 ({_moh}오행): {_tag}", _sI))
 
-        # ── 3장: 신살별 비방 ──
+        # ════════════════════════════════════════════════════
+        # 제2장 : 올해 타이밍 처방 — 월별 길흉·추천 행동
+        # ════════════════════════════════════════════════════
+        story.append(Paragraph(f"제2장  올해 타이밍 처방 — 월별 최적 행동 캘린더", _sC))
+        story.append(_hr())
+        try:
+            _cur_yr_p = datetime.now().year
+            _GH_RANK_P = {"대길(大吉)":5,"길(吉)":4,"평길(平吉)":3,
+                          "평(平)":2,"흉(凶)":1,"흉흉(凶凶)":0}
+            _ACT_MAP_P = {
+                "食神":  "새 프로젝트 시작·창업·자기계발",
+                "傷官":  "네트워킹·발표·예술활동",
+                "偏財":  "투자·영업·부업 활성화",
+                "正財":  "계약·저축·부동산 거래",
+                "偏官":  "변화 대비·이직 준비·법적 점검",
+                "正官":  "승진 도전·공식 활동·명예 쌓기",
+                "偏印":  "공부·자격증·내면 탐구",
+                "正印":  "인맥 활용·학업·상사 지원 받기",
+                "比肩":  "독립 행보·경쟁 도전·체력 강화",
+                "劫財":  "동업 주의·현금 보관·지출 절제",
+            }
+            _mon_data_p = []
+            for _m in range(1, 13):
+                try:
+                    _ml = get_monthly_luck(pils, _cur_yr_p, _m) or {}
+                except Exception:
+                    _ml = {}
+                _gh    = _ml.get("길흉", "평(平)")
+                _ss_m  = _ml.get("십성", "")
+                _rank  = _GH_RANK_P.get(_gh, 2)
+                _act   = _ACT_MAP_P.get(_ss_m.split("(")[0], "긍정적 추진력 활용")
+                _mon_data_p.append((_m, _gh, _rank, _ss_m, _act))
+
+            _sorted_p = sorted(_mon_data_p, key=lambda x: -x[2])
+            _top3_p   = _sorted_p[:3]
+            _bot2_p   = _sorted_p[-2:]
+            _top3_m   = {x[0] for x in _top3_p}
+            _bot2_m   = {x[0] for x in _bot2_p}
+
+            story.append(Paragraph(f"[ {_cur_yr_p}년 최고의 달 TOP 3 — 적극 행동 ]", _sB))
+            for _m, _gh, _, _ss_m, _act in _top3_p:
+                story.append(Paragraph(f"  ✅ {_m}월 — {_gh} | {_act}", _sOk))
+            story.append(_sp(3))
+            story.append(Paragraph(f"[ 절대 조심할 달 ]", _sB))
+            for _m, _gh, _, _ss_m, _act in _bot2_p:
+                story.append(Paragraph(
+                    f"  ⚠️  {_m}월 — {_gh} | 투자·계약·큰 결정 자제 / {_act}", _sWn))
+            story.append(_sp(4))
+            story.append(Paragraph("[ 12개월 전체 길흉 & 추천 행동 ]", _sB))
+            for _m, _gh, _rank, _ss_m, _act in _mon_data_p:
+                if _m in _top3_m:
+                    _style = _sOk
+                    _pfx = "✅"
+                elif _m in _bot2_m:
+                    _style = _sWn
+                    _pfx = "⚠️"
+                else:
+                    _style = _sI
+                    _pfx = "  "
+                story.append(Paragraph(
+                    f"  {_pfx} {_m}월 ({_gh}) : {_act}", _style))
+        except Exception as _e2:
+            story.append(Paragraph(f"월별 데이터 생성 중 오류: {_e2}", _sB))
         story.append(PageBreak())
+
+        # ════════════════════════════════════════════════════
+        # 제3장 : 신살별 비방 처방
+        # ════════════════════════════════════════════════════
         story.append(Paragraph("제3장  신살별 비방(裨方) — 흉살 차단 처방", _sC))
-        story.append(HRFlowable(width="100%", thickness=0.5, color=GOLD, spaceAfter=3*mm))
+        story.append(_hr())
         _active_sn_p = [s.get("이름", "") for s in _sinsal_gw]
+        if _active_sn_p:
+            story.append(Paragraph(f"원국 발동 신살: {', '.join(_active_sn_p)}", _sB))
+            story.append(_sp(2))
         _found_p = False
         for _ssn, _rxd in _SINSAL_RX_GW.items():
             _key_p = _ssn.split("(")[0]
             if any(_key_p in _an for _an in _active_sn_p):
                 _found_p = True
-                story.append(Paragraph(f"{_rxd['icon']} {_ssn} 발동 — 비방 처방", _sB))
+                _block = [
+                    Paragraph(f"{_rxd['icon']} {_ssn} 발동 — 비방 처방", _sB),
+                ]
                 for _b in _rxd["비방"]:
-                    story.append(Paragraph(f"  • {_b}", _sI))
-                story.append(Spacer(1, 3*mm))
+                    _block.append(Paragraph(f"  • {_b}", _sI))
+                _block.append(_sp(3))
+                story.append(KeepTogether(_block))
         if not _found_p:
-            story.append(Paragraph("✅ 현재 주요 흉살이 발동 중이지 않습니다.", _sB))
-
-        # ── 4장: 개운 일상 실천 ──
+            story.append(Paragraph("✅ 현재 주요 흉살이 발동 중이지 않습니다.", _sOk))
+            story.append(Paragraph("이 시기를 기회로 삼아 적극적으로 움직이십시오.", _sI))
         story.append(PageBreak())
-        story.append(Paragraph("제4장  개운 일상 실천 처방", _sC))
-        story.append(HRFlowable(width="100%", thickness=0.5, color=GOLD, spaceAfter=3*mm))
-        for _oh in _yong_gw[:2]:
-            _rx = _OH_RX_GW.get(_oh)
-            if _rx:
-                story.append(Paragraph(f"[{_oh} 용신 일상 실천]", _sB))
-                story.append(Paragraph(
-                    f"  • 매일 {_rx.get('색상','')} 계열 소품·옷을 1가지 이상 활용하세요.", _sI))
-                story.append(Paragraph(
-                    f"  • 잠잘 때 머리를 {_rx.get('방위','')} 쪽으로 두세요.", _sI))
-                story.append(Paragraph(
-                    f"  • {_rx.get('음식','')} 계열 음식을 주 3회 이상 섭취하세요.", _sI))
-                story.append(Paragraph(
-                    f"  • 행동 처방: {_rx.get('행동','')}", _sI))
-                story.append(Spacer(1, 3*mm))
 
-        # ── 5장: 재물·사업 처방 ──
+        # ════════════════════════════════════════════════════
+        # 제4장 : 풍수·이사 처방
+        # ════════════════════════════════════════════════════
+        story.append(Paragraph("제4장  풍수·이사 처방 — 방위·집 배치법", _sC))
+        story.append(_hr())
+        _yong_dirs = [_OH_RX_GW[o]["방위"] for o in _yong_gw if o in _OH_RX_GW]
+        _gis_dirs  = [_OH_RX_GW[o]["방위"] for o in _gis_gw  if o in _OH_RX_GW]
+        _yong_cols = [_OH_RX_GW[o]["색상"] for o in _yong_gw if o in _OH_RX_GW]
+        _yong_objs = [_OH_RX_GW[o]["물상"] for o in _yong_gw if o in _OH_RX_GW]
+        story.append(Paragraph("[ 이사·사무실 방위 ]", _sB))
+        story.append(Paragraph(
+            f"  ✅ 길한 방향 (용신): {', '.join(_yong_dirs) or '미산출'}", _sOk))
+        story.append(Paragraph(
+            f"  ⚠️  피할 방향 (기신): {', '.join(_gis_dirs) or '없음'}", _sWn))
+        story.append(_sp(3))
+        story.append(Paragraph("[ 이사 적합한 달 ]", _sB))
+        try:
+            _move_top = [f"{x[0]}월({x[1]})" for x in _top3_p]
+            story.append(Paragraph(
+                f"  추천: {', '.join(_move_top)} — 길운이 가장 강한 시기입니다.", _sOk))
+            _move_bot = [f"{x[0]}월" for x in _bot2_p]
+            story.append(Paragraph(
+                f"  금지: {', '.join(_move_bot)} — 흉운 달에 이사하면 기운이 뒤틀립니다.", _sWn))
+        except Exception:
+            story.append(Paragraph("  용신 달(봄~여름)에 이사하는 것이 유리합니다.", _sI))
+        story.append(_sp(3))
+        story.append(Paragraph("[ 집안 소품 배치법 ]", _sB))
+        story.append(Paragraph(
+            f"  • 현관: {', '.join(_yong_cols) or '용신 색상'} 계열 매트·소품 배치", _sI))
+        story.append(Paragraph(
+            f"  • 거실: {', '.join(_yong_objs) or '용신 물상'} 소품으로 용신 기운 강화", _sI))
+        story.append(Paragraph(
+            f"  • 침실: 머리를 {_yong_dirs[0] if _yong_dirs else '용신 방위'} 쪽으로 두고 취침", _sI))
+        story.append(Paragraph(
+            f"  • 기신 오행({', '.join(_gis_gw) or '없음'}) 색상 소품은 최소화하세요.", _sWn))
+        story.append(Paragraph(
+            "  • 현관 양쪽 소금 단지 — 외부 나쁜 기운 차단 (매달 교체)", _sI))
+        story.append(Paragraph(
+            "  • 집 구석 참숯 배치 — 음기·전자파 정화 (3개월마다 교체)", _sI))
         story.append(PageBreak())
-        story.append(Paragraph("제5장  재물·사업 처방 — 세운 분석", _sC))
-        story.append(HRFlowable(width="100%", thickness=0.5, color=GOLD, spaceAfter=3*mm))
+
+        # ════════════════════════════════════════════════════
+        # 제5장 : 재물·횡재수 개운법
+        # ════════════════════════════════════════════════════
+        story.append(Paragraph("제5장  재물·횡재수 개운법", _sC))
+        story.append(_hr())
         _ss_p = _sw_ss_gw or "미산출"
-        story.append(Paragraph(f"올해 세운 십성(천간): {_ss_p}", _sB))
-        _money_map = {
-            "比肩": "독립·창업 기운이 강합니다. 혼자 힘으로 밀어붙이는 사업에 유리합니다.",
-            "劫財": "금전 분쟁·손실 위험 — 보증·동업은 반드시 피하세요.",
-            "食神": "재물 생산력이 높습니다. 기술·재능을 적극 활용하면 수입이 늘어납니다.",
-            "傷官": "창의적 수입 기운이 강하지만 법적 분쟁에 주의하세요.",
-            "偏財": "사업·투자에서 큰 수익 기회 — 과감한 결단이 필요합니다.",
-            "正財": "안정적 수입이 보장됩니다. 저축·부동산 투자가 유리합니다.",
-            "偏官": "경쟁이 치열합니다. 도전보다 내실 다지기에 집중하세요.",
-            "正官": "직장·승진 기운이 강합니다. 조직 내 신뢰를 쌓는 해입니다.",
-            "偏印": "공부·자격증·재충전 기운 — 투자보다 학습이 유리합니다.",
-            "正印": "학문·명예 기운이 강합니다. 자격증·출판·교육 분야가 유리합니다.",
+        _wallet_color = _yong_cols[0] if _yong_cols else "용신 색상"
+        _wallet_dir   = _yong_dirs[0] if _yong_dirs else "용신 방위"
+        story.append(Paragraph("[ 재수부(財數符) 처방 ]", _sB))
+        story.append(Paragraph(f"  • 지갑 색상: {_wallet_color} 계열로 교체 — 용신 기운이 재물을 당깁니다.", _sI))
+        story.append(Paragraph(f"  • 지갑 보관 방위: {_wallet_dir} 방향 서랍·가방 칸에 보관", _sI))
+        story.append(Paragraph(
+            "  • 지갑 안에 용신 오행 보석 사진 1장 넣기 (작은 종이라도 효험 있음)", _sI))
+        story.append(Paragraph(
+            "  • 매월 초하루 지갑을 햇빛에 1시간 쬐어 기운 충전", _sI))
+        story.append(_sp(3))
+        story.append(Paragraph("[ 횡재수 발동 조건 ]", _sB))
+        _money_ss_map = {
+            "偏財": "올해 편재(偏財) 세운 — 횡재수 발동 가능성 매우 높음! 투자·사업 기회를 놓치지 마세요.",
+            "正財": "올해 정재(正財) 세운 — 안정적 수입 증가. 부동산·저축 투자가 최적입니다.",
+            "食神": "올해 식신(食神) 세운 — 기술·재능으로 새 수입원 창출 가능. 부업 시작하기 좋습니다.",
+            "比肩": "올해 비견(比肩) 세운 — 독립·창업으로 재물 창출. 동업보다 단독 행보가 유리합니다.",
+            "傷官": "올해 상관(傷官) 세운 — 창의적 아이디어가 수입으로 연결. 특허·저작권 주목.",
+            "劫財": "올해 겁재(劫財) 세운 — 횡재보다 손실 주의. 투기·보증 절대 금지.",
+            "偏官": "올해 편관(偏官) 세운 — 재물 정체기. 수성(守成)에 집중하세요.",
+            "正官": "올해 정관(正官) 세운 — 직업적 성과로 수입 증가. 승진·이직 노려볼 만합니다.",
+            "偏印": "올해 편인(偏印) 세운 — 재물보다 자기계발 투자가 유리합니다.",
+            "正印": "올해 정인(正印) 세운 — 학업·자격증이 미래 재물의 씨앗. 지금 뿌리세요.",
         }
-        story.append(Paragraph(_money_map.get(_ss_p, "세운 십성에 따라 재물 흐름이 결정됩니다."), _sI))
-
-        # ── 6장: 만신의 마지막 말씀 ──
+        story.append(Paragraph(
+            f"  {_money_ss_map.get(_ss_p, f'올해 세운 십성 {_ss_p} — 흐름을 파악해 움직이세요.')}", _sI))
+        story.append(_sp(3))
+        story.append(Paragraph("[ 투자 유리한 달 ]", _sB))
+        try:
+            _inv_mons = [f"{x[0]}월" for x in _top3_p]
+            story.append(Paragraph(f"  ✅ 추천 투자 달: {', '.join(_inv_mons)}", _sOk))
+            _avoid_mons = [f"{x[0]}월" for x in _bot2_p]
+            story.append(Paragraph(f"  ⚠️  투자 금지 달: {', '.join(_avoid_mons)}", _sWn))
+        except Exception:
+            story.append(Paragraph("  용신 달에 투자 결정을 집중하세요.", _sI))
+        story.append(_sp(3))
+        story.append(Paragraph("[ 로또·복권 구매 방향 ]", _sB))
+        story.append(Paragraph(
+            f"  • 구매 방향: {_wallet_dir} 방향에 있는 복권 판매점 이용", _sI))
+        story.append(Paragraph(
+            f"  • 구매 시간: {_OH_RX_GW[_yong_gw[0]]['시간'] if _yong_gw and _yong_gw[0] in _OH_RX_GW else '용신 시간대'}", _sI))
+        story.append(Paragraph(
+            f"  • 구매 시 {_wallet_color} 계열 옷 착용 — 용신 기운을 몸에 두르고 구매하세요.", _sI))
         story.append(PageBreak())
-        story.append(Paragraph("제6장  만신의 마지막 말씀", _sC))
-        story.append(HRFlowable(width="100%", thickness=0.5, color=GOLD, spaceAfter=3*mm))
-        story.append(Spacer(1, 6*mm))
+
+        # ════════════════════════════════════════════════════
+        # 제6장 : 만신의 총체적 처방전
+        # ════════════════════════════════════════════════════
+        story.append(Paragraph("제6장  만신의 총체적 처방전", _sC))
+        story.append(_hr())
+        _yong1_rx = _OH_RX_GW.get(_yong_gw[0], {}) if _yong_gw else {}
+        _gis1_rx  = _OH_RX_GW.get(_gis_gw[0],  {}) if _gis_gw  else {}
+
+        story.append(Paragraph("[ 오늘 당장 할 것 3가지 ]", _sB))
         story.append(Paragraph(
-            f"{name}님, 팔자는 하늘이 짜놓은 설계도이지만, "
-            f"개운(開運)은 당신이 직접 쓰는 이야기입니다.", _sB))
-        story.append(Spacer(1, 3*mm))
+            f"  1. {_yong1_rx.get('색상','용신 색상')} 계열 소품·손수건을 지금 당장 몸에 지니세요.", _sOk))
         story.append(Paragraph(
-            "용신 기운을 매일 조금씩 몸에 두르고, 기신 기운을 조용히 밀어낼 때 "
-            "하늘의 흐름이 당신 편으로 돌아섭니다.", _sB))
-        story.append(Spacer(1, 3*mm))
+            f"  2. {_yong1_rx.get('방위','용신 방위')} 방향으로 책상·침대 머리 방향을 바꾸세요.", _sOk))
         story.append(Paragraph(
-            "오늘부터 딱 21일만 실천하십시오. "
-            "기운의 변화가 반드시 느껴질 것입니다.", _sB))
-        story.append(Spacer(1, 6*mm))
-        story.append(HRFlowable(width="100%", thickness=1, color=GOLD, spaceAfter=4*mm))
+            f"  3. {_yong1_rx.get('음식','용신 음식')} 중 1가지를 오늘 식사에 포함시키세요.", _sOk))
+        story.append(_sp(3))
+
+        story.append(Paragraph("[ 이번달 안에 할 것 3가지 ]", _sB))
+        story.append(Paragraph(
+            f"  1. 지갑을 {_wallet_color} 계열로 교체하고 용신 보석 사진을 넣으세요.", _sI))
+        story.append(Paragraph(
+            f"  2. 집 현관에 {_yong1_rx.get('물상','용신 물상')} 소품을 1개 배치하세요.", _sI))
+        story.append(Paragraph(
+            f"  3. {_gis1_rx.get('색상','기신 색상') if _gis_gw else '기신 오행'} 계열 소품을 서랍 속으로 치우세요.", _sI))
+        story.append(_sp(3))
+
+        story.append(Paragraph("[ 올해 안에 할 것 3가지 ]", _sB))
+        story.append(Paragraph(
+            f"  1. {_wallet_dir} 방향 거주지·사무실로 이사 또는 인테리어 개선을 검토하세요.", _sI))
+        story.append(Paragraph(
+            f"  2. {_yong1_rx.get('보석','용신 보석')} 보석을 1개 구입해 항상 착용하세요.", _sI))
+        story.append(Paragraph(
+            "  3. 용신 기도를 21일 이상 꾸준히 실천하세요. 기운이 반드시 바뀝니다.", _sI))
+        story.append(_sp(3))
+
+        story.append(Paragraph("[ 평생 지켜야 할 것 3가지 ]", _sB))
+        story.append(Paragraph(
+            f"  1. 주거·사무 공간은 항상 {_wallet_dir} 방향의 생기를 살리세요.", _sI))
+        story.append(Paragraph(
+            f"  2. {_yong1_rx.get('음식','용신 음식')} 계열 음식을 주 3회 이상 꾸준히 드세요.", _sI))
+        story.append(Paragraph(
+            "  3. 대운·세운이 바뀔 때마다 새 처방전을 받아 실천 방향을 재조정하세요.", _sI))
+        story.append(_sp(3))
+
+        story.append(Paragraph("[ 절대 하면 안 되는 것 3가지 ]", _sB))
+        story.append(Paragraph(
+            f"  1. {', '.join(_gis_dirs) or '기신 방위'} 방향으로 이사·사무실 이전 — 기운이 완전히 꺾입니다.", _sWn))
+        story.append(Paragraph(
+            f"  2. {_gis1_rx.get('색상','기신 색상') if _gis_gw else '기신 색상'} 계열을 과도하게 사용하는 것 — 기신 기운을 증폭시킵니다.", _sWn))
+        story.append(Paragraph(
+            "  3. 흉운 달(조심할 달)에 큰 투자·계약·수술 강행 — 반드시 흉이 따릅니다.", _sWn))
+        story.append(PageBreak())
+
+        # ════════════════════════════════════════════════════
+        # 마지막 페이지
+        # ════════════════════════════════════════════════════
+        story.append(_sp(20))
+        story.append(HRFlowable(width="100%", thickness=1.5, color=GOLD, spaceAfter=6*mm))
+        story.append(Paragraph(
+            "이 처방전을 항상 가까이 두고 실천하십시오.", _sT))
+        story.append(_sp(4))
+        story.append(Paragraph(
+            "사주는 운명이 아니라 지혜입니다.", _sT))
+        story.append(_sp(8))
+        story.append(HRFlowable(width="100%", thickness=1.5, color=GOLD, spaceAfter=6*mm))
+        story.append(_sp(6))
+        story.append(Paragraph(
+            f"{name}님, 팔자는 하늘이 짜놓은 설계도이지만,", _sS))
+        story.append(Paragraph(
+            "개운(開運)은 당신이 직접 쓰는 이야기입니다.", _sS))
+        story.append(_sp(4))
+        story.append(Paragraph(
+            "오늘부터 딱 21일만 실천하십시오.", _sS))
+        story.append(Paragraph(
+            "기운의 변화가 반드시 느껴질 것입니다.", _sS))
+        story.append(_sp(4))
         story.append(Paragraph(
             "이것이 만신이 수십 년 경험으로 드리는 마지막 처방이니라.", _sS))
 
