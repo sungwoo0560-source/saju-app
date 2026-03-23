@@ -19324,6 +19324,217 @@ def menu_gaewoon(pils, name, birth_year, gender):
         unsafe_allow_html=True,
     )
 
+    # ── 개운처방전 PDF 다운로드 ──────────────────────────────────────────
+    st.markdown("---")
+    st.markdown(
+        '<div class="gold-section">📥 내 개운처방전 PDF 다운로드</div>',
+        unsafe_allow_html=True,
+    )
+
+    def _build_gaewoon_pdf():
+        try:
+            from reportlab.lib.pagesizes import A4
+            from reportlab.lib import colors
+            from reportlab.lib.units import mm
+            from reportlab.platypus import (SimpleDocTemplate, Paragraph, Spacer,
+                                            HRFlowable, PageBreak)
+            from reportlab.lib.styles import ParagraphStyle
+            from reportlab.pdfbase import pdfmetrics
+            from reportlab.pdfbase.ttfonts import TTFont
+            import io as _io, os as _os
+        except ImportError:
+            return None
+
+        _buf = _io.BytesIO()
+        _FONT_CANDS = [
+            ("Malgun",      "C:/Windows/Fonts/malgun.ttf",  None),
+            ("Batang",      "C:/Windows/Fonts/batang.ttc",  0),
+            ("NanumGothic", "/usr/share/fonts/truetype/nanum/NanumGothic.ttf", None),
+        ]
+        _BASE = "Helvetica"
+        for _fn, _fp, _fi in _FONT_CANDS:
+            if _os.path.exists(_fp):
+                try:
+                    if _fi is not None:
+                        pdfmetrics.registerFont(TTFont(_fn, _fp, subfontIndex=_fi))
+                    else:
+                        pdfmetrics.registerFont(TTFont(_fn, _fp))
+                    _BASE = _fn
+                    break
+                except Exception:
+                    pass
+
+        _doc = SimpleDocTemplate(
+            _buf, pagesize=A4,
+            leftMargin=20*mm, rightMargin=20*mm,
+            topMargin=20*mm, bottomMargin=20*mm,
+        )
+        GOLD = colors.HexColor("#d4af37")
+        DARK = colors.HexColor("#2d1f00")
+        BROWN= colors.HexColor("#4a3000")
+
+        _sT = ParagraphStyle("T", fontName=_BASE, fontSize=22, leading=32,
+                              textColor=GOLD, alignment=1, spaceAfter=8)
+        _sS = ParagraphStyle("S", fontName=_BASE, fontSize=13, leading=22,
+                              textColor=DARK, alignment=1, spaceAfter=6)
+        _sC = ParagraphStyle("C", fontName=_BASE, fontSize=15, leading=24,
+                              textColor=GOLD, spaceBefore=12, spaceAfter=6)
+        _sB = ParagraphStyle("B", fontName=_BASE, fontSize=11, leading=18,
+                              textColor=DARK, spaceAfter=4)
+        _sI = ParagraphStyle("I", fontName=_BASE, fontSize=10, leading=16,
+                              textColor=BROWN, leftIndent=12, spaceAfter=3)
+
+        story = []
+
+        # ── 표지 ──
+        story.append(Spacer(1, 28*mm))
+        story.append(Paragraph("천명 개운처방전(天命 開運處方箋)", _sT))
+        story.append(Paragraph(f"{name}님 전용 맞춤 처방", _sS))
+        story.append(Spacer(1, 5*mm))
+        story.append(HRFlowable(width="100%", thickness=1, color=GOLD, spaceAfter=4*mm))
+        story.append(Paragraph(f"성별: {gender}  |  생년: {birth_year}년", _sS))
+        _yong_str = " · ".join(_yong_gw) if _yong_gw else "미산출"
+        _gis_str  = " · ".join(_gis_gw)  if _gis_gw  else "없음"
+        story.append(Paragraph(f"용신: {_yong_str}  |  기신: {_gis_str}", _sS))
+        story.append(Spacer(1, 5*mm))
+        story.append(HRFlowable(width="100%", thickness=1, color=GOLD, spaceAfter=4*mm))
+        story.append(Spacer(1, 18*mm))
+        story.append(Paragraph("이 처방전은 하늘의 기운을 내 편으로 돌리는", _sS))
+        story.append(Paragraph("실천 가능한 개운 처방을 담고 있습니다.", _sS))
+        story.append(PageBreak())
+
+        # ── 1장: 용신 강화 처방 ──
+        story.append(Paragraph("제1장  용신 강화 처방 — 색상·방위·음식·보석", _sC))
+        story.append(HRFlowable(width="100%", thickness=0.5, color=GOLD, spaceAfter=3*mm))
+        if not _yong_gw:
+            story.append(Paragraph("용신이 산출되지 않았습니다.", _sB))
+        else:
+            for _oh in _yong_gw[:2]:
+                _rx = _OH_RX_GW.get(_oh)
+                if not _rx:
+                    continue
+                story.append(Paragraph(f"[{_oh} 용신]", _sB))
+                for _k in ["색상", "방위", "음식", "보석", "물상", "행동"]:
+                    story.append(Paragraph(f"  {_k}: {_rx.get(_k, '')}", _sI))
+                story.append(Spacer(1, 3*mm))
+
+        # ── 2장: 월별 타이밍 ──
+        story.append(PageBreak())
+        story.append(Paragraph("제2장  월별 타이밍 — 용신·기신 달력", _sC))
+        story.append(HRFlowable(width="100%", thickness=0.5, color=GOLD, spaceAfter=3*mm))
+        _yong1_p = _yong_gw[0] if _yong_gw else ""
+        _gis1_p  = _gis_gw[0]  if _gis_gw  else ""
+        _MONTH_OH_P = {1:"水",2:"水",3:"木",4:"木",5:"火",6:"土",
+                       7:"火",8:"土",9:"金",10:"金",11:"水",12:"水"}
+        for _m in range(1, 13):
+            _moh = _MONTH_OH_P.get(_m, "")
+            if _moh == _yong1_p:
+                _tag = "✅ 용신달 — 적극 행동"
+            elif _moh == _gis1_p:
+                _tag = "⚠️ 기신달 — 신중히"
+            else:
+                _tag = "— 보통"
+            story.append(Paragraph(f"  {_m}월 ({_moh}오행): {_tag}", _sI))
+
+        # ── 3장: 신살별 비방 ──
+        story.append(PageBreak())
+        story.append(Paragraph("제3장  신살별 비방(裨方) — 흉살 차단 처방", _sC))
+        story.append(HRFlowable(width="100%", thickness=0.5, color=GOLD, spaceAfter=3*mm))
+        _active_sn_p = [s.get("이름", "") for s in _sinsal_gw]
+        _found_p = False
+        for _ssn, _rxd in _SINSAL_RX_GW.items():
+            _key_p = _ssn.split("(")[0]
+            if any(_key_p in _an for _an in _active_sn_p):
+                _found_p = True
+                story.append(Paragraph(f"{_rxd['icon']} {_ssn} 발동 — 비방 처방", _sB))
+                for _b in _rxd["비방"]:
+                    story.append(Paragraph(f"  • {_b}", _sI))
+                story.append(Spacer(1, 3*mm))
+        if not _found_p:
+            story.append(Paragraph("✅ 현재 주요 흉살이 발동 중이지 않습니다.", _sB))
+
+        # ── 4장: 개운 일상 실천 ──
+        story.append(PageBreak())
+        story.append(Paragraph("제4장  개운 일상 실천 처방", _sC))
+        story.append(HRFlowable(width="100%", thickness=0.5, color=GOLD, spaceAfter=3*mm))
+        for _oh in _yong_gw[:2]:
+            _rx = _OH_RX_GW.get(_oh)
+            if _rx:
+                story.append(Paragraph(f"[{_oh} 용신 일상 실천]", _sB))
+                story.append(Paragraph(
+                    f"  • 매일 {_rx.get('색상','')} 계열 소품·옷을 1가지 이상 활용하세요.", _sI))
+                story.append(Paragraph(
+                    f"  • 잠잘 때 머리를 {_rx.get('방위','')} 쪽으로 두세요.", _sI))
+                story.append(Paragraph(
+                    f"  • {_rx.get('음식','')} 계열 음식을 주 3회 이상 섭취하세요.", _sI))
+                story.append(Paragraph(
+                    f"  • 행동 처방: {_rx.get('행동','')}", _sI))
+                story.append(Spacer(1, 3*mm))
+
+        # ── 5장: 재물·사업 처방 ──
+        story.append(PageBreak())
+        story.append(Paragraph("제5장  재물·사업 처방 — 세운 분석", _sC))
+        story.append(HRFlowable(width="100%", thickness=0.5, color=GOLD, spaceAfter=3*mm))
+        _ss_p = _sw_ss_gw or "미산출"
+        story.append(Paragraph(f"올해 세운 십성(천간): {_ss_p}", _sB))
+        _money_map = {
+            "比肩": "독립·창업 기운이 강합니다. 혼자 힘으로 밀어붙이는 사업에 유리합니다.",
+            "劫財": "금전 분쟁·손실 위험 — 보증·동업은 반드시 피하세요.",
+            "食神": "재물 생산력이 높습니다. 기술·재능을 적극 활용하면 수입이 늘어납니다.",
+            "傷官": "창의적 수입 기운이 강하지만 법적 분쟁에 주의하세요.",
+            "偏財": "사업·투자에서 큰 수익 기회 — 과감한 결단이 필요합니다.",
+            "正財": "안정적 수입이 보장됩니다. 저축·부동산 투자가 유리합니다.",
+            "偏官": "경쟁이 치열합니다. 도전보다 내실 다지기에 집중하세요.",
+            "正官": "직장·승진 기운이 강합니다. 조직 내 신뢰를 쌓는 해입니다.",
+            "偏印": "공부·자격증·재충전 기운 — 투자보다 학습이 유리합니다.",
+            "正印": "학문·명예 기운이 강합니다. 자격증·출판·교육 분야가 유리합니다.",
+        }
+        story.append(Paragraph(_money_map.get(_ss_p, "세운 십성에 따라 재물 흐름이 결정됩니다."), _sI))
+
+        # ── 6장: 만신의 마지막 말씀 ──
+        story.append(PageBreak())
+        story.append(Paragraph("제6장  만신의 마지막 말씀", _sC))
+        story.append(HRFlowable(width="100%", thickness=0.5, color=GOLD, spaceAfter=3*mm))
+        story.append(Spacer(1, 6*mm))
+        story.append(Paragraph(
+            f"{name}님, 팔자는 하늘이 짜놓은 설계도이지만, "
+            f"개운(開運)은 당신이 직접 쓰는 이야기입니다.", _sB))
+        story.append(Spacer(1, 3*mm))
+        story.append(Paragraph(
+            "용신 기운을 매일 조금씩 몸에 두르고, 기신 기운을 조용히 밀어낼 때 "
+            "하늘의 흐름이 당신 편으로 돌아섭니다.", _sB))
+        story.append(Spacer(1, 3*mm))
+        story.append(Paragraph(
+            "오늘부터 딱 21일만 실천하십시오. "
+            "기운의 변화가 반드시 느껴질 것입니다.", _sB))
+        story.append(Spacer(1, 6*mm))
+        story.append(HRFlowable(width="100%", thickness=1, color=GOLD, spaceAfter=4*mm))
+        story.append(Paragraph(
+            "이것이 만신이 수십 년 경험으로 드리는 마지막 처방이니라.", _sS))
+
+        try:
+            _doc.build(story)
+        except Exception:
+            return None
+
+        _buf.seek(0)
+        return _buf.read()
+
+    if st.button("📥 내 개운처방전 PDF 다운로드", type="primary", use_container_width=True):
+        with st.spinner("PDF 생성 중입니다..."):
+            _pdf_data = _build_gaewoon_pdf()
+        if _pdf_data:
+            st.download_button(
+                label="📄 개운처방전 PDF 저장하기",
+                data=_pdf_data,
+                file_name=f"{name}_개운처방전.pdf",
+                mime="application/pdf",
+                use_container_width=True,
+            )
+            st.success("✅ PDF가 생성되었습니다. 위 버튼을 눌러 저장하세요.")
+        else:
+            st.error("PDF 생성에 실패했습니다. reportlab 패키지가 설치되어 있는지 확인하세요: pip install reportlab")
+
 
 def main():
 
