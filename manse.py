@@ -10914,7 +10914,7 @@ def infer_current_worry(pils, birth_year, gender):
                 if k in CHUNG_MAP:
                     has_chung = True
                     break
-        except Exception:
+        except Exception as e:
             _saju_log.warning("[infer_current_worry] 오류: %s", str(e)[:60])
 
         # 합(合) 감지
@@ -10927,7 +10927,7 @@ def infer_current_worry(pils, birth_year, gender):
                    frozenset([p["cg"], sw_cg]) in TG_HAP_MAP:
                     has_hap = True
                     break
-        except Exception:
+        except Exception as e:
             _saju_log.warning("[infer_current_worry] 오류: %s", str(e)[:60])
 
         # 도화살 감지
@@ -10936,7 +10936,7 @@ def infer_current_worry(pils, birth_year, gender):
             ss12 = get_12sinsal(pils)
             if any("도화" in s.get("이름", "") for s in ss12):
                 has_dowhwa = True
-        except Exception:
+        except Exception as e:
             _saju_log.warning("[infer_current_worry] 오류: %s", str(e)[:60])
 
         # 특수 조건 보정
@@ -11216,7 +11216,7 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
                 _pos   = ", ".join(_s.get("위치", []))
                 _advice = _SINSAL_ADVICE.get(_sname, _s.get("caution", ""))
                 st.info(f"{_icon} **{_sname}** 발동 중 ({_pos}) — {_advice}")
-    except Exception:
+    except Exception as e:
         _saju_log.warning("[menu1_report] 오류: %s", str(e)[:60])
 
     # if not api_key and not groq_key:
@@ -12736,7 +12736,7 @@ def menu4_future3(
                 unsafe_allow_html=True,
             )
         except Exception as _mte3:
-            _saju_log.warning("[menu4_future3] 오류: %s", str(e)[:60])
+            _saju_log.warning("[menu4_future3] 오류: %s", str(_mte3)[:60])
 
     st.markdown(
         '<hr style="border:none;border-top:1px solid #e0d8c0;margin:20px 0">',
@@ -12907,7 +12907,7 @@ def menu5_money(pils, birth_year, gender, name="내담자"):
             _y_gh = _yl.get("길흉", "보통")
             _y_sw = _yl.get("세운", str(_y))
             _future5_items.append(f"{_y}년[{_y_sw}] {_y_ss} {_y_gh}")
-        except Exception:
+        except Exception as e:
             _saju_log.warning("[menu5_money] 오류: %s", str(e)[:60])
     st.markdown(
         f"<div style='background:linear-gradient(145deg,#faf7f0,#f2ebe0);border:1px solid #c9a84c;"
@@ -13327,7 +13327,7 @@ def menu6_relations(pils, name, birth_year, gender, marriage_status="미혼"):
             _y_ss = _yl.get("십성_천간", "")
             if _y_ss in _spouse_ss or _yl.get("십성_지지", "") in _spouse_ss:
                 _marriage_years.append(f"{_y}년 [{_yl.get('세운', str(_y))}] — {_y_ss} 기운 (인연운 강함)")
-        except Exception:
+        except Exception as e:
             _saju_log.warning("[menu6_relations] 오류: %s", str(e)[:60])
     if _marriage_years:
         _marriage_info = "\n".join(f"    🌸 {m}" for m in _marriage_years[:4])
@@ -17018,7 +17018,7 @@ def menu7_ai(pils, name, birth_year, gender):
                 if kw in _interest_summary:
                     _interest_default = idx
                     break
-        except Exception:
+        except Exception as e:
             _saju_log.warning("[menu7_ai] 오류: %s", str(e)[:60])
 
         focus_key = st.selectbox(

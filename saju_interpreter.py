@@ -5891,7 +5891,7 @@ class LocalSajuNarrator:
         # ── 오늘 신살(신살) 경고 ─────────────────────────────────
         try:
             from saju_sinsal import get_12sinsal
-            _sinsal = get_12sinsal(b.get("ilgan", "甲"), pils)
+            _sinsal = get_12sinsal(pils)
             _bad_sinsal = [s for s in _sinsal if s.get("type") == "흉" or "조심" in s.get("desc", "")]
             if _bad_sinsal:
                 lines.append("\n### ⚠️ 오늘 활성 신살 경고")
@@ -6824,15 +6824,18 @@ def get_relationship_reading(pils, gender="남", marriage_status="미혼"):
         iljj = pils[1]["jj"] if len(pils) > 1 else ""
         ilgan_oh = OH.get(ilgan, "")
 
-        # 배우자 자리(일지) 십성
-        partner_ss = TEN_GODS_MATRIX.get(ilgan, {}).get(iljj, "")
+        # 배우자 자리(일지) 십성 — 지장간 정기 천간을 통해 십성 계산
+        _iljj_main_gan = JIJANGGAN.get(iljj, [""])[-1] if JIJANGGAN.get(iljj) else iljj
+        partner_ss = TEN_GODS_MATRIX.get(ilgan, {}).get(_iljj_main_gan, "")
 
         _SS_KR = {
             "食神": "식신", "傷官": "상관", "偏財": "편재", "正財": "정재",
             "偏官": "편관", "正官": "정관", "偏印": "편인", "正印": "정인",
             "比肩": "비견", "劫財": "겁재",
         }
-        partner_ss_kr = _SS_KR.get(partner_ss, partner_ss)
+        # "偏官(편관)" → "偏官" 한자만 추출
+        partner_ss_hj = partner_ss.split("(")[0] if "(" in partner_ss else partner_ss
+        partner_ss_kr = _SS_KR.get(partner_ss_hj, partner_ss_hj)
 
         # 일지 십성별 배우자 기질
         _ILJJ_SS_PARTNER = {
@@ -6847,7 +6850,7 @@ def get_relationship_reading(pils, gender="남", marriage_status="미혼"):
             "比肩":  "비슷한 성향의 배우자. 경쟁적 관계가 될 수 있어 역할 분담 중요.",
             "劫財":  "활동적이고 승부욕 강한 배우자. 재물 기복 있으니 경제 관리 필요.",
         }
-        partner_desc = _ILJJ_SS_PARTNER.get(partner_ss, f"{partner_ss_kr} 기운의 배우자 자리. 이 기운에 맞는 인연이 자연스럽게 온다.")
+        partner_desc = _ILJJ_SS_PARTNER.get(partner_ss_hj, f"{partner_ss_kr} 기운의 배우자 자리. 이 기운에 맞는 인연이 자연스럽게 온다.")
 
         # 오행별 이상형/결합 방식
         _OH_LOVE = {
@@ -6868,12 +6871,9 @@ def get_relationship_reading(pils, gender="남", marriage_status="미혼"):
                 love_sinsal.append(n)
 
         # 결혼 시기 힌트 (일지 12운성 기반)
+        # calc_12unsung은 [시주, 일주, 월주, 년주] 순서의 문자열 리스트 반환
         unsung_list = calc_12unsung(ilgan, pils) if pils else []
-        iljj_unsung = ""
-        for u in unsung_list:
-            if u.get("기둥") in ["일주", "일지"]:
-                iljj_unsung = u.get("운성", "")
-                break
+        iljj_unsung = unsung_list[1] if len(unsung_list) > 1 else ""
 
         _UNSUNG_MARRY = {
             "長生": "결혼운이 밝고 배우자 복이 있음.",
@@ -10920,12 +10920,59 @@ def _nar_past(ctx):
         )
 
         try:
-            highlights = generate_engine_highlights(pils, birth_year, gender)
-        except (NameError, Exception):
+            # generate_engine_highlights는 manse.py에만 있으므로 ctx의 daewoon으로 직접 생성
+            _past_events = []
+            _now_year = datetime.now().year
+            _SS_DOM = {
+                "남": {
+                    "偏財": "재물/이성 인연",  "正財": "재물/안정적 수입",
+                    "食神": "재능 발휘/복록",  "傷官": "이직·갈등·창의",
+                    "偏官": "사고·관재·압박",  "正官": "직장·명예·인정",
+                    "偏印": "변화·이동·학업",  "正印": "학업·보살핌·문서",
+                    "比肩": "독립·경쟁·자아",  "劫財": "재물손실·형제갈등",
+                },
+                "여": {
+                    "偏財": "재물/사업",       "正財": "재물/안정적 수입",
+                    "食神": "자녀/재능/복록",  "傷官": "자녀갈등·이직",
+                    "偏官": "이성(남자)·압박", "正官": "남편·명예·직장",
+                    "偏印": "변화·이동·학업",  "正印": "학업·어머니·문서",
+                    "比肩": "독립·경쟁·자아",  "劫財": "재물손실",
+                },
+            }
+            _INTENSITY = {"偏官": "🔴", "劫財": "🔴", "傷官": "🟡", "比肩": "🟡",
+                          "偏印": "🟡", "食神": "🟢", "正財": "🟢", "偏財": "🟡",
+                          "正官": "🟢", "正印": "🟢"}
+            _SS_KR_PAST = {"食神": "식신", "傷官": "상관", "偏財": "편재", "正財": "정재",
+                           "偏官": "편관", "正官": "정관", "偏印": "편인", "正印": "정인",
+                           "比肩": "비견", "劫財": "겁재"}
+            for _dw in daewoon:
+                if _dw.get("시작연도", 9999) >= _now_year:
+                    continue
+                _dw_age = _dw.get("시작나이", 0)
+                _dw_ss_raw = TEN_GODS_MATRIX.get(ilgan, {}).get(_dw.get("cg", ""), "-")
+                # "傷官(상관)" → "傷官" 한자만 추출
+                _dw_ss_hj = _dw_ss_raw.split("(")[0] if "(" in _dw_ss_raw else _dw_ss_raw
+                _dw_ss_kr = _SS_KR_PAST.get(_dw_ss_hj, _dw_ss_hj)
+                _dom = _SS_DOM.get(gender, _SS_DOM["남"]).get(_dw_ss_hj, "변화·사건")
+                _emo = _INTENSITY.get(_dw_ss_hj, "🟢")
+                if _dw_ss_hj and _dw_ss_hj != "-":
+                    _past_events.append({
+                        "age": f"{_dw_age}~{_dw_age + 9}세",
+                        "year": _dw.get("시작연도", ""),
+                        "title": f"{_dw.get('str', '')} 대운 — {_dw_ss_kr} 운기 ({_dom})",
+                        "desc": (
+                            f"{_dw_age}세 전후({_dw.get('시작연도', '')}년~{_dw.get('종료연도', '')}년)부터 "
+                            f"**{_dw.get('str', '')} 대운**이 흘러 **{_dom}** 분야에서 변화와 사건이 집중됩니다. "
+                            f"이 시기 {_dw_ss_kr} 기운이 실제 삶에서 어떻게 작용했는지 되돌아보십시오."
+                        ),
+                        "intensity": _emo,
+                    })
+            highlights = {"past_events": _past_events}
+        except Exception:
             highlights = {"past_events": []}
 
         for event in highlights.get("past_events", []):
-            result.append(f"### {event.get('age')}세 ({event.get('year')}년) | {event.get('title')}\n")
+            result.append(f"### {event.get('age')} ({event.get('year')}년) | {event.get('title')}\n")
 
             result.append(f"{event.get('desc')}\n\n")
 
