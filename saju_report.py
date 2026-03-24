@@ -68,6 +68,47 @@ DAEWOON_PRESCRIPTION = {
     "正印": "시험/학업/귀인과의 만남. 배움에 투자하십시오.",
 }
 
+
+def _pdf_current_status(pils, name, birth_year, gender, story, styles):
+    """PDF용 현재 상태 진단 섹션"""
+    from reportlab.platypus import Paragraph, Spacer
+    from reportlab.lib.units import mm
+    elements = []
+    try:
+        from saju_interpreter import get_yongshin, get_ilgan_strength
+        from saju_engine import calc_ohaeng_strength, OH
+        ilgan = pils[1]["cg"]
+        oh_s = calc_ohaeng_strength(ilgan, pils)
+        oh_max = max(oh_s, key=oh_s.get) if oh_s else ""
+        oh_min = min(oh_s, key=oh_s.get) if oh_s else ""
+        wol_jj = pils[2]["jj"] if len(pils) > 2 else ""
+        OHN = {"木":"목(木)","火":"화(火)","土":"토(土)","金":"금(金)","水":"수(水)"}
+        cold = ["亥","子","丑"]
+
+        _DIAG = {
+            "火": f"{name}님의 사주는 불(火)기운이 집중된 뜨거운 사주입니다. 열정과 추진력이 강하지만 감정 기복과 소진을 주의해야 합니다.",
+            "木": f"{name}님의 사주는 木기운이 강한 성장·도전의 사주입니다. 창의성과 리더십이 뛰어나나 주변과의 마찰을 조심하십시오.",
+            "土": f"{name}님의 사주는 土기운이 강한 안정·신뢰의 사주입니다. 포용력이 크나 변화 적응에 시간이 필요합니다.",
+            "金": f"{name}님의 사주는 金기운이 강한 냉철·결단의 사주입니다. 의리와 원칙이 강하나 유연함을 기르는 것이 과제입니다.",
+            "水": f"{name}님의 사주는 水기운이 강한 지혜·통찰의 사주입니다. 뛰어난 통찰력이 있으나 결단력을 키우는 것이 중요합니다.",
+        }
+        cold_txt = f"{name}님의 사주는 겨울 태생으로 차가운 기운이 강합니다. 따뜻한 인간관계와 정서적 교류가 운을 여는 열쇠입니다."
+
+        diag_txt = cold_txt if wol_jj in cold else _DIAG.get(oh_max, "")
+        weak_txt = f"※ {OHN.get(oh_min,'')} 기운이 부족하여 관련 영역에서 불균형이 나타나기 쉽습니다. 의식적인 보완이 필요합니다." if oh_min else ""
+
+        elements.append(Paragraph("▣ 현재 상태 진단", styles["Heading2"]))
+        elements.append(Spacer(1, 3*mm))
+        if diag_txt:
+            elements.append(Paragraph(diag_txt, styles["BodyText"]))
+            elements.append(Spacer(1, 2*mm))
+        if weak_txt:
+            elements.append(Paragraph(weak_txt, styles["BodyText"]))
+            elements.append(Spacer(1, 4*mm))
+    except Exception as _e:
+        pass
+    return elements
+
 def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str=""):
     """📄 PDF 출력 - 사주 천명 리포트 다운로드"""
 
