@@ -11099,6 +11099,119 @@ def render_worry_inference(pils, birth_year, gender):
             )
 
 
+def menu_current_situation(pils, name, birth_year, gender):
+    """🎯 나의 현재 상황 — 대운·세운 교차 서술형 분석 (500~1000자)"""
+
+    cur_year = datetime.now().year
+    cur_age  = cur_year - birth_year + 1
+
+    # ── 고민 추론 카드 ─────────────────────────────────────
+    render_worry_inference(pils, birth_year, gender)
+
+    # ── 현재 대운·세운 데이터 수집 ────────────────────────
+    try:
+        from saju_interpreter import get_crossing_interpretation
+        cross = get_crossing_interpretation(pils, cur_year)
+    except Exception:
+        cross = {}
+
+    dw_ss   = cross.get("dw_ss", "")
+    sw_ss   = cross.get("sw_ss", "")
+    sw_gil  = cross.get("sw_gil", "")
+    summary = cross.get("summary", "")
+    finance = cross.get("finance", "")
+
+    try:
+        ilgan  = pils[1]["cg"]
+        from saju_interpreter import get_ilgan_strength, get_yongshin
+        sn_info  = get_ilgan_strength(ilgan, pils)
+        sn       = sn_info.get("신강신약", "")
+        ys_info  = get_yongshin(pils)
+        yong_ohs = ys_info.get("종합_용신", [])
+        yong_str = "·".join(yong_ohs[:2]) if yong_ohs else ""
+    except Exception:
+        ilgan = ""; sn = ""; yong_str = ""
+
+    _SS_KR = {"偏財(편재)":"편재","正財(정재)":"정재","食神(식신)":"식신","傷官(상관)":"상관",
+              "偏官(편관)":"편관","正官(정관)":"정관","偏印(편인)":"편인","正印(정인)":"정인",
+              "比肩(비견)":"비견","劫財(겁재)":"겁재"}
+    dw_kr = _SS_KR.get(dw_ss, dw_ss)
+    sw_kr = _SS_KR.get(sw_ss, sw_ss)
+
+    _DW_MEAN = {
+        "편재":"재물과 이성 인연이 활발해지는 대운. 사업·투자 기회가 오지만 과욕은 금물입니다.",
+        "정재":"안정적 수입과 현실 기반을 다지는 대운. 성실함이 보상받는 시기입니다.",
+        "식신":"재능이 꽃피고 복록이 따르는 대운. 하고 싶은 일에 뛰어들기 좋습니다.",
+        "상관":"기존 틀을 깨고 싶은 욕구가 강해지는 대운. 이직·창업 충동이 있으나 신중함이 필요합니다.",
+        "편관":"외부 압박과 경쟁이 심화되는 대운. 강한 추진력이 발동하지만 건강 관리 필수.",
+        "정관":"사회적 인정과 승진·명예가 따르는 대운. 규범을 지키면 좋은 결과가 옵니다.",
+        "편인":"변화와 이동이 잦아지는 대운. 새로운 분야 탐색에 유리하나 집중력 분산 주의.",
+        "정인":"학업·문서·자격증에 유리한 대운. 윗사람의 도움과 귀인이 나타납니다.",
+        "비견":"독립심과 자아 의지가 강해지는 대운. 경쟁은 심하나 자기 주도력이 올라갑니다.",
+        "겁재":"재물 기복과 형제·동료 갈등이 나타나는 대운. 보증·동업은 반드시 피하십시오.",
+    }
+    _SW_MEAN = {
+        "편재":"올해 재물과 이성 인연이 활발하게 움직입니다. 투자 기회를 신중히 선택하십시오.",
+        "정재":"올해 꾸준한 노력이 안정적 결실로 이어집니다. 재테크보다 저축이 유리합니다.",
+        "식신":"올해 재능 발휘와 복록이 따릅니다. 좋아하는 일에 에너지를 쏟으면 결과가 납니다.",
+        "상관":"올해 변화 욕구가 강해집니다. 표현력은 높아지나 대인 갈등에 주의하십시오.",
+        "편관":"올해 경쟁과 압박이 강합니다. 건강·법적 문제·사고수를 각별히 조심하십시오.",
+        "정관":"올해 직장·사회적 평가가 올라갑니다. 원칙을 지키면 인정받는 한 해입니다.",
+        "편인":"올해 계획 변경이 잦습니다. 새로운 공부나 자격 취득에 도전하기 좋습니다.",
+        "정인":"올해 학업·문서·자격증 운이 강합니다. 귀인의 도움이 들어오는 시기입니다.",
+        "비견":"올해 자기 의지와 독립심이 강해집니다. 경쟁은 피하고 협업을 활용하십시오.",
+        "겁재":"올해 재물 손실·구설수가 따릅니다. 보증·투기·충동 지출을 반드시 자제하십시오.",
+    }
+    dw_narr = _DW_MEAN.get(dw_kr, f"{dw_kr} 기운의 대운이 흐르고 있습니다.")
+    sw_narr = _SW_MEAN.get(sw_kr, f"올해 {sw_kr} 세운의 기운이 영향을 줍니다.")
+
+    gil_txt = {"대길":"아주 좋은 기운","길":"좋은 흐름","평":"보통 흐름","흉":"어려운 흐름","대흉":"매우 어려운 시기"}.get(sw_gil, "")
+
+    # ── 서술형 내러티브 조립 ──────────────────────────────
+    lines = []
+    lines.append(f"## 🎯 {name}님의 현재 상황 — {cur_year}년 ({cur_age}세)")
+    lines.append("")
+    lines.append(f"**{cur_year}년, {name}님은 지금 어떤 운기 속에 있는가.**")
+    lines.append("")
+
+    if dw_kr:
+        lines.append(f"현재 **{dw_kr} 대운**이 흐르고 있습니다. {dw_narr}")
+    if sw_kr:
+        lines.append(f"여기에 올해 **{sw_kr} 세운**이 겹칩니다. {sw_narr}")
+    if gil_txt:
+        lines.append(f"대운과 세운의 교차 길흉은 **{sw_gil}({gil_txt})**으로 분류됩니다.")
+    lines.append("")
+
+    if summary:
+        lines.append(f"**종합 흐름**: {summary}")
+        lines.append("")
+
+    if finance:
+        lines.append(f"**재물·사업**: {finance}")
+        lines.append("")
+
+    if sn:
+        _SN_CTX = {
+            "신강": f"{name}님은 신강(身强) 사주로, 자기 의지와 추진력이 강합니다. 지금처럼 대운·세운이 활발할 때 그 에너지가 더욱 증폭됩니다. 단, 독선에 빠지지 않도록 주변의 의견에 귀를 여는 것이 중요합니다.",
+            "신약": f"{name}님은 신약(身弱) 사주로, 환경과 타인의 영향을 크게 받습니다. 지금 대운·세운의 기운을 잘 활용하되, 무리한 도전보다는 한 가지에 집중하는 것이 유리합니다.",
+            "중화": f"{name}님은 중화(中和) 사주로, 균형 잡힌 에너지를 갖추고 있습니다. 현재 대운·세운과 함께 안정적이고 꾸준한 성과를 낼 수 있는 시기입니다.",
+        }
+        for k, v in _SN_CTX.items():
+            if k in sn:
+                lines.append(v)
+                lines.append("")
+                break
+
+    if yong_str:
+        lines.append(f"**용신({yong_str}) 활성화 여부**: 지금 대운·세운 기운이 용신과 맞닿아 있다면 상승 흐름이 강화되고, 기신(忌神)과 충돌하면 저항이 생깁니다. 용신 기운을 생활 속에서 활성화하는 것이 지금 시기의 핵심 개운법입니다.")
+        lines.append("")
+
+    lines.append("---")
+    lines.append("*위 분석은 대운·세운 십성 교차와 사주 원국 데이터를 바탕으로 생성됩니다.*")
+
+    st.markdown("\n".join(lines))
+
+
 def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
     """[1. Comprehensive Report] - Pillars, Personality, Gyeokguk, Yongshin"""
 
@@ -20814,7 +20927,6 @@ def main():
             with d_col:
                 st.date_input(
                     "양력 생년월일",
-                    value=_ss.get("in_solar_date", date(1990, 1, 1)),
                     min_value=date(1920, 1, 1),
                     max_value=date(2030, 12, 31),
                     key="in_solar_date",
@@ -21590,9 +21702,10 @@ def main():
 
             # ── 커스텀 탭 네비게이션 (버튼 방식) ─────────────────────
             _TAB_DEFS = [
+                ("🎯", "현재상황"),
                 ("📋", "종합사주"),
                 ("🌊", "대운흐름"),
-                ("🎯", "과거분석"),
+                ("🕰️", "과거분석"),
                 ("🔮", "미래3년"),
                 ("💰", "재물사업"),
                 ("💑", "궁합관계"),
@@ -21635,9 +21748,9 @@ def main():
 }
 </style>""", unsafe_allow_html=True)
 
-            # 버튼 행 1 (7개)
-            _btn_cols1 = st.columns(7)
-            for _bi, (_em, _nm) in enumerate(_TAB_DEFS[:7]):
+            # 버튼 행 1 (8개)
+            _btn_cols1 = st.columns(8)
+            for _bi, (_em, _nm) in enumerate(_TAB_DEFS[:8]):
                 _is_active = (_cur_tab == _bi)
                 _btn_style = "primary" if _is_active else "secondary"
                 with _btn_cols1[_bi]:
@@ -21649,8 +21762,8 @@ def main():
             st.markdown('<div style="height:4px"></div>', unsafe_allow_html=True)
             # 버튼 행 2 (7개)
             _btn_cols2 = st.columns(7)
-            for _bi, (_em, _nm) in enumerate(_TAB_DEFS[7:]):
-                _real_idx = _bi + 7
+            for _bi, (_em, _nm) in enumerate(_TAB_DEFS[8:]):
+                _real_idx = _bi + 8
                 _is_active = (_cur_tab == _real_idx)
                 _btn_style = "primary" if _is_active else "secondary"
                 with _btn_cols2[_bi]:
@@ -21664,32 +21777,34 @@ def main():
             # ── 콘텐츠 렌더링 ──────────────────────────────────────────
             _cur_tab = _ss.get("active_tab", 0)
             if   _cur_tab == 0:
-                menu1_report(pils, name, birth_year, gender, _ss.get("in_occupation", ""))
+                menu_current_situation(pils, name, birth_year, gender)
             elif _cur_tab == 1:
-                menu2_lifeline(pils, birth_year, gender, name)
+                menu1_report(pils, name, birth_year, gender, _ss.get("in_occupation", ""))
             elif _cur_tab == 2:
-                menu3_past(pils, birth_year, gender, name)
+                menu2_lifeline(pils, birth_year, gender, name)
             elif _cur_tab == 3:
-                menu4_future3(pils, birth_year, gender, _ss.get("in_marriage", "미혼"), name)
+                menu3_past(pils, birth_year, gender, name)
             elif _cur_tab == 4:
-                menu5_money(pils, birth_year, gender, name)
+                menu4_future3(pils, birth_year, gender, _ss.get("in_marriage", "미혼"), name)
             elif _cur_tab == 5:
-                menu6_relations(pils, name, birth_year, gender, _ss.get("in_marriage", "미혼"))
+                menu5_money(pils, birth_year, gender, name)
             elif _cur_tab == 6:
-                menu10_monthly(pils, name, birth_year, gender)
+                menu6_relations(pils, name, birth_year, gender, _ss.get("in_marriage", "미혼"))
             elif _cur_tab == 7:
-                menu9_daily(pils, name, birth_year, gender)
+                menu10_monthly(pils, name, birth_year, gender)
             elif _cur_tab == 8:
-                menu7_ai(pils, name, birth_year, gender)
+                menu9_daily(pils, name, birth_year, gender)
             elif _cur_tab == 9:
-                menu8_bihang(pils, name, birth_year, gender)
+                menu7_ai(pils, name, birth_year, gender)
             elif _cur_tab == 10:
-                menu16_ohaeng_deep(pils, name, birth_year, gender)
+                menu8_bihang(pils, name, birth_year, gender)
             elif _cur_tab == 11:
-                menu_tojeong(pils, name, birth_year, gender)
+                menu16_ohaeng_deep(pils, name, birth_year, gender)
             elif _cur_tab == 12:
-                menu_pdf(pils, birth_year, gender, name, str(_ss.get("in_birth_hour", "")))
+                menu_tojeong(pils, name, birth_year, gender)
             elif _cur_tab == 13:
+                menu_pdf(pils, birth_year, gender, name, str(_ss.get("in_birth_hour", "")))
+            elif _cur_tab == 14:
                 menu_gaewoon(pils, name, birth_year, gender)
 
     # ---- 맨 위로 플로팅 버튼 (window.parent 로 Streamlit iframe 대응) ----
@@ -21732,24 +21847,30 @@ def main():
 }
 </style>
 <a id="scroll-top-btn" href="#" onclick="
-try{
-  var sels=[
-    '.main',
-    'section.main',
-    '[data-testid=\'stAppViewContainer\']',
-    '[data-testid=\'stApp\']',
-    '.stApp',
-    '.block-container'
-  ];
-  for(var i=0;i<sels.length;i++){
-    var el=window.parent.document.querySelector(sels[i]);
-    if(el){el.scrollTop=0;}
+(function(){
+  try{
+    var d=window.parent.document;
+    var sels=[
+      'section[data-testid=\'stMain\']',
+      '[data-testid=\'stAppViewContainer\']',
+      'section[data-testid=\'block-container\']',
+      '.main',
+      'section.main'
+    ];
+    var scrolled=false;
+    for(var i=0;i<sels.length;i++){
+      var el=d.querySelector(sels[i]);
+      if(el&&el.scrollHeight>el.clientHeight){
+        el.scrollTo({top:0,behavior:'smooth'});
+        scrolled=true;
+        break;
+      }
+    }
+    if(!scrolled){window.parent.scrollTo({top:0,behavior:'smooth'});}
+  }catch(e){
+    window.scrollTo({top:0,behavior:'smooth'});
   }
-  window.parent.scrollTo({top:0,behavior:\'smooth\'});
-  window.scrollTo({top:0,behavior:\'smooth\'});
-}catch(e){
-  window.scrollTo({top:0,behavior:\'smooth\'});
-}
+})();
 return false;">▲</a>
 """,
         unsafe_allow_html=True,
