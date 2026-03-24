@@ -21887,30 +21887,22 @@ def main():
 }
 </style>
 <a id="scroll-top-btn" href="#" onclick="
-(function(){
-  try{
-    var d=window.parent.document;
-    var sels=[
-      'section[data-testid=\'stMain\']',
-      '[data-testid=\'stAppViewContainer\']',
-      'section[data-testid=\'block-container\']',
-      '.main',
-      'section.main'
-    ];
-    var scrolled=false;
-    for(var i=0;i<sels.length;i++){
-      var el=d.querySelector(sels[i]);
-      if(el&&el.scrollHeight>el.clientHeight){
-        el.scrollTo({top:0,behavior:'smooth'});
-        scrolled=true;
-        break;
-      }
-    }
-    if(!scrolled){window.parent.scrollTo({top:0,behavior:'smooth'});}
-  }catch(e){
-    window.scrollTo({top:0,behavior:'smooth'});
+try{
+  var sels=[
+    '[data-testid=\'stAppViewBlockContainer\']',
+    '[data-testid=\'stMainBlockContainer\']',
+    '[data-testid=\'stAppViewContainer\']',
+    '.main',
+    'section.main',
+    '.stApp',
+    '.block-container'
+  ];
+  for(var i=0;i<sels.length;i++){
+    var el=window.parent.document.querySelector(sels[i]);
+    if(el){el.scrollTo({top:0,behavior:'smooth'});break;}
   }
-})();
+  window.parent.scrollTo({top:0,behavior:'smooth'});
+}catch(e){}
 return false;">▲</a>
 """,
         unsafe_allow_html=True,
