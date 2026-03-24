@@ -1660,6 +1660,36 @@ class LocalSajuNarrator:
         lines.append("")
 
         # ── 선천적 성격 — 정통사주 스타일 긴 서술 ───────────────
+        # ── 0단계: 현 상태 진단 (공감) ─────────────────────────
+        _jokhu_data = YONGSHIN_JOKHU.get(b.get("pillars",{}).get("월주","")[-1:], {}) if b.get("pillars") else {}
+        _is_hot  = _jokhu_data.get("hot", False)
+        _wol_jj2 = b.get("pillars",{}).get("월주","")[-1:]
+        _cold_months = ["亥","子","丑"]
+        _hot_months  = ["巳","午","未"]
+        _oh_max2 = b.get("oh_max","")
+        _oh_min2 = b.get("oh_min","")
+        _OHN2 = {"木":"목(木)","火":"화(火)","土":"토(土)","金":"금(金)","水":"수(水)"}
+
+        _DIAG_HOT = {
+            "火": f"{name}님의 사주는 태어난 계절에 불(火)기운이 집중되어, 전체적으로 에너지가 넘치고 뜨거운 사주입니다. 열정이 넘치고 추진력이 강하지만, 때로는 쉽게 지치거나 감정의 기복이 올 수 있습니다.",
+            "木": f"{name}님의 사주는 木기운이 강하여 성장과 도전의 기운이 넘칩니다. 창의적이고 진취적이나 때로는 주변과 마찰이 생기기도 합니다.",
+            "土": f"{name}님의 사주는 土기운이 강하여 안정과 신뢰의 기운이 중심입니다. 묵직하고 포용력이 크나 변화에 적응하는 데 시간이 걸릴 수 있습니다.",
+            "金": f"{name}님의 사주는 金기운이 강하여 냉철하고 결단력 있는 기운이 중심입니다. 원칙과 의리가 강하나 때로는 고집스럽게 보일 수 있습니다.",
+            "水": f"{name}님의 사주는 水기운이 강하여 지혜롭고 유연한 기운이 중심입니다. 통찰력이 뛰어나나 때로는 우유부단하거나 감정이 깊어질 수 있습니다.",
+        }
+        _DIAG_COLD = f"{name}님의 사주는 태어난 계절이 겨울로 차갑고 얼어붙은 기운이 강합니다. 인내심과 깊이가 있으나, 만물을 녹여줄 따뜻한 기운이 절실히 필요한 구조입니다."
+        _DIAG_WEAK = f"반면 {_OHN2.get(_oh_min2,'')} 기운이 매우 부족하여, 이 오행과 관련된 영역(직업·건강·관계)에서 불균형이 나타나기 쉽습니다."
+
+        lines.append("---")
+        lines.append("### 🔍 당신의 사주가 말하는 현재 상태")
+        if _wol_jj2 in _cold_months:
+            lines.append(_DIAG_COLD)
+        elif _oh_max2 in _DIAG_HOT:
+            lines.append(_DIAG_HOT.get(_oh_max2,""))
+        if _oh_min2:
+            lines.append(_DIAG_WEAK)
+        lines.append("")
+
         lines.append("---")
         lines.append("### 🧬 선천적 성격")
 
@@ -2178,31 +2208,31 @@ class LocalSajuNarrator:
                             "역마살": (f"{name}님에게 역마살(驛馬殺)이 있습니다. "
                                       f"끊임없이 이동하고 변화를 추구하는 기운입니다. "
                                       f"한 곳에 오래 있으면 답답함을 느끼고, 이직·이사·여행이 잦을 수 있습니다. "
-                                      f"**직업**: 무역·영업·여행·운송·IT 분야가 잘 맞습니다. "
-                                      f"**주의**: 충동적인 이직·이사는 신중히 결정하십시오."),
+                                      f"\n**직업**: 무역·영업·여행·운송·IT 분야가 잘 맞습니다. "
+                                      f"\n**주의**: 충동적인 이직·이사는 신중히 결정하십시오."),
                             "도화살": (f"{name}님에게 도화살(桃花殺)이 있습니다. "
                                       f"타고난 매력과 예술적 감각으로 사람을 끌어당기는 기운입니다. "
                                       f"이성에게 인기가 많고 사교적 능력이 뛰어납니다. "
-                                      f"**직업**: 예술·연예·방송·서비스 분야에서 빛납니다. "
-                                      f"**주의**: 이성 문제로 인한 구설수를 조심하십시오."),
+                                      f"\n**직업**: 예술·연예·방송·서비스 분야에서 빛납니다. "
+                                      f"\n**주의**: 이성 문제로 인한 구설수를 조심하십시오."),
                             "화개살": (f"{name}님에게 화개살(華蓋殺)이 있습니다. "
                                       f"종교·철학·예술에 깊은 인연이 있는 고독한 학자형 기운입니다. "
-                                      f"**직업**: 학문·연구·종교·예술 분야에서 독보적 성취가 가능합니다. "
-                                      f"**주의**: 고독함을 즐기되 사회적 고립이 되지 않도록 주의하십시오."),
+                                      f"\n**직업**: 학문·연구·종교·예술 분야에서 독보적 성취가 가능합니다. "
+                                      f"\n**주의**: 고독함을 즐기되 사회적 고립이 되지 않도록 주의하십시오."),
                             "겁살": (f"{name}님에게 겁살(劫殺)이 있습니다. "
                                     f"외부의 갑작스러운 손재수·변동이 따르는 기운입니다. "
-                                    f"**재물**: 보증·동업·투기 투자를 반드시 피하십시오. "
-                                    f"**주의**: 현금 보유를 늘리고 충동적 지출을 자제하십시오."),
+                                    f"\n**재물**: 보증·동업·투기 투자를 반드시 피하십시오. "
+                                    f"\n**주의**: 현금 보유를 늘리고 충동적 지출을 자제하십시오."),
                             "재살": (f"{name}님에게 재살(災殺)이 있습니다. "
                                     f"사고수·관재수·건강 이상이 따르기 쉬운 기운입니다. "
-                                    f"**주의**: 이동 중 안전에 각별히 주의하고, 법적 분쟁을 미리 예방하십시오. "
-                                    f"**건강**: 정기 건강검진을 반드시 받으십시오."),
+                                    f"\n**주의**: 이동 중 안전에 각별히 주의하고, 법적 분쟁을 미리 예방하십시오. "
+                                    f"\n**건강**: 정기 건강검진을 반드시 받으십시오."),
                             "천살": (f"{name}님에게 천살(天殺)이 있습니다. "
                                     f"윗사람·상사·권위자와 마찰이 생기기 쉬운 기운입니다. "
-                                    f"**직장**: 조직 내 처신을 지혜롭게 하고, 불필요한 충돌을 피하십시오."),
+                                    f"\n**직장**: 조직 내 처신을 지혜롭게 하고, 불필요한 충돌을 피하십시오."),
                             "장성살": (f"{name}님에게 장성살(將星殺)이 있습니다. "
                                       f"타고난 리더십과 통솔력의 기운입니다. "
-                                      f"**직업**: 군·경·경영·스포츠 등 조직을 이끄는 역할이 잘 맞습니다."),
+                                      f"\n**직업**: 군·경·경영·스포츠 등 조직을 이끄는 역할이 잘 맞습니다."),
                         }
                         _printed = set()
                         for _sn_item in _sinsal_list[:4]:
@@ -2290,6 +2320,15 @@ class LocalSajuNarrator:
             }
             if _gs1:
                 lines.append(f"\n{_ACT_GISIN.get(_gs1, '')}")
+                _GISIN_WARN = {
+                    "木": f"⚠️ 기신 경고: {name}님은 木기운이 강해지는 봄철(3~5월)과 동쪽 방향의 기운을 조심하십시오. 이 시기 불필요한 논쟁, 섣부른 창업·확장 결정을 극도로 경계하십시오.",
+                    "火": f"⚠️ 기신 경고: {name}님은 火기운이 강해지는 여름(6~8월)과 충동적 결정을 극도로 조심하십시오. 붉은색 계열과 남쪽 방향 과도한 활용을 피하고, 섣부른 투자·논쟁을 삼가십시오.",
+                    "土": f"⚠️ 기신 경고: {name}님은 土기운이 강한 환절기에 고집과 지연이 화를 부릅니다. 황색 과다 사용을 피하고, 의사결정을 미루는 습관을 경계하십시오.",
+                    "金": f"⚠️ 기신 경고: {name}님은 金기운이 강한 가을(9~11월)에 냉정한 판단이 오히려 독이 될 수 있습니다. 흰색·금속 소품 과다, 충동적 단절·이별 결정을 경계하십시오.",
+                    "水": f"⚠️ 기신 경고: {name}님은 水기운이 강한 겨울(11~1월)에 우유부단함과 과도한 사색이 기회를 놓치게 합니다. 검은색 과다 사용과 중요한 결정 회피를 경계하십시오.",
+                }
+                if _gs1 in _GISIN_WARN:
+                    lines.append(f"\n{_GISIN_WARN[_gs1]}")
 
         lines.append("\n다가오는 10년의 구체적인 전술은 아래 **시기별 행동 지침**을 참고하여 나아갈 때와 물러설 때를 구별하시기 바랍니다.")
 
@@ -6316,9 +6355,26 @@ def get_yongshin(pils):
 
                 tongkwan_desc = f"{t1}({OHN.get(t1, '')})와 {t2}({OHN.get(t2, '')})가 충돌. {tongkwan_yong}({OHN.get(tongkwan_yong, '')}) 통관용신 필요."
 
-    all_yong = list(dict.fromkeys(eokbu_yong + [OH.get(c, "") for c in jokhu.get("need", [])] + ([tongkwan_yong] if tongkwan_yong else [])))
+    # ── 1차 억부, 2차 조후 우선순위 로직 ──────────────────
+    # 극열(巳午未) / 극한(亥子丑) 월은 조후가 억부보다 우선
+    jokhu_oh = [OH.get(c, "") for c in jokhu.get("need", [])]
+    jokhu_oh = [o for o in jokhu_oh if o]
+    is_extreme = jokhu.get("hot", False) or wol_jj in ["亥", "子", "丑"]
 
-    all_yong = [o for o in all_yong if o]
+    if is_extreme and jokhu_oh:
+        # 조후 우선: 조후용신 앞에 배치, 억부는 보조
+        priority_yong = jokhu_oh + [y for y in eokbu_yong if y not in jokhu_oh]
+        jokhu_priority = True
+    else:
+        # 억부 우선: 억부용신 앞에 배치, 조후는 보조
+        priority_yong = eokbu_yong + [y for y in jokhu_oh if y not in eokbu_yong]
+        jokhu_priority = False
+
+    # 통관 추가
+    if tongkwan_yong and tongkwan_yong not in priority_yong:
+        priority_yong.append(tongkwan_yong)
+
+    all_yong = [o for o in priority_yong if o]
 
     # 병약용신(病藥用神): 가장 강한 오행이 병(病)이면 그것을 제어하는 오행이 약(藥)
     byeong_yong = None
@@ -6326,14 +6382,13 @@ def get_yongshin(pils):
     if oh_list:
         strongest_oh, strongest_val = oh_list[0]
         if strongest_val >= 40:  # 한 오행이 40% 이상 독점 → 병(病)으로 판단
-            # 병(病)을 극하는 오행 = 약(藥)
             byeong_yong = CONTROL_MAP.get(strongest_oh, "")
             byeong_desc = (
                 f"{strongest_oh}({OHN.get(strongest_oh, '')}) 기운이 과도({strongest_val:.0f}%)하여 병(病)을 이룸. "
                 f"이를 제어하는 {byeong_yong}({OHN.get(byeong_yong, '')}) 기운이 병약용신(病藥用神)입니다."
             )
             if byeong_yong and byeong_yong not in all_yong:
-                all_yong.append(byeong_yong)
+                all_yong.insert(0, byeong_yong) if is_extreme else all_yong.append(byeong_yong)
 
     return {
         "억부_base": eokbu_base,
@@ -6342,6 +6397,7 @@ def get_yongshin(pils):
         "조후_desc": jokhu.get("desc", ""),
         "조후_need": jokhu.get("need", []),
         "조후_avoid": jokhu.get("avoid", []),
+        "조후_우선": jokhu_priority,   # True=조후우선 / False=억부우선
         "통관_yong": tongkwan_yong,
         "통관_desc": tongkwan_desc,
         "병약_yong": byeong_yong,
