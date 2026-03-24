@@ -8452,7 +8452,7 @@ def save_saju_state():
         "in_marriage": _ss.get("in_marriage", "미혼"),
         "in_occupation": _ss.get("in_occupation", "선택 안 함"),
         "in_premium_correction": _ss.get("in_premium_correction", True),
-        "in_region": _ss.get("in_region", "서울"),
+        "in_birth_region": _ss.get("in_birth_region", "서울"),
         # -- 계산 결과 --
         "saju_pils": _ss.get("saju_pils"),
         "birth_year": _ss.get("birth_year"),
@@ -8629,7 +8629,7 @@ def load_from_favorite(idx: int):
         "in_marriage",
         "in_occupation",
         "in_premium_correction",
-        "in_region",
+        "in_birth_region",
         "saju_pils",
         "birth_year",
         "birth_month",
@@ -20420,6 +20420,9 @@ def main():
     if "in_occupation" not in _ss:
         _ss["in_occupation"] = "선택 안 함"
 
+    if "in_birth_region" not in _ss:
+        _ss["in_birth_region"] = "서울"
+
     # in_premium_correction은 위젯이 key로 생성·관리 (세션 선설정 시 위젯 경고/뻑 방지)
     if "form_expanded" not in _ss:
         _ss["form_expanded"] = True
@@ -21125,7 +21128,7 @@ def main():
                     # 제주도
                     "제주", "제주도", "서귀포",
                 ],
-                key="in_region",
+                key="in_birth_region",
                 help="출생 지역 경도에 따라 진태양시(真太陽時)를 자동 보정합니다. 서울=-32분, 부산=-24분, 제주=-34분 등.",
             )
 
@@ -21190,8 +21193,9 @@ def main():
             # * 핵심 필라(Pillars) 계산 및 세션 저장 (버그 수정)
 
             # 출생지 경도 조회 (진태양시 보정용)
-            _region = _ss.get("in_region", "서울")
-            _longitude = TimeCorrection.REGION_LONGITUDE.get(_region, 127.0)
+            _region_lon = TimeCorrection.REGION_LONGITUDE.get(
+                _ss.get("in_birth_region", "서울"), 126.98
+            )
 
             if _ss.get("in_premium_correction", True):
                 # 정밀 보정 엔진 사용 (진태양시 + 지방시 반영)
@@ -21204,7 +21208,7 @@ def main():
                     _ss.get("birth_minute", _ss.get("in_birth_minute", 0)),
                     _ss["in_gender"],
                     use_yaja_time=_ss.get("in_use_yaja", True),
-                    longitude=_longitude,
+                    longitude=_region_lon,
                 )
 
             else:
