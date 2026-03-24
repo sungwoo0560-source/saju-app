@@ -5119,7 +5119,7 @@ def build_life_analysis(pils, gender):
 
 
 
-@st.cache_data
+@st.cache_data(hash_funcs={list: lambda l: str(l), dict: lambda d: str(sorted(d.items()) if isinstance(d, dict) else d)})
 def generate_engine_highlights(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0):
     """
 
@@ -5420,7 +5420,7 @@ def build_personality_detail_v2(pils, gender, sn, oh_strength):
     return traits[:8]  # 최대 8개 - 너무 많으면 희석됨
 
 
-@st.cache_data
+@st.cache_data(hash_funcs={list: lambda l: str(l)})
 def build_personality_detail(pils, gender="남"):
     """
 
@@ -7518,7 +7518,7 @@ _BIRTH_F2 = {"木": "火", "火": "土", "土": "金", "金": "水", "水": "木
 _CTRL2 = {"木": "土", "火": "金", "土": "水", "金": "木", "水": "火"}
 
 
-@st.cache_data
+@st.cache_data(hash_funcs={list: lambda l: str(l)})
 def detect_event_triggers(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0, target_year=None):
     """
 
@@ -7691,7 +7691,7 @@ def detect_event_triggers(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0, ta
     return triggers
 
 
-@st.cache_data
+@st.cache_data(hash_funcs={list: lambda l: str(l)})
 def calc_luck_score(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0, target_year=None):
     """대운+세운 종합 운세 점수 (0~100)"""
 
@@ -7736,7 +7736,7 @@ def calc_luck_score(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0, target_y
     return max(0, min(100, score))
 
 
-@st.cache_data
+@st.cache_data(hash_funcs={list: lambda l: str(l)})
 def calc_turning_point(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0, target_year=None):
     """
 
@@ -7884,7 +7884,7 @@ def calc_turning_point(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0, targe
     }
 
 
-@st.cache_data
+@st.cache_data(hash_funcs={list: lambda l: str(l)})
 def get_yongshin_multilayer(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0, target_year=None):
     """
 
@@ -21172,7 +21172,7 @@ def main():
 
     _auto_submit = _ss.pop("_auto_submit", False)
 
-    if submitted or _auto_submit or _ss["saju_pils"] is not None:
+    if submitted or _auto_submit or _ss.get("saju_pils") is not None:
         if submitted or _auto_submit:
             if _ss["in_cal_type"] == "음력":
                 try:
@@ -21204,32 +21204,34 @@ def main():
                 _ss.get("in_birth_region", "서울"), 126.98
             )
 
-            if _ss.get("in_premium_correction", True):
-                # 정밀 보정 엔진 사용 (진태양시 + 지방시 반영)
-
-                pils = SajuPrecisionEngine.get_pillars(
-                    b_year,
-                    b_month,
-                    b_day,
-                    _ss.get("birth_hour", _ss.get("in_birth_hour", 12)),
-                    _ss.get("birth_minute", _ss.get("in_birth_minute", 0)),
-                    _ss["in_gender"],
-                    use_yaja_time=_ss.get("in_use_yaja", True),
-                    longitude=_region_lon,
-                )
-
-            else:
-                # 일반 표준 엔진 사용
-
-                pils = SajuCoreEngine.get_pillars(
-                    b_year,
-                    b_month,
-                    b_day,
-                    _ss.get("birth_hour", _ss.get("in_birth_hour", 12)),
-                    _ss.get("birth_minute", _ss.get("in_birth_minute", 0)),
-                    _ss["in_gender"],
-                    use_yaja_time=_ss.get("in_use_yaja", True),
-                )
+            try:
+                if _ss.get("in_premium_correction", True):
+                    # 정밀 보정 엔진 사용 (진태양시 + 지방시 반영)
+                    pils = SajuPrecisionEngine.get_pillars(
+                        b_year,
+                        b_month,
+                        b_day,
+                        _ss.get("birth_hour", _ss.get("in_birth_hour", 12)),
+                        _ss.get("birth_minute", _ss.get("in_birth_minute", 0)),
+                        _ss.get("in_gender", "남"),
+                        use_yaja_time=_ss.get("in_use_yaja", True),
+                        longitude=_region_lon,
+                    )
+                else:
+                    # 일반 표준 엔진 사용
+                    pils = SajuCoreEngine.get_pillars(
+                        b_year,
+                        b_month,
+                        b_day,
+                        _ss.get("birth_hour", _ss.get("in_birth_hour", 12)),
+                        _ss.get("birth_minute", _ss.get("in_birth_minute", 0)),
+                        _ss.get("in_gender", "남"),
+                        use_yaja_time=_ss.get("in_use_yaja", True),
+                    )
+            except Exception as _pils_err:
+                _saju_log.warning("[get_pillars] 계산 오류: %s", str(_pils_err)[:120])
+                st.error(f"⚠️ 사주 계산 중 오류가 발생했습니다. 다시 시도해주세요.\n({str(_pils_err)[:80]})")
+                return
 
             # 세션 스테이트에 최종 반영 (Key Binding 영구화)
 
@@ -24516,4 +24518,9 @@ def menu15_12unsung(pils, name, birth_year, gender):
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as _main_err:
+        import streamlit as _st
+        _st.error(f"⚠️ 앱 초기화 오류: {str(_main_err)[:200]}\n\n새로고침(F5)을 눌러 다시 시도하세요.")
+        raise
