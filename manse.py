@@ -161,6 +161,24 @@ _AI_SANDBOX_HEADER = """
 
 # ── 분리된 모듈 import ──
 from saju_engine import *
+
+# ── TimeCorrection fallback (import 실패 시 안전망) ──
+try:
+    _ = TimeCorrection.REGION_LONGITUDE
+except (NameError, AttributeError):
+    class TimeCorrection:
+        REGION_LONGITUDE = {
+            "서울": 126.98, "부산": 129.04, "인천": 126.71, "대구": 128.60,
+            "대전": 127.38, "광주": 126.85, "울산": 129.31, "제주": 126.53,
+        }
+        DST_PERIODS = []
+        @staticmethod
+        def get_corrected_time(year, month, day, hour, minute, longitude=127.0):
+            from datetime import datetime, timedelta
+            dt = datetime(year, month, day, hour, minute)
+            dt += timedelta(minutes=round((longitude - 135.0) * 4.0))
+            return dt
+
 from saju_sinsal import *
 from saju_interpreter import *
 from saju_report import *
@@ -21117,7 +21135,7 @@ def main():
                 help="출생지 경도 기준으로 진태양시를 자동 보정합니다.",
                 label_visibility="collapsed",
             )
-            _lon = TimeCorrection.REGION_LONGITUDE.get(_ss.get("in_birth_region","서울"), 126.98)
+            _lon = getattr(TimeCorrection, "REGION_LONGITUDE", {}).get(_ss.get("in_birth_region","서울"), 126.98)
             _offset = round((_lon - 135.0) * 4)
             st.caption(f"📍 경도 {_lon}° → 표준시 대비 {_offset:+d}분 보정")
 
@@ -21182,7 +21200,7 @@ def main():
             # * 핵심 필라(Pillars) 계산 및 세션 저장 (버그 수정)
 
             # 출생지 경도 조회 (진태양시 보정용)
-            _region_lon = TimeCorrection.REGION_LONGITUDE.get(
+            _region_lon = getattr(TimeCorrection, "REGION_LONGITUDE", {}).get(
                 _ss.get("in_birth_region", "서울"), 126.98
             )
 
