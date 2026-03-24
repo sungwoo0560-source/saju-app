@@ -32,11 +32,13 @@ def inject_global_css():
 ═══════════════════════════════════ */
 .stApp {
     background: linear-gradient(160deg, #f5f0e8 0%, #ede8d8 50%, #e8e0cc 100%);
-    background-attachment: fixed;
+    background-attachment: scroll; /* iOS Safari: fixed 사용 불가 */
     font-family: 'Noto Serif KR', 'Noto Sans KR', serif;
+    overflow-x: hidden; /* 모바일 가로 스크롤 방지 */
 }
 
-/* 한지 질감 패턴 오버레이 */
+/* 한지 질감 패턴 오버레이 — 모바일에서는 비활성화 */
+@media (min-width: 769px) {
 .stApp::before {
     content: '';
     position: fixed;
@@ -45,6 +47,7 @@ def inject_global_css():
         url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
     pointer-events: none;
     z-index: 0;
+}
 }
 
 /* ═══════════════════════════════════
@@ -232,17 +235,25 @@ h2, h3 {
    모바일 반응형
 ═══════════════════════════════════ */
 @media (max-width: 768px) {
+    /* 컨테이너 가로 넘침 방지 */
+    .main .block-container {
+        padding: 0.5rem 0.4rem !important;
+        overflow-x: hidden !important;
+        max-width: 100vw !important;
+    }
+    body, .stApp, .main {
+        overflow-x: hidden !important;
+    }
     .pillar-box {
-        min-width: 64px !important;
+        min-width: 60px !important;
         padding: 6px 4px !important;
         word-break: keep-all !important;
     }
     .stTabs [data-baseweb="tab"] {
         font-size: 11px !important;
-        padding: 6px 8px !important;
+        padding: 5px 7px !important;
+        min-height: 36px !important;
     }
-    /* [data-testid="column"] 100% 제거 — 사주 기륵 카드 세로 나열 원인 */
-    /* [data-testid="column"] 100% force removed */
     .saju-narrative {
         padding: 12px !important;
         font-size: 14px !important;
@@ -253,6 +264,7 @@ h2, h3 {
         min-height: 44px !important;
         font-size: 13px !important;
         padding: 6px 8px !important;
+        touch-action: manipulation !important; /* 더블탭 줌 방지 */
     }
     #scroll-top-btn {
         bottom: 70px !important;
@@ -260,6 +272,11 @@ h2, h3 {
         width: 44px !important;
         height: 44px !important;
         font-size: 18px !important;
+        touch-action: manipulation !important;
+    }
+    /* 이미지·테이블 가로 넘침 방지 */
+    img, table, iframe {
+        max-width: 100% !important;
     }
 }
 @media (max-width: 480px) {

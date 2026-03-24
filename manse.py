@@ -5119,7 +5119,7 @@ def build_life_analysis(pils, gender):
 
 
 
-@st.cache_data(hash_funcs={list: lambda l: str(l), dict: lambda d: str(sorted(d.items()) if isinstance(d, dict) else d)})
+@st.cache_data
 def generate_engine_highlights(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0):
     """
 
@@ -5420,7 +5420,7 @@ def build_personality_detail_v2(pils, gender, sn, oh_strength):
     return traits[:8]  # 최대 8개 - 너무 많으면 희석됨
 
 
-@st.cache_data(hash_funcs={list: lambda l: str(l)})
+@st.cache_data
 def build_personality_detail(pils, gender="남"):
     """
 
@@ -7518,7 +7518,7 @@ _BIRTH_F2 = {"木": "火", "火": "土", "土": "金", "金": "水", "水": "木
 _CTRL2 = {"木": "土", "火": "金", "土": "水", "金": "木", "水": "火"}
 
 
-@st.cache_data(hash_funcs={list: lambda l: str(l)})
+@st.cache_data
 def detect_event_triggers(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0, target_year=None):
     """
 
@@ -7691,7 +7691,7 @@ def detect_event_triggers(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0, ta
     return triggers
 
 
-@st.cache_data(hash_funcs={list: lambda l: str(l)})
+@st.cache_data
 def calc_luck_score(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0, target_year=None):
     """대운+세운 종합 운세 점수 (0~100)"""
 
@@ -7736,7 +7736,7 @@ def calc_luck_score(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0, target_y
     return max(0, min(100, score))
 
 
-@st.cache_data(hash_funcs={list: lambda l: str(l)})
+@st.cache_data
 def calc_turning_point(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0, target_year=None):
     """
 
@@ -7884,7 +7884,7 @@ def calc_turning_point(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0, targe
     }
 
 
-@st.cache_data(hash_funcs={list: lambda l: str(l)})
+@st.cache_data
 def get_yongshin_multilayer(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0, target_year=None):
     """
 
