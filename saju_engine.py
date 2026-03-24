@@ -1049,7 +1049,7 @@ class SajuPrecisionEngine:
     }
 
     @staticmethod
-    def get_pillars(year, month, day, hour, minute, gender="남", use_yaja_time=True, longitude=127.0):
+    def get_pillars(year, month, day, hour, minute, gender="남", use_yaja_time=True, longitude=126.98):
         """정밀 보정된 사주팔자 계산 (경도 기반 진태양시 반영)"""
 
         corrected_dt = TimeCorrection.get_corrected_time(year, month, day, hour, minute, longitude=longitude)
