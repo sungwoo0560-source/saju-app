@@ -6998,7 +6998,9 @@ def tab_daewoon(pils, birth_year, gender):
         _dw_str = dw["str"]
         _dw_kr = "".join(_GZ_KR.get(c, c) for c in _dw_str)
 
-        tl += f'<div style="background:{bg};color:{tc};{bdr}border-radius:10px;padding:8px 12px;text-align:center;min-width:68px"><div style="font-size:10px;opacity:.8">{dw["시작나이"]}세</div><div style="font-size:15px;font-weight:800">{_dw_str}</div><div style="font-size:10px;opacity:.75">({_dw_kr})</div><div style="font-size:10px">{d_ss}</div>{"<div style=font-size:10px;color:#ffe;font-weight:700>🌟용신</div>" if is_yong else ""}{"<div style=font-size:10px;color:#ff6b00;font-weight:800>◀현재</div>" if is_cur else ""}</div>'
+        _extra_m = dw.get("시작나이_월", 0)
+        _age_label = f'{dw["시작나이"]}세{"·" + str(_extra_m) + "개월" if _extra_m else ""}'
+        tl += f'<div style="background:{bg};color:{tc};{bdr}border-radius:10px;padding:8px 12px;text-align:center;min-width:68px"><div style="font-size:10px;opacity:.8">{_age_label}</div><div style="font-size:15px;font-weight:800">{_dw_str}</div><div style="font-size:10px;opacity:.75">({_dw_kr})</div><div style="font-size:10px">{d_ss}</div>{"<div style=font-size:10px;color:#ffe;font-weight:700>🌟용신</div>" if is_yong else ""}{"<div style=font-size:10px;color:#ff6b00;font-weight:800>◀현재</div>" if is_cur else ""}</div>'
 
     tl += "</div>"
 
@@ -8450,6 +8452,7 @@ def save_saju_state():
         "in_marriage": _ss.get("in_marriage", "미혼"),
         "in_occupation": _ss.get("in_occupation", "선택 안 함"),
         "in_premium_correction": _ss.get("in_premium_correction", True),
+        "in_region": _ss.get("in_region", "서울"),
         # -- 계산 결과 --
         "saju_pils": _ss.get("saju_pils"),
         "birth_year": _ss.get("birth_year"),
@@ -8626,6 +8629,7 @@ def load_from_favorite(idx: int):
         "in_marriage",
         "in_occupation",
         "in_premium_correction",
+        "in_region",
         "saju_pils",
         "birth_year",
         "birth_month",
@@ -21086,12 +21090,21 @@ def main():
                 key="in_occupation",
             )
 
-        with st.expander("⚙️ 고급 설정 (야자시)", expanded=False):
+        with st.expander("⚙️ 고급 설정 (야자시 · 출생지)", expanded=False):
             st.checkbox(
                 "🌙 야자시 적용",
                 value=True,
                 key="in_use_yaja",
                 help="23:00~00:00 사이 출생 시 다음날의 일진을 적용합니다.",
+            )
+            st.selectbox(
+                "📍 출생지 (진태양시 보정)",
+                options=["서울", "부산", "인천", "대구", "대전", "광주", "울산", "세종",
+                         "수원", "고양", "용인", "부천", "창원", "전주", "청주", "천안",
+                         "포항", "원주", "춘천", "강릉", "제주", "목포", "여수", "진주",
+                         "구미", "경주", "평택"],
+                key="in_region",
+                help="출생 지역 경도에 따라 진태양시(真太陽時)를 자동 보정합니다. 서울=-32분, 부산=-24분, 제주=-34분 등.",
             )
 
         submitted = st.button("🔮 천명을 풀이하다", use_container_width=True, type="primary")
@@ -21154,8 +21167,12 @@ def main():
 
             # * 핵심 필라(Pillars) 계산 및 세션 저장 (버그 수정)
 
-            if _ss.get("in_premium_correction", False):
-                # 프리미엄 정밀 보정 엔진 사용
+            # 출생지 경도 조회 (진태양시 보정용)
+            _region = _ss.get("in_region", "서울")
+            _longitude = TimeCorrection.REGION_LONGITUDE.get(_region, 127.0)
+
+            if _ss.get("in_premium_correction", True):
+                # 정밀 보정 엔진 사용 (진태양시 + 지방시 반영)
 
                 pils = SajuPrecisionEngine.get_pillars(
                     b_year,
@@ -21165,6 +21182,7 @@ def main():
                     _ss.get("birth_minute", _ss.get("in_birth_minute", 0)),
                     _ss["in_gender"],
                     use_yaja_time=_ss.get("in_use_yaja", True),
+                    longitude=_longitude,
                 )
 
             else:

@@ -947,9 +947,20 @@ class TimeCorrection:
         (datetime(1988, 5, 8), datetime(1988, 10, 9)),
     ]
 
+    # ─ 지역별 경도 테이블 (동경도, KST 기준 135° 대비 오프셋 계산용) ─
+    REGION_LONGITUDE = {
+        "서울": 126.98, "부산": 129.04, "인천": 126.71, "대구": 128.60,
+        "대전": 127.38, "광주": 126.85, "울산": 129.31, "세종": 127.29,
+        "수원": 127.01, "고양": 126.83, "용인": 127.20, "부천": 126.78,
+        "창원": 128.68, "전주": 127.15, "청주": 127.47, "천안": 127.15,
+        "포항": 129.36, "원주": 127.94, "춘천": 127.74, "강릉": 128.88,
+        "제주": 126.53, "목포": 126.39, "여수": 127.66, "진주": 128.11,
+        "구미": 128.34, "경주": 129.22, "평택": 127.11,
+    }
+
     @staticmethod
-    def get_corrected_time(year, month, day, hour, minute):
-        """입력된 시간을 '진태양시'로 보정"""
+    def get_corrected_time(year, month, day, hour, minute, longitude=127.0):
+        """입력된 시간을 '진태양시'로 보정 (경도 반영)"""
 
         dt = datetime(year, month, day, hour, minute)
 
@@ -971,21 +982,15 @@ class TimeCorrection:
         # 1954.03.21 ~ 1961.08.09 기간은 GMT+8.5 (135도 기준 -30분)
 
         if datetime(1954, 3, 21) <= dt <= datetime(1961, 8, 9, 23, 59):
-            # 이 시기 표준시는 이미 127.5도 기준이므로,
-
-            # 135도 기준 만세력 계산 시에는 30분을 더해주거나 빼주는 처리가 필요할 수 있으나
-
             # 보통 사주에서는 135도(GMT+9)를 기준으로 역산함.
 
             pass
 
-        # 3. 경도 보정 (서울 기준 127.0도 vs 표준 135.0도)
+        # 3. 경도 보정: KST 기준 135°, 1° = 4분
+        # longitude < 135 → 음수 오프셋 (지역 태양이 KST보다 늦게 뜸)
 
-        # 1도 = 4분 차이 -> 8도 차이 = 32분 차이
-
-        # 한국은 동경 135도보다 서쪽에 있으므로 실제 태양은 32분 늦게 뜸 -> 32분을 빼야 진태양시
-
-        dt -= timedelta(minutes=32)
+        lon_offset_min = round((longitude - 135.0) * 4.0)
+        dt += timedelta(minutes=lon_offset_min)
 
         return dt
 
@@ -1009,10 +1014,10 @@ class SajuPrecisionEngine:
     }
 
     @staticmethod
-    def get_pillars(year, month, day, hour, minute, gender="남", use_yaja_time=True):
-        """정밀 보정된 사주팔자 계산"""
+    def get_pillars(year, month, day, hour, minute, gender="남", use_yaja_time=True, longitude=127.0):
+        """정밀 보정된 사주팔자 계산 (경도 기반 진태양시 반영)"""
 
-        corrected_dt = TimeCorrection.get_corrected_time(year, month, day, hour, minute)
+        corrected_dt = TimeCorrection.get_corrected_time(year, month, day, hour, minute, longitude=longitude)
 
         cy, cm, cd = corrected_dt.year, corrected_dt.month, corrected_dt.day
 
@@ -1428,14 +1433,15 @@ class SajuCoreEngine:
         try:
             days_to_term = SajuCoreEngine._get_days_to_term(birth_year, birth_month, birth_day, birth_hour, birth_minute, direction)
 
-            # 3일 = 1년, 1일 = 4개월 자투리.
+            # 3일 = 1년, 1일 = 4개월 → 총 개월수로 정밀 계산
 
-            # ✅ 정밀 대운수: 반올림 적용 (나머지가 0.5년(1.5일) 이상이면 올림)
-
-            start_age = int(round(days_to_term / 3.0))
+            _total_months = max(1, round(days_to_term * 4.0))
+            start_age = _total_months // 12
+            _start_extra_month = _total_months % 12
 
             if start_age == 0:
                 start_age = 1
+                _start_extra_month = 0
 
             daewoon_list = []
 
@@ -1456,6 +1462,9 @@ class SajuCoreEngine:
 
                 year_start = birth_year + age_start
 
+                # 시작나이_월: 첫 대운만 월 단위 잔여, 이후는 정확히 10년 간격
+                extra_m = _start_extra_month if i == 0 else 0
+
                 daewoon_list.append(
                     {
                         "순번": i + 1,
@@ -1463,6 +1472,7 @@ class SajuCoreEngine:
                         "jj": JJ[d_jj_idx],
                         "str": CG[d_cg_idx] + JJ[d_jj_idx],
                         "시작나이": age_start,
+                        "시작나이_월": extra_m,
                         "시작연도": year_start,
                         "종료연도": year_start + 9,
                     }
@@ -1566,121 +1576,157 @@ def calc_12unsung(ilgan, pils):
 @st.cache_data
 def calc_ohaeng_strength(ilgan, pils):
     """
-
-    오행 세력 점수화 v2 (정밀 엔진)
-
-    월령득령(25pt) + 천간투출(6~10pt) + 지지(8~15pt) + 지장간(4~8pt) + 통근보너스(5pt)
-
+    오행 세력 점수화 v3 (정밀 엔진)
+    [기존] 월령득령(25pt) + 천간(10pt) + 지지(15pt) + 지장간(5pt) + 12운성 보정 + 통근(5pt)
+    [추가] 공망 50% 감산 / 삼합·방합·육합·천간합 합화 보너스 / 월령 투출(+15) / 충 감산
     -> 합산 후 100% 정규화
-
     """
-
     power = {"木": 0.0, "火": 0.0, "土": 0.0, "金": 0.0, "水": 0.0}
 
-    # - 월령 득령 (월지 계절기운, 최대 25점) -
-
-    _WOLLYEONG = {
-        "寅": {"木": 25, "火": 0, "土": 3, "金": 0, "水": 0},
-        "卯": {"木": 25, "火": 0, "土": 3, "金": 0, "水": 0},
-        "辰": {"木": 8, "火": 0, "土": 20, "金": 0, "水": 3},
-        "巳": {"木": 0, "火": 25, "土": 3, "金": 0, "水": 0},
-        "午": {"木": 0, "火": 25, "土": 3, "金": 0, "水": 0},
-        "未": {"木": 0, "火": 8, "土": 20, "金": 0, "水": 0},
-        "申": {"木": 0, "火": 0, "土": 3, "金": 25, "水": 0},
-        "酉": {"木": 0, "火": 0, "土": 3, "金": 25, "水": 0},
-        "戌": {"木": 0, "火": 0, "土": 20, "金": 8, "水": 0},
-        "亥": {"木": 3, "火": 0, "土": 0, "金": 0, "水": 25},
-        "子": {"木": 3, "火": 0, "土": 0, "金": 0, "水": 25},
-        "丑": {"木": 0, "火": 0, "土": 20, "金": 3, "水": 8},
+    # ── ① 공망 계산 ──────────────────────────────────────────────
+    _GONGMANG_T = {
+        "甲": ("戌", "亥"), "乙": ("戌", "亥"), "丙": ("申", "酉"), "丁": ("申", "酉"),
+        "戊": ("午", "未"), "己": ("午", "未"), "庚": ("辰", "巳"), "辛": ("辰", "巳"),
+        "壬": ("寅", "卯"), "癸": ("寅", "卯"),
     }
+    nyon_cg = pils[3]["cg"] if len(pils) > 3 else ""
+    gongmang_set = set(_GONGMANG_T.get(nyon_cg, ()))
 
-    wol_jj = pils[2]["jj"]  # 월지 (Index 2)
+    # ── ② 합화/충 데이터 ─────────────────────────────────────────
+    _SAM_HAP = {
+        frozenset(["申", "子", "辰"]): "水",
+        frozenset(["寅", "午", "戌"]): "火",
+        frozenset(["巳", "酉", "丑"]): "金",
+        frozenset(["亥", "卯", "未"]): "木",
+    }
+    _BANG_HAP = {
+        frozenset(["寅", "卯", "辰"]): "木",
+        frozenset(["巳", "午", "未"]): "火",
+        frozenset(["申", "酉", "戌"]): "金",
+        frozenset(["亥", "子", "丑"]): "水",
+    }
+    _YUK_HAP = {
+        frozenset(["子", "丑"]): "土", frozenset(["寅", "亥"]): "木",
+        frozenset(["卯", "戌"]): "火", frozenset(["辰", "酉"]): "金",
+        frozenset(["巳", "申"]): "水", frozenset(["午", "未"]): "火",
+    }
+    _TG_HAP = {
+        frozenset(["甲", "己"]): "土", frozenset(["乙", "庚"]): "金",
+        frozenset(["丙", "辛"]): "水", frozenset(["丁", "壬"]): "木",
+        frozenset(["戊", "癸"]): "火",
+    }
+    _JJ_CHUNG = [
+        (frozenset(["子", "午"]), "水", "火"), (frozenset(["丑", "未"]), "土", "土"),
+        (frozenset(["寅", "申"]), "木", "金"), (frozenset(["卯", "酉"]), "木", "金"),
+        (frozenset(["辰", "戌"]), "土", "土"), (frozenset(["巳", "亥"]), "火", "水"),
+    ]
+    _TG_CHUNG = [
+        (frozenset(["甲", "庚"]), "木", "金"), (frozenset(["乙", "辛"]), "木", "金"),
+        (frozenset(["丙", "壬"]), "火", "水"), (frozenset(["丁", "癸"]), "火", "水"),
+    ]
 
+    jjs = set(p["jj"] for p in pils)
+    cgs = set(p["cg"] for p in pils)
+
+    # ── ③ 합화 보너스 ────────────────────────────────────────────
+    for combo, oh in _SAM_HAP.items():
+        matched = len(combo & jjs)
+        if matched == 3:
+            power[oh] += 15.0   # 삼합 완성
+        elif matched == 2:
+            power[oh] += 7.0    # 반합
+
+    for combo, oh in _BANG_HAP.items():
+        if combo.issubset(jjs):
+            power[oh] += 12.0   # 방합
+
+    for combo, oh in _YUK_HAP.items():
+        if combo.issubset(jjs):
+            power[oh] += 5.0    # 육합
+
+    for combo, oh in _TG_HAP.items():
+        if combo.issubset(cgs):
+            power[oh] += 8.0    # 천간합화
+
+    # ── ④ 충 감산 ────────────────────────────────────────────────
+    for combo, oh1, oh2 in _JJ_CHUNG:
+        if combo.issubset(jjs):
+            power[oh1] = max(0.0, power[oh1] - 5.0)
+            power[oh2] = max(0.0, power[oh2] - 5.0)
+
+    for combo, oh1, oh2 in _TG_CHUNG:
+        if combo.issubset(cgs):
+            power[oh1] = max(0.0, power[oh1] - 4.0)
+            power[oh2] = max(0.0, power[oh2] - 4.0)
+
+    # ── ⑤ 월령 득령 (최대 25pt) ──────────────────────────────────
+    wol_jj = pils[2]["jj"]
     wol_oh = OH.get(wol_jj, "")
-
     ilgan_oh = OH.get(ilgan, "")
 
     if wol_oh == ilgan_oh:
-        power[wol_oh] += 25.0  # 득령 보너스
+        power[wol_oh] += 25.0
 
-    # ② 전체 원국 점수 합산
+    # ── ⑥ 월령 투출 가중치 (+15pt) ───────────────────────────────
+    # 월지 정기(장간 마지막)가 천간에 투출되면 해당 오행 대폭 강화
+    _wol_jg = JIJANGGAN.get(wol_jj, [])
+    if _wol_jg:
+        _wol_jeonggi = _wol_jg[-1]
+        _wol_jeonggi_oh = OH.get(_wol_jeonggi, "")
+        if _wol_jeonggi and _wol_jeonggi in cgs and _wol_jeonggi_oh:
+            power[_wol_jeonggi_oh] += 15.0
 
-    # 천간: 10점, 지지: 15점, 지장간: 5점 (기본 가중치)
-
+    # ── ⑦ 전체 원국 점수 (공망 지지는 50% 감산) ─────────────────
     for i, p in enumerate(pils):
         cg_oh = OH.get(p["cg"], "")
-
-        jj_oh = OH.get(p["jj"], "")
-
-        # 천간 기운
+        jj = p["jj"]
+        jj_oh = OH.get(jj, "")
+        gong_mult = 0.5 if jj in gongmang_set else 1.0
 
         if cg_oh in power:
             power[cg_oh] += 10.0
 
-        # 지지 기운
-
         if jj_oh in power:
-            power[jj_oh] += 15.0
+            power[jj_oh] += 15.0 * gong_mult
 
-        # 지장간 가중치 — JIJANGGAN_RATIO 비율 반영 (여기/중기/정기 분배)
-        jijang_ratio = JIJANGGAN_RATIO.get(p["jj"], [])
+        # 지장간 (JIJANGGAN_RATIO 비율 반영, 공망 동일 감산)
+        jijang_ratio = JIJANGGAN_RATIO.get(jj, [])
         if jijang_ratio:
             _total_r = sum(r for _, r in jijang_ratio) or 1
             for _jg_cg, _jg_r in jijang_ratio:
                 _jg_oh = OH.get(_jg_cg, "")
                 if _jg_oh in power:
-                    power[_jg_oh] += 5.0 * (_jg_r / _total_r)
+                    power[_jg_oh] += 5.0 * (_jg_r / _total_r) * gong_mult
         else:
-            # 폴백: 기존 방식 (정기만)
-            jijang = JIJANGGAN.get(p["jj"], [])
-            if jijang:
-                jj_main = OH.get(jijang[-1], "")
+            _jijang = JIJANGGAN.get(jj, [])
+            if _jijang:
+                jj_main = OH.get(_jijang[-1], "")
                 if jj_main in power:
-                    power[jj_main] += 5.0
+                    power[jj_main] += 5.0 * gong_mult
 
-    # ③ 월령(월지) 추가 가중치 (index 2)
-
+    # ── ⑧ 월령 지지 추가 가중치 ─────────────────────────────────
     if wol_oh in power:
-        power[wol_oh] += 10.0  # 월령의 지지력 추가 반영
+        power[wol_oh] += 10.0
 
-    # ④ 일간(index 1) 통근 보너스
-
+    # ── ⑨ 일지 통근 보너스 ───────────────────────────────────────
     day_jj = pils[1]["jj"]
-
     if OH.get(day_jj) == ilgan_oh:
         power[ilgan_oh] += 5.0
 
-    # - 12운성 보정 -
-
+    # ── ⑩ 12운성 보정 ────────────────────────────────────────────
     _UNSUNG_MOD = {
-        "장생": 1.2,
-        "목욕": 0.8,
-        "관대": 1.1,
-        "건록": 1.4,
-        "제왕": 1.5,
-        "쇠": 0.9,
-        "병": 0.7,
-        "사": 0.5,
-        "묘": 0.4,
-        "절": 0.3,
-        "태": 0.5,
-        "양": 0.7,
+        "장생": 1.2, "목욕": 0.8, "관대": 1.1, "건록": 1.4, "제왕": 1.5,
+        "쇠": 0.9, "병": 0.7, "사": 0.5, "묘": 0.4, "절": 0.3, "태": 0.5, "양": 0.7,
     }
-
     ilgan_oh = OH.get(ilgan, "")
-
     _JJ_W2 = [8, 15, 12, 10]
-
     for i, p in enumerate(pils):
         state = UNSUNG_TABLE.get(ilgan, {}).get(p["jj"], "")
-
         mod = _UNSUNG_MOD.get(state, 1.0)
-
         if mod != 1.0 and ilgan_oh:
             power[ilgan_oh] = max(0, power[ilgan_oh] + _JJ_W2[i] * (mod - 1.0) * 0.4)
 
-    # - 통근 보너스 -
-
+    # ── ⑪ 통근 보너스 ────────────────────────────────────────────
     _TONGGUEN = {
         "木": {"寅", "卯", "辰", "亥", "未"},
         "火": {"巳", "午", "未", "寅", "戌"},
@@ -1688,20 +1734,15 @@ def calc_ohaeng_strength(ilgan, pils):
         "金": {"申", "酉", "戌", "丑"},
         "水": {"亥", "子", "丑", "申", "辰"},
     }
-
     all_jjs = {p["jj"] for p in pils}
-
     for oh, jj_set in _TONGGUEN.items():
         if all_jjs & jj_set:
             power[oh] += 5.0
 
-    # - 정규화 (합=100) -
-
+    # ── 정규화 (합=100) ───────────────────────────────────────────
     total = sum(power.values())
-
     if total <= 0:
         return {"木": 20, "火": 20, "土": 20, "金": 20, "水": 20}
-
     return {k: round(v / total * 100, 1) for k, v in power.items()}
 
 
