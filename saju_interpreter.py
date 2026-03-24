@@ -6358,7 +6358,7 @@ def get_yongshin(pils):
     # ── 1차 억부, 2차 조후 우선순위 로직 ──────────────────
     # 극열(巳午未) / 극한(亥子丑) 월은 조후가 억부보다 우선
     jokhu_oh = [OH.get(c, "") for c in jokhu.get("need", [])]
-    jokhu_oh = [o for o in jokhu_oh if o]
+    jokhu_oh = list(dict.fromkeys(o for o in jokhu_oh if o))  # 중복 제거
     is_extreme = jokhu.get("hot", False) or wol_jj in ["亥", "子", "丑"]
 
     if is_extreme and jokhu_oh:
@@ -6374,7 +6374,7 @@ def get_yongshin(pils):
     if tongkwan_yong and tongkwan_yong not in priority_yong:
         priority_yong.append(tongkwan_yong)
 
-    all_yong = [o for o in priority_yong if o]
+    all_yong = list(dict.fromkeys(o for o in priority_yong if o))  # 중복 제거
 
     # 병약용신(病藥用神): 가장 강한 오행이 병(病)이면 그것을 제어하는 오행이 약(藥)
     byeong_yong = None
