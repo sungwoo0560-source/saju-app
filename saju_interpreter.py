@@ -6132,10 +6132,50 @@ class LocalSajuNarrator:
             from saju_sinsal import get_12sinsal
             _sinsal = get_12sinsal(pils)
             _bad_sinsal = [s for s in _sinsal if s.get("type") == "흉" or "조심" in s.get("desc", "")]
+            _SINSAL_PRESCRIPTION = {
+                "겁살":   "투자·보증·동업 절대 금지. 현금 비중 높이기.",
+                "도화살": "기혼이면 이성 경계. 미혼이면 적극적으로.",
+                "역마살": "이동·출장 활용. 충동적 이직 신중히.",
+                "백호대살": "안전 점검. 정기 건강검진 필수.",
+                "귀문관살": "명상·수면 관리. 신경과민 주의.",
+                "화개살": "고독을 두려워 말고 내공 쌓기.",
+                "양인살": "충동 조절. 강한 에너지 건설적으로 사용.",
+                "상문살": "조상 제사. 소금 정화. 장례식장 주의.",
+                "조객살": "밝은 옷 착용. 긍정적 환경 만들기.",
+                "삼재수": "삼재부적. 빨간 팥죽. 큰 결정 보류.",
+                "관재수": "계약서 확인. 보증 금지. 말조심.",
+            }
             if _bad_sinsal:
-                lines.append("\n### ⚠️ 오늘 활성 신살 경고")
-                for _s in _bad_sinsal[:2]:
-                    lines.append(f"- **{_s.get('name', '')}**: {_s.get('desc', '')[:60]}…")
+                _sinsal_items = []
+                for _s in _bad_sinsal:
+                    _sname = _s.get("이름", _s.get("name", ""))
+                    _sdesc = _s.get("desc", "")
+                    _spresc = _SINSAL_PRESCRIPTION.get(_sname, _s.get("caution", "주의하여 행동하십시오."))
+                    _sinsal_items.append(
+                        f"<div style='background:#fff5f5;border-left:4px solid #e74c3c;"
+                        f"border-radius:8px;padding:12px 16px;margin:6px 0;'>"
+                        f"<div style='font-size:13px;font-weight:900;color:#c0392b;margin-bottom:6px'>"
+                        f"⚡ {_sname}</div>"
+                        f"<div style='font-size:13px;color:#333;line-height:1.8;margin-bottom:6px'>{_sdesc}</div>"
+                        f"<div style='font-size:12px;color:#7d1c00;background:#fdecea;"
+                        f"padding:6px 10px;border-radius:6px;'>"
+                        f"💊 처방: {_spresc}</div></div>"
+                    )
+                lines.append(
+                    "\n<div style='background:#2d1515;border:1.5px solid #e74c3c;"
+                    "border-radius:14px;padding:16px 18px;margin:12px 0;'>"
+                    "<div style='font-size:14px;font-weight:900;color:#ff6b6b;"
+                    "letter-spacing:1px;margin-bottom:10px;'>🚨 오늘 활성 신살 경고</div>"
+                    + "".join(_sinsal_items)
+                    + "</div>"
+                )
+            else:
+                lines.append(
+                    "\n<div style='background:#f0fff4;border:1.5px solid #27ae60;"
+                    "border-radius:12px;padding:14px 18px;margin:12px 0;"
+                    "font-size:13px;color:#1a5c2a;font-weight:700;'>"
+                    "✅ 오늘 특별히 발동된 신살이 없습니다. 평온한 기운입니다.</div>"
+                )
         except Exception:
             _saju_log.warning("[daily 오류] %s", sys.exc_info()[1])
 
