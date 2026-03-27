@@ -19382,13 +19382,22 @@ def menu_gaewoon(pils, name, birth_year, gender):
             )
             st.markdown(_body_s1, unsafe_allow_html=True)
         if _gis_gw:
+            _OH_KR_NAME = {"木":"木(나무)","火":"火(불)","土":"土(흙)","金":"金(쇠)","水":"水(물)"}
+            _GI_ICON    = {"木":"🟢","火":"🔴","土":"🟡","金":"⚪","水":"🔵"}
             _gi_body = "<b style='color:#c0392b;'>⚠ 기신 오행 — 피해야 할 것</b><br>"
             for _goh_s1 in _gis_gw:
-                _grx_s1 = _OH_RX_GW.get(_goh_s1, {})
-                _gi_body += _row(
-                    f"{_goh_s1} 기신",
-                    f"{_grx_s1.get('색상','')} 색상 / {_grx_s1.get('방위','')} 방위 / {_grx_s1.get('음식','')} 음식 자제",
-                    False,
+                if _goh_s1 not in _OH_RX_GW:
+                    continue
+                _grx_s1  = _OH_RX_GW[_goh_s1]
+                _icon_s1 = _GI_ICON.get(_goh_s1, "🔴")
+                _nm_s1   = _OH_KR_NAME.get(_goh_s1, _goh_s1)
+                _col_s1  = _grx_s1.get("색상","").split("·")[0]
+                _dir_s1  = _grx_s1.get("방위","")
+                _food_s1 = _grx_s1.get("음식","").split("·")[0]
+                _gi_body += (
+                    f'<div style="padding:4px 0 4px 10px;color:#c0392b;">'
+                    f'{_icon_s1} <b>{_nm_s1} 기운 자제</b>: '
+                    f'{_col_s1} 색 옷·지갑, {_dir_s1} 방향, {_food_s1} 음식</div>'
                 )
             _card("기신 주의사항", _gi_body)
 
@@ -19548,11 +19557,28 @@ def menu_gaewoon(pils, name, birth_year, gender):
             _card(f"{name}님 이사 처방전", _dir8_html)
 
     # ── 섹션9: 직업·사업 처방 ─────────────────────────────────────
+    _BAD_JOB_GW = {
+        "木": "교육·의료·환경·식물 관련",
+        "火": "연예·방송·요식·에너지·디자인",
+        "土": "부동산·건설·농업·유통·식품",
+        "金": "금융·법률·군경·의료·기계",
+        "水": "무역·관광·철학·IT·유통",
+    }
     with st.expander("💼 제9장 — 직업·사업 오행 처방 (천직)", expanded=True):
         if _yong_gw:
             _y1_s9 = _yong_gw[0]
             _job_list_s9 = _JOB_LIST_GW.get(_y1_s9, [])
             _biz_s9 = _BIZ_GW.get(_y1_s9,"")
+            _OH_KR_S9 = {"木":"나무(木)","火":"불(火)","土":"흙(土)","金":"쇠(金)","水":"물(水)"}
+            # 맥락 소개
+            st.markdown(
+                f'<div style="background:#f0f9f4;border-left:4px solid #27ae60;'
+                f'border-radius:0 10px 10px 0;padding:10px 14px;margin-bottom:10px;">'
+                f'<b style="color:#1e8449;">{name}님은 용신 {_OH_KR_S9.get(_y1_s9,_y1_s9)} 기운이 강한 사람입니다.</b><br>'
+                f'<span style="color:#2e7d52;">이 오행과 맞는 직업에서 재능이 꽃피고 재물이 자연스럽게 따라옵니다.</span>'
+                f'</div>',
+                unsafe_allow_html=True,
+            )
             _job_html = (
                 f'<b>용신 {_y1_s9} 천직 TOP 20</b><br>'
                 + _bullet(_job_list_s9[:10])
@@ -19561,12 +19587,24 @@ def menu_gaewoon(pils, name, birth_year, gender):
                 + _row("직장 방위", f"현 거주지 기준 {_DIR_MAP_GW.get(_y1_s9,'동쪽')} 방향")
             )
             _card("천직 리스트", _job_html)
-            if _occupation_gw and _occupation_gw != "선택 안 함":
-                _match_s9 = any(_occupation_gw in j for j in _job_list_s9)
+            # 현재 직업 판단
+            _occ_s9 = st.session_state.get("in_occupation", "") or _occupation_gw or ""
+            if _occ_s9 and _occ_s9 != "선택 안 함":
+                _match_s9 = any(_occ_s9 in j for j in _job_list_s9)
                 if _match_s9:
-                    st.success(f"현재 직업 [{_occupation_gw}] — 용신 오행 천직과 잘 맞습니다! 지금 하는 일이 천명과 일치합니다.")
+                    st.success(f"✅ 현재 직업 [{_occ_s9}] — 용신과 잘 맞습니다! 지금 하는 일이 천명과 일치합니다.")
                 else:
-                    st.warning(f"현재 직업 [{_occupation_gw}] — 용신 직종으로 전환하거나 부업으로 용신 분야를 병행하면 운이 올라갑니다.")
+                    st.warning(f"⚠️ 현재 직업 [{_occ_s9}] — 용신 직종으로 전환하거나 부업으로 병행하면 운이 올라갑니다.")
+            # 피해야 할 직종 (기신 오행)
+            if _gis_gw:
+                _bad_job_html = "<b style='color:#c0392b;'>⚠ 피해야 할 직종 (기신 오행)</b><br>"
+                for _goh_s9 in _gis_gw:
+                    if _goh_s9 in _BAD_JOB_GW:
+                        _bad_job_html += (
+                            f'<div style="padding:3px 0 3px 10px;color:#c0392b;">'
+                            f'❌ <b>{_goh_s9} 기신</b>: {_BAD_JOB_GW[_goh_s9]} 분야 — 기운 역류로 소진됩니다</div>'
+                        )
+                _card("피해야 할 직종", _bad_job_html)
 
     # ── 섹션10: 총체적 처방 TOP5 ─────────────────────────────────
     with st.expander("🔮 제10장 — 만신의 총체적 처방전 TOP5", expanded=True):
