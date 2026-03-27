@@ -19767,6 +19767,263 @@ def menu_gaewoon(pils, name, birth_year, gender):
         unsafe_allow_html=True,
     )
 
+    # ──────────────────────────────────────────────────────────────
+    # 섹션 12: 홍수맥 분석
+    # ──────────────────────────────────────────────────────────────
+    st.markdown(
+        '<div class="gold-section">🌊 ⑫ 홍수맥(洪水脈) 분석 — 10년에 한 번 오는 기회의 물결</div>',
+        unsafe_allow_html=True,
+    )
+    try:
+        # 천간·지지 → 오행 매핑
+        _HSM_CG_OH = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
+                      "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
+        _HSM_JJ_OH = {"子":"水","丑":"土","寅":"木","卯":"木","辰":"土",
+                      "巳":"火","午":"火","未":"土","申":"金","酉":"金",
+                      "戌":"土","亥":"水"}
+        _HSM_SS_YON = {"食神","傷官","偏財","正財","偏官","正官","偏印","正印","比肩"}
+        _HSM_SS_GIL = {"食神","傷官","偏財","正財","偏印","正印","比肩"}
+        _HSM_SS_GI  = {"偏官","劫財"}
+
+        # 현재 대운 오행 판별
+        _cur_dw_hsm = None
+        try:
+            _bm_hsm  = max(1, min(12, int(st.session_state.get("birth_month",  1) or 1)))
+            _bd_hsm  = max(1, min(31, int(st.session_state.get("birth_day",    1) or 1)))
+            _bh_hsm  = max(0, min(23, int(st.session_state.get("birth_hour",  12) or 12)))
+            _bmi_hsm = max(0, min(59, int(st.session_state.get("birth_minute", 0) or 0)))
+            _dw_list_hsm = SajuCoreEngine.get_daewoon(
+                pils, birth_year, _bm_hsm, _bd_hsm, _bh_hsm, _bmi_hsm, gender
+            )
+            _cur_yr_hsm = datetime.now().year
+            _cur_dw_hsm = next(
+                (d for d in _dw_list_hsm
+                 if d["시작연도"] <= _cur_yr_hsm <= d["종료연도"]),
+                None
+            )
+        except Exception:
+            pass
+
+        # 대운 오행 → 용신/기신 판별
+        _dw_oh_hsm = ""
+        _dw_is_yong = False
+        _dw_is_gi   = False
+        if _cur_dw_hsm:
+            _oh_cg_dw = _HSM_CG_OH.get(_cur_dw_hsm.get("cg",""), "")
+            _oh_jj_dw = _HSM_JJ_OH.get(_cur_dw_hsm.get("jj",""), "")
+            _dw_oh_hsm = _oh_cg_dw or _oh_jj_dw
+            _dw_is_yong = bool(_oh_cg_dw and _oh_cg_dw in _yong_gw) or \
+                          bool(_oh_jj_dw and _oh_jj_dw in _yong_gw)
+            _dw_is_gi   = bool(_oh_cg_dw and _oh_cg_dw in _gis_gw) or \
+                          bool(_oh_jj_dw and _oh_jj_dw in _gis_gw)
+
+        # 세운 오행 → 용신/기신 판별
+        _sw_cg_hsm = _sw_gw.get("cg","")
+        _sw_jj_hsm = _sw_gw.get("jj","")
+        _oh_cg_sw  = _HSM_CG_OH.get(_sw_cg_hsm, "")
+        _oh_jj_sw  = _HSM_JJ_OH.get(_sw_jj_hsm, "")
+        _sw_is_yong = bool(_oh_cg_sw and _oh_cg_sw in _yong_gw) or \
+                      bool(_oh_jj_sw and _oh_jj_sw in _yong_gw)
+        _sw_is_gi   = bool(_oh_cg_sw and _oh_cg_sw in _gis_gw) or \
+                      bool(_oh_jj_sw and _oh_jj_sw in _gis_gw)
+        # 세운 십성 기반 길/흉 판별 (용신 세운이 아닌 경우)
+        _sw_ss_clean = _sw_ss_gw.replace("(월덕)","").replace("(천덕)","").strip()
+        _sw_is_gil   = _sw_ss_clean in _HSM_SS_GIL
+        _sw_is_gi_ss = _sw_ss_clean in _HSM_SS_GI
+
+        # 홍수맥 등급 판정
+        if _dw_is_yong and _sw_is_yong:
+            _hsm_grade = "최강"
+        elif _dw_is_yong and (_sw_is_yong or _sw_is_gil):
+            _hsm_grade = "강함"
+        elif _sw_is_yong and not _dw_is_gi:
+            _hsm_grade = "보통"
+        elif _dw_is_gi and _sw_is_yong:
+            _hsm_grade = "준비기"
+        else:
+            _hsm_grade = "수성기"
+
+        _HSM_MSG = {
+            "최강":  ("🌊 지금이 홍수맥입니다! 10년에 한 번 오는 기회입니다!", "#1a5276", "#5dade2"),
+            "강함":  ("🌊 홍수맥이 흐르고 있습니다. 적극적으로 움직이십시오!", "#154360", "#3498db"),
+            "보통":  ("💧 올해만큼은 기회의 물줄기가 흐릅니다.", "#1a3a4a", "#76d7c4"),
+            "준비기":("🌱 홍수맥을 준비하는 시기입니다. 내실을 다지십시오.", "#1e4d2b", "#52be80"),
+            "수성기":("🛡️ 홍수맥이 막힌 시기입니다. 지키는 것이 최선입니다.", "#4a1942", "#af7ac5"),
+        }
+        _hsm_text, _hsm_bg, _hsm_accent = _HSM_MSG[_hsm_grade]
+
+        # 대운·세운 상태 설명
+        _dw_label = ""
+        if _cur_dw_hsm:
+            _dw_str  = _cur_dw_hsm.get("str", "")
+            _dw_kind = "용신 대운 ✅" if _dw_is_yong else ("기신 대운 ⚠️" if _dw_is_gi else "중성 대운")
+            _dw_label = f"{_dw_str} 대운 ({_dw_kind})"
+        _sw_str_label = f"{_sw_cg_hsm}{_sw_jj_hsm} 세운"
+        _sw_kind = "용신 세운 ✅" if _sw_is_yong else ("기신 세운 ⚠️" if _sw_is_gi else "중성 세운")
+
+        st.markdown(
+            f"""<div style="background:linear-gradient(135deg,{_hsm_bg},{_hsm_bg}cc);
+            border:3px solid {_hsm_accent};border-radius:20px;
+            padding:22px 24px;margin-bottom:18px;text-align:center;">
+<div style="font-size:22px;font-weight:900;color:{_hsm_accent};
+  text-shadow:0 0 20px {_hsm_accent}88;margin-bottom:10px;">
+  {_hsm_text}
+</div>
+<div style="font-size:13px;color:#cce0f0;margin-bottom:8px;">
+  등급: <b style="color:{_hsm_accent};font-size:16px;">{_hsm_grade}</b>
+</div>
+<div style="font-size:12px;color:#a0b8cc;display:flex;justify-content:center;gap:24px;flex-wrap:wrap;">
+  <span>📌 {_dw_label or '대운 미산출'}</span>
+  <span>📌 {_sw_str_label} ({_sw_kind})</span>
+</div>
+</div>""",
+            unsafe_allow_html=True,
+        )
+
+        # 용신 오행별 맞춤 처방
+        _yong1_hsm = _yong_gw[0] if _yong_gw else "木"
+        _HSM_RX = {
+            "木": {
+                "이사":"동쪽으로", "직업":"교육·출판·IT·의료·환경",
+                "색상":"초록·파랑 지갑과 옷", "음식":"신맛·새싹·채소 매일",
+                "기도":"새벽 5시 동쪽 향해", "소품":"집에 식물 키우기",
+                "비방":"푸른 천으로 현관 장식",
+            },
+            "火": {
+                "이사":"남쪽으로", "직업":"연예·방송·요식·에너지·디자인",
+                "색상":"빨강·주황 지갑과 옷", "음식":"쓴맛·고추·계피 매일",
+                "기도":"오전 9시 남쪽 향해", "소품":"집에 촛불·조명 밝게",
+                "비방":"붉은 계열 현관 소품",
+            },
+            "土": {
+                "이사":"중앙·남서쪽으로", "직업":"부동산·건설·농업·유통·금융",
+                "색상":"황색·갈색·베이지 지갑", "음식":"단맛·고구마·감자·곡류",
+                "기도":"오후 2시 중앙 향해", "소품":"도자기·황토 소품",
+                "비방":"집안 정리정돈 철저히",
+            },
+            "金": {
+                "이사":"서쪽으로", "직업":"금융·법률·군경·의료·기계",
+                "색상":"흰색·금색·은색 지갑", "음식":"매운맛·마늘·생강·백색식품",
+                "기도":"오후 7시 서쪽 향해", "소품":"금속 소품·금고",
+                "비방":"흰 쌀을 현관에 작은 그릇에",
+            },
+            "水": {
+                "이사":"북쪽으로", "직업":"무역·유통·관광·철학·예술",
+                "색상":"검정·네이비 지갑", "음식":"짠맛·해산물·검은콩·미역",
+                "기도":"밤 9시 북쪽 향해", "소품":"어항·분수·수족관",
+                "비방":"돼지저금통 북쪽에 배치",
+            },
+        }
+        _rx_hsm = _HSM_RX.get(_yong1_hsm, _HSM_RX["木"])
+        _accent_hsm = _OH_RX_GW.get(_yong1_hsm, {}).get("색_hex", "#d4af37")
+        _rx_items_hsm = [
+            ("🏠", "이사 방향", _rx_hsm["이사"]),
+            ("💼", "천직 분야", _rx_hsm["직업"]),
+            ("🎨", "행운 색상", _rx_hsm["색상"]),
+            ("🍽️", "권장 음식", _rx_hsm["음식"]),
+            ("🙏", "기도 처방", _rx_hsm["기도"]),
+            ("🌿", "집 소품", _rx_hsm["소품"]),
+            ("🔮", "비방", _rx_hsm["비방"]),
+        ]
+
+        st.markdown(
+            f'<div style="font-size:15px;font-weight:900;color:{_accent_hsm};'
+            f'margin-bottom:10px;">✨ 홍수맥 여는 맞춤 처방 — 용신 {_yong1_hsm} 오행</div>',
+            unsafe_allow_html=True,
+        )
+        st.markdown(
+            '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">'
+            + "".join(
+                f'<div style="border:1.5px solid {_accent_hsm}44;border-radius:10px;'
+                f'padding:10px 12px;background:{_accent_hsm}0d;">'
+                f'<span style="font-size:13px;">{icon} <b style="color:{_accent_hsm}">{label}</b><br>'
+                f'<span style="color:#2d1f00;font-size:12px;">{val}</span></span></div>'
+                for icon, label, val in _rx_items_hsm
+            )
+            + "</div>",
+            unsafe_allow_html=True,
+        )
+
+        # 홍수맥이 열리는 신호 체크리스트
+        _HSM_SIGNALS = [
+            "갑자기 좋은 사람을 만나게 됨",
+            "예상치 못한 수입이 생김",
+            "오래된 문제가 한꺼번에 해결됨",
+            "몸이 가볍고 기분이 좋아짐",
+            "꿈이 밝고 선명해짐",
+            "오랫동안 연락 없던 사람이 갑자기 연락옴",
+            "작은 행운들이 연속으로 일어남",
+        ]
+        st.markdown(
+            '<div style="border:1.5px solid #27ae60;border-radius:14px;'
+            'padding:14px 16px;margin-bottom:14px;background:#eafaf1;">'
+            '<div style="font-size:14px;font-weight:900;color:#1e8449;margin-bottom:8px;">'
+            '📋 홍수맥이 열리는 신호 체크리스트</div>'
+            + "".join(
+                f'<div style="font-size:13px;color:#1e4d2b;padding:3px 0;'
+                f'border-bottom:1px dashed #a9dfbf;">☐ {s}</div>'
+                for s in _HSM_SIGNALS
+            )
+            + '<div style="font-size:11px;color:#888;margin-top:6px;">'
+            '3개 이상 해당되면 홍수맥이 이미 열리고 있는 징조이니라!</div>'
+            + "</div>",
+            unsafe_allow_html=True,
+        )
+
+        # 홍수맥 막는 것들 경고
+        _HSM_BLOCKS = [
+            ('부정적인 말버릇', '"안 돼" "못 해" "힘들어"'),
+            ('늦게 자고 늦게 일어나는 습관', '새벽 기운을 놓쳐 홍수맥이 막힌다'),
+            ('조상 제사 소홀히 함', '음덕이 끊기면 흐름도 끊긴다'),
+            ('기신 방위에 침대·책상 배치', f'기신 방위: {", ".join(_DIR_MAP_GW.get(g,"") for g in _gis_gw if g in _DIR_MAP_GW) or "없음"}'),
+            ('어두운 집안 환경', '빛이 없는 공간엔 기운도 들어오지 않는다'),
+            ('기신 색상의 지갑·옷 사용', f'기신 색: {"·".join(_OH_RX_GW.get(g,{}).get("색상","").split("·")[0] for g in _gis_gw if g in _OH_RX_GW)}'),
+            ('용신과 반대되는 직업 유지', '천명에 거스르는 일은 홍수맥을 역류시킨다'),
+        ]
+        st.markdown(
+            '<div style="border:1.5px solid #c0392b;border-radius:14px;'
+            'padding:14px 16px;margin-bottom:14px;background:#fdedec;">'
+            '<div style="font-size:14px;font-weight:900;color:#c0392b;margin-bottom:8px;">'
+            '⚠️ 홍수맥 막는 것들 — 지금 당장 제거하라</div>'
+            + "".join(
+                f'<div style="font-size:13px;color:#922b21;padding:3px 0;'
+                f'border-bottom:1px dashed #f1948a;">'
+                f'❌ <b>{t}</b> — <span style="color:#5d0909;font-size:12px;">{d}</span></div>'
+                for t, d in _HSM_BLOCKS
+            )
+            + "</div>",
+            unsafe_allow_html=True,
+        )
+
+        # 용신별 기도문
+        _HSM_PRAY = {
+            "木": "동방청룡의 기운이여, 나의 길을 열어주소서",
+            "火": "남방주작의 기운이여, 나의 열정을 밝혀주소서",
+            "土": "중앙황제의 기운이여, 나의 터전을 굳건히 하소서",
+            "金": "서방백호의 기운이여, 나의 의지를 날카롭게 하소서",
+            "水": "북방현무의 기운이여, 나의 지혜를 깊게 하소서",
+        }
+        _pray_text_hsm = _HSM_PRAY.get(_yong1_hsm, "하늘이여, 나의 용신 기운을 강하게 하소서")
+        st.markdown(
+            f"""<div style="background:linear-gradient(135deg,#1a1035,#2d1f5e);
+            border:2px solid {_accent_hsm};border-radius:16px;
+            padding:16px 20px;text-align:center;">
+<div style="font-size:14px;font-weight:900;color:{_accent_hsm};margin-bottom:10px;">
+  🙏 홍수맥 기도문 — 용신 {_yong1_hsm} 오행</div>
+<div style="font-size:16px;color:#e8d5f5;font-style:italic;
+  letter-spacing:0.5px;line-height:2.0;padding:8px 0;">
+  "{_pray_text_hsm}"
+</div>
+<div style="font-size:11px;color:#a0a0c0;margin-top:8px;">
+  매일 {_rx_hsm['기도']}을 향해 3번 읊으십시오. 21일 연속 실천하면 하늘이 응답하느니라.
+</div>
+</div>""",
+            unsafe_allow_html=True,
+        )
+
+    except Exception as _e_hsm:
+        st.warning(f"홍수맥 분석 오류: {_e_hsm}")
+
     # ── 최종 마무리 ────────────────────────────────────────────────
     st.markdown(
         f"""<div style="background:linear-gradient(135deg,#2d1f00,#4a3000);
