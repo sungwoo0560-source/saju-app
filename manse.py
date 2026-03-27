@@ -19342,6 +19342,328 @@ def menu_gaewoon(pils, name, birth_year, gender):
         st.info("📥 아래 버튼을 눌러 제1~12장 전체가 담긴 개운처방전 PDF를 다운로드하세요.")
 
     # ─────────────────────────────────────────────────────────────
+    # 화면 12개 섹션
+    # ─────────────────────────────────────────────────────────────
+    def _card(title, body_html):
+        st.markdown(
+            f'<div style="border:1.5px solid #d4af37;border-radius:14px;'
+            f'padding:16px 20px;margin-bottom:10px;background:#fffdf4;">'
+            f'<div style="font-size:15px;font-weight:900;color:#7d5a00;'
+            f'border-bottom:1px solid #e8c96a;padding-bottom:6px;margin-bottom:10px;">{title}</div>'
+            f'<div style="font-size:13px;color:#333;line-height:1.7;">{body_html}</div></div>',
+            unsafe_allow_html=True,
+        )
+
+    def _row(label, val, ok=None):
+        color = "#1e8449" if ok is True else ("#c0392b" if ok is False else "#444")
+        return f'<div style="padding:3px 0;"><b style="color:#7d5a00;">{label}</b>: <span style="color:{color};">{val}</span></div>'
+
+    def _bullet(items, ok=None):
+        color = "#1e8449" if ok is True else ("#c0392b" if ok is False else "#555")
+        return "".join(f'<div style="padding:2px 0 2px 12px;color:{color};">• {i}</div>' for i in items)
+
+    # ── 섹션1: 용신 강화 처방 ─────────────────────────────────────
+    with st.expander("🎨 제1장 — 용신 강화 처방", expanded=True):
+        for _oh_s1 in _yong_gw:
+            _rx_s1 = _OH_RX_GW.get(_oh_s1, {})
+            _hex_s1 = _rx_s1.get("색_hex","#888")
+            _body_s1 = (
+                f'<div style="background:{_hex_s1}22;border-left:4px solid {_hex_s1};'
+                f'border-radius:8px;padding:10px 14px;margin-bottom:8px;">'
+                f'<b style="color:{_hex_s1};font-size:14px;">▶ {_oh_s1} 오행 용신 처방</b><br>'
+                + _row("색상", _rx_s1.get("색상",""), True)
+                + _row("방위", _rx_s1.get("방위",""), True)
+                + _row("음식", _rx_s1.get("음식",""))
+                + _row("보석", _rx_s1.get("보석",""))
+                + _row("물상", _rx_s1.get("물상",""))
+                + _row("기도 시간", _rx_s1.get("시간",""))
+                + _row("행동 처방", _rx_s1.get("행동",""))
+                + "</div>"
+            )
+            st.markdown(_body_s1, unsafe_allow_html=True)
+        if _gis_gw:
+            _gi_body = "<b style='color:#c0392b;'>⚠ 기신 오행 — 피해야 할 것</b><br>"
+            for _goh_s1 in _gis_gw:
+                _grx_s1 = _OH_RX_GW.get(_goh_s1, {})
+                _gi_body += _row(
+                    f"{_goh_s1} 기신",
+                    f"{_grx_s1.get('색상','')} 색상 / {_grx_s1.get('방위','')} 방위 / {_grx_s1.get('음식','')} 음식 자제",
+                    False,
+                )
+            _card("기신 주의사항", _gi_body)
+
+    # ── 섹션2: 올해 타이밍 처방 ───────────────────────────────────
+    with st.expander(f"📅 제2장 — {_cur_yr_gw}년 월별 타이밍 처방", expanded=True):
+        _top3_m_s2 = {x[0] for x in _top3_gw}
+        _bot2_m_s2 = {x[0] for x in _bot2_gw}
+        _top_html = "<b>🏆 최고의 달 TOP3 (적극 행동)</b><br>"
+        for _m2, _mkr2, _gh2, _, _ss_m2 in _top3_gw:
+            _act2 = _ACT_MAP_GW.get(_ss_m2.split("(")[0], "긍정적 추진력 활용")
+            _top_html += f'<div style="padding:3px 0 3px 10px;color:#1e8449;">✅ <b>{_mkr2}</b> — {_gh2} | {_act2}</div>'
+        _top_html += "<br><b>⚠ 조심할 달</b><br>"
+        for _m2, _mkr2, _gh2, _, _ss_m2 in _bot2_gw:
+            _top_html += f'<div style="padding:3px 0 3px 10px;color:#c0392b;">❌ <b>{_mkr2}</b> — {_gh2} | 투자·계약·큰 결정 자제</div>'
+        _card("연간 타이밍 요약", _top_html)
+        _cols_s2 = st.columns(6)
+        for _i2, (_m2, _mkr2, _gh2, _rk2, _ss_m2) in enumerate(_mon_data_gw):
+            _bg2 = "#27ae60" if _rk2>=4 else ("#e74c3c" if _rk2<=1 else ("#f39c12" if _rk2==2 else "#3498db"))
+            with _cols_s2[_i2 % 6]:
+                st.markdown(
+                    f'<div style="background:{_bg2};color:#fff;border-radius:10px;'
+                    f'padding:7px 3px;text-align:center;margin:3px 0;font-size:11px;">'
+                    f'<b>{_mkr2}</b><br>{_gh2}</div>',
+                    unsafe_allow_html=True,
+                )
+
+    # ── 섹션3: 신살별 비방 ────────────────────────────────────────
+    with st.expander("🔔 제3장 — 신살별 비방(裨方) 처방", expanded=True):
+        _ss_active_s3 = [n for n in _active_sinsal_gw if n]
+        if _ss_active_s3:
+            st.markdown(f"**원국 발동 신살:** {' · '.join(_ss_active_s3)}")
+        _found_s3 = False
+        for _ssn3, _rxd3 in _SINSAL_RX_GW.items():
+            _key3 = _ssn3.split("(")[0]
+            if any(_key3 in _an for _an in _active_sinsal_gw):
+                _found_s3 = True
+                _body3 = (
+                    f'<b style="color:{_rxd3["color"]};">{_ssn3} 발동</b><br>'
+                    + _bullet(_rxd3["비방"])
+                )
+                _card(_ssn3, _body3)
+        if not _found_s3:
+            st.success("현재 주요 흉살이 발동 중이지 않습니다. 이 시기를 기회로 삼아 적극 움직이십시오!")
+
+    # ── 섹션4: 풍수·이사 처방 ─────────────────────────────────────
+    with st.expander("🏠 제4장 — 풍수·이사 처방", expanded=True):
+        _yong_dirs_s4 = [_OH_RX_GW[o]["방위"] for o in _yong_gw if o in _OH_RX_GW]
+        _gis_dirs_s4  = [_OH_RX_GW[o]["방위"] for o in _gis_gw  if o in _OH_RX_GW]
+        _yong_cols_s4 = [_OH_RX_GW[o]["색상"] for o in _yong_gw if o in _OH_RX_GW]
+        _yong_objs_s4 = [_OH_RX_GW[o]["물상"] for o in _yong_gw if o in _OH_RX_GW]
+        _dir_html = (
+            _row("이사 길한 방향 (용신)", ', '.join(_yong_dirs_s4) or '미산출', True)
+            + _row("이사 금지 방향 (기신)", ', '.join(_gis_dirs_s4) or '없음', False if _gis_dirs_s4 else None)
+            + _row("이사 길한 달", ', '.join(f'{x[0]}월' for x in _top3_gw), True)
+            + _row("이사 금지 달", ', '.join(f'{x[0]}월' for x in _bot2_gw), False)
+            + _row("손 없는 날", _sonup_days)
+        )
+        _card("이사·방위 처방", _dir_html)
+        _space_html = ""
+        for _oh_s4 in _yong_gw:
+            _sp4 = _SPACE_GW.get(_oh_s4)
+            if _sp4:
+                _space_html += f"<b>{_oh_s4} 용신 집안 배치</b><br>" + _bullet(list(_sp4))
+        if _space_html:
+            _card("집안 소품 배치법", _space_html)
+
+    # ── 섹션5: 재물·횡재수 ────────────────────────────────────────
+    with st.expander("💰 제5장 — 재물·횡재수 개운법", expanded=True):
+        _money_ss_map_s5 = {
+            "偏財":"편재 세운 — 횡재수 발동 가능성 매우 높음! 투자·사업 기회를 놓치지 마세요.",
+            "正財":"정재 세운 — 안정적 수입 증가. 부동산·저축 투자가 최적입니다.",
+            "食神":"식신 세운 — 기술·재능으로 새 수입원 창출 가능. 부업 시작하기 좋습니다.",
+            "比肩":"비견 세운 — 독립·창업으로 재물 창출. 단독 행보가 유리합니다.",
+            "傷官":"상관 세운 — 창의적 아이디어가 수입으로 연결. 특허·저작권 주목.",
+            "劫財":"겁재 세운 — 횡재보다 손실 주의. 투기·보증 절대 금지.",
+            "偏官":"편관 세운 — 재물 정체기. 수성(守成)에 집중하세요.",
+            "正官":"정관 세운 — 직업적 성과로 수입 증가. 승진·이직 노려볼 만합니다.",
+            "偏印":"편인 세운 — 재물보다 자기계발 투자가 유리합니다.",
+            "正印":"정인 세운 — 학업·자격증이 미래 재물의 씨앗. 지금 뿌리세요.",
+        }
+        _ss_c_s5 = (_sw_ss_gw or "").split("(")[0].strip()
+        _money_msg_s5 = _money_ss_map_s5.get(_ss_c_s5, f"올해 세운 십성 {_sw_ss_gw or '-'} — 흐름을 파악해 움직이세요.")
+        _ok_s5 = _ss_c_s5 not in {"劫財","偏官"}
+        _money_html = (
+            _row("지갑 색상", f"{_wallet_color_gw} 계열로 교체 — 용신 기운이 재물을 당깁니다", True)
+            + _row("지갑 보관 방위", f"{_wallet_dir_gw} 방향 서랍·가방 칸에 보관", True)
+            + _row("매월 초하루", "지갑을 햇빛에 1시간 쬐어 기운 충전")
+            + _row("횡재수 판단", _money_msg_s5, _ok_s5)
+        )
+        _card("재물 기운 처방", _money_html)
+        if _lotto_mon_gw:
+            _lotto_html = (
+                _row("투자·로또 추천 달", ', '.join(_lotto_mon_gw), True)
+                + _row("구매 방향", f"{_wallet_dir_gw} 방향 복권 판매점")
+                + _row("구매 시간", _yong_rx_gw.get("시간","용신 시간대"))
+            )
+            _card("투자·횡재수 타이밍", _lotto_html)
+
+    # ── 섹션6: 개명 오행 ──────────────────────────────────────────
+    with st.expander("✍️ 제6장 — 개명 오행 분석", expanded=True):
+        _name_len_s6 = len(name.replace(" ","")) if name else 0
+        st.markdown(f"현재 이름 **{name}** ({_name_len_s6}자) — 사주 원국 부족 오행을 이름에 보강하면 천명의 흐름이 강해집니다.")
+        for _yoh_s6 in _yong_gw[:2]:
+            _strokes_s6 = _OH_STROKE_GW.get(_yoh_s6, [])
+            _chars_s6   = _OH_CHAR_GW.get(_yoh_s6, "")
+            _nm_html = (
+                _row("이름에 넣으면 좋은 오행", _OH_KR_GW2.get(_yoh_s6, _yoh_s6), True)
+                + _row("길한 획수", "·".join(str(s) for s in _strokes_s6[:8]) + "획...", True)
+                + _row("추천 한자", _chars_s6)
+            )
+            _card(f"{_yoh_s6} 오행 개명 처방", _nm_html)
+        if _gis_gw:
+            _gis_strokes_s6 = []
+            for _goh_s6 in _gis_gw:
+                _gis_strokes_s6.extend(_OH_STROKE_GW.get(_goh_s6,[])[:4])
+            _card("개명 시 피해야 할 획수 (기신)",
+                  _row("피할 획수", ', '.join(str(s) for s in _gis_strokes_s6[:10]) + "획", False))
+
+    # ── 섹션7: 배우자 오행 매칭 ───────────────────────────────────
+    with st.expander("💑 제7장 — 배우자·인연 오행 매칭", expanded=True):
+        st.markdown(f"**{name}님 일간:** {_ilgan_gw} ({_OH_KR_GW2.get(_my_oh_gw,'')} 오행)")
+        _good_html = "<b style='color:#1e8449;'>✅ 내 운을 올려주는 상대 일간 (용신 기운)</b><br>"
+        for _ig_s7 in list(dict.fromkeys(_good_ilgans_gw))[:6]:
+            _ig_oh_s7 = _ILGAN_OH_GW.get(_ig_s7,"")
+            _ig_ti_s7, _ig_job_s7 = _ILGAN_DETAIL_GW.get(_ig_s7,("",""))
+            _ig_char_s7 = _ILGAN_CHAR_GW.get(_ig_s7,"")
+            _good_html += (
+                f'<div style="padding:3px 0 3px 10px;color:#1e8449;">'
+                f'<b>{_ig_s7}일간</b> ({_ig_oh_s7}) — 띠: {_ig_ti_s7} | 성격: {_ig_char_s7} | 직업: {_ig_job_s7}</div>'
+            )
+        _card("궁합 좋은 상대", _good_html)
+        if _bad_ilgans_gw:
+            _bad_html = "<b style='color:#c0392b;'>⚠ 조심해야 할 상대 일간 (기신 기운)</b><br>"
+            for _ig_s7 in list(dict.fromkeys(_bad_ilgans_gw))[:4]:
+                _bad_html += (
+                    f'<div style="padding:3px 0 3px 10px;color:#c0392b;">'
+                    f'<b>{_ig_s7}일간</b> ({_ILGAN_OH_GW.get(_ig_s7,"")}) — 처음엔 강하게 끌리지만 장기적으로 기운 소모</div>'
+                )
+            _card("주의할 상대", _bad_html)
+        _birth_oh_s7 = _OH_BIRTH_GW.get(_my_oh_gw,"")
+        st.info(f"나를 생(生)해주는 **{_OH_KR_GW2.get(_birth_oh_s7,'')}** 오행 상대가 가장 자연스럽게 내 기운을 채워줍니다.")
+
+    # ── 섹션8: 이사 방위 정밀 ────────────────────────────────────
+    with st.expander("🧭 제8장 — 이사 방위 정밀 처방", expanded=True):
+        if _yong_gw:
+            _y1_s8 = _yong_gw[0]
+            _dir_str_s8, _dir_desc_s8 = _DIR_DETAIL_GW.get(_y1_s8, ("-","-"))
+            _bad_dirs_s8 = [_DIR_DETAIL_GW.get(g,("-",))[0] for g in _gis_gw if g in _DIR_DETAIL_GW]
+            _move_mons_s8 = _MOVE_MON_GW.get(_y1_s8,[])
+            _dir8_html = (
+                _row("이사 길한 방향", _dir_str_s8, True)
+                + _row("방향 효과", _dir_desc_s8)
+                + _row("이사 절대 금지 방향", ' / '.join(_bad_dirs_s8) or '없음', False if _bad_dirs_s8 else None)
+                + _row("이사 길한 달", '·'.join(f'{m}월' for m in _move_mons_s8), True)
+                + _row("손 없는 날 택일", _sonup_days)
+            )
+            _card(f"{name}님 이사 처방전", _dir8_html)
+
+    # ── 섹션9: 직업·사업 처방 ─────────────────────────────────────
+    with st.expander("💼 제9장 — 직업·사업 오행 처방 (천직)", expanded=True):
+        if _yong_gw:
+            _y1_s9 = _yong_gw[0]
+            _job_list_s9 = _JOB_LIST_GW.get(_y1_s9, [])
+            _biz_s9 = _BIZ_GW.get(_y1_s9,"")
+            _job_html = (
+                f'<b>용신 {_y1_s9} 천직 TOP 20</b><br>'
+                + _bullet(_job_list_s9[:10])
+                + _bullet(_job_list_s9[10:20])
+                + "<br>" + _row("사업 아이템", _biz_s9)
+                + _row("직장 방위", f"현 거주지 기준 {_DIR_MAP_GW.get(_y1_s9,'동쪽')} 방향")
+            )
+            _card("천직 리스트", _job_html)
+            if _occupation_gw and _occupation_gw != "선택 안 함":
+                _match_s9 = any(_occupation_gw in j for j in _job_list_s9)
+                if _match_s9:
+                    st.success(f"현재 직업 [{_occupation_gw}] — 용신 오행 천직과 잘 맞습니다! 지금 하는 일이 천명과 일치합니다.")
+                else:
+                    st.warning(f"현재 직업 [{_occupation_gw}] — 용신 직종으로 전환하거나 부업으로 용신 분야를 병행하면 운이 올라갑니다.")
+
+    # ── 섹션10: 총체적 처방 TOP5 ─────────────────────────────────
+    with st.expander("🔮 제10장 — 만신의 총체적 처방전 TOP5", expanded=True):
+        for _i10, _t10 in enumerate(_TOP5_GW[:5]):
+            st.markdown(
+                f'<div style="border-left:4px solid #d4af37;padding:8px 14px;'
+                f'margin-bottom:6px;background:#fffdf4;border-radius:0 8px 8px 0;">'
+                f'<b style="color:#7d5a00;">TOP{_i10+1}.</b> {_t10}</div>',
+                unsafe_allow_html=True,
+            )
+        for _title10s, _items10s in [
+            ("오늘 당장 할 것 3가지",      _TODAY3_GW),
+            ("이번 달 안에 할 것 3가지",   _MONTH3_GW),
+            ("올해 안에 할 것 3가지",      _YEAR3_GW),
+            ("평생 지켜야 할 것 3가지",    _LIFETIME_GW),
+            ("절대 하면 안 되는 것 3가지", _NEVER_GW),
+        ]:
+            _list_html = f"<b>{_title10s}</b><br>" + "".join(
+                f'<div style="padding:2px 0 2px 10px;">{"❌" if "안 되는" in _title10s else "✅"} {_i2+1}. {_item2}</div>'
+                for _i2, _item2 in enumerate(_items10s)
+            )
+            _card(_title10s, _list_html)
+
+    # ── 섹션11: 부적·기도 처방 ───────────────────────────────────
+    with st.expander("🙏 제11장 — 부적·기도 처방", expanded=True):
+        _buj_html = (
+            _row("추천 부적", _bujeok_name_gw, True)
+            + _row("효능", _bujeok_desc_gw)
+            + _row("부적 제작 방법", "작명가·도사에게 용신 오행 정보를 전달하고 맞춤 제작")
+        )
+        _card(f"{name}님 맞춤 부적 처방", _buj_html)
+        _pray_html = (
+            _row("기도 시간", _pray_time_gw, True)
+            + _row("기도 방향", f"{_pray_dir_gw} 방향을 바라보고 기도")
+            + _row("기도 내용", f"하늘이시여, {name}의 용신 기운을 강하게 하시고 기신 기운을 약하게 하소서")
+            + _row("횟수", "매일 아침 3번 반복, 21일 연속 실천하면 기운이 확실히 전환됩니다")
+        )
+        _card("기도 처방", _pray_html)
+        if _need_temple_gw:
+            st.warning("상문살·화개살 발동 — 가까운 절에서 천도재·위령재를 올리면 조상 음덕이 강하게 보호합니다.")
+        if _need_jesa_gw:
+            st.warning("삼재·관재수 발동 — 조상 제삿날을 빠짐없이 챙기고, 시왕전에서 기도를 올리십시오.")
+        _salt_html = (
+            "<b>빨간팥죽·소금·숯 활용법</b><br>"
+            + _bullet([
+                "빨간팥죽: 동짓날 집 안 곳곳(현관·화장실·부엌)에 뿌려 1년 액운 차단",
+                "굵은 소금: 현관 양쪽 작은 그릇에 담아두면 외부 나쁜 기운 흡수. 매달 교체",
+                "숯(참숯): 집 구석진 곳에 두면 음기·전자파·나쁜 기운을 정화. 3개월마다 새것으로",
+                "소금 목욕: 장례식·병원 방문 후 굵은 소금으로 온몸을 씻으면 정화됨",
+            ])
+        )
+        _card("민간 정화법", _salt_html)
+
+    # ── 섹션12: 홍수맥 분석 ──────────────────────────────────────
+    with st.expander("🌊 제12장 — 홍수맥(洪水脈) 분석 및 처방", expanded=True):
+        _icon12 = {"최강":"🌊","강함":"🌊","보통":"💧","준비기":"🌱","수성기":"🛡️"}
+        st.markdown(
+            f'<div style="background:linear-gradient(135deg,{_hsm_bg},{_hsm_bg}cc);'
+            f'border:2px solid {_hsm_accent};border-radius:14px;'
+            f'padding:14px 18px;margin-bottom:10px;">'
+            f'<div style="font-size:16px;font-weight:900;color:{_hsm_accent};">'
+            f'{_icon12.get(_hsm_grade,"🌊")} 홍수맥 등급 — <b>{_hsm_grade}</b></div>'
+            f'<div style="font-size:13px;color:#cce0f0;margin-top:6px;">{_hsm_text}</div>'
+            f'<div style="font-size:11px;color:#a0b8cc;margin-top:4px;">{_dw_label} | {_sw_label}</div>'
+            f'</div>',
+            unsafe_allow_html=True,
+        )
+        _rx12_html = f"<b>용신 {_yong1_gw} 오행 홍수맥 처방</b><br>" + "".join(
+            _row(_k12, _v12, True) for _k12, _v12 in _rx_hsm.items()
+        )
+        _card("홍수맥 여는 처방", _rx12_html)
+        _sig_html = (
+            "<b>홍수맥이 열리는 신호 체크리스트</b><br>"
+            + _bullet(_HSM_SIGNALS)
+            + '<div style="color:#e67e22;font-size:12px;padding-top:4px;">3개 이상 해당되면 홍수맥이 이미 열리고 있는 징조이니라!</div>'
+        )
+        _card("신호 체크리스트", _sig_html)
+        _blk12_html = "<b style='color:#c0392b;'>⚠ 홍수맥 막는 것들 — 지금 당장 제거하라</b><br>"
+        for _bt12, _bd12 in _HSM_BLOCKS:
+            _blk12_html += f'<div style="padding:2px 0 2px 10px;color:#c0392b;">❌ <b>{_bt12}</b> — <span style="color:#7b241c;">{_bd12}</span></div>'
+        _card("홍수맥 차단 요인", _blk12_html)
+        st.markdown(
+            f'<div style="background:linear-gradient(135deg,#1a1035,#2d1f5e);'
+            f'border:2px solid {_hsm_accent};border-radius:14px;padding:16px 20px;text-align:center;">'
+            f'<div style="font-size:13px;font-weight:900;color:{_hsm_accent};margin-bottom:8px;">'
+            f'🙏 홍수맥 기도문 — 용신 {_yong1_gw} 오행</div>'
+            f'<div style="font-size:15px;color:#e8d5f5;font-style:italic;line-height:2.0;">'
+            f'"{_pray_text_hsm}"</div>'
+            f'<div style="font-size:11px;color:#a89cc8;margin-top:8px;">'
+            f'매일 {_rx_hsm.get("기도","용신 시간")}을 향해 3번 읊으십시오. 21일 연속 실천하면 하늘이 응답하느니라.</div>'
+            f'</div>',
+            unsafe_allow_html=True,
+        )
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # ─────────────────────────────────────────────────────────────
     # PDF 생성 함수
     # ─────────────────────────────────────────────────────────────
     def _build_gaewoon_pdf():
