@@ -19012,7 +19012,19 @@ def menu_gaewoon(pils, name, birth_year, gender):
     try:
         _ys_gw       = get_yongshin(pils)
         _yong_gw     = _ys_gw.get("종합_용신", [])
+        if isinstance(_yong_gw, str):
+            _yong_gw = [o for o in ["木","火","土","金","水"] if o in _yong_gw]
+        elif not isinstance(_yong_gw, list):
+            _yong_gw = []
+        _yong_gw = [g for g in _yong_gw if g in ["木","火","土","金","水"]]
         _gis_gw      = _ys_gw.get("기신", [])
+        # 기신 오행 list 안전 변환
+        if isinstance(_gis_gw, str):
+            _gis_gw = [o for o in ["木","火","土","金","水"] if o in _gis_gw]
+        elif not isinstance(_gis_gw, list):
+            _gis_gw = []
+        # 오행 글자가 아닌 값 필터링
+        _gis_gw = [g for g in _gis_gw if g in ["木","火","土","金","水"]]
         _sw_gw       = get_yearly_luck(pils, datetime.now().year)
         _sw_ss_gw    = _sw_gw.get("십성_천간", "")
         _sinsal_gw   = get_12sinsal(pils)
