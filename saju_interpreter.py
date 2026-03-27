@@ -6589,6 +6589,58 @@ class LocalSajuNarrator:
             "丑": "인내의 달. 변화를 주면 실패하기 쉽습니다. 지금의 자리를 묵묵히 지키고 인내하십시오.",
         }
 
+        # ── 십성별 4항목 서술 ────────────────────────────────────────
+        _SS_MONEY = {
+            "偏財": "예상치 못한 수입 가능성. 단 지출도 큼. 절반은 저축하십시오.",
+            "正財": "꾸준한 수입 안정. 저축·투자 적기.",
+            "食神": "재능이 재물로 연결. 부업·창작 활성화.",
+            "傷官": "수입 불규칙. 지출 과다 주의.",
+            "劫財": "재물 손실 위험. 보증·동업 절대 금지.",
+            "偏官": "재물보다 직장 안정이 우선. 신규 투자 자제.",
+            "正官": "안정적 수입. 계약·투자 좋음.",
+            "偏印": "재물보다 준비·학습 집중. 수입보다 지출이 크기 쉬움.",
+            "正印": "귀인 통한 기회. 재물 소소히 들어옴.",
+            "比肩": "경쟁 심화. 내 것 지키기 우선. 공동 자금 조심.",
+        }
+        _SS_JOB = {
+            "偏財": "영업·미팅·신규 거래처 접촉에 최적. 사업 확장 기회 있음.",
+            "正財": "성과 정산·계약 마무리·보고서 제출에 좋음. 꼼꼼한 일 처리.",
+            "食神": "새 프로젝트 시작·자기계발·부업 도전에 최적.",
+            "傷官": "아이디어 제안·창작·기획엔 강함. 상사와 충돌 주의.",
+            "劫財": "경쟁자 등장. 독립적 업무에 집중하고 공동 작업 최소화.",
+            "偏官": "업무 압박 강화. 기존 업무 마무리 집중. 이직·전직 검토 시기.",
+            "正官": "공식 보고·면접·발표에 최적. 원칙 지키면 인정받음.",
+            "偏印": "학습·조사·준비의 달. 중요 결정은 미루고 내공 쌓기.",
+            "正印": "윗사람·멘토의 지원. 교육·자격증·학업에 좋은 달.",
+            "比肩": "경쟁 속에서 독립 행보. 나만의 전문성 강화에 집중.",
+        }
+        _SS_RELATION = {
+            "偏財": "새 인맥·이성 인연 형성에 좋음. 활발한 소통의 달.",
+            "正財": "기존 관계 안정. 진지한 약속·결혼 논의에 적합.",
+            "食神": "관계에서 여유와 즐거움. 모임·파티·새 인연 가능.",
+            "傷官": "말실수·갈등 주의. 표현이 날카로워져 오해 유발 쉬움.",
+            "劫財": "친한 사람과 갈등·이별 가능. 금전 관련 다툼 특히 주의.",
+            "偏官": "압박받는 관계. 주변 사람과 거리 두고 독립 유지.",
+            "正官": "공식 관계·조직 내 인정. 신뢰도 상승. 공적 모임 참여 좋음.",
+            "偏印": "혼자 있는 시간 증가. 내면 탐구. 사람보다 책과 가까워지는 달.",
+            "正印": "귀인·스승·선배의 도움. 배움의 인연이 찾아옴.",
+            "比肩": "동료·친구와의 경쟁 심화. 팀보다 개인 행동이 유리.",
+        }
+        _JJ_HEALTH = {
+            "寅": "근육·인대 부상 주의. 무리한 운동 자제. 간 기능 체크.",
+            "卯": "눈·간·신경 주의. 야외 활동 늘리되 알레르기 조심.",
+            "辰": "소화기·위장 불편 가능. 불규칙한 식사 자제. 과로 주의.",
+            "巳": "심장·혈압·눈 주의. 더위 대비 수분 섭취 충분히.",
+            "午": "심장 과부하 주의. 과음·과로 자제. 혈압 체크.",
+            "未": "소화 기능 저하. 냉방병·소화 장애 주의. 충분한 휴식.",
+            "申": "호흡기·폐·대장 주의. 기관지 질환 조심. 금연 강조.",
+            "酉": "폐·피부·기관지 주의. 건조한 환경에 수분 보충.",
+            "戌": "근골격계·피부 주의. 무릎·허리 관리. 건조함 조심.",
+            "亥": "신장·방광·생식기 주의. 차가운 음식·음료 자제.",
+            "子": "신장·방광·뼈 주의. 충분한 수면과 따뜻한 환경 유지.",
+            "丑": "소화기·비장·관절 주의. 습한 환경 조심. 무리한 다이어트 자제.",
+        }
+
         lines = []
         lines.append(f"## 📆 {name}님의 향후 6개월 정밀 월별 다이어리")
         lines.append(
@@ -6596,22 +6648,19 @@ class LocalSajuNarrator:
         )
 
         # 길한 달 / 주의 달 미리 계산
-        peak_months   = []
+        peak_months    = []
         caution_months = []
 
         for i in range(6):
             m_raw = today.month + i
             yr    = cur_year + (m_raw - 1) // 12
             m     = ((m_raw - 1) % 12) + 1
-            # 오호둔월법으로 월천간 계산
             _m_cg_idx = (_yr_gan_base + (m - 1)) % 10
             m_cg  = _CG[_m_cg_idx]
-            m_jj  = _JJ_MONTHS[m - 1] if m - 1 < len(_JJ_MONTHS) else ""
             m_oh  = _OH.get(m_cg, "")
             m_ss  = TEN_GODS_MATRIX.get(ilgan, {}).get(m_cg, "")
             is_ys = bool(m_oh) and m_oh in yongshin
             is_gs = bool(m_oh) and m_oh in gisin
-
             if is_ys:
                 peak_months.append(f"{m}월")
             if is_gs:
@@ -6630,32 +6679,34 @@ class LocalSajuNarrator:
             m     = ((m_raw - 1) % 12) + 1
 
             _m_cg_idx = (_yr_gan_base + (m - 1)) % 10
-            m_cg = _CG[_m_cg_idx]
-            m_jj = _JJ_MONTHS[m - 1] if m - 1 < len(_JJ_MONTHS) else ""
-            m_oh = _OH.get(m_cg, "")
-            m_ss = TEN_GODS_MATRIX.get(ilgan, {}).get(m_cg, "")
+            m_cg    = _CG[_m_cg_idx]
+            m_jj    = _JJ_MONTHS[m - 1] if m - 1 < len(_JJ_MONTHS) else ""
+            m_oh    = _OH.get(m_cg, "")
+            m_ss    = TEN_GODS_MATRIX.get(ilgan, {}).get(m_cg, "")
             m_ss_kr = _SS_KR.get(m_ss, m_ss)
-            is_cur = (i == 0)
-            is_ys  = bool(m_oh) and m_oh in yongshin
-            is_gs  = bool(m_oh) and m_oh in gisin
+            is_cur  = (i == 0)
+            is_ys   = bool(m_oh) and m_oh in yongshin
+            is_gs   = bool(m_oh) and m_oh in gisin
 
-            label = "📌 **이번 달**" if is_cur else f"📅 **{yr}년 {m}월**"
-            grade_badge = " 🌟용신" if is_ys else " ⚠️기신" if is_gs else ""
-            m_cg_kr = _CG_KR.get(m_cg, "")
-            m_jj_kr = _JJ_KR.get(m_jj, "")
+            m_jj_kr   = _JJ_KR.get(m_jj, "")
+            gilhyung  = "🌟 길(吉)" if is_ys else "⚠️ 흉(凶)" if is_gs else "평(平)"
+            cur_tag   = " ← 이번 달" if is_cur else ""
 
             lines.append(
-                f"### {label} — {m_cg}({m_cg_kr}){m_jj}({m_jj_kr})월 "
-                f"[{m_ss_kr}]{grade_badge}"
+                f"### {yr}년 {m}월 [{m_jj_kr}] {m_ss_kr} — {gilhyung}{cur_tag}"
             )
-            lines.append(f"> **{_JJ_SEASON.get(m_jj, '흐름의 달')}**")
-            lines.append(f"- **월운 기운**: {_SS_MONTH_MSG.get(m_ss, '흐름에 맞게 꾸준히 움직이십시오.')}")
-            lines.append(f"- **이달의 행동 지침**: {_JJ_ACTION.get(m_jj, '유연하게 대처하십시오.')}")
+            lines.append(f"> {_JJ_SEASON.get(m_jj, '흐름의 달')}")
+            lines.append("")
+            lines.append(f"💰 **재물**: {_SS_MONEY.get(m_ss, '수입·지출 균형 유지. 무리한 투자 자제.')}")
+            lines.append(f"💼 **직업**: {_SS_JOB.get(m_ss, '꾸준히 맡은 일에 집중하십시오.')}")
+            lines.append(f"💑 **관계**: {_SS_RELATION.get(m_ss, '기존 인간관계를 소중히 유지하십시오.')}")
+            lines.append(f"🏥 **건강**: {_JJ_HEALTH.get(m_jj, '무리하지 말고 규칙적인 생활을 유지하십시오.')}")
+            lines.append(f"⭐ **이달의 행동**: {_JJ_ACTION.get(m_jj, '유연하게 대처하십시오.')}")
 
             if is_ys:
-                lines.append(f"- 🌟 **용신 기운의 달**: 용신 오행({OHN.get(m_oh, m_oh)})이 흐르는 최고의 달입니다. 중요한 결정·계약·새 시작을 이 달에 집중하십시오.")
+                lines.append(f"\n> 🌟 용신 오행({OHN.get(m_oh, m_oh)})의 달 — 중요한 결정·계약·새 시작을 이 달에 집중하십시오.")
             elif is_gs:
-                lines.append(f"- ⛔ **기신 기운의 달**: 기신 오행({OHN.get(m_oh, m_oh)})이 흐릅니다. 무리한 확장·투자·계약을 피하고 기존 것을 지키는 데 집중하십시오.")
+                lines.append(f"\n> ⛔ 기신 오행({OHN.get(m_oh, m_oh)})의 달 — 무리한 확장·투자·계약을 피하고 기존 것을 지키십시오.")
 
             lines.append("")
 
