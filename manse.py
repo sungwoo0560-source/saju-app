@@ -12872,6 +12872,58 @@ def menu2_lifeline(pils, birth_year, gender, name="내담자"):
             unsafe_allow_html=True,
         )
 
+    # ── 현재 대운 × 세운 교차 분석 카드 ────────────────────────
+    try:
+        _cy2 = datetime.now().year
+        _sw2 = get_yearly_luck(pils, _cy2) or {}
+        _sw2n = get_yearly_luck(pils, _cy2+1) or {}
+        _sw2_ss  = _sw2.get("십성_천간","")
+        _sw2_gan = _sw2.get("세운","")
+        _sw2_gh  = _sw2.get("길흉","평")
+        _sw2n_ss  = _sw2n.get("십성_천간","")
+        _sw2n_gan = _sw2n.get("세운","")
+
+        if cur_dw and _sw2_gan:
+            _cross2 = get_daewoon_sewoon_cross(pils, birth_year, gender, _cy2)
+            _cross_sum = _cross2.get("교차해석","") if _cross2 else ""
+
+            _GH_C = {"길":"#1a3d1a","+":"#1a3d1a","평":"#1a1a3d","흉":"#3d1a1a","-":"#3d1a1a"}
+            _GH_T = {"길":"#7fff7f","+":"#7fff7f","평":"#aaaaff","흉":"#ffaaaa","-":"#ffaaaa"}
+            _cbg = _GH_C.get(_sw2_gh, "#1a1a3d")
+            _ctc = _GH_T.get(_sw2_gh, "#aaaaff")
+
+            _cross_html = (
+                f"<div style='background:{_cbg};border-radius:14px;padding:16px 20px;"
+                f"margin-bottom:16px;border:1.5px solid {_ctc}44;'>"
+                f"<div style='font-size:11px;color:{_ctc};letter-spacing:2px;font-weight:700;"
+                f"margin-bottom:10px'>⚡ 대운 × 세운 교차 분석</div>"
+                f"<div style='display:flex;gap:20px;align-items:center;margin-bottom:12px;flex-wrap:wrap'>"
+                f"<div style='text-align:center'>"
+                f"<div style='font-size:10px;color:#aaa'>현재 대운</div>"
+                f"<div style='font-size:22px;font-weight:900;color:#fff'>{cur_dw.get('str','')}</div>"
+                f"<div style='font-size:11px;color:{_gc}'>[{_cdw_ss}]</div>"
+                f"</div>"
+                f"<div style='font-size:20px;color:#888'>×</div>"
+                f"<div style='text-align:center'>"
+                f"<div style='font-size:10px;color:#aaa'>올해 세운</div>"
+                f"<div style='font-size:22px;font-weight:900;color:#fff'>{_sw2_gan}</div>"
+                f"<div style='font-size:11px;color:{_ctc}'>[{_sw2_ss}] {_sw2_gh}</div>"
+                f"</div>"
+                f"<div style='font-size:20px;color:#888'>=</div>"
+                f"<div style='flex:1;min-width:120px'>"
+                f"<div style='font-size:13px;color:#fff;font-weight:700;line-height:1.6'>"
+                f"{_cross_sum or '두 기운이 교차하는 해입니다.'}</div>"
+                f"</div></div>"
+                f"<div style='background:rgba(255,255,255,0.08);border-radius:8px;"
+                f"padding:10px;font-size:12px;color:#ccc;'>"
+                f"📅 내년 {_cy2+1}년 세운: <b style='color:#fff'>{_sw2n_gan}</b>"
+                f" [{_sw2n_ss}] — 미리 대비하십시오"
+                f"</div></div>"
+            )
+            st.markdown(_cross_html, unsafe_allow_html=True)
+    except Exception:
+        pass
+
     # ── LocalSajuNarrator.lifeline 서술 분석 ────────────────────
     try:
         _local_out = LocalSajuNarrator.lifeline(pils, name, birth_year, gender)
@@ -12913,6 +12965,72 @@ def menu2_lifeline(pils, birth_year, gender, name="내담자"):
 
 def menu3_past(pils, birth_year, gender, name=""):
     """3️⃣ 과거 적중 타임라인 | 15년 자동 스캔"""
+
+    # ── 과거 대운 타임라인 시각화 카드 ───────────────────────────
+    try:
+        _cy3 = datetime.now().year
+        _ilgan3 = pils[1]["cg"]
+        _ys3 = get_yongshin(pils)
+        _yong3 = _ys3.get("종합_용신",[])
+        _gisin3 = _ys3.get("기신",[]) if isinstance(_ys3.get("기신"), list) else []
+        _OH3 = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
+                "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
+
+        _bm3 = max(1,min(12,int(st.session_state.get("birth_month") or 1)))
+        _bd3 = max(1,min(31,int(st.session_state.get("birth_day") or 1)))
+        _bh3 = max(0,min(23,int(st.session_state.get("birth_hour") or 12)))
+        _bmi3= max(0,min(59,int(st.session_state.get("birth_minute") or 0)))
+
+        _dws3 = SajuCoreEngine.get_daewoon(pils,birth_year,_bm3,_bd3,_bh3,_bmi3,gender=gender)
+        _past_dws3 = [d for d in _dws3 if d.get("종료연도",0) <= _cy3]
+
+        if _past_dws3:
+            st.markdown(
+                '<div class="gold-section">⏳ 지나온 대운 — 황금기 vs 수비기</div>',
+                unsafe_allow_html=True
+            )
+            _tl3 = '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px">'
+            for _dw3 in _past_dws3:
+                _ss3 = TEN_GODS_MATRIX.get(_ilgan3,{}).get(_dw3.get("cg",""),"-")
+                _oh3 = _OH3.get(_dw3.get("cg","")[:1],"")
+                _is_y3 = _oh3 in _yong3
+                _is_g3 = _oh3 in _gisin3
+                _bg3 = "#1a3d1a" if _is_y3 else "#3d1a1a" if _is_g3 else "#2a2a2a"
+                _tc3 = "#7fff7f" if _is_y3 else "#ffaaaa" if _is_g3 else "#aaaaaa"
+                _lbl3 = "🌟황금기" if _is_y3 else "⚠️수비기" if _is_g3 else "일반"
+                _age3 = _dw3.get("시작나이",0)
+                _yr3s = _dw3.get("시작연도",0)
+                _yr3e = _dw3.get("종료연도",0)
+                _tl3 += (
+                    f"<div style='background:{_bg3};border-radius:12px;padding:10px 14px;"
+                    f"min-width:80px;text-align:center;border:1.5px solid {_tc3}44'>"
+                    f"<div style='font-size:10px;color:{_tc3};font-weight:700'>{_lbl3}</div>"
+                    f"<div style='font-size:18px;font-weight:900;color:#fff'>{_dw3.get('str','')}</div>"
+                    f"<div style='font-size:10px;color:#aaa'>[{_ss3}]</div>"
+                    f"<div style='font-size:10px;color:#888'>{_age3}세</div>"
+                    f"<div style='font-size:9px;color:#666'>{_yr3s}~{_yr3e}</div>"
+                    f"</div>"
+                )
+            _tl3 += "</div>"
+            st.markdown(_tl3, unsafe_allow_html=True)
+
+            _gold3 = [d.get("str","") for d in _past_dws3
+                      if _OH3.get(d.get("cg","")[:1],"") in _yong3]
+            _bad3  = [d.get("str","") for d in _past_dws3
+                      if _OH3.get(d.get("cg","")[:1],"") in _gisin3]
+            if _gold3 or _bad3:
+                _sum3 = ""
+                if _gold3:
+                    _sum3 += f"✅ <b>황금기 대운:</b> {' / '.join(_gold3)} — 이 시기 시작한 일들이 가장 잘 풀렸을 것입니다.<br>"
+                if _bad3:
+                    _sum3 += f"⚠️ <b>수비기 대운:</b> {' / '.join(_bad3)} — 이 시기의 고난이 지금의 내공이 되었습니다."
+                st.markdown(
+                    f"<div style='background:#f9f6f0;border:1px solid #c9a84c;border-radius:10px;"
+                    f"padding:14px;font-size:13px;color:#3d2800;line-height:1.9'>{_sum3}</div>",
+                    unsafe_allow_html=True
+                )
+    except Exception:
+        pass
 
     # ── 로컬 엔진 항상 먼저 출력 ─────────────
 
