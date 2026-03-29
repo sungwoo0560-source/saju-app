@@ -2102,6 +2102,79 @@ class LocalSajuNarrator:
         if _gs_warns:
             lines.append("**⚠️ 기신 주의:** " + "  \n".join(_gs_warns))
 
+        # 7) 올해 세운 × 현재 상태 연결
+        try:
+            _sw_now2 = get_yearly_luck(pils, b.get("cur_year", datetime.now().year)) or {}
+            _sw_ss2  = _sw_now2.get("십성_천간","")
+            _sw_gan2 = _sw_now2.get("세운","")
+            _sw_gh2  = _sw_now2.get("길흉","평")
+            _sw_oh2  = OH.get(_sw_gan2[:1],"") if _sw_gan2 else ""
+            _cur_yr2 = b.get("cur_year", datetime.now().year)
+            _age2    = _cur_yr2 - birth_year + 1
+
+            _GH2 = {"길":"✅ 좋음","+":"✅ 좋음","평":"⚖️ 보통","흉":"⚠️ 주의","-":"⚠️ 주의"}
+            _is_yong2  = _sw_oh2 in _ys_diag
+            _is_gisin2 = _sw_oh2 in _gs_diag
+
+            if _sw_gan2:
+                _sw_signal = ""
+                if _is_yong2:
+                    _sw_signal = f"🟢 **올해는 용신 운!** {name}님에게 유리한 기운이 흐릅니다. 적극적으로 움직이십시오."
+                elif _is_gisin2:
+                    _sw_signal = f"🔴 **올해는 기신 운.** 무리한 확장·투자는 자제하고 수비 전략이 현명합니다."
+                else:
+                    _sw_signal = f"🟡 올해는 중립적인 흐름입니다. 내실을 다지며 준비하는 시기입니다."
+
+                lines.append(
+                    f"\n**🗓️ {_cur_yr2}년 현재 운기 ({_age2}세)**: "
+                    f"세운 {_sw_gan2} [{_sw_ss2}] — {_GH2.get(_sw_gh2,_sw_gh2)}\n"
+                    f"{_sw_signal}"
+                )
+        except Exception:
+            pass
+
+        # 8) 나이대별 맞춤 조언
+        _age_now2 = b.get("cur_year", datetime.now().year) - birth_year + 1
+        _AGE_ADVICE = {
+            (1,  29):  (f"20대의 {name}님은 지금 자신만의 색깔을 만들어가는 가장 중요한 시기입니다. "
+                       f"실패를 두려워하지 말고, 다양한 도전을 통해 자신이 무엇을 원하는지 확인하십시오. "
+                       f"이 시기의 경험 하나하나가 40대·50대의 큰 자산이 됩니다."),
+            (30, 39):  (f"30대의 {name}님은 선택과 집중이 가장 중요한 시기입니다. "
+                       f"20대에 뿌린 씨앗이 결실을 맺기 시작하는 때로, 방향을 확실히 잡고 전문성을 쌓아야 합니다. "
+                       f"인간관계에서도 진짜 내 사람을 구분하는 안목이 생기는 시기입니다."),
+            (40, 49):  (f"40대의 {name}님은 인생의 전성기를 맞이하고 있습니다. "
+                       f"지금까지 쌓아온 경험과 인맥이 가장 빛을 발하는 때입니다. "
+                       f"건강 관리를 소홀히 하지 말고, 지금의 결정이 노후를 결정한다는 것을 기억하십시오."),
+            (50, 59):  (f"50대의 {name}님은 결실의 시기입니다. "
+                       f"인생의 중반전을 마무리하며 후반전을 준비하는 때로, "
+                       f"재정적 기반과 건강을 점검하고 진짜 하고 싶은 일을 향해 방향을 잡는 것이 중요합니다."),
+            (60, 99):  (f"60대 이후의 {name}님은 인생의 후반전이 시작됩니다. "
+                       f"지금까지 살아온 모든 경험이 빛이 되는 시기로, "
+                       f"건강과 소중한 관계를 가장 우선시하고, 자신을 위한 시간을 충분히 가지십시오."),
+        }
+        for (_lo, _hi), _adv in _AGE_ADVICE.items():
+            if _lo <= _age_now2 <= _hi:
+                lines.append(f"\n**👤 {_age_now2}세 {name}님께**: {_adv}")
+                break
+
+        # 9) 지금 당장 해야 할 것 3가지
+        _OHN_rx2 = {"木":"목(木)","火":"화(火)","土":"토(土)","金":"금(金)","水":"수(水)"}
+        _NOW_ACTION = {
+            "木": ["새로운 시작·도전에 적극 나서기", "초록색 소품·식물 가까이 두기", "이른 아침 산책으로 木기운 충전"],
+            "火": ["사람들과 활발하게 교류·네트워킹", "붉은색·오렌지색 활용하기", "열정적인 취미 활동 시작"],
+            "土": ["규칙적인 생활 루틴 만들기", "황토색·베이지 계열 활용", "맡은 일 끝까지 완수하는 습관"],
+            "金": ["중요한 결정 미루지 않기", "흰색·은색 소품 활용", "계획 세우고 원칙 지키기"],
+            "水": ["독서·명상으로 통찰력 강화", "검정·파랑 계열 활용", "물과 가까운 환경에서 충전"],
+        }
+        _yong_first2 = _ys_diag[0] if _ys_diag else ""
+        _actions2 = _NOW_ACTION.get(_yong_first2, [])
+        if _actions2:
+            lines.append(
+                f"\n**⚡ 지금 당장 해야 할 것 (용신 {_OHN_rx2.get(_yong_first2,'')} 강화):**"
+            )
+            for _act in _actions2:
+                lines.append(f"- {_act}")
+
         lines.append("")
 
         lines.append("---")
