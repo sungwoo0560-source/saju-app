@@ -3499,6 +3499,7 @@ class LocalSajuNarrator:
         # 연령대 단위(10년)로 묶어서 1단락씩 출력
         decade_start = (birth_year // 10) * 10
         processed_decades = set()
+        seen_events = set()  # (dw_start, event_type) 중복 방지
 
         for dw in shown_dws:
             dw_start   = dw.get("시작연도", 0)
@@ -3615,18 +3616,21 @@ class LocalSajuNarrator:
                 (70, 99): "건강 유지와 감사의 시기. 하루하루가 축복임을 느끼는 때입니다.",
             }
 
-            # ── 만신 한마디 (무당 말투) ───────────────────
-            _MANSHIN_PAST = {
-                "比肩": f"{age_s}세 무렵 독립하고 싶은 마음이 강했거나, 경쟁자가 나타나 힘들었던 시기가 있지 않으셨습니까?",
-                "劫財": f"{age_s}세 무렵 믿었던 사람한테 배신당하거나 돈이 크게 빠져나간 일이 있지 않으셨습니까?",
-                "食神": f"{age_s}세 무렵 하고 싶은 것을 마음껏 하며 가장 즐겁고 편안했던 시기가 있지 않으셨습니까?",
-                "傷官": f"{age_s}세 무렵 기존 틀을 깨고 새로운 길을 찾아 나섰거나 직장을 박차고 나온 일이 있지 않으셨습니까?",
-                "偏財": f"{age_s}세 무렵 큰 돈이 들어왔다 나갔거나, 이성 문제로 크게 흔들린 일이 있지 않으셨습니까?",
-                "正財": f"{age_s}세 무렵 결혼이나 내집마련처럼 안정된 터전을 마련한 일이 있지 않으셨습니까?",
-                "偏官": f"{age_s}세 무렵 외부의 강한 압박이나 관재 문제로 크게 고생한 일이 있지 않으셨습니까?",
-                "正官": f"{age_s}세 무렵 직장에서 인정받거나 중요한 자리를 맡게 된 일이 있지 않으셨습니까?",
-                "偏印": f"{age_s}세 무렵 갑자기 이사하거나 직업을 바꾸고 싶어 안절부절 못한 시기가 있지 않으셨습니까?",
-                "正印": f"{age_s}세 무렵 공부나 자격증으로 실력을 인정받거나 귀인의 도움을 받은 일이 있지 않으셨습니까?",
+            # ── 십성 키 정규화 (TEN_GODS_MATRIX = "偏財(편재)" 형식) ───
+            _dw_ss_hj = dw_ss[:dw_ss.find('(')] if '(' in dw_ss else dw_ss
+
+            # ── 대운 서술 (서술형, 의문·만신 어투 제거) ──────────
+            _PAST_NARR = {
+                "比肩": f"{age_s}세 무렵 독립하고 싶은 마음이 강했거나 경쟁자가 나타나 힘들었던 시기였을 겁니다.",
+                "劫財": f"{age_s}세 무렵 믿었던 사람에게 배신당하거나 돈이 크게 빠져나간 일이 있었을 겁니다.",
+                "食神": f"{age_s}세 무렵 하고 싶은 것을 하며 가장 즐겁고 편안했던 시기였을 겁니다.",
+                "傷官": f"{age_s}세 무렵 기존 틀을 깨고 새로운 길을 찾거나 직장을 떠난 일이 있었을 겁니다.",
+                "偏財": f"{age_s}세 무렵 큰 돈이 들어왔다 나갔거나 이성 문제로 크게 흔들린 시기였을 겁니다.",
+                "正財": f"{age_s}세 무렵 결혼이나 내집마련처럼 안정된 터전을 마련했을 겁니다.",
+                "偏官": f"{age_s}세 무렵 외부의 강한 압박이나 관재 문제로 크게 고생했을 겁니다.",
+                "正官": f"{age_s}세 무렵 직장에서 인정받거나 중요한 자리를 맡게 됐을 겁니다.",
+                "偏印": f"{age_s}세 무렵 이사하거나 직업을 바꾸고 싶어 안절부절 못했던 시기였을 겁니다.",
+                "正印": f"{age_s}세 무렵 공부나 자격증으로 실력을 인정받거나 귀인의 도움을 받았을 겁니다.",
             }
 
             # ── 충(沖) 발동 여부 ──────────────────────────
@@ -3681,15 +3685,23 @@ class LocalSajuNarrator:
             # 이 시기에 있었을 일
             if not is_future:
                 lines.append(f"\n📌 **이 시기에 있었을 일:**")
-                if _age_evt:
+                _age_evt_key = (dw_start, "age_evt")
+                if _age_evt and _age_evt_key not in seen_events:
                     lines.append(f"- {_age_evt}")
-                _ss_evt = _SS_EVENT.get(dw_ss, "")
-                if _ss_evt:
+                    seen_events.add(_age_evt_key)
+                _ss_evt = _SS_EVENT.get(_dw_ss_hj, "")
+                _ss_evt_key = (dw_start, _dw_ss_hj)
+                if _ss_evt and _ss_evt_key not in seen_events:
                     lines.append(f"- {_ss_evt}")
-                if is_ys:
-                    lines.append(f"- 용신({OHN.get(dw_oh, dw_oh)}) 기운이 강해 하는 일마다 길이 열리던 시기였습니다.")
-                elif is_gs:
-                    lines.append(f"- 기신({OHN.get(dw_oh, dw_oh)}) 기운이 강해 뜻대로 되지 않는 일이 많았던 시기였습니다.")
+                    seen_events.add(_ss_evt_key)
+                _ys_key = (dw_start, "ys_gs")
+                if _ys_key not in seen_events:
+                    if is_ys:
+                        lines.append(f"- 용신({OHN.get(dw_oh, dw_oh)}) 기운이 강해 하는 일마다 길이 열리던 시기였습니다.")
+                        seen_events.add(_ys_key)
+                    elif is_gs:
+                        lines.append(f"- 기신({OHN.get(dw_oh, dw_oh)}) 기운이 강해 뜻대로 되지 않는 일이 많았던 시기였습니다.")
+                        seen_events.add(_ys_key)
                 if _chung_hit:
                     _CHUNG_DESC_P = {
                         frozenset({"子","午"}): "子午충 — 심장·혈압 이상, 부부 갈등·이별",
@@ -3702,19 +3714,22 @@ class LocalSajuNarrator:
                     _hit_jj = next((oj for oj in _orig_jjs if _CHUNG.get(_dw_jj,"") == oj), "")
                     _chung_label = _CHUNG_DESC_P.get(frozenset({_dw_jj, _hit_jj}),
                                                      f"{_dw_jj}{_hit_jj}충 — 큰 변동") if _hit_jj else "충 발동 — 큰 변동"
-                    lines.append(
-                        f"- ⚡ **{_chung_label}**이 발동한 시기입니다. "
-                        f"{age_s}~{age_s+9}세 사이에 직장 변동·이사·이별·사고 중 하나가 있었지 않으셨습니까?"
-                    )
+                    _chung_key = (dw_start, f"chung_{_dw_jj}")
+                    if _chung_key not in seen_events:
+                        lines.append(
+                            f"- ⚡ **{_chung_label}**이 발동한 시기입니다. "
+                            f"{age_s}~{age_s+9}세 사이에 직장 변동·이사·이별·사고 중 하나가 있었을 겁니다."
+                        )
+                        seen_events.add(_chung_key)
                 if peak_years:
                     lines.append(f"- 특히 주목할 해: {' / '.join(peak_years[:2])}")
 
-            # 만신의 한마디
+            # 대운 서술
             if not is_future:
-                _manshin_q = _MANSHIN_PAST.get(dw_ss,
-                    f"{age_s}세 무렵 {dw_gan} 대운의 기운이 흘렀던 시기. 그때를 기억하십니까?")
-                lines.append(f"\n💬 **만신의 한마디:**")
-                lines.append(f"> \"허허, {_manshin_q}\"")
+                _past_narr = _PAST_NARR.get(_dw_ss_hj,
+                    f"{age_s}세 무렵 {dw_gan} 대운이 흘렀던 시기입니다. {_dw_ss_hj} 기운이 삶을 이끌었던 때입니다.")
+                lines.append(f"\n📖 **이 시기의 기억:**")
+                lines.append(f"> {_past_narr}")
 
             lines.append("")
 
@@ -3897,6 +3912,10 @@ class LocalSajuNarrator:
 
         dw_ss_j = (dw.get("십성_지지","") or TEN_GODS_MATRIX.get(ilgan,{}).get(JIJANGGAN.get(dw.get("jj",""),[""])[-1] if JIJANGGAN.get(dw.get("jj","")) else "","-"))
 
+        # 십성 키 정규화: "偏財(편재)" → "偏財" (DW_SS_MEANING, _DW_CORE_MSG 등 순수 한자 키 조회용)
+        dw_ss_key = dw_ss[:dw_ss.find('(')] if '(' in dw_ss else dw_ss
+        dw_ss_j_key = dw_ss_j[:dw_ss_j.find('(')] if '(' in dw_ss_j else dw_ss_j
+
         age_s = dw_start - birth_year + 1
 
         age_e = dw_end - birth_year + 1
@@ -3929,22 +3948,72 @@ class LocalSajuNarrator:
 
         lines.append(f"\n{icon} **{dw_gan} 대운 ({dw_start} ~ {dw_end}년 / {age_s} ~ {age_e}세)**{cur_mark}{ys_mark}")
 
-        # 🚨 버그 3 원인 수정: 뻔한 텍스트 대신, 이미 만들어두신 '만신 풍성한 해석 함수' 연동!
+        # ── 대운 십성별 핵심 메시지 ─────────────────────────────
+        _DW_CORE_MSG = {
+            "比肩": "독립과 자립의 10년. 스스로 길을 개척해야 직성이 풀리는 시기. 경쟁이 심화되지만 실력으로 돌파 가능.",
+            "劫財": "변동과 도전의 10년. 재물 기복이 크고 주변에 경쟁자 많아짐. 충동적 결정 자제하고 검증된 파트너와 협력.",
+            "食神": "안정과 재능 발휘의 10년. 꾸준히 노력하면 복록이 따르는 시기. 전문성을 쌓고 표현하는 활동에서 결실.",
+            "傷官": "혁신과 창의의 10년. 기존 방식을 깨고 새로운 길을 여는 에너지. 관재구설 주의. 권위에 도전 전 전략 먼저.",
+            "偏財": "활동과 사업의 10년. 외부 활동과 인맥에서 재물 창출. 움직이는 만큼 기회가 옴. 투기·보증은 반드시 금지.",
+            "正財": "성실과 축적의 10년. 꾸준히 노력한 것이 안정적 재물로 쌓이는 시기. 장기 투자와 부동산 인연 강화.",
+            "偏官": "도전과 명예의 10년. 강한 추진력으로 목표 달성 가능. 건강 관리와 과로 방지 필수. 법적 문제 주의.",
+            "正官": "명예와 안정의 10년. 사회적 인정과 승진 기회. 원칙을 지키며 정도를 걸으면 반드시 인정받음.",
+            "偏印": "학습과 준비의 10년. 내실을 다지고 실력을 쌓는 시기. 새로운 분야 탐구에 좋음. 이동·변화 잦아짐.",
+            "正印": "귀인과 학문의 10년. 스승이나 귀인의 도움을 받을 수 있음. 자격·학업·자기계발에 집중하면 보상이 따름.",
+        }
+        core_msg = _DW_CORE_MSG.get(dw_ss_key, "")
+        if core_msg:
+            lines.append(f"\n**{dw_ss_key} 대운 핵심**: {core_msg}")
 
-        try:
-            nar_icon, nar_title, nar_text = get_daewoon_narrative(dw_ss, dw_ss_j, dw_gan, age_s)
+        # ── 용신/기신 판정 메시지 ──────────────────────────────
+        if is_ys:
+            lines.append(
+                f"✨ **용신 대운** — {oh} 오행이 힘을 받는 황금기입니다. "
+                f"이 시기에 시작한 일은 오래 지속되며, 뜻밖의 귀인과 기회가 찾아옵니다."
+            )
+        elif is_gs:
+            lines.append(
+                f"⚠️ **기신 대운** — {oh} 오행이 과잉되는 수비기입니다. "
+                f"무리한 확장보다 내실을 다지고, 건강·재물·관계를 꼼꼼히 지켜야 합니다."
+            )
+        else:
+            lines.append(
+                f"⚖️ **중립 대운** — 용신·기신 어느 쪽도 아닌 균형 유지의 시기입니다. "
+                f"꾸준한 노력이 결실로 이어지므로 일상의 루틴을 지키는 것이 최선입니다."
+            )
 
-            lines.append(f"> **{nar_icon} {nar_title}**")
+        # ── 나이대별 집중 항목 ─────────────────────────────────
+        _AGE_FOCUS = {
+            (0, 19):  "🎓 학업·진로 탐색기 — 재능 발견과 기초 실력 축적에 집중",
+            (20, 29): "🚀 도전·출발기 — 직업 기반 구축, 첫 인연·결혼 준비에 에너지 투입",
+            (30, 39): "💼 확장·성장기 — 경력 도약, 결혼·육아, 재물 기반 확립",
+            (40, 49): "🏆 전성·결실기 — 사회적 지위 확립, 투자·부동산, 건강 첫 점검",
+            (50, 59): "🌿 안정·전환기 — 자산 보존, 건강 관리, 제2의 커리어 모색",
+            (60, 200): "🌙 완성·회고기 — 건강·가족 중심, 지혜 전수, 마음의 평화",
+        }
+        for (lo, hi), focus_msg in _AGE_FOCUS.items():
+            if lo <= age_s <= hi:
+                lines.append(f"**{age_s}~{age_e}세 집중 항목**: {focus_msg}")
+                break
 
-            # HTML 줄바꿈을 마크다운 줄바꿈으로 깔끔하게 치환
+        # ── 처방: 용신 오행 활용법 ────────────────────────────
+        _YS_PRESCRIPTION = {
+            "木": "동쪽 방향의 활동, 녹색 계열 소품, 식물·화초 가꾸기, 새벽 산책으로 木 기운 보충.",
+            "火": "남쪽 방향의 활동, 붉은·주황 계열 소품, 밝은 조명 환경, 적극적 사교 활동으로 火 기운 보충.",
+            "土": "황색·갈색 계열 소품, 규칙적인 식사·수면 루틴, 중심과 균형 잡힌 생활로 土 기운 보충.",
+            "金": "서쪽 방향의 활동, 흰색·금속 소품, 규율과 원칙을 지키는 생활, 금속 악기로 金 기운 보충.",
+            "水": "북쪽 방향의 활동, 검정·파랑 계열 소품, 충분한 수분 섭취·수영·목욕으로 水 기운 보충.",
+        }
+        ys_list_local = yongshin or []
+        if ys_list_local:
+            presc_parts = [_YS_PRESCRIPTION[y] for y in ys_list_local if y in _YS_PRESCRIPTION]
+            if presc_parts:
+                lines.append(f"**처방 (용신 오행 활용)**: {' / '.join(presc_parts)}")
 
-            lines.append(nar_text.replace("<br>", "\n"))
-
-        except Exception:
-            m = LocalSajuNarrator.DW_SS_MEANING.get(dw_ss, "")
-
-            if m:
-                lines.append(f"**{dw_ss}({dw_ss_j}) 기운**: {m}")
+        # ── 간지 풀이 ────────────────────────────────────────
+        m = LocalSajuNarrator.DW_SS_MEANING.get(dw_ss_key, "")
+        if m:
+            lines.append(f"**{dw_ss_key} 기운 요약**: {m}")
 
         gj_desc = gj[1] if gj[1] else ""
 
@@ -11214,6 +11283,11 @@ def _nar_wealth(ctx):
 
     ss_dist = ctx.get("ss_dist", {})
 
+    # 십성 분포 키 정규화: "偏財(편재)" → "편재" (한글 키 비교용)
+    _kr_key = lambda s: s[s.find('(')+1:s.find(')')] if '(' in s else s
+    ss_dist_kr = {_kr_key(k): v for k, v in ss_dist.items()}
+    top_ss_kr = [_kr_key(s) for s in top_ss]
+
     cur_dw = ctx.get("cur_dw", {})
 
     cur_dw_ss = ctx.get("cur_dw_ss", "")
@@ -11347,28 +11421,59 @@ def _nar_wealth(ctx):
                     f"",
                     f"[ 제4장 | 사업 적합성 분석 ]",
                     f"",
-                    f"{display_name}님의 사주가 독립사업과 직장 중 어느 쪽이 더 맞는지:",
+                    f"{display_name}님의 사주가 독립사업과 직장 중 어느 쪽이 더 맞는지 격국×신강신약×십성으로 판단합니다.",
                     f"",
-                    f"{'비견/겁재가 강한 이 사주는 독립사업/자영업이 더 맞습니다. 남 밑에서 지시받기보다 자신만의 영역에서 일할 때 재물이 쌓입니다.' if any(ss in top_ss for ss in ['비견', '겁재']) else ''}",
-                    f"{'식신/상관이 강한 이 사주는 창의적인 사업 또는 프리랜서 활동이 맞습니다. 재능을 상품화하는 방식이 가장 효율적인 재물 창출입니다.' if any(ss in top_ss for ss in ['식신', '상관']) else ''}",
-                    f"{'정관/정재가 강한 이 사주는 안정적인 직장에서 꾸준히 성장하는 방식이 맞습니다. 조직 내에서 신뢰를 쌓는 것이 재물로 이어집니다.' if any(ss in top_ss for ss in ['정관', '정재']) else ''}",
-                    f"{'편재/편관이 강한 이 사주는 역동적인 사업 환경에서 강합니다. 위험을 감수하고 크게 움직이는 것을 두려워하지 마십시오.' if any(ss in top_ss for ss in ['편재', '편관']) else ''}",
-                    f"",
+                ] + (lambda: (
+                    lambda biz, job: [
+                        f"  직장형: {job}점  /  사업형: {biz}점",
+                        f"  판정: {'사업형' if biz > job else ('직장형' if job > biz else '균형형')} 추천",
+                        f"",
+                        f"  [근거]",
+                    ] + (["  • 비견/겁재가 강함 — 독립 욕구 강하고 자기 영역에서 실력 발휘 (사업+2)"] if any(s in top_ss_kr for s in ['비견', '겁재']) else []) +
+                    (["  • 편재 있음 — 사업 감각과 활동성이 높음. 부업·소규모 창업 병행 추천 (사업+2)"] if '편재' in ss_dist_kr else []) +
+                    (["  • 식신/상관 있음 — 재능 상품화·창의적 프리랜서 활동 적합 (사업+1)"] if any(s in top_ss_kr for s in ['식신', '상관']) else []) +
+                    (["  • 정관/정재格+신강 — 조직 내 전문가형. 직장에서 전문성 발휘가 재물 안정에 유리 (직장+3)"] if (any(s in top_ss_kr for s in ['정관', '정재']) and '신강' in sn) else []) +
+                    (["  • 정인格+신강 — 조직 내 전문가형. 직장 재물 경로가 더 안정적 (직장+2)"] if (any(s in top_ss_kr for s in ['정인']) and '신강' in sn) else []) +
+                    (["  • 편관 있음 — 추진력 강하나 충동 창업 위험. 철저한 준비 후 사업 도전 (사업+1, 주의)"] if '편관' in ss_dist_kr else []) +
+                    [""]
+                )(
+                    sum([
+                        2 if any(s in top_ss_kr for s in ['비견', '겁재']) else 0,
+                        2 if '편재' in ss_dist_kr else 0,
+                        1 if any(s in top_ss_kr for s in ['식신', '상관']) else 0,
+                        1 if '편관' in ss_dist_kr else 0,
+                    ]),
+                    sum([
+                        3 if (any(s in top_ss_kr for s in ['정관', '정재']) and '신강' in sn) else 0,
+                        2 if (any(s in top_ss_kr for s in ['정인']) and '신강' in sn) else 0,
+                        1 if any(s in top_ss_kr for s in ['정관', '정재', '정인']) else 0,
+                    ])
+                ))() + [
                     f"[ 제5장 | 재물 새는 구멍과 막는 법 ]",
                     f"",
                     f"이 사주에서 재물이 새는 주요 원인:",
                     f"",
-                    f"{'1. 겁재가 강해 주변 사람들에게 베풀다가 재물이 분산됩니다. 감정적 지출을 줄이십시오.' if '겁재' in ss_dist else ''}",
-                    f"{'2. 상관이 강해 충동적인 소비나 불필요한 지출이 생깁니다. 구매 전 하루 생각하는 습관을 들이십시오.' if '상관' in ss_dist else ''}",
-                    f"{'3. 편재가 강해 투자 욕구가 넘쳐 무리하게 확장하다 손실이 납니다. 수익의 30%는 반드시 안전 자산으로 보관하십시오.' if '편재' in ss_dist else ''}",
-                    f"{'4. 편인이 강해 직업 변동이 잦아 안정적인 수입 구조를 만들기 어렵습니다. 한 분야에 집중하는 것이 재물 관리의 핵심입니다.' if '편인' in ss_dist else ''}",
+                ] + (lambda: (
+                    [f"  • 겁재 {ss_dist_kr.get('겁재', 0)}개 — 주변 사람에게 재물이 분산됨. 감정적 지출·인정 욕구로 돈 나감. 동업·보증 절대 금지."] if ss_dist_kr.get('겁재', 0) >= 2
+                    else ["  • 겁재 있음 — 재물 기복 주의. 충동적 지출 경계."] if ss_dist_kr.get('겁재', 0) == 1
+                    else []
+                ) + (
+                    ["  • 상관 있음 — 충동적 지출·말실수로 인한 손해. 구매 전 하루 숙고하는 습관 필수."] if '상관' in ss_dist_kr else []
+                ) + (
+                    ["  • 편관 있음 — 법적 문제·관재로 인한 지출 위험. 계약서 없는 거래 금지."] if '편관' in ss_dist_kr else []
+                ) + (
+                    ["  • 편인 있음 — 직업 변동 잦아 수입 불안정. 한 분야에 집중하는 것이 재물 관리의 핵심."] if '편인' in ss_dist_kr else []
+                ) + (
+                    ["  특별한 누수 구멍 없음. 꾸준한 관리만으로 충분합니다."] if not any(s in ss_dist_kr for s in ['겁재', '상관', '편관', '편인']) else []
+                ) + [
                     f"",
-                    f"재물을 지키는 가장 좋은 방법:",
-                    f"* 용신 {yong_kr} 색상의 지갑 사용",
-                    f"* 수입의 20~30% 자동 저축 설정",
-                    f"* 기신 오행이 강한 해에는 큰 재물 결정 미루기",
-                    f"* 용신 오행이 강한 해에 투자 및 사업 확장",
+                    f"재물을 막는 법:",
+                    f"  • 용신 {yong_kr} 색상의 지갑 사용",
+                    f"  • 수입의 20~30% 자동 저축 설정",
+                    f"  • 기신 오행 달에는 큰 재물 결정 금지",
+                    f"  • 보증·동업 절대 금지 (계약서 없는 금전 거래 불가)",
                     f"",
+                ])() + [
                     f"[ 제6장 | 재물 황금기 완전 예측 ]",
                     f"",
                     f"{display_name}님의 인생에서 재물 황금기가 오는 시기:",
@@ -11410,9 +11515,9 @@ def _nar_wealth(ctx):
                     f"",
                     f"일간 {ilgan_kr} + {gname} + {sn} 조합의 재물 관리 황금 원칙:",
                     f"",
-                    f"원칙 1. {'크게 벌고 크게 쓰는 패턴을 끊어야 합니다. 수입이 생기면 즉시 30%를 자동이체로 저축하십시오.' if any(ss in ss_dist for ss in ['겁재', '편재']) else '안정적으로 쌓아가는 것이 이 사주의 재물 방식입니다. 투기성 투자에 유혹받지 마십시오.'}",
+                    f"원칙 1. {'크게 벌고 크게 쓰는 패턴을 끊어야 합니다. 수입이 생기면 즉시 30%를 자동이체로 저축하십시오.' if any(ss in ss_dist_kr for ss in ['겁재', '편재']) else '안정적으로 쌓아가는 것이 이 사주의 재물 방식입니다. 투기성 투자에 유혹받지 마십시오.'}",
                     f"",
-                    f"원칙 2. {'창의력과 재능이 돈이 됩니다. 자신의 전문성을 상품화하는 방법을 끊임없이 고민하십시오.' if any(ss in ss_dist for ss in ['식신', '상관']) else '안정적 수입 구조를 먼저 만들고 투자를 시작하십시오.'}",
+                    f"원칙 2. {'창의력과 재능이 돈이 됩니다. 자신의 전문성을 상품화하는 방법을 끊임없이 고민하십시오.' if any(ss in ss_dist_kr for ss in ['식신', '상관']) else '안정적 수입 구조를 먼저 만들고 투자를 시작하십시오.'}",
                     f"",
                     f"원칙 3. 용신 {yong_kr} 오행이 강해지는 해에 큰 재물 결정을 집중하고, 기신이 강해지는 해에는 지키는 전략을 쓰십시오.",
                     f"",
@@ -11426,9 +11531,9 @@ def _nar_wealth(ctx):
                     f"",
                     f"* 직장인: 꾸준하고 안정적이지만 {'가파른 성장은 어렵습니다. 전문성을 쌓아 희소 인재가 되어야 합니다.' if '신강' in sn else '귀인의 도움으로 예상보다 빠른 성장이 가능합니다.'}",
                     f"",
-                    f"* 프리랜서/자영업: {'이 사주에 가장 잘 맞는 방식입니다. 초기 기반을 잡는 데 3~5년이 필요하지만, 그 후에는 직장보다 훨씬 큰 수익을 낼 수 있습니다.' if any(ss in ss_dist for ss in ['비견', '식신', '상관']) else '안정적인 수입이 보장되지 않는 방식이라 이 사주에는 주의가 필요합니다.'}",
+                    f"* 프리랜서/자영업: {'이 사주에 가장 잘 맞는 방식입니다. 초기 기반을 잡는 데 3~5년이 필요하지만, 그 후에는 직장보다 훨씬 큰 수익을 낼 수 있습니다.' if any(ss in ss_dist_kr for ss in ['비견', '식신', '상관']) else '안정적인 수입이 보장되지 않는 방식이라 이 사주에는 주의가 필요합니다.'}",
                     f"",
-                    f"* 투자/사업: {'편재가 강해 사업 확장 기질이 있습니다. 단, 리스크 관리가 생존의 핵심입니다.' if '편재' in ss_dist else '안정적인 사업 기반을 만든 후 확장하는 보수적 전략이 맞습니다.'}",
+                    f"* 투자/사업: {'편재가 강해 사업 확장 기질이 있습니다. 단, 리스크 관리가 생존의 핵심입니다.' if '편재' in ss_dist_kr else '안정적인 사업 기반을 만든 후 확장하는 보수적 전략이 맞습니다.'}",
                     f"",
                     f"[ 제9장 | 나이별 재물 타이밍 완전 분석 ]",
                     f"",
@@ -11439,44 +11544,43 @@ def _nar_wealth(ctx):
             )
         )
 
+        _DW_SS_KR_MAP = {
+            "食神": "식신", "傷官": "상관", "偏財": "편재", "正財": "정재",
+            "偏官": "편관", "正官": "정관", "偏印": "편인", "正印": "정인",
+            "比肩": "비견", "劫財": "겁재",
+        }
+        _DW_MONEY_ADV = {
+            "비견": "경쟁과 독립의 시기. 재물보다 자리 지키기 우선",
+            "겁재": "재물 기복 심한 시기. 동업·보증 절대 금지",
+            "식신": "재능이 돈되는 시기. 전문성 발휘 최적",
+            "상관": "수입 불규칙. 창의적 활동으로 돌파",
+            "편재": "사업·투자 기회. 큰 돈 가능하나 지출도 큼",
+            "정재": "안정적 수입. 저축·부동산 최적 시기",
+            "편관": "재물보다 생존. 수비 모드 유지",
+            "정관": "명예와 재물 함께. 안정적 성장기",
+            "편인": "재물보다 준비. 자격·학습 투자 시기",
+            "정인": "귀인 통한 기회. 소소하지만 꾸준한 수입",
+        }
+
         for dw in daewoon[:8]:
-            dw_ss_hanja = TEN_GODS_MATRIX.get(ilgan, {}).get(dw["cg"], "-")
+            # 천간 십성 정규화
+            _raw_cg = TEN_GODS_MATRIX.get(ilgan, {}).get(dw["cg"], "-")
+            _hj_cg = _raw_cg[:_raw_cg.find('(')] if '(' in _raw_cg else _raw_cg
+            _kr_cg = _raw_cg[_raw_cg.find('(')+1:_raw_cg.find(')')] if '(' in _raw_cg else _DW_SS_KR_MAP.get(_raw_cg, _raw_cg)
 
-            # 한자 → 한글 변환 (TEN_GODS_MATRIX는 한자 반환)
+            # 지지 십성 정규화
+            _jjg = JIJANGGAN.get(dw.get("jj", ""), [])
+            _raw_jj = TEN_GODS_MATRIX.get(ilgan, {}).get(_jjg[-1] if _jjg else "", "-")
+            _hj_jj = _raw_jj[:_raw_jj.find('(')] if '(' in _raw_jj else _raw_jj
+            _kr_jj = _raw_jj[_raw_jj.find('(')+1:_raw_jj.find(')')] if '(' in _raw_jj else _DW_SS_KR_MAP.get(_raw_jj, _raw_jj)
 
-            _SS_KR = {
-                "食神": "식신",
-                "傷官": "상관",
-                "偏財": "편재",
-                "正財": "정재",
-                "偏官": "편관",
-                "正官": "정관",
-                "偏印": "편인",
-                "正印": "정인",
-                "比肩": "비견",
-                "劫財": "겁재",
-            }
-
-            dw_ss = _SS_KR.get(dw_ss_hanja, dw_ss_hanja)
-
-            is_yong = _get_yongshin_match(dw_ss_hanja, yongshin_ohs, ilgan_oh) == "yong"
-
-            money_advice = {
-                "식신": "재능 소득·창작 수익이 들어오는 시기",
-                "상관": "혁신적 방식으로 새 수익원 개척 시기",
-                "편재": "⭐ 투자·사업으로 크게 버는 시기 (기복 주의)",
-                "정재": "안정적 저축·자산 축적 최적 시기",
-                "편관": "⚠️ 재물 보호·손실 방어가 우선인 시기",
-                "정관": "직장·명예를 통한 합법적 소득 증가 시기",
-                "편인": "전문성 투자 시기 (미래 재물의 씨앗)",
-                "정인": "귀인을 통한 재물 기회 시기",
-                "비견": "재물 분산 주의·독립 수익 도전 시기",
-                "겁재": "❌ 재물 손실 위험·투기 절대 금지 시기",
-            }.get(dw_ss, f"{dw_ss_hanja} 기운의 운기")
-
+            is_yong = _get_yongshin_match(_raw_cg, yongshin_ohs, ilgan_oh) == "yong"
+            money_advice = _DW_MONEY_ADV.get(_kr_cg, "흐름 유지의 시기")
             yong_mark = " ★[용신 황금기]" if is_yong else ""
 
-            result.append(f"  {dw['시작나이']}~{dw['시작나이'] + 9}세 ({dw_ss_hanja}/{dw_ss}): {money_advice}{yong_mark}\n")
+            # 표시: "정관/정재: 명예와 재물이 함께 오는 대운" 형태
+            ss_display = f"{_kr_cg}/{_kr_jj}" if _kr_jj and _kr_jj != "-" else _kr_cg
+            result.append(f"  {dw['시작나이']}~{dw['시작나이'] + 9}세 ({ss_display}): {money_advice}{yong_mark}\n")
 
         result.append(
             "\n".join(
