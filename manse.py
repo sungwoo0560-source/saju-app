@@ -5399,7 +5399,7 @@ def generate_engine_highlights(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=
             "ilgan": ilgan,
             "sn": sn,
             "oh_strength": oh_strength,
-            "yongshin_ohs": get_yongshin(pils)["종합_용신"],
+            "yongshin_ohs": (get_yongshin(pils) or {}).get("종합_용신", []),
             "gyeok": get_gyeokguk(pils)["격국명"] if get_gyeokguk(pils) else "미정격",
         },
     }

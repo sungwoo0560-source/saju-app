@@ -7292,6 +7292,8 @@ BANG_HAP_MAP = {
 def get_yongshin(pils):
     """용신(用神) 종합 분석 - 억부+조후+통관"""
 
+    if not pils or len(pils) < 2:
+        return {}
     ilgan = pils[1]["cg"]
 
     wol_jj = pils[2]["jj"] if len(pils) > 2 else ""
@@ -7595,6 +7597,8 @@ def get_yukjin(ilgan, pils, gender="남", marriage="미혼"):
 def get_special_stars(pils):
     """신살 계산 (tab_special_stars에서 분리)"""
 
+    if not pils or len(pils) < 2:
+        return []
     ilgan = pils[1]["cg"]
 
     pil_jjs = [p["jj"] for p in pils]
@@ -7761,6 +7765,8 @@ def get_yongshin_multilayer(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0, 
     """다층 용신 분석 (1순위~3순위 + 희신 + 기신 + 대운별 용신)"""
     if target_year is None:
         target_year = datetime.now().year
+    if not pils or len(pils) < 2:
+        return {}
     ys = get_yongshin(pils)
     yong_list = ys.get("종합_용신", []) if isinstance(ys.get("종합_용신"), list) else []
     ilgan = pils[1]["cg"]
@@ -12182,6 +12188,8 @@ def _nar_past(ctx):
 
 def build_life_analysis(pils, gender):
     """십성 2-조합으로 인생 전체를 읽는 핵심 엔진"""
+    if not pils or len(pils) < 2:
+        return {}
     ilgan = pils[1]["cg"]
     ss_count = {}
     for p in pils:

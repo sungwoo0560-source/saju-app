@@ -863,7 +863,7 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str=""):
 
                 _gkgrade = _gk.get("격의_등급", "") if _gk else ""
 
-                _sn = _si["신강신약"]
+                _sn = _si.get("신강신약", "중화") if _si else "중화"
 
                 _score = _si.get("일간점수", 50)
 

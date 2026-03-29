@@ -825,6 +825,8 @@ def get_good_days(pils, year, month):
 
     import calendar
 
+    if not pils or len(pils) < 2:
+        return []
     ilgan = pils[1]["cg"]
     il_jj = pils[1]["jj"]
 
@@ -1446,6 +1448,9 @@ class SajuCoreEngine:
         gender="남",
     ):
         """대운 계산 - 정밀 모드"""
+
+        if not pils or len(pils) < 4:
+            return []
 
         # 연간의 음양 (년주의 천간 기준)
 
