@@ -20872,16 +20872,22 @@ def main():
 
         .stButton>button { font-size: 13px !important; min-height: 44px !important; white-space: nowrap !important; word-break: keep-all !important; padding: 6px 8px !important; }
 
-        /* 모바일: 텍스트 줄바꿈 전체 강제 */
-        * {
-            word-break: break-all !important;
+        /* 모바일: 텍스트 줄바꿈 — 한국어 최적화 */
+        p, li, td, span, div {
+            word-break: keep-all !important;
             overflow-wrap: break-word !important;
             white-space: normal !important;
         }
-        /* 버튼·배지는 줄바꿈 예외 */
-        button, .stButton button, [data-baseweb="tab"] {
+        /* 버튼·배지·탭은 줄바꿈 예외 */
+        button, .stButton button, [data-baseweb="tab"],
+        [data-baseweb="badge"], .stMetric {
             white-space: nowrap !important;
             word-break: keep-all !important;
+        }
+        /* 입력 필드 iOS 줌 방지 (16px 이상) */
+        input[type="text"], input[type="number"],
+        input[type="date"], select, textarea {
+            font-size: 16px !important;
         }
 
         /* 모바일: 2열 그리드 → 1열 강제 */
@@ -20952,7 +20958,48 @@ def main():
 
         .gold-section { font-size: 13px; }
 
-        .stButton>button { font-size: 11px !important; min-height: 44px !important; white-space: normal !important; word-break: keep-all !important; line-height: 1.3 !important; padding: 4px 6px !important; }
+        /* 버튼 터치 영역 최적화 */
+        .stButton>button {
+            font-size: 13px !important;
+            min-height: 48px !important;
+            white-space: normal !important;
+            word-break: keep-all !important;
+            line-height: 1.4 !important;
+            padding: 8px 10px !important;
+            border-radius: 10px !important;
+        }
+
+        /* 입력 폼 터치 최적화 */
+        input, select, textarea {
+            font-size: 16px !important;
+            min-height: 44px !important;
+        }
+
+        /* selectbox 터치 최적화 */
+        [data-baseweb="select"] {
+            min-height: 44px !important;
+        }
+
+        /* date_input 터치 최적화 */
+        [data-baseweb="input"] {
+            min-height: 44px !important;
+            font-size: 16px !important;
+        }
+
+        /* 카드 내부 여백 축소 */
+        div[data-testid="stMarkdownContainer"] div[style*="padding"] {
+            padding: 12px !important;
+        }
+
+        /* 사주 명식 글자 크기 */
+        .saju-cell { font-size: 28px !important; }
+
+        /* expander 헤더 터치 영역 */
+        [data-testid="stExpander"] summary {
+            min-height: 48px !important;
+            display: flex !important;
+            align-items: center !important;
+        }
 
         /* 탭 레이블 480px — 13px 유지 */
         button[data-baseweb="tab"] {
