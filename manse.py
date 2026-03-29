@@ -21984,6 +21984,50 @@ def main():
             unsafe_allow_html=True,
         )
 
+        # ── 사주 공유 URL 복사 버튼 ──────────────────────────
+        try:
+            _sd = _ss.get("in_solar_date")
+            if _sd and _ss.get("saju_pils"):
+                _by = _sd.year if hasattr(_sd,"year") else birth_year
+                _bm = _sd.month if hasattr(_sd,"month") else 1
+                _bd = _sd.day if hasattr(_sd,"day") else 1
+                _bh  = _ss.get("birth_hour", 12)
+                _bmi = _ss.get("birth_minute", 0)
+                _gen = "f" if _ss.get("in_gender","남") == "여" else "m"
+                _nm  = _ss.get("in_name","")
+                _mar = _ss.get("in_marriage","")
+                _cal = "l" if _ss.get("in_cal_type","양력") == "음력" else "s"
+                _base_url = "https://saju-manse.streamlit.app"
+                _share_url = (
+                    f"{_base_url}/?by={_by}&bm={_bm}&bd={_bd}"
+                    f"&bh={_bh}&bmin={_bmi}&g={_gen}"
+                )
+                if _nm:
+                    _share_url += f"&n={_nm}"
+                if _mar:
+                    _share_url += f"&mar={_mar}"
+                if _cal == "l":
+                    _share_url += "&cal=l"
+
+                st.markdown("**🔗 사주 공유**")
+                st.code(_share_url, language=None)
+                st.markdown(
+                    f"""
+<button onclick="navigator.clipboard.writeText('{_share_url}').then(()=>{{
+    this.textContent='✅ 복사됐습니다!';
+    setTimeout(()=>this.textContent='📋 링크 복사',1500);
+}})" style="
+    background:#1a1a2e;border:1.5px solid #d4af37;border-radius:10px;
+    color:#d4af37;font-size:13px;font-weight:700;padding:8px 20px;
+    cursor:pointer;width:100%;margin-top:4px;
+">📋 링크 복사</button>
+""",
+                    unsafe_allow_html=True,
+                )
+                st.caption("링크를 카톡/문자로 보내면 상대방이 클릭 시 바로 사주가 열립니다")
+        except Exception:
+            pass
+
         fav_c1, fav_c2 = st.columns([3, 1])
 
         with fav_c1:
