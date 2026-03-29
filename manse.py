@@ -19757,11 +19757,71 @@ def menu_gaewoon(pils, name, birth_year, gender):
         ("SNS·뉴스 부정 콘텐츠 과다 소비", "하루 1시간 이상 부정 정보는 뇌와 기운장을 오염시킨다"),
     ]
     _HSM_PRAY = {
-        "木": "동방청룡의 기운이여, 나의 길을 열어주소서\n막힌 곳은 뚫리고 시든 곳은 살아나리니\n이 한 몸 성장과 창조의 흐름 위에 올려주소서",
-        "火": "남방주작의 기운이여, 나의 열정을 밝혀주소서\n꺼진 불씨를 다시 피워 빛을 발하게 하시니\n이 한 몸 연결과 표현의 불꽃 위에 세워주소서",
-        "土": "중앙황제의 기운이여, 나의 터전을 굳건히 하소서\n흔들리는 땅을 다지고 씨앗을 심어주시니\n이 한 몸 안정과 풍요의 대지 위에 뿌리내리게 하소서",
-        "金": "서방백호의 기운이여, 나의 의지를 날카롭게 하소서\n흐린 것을 베고 굳건한 결단을 주시니\n이 한 몸 명예와 의리의 길 위에 세워주소서",
-        "水": "북방현무의 기운이여, 나의 지혜를 깊게 하소서\n막힌 물줄기를 열어 흐르게 하시니\n이 한 몸 통찰과 흐름의 물결 위에 띄워주소서",
+        "木": (
+            "동방(東方)을 주관하시는 청룡(靑龍)의 기운이여,\n"
+            "이 몸에 깃든 목(木)의 기운을 활짝 열어주소서.\n\n"
+            "하늘을 향해 곧게 뻗는 거목(巨木)처럼\n"
+            "나의 앞길을 가로막는 모든 장애물을 뚫어주시고,\n"
+            "시들어가는 뜻과 꿈에 다시 생기를 불어넣어 주소서.\n\n"
+            "봄비처럼 내리는 천기(天機)의 은혜로\n"
+            "내 사업과 재물의 씨앗이 땅속에서 힘차게 싹을 틔우게 하시고,\n"
+            "귀인(貴人)의 손길이 나를 향해 뻗어오게 하소서.\n\n"
+            "갑(甲)과 을(乙)의 기운이 나와 함께하여\n"
+            "이 홍수맥(洪水脈)의 문이 활짝 열리기를 간절히 바라나이다.\n"
+            "천지신명(天地神明)이시여, 굽어살피소서."
+        ),
+        "火": (
+            "남방(南方)을 주관하시는 주작(朱雀)의 기운이여,\n"
+            "이 몸에 깃든 화(火)의 기운을 활짝 밝혀주소서.\n\n"
+            "한낮의 태양처럼 뜨겁게 타오르는 열정으로\n"
+            "나의 이름을 세상에 드러내주시고,\n"
+            "꺼져가는 가슴속 불씨를 다시 활활 피워주소서.\n\n"
+            "남방의 붉은 기운이 나를 감싸\n"
+            "만나는 이마다 나의 진가를 알아보게 하시고,\n"
+            "재물과 명예의 불꽃이 내 삶을 환히 비추게 하소서.\n\n"
+            "병(丙)과 정(丁)의 기운이 나와 함께하여\n"
+            "이 홍수맥(洪水脈)의 문이 활짝 열리기를 간절히 바라나이다.\n"
+            "천지신명(天地神明)이시여, 굽어살피소서."
+        ),
+        "土": (
+            "중앙(中央)을 주관하시는 황제(黃帝)의 기운이여,\n"
+            "이 몸에 깃든 토(土)의 기운을 굳건히 세워주소서.\n\n"
+            "태산(泰山)처럼 흔들리지 않는 반석 위에\n"
+            "나의 삶과 재물의 터전을 다져주시고,\n"
+            "오곡(五穀)이 풍성히 여무는 옥토(沃土)처럼\n"
+            "내가 심는 모든 씨앗이 결실을 맺게 하소서.\n\n"
+            "중앙의 황금 기운이 나를 감싸\n"
+            "신뢰와 믿음이 쌓이고 인복(人福)이 모여들게 하시고,\n"
+            "안정과 풍요의 땅이 내 발아래 펼쳐지게 하소서.\n\n"
+            "무(戊)와 기(己)의 기운이 나와 함께하여\n"
+            "이 홍수맥(洪水脈)의 문이 활짝 열리기를 간절히 바라나이다.\n"
+            "천지신명(天地神明)이시여, 굽어살피소서."
+        ),
+        "金": (
+            "서방(西方)을 주관하시는 백호(白虎)의 기운이여,\n"
+            "이 몸에 깃든 금(金)의 기운을 날카롭게 벼려주소서.\n\n"
+            "천하를 베는 보검(寶劍)처럼\n"
+            "나의 앞을 가로막는 모든 어둠을 단숨에 물리쳐 주시고,\n"
+            "불의와 혼탁함을 끊어내어 내 길을 밝혀주소서.\n\n"
+            "서방의 흰 기운이 나를 감싸\n"
+            "결단력과 의지가 철석같이 굳어지게 하시고,\n"
+            "명예와 의리의 열매가 내 삶에 가득하게 하소서.\n\n"
+            "경(庚)과 신(辛)의 기운이 나와 함께하여\n"
+            "이 홍수맥(洪水脈)의 문이 활짝 열리기를 간절히 바라나이다.\n"
+            "천지신명(天地神明)이시여, 굽어살피소서."
+        ),
+        "水": (
+            "북방(北方)을 주관하시는 현무(玄武)의 기운이여,\n"
+            "이 몸에 깃든 수(水)의 기운을 깊고 넓게 흐르게 하소서.\n\n"
+            "대해(大海)의 깊이로 세상의 이치를 꿰뚫어 보게 하시고,\n"
+            "막힌 물줄기를 활짝 열어 재물이 강물처럼 흘러들게 하소서.\n\n"
+            "북방의 검은 기운이 나를 감싸\n"
+            "숨겨진 기회와 귀인(貴人)이 어둠 속에서 나타나게 하시고,\n"
+            "통찰과 지혜의 빛이 내 판단을 밝혀주소서.\n\n"
+            "임(壬)과 계(癸)의 기운이 나와 함께하여\n"
+            "이 홍수맥(洪水脈)의 문이 활짝 열리기를 간절히 바라나이다.\n"
+            "천지신명(天地神明)이시여, 굽어살피소서."
+        ),
     }
     _rx_hsm       = _HSM_RX.get(_yong1_gw, _HSM_RX["木"])
     _pray_text_hsm = _HSM_PRAY.get(_yong1_gw, "하늘이여, 나의 용신 기운을 강하게 하소서")
@@ -20273,15 +20333,51 @@ def menu_gaewoon(pils, name, birth_year, gender):
 
         # ── 기도문 ────────────────────────────────────────────────
         _pray_time12 = _rx_hsm.get("기도시간", "용신 시간에")
+        _pray_dir = {"木":"동쪽","火":"남쪽","土":"중앙","金":"서쪽","水":"북쪽"}.get(_yong1_gw,"북쪽")
+        _pray_color = {"木":"#52be80","火":"#e74c3c","土":"#f39c12","金":"#bdc3c7","水":"#3498db"}.get(_yong1_gw,"#a89cc8")
+        _oh_kor = {"木":"목","火":"화","土":"토","金":"금","水":"수"}.get(_yong1_gw,"")
         st.markdown(
-            f'<div style="background:linear-gradient(135deg,#1a1035,#2d1f5e);'
-            f'border:2px solid {_hsm_accent};border-radius:14px;padding:16px 20px;text-align:center;">'
-            f'<div style="font-size:13px;font-weight:900;color:{_hsm_accent};margin-bottom:8px;">'
-            f'🙏 홍수맥 기도문 — 용신 {_yong1_gw} 오행</div>'
-            f'<div style="font-size:15px;color:#e8d5f5;font-style:italic;line-height:2.0;white-space:pre-line;">'
-            f'"{_pray_text_hsm}"</div>'
-            f'<div style="font-size:11px;color:#a89cc8;margin-top:8px;">'
-            f'매일 {_pray_time12}을 향해 3번 읊으십시오. 21일 연속 실천하면 하늘이 응답하느니라.</div>'
+            f'<div style="background:linear-gradient(135deg,#0d0820,#1a1035,#2d1f5e);'
+            f'border:2px solid {_pray_color};border-radius:18px;padding:24px 28px;'
+            f'text-align:center;box-shadow:0 0 30px {_pray_color}44;margin-top:8px;">'
+
+            f'<div style="font-size:11px;letter-spacing:4px;color:{_pray_color};'
+            f'font-weight:900;margin-bottom:6px;">🙏 홍수맥 천명 기도문</div>'
+
+            f'<div style="font-size:13px;color:#c8b8e8;margin-bottom:16px;">'
+            f'용신 {_yong1_gw}({_oh_kor}) 오행 — {_pray_dir}을 향해 읊으소서</div>'
+
+            f'<div style="background:rgba(255,255,255,0.04);border:1px solid {_pray_color}44;'
+            f'border-radius:12px;padding:20px;margin-bottom:16px;">'
+            f'<div style="font-size:14px;color:#f0e6ff;line-height:2.4;white-space:pre-line;'
+            f'font-family:serif;letter-spacing:1px;">{_pray_text_hsm}</div>'
+            f'</div>'
+
+            f'<div style="display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin-bottom:12px;">'
+            f'<div style="background:rgba(255,255,255,0.06);border-radius:10px;padding:8px 16px;">'
+            f'<div style="font-size:10px;color:#a89cc8;">⏰ 기도 시간</div>'
+            f'<div style="font-size:12px;color:#e8d5f5;font-weight:700;">{_pray_time12}</div>'
+            f'</div>'
+            f'<div style="background:rgba(255,255,255,0.06);border-radius:10px;padding:8px 16px;">'
+            f'<div style="font-size:10px;color:#a89cc8;">🧭 기도 방향</div>'
+            f'<div style="font-size:12px;color:#e8d5f5;font-weight:700;">{_pray_dir}</div>'
+            f'</div>'
+            f'<div style="background:rgba(255,255,255,0.06);border-radius:10px;padding:8px 16px;">'
+            f'<div style="font-size:10px;color:#a89cc8;">🔁 횟수</div>'
+            f'<div style="font-size:12px;color:#e8d5f5;font-weight:700;">하루 3번</div>'
+            f'</div>'
+            f'<div style="background:rgba(255,255,255,0.06);border-radius:10px;padding:8px 16px;">'
+            f'<div style="font-size:10px;color:#a89cc8;">📅 기간</div>'
+            f'<div style="font-size:12px;color:#e8d5f5;font-weight:700;">21일 연속</div>'
+            f'</div>'
+            f'</div>'
+
+            f'<div style="font-size:12px;color:#c8a8e8;line-height:1.8;border-top:1px solid {_pray_color}33;'
+            f'padding-top:12px;">'
+            f'🌟 <b>21일 법칙</b> — 매일 같은 시간, 같은 방향, 같은 마음으로 읊을 것.<br>'
+            f'마음이 흔들릴 때도 입술로 읊으면 하늘이 듣느니라.<br>'
+            f'<span style="color:{_pray_color};font-weight:700;">21일 연속 완성 시 홍수맥이 반드시 열리느니라.</span>'
+            f'</div>'
             f'</div>',
             unsafe_allow_html=True,
         )
