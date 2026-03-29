@@ -837,7 +837,32 @@ def _local_saju_engine(pils, name, birth_year, gender, query):
     is_elderly     = bool(_re.search(r"노후|말년|은퇴|노년|60세|70세|80세|늙어서|나중에|수명|장수|오래살", q))
     is_childcare   = bool(_re.search(r"자녀진로|아이진로|아이공부|자녀교육|아이적성|아들사주|딸사주|자식팔자|자식운|아이운", q))
 
-    out = [f"허허, 어서 오게. {name}의 팔자를 내 신안(神眼)으로 살펴보겠느니라.\n"]
+    # ── 개인 사주 컨텍스트 추출 ──────────────────────────────
+    try:
+        from saju_interpreter import get_yongshin
+        from saju_engine import get_ilgan_strength, get_yearly_luck as _gyl
+        _sn_info  = get_ilgan_strength(ilgan, pils)
+        _sn_val   = _sn_info.get("신강신약","중화") if _sn_info else "중화"
+        _ys_data  = get_yongshin(pils)
+        _yong_ohs = _ys_data.get("종합_용신",[])
+        _gisin    = _ys_data.get("기신",[]) if isinstance(_ys_data.get("기신"), list) else []
+        _sw_now   = _gyl(pils, current_year) or {}
+        _sw_oh    = _sw_now.get("오행_천간","")
+        _sw_ss    = _sw_now.get("십성_천간","")
+        _sw_gh    = _sw_now.get("길흉","평")
+        _OHN_ai   = {"木":"목(木)","火":"화(火)","土":"토(土)","金":"금(金)","水":"수(水)"}
+        _is_yong  = _sw_oh in _yong_ohs
+        _is_gisin = _sw_oh in _gisin
+        _luck_signal = "🟢 황금기" if _is_yong else ("🔴 주의 기간" if _is_gisin else "🟡 중립")
+        _yong_str = "·".join(_yong_ohs[:2]) if _yong_ohs else "분석중"
+    except Exception:
+        _sn_val="중화"; _yong_ohs=[]; _gisin=[]; _sw_oh=""; _sw_ss=""; _sw_gh="평"
+        _is_yong=False; _is_gisin=False; _luck_signal="🟡 중립"; _OHN_ai={}; _yong_str="분석중"
+
+    out = [
+        f"허허, 어서 오게. {name}의 팔자를 내 신안(神眼)으로 살펴보겠느니라.\n"
+        f"*[{ilgan}일간 / {_sn_val} / 용신:{_yong_str} / 올해:{_luck_signal}]*\n"
+    ]
 
     # ── 복합 질문(2개 이상 분야) 시 AICouncil 다중 전문가 헤더 ──
     _topic_count = sum([
@@ -1112,6 +1137,14 @@ def _local_saju_engine(pils, name, birth_year, gender, query):
             out.append(f"\n로또는 정가비를 즐기는 선에서 하는 것이 현명하니라. {ilgan}(일간)의 기운상 매주 소액으로 꾸준히 사는 것이 한 방보다 낫느니라!\n")
 
         elif is_money:
+            if _is_yong:
+                out.append(f"\n✅ **{name}님, 올해는 재물 황금기입니다!** "
+                           f"용신인 {_OHN_ai.get(_sw_oh,_sw_oh)} 기운이 들어오는 해로, "
+                           f"지금 움직이면 반드시 결실이 따릅니다.\n")
+            elif _is_gisin:
+                out.append(f"\n⚠️ **{name}님, 올해는 재물 조심 기간입니다.** "
+                           f"기신인 {_OHN_ai.get(_sw_oh,_sw_oh)} 기운이 들어오는 해로, "
+                           f"무리한 투자·보증·동업은 반드시 피하십시오.\n")
             gk = get_gyeokguk(pils)
             ys = get_yongshin_multilayer(pils, birth_year, gender, bm, bd, bh, bmn, current_year)
             gkn = gk["격국명"] if gk else "미정격"
@@ -1250,6 +1283,36 @@ def _local_saju_engine(pils, name, birth_year, gender, query):
                 _saju_log.debug("[silent except] %s", _e)
 
         elif is_love:
+            _LOVE_ILGAN = {
+                "甲": ("주도적이고 든든한 사람을 원합니다. 상대가 나를 따라오는 관계가 편합니다.",
+                       "포용력 있고 유연한 상대, 水·土 오행 기운의 사람이 잘 맞습니다."),
+                "乙": ("감성적이고 섬세합니다. 나를 지켜주는 강한 사람에게 끌립니다.",
+                       "든든하고 결단력 있는 金·土 오행 기운의 사람이 천생연분입니다."),
+                "丙": ("열정적이고 화끈한 연애를 합니다. 첫인상에 확 끌리는 스타일입니다.",
+                       "차분하고 깊은 水 오행 기운의 사람이 균형을 잡아줍니다."),
+                "丁": ("감성이 풍부하고 헌신적입니다. 내 진가를 알아주는 사람을 원합니다.",
+                       "안정적이고 성실한 木·土 오행 기운의 사람이 잘 맞습니다."),
+                "戊": ("믿음직하고 의리 있는 연애를 합니다. 변화를 싫어하는 편입니다.",
+                       "활기차고 역동적인 水·木 오행 기운의 사람이 생기를 불어넣습니다."),
+                "己": ("실속을 중시하고 헌신적입니다. 현실적인 판단으로 인연을 고릅니다.",
+                       "대범하고 밝은 火·金 오행 기운의 사람과 시너지가 납니다."),
+                "庚": ("한번 마음 주면 끝까지 갑니다. 의리와 원칙이 강합니다.",
+                       "온화하게 녹여줄 火·水 오행 기운의 사람이 천생연분입니다."),
+                "辛": ("완벽주의적이고 예민합니다. 나를 이해해주는 사람이 필요합니다.",
+                       "너그럽고 스케일 큰 水 오행 기운의 사람이 잘 맞습니다."),
+                "壬": ("자유롭고 지적인 연애를 원합니다. 대화가 통하는 사람이 좋습니다.",
+                       "재치 있고 활기찬 木·火 오행 기운의 사람이 잘 맞습니다."),
+                "癸": ("감수성이 풍부하고 적응력이 좋습니다. 변덕이 있는 편입니다.",
+                       "굳건하게 잡아줄 金·土 오행 기운의 사람이 천생연분입니다."),
+            }
+            _love_style, _love_match = _LOVE_ILGAN.get(ilgan, ("인연을 소중히 여깁니다.", "상생하는 오행의 상대가 좋습니다."))
+            _gender_love = "남성분" if gender == "남" else "여성분"
+            out.append(f"\n{name}님은 {_gender_love}으로, {_love_style}\n")
+            out.append(f"\n💑 **{name}님의 이상형**: {_love_match}\n")
+            if _is_yong:
+                out.append(f"\n✅ 올해는 인연 황금기! 적극적으로 나서십시오.\n")
+            elif _is_gisin:
+                out.append(f"\n⚠️ 올해는 인연 신중 기간. 충동적인 만남보다 깊이 알아가는 것이 중요합니다.\n")
             out.append(f"**{name}의 인연·결혼운 완전 분석**\n허어, 인연의 실타래를 신안으로 살펴보겠느니라.\n")
             _love_now_e = get_yearly_luck(pils, current_year) or {}
             _love_ss_e = _love_now_e.get("십성_천간","").split("(")[0]
@@ -1720,6 +1783,18 @@ def _local_saju_engine(pils, name, birth_year, gender, query):
                         out.append(f"* {d.get('age', '')}: {d.get('desc', '')}\n")
 
         elif is_job:
+            _JOB_SN = {
+                "신강":   f"{name}님은 신강(身强) 사주로 강한 에너지를 발산하는 리더형입니다. 조직 내 관리직, 창업, 영업, 대외 활동 직군이 잘 맞습니다.",
+                "극신강": f"{name}님은 극신강(極身强) 사주로 독보적인 추진력이 있습니다. 독립 사업, 전문직, 스포츠, 군경 직군에서 최고의 성과를 냅니다.",
+                "신약":   f"{name}님은 신약(身弱) 사주로 조력자와 협력할 때 빛나는 스타일입니다. 전문 자격직, 교직, 상담, 행정 지원 직군이 안정적입니다.",
+                "극신약": f"{name}님은 극신약(極身弱) 사주로 좋은 상사·멘토를 만나는 것이 성공의 핵심입니다. 대기업 조직, 공무원, 연구직이 가장 안정적입니다.",
+                "중화":   f"{name}님은 중화(中和) 사주로 어떤 직군에서도 균형 있게 적응합니다. 자신이 가장 좋아하는 분야에서 전문성을 쌓는 것이 최선입니다.",
+            }
+            _sn_key_ai = "극신강" if "극신강" in _sn_val else \
+                         "극신약" if "극신약" in _sn_val else \
+                         "신강"   if "신강"   in _sn_val else \
+                         "신약"   if "신약"   in _sn_val else "중화"
+            out.append(f"\n{_JOB_SN.get(_sn_key_ai, _JOB_SN['중화'])}\n")
             gk = get_gyeokguk(pils)
 
             gkn = gk["격국명"] if gk else "미정격"
