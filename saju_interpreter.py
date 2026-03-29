@@ -3573,20 +3573,77 @@ class LocalSajuNarrator:
                     _SS_PROSE.get(dw_ss, f"{dw_gan}({dw_ss}) 대운의 기운이 흘렀던 시기입니다.")
                 )
 
-            # 이 대운에서 가장 주목할 해 1~2개만 추출
+            # ── 이 대운에서 주목할 해 — 충/합/용신/기신 교차 ──
             peak_years = []
+            _CHUNG_PAIRS = {
+                "子":"午","午":"子","丑":"未","未":"丑",
+                "寅":"申","申":"寅","卯":"酉","酉":"卯",
+                "辰":"戌","戌":"辰","巳":"亥","亥":"巳",
+            }
+            _HAP_PAIRS = {
+                "子":"丑","丑":"子","寅":"亥","亥":"寅",
+                "卯":"戌","戌":"卯","辰":"酉","酉":"辰",
+                "巳":"申","申":"巳","午":"未","未":"午",
+            }
+            _JJ_LIST = [p["jj"] for p in pils if isinstance(p, dict) and "jj" in p]
+            _EVENT_SS = {
+                "偏財": "재물 기회·이성 인연",
+                "正財": "안정된 수입·결혼",
+                "食神": "재능 발휘·창업",
+                "傷官": "이직·구설·갈등",
+                "偏官": "사고수·건강·이동",
+                "正官": "승진·명예·취직",
+                "劫財": "재물 손실·배신",
+                "比肩": "독립·경쟁",
+                "偏印": "이사·학업·변화",
+                "正印": "귀인·자격취득",
+            }
             for yr in range(dw_start, min(dw_end + 1, cur_year + 1)):
                 try:
                     sw_yr = get_yearly_luck(pils, yr) or {}
                     sw_gh = sw_yr.get("길흉", "평")
                     sw_g  = sw_yr.get("세운", "")
+                    sw_jj = sw_yr.get("jj", "")
+                    sw_cg = sw_yr.get("cg", "")
+                    sw_ss_yr = sw_yr.get("십성_천간", "")
                     yr_oh = _OH.get(sw_g[:1], "") if sw_g else ""
                     is_ys2 = bool(yr_oh) and yr_oh in yongshin
                     is_gs2 = bool(yr_oh) and yr_oh in gisin
-                    if (sw_gh in ["길","+"] and is_ys2):
-                        peak_years.append(f"**{yr}년**({yr-birth_year+1}세) 🌟 특히 좋았던 해")
+
+                    # 충 감지 (세운 지지 vs 원국 지지)
+                    has_chung = sw_jj and any(
+                        _CHUNG_PAIRS.get(sw_jj) == jj for jj in _JJ_LIST
+                    )
+                    # 합 감지
+                    has_hap = sw_jj and any(
+                        _HAP_PAIRS.get(sw_jj) == jj for jj in _JJ_LIST
+                    )
+
+                    event_hint = _EVENT_SS.get(sw_ss_yr, "")
+                    age_yr = yr - birth_year + 1
+
+                    if sw_gh in ["길","+"] and is_ys2:
+                        tag = f"**{yr}년**({age_yr}세) 🌟 황금의 해"
+                        if event_hint:
+                            tag += f" — {event_hint} 기운 강함"
+                        peak_years.append(tag)
                     elif sw_gh in ["흉","-"] and is_gs2:
-                        peak_years.append(f"**{yr}년**({yr-birth_year+1}세) ⚠️ 특히 조심해야 했던 해")
+                        tag = f"**{yr}년**({age_yr}세) ⚠️ 조심해야 했던 해"
+                        if has_chung:
+                            tag += " — 충(沖) 발생, 환경 변동"
+                        elif event_hint:
+                            tag += f" — {event_hint} 주의"
+                        peak_years.append(tag)
+                    elif has_chung and not is_ys2:
+                        peak_years.append(
+                            f"**{yr}년**({age_yr}세) 💥 충(沖) — "
+                            f"이사·이직·관계 변동이 있었을 수 있습니다"
+                        )
+                    elif has_hap and is_ys2:
+                        peak_years.append(
+                            f"**{yr}년**({age_yr}세) 🔗 합(合) + 용신 — "
+                            f"새로운 인연·협력의 기운이 강했던 해"
+                        )
                 except Exception:
                     pass
 
@@ -3723,6 +3780,54 @@ class LocalSajuNarrator:
                         seen_events.add(_chung_key)
                 if peak_years:
                     lines.append(f"- 특히 주목할 해: {' / '.join(peak_years[:2])}")
+
+            # ── 대운 십성별 구체 사건 예측 문장 ──────────────
+            _DW_EVENT = {
+                "偏財": (
+                    f"이 시기 {name}님의 삶에는 사업·투자·이성과 관련된 큰 변화가 있었을 가능성이 높습니다. "
+                    f"돈이 크게 들어오거나 나가는 경험, 혹은 중요한 이성 인연과의 만남이 있었을 것입니다."
+                ),
+                "正財": (
+                    f"이 시기 {name}님은 안정적인 수입과 절약을 통해 재산을 쌓아가던 때였습니다. "
+                    f"결혼이나 내 집 마련, 직장 안정과 같은 현실적 기반을 다졌을 가능성이 높습니다."
+                ),
+                "食神": (
+                    f"이 시기 {name}님의 재능과 능력이 외부에 드러나고 인정받기 시작한 때였습니다. "
+                    f"새로운 일을 시작하거나, 좋아하는 분야에서 성과를 내기 시작했을 것입니다."
+                ),
+                "傷官": (
+                    f"이 시기 {name}님은 기존 환경에 답답함을 느끼고 변화를 시도하던 때였습니다. "
+                    f"이직·창업·전공 변경·윗사람과의 갈등 등이 있었을 가능성이 높습니다."
+                ),
+                "偏官": (
+                    f"이 시기 {name}님에게는 외부의 강한 압박과 도전이 있었습니다. "
+                    f"건강 문제, 사고수, 법적 문제, 또는 강한 경쟁이 있었을 수 있습니다. "
+                    f"힘든 시기였지만 이를 이겨낸 것이 지금의 {name}님을 강하게 만들었습니다."
+                ),
+                "正官": (
+                    f"이 시기 {name}님은 조직과 사회 안에서 자리를 잡고 인정받던 때였습니다. "
+                    f"취직·승진·자격 취득·결혼 등 사회적으로 안정되는 이벤트가 있었을 것입니다."
+                ),
+                "劫財": (
+                    f"이 시기 {name}님에게는 예상치 못한 재물 손실이나 배신의 경험이 있었을 수 있습니다. "
+                    f"믿었던 사람과의 갈등, 동업 파탄, 경쟁에서의 손실 등이 있었을 가능성이 높습니다."
+                ),
+                "比肩": (
+                    f"이 시기 {name}님은 독립하거나 자신만의 길을 개척하려 했던 때였습니다. "
+                    f"형제·동료와의 경쟁이나 갈등, 또는 혼자서 무언가를 시작한 경험이 있었을 것입니다."
+                ),
+                "偏印": (
+                    f"이 시기 {name}님은 새로운 공부나 기술 습득, 이사·이직 등 환경 변화가 잦았습니다. "
+                    f"기존의 것을 내려놓고 새로운 방향을 모색하던 전환의 시기였을 것입니다."
+                ),
+                "正印": (
+                    f"이 시기 {name}님은 배움과 귀인의 도움이 함께했던 때였습니다. "
+                    f"학업·자격·어머니와의 인연, 또는 든든한 후원자가 나타났을 가능성이 높습니다."
+                ),
+            }
+            _dw_event_txt = _DW_EVENT.get(_dw_ss_hj, "")
+            if _dw_event_txt and not is_future:
+                lines.append(f"\n💡 **이 시기 주요 사건 예측**: {_dw_event_txt}")
 
             # 대운 서술
             if not is_future:
