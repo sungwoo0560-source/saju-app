@@ -4469,7 +4469,7 @@ def get_ai_interpretation(
 # ✅ BUG 3 FIX: hash_funcs를 사용하여 dict 인수 해싱 가능하게 처리
 
 
-@st.cache_data(hash_funcs={dict: lambda d: json.dumps(d, sort_keys=True, default=str)})
+# @cache_data 제거 — session_state 내부 접근으로 캐시 불가
 def build_past_events(pils, birth_year, gender):
     """
 

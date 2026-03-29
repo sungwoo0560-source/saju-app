@@ -1925,7 +1925,7 @@ def get_monthly_luck(pils, year, month):
     """월운 계산 - 오호둔월법으로 월간(천간) 계산 후 십성 산출"""
 
     if not pils:
-        return None
+        return {}
 
     ilgan = pils[1]["cg"]
 
