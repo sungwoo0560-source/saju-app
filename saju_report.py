@@ -273,11 +273,23 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str=""):
 
                 return y - 3 * mm
 
+            _page_num = [1]
+
+            def _draw_footer(c):
+                c.setStrokeColorRGB(0.75, 0.65, 0.25)
+                c.setLineWidth(0.3)
+                c.line(MARGIN, BOT - 3*mm, W - MARGIN, BOT - 3*mm)
+                c.setFillColorRGB(0.5, 0.45, 0.35)
+                c.setFont(BASE_FONT, 8)
+                c.drawString(MARGIN, BOT - 7*mm, "만세력 사주 천명풀이")
+                c.drawRightString(W - MARGIN, BOT - 7*mm, f"{_page_num[0]}p")
+                c.drawCentredString(W/2, BOT - 7*mm, f"{name} 님의 사주 리포트")
+
             def new_page(c):
-
+                _draw_footer(c)
+                _page_num[0] += 1
                 c.showPage()
-
-                return H - 24 * mm
+                return H - 24*mm
 
             # 비BMP 이모지 + 특수기호 → PDF 안전 텍스트 변환
 
@@ -483,32 +495,31 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str=""):
 
                 return y
 
+            _section_num = [0]
+
             def section_title(c, text, y):
 
                 if y < 42 * mm:
                     y = new_page(c)
 
-                # 골드 배경 바
+                _section_num[0] += 1
 
                 c.setFillColorRGB(0.15, 0.12, 0.05)
-
                 c.rect(
-                    MARGIN - 3 * mm,
-                    y - 2 * mm,
-                    W - 2 * MARGIN + 6 * mm,
-                    9 * mm,
-                    fill=1,
-                    stroke=0,
+                    MARGIN - 3*mm, y - 2*mm,
+                    W - 2*MARGIN + 6*mm, 9*mm,
+                    fill=1, stroke=0,
                 )
-
                 c.setFillColorRGB(0.97, 0.88, 0.38)
-
+                c.rect(MARGIN - 3*mm, y - 2*mm, 2*mm, 9*mm, fill=1, stroke=0)
+                c.setFillColorRGB(0.97, 0.88, 0.38)
                 c.setFont(BASE_FONT, 14)
+                c.drawString(MARGIN + 2*mm, y + 1.5*mm, text)
+                c.setFillColorRGB(0.65, 0.58, 0.28)
+                c.setFont(BASE_FONT, 9)
+                c.drawRightString(W - MARGIN, y + 1.5*mm, f"[ {_section_num[0]} ]")
 
-                c.drawString(MARGIN + 1 * mm, y + 1.5 * mm, text)
-
-                y -= 11 * mm
-
+                y -= 11*mm
                 return y
 
             def subsection(c, text, y):
@@ -663,47 +674,68 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str=""):
 
                 return y
 
-            # == 표지 ==
-
-            c.setFillColorRGB(0.05, 0.05, 0.05)
-
-            c.rect(0, H - 55 * mm, W, 55 * mm, fill=1, stroke=0)
-
+            # == 표지 개선 ==
+            c.setFillColorRGB(0.08, 0.06, 0.02)
+            c.rect(0, H - 70*mm, W, 70*mm, fill=1, stroke=0)
+            c.setStrokeColorRGB(0.97, 0.88, 0.38)
+            c.setLineWidth(1.5)
+            c.line(MARGIN, H - 58*mm, W - MARGIN, H - 58*mm)
+            c.line(MARGIN, H - 12*mm, W - MARGIN, H - 12*mm)
             c.setFillColorRGB(0.97, 0.90, 0.42)
-
-            c.setFont(BASE_FONT, 24)
-
-            c.drawCentredString(W / 2, H - 28 * mm, "만신 사주 천명풀이")
-
-            c.setFillColorRGB(0.85, 0.85, 0.85)
-
-            c.setFont(BASE_FONT, 11)
-
-            c.drawCentredString(W / 2, H - 36 * mm, "사주팔자 / 천명을 밝히다")
-
-            c.setFillColorRGB(0.7, 0.7, 0.7)
-
+            c.setFont(BASE_FONT, 26)
+            c.drawCentredString(W/2, H - 28*mm, "만신 사주 천명풀이")
+            c.setFillColorRGB(0.85, 0.82, 0.70)
+            c.setFont(BASE_FONT, 12)
+            c.drawCentredString(W/2, H - 38*mm, "사주팔자 / 천명을 밝히다")
+            c.setFillColorRGB(0.65, 0.62, 0.55)
             c.setFont(BASE_FONT, 9)
+            c.drawCentredString(W/2, H - 47*mm,
+                f"출력일: {_dt.now().strftime('%Y년 %m월 %d일')}")
+            c.setFillColorRGB(0.15, 0.12, 0.05)
+            c.roundRect(MARGIN, H - 100*mm, W - 2*MARGIN, 25*mm, 4*mm, fill=1, stroke=0)
+            c.setFillColorRGB(0.97, 0.90, 0.42)
+            c.setFont(BASE_FONT, 16)
+            c.drawCentredString(W/2, H - 82*mm, f"{name}  님의 사주 리포트")
+            c.setFillColorRGB(0.85, 0.82, 0.70)
+            c.setFont(BASE_FONT, 10)
+            _g_str = "남성" if gender == "남" else "여성"
+            c.drawCentredString(W/2, H - 91*mm,
+                f"{birth_year}년생  |  {_g_str}  |  출생시: {birth_hour_str or '미입력'}")
 
-            c.drawCentredString(
-                W / 2,
-                H - 44 * mm,
-                f"출력일: {_dt.now().strftime('%Y년 %m월 %d일 %H:%M')}",
-            )
+            y = H - 108*mm
 
-            y = H - 62 * mm
+            try:
+                from saju_engine import get_ilgan_strength
+                from saju_interpreter import get_yongshin, get_gyeokguk
+                _ilgan_cv = pils[1]["cg"]
+                _sn_cv = get_ilgan_strength(_ilgan_cv, pils)
+                _sn_str = _sn_cv.get("신강신약","") if _sn_cv else ""
+                _ys_cv = get_yongshin(pils)
+                _yong_str = "·".join(_ys_cv.get("종합_용신",[])[:2]) if _ys_cv else ""
+                _gk_cv = get_gyeokguk(pils)
+                _gk_str = _gk_cv.get("격국명","") if _gk_cv else ""
+                _info_items = [
+                    ("일간(日干)", _ilgan_cv),
+                    ("격국(格局)", _gk_str or "-"),
+                    ("신강신약", _sn_str or "-"),
+                    ("용신(用神)", _yong_str or "-"),
+                ]
+                _box_w = (W - 2*MARGIN - 3*3*mm) / 4
+                for _bi, (_lbl, _val) in enumerate(_info_items):
+                    _bx = MARGIN + _bi * (_box_w + 3*mm)
+                    c.setFillColorRGB(0.95, 0.92, 0.82)
+                    c.roundRect(_bx, y - 16*mm, _box_w, 16*mm, 2*mm, fill=1, stroke=0)
+                    c.setFillColorRGB(0.45, 0.32, 0.08)
+                    c.setFont(BASE_FONT, 8)
+                    c.drawCentredString(_bx + _box_w/2, y - 6*mm, _lbl)
+                    c.setFillColorRGB(0.15, 0.10, 0.02)
+                    c.setFont(BASE_FONT, 11)
+                    c.drawCentredString(_bx + _box_w/2, y - 13*mm, _val)
+                y -= 20*mm
+            except Exception:
+                pass
 
-            # -- 이름/생년월일 --
-
-            y = write(
-                c,
-                f"대상: {name}  |  성별: {gender}  |  출생연도: {birth_year}년",
-                y,
-                size=11,
-                color=(0.2, 0.2, 0.2),
-            )
-
-            y -= 3 * mm
+            y -= 3*mm
 
             ilgan = pils[1]["cg"]
 
@@ -2305,6 +2337,7 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str=""):
                 f"만신 사주 천명풀이  |  {_dt.now().strftime('%Y.%m.%d')} 출력",
             )
 
+            _draw_footer(c)
             c.save()
 
             buf.seek(0)
