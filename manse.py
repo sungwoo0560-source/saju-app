@@ -20242,11 +20242,13 @@ def menu_gaewoon(pils, name, birth_year, gender):
                     story.append(Paragraph(_safe(f"  {_k}: {_rx.get(_k,'')}"), _sI))
                 story.append(_sp(3))
         if _gis_gw:
-            story.append(Paragraph(_safe("[ 기신 오행 - 피해야 할 것 ]"), _sB))
+            story.append(Paragraph(_safe("[ 기신 오행 차단 처방 ]"), _sB))
             for _goh in _gis_gw:
-                _grx = _OH_RX_GW.get(_goh)
-                if _grx:
-                    story.append(Paragraph(_safe(f"  {_goh} 기신: {_grx.get('색상','')} 색상 / {_grx.get('방위','')} 방위 / {_grx.get('음식','')} 음식 자제"), _sWn))
+                _grx_pdf = _GIS_RX.get(_goh)
+                if _grx_pdf:
+                    story.append(Paragraph(_safe(f"  ▶ {_goh} 기신 차단"), _sWn))
+                    for _gk in ["차단방위","피할색상","피할음식","피할소품","차단비방","대체처방","21일차단","주의사항"]:
+                        story.append(Paragraph(_safe(f"    - {_gk}: {_grx_pdf.get(_gk,'')}"), _sI))
         story.append(PageBreak())
 
         # ── 제2장: 올해 타이밍 처방 ───────────────────────────────
@@ -20493,6 +20495,11 @@ def menu_gaewoon(pils, name, birth_year, gender):
         story.append(Paragraph(_safe(f"  {_dw_label}"), _sI))
         story.append(Paragraph(_safe(f"  {_sw_label}"), _sI))
         story.append(_sp(3))
+        if _grade_acts_hsm:
+            story.append(Paragraph(_safe(f"[ 홍수맥 {_hsm_grade} — 지금 당장 해야 할 것 ]"), _sB))
+            for _act_pdf in _grade_acts_hsm:
+                story.append(Paragraph(_safe(f"  {_act_pdf}"), _sI))
+            story.append(_sp(3))
         story.append(Paragraph(_safe(f"[ 홍수맥 여는 맞춤 처방 - 용신 {_yong1_gw} 오행 ]"), _sB))
         for _k12, _v12 in _rx_hsm.items():
             story.append(Paragraph(_safe(f"  - {_k12}: {_v12}"), _sI))
@@ -20508,7 +20515,7 @@ def menu_gaewoon(pils, name, birth_year, gender):
         story.append(_sp(3))
         story.append(Paragraph(_safe(f"[ 홍수맥 기도문 - 용신 {_yong1_gw} 오행 ]"), _sB))
         story.append(Paragraph(_safe(f"  \"{_pray_text_hsm}\""), _sHl))
-        story.append(Paragraph(_safe(f"  매일 {_rx_hsm.get('기도','용신 시간')}을 향해 3번 읊으십시오. 21일 연속 실천하면 하늘이 응답하느니라."), _sI))
+        story.append(Paragraph(_safe(f"  매일 {_rx_hsm.get('기도시간','용신 시간에')}을 향해 3번 읊으십시오. 21일 연속 실천하면 하늘이 응답하느니라."), _sI))
         story.append(PageBreak())
 
         # ── 마지막 페이지 ─────────────────────────────────────────
