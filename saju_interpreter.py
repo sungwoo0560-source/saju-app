@@ -5673,17 +5673,41 @@ class LocalSajuNarrator:
         _love_ss_target = _love_ss_male if gender == "남" else _love_ss_female
 
         _love_peaks = []
+        _orig_jjs_r = {p.get("jj","") for p in pils}
+        _JJ_CHUNG_R = {
+            "子":"午","午":"子","丑":"未","未":"丑",
+            "寅":"申","申":"寅","卯":"酉","酉":"卯",
+            "辰":"戌","戌":"辰","巳":"亥","亥":"巳",
+        }
         for yr in range(cur_year, cur_year + 10):
             try:
-                sw_yr = get_yearly_luck(pils, yr) or {}
-                yr_ss = sw_yr.get("십성_천간","")
-                yr_oh = _OH.get(sw_yr.get("세운","")[:1], "")
-                is_ys = bool(yr_oh) and yr_oh in yongshin
-                is_love = yr_ss in _love_ss_target
-                if is_ys and is_love:
-                    _love_peaks.append(f"**{yr}년** ({yr-birth_year+1}세) 🌟 최고 인연운")
+                sw_yr  = get_yearly_luck(pils, yr) or {}
+                yr_ss  = sw_yr.get("십성_천간","")
+                yr_jj  = sw_yr.get("jj","")
+                yr_oh  = _OH.get(sw_yr.get("세운","")[:1], "")
+                is_ys  = bool(yr_oh) and yr_oh in yongshin
+                is_love= yr_ss in _love_ss_target
+                chung_t = _JJ_CHUNG_R.get(yr_jj,"")
+                has_chung_r = bool(chung_t) and chung_t in _orig_jjs_r
+                if is_ys and is_love and has_chung_r:
+                    _love_peaks.append(
+                        f"**{yr}년** ({yr-birth_year+1}세) 🌟💥 최고 인연운+충 — "
+                        f"강한 만남·이별이 교차하는 변곡점"
+                    )
+                elif is_ys and is_love:
+                    _love_peaks.append(
+                        f"**{yr}년** ({yr-birth_year+1}세) 🌟 최고 인연운 — "
+                        f"적극적으로 나서십시오"
+                    )
+                elif is_love and has_chung_r:
+                    _love_peaks.append(
+                        f"{yr}년 ({yr-birth_year+1}세) 💥 인연+충 — "
+                        f"만남과 이별이 동시에 올 수 있는 해"
+                    )
                 elif is_love:
-                    _love_peaks.append(f"{yr}년 ({yr-birth_year+1}세) ✅ 인연 기운")
+                    _love_peaks.append(
+                        f"{yr}년 ({yr-birth_year+1}세) ✅ 인연 기운 — {yr_ss}"
+                    )
             except Exception:
                 _saju_log.warning("[relations] 오류: %s", sys.exc_info()[1])
 
