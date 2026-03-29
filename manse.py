@@ -20010,29 +20010,85 @@ def menu_gaewoon(pils, name, birth_year, gender):
             f'</div>',
             unsafe_allow_html=True,
         )
+        # ── 등급별 집중 처방 ──────────────────────────────────────
+        if _grade_acts_hsm:
+            _GRADE_COLOR = {"최강":"#1a5276","강함":"#154360","보통":"#1a3a4a","준비기":"#1e4d2b","수성기":"#4a1942"}
+            _grade_bg = _GRADE_COLOR.get(_hsm_grade, "#1a5276")
+            _acts_html = (
+                f'<div style="font-size:14px;font-weight:900;color:{_hsm_accent};margin-bottom:8px;">'
+                f'📌 홍수맥 {_hsm_grade} — 지금 당장 해야 할 것</div>'
+            )
+            for _act12 in _grade_acts_hsm:
+                _acts_html += (
+                    f'<div style="padding:5px 0 5px 10px;border-left:3px solid {_hsm_accent};'
+                    f'margin-bottom:4px;color:#1a1a2e;">{_act12}</div>'
+                )
+            st.markdown(
+                f'<div style="background:linear-gradient(135deg,{_grade_bg}22,{_grade_bg}11);'
+                f'border:2px solid {_hsm_accent};border-radius:12px;padding:14px 18px;margin-bottom:10px;">'
+                f'{_acts_html}</div>',
+                unsafe_allow_html=True,
+            )
+
+        # ── 용신 오행 상세 처방 ───────────────────────────────────
+        _RX12_LABEL = {
+            "이사방위": "이사·이동 방위",
+            "천직":     "천직·적합 직업",
+            "용신색상": "용신 색상 처방",
+            "용신음식": "용신 음식 처방",
+            "기도시간": "기도 시간·방향",
+            "풍수소품": "풍수·인테리어 소품",
+            "강화비방": "강화 비방(裨方)",
+            "21일집중": "21일 집중 처방",
+            "금기":     "금기 사항",
+        }
         _rx12_html = f"<b>용신 {_yong1_gw} 오행 홍수맥 처방</b><br>" + "".join(
-            _row(_k12, _v12, True) for _k12, _v12 in _rx_hsm.items()
+            _row(_RX12_LABEL.get(_k12, _k12), _v12, None if _k12 == "금기" else True)
+            for _k12, _v12 in _rx_hsm.items()
         )
         _card("홍수맥 여는 처방", _rx12_html)
+
+        # ── 기신 차단 요약 ────────────────────────────────────────
+        if _gis_gw:
+            _gi12_html = f"<b style='color:#c0392b;'>⛔ 기신 {' / '.join(_gis_gw)} 차단 핵심</b><br>"
+            for _goh12 in _gis_gw:
+                if _goh12 in _GIS_RX:
+                    _g12 = _GIS_RX[_goh12]
+                    _gi12_html += (
+                        f'<div style="padding:4px 0 4px 10px;color:#c0392b;">'
+                        f'<b>{_goh12} 기신</b> — '
+                        f'피할색: {_g12.get("피할색상","").split("—")[0].strip()} | '
+                        f'대체: {_g12.get("대체처방","").split("—")[0].strip()}</div>'
+                        f'<div style="padding:2px 0 2px 20px;color:#7b241c;font-size:12px;">'
+                        f'주의: {_g12.get("주의사항","")}</div>'
+                    )
+            _card("기신 차단 요약", _gi12_html)
+
+        # ── 신호 체크리스트 ───────────────────────────────────────
         _sig_html = (
             "<b>홍수맥이 열리는 신호 체크리스트</b><br>"
             + _bullet(_HSM_SIGNALS)
             + '<div style="color:#e67e22;font-size:12px;padding-top:4px;">3개 이상 해당되면 홍수맥이 이미 열리고 있는 징조이니라!</div>'
         )
         _card("신호 체크리스트", _sig_html)
+
+        # ── 홍수맥 차단 요인 ─────────────────────────────────────
         _blk12_html = "<b style='color:#c0392b;'>⚠ 홍수맥 막는 것들 — 지금 당장 제거하라</b><br>"
         for _bt12, _bd12 in _HSM_BLOCKS:
             _blk12_html += f'<div style="padding:2px 0 2px 10px;color:#c0392b;">❌ <b>{_bt12}</b> — <span style="color:#7b241c;">{_bd12}</span></div>'
         _card("홍수맥 차단 요인", _blk12_html)
+
+        # ── 기도문 ────────────────────────────────────────────────
+        _pray_time12 = _rx_hsm.get("기도시간", "용신 시간에")
         st.markdown(
             f'<div style="background:linear-gradient(135deg,#1a1035,#2d1f5e);'
             f'border:2px solid {_hsm_accent};border-radius:14px;padding:16px 20px;text-align:center;">'
             f'<div style="font-size:13px;font-weight:900;color:{_hsm_accent};margin-bottom:8px;">'
             f'🙏 홍수맥 기도문 — 용신 {_yong1_gw} 오행</div>'
-            f'<div style="font-size:15px;color:#e8d5f5;font-style:italic;line-height:2.0;">'
+            f'<div style="font-size:15px;color:#e8d5f5;font-style:italic;line-height:2.0;white-space:pre-line;">'
             f'"{_pray_text_hsm}"</div>'
             f'<div style="font-size:11px;color:#a89cc8;margin-top:8px;">'
-            f'매일 {_rx_hsm.get("기도","용신 시간")}을 향해 3번 읊으십시오. 21일 연속 실천하면 하늘이 응답하느니라.</div>'
+            f'매일 {_pray_time12}을 향해 3번 읊으십시오. 21일 연속 실천하면 하늘이 응답하느니라.</div>'
             f'</div>',
             unsafe_allow_html=True,
         )
