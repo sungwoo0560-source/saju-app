@@ -14182,11 +14182,182 @@ def menu5_money(pils, birth_year, gender, name="내담자"):
 def menu6_relations(pils, name, birth_year, gender, marriage_status="미혼"):
     """6️⃣ 궁합 / 인간관계 분석"""
 
-    # ── 로컬 엔진 항상 먼저 출력 ─────────────
+    # ── 상대방 사주 입력 섹션 ────────────────────────────────────
+    st.markdown(
+        "<div style='background:linear-gradient(135deg,#1a0d2e,#2d1f5e);"
+        "border-radius:16px;padding:20px 24px;margin-bottom:16px;"
+        "border:2px solid #9b59b655;'>"
+        "<div style='font-size:14px;font-weight:900;color:#e8a0f0;"
+        "letter-spacing:2px;margin-bottom:4px'>💑 상대방 사주 직접 입력</div>"
+        "<div style='font-size:12px;color:#c8a8e8;'>"
+        "상대방 생년월일을 입력하면 두 사주를 비교한 실제 궁합을 분석합니다</div>"
+        "</div>",
+        unsafe_allow_html=True,
+    )
 
+    _p_col1, _p_col2, _p_col3 = st.columns([2,2,1])
+    with _p_col1:
+        _p_year = st.number_input("상대방 출생연도", min_value=1930, max_value=2010,
+                                   value=st.session_state.get("partner_year", 1990),
+                                   key="partner_year_input")
+    with _p_col2:
+        _p_month = st.number_input("월", min_value=1, max_value=12,
+                                    value=st.session_state.get("partner_month", 1),
+                                    key="partner_month_input")
+        _p_day = st.number_input("일", min_value=1, max_value=31,
+                                  value=st.session_state.get("partner_day", 1),
+                                  key="partner_day_input")
+    with _p_col3:
+        _p_gender = st.radio("성별", ["남","여"],
+                              index=0 if gender=="여" else 1,
+                              key="partner_gender_input")
+        _p_hour = st.number_input("출생시(시)", min_value=0, max_value=23,
+                                   value=12, key="partner_hour_input")
+
+    if st.button("💑 두 사주 궁합 분석", use_container_width=True,
+                 type="primary", key="partner_calc_btn"):
+        try:
+            _p_pils = SajuCoreEngine.get_pillars(
+                _p_year, _p_month, _p_day, _p_hour, 0, _p_gender
+            )
+            st.session_state["partner_pils"]   = _p_pils
+            st.session_state["partner_year"]   = _p_year
+            st.session_state["partner_month"]  = _p_month
+            st.session_state["partner_day"]    = _p_day
+            st.session_state["partner_gender"] = _p_gender
+        except Exception as _pe:
+            st.error(f"상대방 사주 계산 오류: {_pe}")
+
+    # ── 두 사주 궁합 분석 결과 ───────────────────────────────────
+    _p_pils = st.session_state.get("partner_pils")
+    if _p_pils:
+        _p_year_s  = st.session_state.get("partner_year", 1990)
+        _p_gender_s= st.session_state.get("partner_gender", "남")
+        _my_ilgan  = pils[1]["cg"]
+        _p_ilgan   = _p_pils[1]["cg"]
+        _my_iljj   = pils[1]["jj"]
+        _p_iljj    = _p_pils[1]["jj"]
+        _OH_G = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
+                 "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
+        _OHN_G = {"木":"목(木)","火":"화(火)","土":"토(土)","金":"금(金)","水":"수(水)"}
+        _my_oh = _OH_G.get(_my_ilgan,"")
+        _p_oh  = _OH_G.get(_p_ilgan,"")
+
+        # 오행 상생/상극 관계
+        _SANG_SAENG = {"木":"火","火":"土","土":"金","金":"水","水":"木"}
+        _SANG_GEUK  = {"木":"土","火":"金","土":"水","金":"木","水":"火"}
+        _is_saeng_mp = _SANG_SAENG.get(_my_oh,"") == _p_oh
+        _is_saeng_pm = _SANG_SAENG.get(_p_oh,"") == _my_oh
+        _is_geuk_mp  = _SANG_GEUK.get(_my_oh,"") == _p_oh
+        _is_geuk_pm  = _SANG_GEUK.get(_p_oh,"") == _my_oh
+
+        # 일지 충/합 체크
+        _ILJJ_CHUNG = {"子":"午","午":"子","丑":"未","未":"丑","寅":"申","申":"寅",
+                       "卯":"酉","酉":"卯","辰":"戌","戌":"辰","巳":"亥","亥":"巳"}
+        _SAM_HAP_G  = {frozenset(["申","子","辰"]):"水합",frozenset(["寅","午","戌"]):"火합",
+                       frozenset(["巳","酉","丑"]):"金합",frozenset(["亥","卯","未"]):"木합"}
+        _YOOK_HAP_G = {frozenset(["子","丑"]):"土합",frozenset(["寅","亥"]):"木합",
+                       frozenset(["卯","戌"]):"火합",frozenset(["辰","酉"]):"金합",
+                       frozenset(["巳","申"]):"水합",frozenset(["午","未"]):"日月합"}
+
+        _has_iljj_chung = _ILJJ_CHUNG.get(_my_iljj,"") == _p_iljj
+        _iljj_pair = frozenset([_my_iljj, _p_iljj])
+        _has_yook_hap = _iljj_pair in _YOOK_HAP_G
+        _sam_hap_name = ""
+        for _sh_set, _sh_name in _SAM_HAP_G.items():
+            if _my_iljj in _sh_set and _p_iljj in _sh_set:
+                _sam_hap_name = _sh_name
+                break
+
+        # 궁합 점수 계산
+        _score = 60
+        if _is_saeng_pm:  _score += 20  # 상대가 나를 생함 (최고)
+        if _is_saeng_mp:  _score += 15  # 내가 상대를 생함
+        if _is_geuk_mp:   _score -= 10  # 내가 상대를 극함
+        if _is_geuk_pm:   _score -= 15  # 상대가 나를 극함 (최악)
+        if _has_yook_hap: _score += 15  # 일지 육합
+        if _sam_hap_name: _score += 10  # 삼합
+        if _has_iljj_chung: _score -= 20  # 일지 충
+
+        # 용신 교차
+        try:
+            _my_ys = get_yongshin(pils)
+            _p_ys  = get_yongshin(_p_pils)
+            _my_yong = _my_ys.get("종합_용신",[])
+            _p_yong  = _p_ys.get("종합_용신",[])
+            if _p_oh in _my_yong:  _score += 15  # 상대 오행이 내 용신
+            if _my_oh in _p_yong:  _score += 10  # 내 오행이 상대 용신
+        except Exception:
+            pass
+
+        _score = max(0, min(100, _score))
+        _grade = ("🏆 천생연분" if _score >= 85 else
+                  "💚 좋은 궁합" if _score >= 70 else
+                  "💛 무난한 궁합" if _score >= 55 else
+                  "🧡 노력 필요" if _score >= 40 else
+                  "❤️ 극복 가능")
+        _bar = "█" * (_score//10) + "░" * (10-_score//10)
+
+        # 관계 해석
+        _rel_desc = ""
+        if _is_saeng_pm:
+            _rel_desc = f"상대방({_OHN_G.get(_p_oh,'')})이 나({_OHN_G.get(_my_oh,'')})를 생(生)해주는 관계. 상대가 나를 성장시켜주는 천생연분 구조입니다."
+        elif _is_saeng_mp:
+            _rel_desc = f"내({_OHN_G.get(_my_oh,'')})가 상대방({_OHN_G.get(_p_oh,'')})을 생(生)해주는 관계. 내가 상대를 이끌고 지지하는 구조입니다."
+        elif _is_geuk_pm:
+            _rel_desc = f"상대방({_OHN_G.get(_p_oh,'')})이 나({_OHN_G.get(_my_oh,'')})를 극(剋)하는 관계. 처음엔 강하게 끌리지만 마찰이 생기기 쉽습니다."
+        elif _is_geuk_mp:
+            _rel_desc = f"내가 상대방을 극(剋)하는 관계. 내가 주도하지만 상대가 눌리는 구조입니다."
+        else:
+            _rel_desc = f"비화(比和) 관계 — 같은 오행끼리라 편하지만 경쟁도 생깁니다."
+
+        _hap_desc = ""
+        if _has_yook_hap:
+            _hap_desc = f"✅ 일지 육합({_YOOK_HAP_G.get(_iljj_pair,'합')}) — 두 사람의 배우자 자리가 자연스럽게 합(合)을 이룹니다."
+        if _sam_hap_name:
+            _hap_desc += f" ✅ 삼합({_sam_hap_name}) — 강력한 인연의 끈이 있습니다."
+        if _has_iljj_chung:
+            _hap_desc += f" ⚠️ 일지 충(沖) — 두 사람의 배우자 자리가 충돌합니다. 결혼 후 갈등 주의."
+
+        st.markdown(
+            f"<div style='background:linear-gradient(135deg,#1a0d2e,#2d1f5e);"
+            f"border-radius:16px;padding:24px;margin:12px 0;"
+            f"border:2px solid #9b59b6;'>"
+            f"<div style='font-size:13px;color:#e8a0f0;font-weight:900;"
+            f"letter-spacing:2px;margin-bottom:16px'>💑 두 사주 궁합 분석 결과</div>"
+            f"<div style='display:flex;justify-content:center;gap:30px;"
+            f"align-items:center;margin-bottom:20px;'>"
+            f"<div style='text-align:center'>"
+            f"<div style='font-size:11px;color:#aaa'>{name}님 ({birth_year}년생 {gender})</div>"
+            f"<div style='font-size:28px;font-weight:900;color:#fff'>{_my_ilgan}{_my_iljj}</div>"
+            f"<div style='font-size:12px;color:#e8a0f0'>{_OHN_G.get(_my_oh,'')}</div>"
+            f"</div>"
+            f"<div style='font-size:24px;color:#9b59b6'>💑</div>"
+            f"<div style='text-align:center'>"
+            f"<div style='font-size:11px;color:#aaa'>상대방 ({_p_year_s}년생 {_p_gender_s})</div>"
+            f"<div style='font-size:28px;font-weight:900;color:#fff'>{_p_ilgan}{_p_iljj}</div>"
+            f"<div style='font-size:12px;color:#e8a0f0'>{_OHN_G.get(_p_oh,'')}</div>"
+            f"</div></div>"
+            f"<div style='text-align:center;margin-bottom:16px'>"
+            f"<div style='font-size:36px;font-weight:900;color:#fff'>{_score}점</div>"
+            f"<div style='font-size:16px;color:#e8a0f0;font-weight:700'>{_grade}</div>"
+            f"<div style='font-size:14px;color:#888;letter-spacing:2px'>`{_bar}`</div>"
+            f"</div>"
+            f"<div style='background:rgba(255,255,255,0.08);border-radius:10px;"
+            f"padding:12px;margin-bottom:10px;font-size:13px;color:#e8d5f5;line-height:1.8'>"
+            f"<b>오행 관계:</b> {_rel_desc}</div>"
+            f"<div style='background:rgba(255,255,255,0.06);border-radius:10px;"
+            f"padding:12px;font-size:13px;color:#e8d5f5;line-height:1.8'>"
+            f"<b>일지 합·충:</b> {_hap_desc if _hap_desc else '특별한 합·충 없음'}</div>"
+            f"</div>",
+            unsafe_allow_html=True,
+        )
+
+    st.markdown("---")
+
+    # ── 로컬 엔진 항상 먼저 출력 ─────────────
     try:
         _marriage_v2 = st.session_state.get("in_marriage", "미혼")
-
         _local_out = LocalSajuNarrator.relations(pils, name, birth_year, gender, _marriage_v2)
         if _local_out:
             st.markdown(_local_out, unsafe_allow_html=True)
