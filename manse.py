@@ -14449,8 +14449,57 @@ def menu9_daily(pils, name, birth_year, gender):
         return CG[delta % 10], JJ[delta % 12]
 
     today_cg, today_jj = get_day_pillar(today)
-
     today_ss = TEN_GODS_MATRIX.get(ilgan, {}).get(today_cg, "-")
+
+    # ── 오늘 용신/기신 개인화 신호 카드 ─────────────────────────
+    try:
+        _ys_d = get_yongshin(pils)
+        _yong_d  = _ys_d.get("종합_용신",[])
+        _gisin_d = _ys_d.get("기신",[]) if isinstance(_ys_d.get("기신"),list) else []
+        _OH_D = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
+                 "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
+        _JJ_OH_D = {"子":"水","丑":"土","寅":"木","卯":"木","辰":"土",
+                    "巳":"火","午":"火","未":"土","申":"金","酉":"金","戌":"土","亥":"水"}
+        _cg_oh_d = _OH_D.get(today_cg,"")
+        _jj_oh_d = _JJ_OH_D.get(today_jj,"")
+        _is_yong_d  = _cg_oh_d in _yong_d or _jj_oh_d in _yong_d
+        _is_gisin_d = _cg_oh_d in _gisin_d or _jj_oh_d in _gisin_d
+
+        # 충 감지 — 오늘 지지 vs 원국 지지
+        _orig_jjs_d = {p.get("jj","") for p in pils}
+        _CHUNG_D = {"子":"午","午":"子","丑":"未","未":"丑","寅":"申","申":"寅",
+                    "卯":"酉","酉":"卯","辰":"戌","戌":"辰","巳":"亥","亥":"巳"}
+        _chung_target_d = _CHUNG_D.get(today_jj,"")
+        _has_chung_d = bool(_chung_target_d and _chung_target_d in _orig_jjs_d)
+
+        if _is_yong_d and not _has_chung_d:
+            _sig_bg = "#1a3d1a"; _sig_tc = "#7fff7f"
+            _signal = f"🟢 오늘은 용신 기운의 날! 적극적으로 움직이십시오."
+            _sig_sub = "중요한 결정·미팅·계약·시작에 유리한 날입니다."
+        elif _is_gisin_d or _has_chung_d:
+            _sig_bg = "#3d1a1a"; _sig_tc = "#ffaaaa"
+            _chung_msg = f" 원국과 충(沖)이 발생합니다." if _has_chung_d else ""
+            _signal = f"🔴 오늘은 조심이 필요한 날.{_chung_msg}"
+            _sig_sub = "큰 결정·서명·투자는 내일로 미루십시오."
+        else:
+            _sig_bg = "#1a1a3d"; _sig_tc = "#aaaaff"
+            _signal = "🟡 오늘은 중립적인 기운의 날."
+            _sig_sub = "평소대로 꾸준히 나아가는 것이 최선입니다."
+
+        st.markdown(
+            f"<div style='background:{_sig_bg};border-radius:14px;padding:16px 20px;"
+            f"margin-bottom:16px;border:1.5px solid {_sig_tc}44;'>"
+            f"<div style='font-size:16px;font-weight:900;color:{_sig_tc};'>{_signal}</div>"
+            f"<div style='font-size:13px;color:#ccc;margin-top:6px;'>{_sig_sub}</div>"
+            f"<div style='font-size:11px;color:#888;margin-top:8px;'>"
+            f"용신: {' '.join(_yong_d[:2]) if _yong_d else '-'} | "
+            f"기신: {' '.join(_gisin_d[:2]) if _gisin_d else '-'} | "
+            f"오늘 천간오행: {_cg_oh_d} / 지지오행: {_jj_oh_d}"
+            f"</div></div>",
+            unsafe_allow_html=True,
+        )
+    except Exception:
+        pass
 
     # -- 헤더 --------------------------
 
@@ -14882,6 +14931,66 @@ def menu10_monthly(pils, name, birth_year, gender):
 
     cur_year = datetime.now().year
 
+    # ── 이달 개인화 운기 요약 카드 ──────────────────────────────
+    try:
+        _ml = get_monthly_luck(pils, cur_year, datetime.now().month) or {}
+        _ml_ss  = _ml.get("십성_천간","")
+        _ml_jj  = _ml.get("지지","")
+        _ml_oh  = _ml.get("오행_천간","")
+        _ys_m   = get_yongshin(pils)
+        _yong_m = _ys_m.get("종합_용신",[])
+        _gisin_m= _ys_m.get("기신",[]) if isinstance(_ys_m.get("기신"),list) else []
+        _is_yong_m  = _ml_oh in _yong_m
+        _is_gisin_m = _ml_oh in _gisin_m
+
+        # 충 감지
+        _orig_jjs_m = {p.get("jj","") for p in pils}
+        _CHUNG_M = {"子":"午","午":"子","丑":"未","未":"丑","寅":"申","申":"寅",
+                    "卯":"酉","酉":"卯","辰":"戌","戌":"辰","巳":"亥","亥":"巳"}
+        _chung_m = _CHUNG_M.get(_ml_jj,"")
+        _has_chung_m = bool(_chung_m and _chung_m in _orig_jjs_m)
+
+        _MON_SS_DESC = {
+            "食神": "재능·창의·복록이 활성화되는 달. 새 프로젝트 시작에 좋습니다.",
+            "傷官": "창의성은 높지만 윗사람과 마찰 조심. 말 한마디가 관계를 바꿉니다.",
+            "偏財": "재물 기회가 들어오는 달. 적극적으로 움직이면 수입이 생깁니다.",
+            "正財": "안정적 수입·저축의 달. 계획대로 실행하면 재물이 쌓입니다.",
+            "偏官": "긴장·변동의 달. 건강과 법적 문제에 특히 주의하십시오.",
+            "正官": "명예·승진 기운의 달. 책임을 다하면 인정받습니다.",
+            "劫財": "재물 손실·경쟁의 달. 투자·보증·동업은 이달 자제하십시오.",
+            "比肩": "독립심이 강해지는 달. 혼자 추진하는 일이 더 잘 됩니다.",
+            "偏印": "변화·이동의 달. 큰 결정은 신중히, 새 공부는 유리합니다.",
+            "正印": "학습·자격·귀인의 달. 배움과 연구에 집중하십시오.",
+        }
+
+        if _is_yong_m and not _has_chung_m:
+            _mbg = "#1a3d1a"; _mtc = "#7fff7f"
+            _msig = "🟢 이달은 용신 운! 적극 공세의 달"
+        elif _is_gisin_m or _has_chung_m:
+            _mbg = "#3d1a1a"; _mtc = "#ffaaaa"
+            _chung_msg_m = " 원국과 충(沖) 발생." if _has_chung_m else ""
+            _msig = f"🔴 이달은 수비 전략의 달.{_chung_msg_m}"
+        else:
+            _mbg = "#1a1a3d"; _mtc = "#aaaaff"
+            _msig = "🟡 이달은 중립 — 내실 다지기"
+
+        _mdesc = _MON_SS_DESC.get(_ml_ss, f"{_ml_ss} 기운의 달입니다.")
+        st.markdown(
+            f"<div style='background:{_mbg};border-radius:14px;padding:16px 20px;"
+            f"margin-bottom:16px;border:1.5px solid {_mtc}44;'>"
+            f"<div style='font-size:16px;font-weight:900;color:{_mtc};'>"
+            f"{_msig}</div>"
+            f"<div style='font-size:14px;color:#fff;margin-top:8px;font-weight:700;'>"
+            f"{datetime.now().month}월 [{_ml_ss}] — {_mdesc}</div>"
+            f"<div style='font-size:11px;color:#888;margin-top:8px;'>"
+            f"용신: {' '.join(_yong_m[:2]) if _yong_m else '-'} | "
+            f"이달 십성: {_ml_ss} | 오행: {_ml_oh}"
+            f"</div></div>",
+            unsafe_allow_html=True,
+        )
+    except Exception:
+        pass
+
     # ── 월 단위 시기 직격 특정 (최상단) ─────────────────────────
     st.markdown(
         '<div class="gold-section">🎯 올해 월별 최적 타이밍 — 직격 특정</div>',
@@ -15024,7 +15133,16 @@ def menu10_monthly(pils, name, birth_year, gender):
 
         all_days_data.append(day_info)
 
-        if ss in ("겁재", "편관", "상관"):
+        # 충 감지 추가
+        _CHUNG_M2 = {"子":"午","午":"子","丑":"未","未":"丑","寅":"申","申":"寅",
+                     "卯":"酉","酉":"卯","辰":"戌","戌":"辰","巳":"亥","亥":"巳"}
+        _orig_jjs_m2 = {p.get("jj","") for p in pils}
+        _chung_today = _CHUNG_M2.get(jj,"")
+        _has_chung_today = bool(_chung_today and _chung_today in _orig_jjs_m2)
+
+        _bad_ss = ss in ("겁재", "편관", "상관")
+        if _bad_ss or _has_chung_today:
+            day_info["chung"] = _has_chung_today
             bad_days.append(day_info)
 
         if ss in ("식신", "정관", "정인", "정재"):
