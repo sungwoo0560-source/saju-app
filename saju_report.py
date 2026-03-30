@@ -129,33 +129,32 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str=""):
 
     # -- 출력 섹션 선택 --
 
-    col1, col2 = st.columns(2)
-
+    col1, col2, col3 = st.columns(3)
     with col1:
-        include_basic = st.checkbox("사주 기본 정보 (팔자/오행)", value=True, key="pdf_basic")
-
-        include_yongshin = st.checkbox("용신/격국 상세 분석", value=True, key="pdf_yong")
-
-        include_past = st.checkbox("과거 적중 (상세 서술)", value=True, key="pdf_past")
-
-        include_dw = st.checkbox("대운 흐름 (10년 단위)", value=True, key="pdf_dw")
-
-        include_current = st.checkbox("현재 운세 분석 (올해/내년)", value=True, key="pdf_current")
-
-        include_future = st.checkbox("미래 5년 운세 흐름", value=True, key="pdf_future")
-
+        include_basic    = st.checkbox("사주 기본 정보 (팔자/오행)",    value=True, key="pdf_basic")
+        include_yongshin = st.checkbox("용신/격국 상세 분석",           value=True, key="pdf_yong")
+        include_past     = st.checkbox("과거 적중 (상세 서술)",          value=True, key="pdf_past")
+        include_dw       = st.checkbox("대운 흐름 (10년 단위)",          value=True, key="pdf_dw")
+        include_current  = st.checkbox("현재 운세 분석 (올해/내년)",     value=True, key="pdf_current")
+        include_future   = st.checkbox("미래 5년 운세 흐름",             value=True, key="pdf_future")
+        include_money    = st.checkbox("💰 재물/직업 적성 분석",         value=True, key="pdf_money")
+        include_health   = st.checkbox("🏥 건강 분석",                   value=True, key="pdf_health")
     with col2:
-        include_ss = st.checkbox("십성 분포 분석", value=True, key="pdf_ss")
-
-        include_sinsal = st.checkbox("신살 분석", value=True, key="pdf_sinsal")
-
-        include_yukjin = st.checkbox("육친 분석", value=True, key="pdf_yukjin")
-
-        include_fortune = st.checkbox("AI 종합운세 (전문 분석)", value=True, key="pdf_fortune")
-
-        include_advice = st.checkbox("처방/조언", value=True, key="pdf_advice")
-
-        include_ohaeng = st.checkbox("☯️ 음양오행 심층 분석", value=True, key="pdf_ohaeng")
+        include_ss       = st.checkbox("십성 분포 분석",                 value=True, key="pdf_ss")
+        include_sinsal   = st.checkbox("신살 분석",                      value=True, key="pdf_sinsal")
+        include_yukjin   = st.checkbox("육친 분석",                      value=True, key="pdf_yukjin")
+        include_fortune  = st.checkbox("AI 종합운세 (전문 분석)",         value=True, key="pdf_fortune")
+        include_advice   = st.checkbox("처방/조언",                      value=True, key="pdf_advice")
+        include_ohaeng   = st.checkbox("☯️ 음양오행 심층 분석",          value=True, key="pdf_ohaeng")
+        include_relation = st.checkbox("💑 궁합/관계 분석",              value=True, key="pdf_relation")
+        include_future3  = st.checkbox("🔮 미래 3년 집중 분석",          value=True, key="pdf_future3")
+    with col3:
+        include_daily    = st.checkbox("☀️ 오늘의 운세",                value=True, key="pdf_daily")
+        include_monthly  = st.checkbox("📅 이달의 운세",                 value=True, key="pdf_monthly")
+        include_current2 = st.checkbox("🎯 현재 상황 진단",              value=True, key="pdf_current2")
+        include_nature   = st.checkbox("🧬 성격/기질 분석",              value=True, key="pdf_nature")
+        include_gaewoon  = st.checkbox("🌟 개운 처방",                   value=True, key="pdf_gaewoon")
+        include_tojeong  = st.checkbox("📜 토정비결",                    value=True, key="pdf_tojeong")
 
     if st.button("📥 PDF 생성 및 다운로드", use_container_width=True, key="pdf_gen_btn"):
         try:
@@ -2328,6 +2327,281 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str=""):
 
                 except Exception as _oe:
                     y = write(c, f"  (음양오행 분석 오류: {str(_oe)[:50]})", y, size=9)
+
+            # ══ 재물/직업 적성 분석 ══
+            if include_money:
+                try:
+                    y = section_title(c, "💰 재물/직업 적성 분석", y)
+                    from saju_engine import get_ilgan_strength
+                    from saju_interpreter import get_yongshin, get_gyeokguk
+                    _ilgan_m = pils[1]["cg"] if len(pils)>1 else ""
+                    _sn_m = get_ilgan_strength(_ilgan_m, pils)
+                    _sn_str_m = _sn_m.get("신강신약","중화") if _sn_m else "중화"
+                    _ys_m = get_yongshin(pils)
+                    _yong_m = _ys_m.get("종합_용신",[]) if _ys_m else []
+                    _gk_m = get_gyeokguk(pils)
+                    _gk_name_m = _gk_m.get("격국명","") if _gk_m else ""
+                    _OH_M = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
+                             "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
+                    _ilgan_oh_m = _OH_M.get(_ilgan_m,"")
+                    _OH_JOB_M = {
+                        "木":"교육·출판·의류·목공·농업·환경·인테리어",
+                        "火":"방송·미디어·IT·에너지·음식점·뷰티·마케팅",
+                        "土":"부동산·건축·토목·농업·유통·물류·보험",
+                        "金":"금융·철강·기계·자동차·보석·법조·군경",
+                        "水":"유통·무역·해운·수산·의약·철학·상담",
+                    }
+                    _GYEOK_MONEY_M = {
+                        "식신격":"중·대형 — 꾸준한 복록. 부업·창작으로 자산을 늘림.",
+                        "정관격":"중형 — 조직 안정수입. 직업적 성취로 자산 형성.",
+                        "편관격":"대형 또는 소형 — 극단적 기복. 도전적 투자 성향.",
+                        "정재격":"중·대형 — 착실히 쌓는 재물. 저축·부동산·안전 투자.",
+                        "편재격":"대형 — 사업·투자로 자산 폭발. 기회 포착 능력 최강.",
+                        "상관격":"중형 — 기술·창의로 버는 재물. 전문직에서 극대화.",
+                        "건록격":"중형 — 노력으로 쌓는 재물. 직업적 성취가 안정적.",
+                    }
+                    _bowl_m = "중형"
+                    for _gk2, _desc2 in _GYEOK_MONEY_M.items():
+                        if _gk2 in _gk_name_m:
+                            _bowl_m = _desc2
+                            break
+                    y = write(c, f"  격국: {_gk_name_m} | 신강신약: {_sn_str_m}", y, size=10)
+                    y = write(c, f"  재물 그릇: {_bowl_m}", y, size=9)
+                    y = write(c, f"  일간({_ilgan_m}) 유리 업종: {_OH_JOB_M.get(_ilgan_oh_m,'')}", y, size=9)
+                    y = write(c, f"  용신({' '.join(_yong_m[:2])}) 강화가 재물 개운의 핵심입니다.", y, size=9)
+                    y -= 3*mm
+                except Exception as _me:
+                    y = write(c, f"  (재물분석 오류: {str(_me)[:50]})", y, size=9)
+
+            # ══ 건강 분석 ══
+            if include_health:
+                try:
+                    y = section_title(c, "🏥 건강 분석", y)
+                    _OH_HEALTH = {
+                        "木":"간·담·눈·근육·힘줄 — 스트레스성 질환, 과로 주의",
+                        "火":"심장·소장·혈관·혀 — 혈압·심장·정신건강 주의",
+                        "土":"비장·위·췌장·근육 — 소화기·당뇨·과식 주의",
+                        "金":"폐·대장·피부·코 — 호흡기·피부·알레르기 주의",
+                        "水":"신장·방광·생식기·귀 — 신장·부종·생식기 주의",
+                    }
+                    from saju_engine import calc_ohaeng_strength
+                    _oh_str_h = calc_ohaeng_strength(pils[1]["cg"], pils) if pils else {}
+                    _oh_sorted_h = sorted(_oh_str_h.items(), key=lambda x:-x[1])
+                    _oh_max_h = _oh_sorted_h[0][0] if _oh_sorted_h else ""
+                    _oh_min_h = _oh_sorted_h[-1][0] if _oh_sorted_h else ""
+                    y = write(c, f"  강한 오행({_oh_max_h}) 취약 장기: {_OH_HEALTH.get(_oh_max_h,'')}", y, size=9)
+                    y = write(c, f"  약한 오행({_oh_min_h}) 보강 필요: {_OH_HEALTH.get(_oh_min_h,'')}", y, size=9)
+                    y = write(c, "  정기 건강검진을 반드시 받으시고 취약 장기를 중점 관리하십시오.", y, size=9)
+                    y -= 3*mm
+                except Exception as _he:
+                    y = write(c, f"  (건강분석 오류: {str(_he)[:50]})", y, size=9)
+
+            # ══ 궁합/관계 분석 ══
+            if include_relation:
+                try:
+                    y = section_title(c, "💑 궁합/관계 분석", y)
+                    _ilgan_r = pils[1]["cg"] if len(pils)>1 else ""
+                    _iljj_r  = pils[1]["jj"] if len(pils)>1 else ""
+                    _OH_R2 = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
+                              "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
+                    _SANG_SAENG_R = {"木":"火","火":"土","土":"金","金":"水","水":"木"}
+                    _OH_ANIMALS_R = {
+                        "木":"인(寅)·묘(卯)띠 — 호랑이·토끼",
+                        "火":"사(巳)·오(午)띠 — 뱀·말",
+                        "土":"진(辰)·술(戌)·축(丑)·미(未)띠 — 용·개·소·양",
+                        "金":"신(申)·유(酉)띠 — 원숭이·닭",
+                        "水":"해(亥)·자(子)띠 — 돼지·쥐",
+                    }
+                    _JJ_SPOUSE_R = {
+                        "子":"지적·총명한 배우자","丑":"듬직·성실한 배우자",
+                        "寅":"활동적·리더십 강한 배우자","卯":"섬세·예술적 배우자",
+                        "辰":"포용력·현실적 배우자","巳":"지혜·카리스마 배우자",
+                        "午":"열정·매력적 배우자","未":"온화·배려 깊은 배우자",
+                        "申":"총명·실행력 배우자","酉":"세련·완벽주의 배우자",
+                        "戌":"의리·충성스런 배우자","亥":"자유·지적인 배우자",
+                    }
+                    _ilgan_oh_r = _OH_R2.get(_ilgan_r,"")
+                    _best_oh_r = _SANG_SAENG_R.get(_ilgan_oh_r,"")
+                    _spouse_desc_r = _JJ_SPOUSE_R.get(_iljj_r,"인연 있는 배우자")
+                    y = write(c, f"  일주({_ilgan_r}{_iljj_r}) — 배우자 자리: {_spouse_desc_r}", y, size=9)
+                    y = write(c, f"  천생연분 오행: {_best_oh_r} — {_OH_ANIMALS_R.get(_best_oh_r,'')}", y, size=9)
+                    if gender == "남":
+                        y = write(c, "  배우자성(妻星): 재성 — 사주 내 재성 위치와 강약이 배우자 인연을 결정.", y, size=9)
+                    else:
+                        y = write(c, "  배우자성(夫星): 관성 — 사주 내 관성 위치와 강약이 배우자 인연을 결정.", y, size=9)
+                    y -= 3*mm
+                except Exception as _re2:
+                    y = write(c, f"  (궁합분석 오류: {str(_re2)[:50]})", y, size=9)
+
+            # ══ 미래 3년 집중 분석 ══
+            if include_future3:
+                try:
+                    y = section_title(c, "🔮 미래 3년 집중 분석", y)
+                    from saju_engine import get_yearly_luck as _gyl3
+                    from saju_interpreter import get_yongshin as _gys3
+                    _cy3 = _dt.now().year
+                    _OH3 = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
+                            "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
+                    _ys3 = _gys3(pils)
+                    _yong3 = _ys3.get("종합_용신",[]) if _ys3 else []
+                    for _y3 in range(_cy3, _cy3+3):
+                        _yl3 = _gyl3(pils, _y3) or {}
+                        _ss3 = _yl3.get("십성_천간","")
+                        _gh3 = _yl3.get("길흉","평")
+                        _sw3 = _yl3.get("세운","")
+                        _oh3 = _OH3.get(_sw3[:1],"") if _sw3 else ""
+                        _is_y3 = _oh3 in _yong3
+                        _sig3 = "🌟 황금기" if _is_y3 and _gh3 in ("길","+") else ("⚠️ 주의" if _gh3 in ("흉","-") else "〰️ 보통")
+                        _age3 = _y3 - birth_year + 1
+                        y = write(c, f"  {_y3}년({_age3}세) [{_sw3}] {_ss3} {_gh3} — {_sig3}", y, size=9)
+                    y -= 3*mm
+                except Exception as _f3e:
+                    y = write(c, f"  (미래3년 오류: {str(_f3e)[:50]})", y, size=9)
+
+            # ══ 오늘의 운세 ══
+            if include_daily:
+                try:
+                    y = section_title(c, f"☀️ 오늘의 운세 ({_dt.now().strftime('%Y.%m.%d')})", y)
+                    from datetime import date as _date_d
+                    _today_d = _date_d.today()
+                    _base_d = _date_d(1924,1,1)
+                    _delta_d = (_today_d - _base_d).days
+                    _CG_D = ["甲","乙","丙","丁","戊","己","庚","辛","壬","癸"]
+                    _JJ_D = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"]
+                    _cg_d = _CG_D[_delta_d % 10]
+                    _jj_d = _JJ_D[_delta_d % 12]
+                    from saju_engine import TEN_GODS_MATRIX as _TGM_D
+                    _ilgan_d = pils[1]["cg"] if len(pils)>1 else ""
+                    _ss_d = _TGM_D.get(_ilgan_d,{}).get(_cg_d,"-")
+                    _GH_D = {"食神":"길","正財":"길","正官":"길","正印":"길",
+                             "劫財":"흉","偏官":"흉","傷官":"주의"}
+                    _gh_today = _GH_D.get(_ss_d,"보통")
+                    y = write(c, f"  오늘 일진: {_cg_d}{_jj_d} | 십성: {_ss_d} | 길흉: {_gh_today}", y, size=9)
+                    _msg_today = "✅ 중요한 일을 추진하기 좋은 날입니다." if _gh_today=="길" else ("⚠️ 중요한 결정은 내일로 미루십시오." if _gh_today=="흉" else "〰️ 평온한 하루, 꾸준히 나아가십시오.")
+                    y = write(c, f"  {_msg_today}", y, size=9)
+                    y -= 3*mm
+                except Exception as _de:
+                    y = write(c, f"  (일진 오류: {str(_de)[:50]})", y, size=9)
+
+            # ══ 이달의 운세 ══
+            if include_monthly:
+                try:
+                    y = section_title(c, f"📅 이달의 운세 ({_dt.now().year}년 {_dt.now().month}월)", y)
+                    from saju_engine import get_monthly_luck as _gml
+                    _ml = _gml(pils, _dt.now().year, _dt.now().month) or {}
+                    _ml_ss = _ml.get("십성_천간","")
+                    _ml_gh = _ml.get("길흉","평")
+                    _MON_DESC = {
+                        "食神":"재능·복록의 달. 새 프로젝트·창업 시작에 최적.",
+                        "傷官":"창의 폭발하나 윗사람 마찰 조심. 말 조심 필수.",
+                        "偏財":"재물 기회의 달. 적극적으로 움직이면 수입 생김.",
+                        "正財":"안정 수입·저축의 달. 계획대로 실행하면 재물 쌓임.",
+                        "偏官":"긴장·변동의 달. 건강·법적 문제 특히 주의.",
+                        "正官":"명예·승진 기운. 책임 다하면 인정받는 달.",
+                        "劫財":"재물 손실·경쟁. 투자·보증·동업 이달 자제.",
+                        "比肩":"독립심 강해짐. 혼자 추진하는 일이 잘 됨.",
+                        "偏印":"변화·이동의 달. 큰 결정 신중히, 새 공부 유리.",
+                        "正印":"학습·귀인의 달. 배움과 연구에 집중.",
+                    }
+                    y = write(c, f"  이달 십성: {_ml_ss} | 길흉: {_ml_gh}", y, size=9)
+                    y = write(c, f"  {_MON_DESC.get(_ml_ss,'이달의 기운을 잘 활용하십시오.')}", y, size=9)
+                    y -= 3*mm
+                except Exception as _mle:
+                    y = write(c, f"  (월운 오류: {str(_mle)[:50]})", y, size=9)
+
+            # ══ 현재 상황 진단 ══
+            if include_current2:
+                try:
+                    y = section_title(c, "🎯 현재 상황 진단", y)
+                    from saju_interpreter import get_yongshin as _gys_c2
+                    from saju_engine import get_yearly_luck as _gyl_c2
+                    _ys_c2 = _gys_c2(pils)
+                    _yong_c2 = _ys_c2.get("종합_용신",[]) if _ys_c2 else []
+                    _gisin_c2 = _ys_c2.get("기신",[]) if (_ys_c2 and isinstance(_ys_c2.get("기신"),list)) else []
+                    _cy_c2 = _dt.now().year
+                    _sw_c2 = _gyl_c2(pils, _cy_c2) or {}
+                    _OH_C2 = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
+                              "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
+                    _sw_oh_c2 = _OH_C2.get((_sw_c2.get("세운","") or "")[:1],"")
+                    _is_y_c2 = _sw_oh_c2 in _yong_c2
+                    _is_g_c2 = _sw_oh_c2 in _gisin_c2
+                    _age_c2 = _cy_c2 - birth_year + 1
+                    _sig_c2 = "🟢 황금기 — 적극 공세" if _is_y_c2 else ("🔴 주의기 — 수비 전략" if _is_g_c2 else "🟡 중립 — 내실 다지기")
+                    y = write(c, f"  {_cy_c2}년 현재 ({_age_c2}세) — {_sig_c2}", y, size=9)
+                    y = write(c, f"  용신: {' '.join(_yong_c2[:2])} | 기신: {' '.join(_gisin_c2[:2])}", y, size=9)
+                    y -= 3*mm
+                except Exception as _c2e:
+                    y = write(c, f"  (현재상황 오류: {str(_c2e)[:50]})", y, size=9)
+
+            # ══ 성격/기질 분석 ══
+            if include_nature:
+                try:
+                    y = section_title(c, "🧬 성격/기질 분석", y)
+                    _ilgan_n = pils[1]["cg"] if len(pils)>1 else ""
+                    _NATURE_SHORT = {
+                        "甲":"강인한 개척자. 직선적이고 정의감 강함. 고집 있으나 신뢰받음.",
+                        "乙":"유연한 생존자. 적응력 최강. 외유내강. 눈치 빠르고 감수성 풍부.",
+                        "丙":"태양 같은 에너자이저. 열정·사교·카리스마. 감정 기복 주의.",
+                        "丁":"섬세한 촛불. 헌신적·직관적. 속 깊은 감성파. 인정 욕구 강함.",
+                        "戊":"대산 같은 묵직함. 신뢰·안정·포용력. 변화 싫어하나 든든함.",
+                        "己":"꼼꼼한 현실주의자. 실속·배려·섬세함. 복잡한 내면 숨김.",
+                        "庚":"냉철한 결단자. 원칙·의리·추진력. 융통성 부족할 수 있음.",
+                        "辛":"완벽주의 심미안. 날카롭고 예민. 섬세하나 까다로운 면 있음.",
+                        "壬":"깊은 지혜의 바다. 유연·포용·지략. 우유부단함이 약점.",
+                        "癸":"감성적 적응자. 직관·공감·섬세함. 변덕과 결단력 부족 주의.",
+                    }
+                    y = write(c, f"  일간({_ilgan_n}) 기질: {_NATURE_SHORT.get(_ilgan_n,'')}", y, size=9)
+                    y -= 3*mm
+                except Exception as _ne:
+                    y = write(c, f"  (성격분석 오류: {str(_ne)[:50]})", y, size=9)
+
+            # ══ 개운 처방 ══
+            if include_gaewoon:
+                try:
+                    y = section_title(c, "🌟 개운 처방", y)
+                    from saju_interpreter import get_yongshin as _gys_g
+                    _ys_g = _gys_g(pils)
+                    _yong_g = _ys_g.get("종합_용신",[]) if _ys_g else []
+                    _OH_RX_G = {
+                        "木":"동쪽 방향, 초록색 활용, 새벽 산책, 나무·식물 가까이",
+                        "火":"남쪽 방향, 붉은색 활용, 밝은 사교활동, 햇빛 쬐기",
+                        "土":"중앙·황토색 활용, 규칙적 생활, 황색 계열 음식",
+                        "金":"서쪽 방향, 흰색·은색 활용, 원칙 세우기, 금속 소품",
+                        "水":"북쪽 방향, 검은색 활용, 독서·명상, 물가 산책",
+                    }
+                    for _yg in _yong_g[:2]:
+                        y = write(c, f"  용신({_yg}) 개운법: {_OH_RX_G.get(_yg,'')}", y, size=9)
+                    y -= 3*mm
+                except Exception as _ge:
+                    y = write(c, f"  (개운처방 오류: {str(_ge)[:50]})", y, size=9)
+
+            # ══ 토정비결 ══
+            if include_tojeong:
+                try:
+                    y = section_title(c, "📜 토정비결 요약", y)
+                    from saju_engine import get_yearly_luck as _gyl_t
+                    _cy_t = _dt.now().year
+                    _age_t = _cy_t - birth_year + 1
+                    _yt = _gyl_t(pils, _cy_t) or {}
+                    _ss_t = _yt.get("십성_천간","")
+                    _gh_t = _yt.get("길흉","평")
+                    _TJ_MSG = {
+                        "食神":f"{_cy_t}년은 먹고 즐기는 복록의 해입니다. 재능이 꽃피고 하고 싶은 일을 펼치기 좋습니다.",
+                        "正財":f"{_cy_t}년은 착실히 쌓이는 재물의 해입니다. 성실함이 결실로 돌아옵니다.",
+                        "偏財":f"{_cy_t}년은 재물과 변화의 해입니다. 사업 기회가 오지만 투기는 조심하십시오.",
+                        "正官":f"{_cy_t}년은 명예와 승진의 해입니다. 원칙을 지키면 인정받습니다.",
+                        "偏官":f"{_cy_t}년은 긴장과 변동의 해입니다. 건강과 안전에 특히 주의하십시오.",
+                        "劫財":f"{_cy_t}년은 재물 손실 주의의 해입니다. 투자·보증·동업을 삼가십시오.",
+                        "傷官":f"{_cy_t}년은 창의성의 해이지만 윗사람 마찰을 조심하십시오.",
+                        "偏印":f"{_cy_t}년은 변화와 이동의 해입니다. 큰 결정은 신중히 하십시오.",
+                        "正印":f"{_cy_t}년은 학업·자격의 해입니다. 배움에 집중하면 성과가 옵니다.",
+                        "比肩":f"{_cy_t}년은 독립심이 강해지는 해입니다. 단독 행동이 유리합니다.",
+                    }
+                    y = write(c, f"  {_age_t}세 {_cy_t}년 토정비결 — {_gh_t}", y, size=10)
+                    y = write(c, f"  {_TJ_MSG.get(_ss_t, f'{_cy_t}년 {_ss_t} 기운의 해입니다. 흐름을 잘 타십시오.')}", y, size=9)
+                    y -= 3*mm
+                except Exception as _te:
+                    y = write(c, f"  (토정비결 오류: {str(_te)[:50]})", y, size=9)
 
             c.setFont(BASE_FONT, 8)
 
