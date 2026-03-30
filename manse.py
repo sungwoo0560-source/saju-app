@@ -13679,6 +13679,80 @@ def menu5_money(pils, birth_year, gender, name="내담자"):
     st.markdown('<div class="gold-section">💼 ② 직업 적성 정밀 분석</div>', unsafe_allow_html=True)
     _jikup = ilp.get("직업", "")
     _cur_dw_ss_hanja = TEN_GODS_MATRIX.get(ilgan, {}).get(cur_dw.get("cg", ""), "") if cur_dw else ""
+
+    # 신강신약 확인
+    try:
+        from saju_engine import get_ilgan_strength
+        _sn_info5 = get_ilgan_strength(ilgan, pils)
+        _sn5 = _sn_info5.get("신강신약","중화") if _sn_info5 else "중화"
+    except Exception:
+        _sn5 = "중화"
+
+    # 격국×신강신약 교차 직업 분석
+    _GYEOK_JOB_DETAIL = {
+        "식신격": {
+            "신강": "전문 자격직·컨설팅·강사·요식업·콘텐츠 크리에이터 — 넘치는 에너지를 표현하는 일이 최고",
+            "신약": "서비스직·돌봄·상담사·영양사 — 섬세한 감성이 강점. 혼자보다 팀 안에서 빛남",
+            "중화": "교육·창작·미디어·식품·외식업 — 어떤 환경에서도 재능 발휘 가능",
+        },
+        "정관격": {
+            "신강": "관리직·임원·공기업·군·경찰 — 리더십 발휘. 조직 내 빠른 승진 가능",
+            "신약": "행정·지원·비서·공무원 — 규칙과 체계 안에서 안정적으로 성장",
+            "중화": "공기업·금융·교육·법조·회계 — 신뢰와 원칙이 무기",
+        },
+        "편관격": {
+            "신강": "군인·경찰·스포츠·파일럿·외과의사 — 강한 신체와 결단력이 필요한 직종",
+            "신약": "의료보조·사회복지·NGO — 타인을 위한 헌신으로 보람 찾음",
+            "중화": "의료·법조·경찰·스포츠·무역 — 도전적 환경에서 성장",
+        },
+        "정재격": {
+            "신강": "금융투자·부동산·세무사·CFO — 큰 자산을 다루는 역할",
+            "신약": "회계·경리·재무관리·은행원 — 꼼꼼한 성격이 안정적 재물로 연결",
+            "중화": "금융·회계·보험·부동산·공무원 — 착실한 자산 축적",
+        },
+        "편재격": {
+            "신강": "사업가·무역·투자·부동산 개발 — 대담한 승부사 기질 극대화",
+            "신약": "영업·마케팅·유통·커머스 — 대인관계로 수익 창출",
+            "중화": "사업·무역·마케팅·IT 창업 — 기회 포착 능력 최강",
+        },
+        "상관격": {
+            "신강": "IT개발·엔지니어·발명가·작가·아티스트 — 독창성이 수익으로",
+            "신약": "디자인·음악·작가·강사 — 섬세한 감성이 차별화 포인트",
+            "중화": "IT·예술·컨설팅·교육·방송 — 창의성이 핵심 무기",
+        },
+        "건록격": {
+            "신강": "1인 창업·독립 사업·스포츠·선구자 역할",
+            "신약": "조직 내 전문직·기술직·직인(職人) 스타일",
+            "중화": "전문직·기술직·관리직 — 노력이 결실로",
+        },
+        "편인격": {
+            "신강": "역술가·심리상담·철학·종교·의술·예술 — 독보적 전문성",
+            "신약": "상담·치유·명상·종교·보건 — 돕는 역할에서 보람",
+            "중화": "역술·심리·의료·예술·종교·자유업",
+        },
+        "정인격": {
+            "신강": "교수·연구원·작가·출판·법조·의사 — 지식이 권위로",
+            "신약": "교사·강사·사서·사무직 — 배움을 나누는 역할",
+            "중화": "교육·연구·의료·법조·출판·상담",
+        },
+    }
+
+    # 오행 기반 추천 업종
+    _OH_JOB = {
+        "木": "교육·출판·의류·목공·농업·환경·인테리어·새벽배송",
+        "火": "방송·미디어·IT·에너지·조명·음식점·뷰티·마케팅",
+        "土": "부동산·건축·토목·농업·유통·물류·보험·중개업",
+        "金": "금융·철강·기계·자동차·보석·법조·군경·제조업",
+        "水": "유통·무역·해운·수산·의약·철학·상담·유통",
+    }
+
+    _sn_key5 = "신강" if "신강" in _sn5 else ("신약" if "신약" in _sn5 else "중화")
+    _job_detail5 = ""
+    for _gk5, _jmap5 in _GYEOK_JOB_DETAIL.items():
+        if _gk5 in gname:
+            _job_detail5 = _jmap5.get(_sn_key5, _jmap5.get("중화",""))
+            break
+
     _DW_INDUSTRY = {
         "比肩": "독립 사업·프리랜서·스포츠·1인 창업",
         "劫財": "경쟁업종·금융·영업·투자",
@@ -13692,12 +13766,20 @@ def menu5_money(pils, birth_year, gender, name="내담자"):
         "正印": "교육·연구·출판·의료·상담",
     }
     _cur_industry = _DW_INDUSTRY.get(_cur_dw_ss_hanja, "현재 대운 기운에 맞는 업종 탐색 중")
+    _oh_job5 = _OH_JOB.get(ilgan_oh, "")
+
     st.markdown(
         f"<div style='background:linear-gradient(145deg,#faf7f0,#f2ebe0);border:1px solid #c9a84c;"
         f"border-radius:14px;padding:20px;margin:10px 0'>"
-        f"<div style='font-size:14px;color:#3d2800;line-height:2'>"
-        f"<b>🎯 일간({ilgan}) 최적 직군:</b> {_jikup}<br>"
-        f"<b>📈 현재 대운({_cur_dw_ss_hanja or '?'})에서 유리한 업종:</b> {_cur_industry}</div></div>",
+        f"<div style='font-size:14px;color:#3d2800;line-height:2.2'>"
+        f"<b>🎯 일간({ilgan}) 기본 직군:</b> {_jikup}<br>"
+        f"<b>🏆 격국({gname or '?'})×{_sn_key5} 최적 직업:</b><br>"
+        f"<div style='background:rgba(201,168,76,0.1);border-left:3px solid #c9a84c;"
+        f"padding:8px 12px;border-radius:0 8px 8px 0;margin:4px 0;font-size:13px;color:#2d1800'>"
+        f"{_job_detail5 or _jikup}</div>"
+        f"<b>🌊 오행({ilgan_oh}) 유리한 업종:</b> {_oh_job5}<br>"
+        f"<b>📈 현재 대운({_cur_dw_ss_hanja or '?'}) 유리 업종:</b> {_cur_industry}"
+        f"</div></div>",
         unsafe_allow_html=True,
     )
 
@@ -13729,6 +13811,56 @@ def menu5_money(pils, birth_year, gender, name="내담자"):
         f"{''.join(_timeline_items)}{_now_label}"
         f"<div style='margin-top:8px;font-size:12px;color:#5a3d1a'><b>향후 5년:</b> "
         f"{' / '.join(_future5_items)}</div></div>",
+        unsafe_allow_html=True,
+    )
+
+    # ③-2 사업/창업/이직 최적 타이밍
+    st.markdown('<div class="gold-section">🚀 ③-2 창업·이직·투자 최적 타이밍</div>', unsafe_allow_html=True)
+    _BIZ_SS_GOOD  = {"偏財","食神","比肩","傷官"}  # 창업/사업 유리
+    _JOB_SS_GOOD  = {"正官","正財","正印","食神"}   # 취업/승진 유리
+    _INVEST_GOOD  = {"偏財","正財","食神"}           # 투자 유리
+    _CAUTION_SS   = {"劫財","偏官"}                  # 무조건 조심
+    _biz_peaks, _job_peaks, _invest_peaks, _caution_years = [], [], [], []
+
+    for _y5 in range(current_year, current_year + 8):
+        try:
+            _yl5 = get_yearly_luck(pils, _y5) or {}
+            _ss5 = _yl5.get("십성_천간","")
+            _gh5 = _yl5.get("길흉","평")
+            _sw5 = _yl5.get("세운","")
+            _oh5 = OH.get(_sw5[:1],"") if _sw5 else ""
+            _is_y5 = _oh5 in yongshin_ohs
+            _age5  = _y5 - birth_year + 1
+
+            if _ss5 in _CAUTION_SS and _gh5 in ("흉","-"):
+                _caution_years.append(f"**{_y5}년**({_age5}세) ⛔ {_ss5} — 큰 결정 금지")
+            elif _ss5 in _BIZ_SS_GOOD and _is_y5:
+                _biz_peaks.append(f"**{_y5}년**({_age5}세) 🌟 창업·독립 황금기 [{_ss5}]")
+            elif _ss5 in _BIZ_SS_GOOD:
+                _biz_peaks.append(f"{_y5}년({_age5}세) ✅ 창업 유리 [{_ss5}]")
+            if _ss5 in _JOB_SS_GOOD and _is_y5:
+                _job_peaks.append(f"**{_y5}년**({_age5}세) 🌟 취업·승진 황금기 [{_ss5}]")
+            if _ss5 in _INVEST_GOOD and _is_y5:
+                _invest_peaks.append(f"**{_y5}년**({_age5}세) 🌟 투자 황금기 [{_ss5}]")
+        except Exception:
+            pass
+
+    _timing_html = "<div style='font-size:13px;color:#3d2800;line-height:2'>"
+    if _biz_peaks:
+        _timing_html += "<b>🏢 창업·독립 최적 시기:</b><br>" + "<br>".join(f"&nbsp;&nbsp;{p}" for p in _biz_peaks[:3]) + "<br>"
+    if _job_peaks:
+        _timing_html += "<b>💼 취업·승진 최적 시기:</b><br>" + "<br>".join(f"&nbsp;&nbsp;{p}" for p in _job_peaks[:3]) + "<br>"
+    if _invest_peaks:
+        _timing_html += "<b>💰 투자 최적 시기:</b><br>" + "<br>".join(f"&nbsp;&nbsp;{p}" for p in _invest_peaks[:3]) + "<br>"
+    if _caution_years:
+        _timing_html += "<b>⛔ 절대 조심 — 큰 결정 금지:</b><br>" + "<br>".join(f"&nbsp;&nbsp;{p}" for p in _caution_years[:3]) + "<br>"
+    if not (_biz_peaks or _job_peaks or _invest_peaks):
+        _timing_html += "향후 8년은 내실을 다지는 준비기입니다. 급하게 움직이기보다 역량을 쌓아두십시오."
+    _timing_html += "</div>"
+
+    st.markdown(
+        f"<div style='background:linear-gradient(145deg,#f0f7ff,#e8f0ff);border:1px solid #4a90d9;"
+        f"border-radius:14px;padding:20px;margin:10px 0'>{_timing_html}</div>",
         unsafe_allow_html=True,
     )
 
