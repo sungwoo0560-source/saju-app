@@ -6084,20 +6084,265 @@ def clear_ai_cache_for_key(saju_key: str):
 
 
 def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
-    """각 탭 하단 PDF 빠른 출력 버튼"""
+    """각 탭 전용 PDF 즉시 생성 버튼"""
+    import io
+    from datetime import datetime as _dt2
+
     st.markdown(
         "<hr style='border:none;border-top:1px solid rgba(212,175,55,0.2);margin:24px 0 12px'>",
         unsafe_allow_html=True,
     )
-    _col_pdf1, _col_pdf2, _col_pdf3 = st.columns([1,2,1])
-    with _col_pdf2:
+
+    _TAB_LABEL = {
+        "lifeline":   "대운흐름",
+        "past":       "과거분석",
+        "future3":    "미래3년",
+        "money":      "재물사업",
+        "relations":  "궁합관계",
+        "health":     "건강분석",
+        "daily":      "일일운세",
+        "monthly":    "월별운세",
+        "gaewoon":    "개운처방",
+        "ohaeng":     "음양오행",
+        "tojeong":    "토정비결",
+        "current_situation": "현재상황",
+    }
+    _label = _TAB_LABEL.get(tab_name, tab_name)
+
+    _col1, _col2, _col3 = st.columns([1,2,1])
+    with _col2:
         if st.button(
-            "📄 이 내용 PDF로 출력",
+            f"📄 {_label} PDF 출력",
             key=f"pdf_quick_{tab_name}",
             use_container_width=True,
+            type="secondary",
         ):
-            st.session_state["active_tab"] = 14  # PDF 탭으로 이동
-            st.rerun()
+            try:
+                from reportlab.lib.pagesizes import A4
+                from reportlab.lib.units import mm
+                from reportlab.pdfgen import canvas
+                from reportlab.pdfbase.ttfonts import TTFont
+                from reportlab.pdfbase import pdfmetrics
+                import os, re as _re
+
+                _buf = io.BytesIO()
+                W, H = A4
+                MARGIN = 18 * mm
+                BOT = 20 * mm
+
+                # 폰트 등록
+                _FONTS = [
+                    ("Malgun", "C:/Windows/Fonts/malgun.ttf"),
+                    ("NanumGothic", "/usr/share/fonts/truetype/nanum/NanumGothic.ttf"),
+                    ("UnDotum", "/usr/share/fonts/truetype/unfonts-core/UnDotum.ttf"),
+                ]
+                _BF = "Helvetica"
+                for _fn, _fp in _FONTS:
+                    if os.path.exists(_fp):
+                        try:
+                            pdfmetrics.registerFont(TTFont(_fn, _fp))
+                            _BF = _fn
+                            break
+                        except Exception:
+                            pass
+
+                c = canvas.Canvas(_buf, pagesize=A4)
+                y = H - MARGIN
+
+                def _new_page():
+                    c.showPage()
+                    return H - MARGIN
+
+                def _write(text, y, size=10, color=(0.1, 0.1, 0.1)):
+                    if y < BOT + 10 * mm:
+                        y = _new_page()
+                    c.setFont(_BF, size)
+                    c.setFillColorRGB(*color)
+                    max_w = W - 2 * MARGIN
+                    text = _re.sub(r'\*{1,3}([^*]+)\*{1,3}', r'\1', str(text or ""))
+                    text = _re.sub(r'#{1,6}\s*', '', text)
+                    text = _re.sub(r'<[^>]+>', '', text)
+                    for raw in text.split("\n"):
+                        raw = raw.strip()
+                        if not raw:
+                            y -= 3 * mm
+                            continue
+                        while raw:
+                            if c.stringWidth(raw, _BF, size) <= max_w:
+                                if y < BOT + 8 * mm:
+                                    y = _new_page()
+                                c.drawString(MARGIN, y, raw)
+                                y -= (size * 0.45) * mm
+                                break
+                            lo, hi = 1, len(raw)
+                            while lo < hi - 1:
+                                mid = (lo + hi) // 2
+                                if c.stringWidth(raw[:mid], _BF, size) <= max_w:
+                                    lo = mid
+                                else:
+                                    hi = mid
+                            if y < BOT + 8 * mm:
+                                y = _new_page()
+                            c.drawString(MARGIN, y, raw[:lo])
+                            y -= (size * 0.45) * mm
+                            raw = raw[lo:].lstrip()
+                    return y
+
+                def _sec(text, y):
+                    if y < 45 * mm:
+                        y = _new_page()
+                    c.setFillColorRGB(0.15, 0.12, 0.05)
+                    c.rect(MARGIN - 3 * mm, y - 2 * mm, W - 2 * MARGIN + 6 * mm, 9 * mm, fill=1, stroke=0)
+                    c.setFillColorRGB(0.97, 0.88, 0.38)
+                    c.setFont(_BF, 13)
+                    c.drawString(MARGIN + 1 * mm, y + 1.5 * mm, text)
+                    return y - 12 * mm
+
+                # 표지
+                c.setFillColorRGB(0.08, 0.06, 0.02)
+                c.rect(0, H - 55 * mm, W, 55 * mm, fill=1, stroke=0)
+                c.setFillColorRGB(0.97, 0.90, 0.42)
+                c.setFont(_BF, 22)
+                c.drawCentredString(W / 2, H - 25 * mm, f"만신 사주 — {_label} 리포트")
+                c.setFillColorRGB(0.85, 0.82, 0.70)
+                c.setFont(_BF, 11)
+                c.drawCentredString(W / 2, H - 35 * mm, f"{name} 님  |  {birth_year}년생  |  {gender}성")
+                c.setFillColorRGB(0.65, 0.62, 0.55)
+                c.setFont(_BF, 9)
+                c.drawCentredString(W / 2, H - 43 * mm, f"출력일: {_dt2.now().strftime('%Y년 %m월 %d일')}")
+                y = H - 65 * mm
+
+                # ── 탭별 전용 콘텐츠 ──
+                from saju_interpreter import LocalSajuNarrator, get_yongshin
+                from saju_engine import get_yearly_luck, get_monthly_luck
+
+                _cur_yr = _dt2.now().year
+
+                if tab_name == "lifeline":
+                    y = _sec("🌊 대운흐름 분석", y)
+                    _txt = LocalSajuNarrator.lifeline(pils, name, birth_year, gender)
+                    y = _write(_txt, y, size=9)
+
+                elif tab_name == "past":
+                    y = _sec("🕰️ 과거 타임라인 분석", y)
+                    _txt = LocalSajuNarrator.past_analysis(pils, name, birth_year, gender)
+                    y = _write(_txt, y, size=9)
+
+                elif tab_name == "future3":
+                    y = _sec("🔮 미래 3년 집중 분석", y)
+                    _txt = LocalSajuNarrator.future3(pils, name, birth_year, gender)
+                    y = _write(_txt, y, size=9)
+
+                elif tab_name == "money":
+                    y = _sec("💰 재물/직업 분석", y)
+                    _txt = LocalSajuNarrator.money(pils, name, birth_year, gender)
+                    y = _write(_txt, y, size=9)
+
+                elif tab_name == "relations":
+                    y = _sec("💑 궁합/관계 분석", y)
+                    _txt = LocalSajuNarrator.relations(pils, name, birth_year, gender)
+                    y = _write(_txt, y, size=9)
+
+                elif tab_name == "health":
+                    y = _sec("🏥 건강 분석", y)
+                    _txt = LocalSajuNarrator.full_report(pils, name, birth_year, gender)
+                    _OH_HEALTH = {
+                        "木": "간·담·눈·근육 — 스트레스성 질환, 과로 주의",
+                        "火": "심장·소장·혈관 — 혈압·심장·정신건강 주의",
+                        "土": "비장·위·췌장 — 소화기·당뇨·과식 주의",
+                        "金": "폐·대장·피부·코 — 호흡기·피부·알레르기 주의",
+                        "水": "신장·방광·생식기 — 신장·부종·생식기 주의",
+                    }
+                    try:
+                        from saju_engine import calc_ohaeng_strength
+                        _oh_s = calc_ohaeng_strength(pils[1]["cg"], pils)
+                        _oh_sorted = sorted(_oh_s.items(), key=lambda x: -x[1])
+                        _oh_max = _oh_sorted[0][0] if _oh_sorted else ""
+                        _oh_min = _oh_sorted[-1][0] if _oh_sorted else ""
+                        y = _write(f"가장 강한 오행({_oh_max}) → 취약 장기: {_OH_HEALTH.get(_oh_max, '')}", y, size=9)
+                        y = _write(f"가장 약한 오행({_oh_min}) → 보강 필요: {_OH_HEALTH.get(_oh_min, '')}", y, size=9)
+                        y = _write("정기 건강검진을 반드시 받으시고, 취약 장기를 중점 관리하십시오.", y, size=9)
+                    except Exception:
+                        pass
+
+                elif tab_name == "daily":
+                    y = _sec(f"☀️ 오늘의 운세 ({_dt2.now().strftime('%Y.%m.%d')})", y)
+                    _txt = LocalSajuNarrator.daily(pils, name, birth_year, gender)
+                    y = _write(_txt, y, size=9)
+
+                elif tab_name == "monthly":
+                    y = _sec(f"📅 이달의 운세 ({_dt2.now().month}월)", y)
+                    _txt = LocalSajuNarrator.monthly(pils, name, birth_year, gender)
+                    y = _write(_txt, y, size=9)
+
+                elif tab_name == "gaewoon":
+                    y = _sec("🌟 개운 처방", y)
+                    _ys = get_yongshin(pils)
+                    _yong = _ys.get("종합_용신", []) if _ys else []
+                    _OHN_G = {"木": "목(木)", "火": "화(火)", "土": "토(土)", "金": "금(金)", "水": "수(水)"}
+                    _OH_RX = {
+                        "木": "동쪽 방향, 초록색 활용, 새벽 산책, 나무·식물 가까이",
+                        "火": "남쪽 방향, 붉은색 활용, 밝은 사교활동, 햇빛 쬐기",
+                        "土": "중앙·황토색 활용, 규칙적 생활, 황색 계열 음식",
+                        "金": "서쪽 방향, 흰색·은색 활용, 원칙 세우기, 금속 소품",
+                        "水": "북쪽 방향, 검은색 활용, 독서·명상, 물가 산책",
+                    }
+                    for _y_oh in _yong[:3]:
+                        y = _write(f"용신({_OHN_G.get(_y_oh, '')}) 개운법: {_OH_RX.get(_y_oh, '')}", y, size=9)
+
+                elif tab_name == "ohaeng":
+                    y = _sec("☯️ 음양오행 심층 분석", y)
+                    _txt = LocalSajuNarrator.full_report(pils, name, birth_year, gender)
+                    y = _write(_txt[:3000], y, size=9)
+
+                elif tab_name == "tojeong":
+                    y = _sec("📜 토정비결", y)
+                    _sw = get_yearly_luck(pils, _cur_yr) or {}
+                    _ss_t = _sw.get("십성_천간", "")
+                    _gh_t = _sw.get("길흉", "평")
+                    _age_t = _cur_yr - birth_year + 1
+                    y = _write(f"{_cur_yr}년 {_age_t}세 — {_ss_t} [{_gh_t}]", y, size=11)
+                    _TJ = {
+                        "食神": f"{_cur_yr}년은 재능이 꽃피는 복록의 해입니다.",
+                        "正財": f"{_cur_yr}년은 착실히 쌓이는 재물의 해입니다.",
+                        "偏財": f"{_cur_yr}년은 재물과 변화의 해입니다.",
+                        "正官": f"{_cur_yr}년은 명예와 승진의 해입니다.",
+                        "偏官": f"{_cur_yr}년은 긴장과 변동의 해. 건강 주의하십시오.",
+                        "劫財": f"{_cur_yr}년은 재물 손실 주의. 투자·보증 삼가십시오.",
+                        "傷官": f"{_cur_yr}년은 창의성의 해. 윗사람 마찰 조심하십시오.",
+                        "偏印": f"{_cur_yr}년은 변화·이동의 해. 큰 결정은 신중히.",
+                        "正印": f"{_cur_yr}년은 학업·자격의 해. 배움에 집중하십시오.",
+                        "比肩": f"{_cur_yr}년은 독립심 강해지는 해. 단독 행동 유리.",
+                    }
+                    y = _write(_TJ.get(_ss_t, f"{_cur_yr}년 {_ss_t} 기운의 해입니다."), y, size=9)
+
+                elif tab_name == "current_situation":
+                    y = _sec("🎯 현재 상황 진단", y)
+                    _txt = LocalSajuNarrator.full_report(pils, name, birth_year, gender)
+                    y = _write(_txt[:3000], y, size=9)
+
+                # 푸터
+                c.setFont(_BF, 8)
+                c.setFillColorRGB(0.5, 0.45, 0.35)
+                c.drawString(MARGIN, 12 * mm, "만세력 사주 천명풀이")
+                c.drawRightString(W - MARGIN, 12 * mm, f"{_dt2.now().strftime('%Y.%m.%d')} 출력")
+                c.save()
+                _buf.seek(0)
+
+                st.download_button(
+                    label=f"📥 {_label} PDF 다운로드",
+                    data=_buf.read(),
+                    file_name=f"사주_{name}_{_label}_{_dt2.now().strftime('%Y%m%d')}.pdf",
+                    mime="application/pdf",
+                    use_container_width=True,
+                    key=f"pdf_dl_{tab_name}",
+                )
+                st.success(f"✅ {_label} PDF 생성 완료!")
+
+            except ImportError:
+                st.error("❌ reportlab 미설치. pip install reportlab 실행 필요")
+            except Exception as _pe:
+                st.error(f"❌ PDF 오류: {str(_pe)[:80]}")
 
 def render_ai_deep_analysis(prompt_type, pils, name, birth_year, gender):
     """
