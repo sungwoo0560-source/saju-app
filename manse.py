@@ -6083,6 +6083,22 @@ def clear_ai_cache_for_key(saju_key: str):
     _save_json_cache(_AI_CACHE_FILE, cache)
 
 
+def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
+    """각 탭 하단 PDF 빠른 출력 버튼"""
+    st.markdown(
+        "<hr style='border:none;border-top:1px solid rgba(212,175,55,0.2);margin:24px 0 12px'>",
+        unsafe_allow_html=True,
+    )
+    _col_pdf1, _col_pdf2, _col_pdf3 = st.columns([1,2,1])
+    with _col_pdf2:
+        if st.button(
+            "📄 이 내용 PDF로 출력",
+            key=f"pdf_quick_{tab_name}",
+            use_container_width=True,
+        ):
+            st.session_state["active_tab"] = 14  # PDF 탭으로 이동
+            st.rerun()
+
 def render_ai_deep_analysis(prompt_type, pils, name, birth_year, gender):
     """
     [로컬 엔진 완전 해방 버전]
@@ -11676,6 +11692,8 @@ def menu_current_situation(pils, name, birth_year, gender):
     )
     st.markdown("\n".join(lines))
 
+    render_pdf_download_btn("current_situation", pils, name, birth_year, gender)
+
 
 def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
     """[1. Comprehensive Report] - Pillars, Personality, Gyeokguk, Yongshin"""
@@ -12961,6 +12979,7 @@ def menu2_lifeline(pils, birth_year, gender, name="내담자"):
 
     # AI 정밀 분석 버튼
     render_ai_deep_analysis("lifeline", pils, name, birth_year, gender)
+    render_pdf_download_btn("lifeline", pils, name, birth_year, gender)
 
 
 def menu3_past(pils, birth_year, gender, name=""):
@@ -13106,6 +13125,7 @@ def menu3_past(pils, birth_year, gender, name=""):
     # AI 정밀 분석 버튼
 
     render_ai_deep_analysis("past", pils, name, birth_year, gender)
+    render_pdf_download_btn("past", pils, name, birth_year, gender)
 
 
 def menu4_future3(
@@ -13623,6 +13643,7 @@ def menu4_future3(
     # AI 정밀 분석 버튼
 
     render_ai_deep_analysis("future", pils, name, birth_year, gender)
+    render_pdf_download_btn("future3", pils, name, birth_year, gender)
 
 
 def menu5_money(pils, birth_year, gender, name="내담자"):
@@ -14177,6 +14198,7 @@ def menu5_money(pils, birth_year, gender, name="내담자"):
     # AI 정밀 분석 버튼
 
     render_ai_deep_analysis("money", pils, name, birth_year, gender)
+    render_pdf_download_btn("money", pils, name, birth_year, gender)
 
 
 def menu6_relations(pils, name, birth_year, gender, marriage_status="미혼"):
@@ -14570,6 +14592,7 @@ def menu6_relations(pils, name, birth_year, gender, marriage_status="미혼"):
     # AI 정밀 분석 버튼
 
     render_ai_deep_analysis("relations", pils, name, birth_year, gender)
+    render_pdf_download_btn("relations", pils, name, birth_year, gender)
 
 
 ################################################################################
@@ -15095,6 +15118,8 @@ def menu9_daily(pils, name, birth_year, gender):
         )
     except Exception as _dg_e:
         st.warning(f"⚠️ 개운 처방 오류: {_dg_e}")
+
+    render_pdf_download_btn("daily", pils, name, birth_year, gender)
 
 
 def menu10_monthly(pils, name, birth_year, gender):
@@ -16042,6 +16067,8 @@ def menu11_yearly(pils, name, birth_year, gender):
 """,
                 unsafe_allow_html=True,
             )
+
+    render_pdf_download_btn("monthly", pils, name, birth_year, gender)
 
 
 def menu8_bihang(pils, name, birth_year, gender):
@@ -21287,6 +21314,8 @@ def menu_gaewoon(pils, name, birth_year, gender):
         else:
             st.error("PDF 생성에 실패했습니다. reportlab 패키지가 설치되어 있는지 확인하세요: pip install reportlab")
 
+    render_pdf_download_btn("gaewoon", pils, name, birth_year, gender)
+
 def main():
 
     # -- 페이지 설정 ---------------------------------
@@ -23440,6 +23469,8 @@ return false;">▲</a>
     )
 
     total_lines = get_total_lines()
+
+    render_pdf_download_btn("ohaeng", pils, name, birth_year, gender)
 
 
 
@@ -25925,6 +25956,8 @@ padding:14px;margin:6px 0;text-align:center">
         st.warning(f"풍수 방위 계산 오류: {e}")
 
     st.caption("⚠️ 토정비결·풍수 방위는 전통 민속 문화 기반 참고 자료입니다. 전문 술사와 상담하십시오.")
+
+    render_pdf_download_btn("tojeong", pils, name, birth_year, gender)
 
 
 def menu15_12unsung(pils, name, birth_year, gender):
