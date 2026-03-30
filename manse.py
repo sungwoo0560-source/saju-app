@@ -17242,7 +17242,16 @@ def tab_ai_chat(pils, name, birth_year, gender):
 
     # -- 입력 처리 --
 
-    user_input = st.chat_input("사주나 운세에 대해 무엇이든 물어보세요...")
+    # 퀵 버튼 안내
+    st.markdown(
+        "<div style='background:#1a1a2e;border-radius:10px;padding:10px 16px;"
+        "margin-bottom:10px;font-size:12px;color:#aaa;'>"
+        "💬 <b>예시 질문:</b> 올해 운세 알려줘 / 재물운은? / 연애운 어때? / "
+        "직업 적성은? / 건강 조심해야 할 것은? / 대운 흐름 알려줘"
+        "</div>",
+        unsafe_allow_html=True,
+    )
+    user_input = st.chat_input("무엇이든 물어보세요 — 재물·연애·직업·건강·대운...")
 
     prompt = st.session_state.pop("pending_query", user_input)
 
@@ -18200,7 +18209,57 @@ def tab_ai_chat(pils, name, birth_year, gender):
             except Exception as _le:
                 out.append(f"\n허어, 기운이 잠시 흔들렸느니라. 기본 팔자로 답을 드리겠네. (오류: {_le})\n")
 
-            out.append(f"\n---\n*내 신안(神眼)이 본 {name}의 팔자가 이러하니라. 더 깊이 알고 싶다면 다시 물어보게.*")
+            # ── 키워드 미매칭 시 기본 사주 응답 ────────────────────
+            if len(out) <= 1:  # 인사말만 있는 경우 (키워드 미매칭)
+                try:
+                    _sw_def = get_yearly_luck(pils, current_year) or {}
+                    _ss_def = _sw_def.get("십성_천간","")
+                    _gh_def = _sw_def.get("길흉","평")
+                    _gan_def = _sw_def.get("세운","")
+                    _ys_def = get_yongshin(pils)
+                    _yong_def = _ys_def.get("종합_용신",[]) if _ys_def else []
+                    _gisin_def = _ys_def.get("기신",[]) if _ys_def and isinstance(_ys_def.get("기신"),list) else []
+                    _OH_DEF = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
+                               "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
+                    _oh_def = _OH_DEF.get(_gan_def[:1],"") if _gan_def else ""
+                    _is_y_def = _oh_def in _yong_def
+                    _is_g_def = _oh_def in _gisin_def
+
+                    _sig_def = ("🟢 올해는 용신 운이 흐르는 황금기이니라. 지금 움직이면 반드시 결실이 따르느니라."
+                                if _is_y_def else
+                                "🔴 올해는 기신 운이 강한 수비기이니라. 무리한 확장보다 지키는 것이 최선이니라."
+                                if _is_g_def else
+                                "🟡 올해는 평온한 흐름이니라. 내실을 다지며 꾸준히 나아가는 것이 현명하니라.")
+
+                    _GH_MAP = {"길":"길한","+":" 길한","평":"평범한","흉":"조심스러운","-":"조심스러운"}
+                    out.append(
+                        f"\n{name}의 팔자를 살펴보니, "
+                        f"올해 {current_year}년은 **{_gan_def}({_ss_def})** 기운이 흐르는 "
+                        f"{_GH_MAP.get(_gh_def,'평범한')} 해이니라.\n"
+                    )
+                    out.append(f"{_sig_def}\n")
+                    out.append(
+                        f"\n용신은 **{'·'.join(_yong_def[:2]) if _yong_def else '분석중'}** 오행이니라. "
+                        f"이 기운을 강화하는 방향으로 행동하면 운이 열리느니라.\n"
+                    )
+                    if _gisin_def:
+                        out.append(
+                            f"\n기신은 **{'·'.join(_gisin_def[:2])}** 오행이니라. "
+                            f"이 기운이 강한 시기에는 중요한 결정을 삼가게.\n"
+                        )
+                    out.append(
+                        f"\n더 구체적으로 알고 싶은 것이 있다면 "
+                        f"재물·연애·직업·건강·대운 등 원하는 분야를 말해주게. "
+                        f"더 정확한 답을 드리겠느니라.\n"
+                    )
+                except Exception:
+                    out.append(
+                        f"\n{name}의 팔자에서 현재 중요한 흐름이 감지되느니라. "
+                        f"재물·연애·직업·건강·대운 중 어느 분야가 가장 궁금한지 말씀해 주시게. "
+                        f"더 정확하게 풀어드리겠느니라.\n"
+                    )
+
+            out.append(f"\n---\n*내 신안(神眼)이 본 {name}의 팔자가 이러하니라.*")
 
             return "\n".join(out)
 
@@ -18216,7 +18275,11 @@ def tab_ai_chat(pils, name, birth_year, gender):
 
             follow_up = FollowUpGenerator.get_question(intent_res["topic"], trust_level=trust_lv).replace("{name}", name)
 
-            final_resp = f"{_resp}\n\n---\n💡 **만신의 깊은 질문:** {follow_up}"
+            # follow_up이 빈 경우 처리
+            if follow_up and follow_up.strip():
+                final_resp = f"{_resp}\n\n---\n💭 *{follow_up}*"
+            else:
+                final_resp = _resp
 
             st.markdown(final_resp)
 
