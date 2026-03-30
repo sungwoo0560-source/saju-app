@@ -22856,6 +22856,7 @@ def main():
                 ("🔮", "미래3년"),
                 ("💰", "재물사업"),
                 ("💑", "궁합관계"),
+                ("🏥", "건강분석"),
                 ("📅", "월별운세"),
                 ("☀️", "일일운세"),
                 ("🤖", "AI상담"),
@@ -22907,8 +22908,8 @@ def main():
                         st.rerun()
 
             st.markdown('<div style="height:4px"></div>', unsafe_allow_html=True)
-            # 버튼 행 2 (7개)
-            _btn_cols2 = st.columns(7)
+            # 버튼 행 2 (8개)
+            _btn_cols2 = st.columns(8)
             for _bi, (_em, _nm) in enumerate(_TAB_DEFS[8:]):
                 _real_idx = _bi + 8
                 _is_active = (_cur_tab == _real_idx)
@@ -22938,20 +22939,22 @@ def main():
             elif _cur_tab == 6:
                 menu6_relations(pils, name, birth_year, gender, _ss.get("in_marriage", "미혼"))
             elif _cur_tab == 7:
-                menu10_monthly(pils, name, birth_year, gender)
+                menu14_health(pils, name, birth_year, gender)
             elif _cur_tab == 8:
-                menu9_daily(pils, name, birth_year, gender)
+                menu10_monthly(pils, name, birth_year, gender)
             elif _cur_tab == 9:
-                menu7_ai(pils, name, birth_year, gender)
+                menu9_daily(pils, name, birth_year, gender)
             elif _cur_tab == 10:
-                menu8_bihang(pils, name, birth_year, gender)
+                menu7_ai(pils, name, birth_year, gender)
             elif _cur_tab == 11:
-                menu16_ohaeng_deep(pils, name, birth_year, gender)
+                menu8_bihang(pils, name, birth_year, gender)
             elif _cur_tab == 12:
-                menu_tojeong(pils, name, birth_year, gender)
+                menu16_ohaeng_deep(pils, name, birth_year, gender)
             elif _cur_tab == 13:
-                menu_pdf(pils, birth_year, gender, name, str(_ss.get("in_birth_hour", "")))
+                menu_tojeong(pils, name, birth_year, gender)
             elif _cur_tab == 14:
+                menu_pdf(pils, birth_year, gender, name, str(_ss.get("in_birth_hour", "")))
+            elif _cur_tab == 15:
                 menu_gaewoon(pils, name, birth_year, gender)
 
     # ---- 맨 위로 플로팅 버튼 (window.parent 로 Streamlit iframe 대응) ----
