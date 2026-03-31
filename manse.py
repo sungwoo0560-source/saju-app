@@ -11517,9 +11517,14 @@ def menu_current_situation(pils, name, birth_year, gender):
     except Exception:
         cross = {}
 
-    dw_ss  = cross.get("dw_ss", "")
-    sw_ss  = cross.get("sw_ss", "")
-    sw_gil = cross.get("sw_gil", "")
+    dw_ss  = (cross.get("dw_ss")  or cross.get("대운_천간십성") or cross.get("대운십성") or "")
+    sw_ss  = (cross.get("sw_ss")  or cross.get("세운_천간십성") or cross.get("세운십성") or "")
+    sw_gil = (cross.get("sw_gil") or cross.get("길흉") or "평")
+    # "평(平)" → "평" 정규화
+    import re as _re
+    sw_gil = _re.sub(r'\([^)]+\)', '', str(sw_gil)).strip()
+    dw_age_s = cross.get("dw_start_age", cross.get("시작나이", ""))
+    dw_age_e = cross.get("dw_end_age",   cross.get("종료나이", ""))
 
     try:
         ilgan   = pils[1]["cg"]
@@ -11529,7 +11534,15 @@ def menu_current_situation(pils, name, birth_year, gender):
         sn       = sn_info.get("신강신약", "중화")
         ys_info  = get_yongshin(pils)
         yong_ohs = ys_info.get("종합_용신", [])
-        gi_ohs   = ys_info.get("기신", [])
+        _gi_raw  = ys_info.get("기신", [])
+        # 기신이 문자열로 반환되는 경우 리스트로 변환
+        if isinstance(_gi_raw, list):
+            gi_ohs = _gi_raw
+        elif isinstance(_gi_raw, str) and _gi_raw:
+            # "木·火" 형태면 분리, 아니면 빈 리스트
+            gi_ohs = [x.strip() for x in _gi_raw.replace("·", ",").split(",") if x.strip() in ["木","火","土","金","水"]]
+        else:
+            gi_ohs = []
         yong_str = "·".join(yong_ohs[:2]) if yong_ohs else ""
         gi_str   = "·".join(gi_ohs[:1]) if gi_ohs else ""
     except Exception:
@@ -11880,13 +11893,95 @@ def menu_current_situation(pils, name, birth_year, gender):
         if k in sn:
             sn_cmt = v
             break
-    yong_rx = _YONG_RX.get(yong_ohs[0] if yong_ohs else "", "") if yong_ohs else ""
-    gi_detail = _GISIN_DETAIL.get(gi_str, "") if gi_str else ""
+    yong_rx = ""
+    for _yoh in (yong_ohs[:2] if yong_ohs else []):
+        _rx = _YONG_RX.get(_yoh, "")
+        if _rx:
+            yong_rx += _rx + "\n\n"
+    yong_rx = yong_rx.strip()
+    gi_str2 = "·".join(gi_ohs[:2]) if gi_ohs else ""
+    gi_detail = _GISIN_DETAIL.get(gi_str, _GISIN_DETAIL.get(gi_str2, "")) if (gi_str or gi_str2) else ""
+
+    # ── 위험 신호 분석 ─────────────────────────────────────
+    _danger_signals = []
+    try:
+        from saju_interpreter import get_12sinsal, get_yearly_luck
+        _sinsal_list = get_12sinsal(pils)
+        _yl = get_yearly_luck(pils, cur_year)
+        _jj_cur = _yl.get("jj", "")
+        _oh_cg  = _yl.get("오행_천간", "")
+        _oh_jj  = _yl.get("오행_지지", "")
+        _CHUNG_MAP = {"子":"午","午":"子","丑":"未","未":"丑","寅":"申","申":"寅",
+                      "卯":"酉","酉":"卯","辰":"戌","戌":"辰","巳":"亥","亥":"巳"}
+        _il_jj   = pils[1].get("jj","")
+        _year_jj = pils[0].get("jj","") if len(pils)>0 else ""
+        if _CHUNG_MAP.get(_il_jj,"") == _jj_cur:
+            _danger_signals.append(("💥 이동수·사고수 주의",
+                f"올해 일지({_il_jj})와 세운지지({_jj_cur})가 충(沖)입니다. "
+                f"교통사고, 수술, 갑작스러운 이사·이직 등 큰 변화가 터질 수 있습니다. "
+                f"상반기 중 각별히 조심하십시오."))
+        if _CHUNG_MAP.get(_year_jj,"") == _jj_cur:
+            _danger_signals.append(("💔 부부·가족 갈등수",
+                f"년주({_year_jj})와 세운이 충돌합니다. "
+                f"배우자·가족과 심각한 갈등, 별거, 이혼 논의가 생길 수 있습니다. "
+                f"감정이 격해지는 시기에 큰 결정을 미루십시오."))
+        for _s in _sinsal_list:
+            _nm = _s.get("이름","")
+            if "도화" in _nm:
+                _danger_signals.append(("🌸 이성 문제·외도 가능성",
+                    "도화살이 강하게 작용하는 시기입니다. "
+                    "배우자 있는 분은 외부 이성과의 접촉을 삼가십시오. "
+                    "감각적 유혹에 흔들리기 쉬운 해입니다."))
+            if "망신" in _nm:
+                _danger_signals.append(("🌀 구설수·스캔들 주의",
+                    "망신살이 세운과 맞물립니다. "
+                    "SNS·술자리·직장에서 언행을 극도로 조심하십시오. "
+                    "비밀이 드러나거나 남의 일에 엮이는 수가 있습니다."))
+            if "역마" in _nm:
+                _danger_signals.append(("🚗 이동·교통사고 주의",
+                    "역마살이 활성화되어 있습니다. "
+                    "장거리 이동 시 각별히 조심하고 운전 중 핸드폰은 금물입니다."))
+            if "관재" in _nm or "백호" in _nm:
+                _danger_signals.append(("⚖️ 법적 분쟁·관재수",
+                    "관재수가 보입니다. 계약서·법적 서류를 꼼꼼히 확인하고 "
+                    "보증·연대책임은 절대 서지 마십시오."))
+        if _oh_cg == "火" and _oh_jj == "火":
+            _danger_signals.append(("🏥 건강 적신호 — 심장·혈압·눈",
+                "올해 천간·지지 모두 火 기운으로 과열 상태입니다. "
+                "심장 두근거림, 혈압 상승, 눈 충혈, 불면증이 생기기 쉽습니다. "
+                "정기 건강검진을 꼭 받으십시오."))
+        _sw_ss_raw = cross.get("sw_ss","")
+        if "편관" in _sw_ss_raw:
+            _danger_signals.append(("⚡ 직장·권력자 압박수",
+                "편관 세운은 상사나 권력자로부터 압박을 받거나 "
+                "직장에서 갑작스러운 위기가 올 수 있습니다. "
+                "규칙을 철저히 지키고 튀는 행동을 삼가십시오."))
+        if "상관" in _sw_ss_raw:
+            _danger_signals.append(("💬 이혼·구설·직장 충돌",
+                "상관 세운은 윗사람과의 충돌, 배우자와의 갈등이 폭발하는 시기입니다. "
+                "기혼자는 이혼 위기, 직장인은 상사와 크게 부딪힐 수 있습니다."))
+    except Exception:
+        pass
 
     lines = []
+    _dw_label = f"{dw_kr} 대운" if dw_kr else "대운 미산출"
+    _sw_label = f"{sw_kr} 세운" if sw_kr else f"{cur_year}년 세운"
+    _age_range = f" ({dw_age_s}~{dw_age_e}세)" if dw_age_s and dw_age_e else ""
     lines.append(f"## 🎯 {name}님, 지금 무엇 때문에 힘드신가요?")
-    lines.append(f"*{cur_year}년 · {cur_age}세 · {dw_kr or ''} 대운 · {sw_kr or ''} 세운*")
+    lines.append(f"*{cur_year}년 · 한국나이 {cur_age}세(만 {cur_age-1}세) · {_dw_label}{_age_range} · {_sw_label}*")
     lines.append("")
+
+    # 0. 위험 신호 카드 (있을 때만)
+    if _danger_signals:
+        lines.append("### 🚨 지금 당신의 사주에서 보이는 위험 신호")
+        lines.append("")
+        for _title, _body in _danger_signals:
+            lines.append(f"**{_title}**  ")
+            lines.append("")
+            lines.append(_body)
+            lines.append("")
+        lines.append("---")
+        lines.append("")
 
     # 1. 공감 질문
     lines.append(f"### 💬 {hard_q}")
@@ -11927,7 +12022,9 @@ def menu_current_situation(pils, name, birth_year, gender):
         lines.append("")
 
     lines.append("---")
-    lines.append("*위 분석은 대운·세운 십성 교차 및 사주 원국 데이터를 기반으로 자동 생성됩니다.*")
+    _data_note = f"일간 {ilgan} · 신강신약 {sn} · 용신 {yong_str or '미산출'} · 기신 {gi_str or '미산출'}"
+    lines.append(f"*위 분석은 {_dw_label} × {_sw_label} 교차 및 원국 기반으로 자동 생성됩니다.*")
+    lines.append(f"*[ {_data_note} ]*")
 
     st.markdown(
         "<style>.stMarkdown p{word-break:keep-all;line-height:2;font-size:15px;color:#1a1a1a}"
