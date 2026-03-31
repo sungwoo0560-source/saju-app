@@ -4675,6 +4675,71 @@ class LocalSajuNarrator:
 
 
     @staticmethod
+    def tojeong(pils, name, birth_year, gender):
+        """📜 토정비결 — 전통 신수 기반 올해 운세"""
+        
+        b = LocalSajuNarrator._get_base(pils, name, birth_year, gender)
+        if not b:
+            return "## ⚠️ 토정비결 분석을 불러오지 못했습니다."
+        
+        ilgan = b.get("ilgan", "甲")
+        ys_list = b.get("yongshin", [])
+        gisin = b.get("gisin", [])
+        cur_year = b.get("cur_year", datetime.now().year)
+        sw = b.get("sw", {})
+        OHN = b.get("OHN", {})
+        
+        lines = []
+        
+        # 토정비결 해석
+        lines.append("## 📜 올해 토정비결 분석 (전통 신수법)\n")
+        
+        # 일간별 메시지
+        ilgan_msg = {
+            "甲": "새로운 시작과 성장의 기운. 계획한 일을 실행에 옮기면 좋은 결과를 얻습니다.",
+            "乙": "유연함과 적응력의 회복. 변화를 거부하지 말고 유순하게 받아들이십시오.",
+            "丙": "밝음과 활발함의 해. 내적 동력이 강해져 공개적 활동에 집중하기 좋습니다.",
+            "丁": "차분함과 철학의 해. 깊이 있는 사고와 내면의 성찰을 통해 지혜를 얻습니다.",
+            "戊": "안정과 수호의 기운. 기초를 다지고 중심을 잡는 데 최고의 한 해입니다.",
+            "己": "배려와 조화의 해. 주변을 돌보는 마음과 소통이 운을 열 것입니다.",
+            "庚": "결단과 의리의 기운. 중요한 결정을 내릴 때가 왔으니 확신을 가지십시오.",
+            "辛": "세련됨과 완벽의 추구. 디테일에 신경 쓰고 완성도를 높이는 한 해가 좋습니다.",
+            "壬": "현명함과 유동성. 상황을 정확히 판단하고 유연하게 대응하면 기회를 잡습니다.",
+            "癸": "내면의 창의성과 적응. 깊은 생각과 신중함으로 새로운 길을 개척합니다."
+        }
+        
+        lines.append(f"### 일간별 운세 — {ilgan}({name}님)\n")
+        lines.append(ilgan_msg.get(ilgan, "평안한 한 해가 될 것입니다.") + "\n")
+        
+        # 세운 기반 메시지
+        if sw:
+            sw_ss = sw.get("십성_천간", "")
+            sw_gh = sw.get("길흉", "평")
+            
+            gh_msg = {"길": "✅ 좋은 운세", "흉": "⚠️ 조심의 운세", "평": "⚖️ 평탄한 운세"}
+            
+            lines.append(f"### 올해 세운 분석 — {sw.get('세운', '?')}\n")
+            lines.append(f"• **길흉**: {gh_msg.get(sw_gh, '⚖️ 평탄')}\n")
+            lines.append(f"• **십성**: {sw_ss}\n")
+        
+        # 용신·기신 기반 조언
+        if ys_list:
+            lines.append(f"\n### 💚 용신 기운 강화\n")
+            lines.append(f"올해는 용신인 {', '.join(OHN.get(y, y) for y in ys_list)} 기운을 최대한 활용하십시오.\n")
+        
+        if gisin:
+            lines.append(f"\n### ⚠️ 기신 기운 조심\n")
+            lines.append(f"기신인 {', '.join(OHN.get(g[:1], g) for g in gisin)} 기운이 강한 해입니다. 신중함이 필요합니다.\n")
+        
+        lines.append("\n**💡 올해 운세의 핵심**\n")
+        lines.append("• 정기검진 및 건강 관리 필수\n")
+        lines.append("• 큰 결정은 3번 숙고하고 내리십시오\n")
+        lines.append("• 인맥을 소중히 하고 귀인을 놀치지 마십시오\n")
+        lines.append("• 기본에 충실하면 모든 것이 따라옵니다\n")
+        
+        return "\n".join(lines)
+
+    @staticmethod
     def money(pils, name, birth_year, gender):
         """💰 재물/사업 분석 ― 언제 벌고 언제 조심하나"""
 
