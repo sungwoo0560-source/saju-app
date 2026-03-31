@@ -24441,8 +24441,10 @@ def main():
             elif _cur_tab == 13:
                 menu_tojeong(pils, name, birth_year, gender)
             elif _cur_tab == 14:
-                menu_pdf(pils, birth_year, gender, name, str(_ss.get("in_birth_hour", "")))
+                menu_yearly(pils, name, birth_year, gender)
             elif _cur_tab == 15:
+                menu_pdf(pils, birth_year, gender, name, str(_ss.get("in_birth_hour", "")))
+            elif _cur_tab == 16:
                 menu_gaewoon(pils, name, birth_year, gender)
 
     # ---- 맨 위로 플로팅 버튼 (window.parent 로 Streamlit iframe 대응) ----
