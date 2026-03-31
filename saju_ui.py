@@ -7,20 +7,7 @@ manse.py에서 from saju_ui import * 로 사용
 import streamlit as st
 
 
-def _get_ohang_color(char):
-    """오행별 (배경색, 글자색) 반환 — saju_ui 내부용"""
-    wood  = (["甲","乙","寅","卯"], "#2d8a4e", "#ffffff")
-    fire  = (["丙","丁","巳","午"], "#e53935", "#ffffff")
-    earth = (["戊","己","辰","戌","丑","未"], "#f9a825", "#1a1a1a")
-    metal = (["庚","辛","申","酉"], "#9e9e9e", "#ffffff")
-    water = (["壬","癸","亥","子"], "#1565c0", "#ffffff")
-    for chars, bg, fg in [wood, fire, earth, metal, water]:
-        if char in chars:
-            return bg, fg
-    return "#555555", "#ffffff"
 
-
-def inject_global_css():
     """전역 CSS — 전통 한지 크림 톤 + 프리미엄 앱 스타일 (st.set_page_config 직후 호출)"""
     st.markdown(
         """

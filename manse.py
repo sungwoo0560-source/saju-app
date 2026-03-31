@@ -14734,6 +14734,27 @@ def menu6_relations(pils, name, birth_year, gender, marriage_status="미혼"):
 
     tab_yukjin(pils, gender)
 
+    # ── 미사용 신살 분석 연결 ────────────────────────────────────
+    try:
+        from saju_sinsal import get_pahae, get_geunmyo_hwasil, get_waryeong, get_oigyeok
+        st.markdown('<div class="gold-section">🔍 파살·해살 분석</div>', unsafe_allow_html=True)
+        _ph = get_pahae(pils)
+        _pahae_list = _ph.get("파살",[]) + _ph.get("해살",[])
+        if _pahae_list:
+            for _p in _pahae_list[:3]:
+                st.markdown(f"- {_p}", unsafe_allow_html=True)
+        else:
+            st.markdown("파살·해살이 감지되지 않습니다. ✅")
+
+        st.markdown('<div class="gold-section">🌱 근묘화실 — 4기둥 궁 분석</div>', unsafe_allow_html=True)
+        _gm = get_geunmyo_hwasil(pils)
+        if isinstance(_gm, list):
+            for _g in _gm[:4]:
+                if isinstance(_g, dict):
+                    st.markdown(f"**{_g.get('궁','')}**: {_g.get('설명','')}")
+    except Exception as _se:
+        pass
+
     st.markdown(
         '<hr style="border:none;border-top:1px solid #e0d8c0;margin:20px 0">',
         unsafe_allow_html=True,
@@ -15363,6 +15384,8 @@ def menu9_daily(pils, name, birth_year, gender):
         )
     except Exception as _dg_e:
         st.warning(f"⚠️ 개운 처방 오류: {_dg_e}")
+
+    render_pdf_download_btn("daily", pils, name, birth_year, gender)
 
     render_pdf_download_btn("daily", pils, name, birth_year, gender)
 
@@ -16312,6 +16335,8 @@ def menu11_yearly(pils, name, birth_year, gender):
 """,
                 unsafe_allow_html=True,
             )
+
+    render_pdf_download_btn("monthly", pils, name, birth_year, gender)
 
     render_pdf_download_btn("monthly", pils, name, birth_year, gender)
 
@@ -26063,6 +26088,15 @@ unsafe_allow_html=True)
 
 
 def menu_tojeong(pils, name, birth_year, gender):
+    """📜 토정비결 — 개인화 신년운세"""
+    # ── 개인화 토정비결 ──────────────────────────────────────
+    try:
+        _tj_out = LocalSajuNarrator.tojeong(pils, name, birth_year, gender)
+        if _tj_out:
+            st.markdown(_tj_out, unsafe_allow_html=True)
+    except Exception as _te:
+        st.warning(f"⚠️ 토정비결 오류: {_te}")
+    st.markdown("---")
     """📜 토정비결 탭 — 올해 신수 + 풍수지리 방위"""
     import datetime as _dt_tj
 

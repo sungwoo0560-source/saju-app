@@ -3541,6 +3541,86 @@ class LocalSajuNarrator:
             f"팔자 속에서 찾아보겠습니다.\n"
         )
 
+        # ── 인생 결정적 순간 — 충/합/세운 교차 TOP 3 ──────────────────
+        try:
+            _JJ_CHUNG_PA = {
+                "子":"午","午":"子","丑":"未","未":"丑","寅":"申","申":"寅",
+                "卯":"酉","酉":"卯","辰":"戌","戌":"辰","巳":"亥","亥":"巳",
+            }
+            _orig_jjs_pa = {p.get("jj","") for p in pils}
+            _orig_cgs_pa = {p.get("cg","") for p in pils}
+            _CG_CHUNG_PA = {
+                "甲":"庚","庚":"甲","乙":"辛","辛":"乙",
+                "丙":"壬","壬":"丙","丁":"癸","癸":"丁",
+            }
+            _SS_EVENT_PA = {
+                "偏財":"💰 재물 기회·이성 인연·사업 변동",
+                "正財":"💰 안정 수입·결혼·재물 정착",
+                "食神":"🌟 창업·재능 개화·임신·복록",
+                "傷官":"⚡ 이직·갈등·창의적 도전·구설",
+                "偏官":"⚠️ 사고·건강 이상·직장 변동·관재",
+                "正官":"🏆 승진·명예·결혼·공식 인정",
+                "劫財":"🔴 재물 손실·배신·경쟁",
+                "比肩":"💪 독립·창업 시도·이사",
+                "偏印":"📚 이동·이직·학업 전환",
+                "正印":"📖 자격취득·귀인 만남",
+            }
+            _decisive_moments = []
+            for _yr_pa in range(birth_year + 10, cur_year + 1):
+                try:
+                    _sw_pa = get_yearly_luck(pils, _yr_pa) or {}
+                    _jj_pa = _sw_pa.get("jj","")
+                    _cg_pa = _sw_pa.get("세운","")[:1] if _sw_pa.get("세운") else ""
+                    _ss_pa = _sw_pa.get("십성_천간","")
+                    _gh_pa = _sw_pa.get("길흉","평")
+                    _oh_pa = _OH.get(_cg_pa,"") if _cg_pa else ""
+                    _is_y = _oh_pa in yongshin
+                    _is_g = _oh_pa in gisin
+                    # 충 감지
+                    _ct = _JJ_CHUNG_PA.get(_jj_pa,"")
+                    _has_chung = bool(_ct and _ct in _orig_jjs_pa)
+                    # 천간충 감지
+                    _cct = _CG_CHUNG_PA.get(_cg_pa,"")
+                    _has_cg_chung = bool(_cct and _cct in _orig_cgs_pa)
+                    _age_pa = _yr_pa - birth_year + 1
+                    _event_hint = _SS_EVENT_PA.get(_ss_pa,"")
+                    if _has_chung and _has_cg_chung:
+                        _decisive_moments.append(
+                            f"**{_yr_pa}년({_age_pa}세)** 💥 천간+지지 동시 충(沖) — "
+                            f"인생 최대 변곡점. {_event_hint}"
+                        )
+                    elif _has_chung and _is_g:
+                        _decisive_moments.append(
+                            f"**{_yr_pa}년({_age_pa}세)** 💥 충(沖)+기신 — "
+                            f"힘든 변화. {_event_hint}"
+                        )
+                    elif _has_chung and _is_y:
+                        _decisive_moments.append(
+                            f"**{_yr_pa}년({_age_pa}세)** 💥 충(沖)+용신 — "
+                            f"변화 속 기회. {_event_hint}"
+                        )
+                    elif _is_y and _gh_pa in ("길","+"):
+                        _decisive_moments.append(
+                            f"**{_yr_pa}년({_age_pa}세)** 🌟 황금 세운 — {_event_hint}"
+                        )
+                    elif _is_g and _gh_pa in ("흉","-"):
+                        _decisive_moments.append(
+                            f"**{_yr_pa}년({_age_pa}세)** ⚠️ 흉 세운 — {_event_hint}"
+                        )
+                except Exception:
+                    pass
+            if _decisive_moments:
+                lines.append("### 🔍 인생 결정적 순간 TOP — 사주가 가장 크게 움직인 해")
+                lines.append(
+                    f"아래는 {name}님의 사주 원국과 세운이 가장 강하게 충돌하거나 "
+                    f"결합했던 해입니다. 이 시기에 중요한 사건이 있었는지 확인해 보십시오."
+                )
+                for _dm in _decisive_moments[:5]:
+                    lines.append(f"- {_dm}")
+                lines.append("")
+        except Exception:
+            pass
+
         # 전체 대운 목록 (과거 + 현재 포함)
         all_dws = b.get("dw_list", [])
         shown_dws = [d for d in all_dws if d.get("시작연도", 9999) <= cur_year + 10]
@@ -7185,7 +7265,7 @@ def get_gyeokguk(pils):
     jijang = JIJANGGAN.get(wolji, [])
 
     if not jijang:
-        return None
+        return {}
 
     jeongi = jijang[-1]
 
