@@ -7,7 +7,7 @@ manse.py에서 from saju_ui import * 로 사용
 import streamlit as st
 
 
-
+def inject_global_css():
     """전역 CSS — 전통 한지 크림 톤 + 프리미엄 앱 스타일 (st.set_page_config 직후 호출)"""
     st.markdown(
         """
