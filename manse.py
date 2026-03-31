@@ -26135,12 +26135,49 @@ border-radius:14px;padding:16px 20px;margin:16px 0 6px">
                 "ganji":_sw2.get("세운","")
             })
 
-        # 사고수 테이블 출력
+        # 사고수 테이블 + 월별 상세 분석 출력
+        
+        # 월별 위험도 맵 (세운 오행 기반)
+        _MONTHLY_RISK = {
+            "木": {"위험월": [2,3,4,5], "사고유형": "교통사고·낙상·골절", "질환": "간·담·눈·신경"},
+            "火": {"위험월": [5,6,7,8], "사고유형": "화상·심장질환·염증", "질환": "심장·혈관·눈·고혈압"},
+            "土": {"위험월": [3,6,9,12], "사고유형": "소화기질환·중독", "질환": "비장·위·소화기·관절"},
+            "金": {"위험월": [8,9,10,11], "사고유형": "호흡기질환·수술", "질환": "폐·대장·기관지·피부"},
+            "水": {"위험월": [11,12,1,2], "사고유형": "신장질환·차가움", "질환": "신장·생식기·귀·비뇨계"}
+        }
+        
+        # 대처방법 맵
+        _PREVENTION = {
+            r"木": r"봄(3\~5월)/동쪽 방향 활동 최소화 / 새벽 산행·수련 금지 / 초록색·파란색 과다 착용 금지",
+            r"火": r"여름(6\~8월)/남쪽 활동 자제 / 햇빛 과다 노출 금지 / 붉은색 옷 자제 / 화기류 주변 조심",
+            r"土": r"환절기(3,6,9,12월)/기름진 음식·과식 금지 / 과로·스트레스 관리 필수 / 황색·갈색 과다 착용 금지",
+            r"金": r"가을(9\~11월)/서쪽 방향 활동 자제 / 금속제 가전 안전점검 / 흰색·회색 옷 제한 / 결단성 있는 행동 자제",
+            r"水": r"겨울(12\~2월)/찬바람·냉수 접촉 금지 / 저녁 늦게 밖돌아다니기 금지 / 검은색·남색 과다 착용 금지 / 과도한 사색 자제"
+        }
+        
         for _ad in accident_data:
             _is_cur = (_ad["yr"] == _cur_yr2)
             _bdr = "border:2px solid "+_ad["gc"]+";" if _is_cur else "border:1px solid "+_ad["gc"]+"44;"
             _bg = _ad["gc"]+"22" if _ad["risk"] >= 50 else "rgba(255,255,255,0.03)"
             _cur_badge = " ◀ 올해" if _is_cur else ""
+            
+            # 세운 오행 추출
+            try:
+                _sw_cg_yr = _ad["ganji"][:1] if _ad["ganji"] else ""
+                _yr_oh = _OH.get(_sw_cg_yr, "土")  # 기본값 土
+            except:
+                _yr_oh = "土"
+            
+            # 월별 정보 추출
+            _monthly_info = _MONTHLY_RISK.get(_yr_oh, _MONTHLY_RISK["木"])
+            _monthly_list = _monthly_info.get("위험월", [])
+            _accident_type = _monthly_info.get("사고유형", "질병·위기")
+            _disease = _monthly_info.get("질환", "건강")
+            _prevention_method = _PREVENTION.get(_yr_oh, "일반 건강 관리")
+            
+            # 위험 달 텍스트
+            _month_text = " / ".join([f"{m}월" for m in sorted(set(_monthly_list))])
+            
             st.markdown(
                 f"<div style='background:{_bg};{_bdr}border-radius:10px;padding:12px 14px;margin-bottom:6px'>"
                 f"<div style='display:flex;justify-content:space-between;align-items:center;margin-bottom:6px'>"
@@ -26152,11 +26189,26 @@ border-radius:14px;padding:16px 20px;margin:16px 0 6px">
                 f"<span style='font-size:12px;font-weight:700;color:{_ad["gc"]}'>{_ad["risk"]}점</span>"
                 f"<span style='font-size:13px'>{_ad["grade"]}</span></div></div>",
                 unsafe_allow_html=True)
+            
+            # 위험 요인
             if _ad["reasons"]:
                 _r_html = " &nbsp;·&nbsp; ".join([f"<span style='color:#ddd'>{r}</span>" for r in _ad["reasons"]])
                 st.markdown(
                     f"<div style='font-size:11px;color:#aaa;padding:4px 8px;background:rgba(0,0,0,0.3);border-radius:6px;margin-top:-4px;margin-bottom:4px'>"
                     f"위험 요인: {_r_html}</div>",
+                    unsafe_allow_html=True)
+            
+            # 월별 상세 정보 (위험도 높을 때만)
+            if _ad["risk"] >= 40:
+                st.markdown(
+                    f"<div style='font-size:11px;color:#fff;padding:8px;background:rgba(0,0,0,0.4);border-radius:6px;margin-top:4px;border-left:3px solid {_ad["gc"]}'>"
+                    f"<div style='font-weight:700;margin-bottom:4px;color:{_ad["gc"]}'>📅 월별 위험도 분석</div>"
+                    f"<div style='margin-bottom:4px'><strong>위험 달:</strong> {_month_text}</div>"
+                    f"<div style='margin-bottom:4px'><strong>주요 사고:</strong> {_accident_type}</div>"
+                    f"<div style='margin-bottom:4px'><strong>주의 질환:</strong> {_disease}</div>"
+                    f"<div style='color:#ffeb3b;margin-top:6px;padding:6px;background:rgba(0,0,0,0.3);border-radius:4px;'>"
+                    f"<strong>⚠️ 대처방법:</strong><br>{_prevention_method}</div>"
+                    f"</div>",
                     unsafe_allow_html=True)
 
         # 원국 위험 요소 요약
