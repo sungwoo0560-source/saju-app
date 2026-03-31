@@ -24396,8 +24396,8 @@ def main():
                         st.rerun()
 
             st.markdown('<div style="height:4px"></div>', unsafe_allow_html=True)
-            # 버튼 행 2 (8개)
-            _btn_cols2 = st.columns(8)
+            # 버튼 행 2 (9개)
+            _btn_cols2 = st.columns(9)
             for _bi, (_em, _nm) in enumerate(_TAB_DEFS[8:]):
                 _real_idx = _bi + 8
                 _is_active = (_cur_tab == _real_idx)
