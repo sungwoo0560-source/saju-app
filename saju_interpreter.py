@@ -4637,38 +4637,140 @@ class LocalSajuNarrator:
             lines.append(f"• **금지 사항**: {gisin_warning}")
             lines.append("")
         
-        # 종합 건강 가이드
-        lines.append(f"#### 🏥 종합 건강 & 안전 가이드 (3년간)")
+        # ── 3년별 카드 형식 + 종합 건강 가이드 ─────────────────────────────
+        lines.append("---")
+        lines.append("### 🔮 3년별 안전 & 건강 카드\n")
         
-        # 각 연도별 위험 달 정리
-        risk_month_dict = {}
+        # 각 연도별 종합 정보 재수집
+        yr_health_map = {}
         for yr in [cur_year, cur_year+1, cur_year+2]:
             try:
                 sw = get_yearly_luck(pils, yr) or {}
                 sw_gan = sw.get("세운", "")
                 yr_oh = _OH.get(sw_gan[:1], "") if sw_gan else ""
-                risk_data = _OH_ACCIDENT_RISK.get(yr_oh, {})
-                if risk_data.get("월"):
-                    risk_month_dict[yr] = risk_data["월"]
+                
+                # 사고수 위험도
+                accident_risk = _OH_ACCIDENT_RISK.get(yr_oh, {"위험도": 45, "원인": "일반적 주의", "월": []})
+                risk_grade = "🔴 고위험" if accident_risk["위험도"] >= 70 else ("🟡 주의" if accident_risk["위험도"] >= 55 else "🟢 안전")
+                
+                # 건강수 위험도
+                health_rs = _OH_HEALTH_RISK.get(yr_oh, {"위험도": 45, "질환": "일반관리", "예방": "정기검진"})
+                health_grade = "🔴 주의" if health_rs["위험도"] >= 70 else ("🟡 관찰" if health_rs["위험도"] >= 60 else "🟢 양호")
+                
+                risk_months = ", ".join(str(m) + "월" for m in accident_risk.get("월", []))
+                
+                yr_health_map[yr] = {
+                    "accident": {"grade": risk_grade, "risk": accident_risk["위험도"], "reason": accident_risk["원인"], "months": risk_months},
+                    "health": {"grade": health_grade, "risk": health_rs["위험도"], "disease": health_rs["질환"], "prevention": health_rs["예방"]}
+                }
             except:
-                pass
+                yr_health_map[yr] = None
         
-        yr_label_map = {cur_year: "올해", cur_year+1: "내년", cur_year+2: "내후년"}
+        # 연도별 카드 출력
+        yr_names = {cur_year: f"🔮 {cur_year}년 (올해)", cur_year+1: f"🔮 {cur_year+1}년 (내년)", cur_year+2: f"🔮 {cur_year+2}년 (내후년)"}
         
         for yr in [cur_year, cur_year+1, cur_year+2]:
-            yr_label = yr_label_map.get(yr, str(yr))
-            risk_months = ", ".join(str(m) + "월" for m in risk_month_dict.get(yr, []))
-            if risk_months:
-                lines.append(f"• **{yr_label} ({yr}년)**: 위험 달 → {risk_months} (자동차·야간활동·스트레스 관리 각별히)")
+            lines.append(f"\n#### {yr_names.get(yr, str(yr))}")
+            
+            if yr_health_map.get(yr):
+                health_info = yr_health_map[yr]
+                accident = health_info["accident"]
+                health = health_info["health"]
+                
+                lines.append(f"**⚡ 사고수 위험도**: {accident['grade']} (위험도 {accident['risk']}%)")
+                lines.append(f"> {accident['reason']}")
+                
+                lines.append(f"\n**🏥 건강수 위험도**: {health['grade']} (위험도 {health['risk']}%)")
+                lines.append(f"> 취약 질환: {health['disease']}")
+                lines.append(f"  예방법: {health['prevention']}")
+                
+                if accident["months"]:
+                    lines.append(f"\n**📅 위험 달**: {accident['months']}")
+                    lines.append(f"> 이 기간 자동차 운전 조심 / 야간활동 최소화 / 스트레스 관리")
+                else:
+                    lines.append(f"\n**📅 위험 달**: 특수 위험월 없음 (일반 주의 수준)")
+                
+                lines.append(f"\n**🛡️ 피할 방법**: {_ILGAN_CAUTION.get(ilgan, ('정기검진', '무리한 활동'))[0]}")
+                lines.append("")
             else:
-                lines.append(f"• **{yr_label} ({yr}년)**: 일반 주의 수준 유지")
+                lines.append("⚠️ 데이터를 불러오지 못했습니다.\n")
+        
+        # ── 3년 종합 건강 가이드 ─────────────────────────────────
+        lines.append("---")
+        lines.append("### 💊 3년 종합 건강 & 개인화 가이드\n")
+        
+        # 용신 기반 개운법
+        if ys_list:
+            ys_oh = ys_list[0] if ys_list else "목"
+            ys_caution = _YONG_CAUTION_MAP.get(ys_oh, {"강화": "정상 활동", "피할": "개별상담"})
+            lines.append(f"#### 💚 용신 오행별 3년 개운법 — {name}님의 긍정 에너지 최대화")
+            lines.append(f"**하늘이 주는 기운 {OHN.get(ys_oh, ys_oh)}를 극대화하세요:**")
+            lines.append(f"• **강화하기**: {ys_caution.get('강화', '정상 활동')}")
+            lines.append(f"• **색상**: {_YONG_CAUTION_MAP.get(ys_oh, {}).get('색상', '적절한 색상 선택')}")
+            lines.append(f"• **방위**: {_YONG_CAUTION_MAP.get(ys_oh, {}).get('방위', '중요 활동시 고려')}")
+            lines.append("")
+        
+        # 기신 기반 주의사항
+        if gisin:
+            gisin_oh_main = _OH.get(gisin[0][:1], "") if gisin else "목"
+            gisin_warning = _GISIN_CAUTION_MAP.get(gisin_oh_main, "개별상담 권고")
+            lines.append(f"#### ⚠️ 기신 오행별 3년 피할 행동 — {name}님의 약한 지점 보호")
+            lines.append(f"**하늘이 피하는 기운 {OHN.get(gisin_oh_main, gisin_oh_main)}을(를) 조심하세요:**")
+            lines.append(f"• **금지 사항**: {gisin_warning}")
+            lines.append(f"• **주의 시기**: 기신 오행이 강한 계절 (봄/여름/가을/겨울 중 해당 시기)")
+            lines.append("")
+        
+        # 정기검진 일정
+        lines.append(f"#### 🏥 맞춤형 정기검진 일정 — {name}님을 위한 예방 전략")
+        
+        ilgan_disease = {
+            "甲": "간·담·눈", "乙": "간·담", "丙": "심장·눈", "丁": "심장·혀",
+            "戊": "소화기·비장", "己": "비장·관절", "庚": "폐·피부", "辛": "폐·호흡",
+            "壬": "신장·생식", "癸": "신장·귀"
+        }
+        
+        lines.append(f"**{name}님의 취약 장기: {ilgan_disease.get(ilgan, '일반 검진')}**")
+        lines.append("")
+        
+        lines.append("**🔴 올해 (위험 단계별)**")
+        if yr_health_map.get(cur_year):
+            yr_health = yr_health_map[cur_year]["health"]["risk"]
+            if yr_health >= 70:
+                lines.append("• **즉시**: 종합검진 (위험도 높음)")
+                lines.append("• **상반기**: 각 과목 정밀검진 (심장·폐·간·신장)")
+                lines.append("• **하반기**: 재검진 (상반기 이상 발견시)")
+            elif yr_health >= 60:
+                lines.append("• **상반기**: 일반검진 + 취약 장기 검사")
+                lines.append("• **하반기**: 추가 정밀검진 (필요시)")
+            else:
+                lines.append("• **상반기/하반기 각 1회**: 일반검진")
         
         lines.append("")
-        lines.append("**💡 3년 건강 총괄**")
-        lines.append("∙ 정기검진 (상반기·하반기 2회/년) 필수")
-        lines.append("∙ 스트레스 관리 (명상·요가·산책·독서)")
-        lines.append("∙ 질병 예방 백신 및 대병원 진료 우선 (위험 달)")
-        lines.append("∙ 위험 달 야외활동·운전조심·음주 절제")
+        lines.append("**💛 내년 (위험 단계별)**")
+        if yr_health_map.get(cur_year+1):
+            yr_health = yr_health_map[cur_year+1]["health"]["risk"]
+            if yr_health >= 70:
+                lines.append("• **즉시**: 예방 검진 (위험도 선제 대응)")
+                lines.append("• **상반기**: 정밀검진")
+                lines.append("• **하반기**: 재검진")
+            else:
+                lines.append("• **상반기/하반기**: 정기검진")
+        
+        lines.append("")
+        lines.append("**💙 내후년 (위험 단계별)**")
+        if yr_health_map.get(cur_year+2):
+            yr_health = yr_health_map[cur_year+2]["health"]["risk"]
+            if yr_health >= 70:
+                lines.append("• **상반기**: 정밀검진")
+                lines.append("• **하반기**: 추가 검진")
+            else:
+                lines.append("• **상반기/하반기**: 일반검진")
+        
+        lines.append("")
+        lines.append("**📋 필수 검진 항목**")
+        lines.append("• **전체 대상**: 혈액검사 / 심전도 / 복부초음파 / 암 선별검사")
+        lines.append(f"• **{name}님 추가**: {ilgan_disease.get(ilgan, '의사 상담')} 정밀검진")
+        lines.append("• **예방 접종**: 독감(10월) / 폐렴(계절별) / 대상포진(55세 이상)")
         lines.append("")
 
         return "\n".join(lines)
