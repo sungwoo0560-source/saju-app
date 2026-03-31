@@ -4332,6 +4332,63 @@ class LocalSajuNarrator:
                   "正財":"正財(정재)","偏官":"偏官(편관)","正官":"正官(정관)",
                   "劫財":"劫財(겁재)","比肩":"比肩(비견)","偏印":"偏印(편인)","正印":"正印(정인)"}
 
+        # ── 일간별 취약 신체부위 ──────────────────────────────
+        _ILGAN_BODY = {
+            "甲": "간담·목", "乙": "간담·담", "丙": "심장·소장·눈",
+            "丁": "심장·혀·혈액", "戊": "비장·위·소화기", "己": "비장·근육",
+            "庚": "폐·대장·피부", "辛": "폐·호흡계", "壬": "신장·생식계",
+            "癸": "신장·방광·귀"
+        }
+        
+        # ── 오행별 사고수 위험도 (기신 오행이 강할 때) ──────────
+        _OH_ACCIDENT_RISK = {
+            "木": {"위험도": 65, "원인": "목 기운 과다 — 성급한 결정·과속·음주운전 주의", "월": [1,2,3]},
+            "火": {"위험도": 75, "원인": "화 기운 과다 — 감정적 갈등·돌발 행동·화상 주의", "월": [4,5,6]},
+            "金": {"위험도": 70, "원인": "금 기운 과다 — 차량사고·절단상·충동적 결단 주의", "월": [7,8,9]},
+            "水": {"위험도": 60, "원인": "수 기운 과다 — 우유부단·물과 관련된 사고 주의", "월": [10,11,12]},
+            "土": {"위험도": 55, "원인": "토 기운 과다 — 부동산사고·넘어짐·소화계 질환 주의", "월": [3,6,9,12]}
+        }
+        
+        # ── 오행별 건강수 위험도 ──────────────────────────────
+        _OH_HEALTH_RISK = {
+            "木": {"위험도": 70, "질환": "간질환·신경계·눈질환", "예방": "야채·신맛 섭취·동쪽 운동·스트레스 관리"},
+            "火": {"위험도": 75, "질환": "심장질환·고혈압·열질환", "예방": "과로 피하기·명상·따뜻한 음료 절제·수면 관리"},
+            "金": {"위험도": 68, "질환": "폐질환·호흡곤란·피부질환", "예방": "습도 유지·호흡운동·매운음식 적절·금속 소품 활용"},
+            "水": {"위험도": 62, "질환": "신장·비뇨계·청력 저하", "예방": "짠음식 절제·검진·겨울 보온·명상·독서"},
+            "土": {"위험도": 65, "질환": "소화계·관절염·비만", "예전": "규칙적 식사·요가·황토 효능·소화제 준비"}
+        }
+        
+        # ── 일간별 사고·건강 금기 행동 ──────────────────────────
+        _ILGAN_CAUTION = {
+            "甲": ("자동차 운전 중 전화·과속·음주 절대 금지", "과로·스트레스 누적 금지·정기검진 필수"),
+            "乙": ("무리한 신체활동·산행 금지", "신경·불안감 조절·명상 시간 확보"),
+            "丙": ("야외활동 중 열기 노출·과음금지", "심장 부담 주는 카페인 섭취 절제"),
+            "丁": ("자극적 음식·과도한 운동금지", "혈액 순환 관리·휴식 우선"),
+            "戊": ("폭식·음식 위생 관리 안 하기금지", "규칙적 식생활·소화 시간 충분히"),
+            "己": ("과식·야식·자극적 음식 금지", "식이조절·정기검진·복부 보온"),
+            "庚": ("담배·미세먼지 노출금지", "호흡 운동·항산화 음식·실내 공기질 관리"),
+            "辛": ("과로·밤샘 금지", "충분한 수면·폐 건강 음식·면역력 관리"),
+            "壬": ("과도한 음주·냉음식 금지", "신장 보호·따뜻한 체온 유지·검진"),
+            "癸": ("과도한 정신활동·수면 부족금지", "명상·휴식·청력 검진·따뜻한 음료")
+        }
+        
+        # ── 용신·기신 오행별 개인화 개운법 ──────────────────────
+        _YONG_CAUTION_MAP = {
+            "木": {"강화": "동쪽 방향 활동·초록 옷·새벽 운동·목재 소품", "피할": "서쪽·금속 소품·과잉 활동"},
+            "火": {"강화": "남쪽·빨간색·낮 시간·사람 만나기", "피할": "북쪽·검은색·실내 고립·빙냉한 음식"},
+            "金": {"강화": "서쪽·흰색·저녁·정리정돈", "피할": "동쪽·초록색·과도한 결단·소음"},
+            "水": {"강화": "북쪽·검은색·밤시간·명상", "피할": "남쪽·붉은색·낮 활동·단식"},
+            "土": {"강화": "중앙·황색·황토·요가·대지 밟기", "피할": "동서남북 극단·과도한 활동"}
+        }
+        
+        _GISIN_CAUTION_MAP = {
+            "木": "동쪽 무리한 신체활동 금지·초록색 옷 최소화·목재 가구 재배치",
+            "火": "남쪽 과도한 활동 금지·빨간색 제거·심화되는 감정 조절·과음 금지",
+            "金": "서쪽 여행·주요 회의 피하기·흰색 계열 옷 최소화·단호한 결정 미루기",
+            "水": "북쪽 물 접근 최소화·검은색 옷 제거·감정 고립 주의·과돈 금지",
+            "土": "부동산 거래·이사·중요 투자 연기·황색 소품 치우기·과식 금지"
+        }
+
         # 연도별 직격 가이드
         _YEAR_GUIDES = {
             "偏財": ("사업·투자·새 인맥을 공격적으로 늘리십시오. 이 해에 시작한 사업은 빠르게 성장합니다.",
@@ -4499,8 +4556,34 @@ class LocalSajuNarrator:
             for fl in _field_lines:
                 lines.append(fl)
             lines.append("")
+            
+            # ── 사고수·건강수 위험도 분석 ──────────────────────────
+            lines.append("#### 🚨 안전 & 건강 예측")
+            
+            # 사고수 위험도
+            gisin_oh_list = [_OH.get(gs[:1], "") for gs in (gisin or [])]
+            gisin_oh = gisin_oh_list[0] if gisin_oh_list else ""
+            accident_risk = _OH_ACCIDENT_RISK.get(gisin_oh, {"위험도": 45, "원인": "일반적 주의"})
+            risk_grade = "🔴 고위험" if accident_risk["위험도"] >= 70 else ("🟡 주의" if accident_risk["위험도"] >= 55 else "🟢 안전")
+            lines.append(
+                f"• **사고수 예측**: {risk_grade} (위험도 {accident_risk['위험도']}%) — {accident_risk['원인']}\n"
+            )
+            
+            # 건강수 위험도
+            health_rs = _OH_HEALTH_RISK.get(gisin_oh, {"위험도": 45, "질환": "일반관리", "예방": "정기검진"})
+            health_grade = "🔴 주의" if health_rs["위험도"] >= 70 else ("🟡 관찰" if health_rs["위험도"] >= 60 else "🟢 양호")
+            lines.append(
+                f"• **건강수 예측**: {health_grade} (위험도 {health_rs['위험도']}%) — {health_rs['질환']}\n"
+                f"  *예방법*: {health_rs['예방']}\n"
+            )
+            
+            # 위험 달 안내
+            if accident_risk.get("월"):
+                risk_months = ", ".join(str(m) + "월" for m in accident_risk["월"])
+                lines.append(f"• **위험 달**: {risk_months}에 각별한 주의 권고\n")
+            
+            lines.append("")
 
-        # ── 3년 승부처 요약 서술형 ─────────────────────────────
         lines.append("---")
         lines.append("### 🏆 3년 승부처와 휴식처")
         best  = [f"{y}년" for y,g,s,gl,gd,rs in yr_summaries if "황금기" in gd]
@@ -4519,7 +4602,77 @@ class LocalSajuNarrator:
         if not best and not worst:
             lines.append("3년 모두 중립적 흐름입니다. 꾸준함이 최고의 전략입니다.")
 
+        # ── 개인화 피할방법 최종 요약 ─────────────────────────────
+        lines.append("")
+        lines.append("---")
+        lines.append("### 💪 개인화된 3년 피할방법 & 건강 가이드")
+        
+        # 일간 기반 취약 신체
+        ilgan_body = _ILGAN_BODY.get(ilgan, "일반적 관리")
+        ilgan_caution = _ILGAN_CAUTION.get(ilgan, ("정기검진 필수", "무리한 활동 금지"))
+        
+        lines.append(f"#### 👤 {name}님의 체질 & 취약 신체부위")
+        lines.append(f"• **일간**: {ilgan} (천간의 성질에 따른 기질)")
+        lines.append(f"• **취약 부위**: {ilgan_body}")
+        lines.append(f"• **반드시 피할 행동**: {ilgan_caution[0]}")
+        lines.append(f"• **건강 관리법**: {ilgan_caution[1]}")
+        lines.append("")
+        
+        # 용신 오행별 개운법
+        if ys_list:
+            ys_oh = ys_list[0] if ys_list else "목"
+            ys_caution = _YONG_CAUTION_MAP.get(ys_oh, {"강화": "정상 활동", "피할": "개별상담"})
+            lines.append(f"#### 💚 용신(用神) 오행별 개운법 — {name}님의 긍정 에너지")
+            lines.append(f"• **용신 오행**: {OHN.get(ys_oh, ys_oh)}")
+            lines.append(f"• **강화 방법**: {ys_caution.get('강화', '정상 활동')}")
+            lines.append(f"• **피할 것**: {ys_caution.get('피할', '개별상담')}")
+            lines.append("")
+        
+        # 기신 오행별 피할행동
+        if gisin:
+            gisin_oh_main = _OH.get(gisin[0][:1], "") if gisin else "목"
+            gisin_warning = _GISIN_CAUTION_MAP.get(gisin_oh_main, "개별상담 권고")
+            lines.append(f"#### ⚠️ 기신(忌神) 오행별 피할 행동 — {name}님의 약한 지점")
+            lines.append(f"• **기신 오행**: {OHN.get(gisin_oh_main, gisin_oh_main)}")
+            lines.append(f"• **금지 사항**: {gisin_warning}")
+            lines.append("")
+        
+        # 종합 건강 가이드
+        lines.append(f"#### 🏥 종합 건강 & 안전 가이드 (3년간)")
+        
+        # 각 연도별 위험 달 정리
+        risk_month_dict = {}
+        for yr in [cur_year, cur_year+1, cur_year+2]:
+            try:
+                sw = get_yearly_luck(pils, yr) or {}
+                sw_gan = sw.get("세운", "")
+                yr_oh = _OH.get(sw_gan[:1], "") if sw_gan else ""
+                risk_data = _OH_ACCIDENT_RISK.get(yr_oh, {})
+                if risk_data.get("월"):
+                    risk_month_dict[yr] = risk_data["월"]
+            except:
+                pass
+        
+        yr_label_map = {cur_year: "올해", cur_year+1: "내년", cur_year+2: "내후년"}
+        
+        for yr in [cur_year, cur_year+1, cur_year+2]:
+            yr_label = yr_label_map.get(yr, str(yr))
+            risk_months = ", ".join(str(m) + "월" for m in risk_month_dict.get(yr, []))
+            if risk_months:
+                lines.append(f"• **{yr_label} ({yr}년)**: 위험 달 → {risk_months} (자동차·야간활동·스트레스 관리 각별히)")
+            else:
+                lines.append(f"• **{yr_label} ({yr}년)**: 일반 주의 수준 유지")
+        
+        lines.append("")
+        lines.append("**💡 3년 건강 총괄**")
+        lines.append("∙ 정기검진 (상반기·하반기 2회/년) 필수")
+        lines.append("∙ 스트레스 관리 (명상·요가·산책·독서)")
+        lines.append("∙ 질병 예방 백신 및 대병원 진료 우선 (위험 달)")
+        lines.append("∙ 위험 달 야외활동·운전조심·음주 절제")
+        lines.append("")
+
         return "\n".join(lines)
+
 
     @staticmethod
     def money(pils, name, birth_year, gender):
