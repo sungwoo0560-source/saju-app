@@ -14735,7 +14735,7 @@ def menu5_money(pils, birth_year, gender, name="내담자"):
             _is_money_mi = _mss_mi in _MONEY_SS
             _is_danger_mi= _mss_mi in _DANGER_SS
 
-            # 금전 점수 (0~100)
+            # 금전 점수 (0\~100)
             _score_mi = 50
             if _is_y_mi:   _score_mi += 20
             if _is_g_mi:   _score_mi -= 20
@@ -24350,6 +24350,7 @@ def main():
                 ("🔴", "비방처방"),
                 ("☯️", "음양오행"),
                 ("📜", "토정비결"),
+                ("🎊", "신년운세"),
                 ("📄", "PDF리포트"),
                 ("🌟", "개운처방"),
             ]
@@ -26790,6 +26791,55 @@ unsafe_allow_html=True)
         st.caption("⚠️ 본 분석은 전통 명리학·민속 문화 기반 참고 자료입니다. 실제 처방은 전문 만신에게 문의하십시오.")
 
 
+
+
+def menu_yearly(pils, name, birth_year, gender):
+    """🎊 신년운세 — 올해·내년 집중 분석"""
+    cur_year = datetime.now().year
+    st.markdown(
+        f"<div style='background:linear-gradient(135deg,#0d0820,#2d1f5e);"
+        f"border-radius:16px;padding:20px 24px;margin-bottom:16px;"
+        f"border:2px solid #d4af3788;'>"
+        f"<div style='font-size:20px;font-weight:900;color:#fff;'>"
+        f"🎊 {name}님의 {cur_year}년 신년운세</div>"
+        f"<div style='font-size:12px;color:#aaa;margin-top:4px;'>"
+        f"{birth_year}년생 ({cur_year-birth_year+1}세)</div>"
+        f"</div>",
+        unsafe_allow_html=True,
+    )
+    try:
+        _tj_out = LocalSajuNarrator.tojeong(pils, name, birth_year, gender)
+        if _tj_out:
+            st.markdown(_tj_out, unsafe_allow_html=True)
+    except Exception as _e:
+        st.warning(f"⚠️ 신년운세 오류: {_e}")
+    st.markdown("---")
+    try:
+        _ny = get_yearly_luck(pils, cur_year+1) or {}
+        _ny_ss  = _ny.get("십성_천간","")
+        _ny_gh  = _ny.get("길흉","평")
+        _ny_gan = _ny.get("세운","")
+        _ys_ny  = get_yongshin(pils)
+        _yong_ny= _ys_ny.get("종합_용신",[]) if _ys_ny else []
+        _OH_NY  = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
+                   "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
+        _ny_oh  = _OH_NY.get(_ny_gan[:1],"") if _ny_gan else ""
+        _is_y_ny= _ny_oh in _yong_ny
+        _GH_KR2 = {"길":"✅ 길","+":"✅ 길","평":"⚖️ 평","흉":"⚠️ 흉","-":"⚠️ 흉"}
+        _ny_sig = ("🟢 황금기 예고!" if _is_y_ny else "🟡 중립")
+        st.markdown(
+            f"<div style='background:#1a1a2e;border-radius:14px;padding:16px 20px;"
+            f"border:1.5px solid #d4af3744;'>"
+            f"<div style='font-size:14px;font-weight:900;color:#fff;margin-bottom:6px'>"
+            f"🔮 {cur_year+1}년 미리보기</div>"
+            f"<div style='font-size:13px;color:#e8a0f0;'>"
+            f"{_ny_gan} [{_ny_ss}] {_GH_KR2.get(_ny_gh,_ny_gh)} — {_ny_sig}</div>"
+            f"</div>",
+            unsafe_allow_html=True,
+        )
+    except Exception:
+        pass
+    render_pdf_download_btn("yearly", pils, name, birth_year, gender)
 
 def menu_tojeong(pils, name, birth_year, gender):
     """📜 토정비결 — 개인화 신년운세"""
