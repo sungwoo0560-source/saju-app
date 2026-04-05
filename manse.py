@@ -12019,28 +12019,28 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                         f"일지({_jj})와 올해 세운({_jj_cur})이 정면으로 충(沖)을 맞습니다. "
                         f"이건 사주에서 가장 강한 충격 신호입니다. "
                         f"교통사고, 수술, 큰 부상, 배우자와의 갑작스러운 파국이 실제로 일어날 수 있습니다. "
-                        f"올해 상반기 안에 큰 계약·수술·투자 결정을 하면 반드시 후회합니다. 미루십시오."))
+                        f"올해 상반기 안에 큰 계약·수술·투자 결정을 하면 반드시 후회합니다. 미루십시오.", "위험"))
                 elif _idx == 0:  # 년지 충
                     if _is_married:
                         _danger_signals.append(("💔 배우자·부모 이별수가 보입니다",
                             f"년지({_jj})와 세운이 충돌합니다. "
                             f"배우자나 부모 중 한 명이 크게 아프거나, 이혼·별거가 현실이 될 수 있습니다. "
-                            f"가족 간 재산 문제, 상속 갈등도 터질 수 있습니다. 지금 가족 관계를 점검하십시오."))
+                            f"가족 간 재산 문제, 상속 갈등도 터질 수 있습니다. 지금 가족 관계를 점검하십시오.", "위험"))
                     else:
                         _danger_signals.append(("💔 부모·형제 건강 이변 주의",
                             f"년지({_jj})와 세운이 충돌합니다. "
                             f"부모 또는 형제 중 한 명이 크게 아프거나 사고가 날 수 있습니다. "
-                            f"가족 건강을 지금 당장 확인하십시오. 상속·재산 문제도 터질 수 있습니다."))
+                            f"가족 건강을 지금 당장 확인하십시오. 상속·재산 문제도 터질 수 있습니다.", "위험"))
                 elif _idx == 1:  # 월지 충
                     _danger_signals.append(("⚡ 직장·사업이 뿌리째 흔들립니다",
                         f"월지({_jj})와 세운이 충돌합니다. "
                         f"갑작스러운 해고, 사업 부도, 거래처 이탈이 올 수 있습니다. "
-                        f"올해 사업 확장이나 이직은 독약입니다. 현상 유지가 최선입니다."))
+                        f"올해 사업 확장이나 이직은 독약입니다. 현상 유지가 최선입니다.", "위험"))
                 elif _idx == 3:  # 시지 충
                     _danger_signals.append(("👶 자녀 사고·부하 배신수",
                         f"시지({_jj})와 세운이 충돌합니다. "
                         f"자녀가 크게 다치거나, 믿었던 부하직원에게 배신당할 수 있습니다. "
-                        f"자녀의 외출과 안전을 각별히 챙기십시오."))
+                        f"자녀의 외출과 안전을 각별히 챙기십시오.", "주의"))
 
         # ② 일지 합(合) → 외도·배우자 변심 / 미혼이면 이성 인연
         if _HAP.get(_jj_vals[2],"") == _jj_cur:
@@ -12048,13 +12048,13 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                 _danger_signals.append(("🌸 배우자가 바람 필 수 있습니다",
                     f"일지({_jj_vals[2]})와 세운({_jj_cur})이 합(合)을 이룹니다. "
                     f"배우자가 외부 이성과 가까워지거나 실제 외도가 일어날 수 있는 구조입니다. "
-                    f"배우자의 귀가 시간, 핸드폰 사용 패턴이 달라졌다면 예사롭게 보지 마십시오."))
+                    f"배우자의 귀가 시간, 핸드폰 사용 패턴이 달라졌다면 예사롭게 보지 마십시오.", "주의"))
             else:
                 _danger_signals.append(("🌸 강한 이성 인연이 들어옵니다",
                     f"일지({_jj_vals[2]})와 세운({_jj_cur})이 합(合)을 이룹니다. "
                     f"올해 강한 이성 인연이 들어옵니다. "
                     f"그러나 상대가 기혼자이거나 복잡한 사람일 수 있으니 "
-                    f"빠르게 감정이 붙는 관계는 상대 신상을 반드시 확인하십시오."))
+                    f"빠르게 감정이 붙는 관계는 상대 신상을 반드시 확인하십시오.", "참고"))
 
         # ③ 신살 위치 기반 정밀 판단
         _sinsal_done = set()
@@ -12072,13 +12072,13 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                         "일주에 도화살이 박혔습니다. 이성이 사방에서 접근하는 구조입니다. "
                         "기혼자는 올해 이성과 단둘이 있는 자리를 절대 만들지 마십시오. "
                         "한 번의 실수가 가정을 완전히 박살낼 수 있습니다. "
-                        "미혼자도 상대가 기혼자인지 반드시 확인하십시오. 이 살은 불륜으로 끝나기 쉽습니다."))
+                        "미혼자도 상대가 기혼자인지 반드시 확인하십시오. 이 살은 불륜으로 끝나기 쉽습니다.", "주의"))
                 else:
                     _pos_str = "·".join(_pos) if isinstance(_pos, list) else str(_pos)
                     _danger_signals.append(("🌸 도화살 — 이성 문제로 망신 조심",
                         f"도화살({_pos_str})이 작용합니다. "
                         "이성 때문에 가정이 흔들리거나, 이성 관계로 구설에 오를 수 있습니다. "
-                        "감각적 유혹을 이기지 못하면 인생 전체가 꼬입니다."))
+                        "감각적 유혹을 이기지 못하면 인생 전체가 꼬입니다.", "주의"))
 
             elif "망신" in _nm:
                 _sinsal_done.add(_key)
@@ -12087,7 +12087,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                     "숨겨온 것이 반드시 드러납니다. 외도, 빚, 전과, 학력 위조 등 "
                     "숨기고 싶은 것들이 본인 의지와 상관없이 세상에 공개될 수 있습니다. "
                     "SNS에 경솔한 글 올리지 마시고, 술자리에서 말조심 하십시오. "
-                    "지금 당장 정리해야 할 비밀이 있다면 미루지 마십시오."))
+                    "지금 당장 정리해야 할 비밀이 있다면 미루지 마십시오.", "주의"))
 
             elif "겁살" in _nm:
                 _sinsal_done.add(_key)
@@ -12096,13 +12096,13 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                         "일주 겁살은 돈도 잃고 배우자도 잃을 수 있는 구조입니다. "
                         "보증 서면 전 재산 날립니다. 투자하면 원금도 못 건집니다. "
                         "배우자가 아프거나 갑자기 떠나는 수도 있습니다. "
-                        "올해만큼은 돈과 사람 모두 꽉 붙잡으십시오."))
+                        "올해만큼은 돈과 사람 모두 꽉 붙잡으십시오.", "위험"))
                 else:
                     _danger_signals.append(("⚔️ 겁살 — 누군가 당신 돈을 노립니다",
                         "겁살 기운이 강합니다. "
                         "주변에 당신 돈을 빼가려는 사람이 있습니다. "
                         "동업 제안, 투자 권유, 보증 요청은 모두 거절하십시오. "
-                        "친한 친구나 가족이 들고 오는 제안도 예외 없습니다."))
+                        "친한 친구나 가족이 들고 오는 제안도 예외 없습니다.", "주의"))
 
             elif "역마" in _nm:
                 _sinsal_done.add(_key)
@@ -12111,7 +12111,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                     f"역마살({_pos_str})이 올해 발동합니다. "
                     "장거리 운전, 오토바이, 자전거 등 이동 수단 관련 사고가 실제로 날 수 있습니다. "
                     "운전 중 핸드폰은 목숨 거는 짓입니다. "
-                    "해외 출장이나 이사 계획이 있다면 출발 전 날짜를 신중하게 고르십시오."))
+                    "해외 출장이나 이사 계획이 있다면 출발 전 날짜를 신중하게 고르십시오.", "주의"))
 
             elif "삼재" in _nm:
                 _sinsal_done.add(_key)
@@ -12121,7 +12121,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                     "삼재는 재물, 건강, 인간관계 이 세 가지가 동시에 무너지는 3년입니다. "
                     "사업 시작, 이사, 결혼, 큰 투자, 수술 — 이 중 하나라도 올해 하면 안 됩니다. "
                     "삼재 중에는 조용히 버티는 것이 이기는 것입니다. "
-                    "부적이 필요하다면 믿는 곳에서 받으십시오."))
+                    "부적이 필요하다면 믿는 곳에서 받으십시오.", "위험"))
 
             elif "조객" in _nm or "상문" in _nm:
                 if "조객상문" in _sinsal_done: continue
@@ -12130,7 +12130,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                     "조객살이 들어왔습니다. "
                     "올해 가까운 사람 중 누군가가 세상을 떠날 수 있습니다. "
                     "부모님, 배우자, 오래된 지인의 건강을 지금 당장 확인하십시오. "
-                    "본인도 건강검진을 미루면 안 됩니다. 이 살이 있는 해에는 병원을 가까이 하십시오."))
+                    "본인도 건강검진을 미루면 안 됩니다. 이 살이 있는 해에는 병원을 가까이 하십시오.", "주의"))
 
             elif "백호" in _nm:
                 _sinsal_done.add(_key)
@@ -12138,7 +12138,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                     "백호살은 말 그대로 피를 보는 살입니다. "
                     "교통사고, 수술, 칼에 베임, 타박상 등 외상 위험이 올해 매우 높습니다. "
                     "오토바이, 등산, 격투기 등 위험한 활동은 올해 하지 마십시오. "
-                    "수술이 예정되어 있다면 날짜를 잘 잡아야 합니다."))
+                    "수술이 예정되어 있다면 날짜를 잘 잡아야 합니다.", "위험"))
 
             elif "화개" in _nm:
                 _sinsal_done.add(_key)
@@ -12146,7 +12146,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                     "화개살이 강합니다. 세상이 싫고 혼자 있고 싶어집니다. "
                     "종교나 무속에 지나치게 빠져들거나, 현실을 도피하고 싶어집니다. "
                     "돈을 쏟아붓는 종교 활동은 지금 당장 멈추십시오. "
-                    "사람들과 억지로라도 어울리는 것이 이 살을 이기는 방법입니다."))
+                    "사람들과 억지로라도 어울리는 것이 이 살을 이기는 방법입니다.", "주의"))
 
         # ④ 세운 오행 조합별 건강 경고
         _OH_HEALTH = {
@@ -12159,7 +12159,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
         _h_key = (_oh_cg, _oh_jj)
         if _h_key in _OH_HEALTH:
             _ht, _hb = _OH_HEALTH[_h_key]
-            _danger_signals.append((_ht, _hb))
+            _danger_signals.append((_ht, _hb, "주의"))
 
         # ⑤ 세운 십성별 구체 경고
         if "편관" in _sw_ss_raw:
@@ -12167,31 +12167,31 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                 "편관이 세운으로 들어오면 위에서 칼이 내려옵니다. "
                 "갑작스러운 해고, 징계, 경찰·법원으로부터 연락이 올 수 있습니다. "
                 "지금 당장 규정 위반하는 것 없는지 점검하십시오. "
-                "입 가볍게 열면 고소·고발로 이어집니다."))
+                "입 가볍게 열면 고소·고발로 이어집니다.", "주의"))
         if "상관" in _sw_ss_raw:
             _danger_signals.append(("💬 상관 세운 — 이혼·퇴사 충동이 폭발합니다",
                 "상관 세운은 참아온 것이 한꺼번에 터지는 해입니다. "
                 "배우자에게 이혼 통보하거나 직장에서 상사한테 폭발하고 싶어집니다. "
                 "그 충동을 올해 실행하면 반드시 후회합니다. 최소 6개월 기다리십시오. "
-                "기혼자의 이혼 위기, 직장인의 충동 사직이 가장 위험합니다."))
+                "기혼자의 이혼 위기, 직장인의 충동 사직이 가장 위험합니다.", "주의"))
         if "겁재" in _sw_ss_raw:
             _danger_signals.append(("💸 겁재 세운 — 재물이 새나갑니다",
                 "겁재 세운은 벌어도 벌어도 돈이 손에 안 남는 해입니다. "
                 "주식, 코인, 부동산 투자하면 원금을 잃습니다. "
                 "친구·형제가 돈 빌려달라고 하면 영원히 못 받는다고 생각하십시오. "
-                "올해는 무조건 지출을 줄이고 저축만 하십시오."))
+                "올해는 무조건 지출을 줄이고 저축만 하십시오.", "주의"))
         if "편재" in _sw_ss_raw:
             _danger_signals.append(("💰 편재 세운 — 한탕주의 유혹 조심",
                 "편재 세운에는 갑자기 큰돈이 생길 것 같은 기분이 듭니다. "
                 "그 돈은 신기루입니다. 편재 세운의 돈은 들어오는 만큼 나갑니다. "
-                "도박, 가상화폐, 리딩방 — 올해 이런 것에 손대면 전 재산을 날립니다."))
+                "도박, 가상화폐, 리딩방 — 올해 이런 것에 손대면 전 재산을 날립니다.", "주의"))
 
         # ⑥ 대운+세운 최악 조합
         if "편관" in _dw_ss_raw and "상관" in _sw_ss_raw:
             _danger_signals.append(("🚨 편관 대운 × 상관 세운 — 최악의 조합",
                 "이 조합은 사주에서 가장 위험한 조합 중 하나입니다. "
                 "직장에서 쫓겨나거나, 이혼 소송이 터지거나, 건강이 한꺼번에 무너질 수 있습니다. "
-                "올해는 어떤 중요한 결정도 하지 마십시오. 버티는 것이 이기는 것입니다."))
+                "올해는 어떤 중요한 결정도 하지 마십시오. 버티는 것이 이기는 것입니다.", "위험"))
 
         # ⑦ 여명(女命) 식상×관성 외도·이혼 분석
         if gender == "여":
@@ -12209,36 +12209,36 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                         "동시에 일지합으로 외부 이성이 당겨지는 구조가 완성됩니다. "
                         "즉 남편과는 멀어지고 다른 남자와 가까워지는 흐름이 만들어집니다. "
                         "올해 배우자와의 관계에서 결정적인 균열이 생길 수 있습니다. "
-                        "충동적인 이혼 결정은 최소 1년 이상 보류하십시오."))
+                        "충동적인 이혼 결정은 최소 1년 이상 보류하십시오.", "위험"))
                 elif _ilji_hap and _sw_sikshin:
                     _danger_signals.append(("🌸 여명 외도 유혹 — 식신이 지켜줍니다",
                         "일지합으로 외부 이성의 접근이 강해지는 해입니다. "
                         "그러나 올해 식신 세운이 편관(외부 이성)을 눌러줍니다. "
                         "유혹은 강하게 들어오지만 결국 가정을 지키는 방향으로 흘러갑니다. "
-                        "단, 유혹 자체는 실재합니다. 불필요한 이성과의 단둘 만남은 피하십시오."))
+                        "단, 유혹 자체는 실재합니다. 불필요한 이성과의 단둘 만남은 피하십시오.", "주의"))
                 elif _sw_sanggwan and not _ilji_hap:
                     _danger_signals.append(("⚠️ 여명 상관 세운 — 남편과 충돌 폭발",
                         "상관 세운은 여명에게 남편을 극하는 기운입니다. "
                         "참아왔던 불만이 폭발하고 배우자와 심각하게 충돌하는 해입니다. "
                         "말 한마디가 이혼 도장으로 이어질 수 있습니다. "
-                        "올해는 부부 싸움을 절대 극단까지 밀고 가지 마십시오."))
+                        "올해는 부부 싸움을 절대 극단까지 밀고 가지 마십시오.", "주의"))
                 elif _dw_sanggwan:
                     _danger_signals.append(("⚠️ 여명 상관 대운 — 결혼 생활 전반이 흔들립니다",
                         "상관 대운은 여명에게 10년간 부부 관계가 불안정한 구간입니다. "
                         "남편과의 갈등이 반복되고, 이혼 생각이 머릿속에서 떠나지 않는 시기입니다. "
                         "이 대운 중에 충동적으로 이혼을 결정한 여성들 중 후회하는 경우가 많습니다. "
-                        "전문 상담을 먼저 받으십시오."))
+                        "전문 상담을 먼저 받으십시오.", "주의"))
             else:  # 미혼 여성
                 if _ilji_hap and _sw_sanggwan:
                     _danger_signals.append(("⚠️ 여명 미혼 — 남자친구와 결별 위기",
                         "상관 세운과 일지합이 동시에 발동했습니다. "
                         "현재 만나는 남자와 갑작스럽게 결별할 수 있는 구조입니다. "
-                        "충동적인 이별 통보는 최소 3개월 보류하십시오."))
+                        "충동적인 이별 통보는 최소 3개월 보류하십시오.", "주의"))
                 elif _sw_sanggwan:
                     _danger_signals.append(("⚠️ 여명 미혼 상관 세운 — 이성 관계 갈등",
                         "상관 세운은 미혼 여성에게 이성과의 심각한 갈등 또는 결별을 의미합니다. "
                         "감정이 폭발해서 관계를 스스로 끊어버리는 패턴이 나타납니다. "
-                        "올해 결정적인 말은 한 박자 늦게 하십시오."))
+                        "올해 결정적인 말은 한 박자 늦게 하십시오.", "주의"))
 
         # ⑧ 남명(男命) 재성×관성 외도·이혼 분석
         if gender == "남":
@@ -12256,25 +12256,25 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                     "올해 특정 여성과 급격히 가까워지는 상황이 생긴다면 "
                     "그것이 가정을 무너뜨리는 시작점이 될 수 있습니다. "
                     "편재는 달콤하게 들어와서 정재(본처)와 가정을 흔듭니다. "
-                    "각별히 경계하십시오."))
+                    "각별히 경계하십시오.", "위험"))
             elif _sw_pyunjae and not _ilji_hap:
                 if _is_married:
                     _danger_signals.append(("🌸 남명 편재 세운 — 이성 유혹 강함",
                         "편재 세운에는 매력적인 이성이 접근합니다. "
                         "기혼자는 가정 밖의 여성과 가까워지고 싶은 충동이 강해집니다. "
                         "이 충동을 실행으로 옮기면 이혼·위자료·자녀 문제로 이어집니다. "
-                        "편재의 달콤함은 반드시 대가를 치르게 되어 있습니다."))
+                        "편재의 달콤함은 반드시 대가를 치르게 되어 있습니다.", "주의"))
                 else:
                     _danger_signals.append(("🌸 남명 미혼 편재 세운 — 연애 기회 강함",
                         "편재 세운에 이성 인연이 강하게 들어옵니다. "
                         "단, 한꺼번에 여러 여성과 엮이는 구조라 관계가 복잡해질 수 있습니다. "
-                        "진지하지 않은 만남은 상대에게 상처를 주고 결국 본인도 다칩니다."))
+                        "진지하지 않은 만남은 상대에게 상처를 주고 결국 본인도 다칩니다.", "참고"))
             elif _dw_pyunjae and not _sw_pyunjae:
                 _danger_signals.append(("⚠️ 남명 편재 대운 — 10년 이성 문제 조심",
                     "편재 대운은 10년간 이성 문제가 반복되는 구간입니다. "
                     "기혼자는 외도 유혹이 끊이지 않고, "
                     "미혼자는 여러 여성과 동시에 엮이는 구조가 만들어집니다. "
-                    "이 대운 중 충동적인 이성 관계로 인생 전체가 뒤집힌 남성이 많습니다."))
+                    "이 대운 중 충동적인 이성 관계로 인생 전체가 뒤집힌 남성이 많습니다.", "주의"))
 
             if _ilji_chung and "겁재" in _sw_ss_raw:
                 _danger_signals.append(("💸 남명 겁재+일지충 — 배우자 떠나고 재물도 날아갑니다",
@@ -12282,7 +12282,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                     "겁재 세운으로 재물까지 동시에 빠져나가는 최악의 구조입니다. "
                     "이혼 소송 + 재산 분할이 현실이 될 수 있습니다. "
                     "올해는 배우자와의 관계 회복에 모든 에너지를 쏟으십시오. "
-                    "이혼 서류에 도장 찍는 것은 최소 2년 후로 미루십시오."))
+                    "이혼 서류에 도장 찍는 것은 최소 2년 후로 미루십시오.", "위험"))
 
         # ⑨ 신약 유형 정밀 판별
         try:
@@ -12317,14 +12317,14 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                     f"돈이 눈앞에 보여도 몸이 감당하지 못해 결국 빠져나가는 구조입니다. "
                     f"투자·사업 확장·큰 계약은 비겁 운이 올 때까지 기다리십시오. "
                     f"지금 무리하게 재물을 잡으려 하면 건강과 돈을 동시에 잃습니다. "
-                    f"지금 당장 할 것: 지출을 줄이고 체력을 먼저 회복하십시오."))
+                    f"지금 당장 할 것: 지출을 줄이고 체력을 먼저 회복하십시오.", "주의"))
 
             elif _is_shinyak and _kwan_cnt2 >= 3:
                 _danger_signals.append(("⚡ 관다신약(官多身弱) — 책임과 압박에 짓눌립니다",
                     f"관성({_kwan_oh2})이 {_kwan_cnt2}개로 과다한데 일간이 약합니다. "
                     f"직장·사회적 책임이 감당 못할 만큼 쏟아지는 구조입니다. "
                     f"'내가 다 해야 한다'는 강박을 버리십시오. "
-                    f"인성 운이 올 때까지는 새로운 직책·책임을 맡지 마십시오."))
+                    f"인성 운이 올 때까지는 새로운 직책·책임을 맡지 마십시오.", "주의"))
 
             elif _is_shinyak and _in_cnt2 >= 3:
                 _danger_signals.append(("🌀 인다신약(印多身弱) — 생각만 많고 행동이 안 됩니다",
@@ -12332,28 +12332,28 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                     f"머릿속에 계획과 생각은 넘치는데 실행이 안 되는 구조입니다. "
                     f"의존성이 강해지고 결정을 미루는 습관이 생깁니다. "
                     f"지금 당장 생각을 줄이고 작은 것 하나라도 실행하십시오. "
-                    f"책·공부·자격증에만 매달리면 평생 준비만 하다 끝납니다."))
+                    f"책·공부·자격증에만 매달리면 평생 준비만 하다 끝납니다.", "주의"))
 
             elif _is_shingang and _jae_cnt2 == 0:
                 _danger_signals.append(("💰 신강무재(身强無財) — 힘은 있는데 돈이 안 모입니다",
                     f"일간이 강한데 재성({_jae_oh2})이 원국에 없습니다. "
                     f"능력은 있지만 돈으로 연결되지 않는 구조입니다. "
                     f"직장보다 사업이, 월급보다 프리랜서가 맞는 사주입니다. "
-                    f"재성 운(대운·세운)이 들어올 때 집중적으로 승부하십시오."))
+                    f"재성 운(대운·세운)이 들어올 때 집중적으로 승부하십시오.", "참고"))
 
             elif _is_shingang and _kwan_cnt2 == 0:
                 _danger_signals.append(("⚠️ 신강무관(身强無官) — 조직 생활이 맞지 않습니다",
                     f"일간이 강한데 관성({_kwan_oh2})이 원국에 없습니다. "
                     f"직장 상사와 충돌이 잦고 조직 생활이 답답하게 느껴지는 구조입니다. "
                     f"독립·창업·프리랜서가 훨씬 잘 맞는 사주입니다. "
-                    f"관성 운이 들어오는 시기에 이직이나 창업 타이밍을 잡으십시오."))
+                    f"관성 운이 들어오는 시기에 이직이나 창업 타이밍을 잡으십시오.", "참고"))
 
             elif _is_shingang and _jae_cnt2 >= 3:
                 _danger_signals.append(("💎 신강재왕(身强財旺) — 재물복이 타고난 구조",
                     f"일간도 강하고 재성({_jae_oh2})도 {_jae_cnt2}개로 풍부합니다. "
                     f"재물을 감당할 힘도 있고 재물도 있는 길한 구조입니다. "
                     f"단, 재물에 대한 욕심이 지나치면 인간관계를 잃습니다. "
-                    f"돈보다 사람을 먼저 챙기는 것이 이 사주를 최대로 활용하는 방법입니다."))
+                    f"돈보다 사람을 먼저 챙기는 것이 이 사주를 최대로 활용하는 방법입니다.", "참고"))
 
         except Exception:
             pass
@@ -12406,7 +12406,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                         f"공망이 발동하면 아무리 열심히 해도 결과가 나오지 않는 해가 됩니다. "
                         f"투자해도 수익이 안 나고, 노력해도 인정받지 못하고, 계획이 흐지부지됩니다. "
                         f"올해는 새로운 시작보다 기존 것을 정리하고 내실을 다지는 해입니다. "
-                        f"공망 중에 억지로 밀어붙이면 반드시 손해를 봅니다. 내년을 기약하십시오."))
+                        f"공망 중에 억지로 밀어붙이면 반드시 손해를 봅니다. 내년을 기약하십시오.", "주의"))
 
                 if _gm_positions and not _sw_gongmang:
                     _gm_pos_str = "·".join(_gm_positions)
@@ -12423,7 +12423,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                             + " ".join(_gm_detail) + ". "
                             f"공망 자리의 육친에서 기대 이상을 바라면 실망합니다. "
                             f"그러나 공망은 정신적·종교적·예술적 분야에서 오히려 탁월한 능력을 줍니다. "
-                            f"물질보다 정신적 가치를 추구하면 공망이 오히려 강점이 됩니다."))
+                            f"물질보다 정신적 가치를 추구하면 공망이 오히려 강점이 됩니다.", "참고"))
         except Exception:
             pass
 
@@ -12450,7 +12450,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                     f"원진살이 발동하면 가장 가까운 사람과 이유 없이 미워지고 원망하게 됩니다. "
                     f"배우자·가족·직장동료와 감정 골이 깊어지는 해입니다. "
                     f"'왜 저 사람이 나를 이렇게 대하나' 싶은 감정이 반복된다면 원진살의 기운입니다. "
-                    f"올해는 감정싸움을 시작하지 마십시오. 먼저 말 걸고 먼저 풀려는 쪽이 이기는 해입니다."))
+                    f"올해는 감정싸움을 시작하지 마십시오. 먼저 말 걸고 먼저 풀려는 쪽이 이기는 해입니다.", "주의"))
 
             # 원국 내 원진 체크 (일지 vs 년/월/시지)
             _wonjin_in_chart = []
@@ -12467,7 +12467,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                     f"원국 {_wj_pos}에 원진살이 걸려 있습니다. "
                     + " ".join(_wj_who) + " 이유 없이 미움을 받거나 주는 관계가 반복됩니다. "
                     f"원진살이 있는 육친과는 기대를 낮추는 것이 상처를 줄이는 방법입니다. "
-                    f"거리를 두되 적으로 만들지는 마십시오."))
+                    f"거리를 두되 적으로 만들지는 마십시오.", "참고"))
 
             # 귀문관살 — 원국 지지 전체에서 짝 찾기
             _gwimun_pairs = []
@@ -12484,14 +12484,14 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                     f"심한 경우 불면증·공황장애·강박증·우울증으로 발전합니다. "
                     f"무속·종교·영적 세계에 끌리는 성향이 강하게 나타납니다. "
                     f"정신건강의학과 상담을 부끄럽게 여기지 마십시오. "
-                    f"예술·상담·치유 분야에서 탁월한 능력을 발휘할 수 있습니다."))
+                    f"예술·상담·치유 분야에서 탁월한 능력을 발휘할 수 있습니다.", "주의"))
             elif len(_gwimun_pairs) == 1:
                 _danger_signals.append(("👻 귀문관살 — 신경이 예민하고 정신적 소모가 큽니다",
                     f"원국에 귀문관살({_gwimun_pairs[0]})이 있습니다. "
                     f"남들이 모르는 것을 느끼고 보는 예민한 감수성이 있습니다. "
                     f"그러나 그만큼 정신적으로 쉽게 지치고 상처를 깊게 받습니다. "
                     f"혼자 감당하려 하지 말고 믿는 사람에게 털어놓는 습관을 만드십시오. "
-                    f"명상·요가·산책 등 정신을 정화하는 루틴이 반드시 필요합니다."))
+                    f"명상·요가·산책 등 정신을 정화하는 루틴이 반드시 필요합니다.", "주의"))
 
             # 세운과 귀문 발동
             if _GWIMUN_MAP.get(_il_jj_wj,"") == _jj_cur:
@@ -12500,7 +12500,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                     f"올해 유독 이유 없는 불안, 강박적 생각, 불면증이 심해질 수 있습니다. "
                     f"귀신·신내림·무속에 지나치게 빠져드는 것도 이 살의 영향입니다. "
                     f"정신적으로 흔들리는 느낌이 든다면 혼자 버티지 말고 전문가를 찾으십시오. "
-                    f"올해는 자극적인 콘텐츠·뉴스·SNS를 줄이고 마음을 안정시키는 것이 최우선입니다."))
+                    f"올해는 자극적인 콘텐츠·뉴스·SNS를 줄이고 마음을 안정시키는 것이 최우선입니다.", "주의"))
         except Exception:
             pass
 
@@ -12529,7 +12529,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                     f"아무리 힘든 상황도 반드시 누군가 나타나 해결해줍니다. "
                     f"혼자 끙끙 앓지 말고 주변에 도움을 요청하십시오. "
                     f"올해 처음 만나는 사람 중에 인생을 바꿀 귀인이 있습니다. "
-                    f"귀인은 화려하게 오지 않고 조용히 나타납니다."))
+                    f"귀인은 화려하게 오지 않고 조용히 나타납니다.", "참고"))
             elif _guiin_sw:
                 _danger_signals.append(("⭐ 올해 귀인 세운 — 결정적 도움이 옵니다",
                     f"올해 세운({_jj_cur})이 {ilgan}일간의 천을귀인입니다. "
@@ -12537,7 +12537,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                     f"직장에서는 윗사람의 도움, 사업에서는 뜻밖의 파트너, "
                     f"개인적으로는 오랜 지인의 결정적 한마디가 올 수 있습니다. "
                     f"올해 만나는 새로운 인연을 소중히 하십시오. "
-                    f"귀인을 먼저 알아보는 사람이 귀인복을 제대로 씁니다."))
+                    f"귀인을 먼저 알아보는 사람이 귀인복을 제대로 씁니다.", "참고"))
             elif _guiin_in_chart:
                 _guiin_pos = "·".join(_guiin_in_chart)
                 _danger_signals.append(("⭐ 천을귀인 보유 — 위기마다 구원자가 나타납니다",
@@ -12546,7 +12546,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                     f"이것이 타고난 귀인복입니다. "
                     f"인간관계를 절대 소홀히 하지 마십시오. "
                     f"귀인은 대부분 이미 주변에 있습니다. "
-                    f"지금 당신 곁의 사람들을 다시 한번 돌아보십시오."))
+                    f"지금 당신 곁의 사람들을 다시 한번 돌아보십시오.", "참고"))
         except Exception:
             pass
 
@@ -12586,13 +12586,13 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                         f"직업·거주지·인간관계가 동시에 흔들리는 것처럼 느껴집니다. "
                         f"이 시기에 충동적으로 내린 결정은 대부분 후회로 이어집니다. "
                         f"대운이 완전히 바뀐 후 1~2년을 기다렸다가 새로운 결정을 내리십시오. "
-                        f"지금의 혼란은 새로운 10년을 준비하는 진통입니다."))
+                        f"지금의 혼란은 새로운 10년을 준비하는 진통입니다.", "위험"))
                 elif _years_left2 <= 5:
                     _danger_signals.append((f"📅 대운 교체 {_years_left2}년 전 — 다음 10년을 준비하십시오",
                         f"{_years_left2}년 후 {_next_cg2}{_next_jj2} 대운으로 교체됩니다. "
                         f"지금부터 다음 대운에 맞는 준비를 시작해야 합니다. "
                         f"대운이 바뀌었을 때 준비된 사람과 그렇지 않은 사람의 "
-                        f"10년 후 차이는 하늘과 땅입니다."))
+                        f"10년 후 차이는 하늘과 땅입니다.", "참고"))
 
                 if cur_age - int(_cur_start_age2) <= 2:
                     _danger_signals.append(("🔄 대운 교체 직후 — 적응 기간입니다",
@@ -12600,7 +12600,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                         f"새 대운의 기운에 아직 몸과 마음이 적응 중입니다. "
                         f"지금 느끼는 혼란과 방향 상실감은 대운 교체기의 자연스러운 현상입니다. "
                         f"새 대운의 기운이 완전히 자리 잡는 데 2~3년이 걸립니다. "
-                        f"조급해하지 말고 새로운 흐름에 서서히 몸을 맞춰가십시오."))
+                        f"조급해하지 말고 새로운 흐름에 서서히 몸을 맞춰가십시오.", "참고"))
         except Exception:
             pass
 
@@ -12636,7 +12636,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                     f"형살은 충(沖)보다 더 집요하고 내부에서 썩어들어가는 방식으로 작용합니다. "
                     f"겉으로는 멀쩡해 보이지만 속에서 곪고 있는 상황이 올해 터집니다. "
                     f"수술·법적 분쟁·배신이 실제로 일어날 수 있습니다. "
-                    f"몸에 이상 신호가 있으면 절대 방치하지 마십시오."))
+                    f"몸에 이상 신호가 있으면 절대 방치하지 마십시오.", "위험"))
             for _hname14, _hdesc14, _matched14 in _hyung_found:
                 _matched14_str = "·".join(sorted(_matched14))
                 _danger_signals.append((f"⚠️ 원국 {_hname14} — 평생 조심해야 할 기운",
@@ -12645,7 +12645,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                     f"형살이 있는 사람은 수술을 한두 번 이상 경험하는 경우가 많습니다. "
                     f"가까운 사람에게 배신당하거나 본인도 모르게 남에게 상처를 주기도 합니다. "
                     f"특히 형살 운이 겹치는 해에 가장 위험합니다. "
-                    f"건강검진을 매년 빠짐없이 받으십시오."))
+                    f"건강검진을 매년 빠짐없이 받으십시오.", "주의"))
         except Exception:
             pass
 
@@ -12743,7 +12743,8 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
 
                 _danger_signals.append((
                     f"🌡️ 월령 용신 — {_season_born} 태생 정밀 분석",
-                    " ".join(_msg15)
+                    " ".join(_msg15),
+                    "참고"
                 ))
         except Exception:
             pass
@@ -12839,7 +12840,8 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
 
                 _danger_signals.append((
                     f"🌀 십이운성 — 일지 {_일지_운성} · 올해 세운 {_세운_운성}",
-                    _full_msg16
+                    _full_msg16,
+                    "주의"
                 ))
         except Exception:
             pass
@@ -12874,14 +12876,14 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                     f"고혈압·심장질환·피부병·불면증·안구건조증이 생기기 쉽습니다. "
                     f"지금 당장: 찬물 자주 마시기, 수영·목욕, "
                     f"검은색·파란색 옷 착용, 북쪽 방향 활동, "
-                    f"매운 음식·술·담배 완전 금지, 심혈관 검사 즉시 받으십시오."))
+                    f"매운 음식·술·담배 완전 금지, 심혈관 검사 즉시 받으십시오.", "위험"))
             elif _total_temp >= 6:
                 _danger_signals.append(("🌡️ 온열(溫熱) 사주 — 열기 조절이 필요합니다",
                     f"원국 온도 지수가 {_total_temp}점으로 따뜻한 편입니다. "
                     f"활동적이고 열정적이지만 과열되면 충동적이 됩니다. "
                     f"水 기운을 꾸준히 보충해 균형을 유지하십시오. "
                     f"혈압과 심장 건강을 주기적으로 체크하십시오. "
-                    f"여름에 특히 건강관리를 철저히 하십시오."))
+                    f"여름에 특히 건강관리를 철저히 하십시오.", "주의"))
             elif _total_temp <= -10:
                 _danger_signals.append(("🧊 한습(寒濕) 사주 — 몸과 마음이 항상 차갑습니다",
                     f"원국 온도 지수가 {_total_temp}점으로 극도로 차가운 사주입니다. "
@@ -12890,19 +12892,19 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                     f"겨울철 우울증과 무기력이 극도로 심해질 수 있습니다. "
                     f"지금 당장: 따뜻한 음식만 먹기, 아침 햇볕 쬐기, "
                     f"붉은색·주황색 옷 착용, 남쪽 방향 활동, "
-                    f"운동으로 체온 올리기, 정신건강의학과 상담 고려하십시오."))
+                    f"운동으로 체온 올리기, 정신건강의학과 상담 고려하십시오.", "위험"))
             elif _total_temp <= -6:
                 _danger_signals.append(("🌡️ 냉한(冷寒) 사주 — 온기 보충이 필요합니다",
                     f"원국 온도 지수가 {_total_temp}점으로 서늘한 편입니다. "
                     f"차분하고 신중하지만 소극적이 되기 쉽습니다. "
                     f"火 기운을 꾸준히 보충해 활력을 유지하십시오. "
                     f"겨울철 건강관리를 특히 철저히 하십시오. "
-                    f"몸을 항상 따뜻하게 유지하는 것이 핵심입니다."))
+                    f"몸을 항상 따뜻하게 유지하는 것이 핵심입니다.", "주의"))
             else:
                 _danger_signals.append(("✅ 조후 균형 사주 — 온도 균형이 잘 맞습니다",
                     f"원국 온도 지수가 {_total_temp}점으로 비교적 균형 잡혀 있습니다. "
                     f"조후가 균형 잡힌 사주는 건강하고 안정적인 삶의 기반이 됩니다. "
-                    f"큰 계절 변화(여름·겨울)에만 건강관리를 신경 쓰면 됩니다."))
+                    f"큰 계절 변화(여름·겨울)에만 건강관리를 신경 쓰면 됩니다.", "참고"))
 
             # 세운 오행이 조후를 악화시키는지 체크
             _sw_oh_temp = _OH_TEMP.get(_oh_cg, 0) + _OH_TEMP.get(_oh_jj, 0)
@@ -12912,14 +12914,14 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                     f"火·木 계열로 온도를 더 올립니다. "
                     f"올해 심장·혈압·뇌혈관 관련 응급상황이 실제로 올 수 있습니다. "
                     f"지금 즉시 심혈관 전문의 검진을 받으십시오. "
-                    f"무더운 여름 야외 활동은 생명을 위협할 수 있습니다."))
+                    f"무더운 여름 야외 활동은 생명을 위협할 수 있습니다.", "위험"))
             elif _total_temp <= -6 and _sw_oh_temp <= -4:
                 _danger_signals.append(("🧊 올해 한습 극대화 — 우울·냉증 극도 주의",
                     f"원래도 차가운 사주인데 올해 세운 오행({_oh_cg}·{_oh_jj})까지 "
                     f"水·金 계열로 온도를 더 내립니다. "
                     f"올해 심한 우울증·무기력·냉증이 겹칠 수 있습니다. "
                     f"겨울철 극도로 조심하고 혼자 있는 시간을 줄이십시오. "
-                    f"정신건강의학과 상담을 부끄러워하지 마십시오."))
+                    f"정신건강의학과 상담을 부끄러워하지 마십시오.", "위험"))
         except Exception:
             pass
 
@@ -12934,29 +12936,61 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
     lines.append(f"*{cur_year}년 · 한국나이 {cur_age}세(만 {cur_age-1}세) · {_dw_label}{_age_range} · {_sw_label}*")
     lines.append("")
 
-    # 0. 위험 신호 카드
-    if _danger_signals:
-        lines.append("### 🚨 지금 당신의 사주에서 보이는 위험 신호")
+    # 0. 위험 신호 카드 — 3등급 분류
+    _signals_danger  = [(t,b) for t,b,g in _danger_signals if g == "위험"]
+    _signals_caution = [(t,b) for t,b,g in _danger_signals if g == "주의"]
+    _signals_info    = [(t,b) for t,b,g in _danger_signals if g == "참고"]
+
+    if _signals_danger:
+        lines.append("### 🚨 지금 즉시 조심해야 할 위험 신호")
         lines.append("")
-        for _title, _body in _danger_signals:
-            lines.append(f"**{_title}**  ")
+        lines.append("<div style='background:#fff0f0;border-left:4px solid #ff4444;padding:12px;border-radius:6px;margin:8px 0'>")
+        for _t, _b in _signals_danger:
+            lines.append(f"**{_t}**  ")
             lines.append("")
-            lines.append(_body)
+            lines.append(_b)
             lines.append("")
-        lines.append("---")
+        lines.append("</div>")
         lines.append("")
-    else:
+
+    if _signals_caution:
+        lines.append("### ⚠️ 올해 주의해야 할 신호")
+        lines.append("")
+        lines.append("<div style='background:#fffbf0;border-left:4px solid #ffaa00;padding:12px;border-radius:6px;margin:8px 0'>")
+        for _t, _b in _signals_caution:
+            lines.append(f"**{_t}**  ")
+            lines.append("")
+            lines.append(_b)
+            lines.append("")
+        lines.append("</div>")
+        lines.append("")
+
+    if _signals_info:
+        lines.append("### ✅ 긍정 신호 & 참고 정보")
+        lines.append("")
+        lines.append("<div style='background:#f0fff4;border-left:4px solid #00cc44;padding:12px;border-radius:6px;margin:8px 0'>")
+        for _t, _b in _signals_info:
+            lines.append(f"**{_t}**  ")
+            lines.append("")
+            lines.append(_b)
+            lines.append("")
+        lines.append("</div>")
+        lines.append("")
+
+    if not _danger_signals:
         lines.append("### ✅ 올해 큰 위험 신호는 없습니다")
         lines.append("")
+        lines.append("<div style='background:#f0fff4;border-left:4px solid #00cc44;padding:12px;border-radius:6px;margin:8px 0'>")
         lines.append(
             f"사주 원국과 올해 세운의 충돌이 크지 않습니다. "
-            f"그러나 방심은 금물입니다. "
-            f"{sw_kr or '올해'} 세운이 {name}님에게 비교적 순탄하게 흐르는 해입니다. "
-            f"이런 해에 오히려 차분하게 다음 도약을 준비하십시오."
+            f"{sw_kr or '올해'} 세운이 {name}님에게 비교적 순탄하게 "
+            f"흐르는 해입니다. 조용히 내실을 다지십시오."
         )
+        lines.append("</div>")
         lines.append("")
-        lines.append("---")
-        lines.append("")
+
+    lines.append("---")
+    lines.append("")
 
     # 1. 공감 질문
     lines.append(f"### 💬 {hard_q}")
