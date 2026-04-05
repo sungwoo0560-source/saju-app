@@ -12427,6 +12427,83 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
         except Exception:
             pass
 
+        # ⑪ 원진살·귀문관살 분석
+        try:
+            _WONJIN_MAP = {
+                "子":"未","未":"子","丑":"午","午":"丑",
+                "寅":"酉","酉":"寅","卯":"申","申":"卯",
+                "辰":"亥","亥":"辰","巳":"戌","戌":"巳"
+            }
+            _GWIMUN_MAP = {
+                "子":"酉","丑":"午","寅":"亥","卯":"戌",
+                "辰":"未","巳":"申","午":"丑","未":"辰",
+                "申":"巳","酉":"子","戌":"卯","亥":"寅"
+            }
+            _all_jj = [p.get("jj","") for p in pils]
+            _il_jj_wj = pils[1].get("jj","")
+
+            # 세운과 원진 체크
+            _wonjin_target = _WONJIN_MAP.get(_il_jj_wj,"")
+            if _wonjin_target and _wonjin_target == _jj_cur:
+                _danger_signals.append(("😤 올해 원진살 발동 — 주변과 이유없이 원수가 됩니다",
+                    f"일지({_il_jj_wj})와 올해 세운({_jj_cur})이 원진(怨嗔) 관계입니다. "
+                    f"원진살이 발동하면 가장 가까운 사람과 이유 없이 미워지고 원망하게 됩니다. "
+                    f"배우자·가족·직장동료와 감정 골이 깊어지는 해입니다. "
+                    f"'왜 저 사람이 나를 이렇게 대하나' 싶은 감정이 반복된다면 원진살의 기운입니다. "
+                    f"올해는 감정싸움을 시작하지 마십시오. 먼저 말 걸고 먼저 풀려는 쪽이 이기는 해입니다."))
+
+            # 원국 내 원진 체크 (일지 vs 년/월/시지)
+            _wonjin_in_chart = []
+            for _pi, _pn in zip([0, 2, 3], ["시지", "월지", "년지"]):
+                if _pi < len(pils) and _WONJIN_MAP.get(_il_jj_wj,"") == pils[_pi].get("jj",""):
+                    _wonjin_in_chart.append(_pn)
+            if _wonjin_in_chart:
+                _wj_pos = "·".join(_wonjin_in_chart)
+                _wj_who = []
+                if "년지" in _wonjin_in_chart: _wj_who.append("부모·조상과 인연이 박하고")
+                if "월지" in _wonjin_in_chart: _wj_who.append("형제·직장 동료와 감정 충돌이 잦고")
+                if "시지" in _wonjin_in_chart: _wj_who.append("자녀와 원망 관계가 생기기 쉽고")
+                _danger_signals.append(("😤 원국 원진살 — 평생 특정 관계가 힘듭니다",
+                    f"원국 {_wj_pos}에 원진살이 걸려 있습니다. "
+                    + " ".join(_wj_who) + " 이유 없이 미움을 받거나 주는 관계가 반복됩니다. "
+                    f"원진살이 있는 육친과는 기대를 낮추는 것이 상처를 줄이는 방법입니다. "
+                    f"거리를 두되 적으로 만들지는 마십시오."))
+
+            # 귀문관살 — 원국 지지 전체에서 짝 찾기
+            _gwimun_pairs = []
+            for _i, _jj_a in enumerate(_all_jj):
+                for _j, _jj_b in enumerate(_all_jj):
+                    if _i >= _j: continue
+                    if _GWIMUN_MAP.get(_jj_a,"") == _jj_b:
+                        _gwimun_pairs.append(f"{_jj_a}·{_jj_b}")
+            if len(_gwimun_pairs) >= 2:
+                _gwimun_str = ", ".join(_gwimun_pairs)
+                _danger_signals.append(("👻 귀문관살 강력 발동 — 정신적 예민함 극도 주의",
+                    f"원국에 귀문관살 짝이 {len(_gwimun_pairs)}쌍({_gwimun_str}) 있습니다. "
+                    f"귀문관살이 강하면 감수성과 직관이 뛰어나지만 정신적 스트레스에 매우 취약합니다. "
+                    f"심한 경우 불면증·공황장애·강박증·우울증으로 발전합니다. "
+                    f"무속·종교·영적 세계에 끌리는 성향이 강하게 나타납니다. "
+                    f"정신건강의학과 상담을 부끄럽게 여기지 마십시오. "
+                    f"예술·상담·치유 분야에서 탁월한 능력을 발휘할 수 있습니다."))
+            elif len(_gwimun_pairs) == 1:
+                _danger_signals.append(("👻 귀문관살 — 신경이 예민하고 정신적 소모가 큽니다",
+                    f"원국에 귀문관살({_gwimun_pairs[0]})이 있습니다. "
+                    f"남들이 모르는 것을 느끼고 보는 예민한 감수성이 있습니다. "
+                    f"그러나 그만큼 정신적으로 쉽게 지치고 상처를 깊게 받습니다. "
+                    f"혼자 감당하려 하지 말고 믿는 사람에게 털어놓는 습관을 만드십시오. "
+                    f"명상·요가·산책 등 정신을 정화하는 루틴이 반드시 필요합니다."))
+
+            # 세운과 귀문 발동
+            if _GWIMUN_MAP.get(_il_jj_wj,"") == _jj_cur:
+                _danger_signals.append(("👻 올해 귀문관살 발동 — 정신건강 적신호",
+                    f"일지({_il_jj_wj})와 올해 세운({_jj_cur})이 귀문(鬼門) 관계입니다. "
+                    f"올해 유독 이유 없는 불안, 강박적 생각, 불면증이 심해질 수 있습니다. "
+                    f"귀신·신내림·무속에 지나치게 빠져드는 것도 이 살의 영향입니다. "
+                    f"정신적으로 흔들리는 느낌이 든다면 혼자 버티지 말고 전문가를 찾으십시오. "
+                    f"올해는 자극적인 콘텐츠·뉴스·SNS를 줄이고 마음을 안정시키는 것이 최우선입니다."))
+        except Exception:
+            pass
+
     except Exception:
         pass
 
