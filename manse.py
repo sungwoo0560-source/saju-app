@@ -12649,6 +12649,105 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
         except Exception:
             pass
 
+        # ⑮ 월령 용신 정밀 분석
+        try:
+            from saju_interpreter import get_yongshin as _get_ys15
+            _ys_full = _get_ys15(pils)
+            _월지15    = pils[2].get("jj","") if len(pils) > 2 else ""
+            _억부_용신 = _ys_full.get("억부_용신", [])
+            _조후_need = _ys_full.get("조후_need", [])
+            _조후_avoid= _ys_full.get("조후_avoid", [])
+            _조후_우선 = _ys_full.get("조후_우선", False)
+            _종합_용신 = _ys_full.get("종합_용신", [])
+
+            _SEASON_MAP15 = {
+                "寅":"봄","卯":"봄","辰":"봄",
+                "巳":"여름","午":"여름","未":"여름",
+                "申":"가을","酉":"가을","戌":"가을",
+                "亥":"겨울","子":"겨울","丑":"겨울",
+            }
+            _SEASON_OH15 = {
+                "봄":  {"강함":"木", "필요":["火","土"], "주의":"木 과다면 金으로 제어"},
+                "여름":{"강함":"火", "필요":["水","金"], "주의":"火 과다면 水 최우선"},
+                "가을":{"강함":"金", "필요":["木","火"], "주의":"金 과다면 火로 제어"},
+                "겨울":{"강함":"水", "필요":["火","土"], "주의":"水 과다면 火 최우선"},
+            }
+            _CG_OH15 = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
+                        "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
+
+            _season_born = _SEASON_MAP15.get(_월지15, "")
+            _season_info = _SEASON_OH15.get(_season_born, {})
+
+            # 억부용신 vs 조후기신 충돌 감지
+            _conflict15 = bool(set(_억부_용신) & set(_조후_avoid)) if (_억부_용신 and _조후_avoid) else False
+
+            # 세운 천간 오행 → 종합용신/조후기신 비교
+            _조후_avoid_oh = set(_CG_OH15.get(s,"") for s in _조후_avoid) - {""}
+
+            if _season_born:
+                _msg15 = []
+                _season_강함 = _season_info.get("강함","")
+                _season_주의 = _season_info.get("주의","")
+                _msg15.append(
+                    f"{_season_born}({_월지15}월)에 태어나 {_season_강함} 기운이 강한 사주입니다. "
+                )
+
+                if _조후_우선 and _조후_need:
+                    _조후_str = "·".join(_조후_need)
+                    _msg15.append(
+                        f"이 사주는 온도·습도 균형(調候)이 최우선입니다. "
+                        f"{_조후_str} 기운을 보충하는 것이 억부 용신보다 더 급합니다. "
+                    )
+                    if _season_born == "여름":
+                        _msg15.append(
+                            f"여름 태생은 水 기운이 생명줄입니다. "
+                            f"몸이 자주 뜨겁고 조급해지는 것은 水 부족 신호입니다. "
+                            f"물을 자주 마시고 서늘한 환경을 만드십시오. "
+                            f"붉은색·남쪽 방향은 피하고 검은색·북쪽을 가까이 하십시오. "
+                        )
+                    elif _season_born == "겨울":
+                        _msg15.append(
+                            f"겨울 태생은 火 기운이 생명줄입니다. "
+                            f"몸이 자주 차고 의욕이 없어지는 것은 火 부족 신호입니다. "
+                            f"따뜻한 환경을 유지하고 붉은색·남쪽 방향을 가까이 하십시오. "
+                            f"찬 음식·음료는 줄이고 따뜻한 음식을 드십시오. "
+                        )
+
+                if _억부_용신:
+                    _억부_str = "·".join(_억부_용신)
+                    _msg15.append(f"억부 기준 용신은 {_억부_str}입니다. ")
+
+                if _conflict15:
+                    _msg15.append(
+                        f"⚠️ 억부 용신과 조후 용신이 충돌합니다. "
+                        f"계절의 온도 균형을 먼저 맞춘 뒤 억부를 적용해야 합니다. "
+                        f"잘못된 용신 처방이 오히려 독이 될 수 있으니 "
+                        f"전문 감명가에게 정밀 감정을 받아보십시오. "
+                    )
+
+                if _종합_용신 and _oh_cg:
+                    if _oh_cg in _종합_용신:
+                        _msg15.append(
+                            f"올해 세운 천간 오행({_oh_cg})이 용신과 일치합니다. "
+                            f"기운의 방향이 맞는 해이므로 적극적으로 움직이면 좋은 결과가 따릅니다. "
+                        )
+                    elif _oh_cg in _조후_avoid_oh:
+                        _msg15.append(
+                            f"올해 세운 오행({_oh_cg})이 조후 기신에 해당합니다. "
+                            f"몸과 마음이 불균형해지기 쉬운 해입니다. "
+                            f"건강관리와 감정 조절에 특히 신경 쓰십시오. "
+                        )
+
+                if _season_주의:
+                    _msg15.append(_season_주의 + ".")
+
+                _danger_signals.append((
+                    f"🌡️ 월령 용신 — {_season_born} 태생 정밀 분석",
+                    " ".join(_msg15)
+                ))
+        except Exception:
+            pass
+
     except Exception:
         pass
 
