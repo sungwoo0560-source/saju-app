@@ -12284,6 +12284,80 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                     "올해는 배우자와의 관계 회복에 모든 에너지를 쏟으십시오. "
                     "이혼 서류에 도장 찍는 것은 최소 2년 후로 미루십시오."))
 
+        # ⑨ 신약 유형 정밀 판별
+        try:
+            from saju_interpreter import get_ilgan_strength as _get_sn
+            _sn_info = _get_sn(ilgan, pils)
+            _sn_type = _sn_info.get("신강신약", "")
+
+            # 오행 실제 개수 계산
+            _CG_OH2 = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土","己":"土",
+                       "庚":"金","辛":"金","壬":"水","癸":"水"}
+            _JJ_OH2 = {"子":"水","丑":"土","寅":"木","卯":"木","辰":"土","巳":"火",
+                       "午":"火","未":"土","申":"金","酉":"金","戌":"土","亥":"水"}
+            _oh_cnt2 = {"木":0,"火":0,"土":0,"金":0,"水":0}
+            for _p in pils:
+                _c = _CG_OH2.get(_p.get("cg",""),""); _j = _JJ_OH2.get(_p.get("jj",""),"")
+                if _c: _oh_cnt2[_c] += 1
+                if _j: _oh_cnt2[_j] += 1
+
+            _jae_oh2  = _sn_info.get("jae_oh", "")
+            _kwan_oh2 = _sn_info.get("gwan_oh", "")
+            _in_oh2   = _sn_info.get("parent_oh", "")
+            _jae_cnt2  = _oh_cnt2.get(_jae_oh2, 0)
+            _kwan_cnt2 = _oh_cnt2.get(_kwan_oh2, 0)
+            _in_cnt2   = _oh_cnt2.get(_in_oh2, 0)
+
+            _is_shinyak = "신약" in _sn_type
+            _is_shingang = "신강" in _sn_type or "중화" in _sn_type
+
+            if _is_shinyak and _jae_cnt2 >= 3:
+                _danger_signals.append(("💸 재다신약(財多身弱) — 돈이 보여도 못 잡습니다",
+                    f"재성({_jae_oh2})이 {_jae_cnt2}개로 과다한데 일간이 약합니다. "
+                    f"돈이 눈앞에 보여도 몸이 감당하지 못해 결국 빠져나가는 구조입니다. "
+                    f"투자·사업 확장·큰 계약은 비겁 운이 올 때까지 기다리십시오. "
+                    f"지금 무리하게 재물을 잡으려 하면 건강과 돈을 동시에 잃습니다. "
+                    f"지금 당장 할 것: 지출을 줄이고 체력을 먼저 회복하십시오."))
+
+            elif _is_shinyak and _kwan_cnt2 >= 3:
+                _danger_signals.append(("⚡ 관다신약(官多身弱) — 책임과 압박에 짓눌립니다",
+                    f"관성({_kwan_oh2})이 {_kwan_cnt2}개로 과다한데 일간이 약합니다. "
+                    f"직장·사회적 책임이 감당 못할 만큼 쏟아지는 구조입니다. "
+                    f"'내가 다 해야 한다'는 강박을 버리십시오. "
+                    f"인성 운이 올 때까지는 새로운 직책·책임을 맡지 마십시오."))
+
+            elif _is_shinyak and _in_cnt2 >= 3:
+                _danger_signals.append(("🌀 인다신약(印多身弱) — 생각만 많고 행동이 안 됩니다",
+                    f"인성({_in_oh2})이 {_in_cnt2}개로 과다한데 일간이 약합니다. "
+                    f"머릿속에 계획과 생각은 넘치는데 실행이 안 되는 구조입니다. "
+                    f"의존성이 강해지고 결정을 미루는 습관이 생깁니다. "
+                    f"지금 당장 생각을 줄이고 작은 것 하나라도 실행하십시오. "
+                    f"책·공부·자격증에만 매달리면 평생 준비만 하다 끝납니다."))
+
+            elif _is_shingang and _jae_cnt2 == 0:
+                _danger_signals.append(("💰 신강무재(身强無財) — 힘은 있는데 돈이 안 모입니다",
+                    f"일간이 강한데 재성({_jae_oh2})이 원국에 없습니다. "
+                    f"능력은 있지만 돈으로 연결되지 않는 구조입니다. "
+                    f"직장보다 사업이, 월급보다 프리랜서가 맞는 사주입니다. "
+                    f"재성 운(대운·세운)이 들어올 때 집중적으로 승부하십시오."))
+
+            elif _is_shingang and _kwan_cnt2 == 0:
+                _danger_signals.append(("⚠️ 신강무관(身强無官) — 조직 생활이 맞지 않습니다",
+                    f"일간이 강한데 관성({_kwan_oh2})이 원국에 없습니다. "
+                    f"직장 상사와 충돌이 잦고 조직 생활이 답답하게 느껴지는 구조입니다. "
+                    f"독립·창업·프리랜서가 훨씬 잘 맞는 사주입니다. "
+                    f"관성 운이 들어오는 시기에 이직이나 창업 타이밍을 잡으십시오."))
+
+            elif _is_shingang and _jae_cnt2 >= 3:
+                _danger_signals.append(("💎 신강재왕(身强財旺) — 재물복이 타고난 구조",
+                    f"일간도 강하고 재성({_jae_oh2})도 {_jae_cnt2}개로 풍부합니다. "
+                    f"재물을 감당할 힘도 있고 재물도 있는 길한 구조입니다. "
+                    f"단, 재물에 대한 욕심이 지나치면 인간관계를 잃습니다. "
+                    f"돈보다 사람을 먼저 챙기는 것이 이 사주를 최대로 활용하는 방법입니다."))
+
+        except Exception:
+            pass
+
     except Exception:
         pass
 
