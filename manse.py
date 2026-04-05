@@ -11504,8 +11504,10 @@ def render_worry_inference(pils, birth_year, gender):
 def menu_current_situation(pils, name, birth_year, gender):
     """🎯 나의 현재 상황 — 공감형 서술 (무엇 때문에 힘드신지 짚어드립니다)"""
 
-    cur_year = datetime.now().year
-    cur_age  = cur_year - birth_year + 1
+    cur_year  = datetime.now().year
+    cur_month = datetime.now().month
+    cur_age   = cur_year - birth_year + 1
+    _season   = "봄" if cur_month in [3,4,5] else "여름" if cur_month in [6,7,8] else "가을" if cur_month in [9,10,11] else "겨울"
 
     # ── 고민 추론 카드 ─────────────────────────────────────
     render_worry_inference(pils, birth_year, gender)
@@ -12194,6 +12196,44 @@ def menu_current_situation(pils, name, birth_year, gender):
                     "이 대운 중에 충동적으로 이혼을 결정한 여성들 중 후회하는 경우가 많습니다. "
                     "전문 상담을 먼저 받으십시오."))
 
+        # ⑧ 남명(男命) 재성×관성 외도·이혼 분석
+        if gender == "남":
+            _sw_pyunjae  = "편재" in _sw_ss_raw
+            _sw_jungjae  = "정재" in _sw_ss_raw
+            _dw_pyunjae  = "편재" in _dw_ss_raw
+            _ilji_hap    = _HAP.get(_jj_vals[2], "") == _jj_cur
+            _ilji_chung  = _CHUNG.get(_jj_vals[2], "") == _jj_cur
+
+            if _ilji_hap and _sw_pyunjae:
+                _danger_signals.append(("💔 남명 외도 실행 위험 — 편재+일지합",
+                    "남명 사주에서 편재 세운과 일지합이 동시에 발동했습니다. "
+                    "편재는 본처(정재) 외의 여성, 즉 애인·외도 상대를 의미합니다. "
+                    "일지합으로 외부 이성이 강하게 당겨지는 구조가 완성됩니다. "
+                    "올해 특정 여성과 급격히 가까워지는 상황이 생긴다면 "
+                    "그것이 가정을 무너뜨리는 시작점이 될 수 있습니다. "
+                    "편재는 달콤하게 들어와서 정재(본처)와 가정을 흔듭니다. "
+                    "각별히 경계하십시오."))
+            elif _sw_pyunjae and not _ilji_hap:
+                _danger_signals.append(("🌸 남명 편재 세운 — 이성 유혹 강함",
+                    "편재 세운에는 매력적인 이성이 접근합니다. "
+                    "기혼자는 가정 밖의 여성과 가까워지고 싶은 충동이 강해집니다. "
+                    "이 충동을 실행으로 옮기면 이혼·위자료·자녀 문제로 이어집니다. "
+                    "편재의 달콤함은 반드시 대가를 치르게 되어 있습니다."))
+            elif _dw_pyunjae and not _sw_pyunjae:
+                _danger_signals.append(("⚠️ 남명 편재 대운 — 10년 이성 문제 조심",
+                    "편재 대운은 10년간 이성 문제가 반복되는 구간입니다. "
+                    "기혼자는 외도 유혹이 끊이지 않고, "
+                    "미혼자는 여러 여성과 동시에 엮이는 구조가 만들어집니다. "
+                    "이 대운 중 충동적인 이성 관계로 인생 전체가 뒤집힌 남성이 많습니다."))
+
+            if _ilji_chung and "겁재" in _sw_ss_raw:
+                _danger_signals.append(("💸 남명 겁재+일지충 — 배우자 떠나고 재물도 날아갑니다",
+                    "일지충으로 배우자와의 관계가 뿌리째 흔들리고, "
+                    "겁재 세운으로 재물까지 동시에 빠져나가는 최악의 구조입니다. "
+                    "이혼 소송 + 재산 분할이 현실이 될 수 있습니다. "
+                    "올해는 배우자와의 관계 회복에 모든 에너지를 쏟으십시오. "
+                    "이혼 서류에 도장 찍는 것은 최소 2년 후로 미루십시오."))
+
     except Exception:
         pass
 
@@ -12237,9 +12277,32 @@ def menu_current_situation(pils, name, birth_year, gender):
         lines.append(dw_ctx)
         lines.append("")
 
-    # 4. 길흉 코멘트
-    if gil_cmt:
-        lines.append(gil_cmt)
+    # 4. 길흉 코멘트 개인화 (세운십성 반영)
+    _sw_ss_for_gil = sw_kr if sw_kr else ""
+    if sw_gil == "대길":
+        if "편재" in _sw_ss_for_gil:
+            _gil_personal = f"올해는 **대길(大吉)** 흐름입니다. {_sw_ss_for_gil} 세운에서 재물운이 폭발적으로 열립니다. 기회가 왔을 때 망설이지 마십시오. 단, 과욕은 금물입니다."
+        elif "정관" in _sw_ss_for_gil or "편관" in _sw_ss_for_gil:
+            _gil_personal = f"올해는 **대길(大吉)** 흐름입니다. {_sw_ss_for_gil} 세운에서 사회적 인정과 승진 기회가 옵니다. 지금 하는 일에 집중하면 반드시 보상받습니다."
+        elif "식신" in _sw_ss_for_gil:
+            _gil_personal = f"올해는 **대길(大吉)** 흐름입니다. {_sw_ss_for_gil} 세운에서 창의적 활동과 새로운 수입원이 열립니다. 하고 싶은 것을 지금 시작하십시오."
+        else:
+            _gil_personal = f"올해는 **대길(大吉)** 흐름입니다. {_sw_ss_for_gil} 기운이 {name}님 편에서 강하게 작동하는 해입니다. 적극적으로 움직이십시오."
+    elif sw_gil == "길":
+        if "정인" in _sw_ss_for_gil or "편인" in _sw_ss_for_gil:
+            _gil_personal = f"올해 **길(吉)** 흐름입니다. {_sw_ss_for_gil} 세운에서 학습·자격증·내실 다지기가 빛을 발합니다. 조용히 실력을 쌓는 해입니다."
+        elif "비견" in _sw_ss_for_gil:
+            _gil_personal = f"올해 **길(吉)** 흐름입니다. {_sw_ss_for_gil} 세운에서 동료·협력자의 도움으로 일이 풀립니다. 혼자 하려 하지 말고 함께 하십시오."
+        else:
+            _gil_personal = f"올해 **길(吉)** 흐름입니다. {_sw_ss_for_gil} 기운이 {name}님을 지지합니다. 지금의 어려움은 잠시 지나가는 파도입니다."
+    elif sw_gil == "대흉":
+        _gil_personal = f"올해는 **대흉(大凶)** 흐름입니다. {_sw_ss_for_gil} 세운이 {name}님의 원국과 정면 충돌합니다. 올해만큼은 새로운 시작을 모두 보류하십시오. 버티는 것이 이기는 것입니다."
+    elif sw_gil == "흉":
+        _gil_personal = f"올해는 **흉(凶)** 흐름입니다. {_sw_ss_for_gil} 기운이 역방향으로 작동합니다. 무리한 확장보다 현상 유지에 집중하십시오."
+    else:
+        _gil_personal = f"올해는 **평(平)** 흐름입니다. {_sw_ss_for_gil} 세운이 큰 변화 없이 지나갑니다. 조용히 내실을 다지고 다음 기회를 준비하는 해입니다."
+    if _gil_personal:
+        lines.append(_gil_personal)
         lines.append("")
 
     # 4-1. [NEW] 나이대 고민 테마
@@ -12248,9 +12311,11 @@ def menu_current_situation(pils, name, birth_year, gender):
     lines.append(_age_theme)
     lines.append("")
 
-    # 5. 신강신약 개인 맥락
+    # 5. 신강신약 개인 맥락 (일간 표시)
     if sn_cmt:
         lines.append("---")
+        lines.append(f"**{ilgan}일간 {name}님의 에너지 구조**")
+        lines.append("")
         lines.append(sn_cmt)
         lines.append("")
 
@@ -12289,10 +12354,10 @@ def menu_current_situation(pils, name, birth_year, gender):
         lines.append(_iljj_partner_msg)
         lines.append("")
 
-    # 6. 용신 처방
+    # 6. 용신 처방 (계절 반영)
     if yong_rx:
         lines.append("---")
-        lines.append(f"### 🌿 지금 당장 할 수 있는 것")
+        lines.append(f"### 🌿 지금 {_season}에 {name}님이 당장 할 수 있는 것")
         lines.append(yong_rx)
         lines.append("")
 
