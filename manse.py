@@ -11549,6 +11549,20 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
             gi_ohs = [x.strip() for x in _gi_raw.replace("·", ",").split(",") if x.strip() in ["木","火","土","金","水"]]
         else:
             gi_ohs = []
+        # 기신이 서술형 문자열(오행 없음)인 경우 → sn으로 역산
+        if not gi_ohs and isinstance(_gi_raw, str) and _gi_raw:
+            _ilgan_oh2 = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
+                          "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}.get(ilgan, "")
+            _BMRV2 = {"木":"水","火":"木","土":"火","金":"土","水":"金"}
+            _CTLV2 = {"木":"土","火":"金","土":"水","金":"木","水":"火"}
+            if "신강" in sn and _ilgan_oh2:
+                _ok_인2 = _BMRV2.get(_ilgan_oh2, "")
+                gi_ohs = [o for o in [_ok_인2, _ilgan_oh2] if o]
+            elif "신약" in sn and _ilgan_oh2:
+                _ok_관2 = next((k for k, v in _CTLV2.items() if v == _ilgan_oh2), "")
+                _ok_재2 = _CTLV2.get(_ilgan_oh2, "")
+                gi_ohs = [o for o in [_ok_관2, _ok_재2] if o]
+            # 중화(中和): 특정 기신 없음 → gi_ohs 빈 리스트 유지
         yong_str = "·".join(yong_ohs[:2]) if yong_ohs else ""
         gi_str   = "·".join(gi_ohs[:1]) if gi_ohs else ""
     except Exception:
@@ -12007,20 +12021,20 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
         _HAP   = {"子":"丑","丑":"子","寅":"亥","亥":"寅","卯":"戌","戌":"卯",
                   "辰":"酉","酉":"辰","巳":"申","申":"巳","午":"未","未":"午"}
 
-        _jj_labels = ["년지","월지","일지","시지"]
+        _jj_labels = ["시지","일지","월지","년지"]   # pils순서: [0]=시주,[1]=일주,[2]=월주,[3]=년주
         _jj_vals   = [p.get("jj","") for p in pils]
 
         # ① 4기둥 지지 전체 vs 세운지지 충 체크
         for _idx, (_jj, _lb) in enumerate(zip(_jj_vals, _jj_labels)):
             if not _jj: continue
             if _CHUNG.get(_jj,"") == _jj_cur:
-                if _idx == 2:  # 일지 충
+                if _idx == 1:  # 일지 충 (pils[1]=일주)
                     _danger_signals.append(("💥 사고수 — 지금 당장 조심하십시오",
                         f"일지({_jj})와 올해 세운({_jj_cur})이 정면으로 충(沖)을 맞습니다. "
                         f"이건 사주에서 가장 강한 충격 신호입니다. "
                         f"교통사고, 수술, 큰 부상, 배우자와의 갑작스러운 파국이 실제로 일어날 수 있습니다. "
                         f"올해 상반기 안에 큰 계약·수술·투자 결정을 하면 반드시 후회합니다. 미루십시오.", "위험"))
-                elif _idx == 0:  # 년지 충
+                elif _idx == 3:  # 년지 충 (pils[3]=년주)
                     if _is_married:
                         _danger_signals.append(("💔 배우자·부모 이별수가 보입니다",
                             f"년지({_jj})와 세운이 충돌합니다. "
@@ -12031,27 +12045,27 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                             f"년지({_jj})와 세운이 충돌합니다. "
                             f"부모 또는 형제 중 한 명이 크게 아프거나 사고가 날 수 있습니다. "
                             f"가족 건강을 지금 당장 확인하십시오. 상속·재산 문제도 터질 수 있습니다.", "위험"))
-                elif _idx == 1:  # 월지 충
+                elif _idx == 2:  # 월지 충 (pils[2]=월주)
                     _danger_signals.append(("⚡ 직장·사업이 뿌리째 흔들립니다",
                         f"월지({_jj})와 세운이 충돌합니다. "
                         f"갑작스러운 해고, 사업 부도, 거래처 이탈이 올 수 있습니다. "
                         f"올해 사업 확장이나 이직은 독약입니다. 현상 유지가 최선입니다.", "위험"))
-                elif _idx == 3:  # 시지 충
+                elif _idx == 0:  # 시지 충 (pils[0]=시주)
                     _danger_signals.append(("👶 자녀 사고·부하 배신수",
                         f"시지({_jj})와 세운이 충돌합니다. "
                         f"자녀가 크게 다치거나, 믿었던 부하직원에게 배신당할 수 있습니다. "
                         f"자녀의 외출과 안전을 각별히 챙기십시오.", "주의"))
 
         # ② 일지 합(合) → 외도·배우자 변심 / 미혼이면 이성 인연
-        if _HAP.get(_jj_vals[2],"") == _jj_cur:
+        if _HAP.get(_jj_vals[1],"") == _jj_cur:  # pils[1]=일주 일지
             if _is_married:
                 _danger_signals.append(("🌸 배우자가 바람 필 수 있습니다",
-                    f"일지({_jj_vals[2]})와 세운({_jj_cur})이 합(合)을 이룹니다. "
+                    f"일지({_jj_vals[1]})와 세운({_jj_cur})이 합(合)을 이룹니다. "
                     f"배우자가 외부 이성과 가까워지거나 실제 외도가 일어날 수 있는 구조입니다. "
                     f"배우자의 귀가 시간, 핸드폰 사용 패턴이 달라졌다면 예사롭게 보지 마십시오.", "주의"))
             else:
                 _danger_signals.append(("🌸 강한 이성 인연이 들어옵니다",
-                    f"일지({_jj_vals[2]})와 세운({_jj_cur})이 합(合)을 이룹니다. "
+                    f"일지({_jj_vals[1]})와 세운({_jj_cur})이 합(合)을 이룹니다. "
                     f"올해 강한 이성 인연이 들어옵니다. "
                     f"그러나 상대가 기혼자이거나 복잡한 사람일 수 있으니 "
                     f"빠르게 감정이 붙는 관계는 상대 신상을 반드시 확인하십시오.", "참고"))
@@ -12198,7 +12212,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
             _sw_sikshin   = "식신" in _sw_ss_raw
             _sw_sanggwan  = "상관" in _sw_ss_raw
             _dw_sanggwan  = "상관" in _dw_ss_raw
-            _ilji_hap     = _HAP.get(_jj_vals[2], "") == _jj_cur
+            _ilji_hap     = _HAP.get(_jj_vals[1], "") == _jj_cur  # pils[1]=일주 일지
 
             if _is_married:
                 if _ilji_hap and _sw_sanggwan:
@@ -12245,8 +12259,8 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
             _sw_pyunjae  = "편재" in _sw_ss_raw
             _sw_jungjae  = "정재" in _sw_ss_raw
             _dw_pyunjae  = "편재" in _dw_ss_raw
-            _ilji_hap    = _HAP.get(_jj_vals[2], "") == _jj_cur
-            _ilji_chung  = _CHUNG.get(_jj_vals[2], "") == _jj_cur
+            _ilji_hap    = _HAP.get(_jj_vals[1], "") == _jj_cur   # pils[1]=일주 일지
+            _ilji_chung  = _CHUNG.get(_jj_vals[1], "") == _jj_cur  # pils[1]=일주 일지
 
             if _is_married and _ilji_hap and _sw_pyunjae:
                 _danger_signals.append(("💔 남명 외도 실행 위험 — 편재+일지합",
@@ -12684,6 +12698,20 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
             # 세운 천간 오행 → 종합용신/조후기신 비교
             _조후_avoid_oh = set(_CG_OH15.get(s,"") for s in _조후_avoid) - {""}
 
+            # 온도지수 계산 (⑰과 동일 기준) — 조후 메시지 강도 조절에 사용
+            _TEMP_SCORE15 = {"寅":1,"卯":2,"辰":1,"巳":3,"午":5,"未":4,
+                             "申":-1,"酉":-2,"戌":-1,"亥":-3,"子":-5,"丑":-4}
+            _OH_TEMP15 = {"木":1,"火":3,"土":0,"金":-1,"水":-3}
+            _JJ_OH15   = {"子":"水","丑":"土","寅":"木","卯":"木","辰":"土",
+                          "巳":"火","午":"火","未":"土","申":"金","酉":"金","戌":"土","亥":"水"}
+            _temp15 = _TEMP_SCORE15.get(_월지15, 0)
+            for _p15 in pils:
+                _oh_cg15 = _CG_OH15.get(_p15.get("cg",""), "")
+                _oh_jj15 = _JJ_OH15.get(_p15.get("jj",""), "")
+                if _oh_cg15: _temp15 += _OH_TEMP15.get(_oh_cg15, 0)
+                if _oh_jj15: _temp15 += _OH_TEMP15.get(_oh_jj15, 0)
+            _temp15_extreme = abs(_temp15) >= 6  # 실제로 극한/극열인지
+
             if _season_born:
                 _msg15 = []
                 _season_강함 = _season_info.get("강함","")
@@ -12694,28 +12722,40 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
 
                 if _조후_우선 and _조후_need:
                     _조후_str = "·".join(_조후_need)
-                    _msg15.append(
-                        f"이 사주는 온도·습도 균형(調候)이 최우선입니다. "
-                        f"{_조후_str} 기운을 보충하는 것이 억부 용신보다 더 급합니다. "
-                    )
-                    if _season_born == "여름":
+                    if _temp15_extreme:
+                        # 실제로 온도 불균형이 심한 경우 → 강하게 권고
                         _msg15.append(
-                            f"여름 태생은 水 기운이 생명줄입니다. "
-                            f"몸이 자주 뜨겁고 조급해지는 것은 水 부족 신호입니다. "
-                            f"물을 자주 마시고 서늘한 환경을 만드십시오. "
-                            f"붉은색·남쪽 방향은 피하고 검은색·북쪽을 가까이 하십시오. "
+                            f"이 사주는 온도·습도 균형(調候)이 최우선입니다. "
+                            f"{_조후_str} 기운을 보충하는 것이 억부 용신보다 더 급합니다. "
                         )
-                    elif _season_born == "겨울":
+                        if _season_born == "여름":
+                            _msg15.append(
+                                f"여름 태생은 水 기운이 생명줄입니다. "
+                                f"몸이 자주 뜨겁고 조급해지는 것은 水 부족 신호입니다. "
+                                f"물을 자주 마시고 서늘한 환경을 만드십시오. "
+                                f"붉은색·남쪽 방향은 피하고 검은색·북쪽을 가까이 하십시오. "
+                            )
+                        elif _season_born == "겨울":
+                            _msg15.append(
+                                f"겨울 태생은 火 기운이 생명줄입니다. "
+                                f"몸이 자주 차고 의욕이 없어지는 것은 火 부족 신호입니다. "
+                                f"따뜻한 환경을 유지하고 붉은색·남쪽 방향을 가까이 하십시오. "
+                                f"찬 음식·음료는 줄이고 따뜻한 음식을 드십시오. "
+                            )
+                    else:
+                        # 온도 지수가 균형 범위(-5~+5) → 조후 언급하되 완화
                         _msg15.append(
-                            f"겨울 태생은 火 기운이 생명줄입니다. "
-                            f"몸이 자주 차고 의욕이 없어지는 것은 火 부족 신호입니다. "
-                            f"따뜻한 환경을 유지하고 붉은색·남쪽 방향을 가까이 하십시오. "
-                            f"찬 음식·음료는 줄이고 따뜻한 음식을 드십시오. "
+                            f"계절 특성상 {_조후_str} 기운을 보충하면 좋습니다. "
+                            f"다만 전체 오행 균형이 잘 잡혀 있어 극단적인 불균형은 아닙니다. "
                         )
 
-                if _억부_용신:
+                if _억부_용신 and not _조후_우선:
+                    # 조후 우선일 때는 종합용신이 조후를 앞세우므로 억부 단독 출력 생략
                     _억부_str = "·".join(_억부_용신)
                     _msg15.append(f"억부 기준 용신은 {_억부_str}입니다. ")
+                elif _억부_용신 and _조후_우선:
+                    _억부_str = "·".join(_억부_용신)
+                    _msg15.append(f"억부 용신({_억부_str})은 조후 보정 후 보조 적용합니다. ")
 
                 if _conflict15:
                     _msg15.append(
@@ -13206,7 +13246,8 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
         lines.append("")
 
     lines.append("---")
-    _data_note = f"일간 {ilgan}({iljj}) · 신강신약 {sn} · 용신 {yong_str or '미산출'} · 기신 {gi_str or '미산출'} · 오행 {_oh_bar}"
+    _gi_display = gi_str if gi_str else ("없음(중화)" if "중화" in sn else "미산출")
+    _data_note = f"일간 {ilgan}({iljj}) · 신강신약 {sn} · 용신 {yong_str or '미산출'} · 기신 {_gi_display} · 오행 {_oh_bar}"
     lines.append(f"*위 분석은 {_dw_label} × {_sw_label} 교차 + 원국 오행구성 + 일간·일지·나이 개인화 기반으로 생성됩니다.*")
     lines.append(f"*[ {_data_note} ]*")
 
