@@ -13103,6 +13103,108 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
         lines.append(gi_detail)
         lines.append("")
 
+    # ── 개운법 섹션 ─────────────────────────────
+    _gaeun_items = []
+
+    # 1) 사고수 예방법
+    _has_accident = any(
+        k in t for t,b,g in _danger_signals
+        for k in ["사고수","충","삼재","백호"]
+    )
+    if _has_accident:
+        _gaeun_items.append(("🛡️ 사고수·위기 예방법",
+            f"**이동 관련:** 장거리 이동 전 출발일을 신중히 고르십시오. "
+            f"충(沖)이 강한 달에는 비행기·장거리 운전을 피하십시오. "
+            f"운전 시 절대 핸드폰을 보지 마십시오.\n\n"
+            f"**수술·의료:** 수술이 예정되어 있다면 봄(3~4월)이나 가을(9~10월)을 "
+            f"선택하십시오. 여름·겨울은 회복이 더딥니다.\n\n"
+            f"**방위·색깔:** 용신이 水면 북쪽·검정/파랑, 木이면 동쪽·초록, "
+            f"火면 남쪽·빨강/주황, 金이면 서쪽·흰색/금색, 土면 중앙·노랑/베이지."))
+
+    # 2) 재물 극대화법
+    _has_wealth = any(
+        k in t for t,b,g in _danger_signals
+        for k in ["천을귀인","신강재왕","편재 세운"]
+    ) or (sw_kr and "편재" in sw_kr) or (dw_kr and "정재" in dw_kr)
+    if _has_wealth:
+        _gaeun_items.append(("💰 재물 극대화 개운법",
+            f"**타이밍:** 편재·정재 세운에는 재물이 들어오는 시기입니다. "
+            f"새로운 수입원을 만드십시오. 단, 투기보다 실물 자산에 집중하십시오.\n\n"
+            f"**방위·지갑:** 재물은 용신 방위에서 옵니다. "
+            f"지갑은 검정·갈색이 재물을 모아줍니다. 빨간 지갑은 돈을 불태웁니다.\n\n"
+            f"**행동:** 천을귀인 운에는 새로운 사람을 적극 만나십시오. "
+            f"그 중에 재물 귀인이 있습니다.\n\n"
+            f"**금기:** 겁재·비견이 강한 달에는 투자를 멈추십시오."))
+
+    # 3) 연애·결혼 개운법
+    _has_love = any(
+        k in t for t,b,g in _danger_signals
+        for k in ["도화","이성","외도","인연"]
+    )
+    if _has_love:
+        if marriage_status in ["기혼","재혼"]:
+            _gaeun_items.append(("💑 부부관계 개운법",
+                f"**소통:** 주 1회 이상 단둘이 식사하는 시간을 만드십시오.\n\n"
+                f"**공간:** 침실에 핑크·빨강 계열 소품을 두면 부부 기운이 살아납니다.\n\n"
+                f"**방위:** 부부 침실을 집의 서남쪽(坤)에 두면 좋습니다.\n\n"
+                f"**금기:** 외부 이성과 단둘이 만나는 자리를 만들지 마십시오."))
+        else:
+            _gaeun_items.append(("💑 연애·결혼 개운법",
+                f"**만남:** 집에만 있으면 인연이 오지 않습니다. "
+                f"모임·동호회·소개팅에 적극 나가십시오.\n\n"
+                f"**외모:** 헤어스타일·옷차림에 신경 쓰십시오. "
+                f"이성 만날 때 핑크·복숭아색 계열을 착용하십시오.\n\n"
+                f"**방위:** 용신 방위의 모임에서 좋은 인연 확률이 높습니다.\n\n"
+                f"**금기:** 유부남·유부녀와의 관계는 절대 금지입니다."))
+
+    # 4) 건강 개운법
+    _has_health = any(
+        k in t for t,b,g in _danger_signals
+        for k in ["건강","조열","한습","심장","혈압","신장","백호"]
+    )
+    if _has_health:
+        _gaeun_items.append(("🏥 건강 개운법",
+            f"**운동:** 용신 오행에 맞는 운동을 하십시오. "
+            f"水→수영·목욕, 木→등산·산책, 火→달리기·구기종목, "
+            f"金→격투기·웨이트, 土→맨발걷기·텃밭.\n\n"
+            f"**음식:** 조열 사주→찬 성질 음식(오이·수박·두부), "
+            f"한습 사주→따뜻한 성질 음식(생강·마늘·계피).\n\n"
+            f"**수면:** 자정 전 취침이 가장 중요합니다. 사주가 불균형할수록 수면이 보약입니다.\n\n"
+            f"**정기검진:** 위험 신호가 있다면 지금 즉시 건강검진을 예약하십시오.\n\n"
+            f"**금기:** 조열→술·담배·매운 음식 완전 금지. 한습→찬 음식·냉방 과다 금지."))
+
+    # 5) 흉살 해소법
+    _has_흉살 = any(
+        k in t for t,b,g in _danger_signals
+        for k in ["망신","원진","귀문","삼재","겁살"]
+    )
+    if _has_흉살:
+        _gaeun_items.append(("🙏 흉살 해소 개운법",
+            f"**삼재 해소:** 삼재 중에는 이사·결혼·사업을 피하십시오. "
+            f"가장 중요한 것은 겸손함입니다. 나서지 말고 조용히 버티십시오.\n\n"
+            f"**망신살 해소:** 말을 줄이십시오. "
+            f"SNS 게시물을 올리기 전 3번 읽어보십시오.\n\n"
+            f"**원진살 해소:** 원진 관계의 가족·동료에게 먼저 인사하고 먼저 풀면 "
+            f"원진의 기운이 약해집니다.\n\n"
+            f"**귀문관살 해소:** 명상·요가·참선이 효과적입니다. "
+            f"하루 10분만 명상해도 귀문의 기운이 가라앉습니다.\n\n"
+            f"**공통:** 새벽 인시(寅時, 3~5시)에 맑은 물 한 잔을 마시면 "
+            f"하루의 흉기가 줄어든다고 합니다."))
+
+    if _gaeun_items:
+        lines.append("---")
+        lines.append("### 🔮 지금 당신에게 맞는 개운법")
+        lines.append("")
+        lines.append("<div style='background:#f8f0ff;border-left:4px solid #9b59b6;padding:12px;border-radius:6px;margin:8px 0'>")
+        for _gt, _gb in _gaeun_items:
+            lines.append(f"**{_gt}**")
+            lines.append("")
+            lines.append(_gb)
+            lines.append("")
+            lines.append("---")
+        lines.append("</div>")
+        lines.append("")
+
     lines.append("---")
     _data_note = f"일간 {ilgan}({iljj}) · 신강신약 {sn} · 용신 {yong_str or '미산출'} · 기신 {gi_str or '미산출'} · 오행 {_oh_bar}"
     lines.append(f"*위 분석은 {_dw_label} × {_sw_label} 교차 + 원국 오행구성 + 일간·일지·나이 개인화 기반으로 생성됩니다.*")
@@ -13114,7 +13216,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
         "</style>",
         unsafe_allow_html=True,
     )
-    st.markdown("\n".join(lines))
+    st.markdown("\n".join(lines), unsafe_allow_html=True)
 
     render_pdf_download_btn("current_situation", pils, name, birth_year, gender)
 
