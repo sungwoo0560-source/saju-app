@@ -12504,6 +12504,151 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
         except Exception:
             pass
 
+        # ⑫ 천을귀인(天乙貴人) 분석
+        try:
+            _GUIIN_MAP = {
+                "甲":("丑","未"),"戊":("丑","未"),"庚":("丑","未"),
+                "乙":("子","申"),"己":("子","申"),
+                "丙":("亥","酉"),"丁":("亥","酉"),
+                "辛":("寅","午"),
+                "壬":("卯","巳"),"癸":("卯","巳"),
+            }
+            _guiin = _GUIIN_MAP.get(ilgan, ("",""))
+            _guiin_in_chart = []
+            for _pi2, _pn2 in zip([3, 2, 1, 0], ["년지","월지","일지","시지"]):
+                if _pi2 < len(pils) and pils[_pi2].get("jj","") in _guiin:
+                    _guiin_in_chart.append(_pn2)
+            _guiin_sw = _jj_cur in _guiin
+
+            if _guiin_sw and _guiin_in_chart:
+                _danger_signals.append(("⭐ 천을귀인 — 올해 최강 귀인 발동",
+                    f"{ilgan}일간의 천을귀인은 {_guiin[0]}·{_guiin[1]}입니다. "
+                    f"원국 {'·'.join(_guiin_in_chart)}에도 귀인이 있고 "
+                    f"올해 세운({_jj_cur})까지 귀인이 겹쳤습니다. "
+                    f"이것은 사주에서 가장 강력한 보호막이 작동하는 해입니다. "
+                    f"아무리 힘든 상황도 반드시 누군가 나타나 해결해줍니다. "
+                    f"혼자 끙끙 앓지 말고 주변에 도움을 요청하십시오. "
+                    f"올해 처음 만나는 사람 중에 인생을 바꿀 귀인이 있습니다. "
+                    f"귀인은 화려하게 오지 않고 조용히 나타납니다."))
+            elif _guiin_sw:
+                _danger_signals.append(("⭐ 올해 귀인 세운 — 결정적 도움이 옵니다",
+                    f"올해 세운({_jj_cur})이 {ilgan}일간의 천을귀인입니다. "
+                    f"위기의 순간에 예상치 못한 사람이 손을 내밉니다. "
+                    f"직장에서는 윗사람의 도움, 사업에서는 뜻밖의 파트너, "
+                    f"개인적으로는 오랜 지인의 결정적 한마디가 올 수 있습니다. "
+                    f"올해 만나는 새로운 인연을 소중히 하십시오. "
+                    f"귀인을 먼저 알아보는 사람이 귀인복을 제대로 씁니다."))
+            elif _guiin_in_chart:
+                _guiin_pos = "·".join(_guiin_in_chart)
+                _danger_signals.append(("⭐ 천을귀인 보유 — 위기마다 구원자가 나타납니다",
+                    f"원국 {_guiin_pos}에 천을귀인({_guiin[0]}·{_guiin[1]})이 있습니다. "
+                    f"살면서 막다른 순간마다 반드시 누군가 손을 내밀어 줬을 겁니다. "
+                    f"이것이 타고난 귀인복입니다. "
+                    f"인간관계를 절대 소홀히 하지 마십시오. "
+                    f"귀인은 대부분 이미 주변에 있습니다. "
+                    f"지금 당신 곁의 사람들을 다시 한번 돌아보십시오."))
+        except Exception:
+            pass
+
+        # ⑬ 대운 교체 시기 경고
+        try:
+            _dw_list2 = SajuCoreEngine.get_daewoon(
+                pils, birth_year,
+                st.session_state.get("birth_month", 1),
+                st.session_state.get("birth_day", 1),
+                st.session_state.get("birth_hour", 12),
+                st.session_state.get("birth_minute", 0),
+                gender=gender
+            )
+            _cur_dw2 = None
+            _next_dw2 = None
+            for _di2, _dw2 in enumerate(_dw_list2):
+                _dw2_start = _dw2.get("시작연도", 0)
+                _dw2_end   = _dw2.get("종료연도", 9999)
+                if _dw2_start and _dw2_end and int(_dw2_start) <= cur_year <= int(_dw2_end):
+                    _cur_dw2 = _dw2
+                    if _di2 + 1 < len(_dw_list2):
+                        _next_dw2 = _dw_list2[_di2 + 1]
+                    break
+
+            if _cur_dw2 and _next_dw2:
+                _next_start_age = _next_dw2.get("시작나이", 999)
+                _years_left2    = int(_next_start_age) - cur_age if _next_start_age else 99
+                _next_cg2 = _next_dw2.get("cg","")
+                _next_jj2 = _next_dw2.get("jj","")
+                _cur_start_age2 = _cur_dw2.get("시작나이", 0) or 0
+
+                if _years_left2 <= 3:
+                    _danger_signals.append((f"⚠️ 대운 교체 {_years_left2}년 전 — 지금이 가장 혼란스럽습니다",
+                        f"현재 대운이 {_years_left2}년 후면 바뀝니다. "
+                        f"다음 대운은 {_next_cg2}{_next_jj2} 대운입니다. "
+                        f"대운 교체 전후 1~3년은 사주에서 가장 불안정한 구간입니다. "
+                        f"직업·거주지·인간관계가 동시에 흔들리는 것처럼 느껴집니다. "
+                        f"이 시기에 충동적으로 내린 결정은 대부분 후회로 이어집니다. "
+                        f"대운이 완전히 바뀐 후 1~2년을 기다렸다가 새로운 결정을 내리십시오. "
+                        f"지금의 혼란은 새로운 10년을 준비하는 진통입니다."))
+                elif _years_left2 <= 5:
+                    _danger_signals.append((f"📅 대운 교체 {_years_left2}년 전 — 다음 10년을 준비하십시오",
+                        f"{_years_left2}년 후 {_next_cg2}{_next_jj2} 대운으로 교체됩니다. "
+                        f"지금부터 다음 대운에 맞는 준비를 시작해야 합니다. "
+                        f"대운이 바뀌었을 때 준비된 사람과 그렇지 않은 사람의 "
+                        f"10년 후 차이는 하늘과 땅입니다."))
+
+                if cur_age - int(_cur_start_age2) <= 2:
+                    _danger_signals.append(("🔄 대운 교체 직후 — 적응 기간입니다",
+                        f"최근 {_cur_dw2.get('cg','')}{_cur_dw2.get('jj','')} 대운으로 바뀐 지 얼마 되지 않았습니다. "
+                        f"새 대운의 기운에 아직 몸과 마음이 적응 중입니다. "
+                        f"지금 느끼는 혼란과 방향 상실감은 대운 교체기의 자연스러운 현상입니다. "
+                        f"새 대운의 기운이 완전히 자리 잡는 데 2~3년이 걸립니다. "
+                        f"조급해하지 말고 새로운 흐름에 서서히 몸을 맞춰가십시오."))
+        except Exception:
+            pass
+
+        # ⑭ 형(刑)살 분석
+        try:
+            _all_jj14 = [p.get("jj","") for p in pils]
+            _all_jj14_set = set(_all_jj14)
+            _HYUNG_3 = [
+                ({"寅","巳","申"}, "寅巳申 삼형살", "권력 다툼·수술·사고"),
+                ({"丑","戌","未"}, "丑戌未 삼형살", "은혜를 원수로 갚는 배신"),
+                ({"子","卯"},      "子卯 형살",     "무례·예절 없는 충돌"),
+            ]
+            _HYUNG_SELF = {"辰","午","酉","亥"}
+            _hyung_found = []
+            for _hset14, _hname14, _hdesc14 in _HYUNG_3:
+                _matched14 = _hset14 & _all_jj14_set
+                if len(_matched14) >= 2:
+                    _hyung_found.append((_hname14, _hdesc14, _matched14))
+            for _jj_sf in _HYUNG_SELF:
+                if _all_jj14.count(_jj_sf) >= 2:
+                    _hyung_found.append((f"{_jj_sf} 자형살", "스스로 자신을 해치는 구조", {_jj_sf}))
+
+            # 세운 지지가 형살 완성 트리거
+            _hyung_sw_trigger = []
+            for _hset14, _hname14, _hdesc14 in _HYUNG_3:
+                _in_chart14 = _hset14 & _all_jj14_set
+                if _jj_cur in _hset14 and len(_in_chart14) >= 1 and _jj_cur not in _all_jj14_set:
+                    _hyung_sw_trigger.append((_hname14, _hdesc14))
+            for _hname14, _hdesc14 in _hyung_sw_trigger:
+                _danger_signals.append((f"⚠️ 올해 {_hname14} 완성 — 형살 발동",
+                    f"올해 세운({_jj_cur})이 들어오면서 원국의 {_hname14}이 완성됩니다. "
+                    f"형살의 특성: {_hdesc14}. "
+                    f"형살은 충(沖)보다 더 집요하고 내부에서 썩어들어가는 방식으로 작용합니다. "
+                    f"겉으로는 멀쩡해 보이지만 속에서 곪고 있는 상황이 올해 터집니다. "
+                    f"수술·법적 분쟁·배신이 실제로 일어날 수 있습니다. "
+                    f"몸에 이상 신호가 있으면 절대 방치하지 마십시오."))
+            for _hname14, _hdesc14, _matched14 in _hyung_found:
+                _matched14_str = "·".join(sorted(_matched14))
+                _danger_signals.append((f"⚠️ 원국 {_hname14} — 평생 조심해야 할 기운",
+                    f"원국에 {_hname14}({_matched14_str})이 있습니다. "
+                    f"형살의 특성: {_hdesc14}. "
+                    f"형살이 있는 사람은 수술을 한두 번 이상 경험하는 경우가 많습니다. "
+                    f"가까운 사람에게 배신당하거나 본인도 모르게 남에게 상처를 주기도 합니다. "
+                    f"특히 형살 운이 겹치는 해에 가장 위험합니다. "
+                    f"건강검진을 매년 빠짐없이 받으십시오."))
+        except Exception:
+            pass
+
     except Exception:
         pass
 
