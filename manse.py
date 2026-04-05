@@ -12039,8 +12039,9 @@ def menu_current_situation(pils, name, birth_year, gender):
                         "한 번의 실수가 가정을 완전히 박살낼 수 있습니다. "
                         "미혼자도 상대가 기혼자인지 반드시 확인하십시오. 이 살은 불륜으로 끝나기 쉽습니다."))
                 else:
+                    _pos_str = "·".join(_pos) if isinstance(_pos, list) else str(_pos)
                     _danger_signals.append(("🌸 도화살 — 이성 문제로 망신 조심",
-                        f"도화살({_pos})이 작용합니다. "
+                        f"도화살({_pos_str})이 작용합니다. "
                         "이성 때문에 가정이 흔들리거나, 이성 관계로 구설에 오를 수 있습니다. "
                         "감각적 유혹을 이기지 못하면 인생 전체가 꼬입니다."))
 
@@ -12070,8 +12071,9 @@ def menu_current_situation(pils, name, birth_year, gender):
 
             elif "역마" in _nm:
                 _sinsal_done.add(_key)
+                _pos_str = "·".join(_pos) if isinstance(_pos, list) else str(_pos)
                 _danger_signals.append(("🚗 역마살 — 이동 중 사고 위험",
-                    f"역마살({_pos})이 올해 발동합니다. "
+                    f"역마살({_pos_str})이 올해 발동합니다. "
                     "장거리 운전, 오토바이, 자전거 등 이동 수단 관련 사고가 실제로 날 수 있습니다. "
                     "운전 중 핸드폰은 목숨 거는 짓입니다. "
                     "해외 출장이나 이사 계획이 있다면 출발 전 날짜를 신중하게 고르십시오."))
@@ -12087,7 +12089,8 @@ def menu_current_situation(pils, name, birth_year, gender):
                     "부적이 필요하다면 믿는 곳에서 받으십시오."))
 
             elif "조객" in _nm or "상문" in _nm:
-                _sinsal_done.add(_key)
+                if "조객상문" in _sinsal_done: continue
+                _sinsal_done.add("조객상문")
                 _danger_signals.append(("🕯️ 조객살 — 주변에 상(喪)이 납니다",
                     "조객살이 들어왔습니다. "
                     "올해 가까운 사람 중 누군가가 세상을 떠날 수 있습니다. "
@@ -12154,6 +12157,42 @@ def menu_current_situation(pils, name, birth_year, gender):
                 "이 조합은 사주에서 가장 위험한 조합 중 하나입니다. "
                 "직장에서 쫓겨나거나, 이혼 소송이 터지거나, 건강이 한꺼번에 무너질 수 있습니다. "
                 "올해는 어떤 중요한 결정도 하지 마십시오. 버티는 것이 이기는 것입니다."))
+
+        # ⑦ 여명(女命) 식상×관성 외도·이혼 분석
+        if gender == "여":
+            _sw_sikshin   = "식신" in _sw_ss_raw
+            _sw_sanggwan  = "상관" in _sw_ss_raw
+            _dw_sanggwan  = "상관" in _dw_ss_raw
+            _ilji_hap     = _HAP.get(_jj_vals[2], "") == _jj_cur
+
+            if _ilji_hap and _sw_sanggwan:
+                _danger_signals.append(("💔 여명 이혼 위기 — 상관+일지합 최악 조합",
+                    "여명 사주에서 상관 세운과 일지합이 동시에 발동했습니다. "
+                    "이것은 이혼 위기를 나타내는 가장 강력한 신호 중 하나입니다. "
+                    "상관은 남편(정관)을 극하고 깨버리는 기운입니다. "
+                    "동시에 일지합으로 외부 이성이 당겨지는 구조가 완성됩니다. "
+                    "즉 남편과는 멀어지고 다른 남자와 가까워지는 흐름이 만들어집니다. "
+                    "올해 배우자와의 관계에서 결정적인 균열이 생길 수 있습니다. "
+                    "충동적인 이혼 결정은 최소 1년 이상 보류하십시오."))
+            elif _ilji_hap and _sw_sikshin:
+                _danger_signals.append(("🌸 여명 외도 유혹 — 식신이 지켜줍니다",
+                    "일지합으로 외부 이성의 접근이 강해지는 해입니다. "
+                    "그러나 올해 식신 세운이 편관(외부 이성)을 눌러줍니다. "
+                    "유혹은 강하게 들어오지만 결국 가정을 지키는 방향으로 흘러갑니다. "
+                    "단, 유혹 자체는 실재합니다. 불필요한 이성과의 단둘 만남은 피하십시오."))
+            elif _sw_sanggwan and not _ilji_hap:
+                _danger_signals.append(("⚠️ 여명 상관 세운 — 남편과 충돌 폭발",
+                    "상관 세운은 여명에게 남편을 극하는 기운입니다. "
+                    "참아왔던 불만이 폭발하고 배우자와 심각하게 충돌하는 해입니다. "
+                    "말 한마디가 이혼 도장으로 이어질 수 있습니다. "
+                    "올해는 부부 싸움을 절대 극단까지 밀고 가지 마십시오. "
+                    "기혼자는 별거·이혼 위기, 미혼자는 남자친구와 결별 수가 있습니다."))
+            elif _dw_sanggwan:
+                _danger_signals.append(("⚠️ 여명 상관 대운 — 결혼 생활 전반이 흔들립니다",
+                    "상관 대운은 여명에게 10년간 부부 관계가 불안정한 구간입니다. "
+                    "남편과의 갈등이 반복되고, 이혼 생각이 머릿속에서 떠나지 않는 시기입니다. "
+                    "이 대운 중에 충동적으로 이혼을 결정한 여성들 중 후회하는 경우가 많습니다. "
+                    "전문 상담을 먼저 받으십시오."))
 
     except Exception:
         pass
