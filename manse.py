@@ -12965,6 +12965,91 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
         except Exception:
             pass
 
+        # ⑱ 천간합(天干合) 정밀 분석
+        try:
+            _TG_HAP_OH = {
+                frozenset({"甲","己"}): "土",
+                frozenset({"乙","庚"}): "金",
+                frozenset({"丙","辛"}): "水",
+                frozenset({"丁","壬"}): "木",
+                frozenset({"戊","癸"}): "火",
+            }
+            _TG_HAP_NAME = {
+                frozenset({"甲","己"}): "甲己합(토화)",
+                frozenset({"乙","庚"}): "乙庚합(금화)",
+                frozenset({"丙","辛"}): "丙辛합(수화)",
+                frozenset({"丁","壬"}): "丁壬합(목화)",
+                frozenset({"戊","癸"}): "戊癸합(화화)",
+            }
+            _CG_OH_T = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
+                        "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
+            _PIL_LBL = {0:"시간", 1:"일간", 2:"월간", 3:"년간"}
+            _세운_cg  = _yl.get("cg", "")
+            _일간_oh  = _CG_OH_T.get(ilgan, "")
+
+            # 세운 천간 × 원국 천간 합 체크
+            _합_발동 = []
+            for _pi, _p in enumerate(pils):
+                _pcg = _p.get("cg", "")
+                if not _pcg or _pcg == _세운_cg:
+                    continue
+                _pair = frozenset({_세운_cg, _pcg})
+                if _pair in _TG_HAP_OH:
+                    _합_발동.append((_pi, _pcg, _PIL_LBL.get(_pi,""),
+                                     _TG_HAP_OH[_pair], _TG_HAP_NAME[_pair]))
+
+            # 세운 천간합 → 기능 약화 경고
+            for _pi, _pcg, _기둥명, _합화오행, _합이름 in _합_발동:
+                if _pi == 1:  # 일간과 합
+                    _danger_signals.append((
+                        f"🔗 세운이 일간을 합으로 잡아끕니다 — 최고 경계",
+                        f"올해 세운 천간({_세운_cg})이 일간({_pcg})과 {_합이름}을 이룹니다. "
+                        f"일간이 세운에 합으로 묶이면 본인의 의지·결단력·에너지가 "
+                        f"올해 세운의 기운에 완전히 종속됩니다. "
+                        f"주체적인 판단이 흐려지고 외부 환경에 휩쓸리기 쉬운 해입니다. "
+                        f"합화 오행은 {_합화오행}으로 변질되어 용신·기신 계산이 달라집니다. "
+                        f"중요한 결정은 반드시 신뢰할 수 있는 사람과 상의하십시오.",
+                        "위험"))
+                elif _CG_OH_T.get(_pcg, "") == _일간_oh:  # 비겁과 합 → 지원군 상실
+                    _danger_signals.append((
+                        f"🔗 {_기둥명}({_pcg})이 세운에 합으로 묶입니다 — 지원 상실",
+                        f"원국 {_기둥명} {_pcg}이 세운 천간 {_세운_cg}과 {_합이름}을 이룹니다. "
+                        f"{_pcg}은 일간 {ilgan}의 비겁(支援軍)인데, "
+                        f"올해 세운에 합으로 묶여 일간을 돕지 못합니다. "
+                        f"평소보다 혼자 감당해야 할 일이 많아지고 "
+                        f"주변의 도움이 줄어드는 해입니다. "
+                        f"체력 관리와 혼자 무리하지 않는 것이 중요합니다.",
+                        "주의"))
+                else:
+                    _danger_signals.append((
+                        f"🔗 {_기둥명}({_pcg})이 세운에 합으로 변질됩니다",
+                        f"원국 {_기둥명} {_pcg}이 세운 천간 {_세운_cg}과 {_합이름}을 이룹니다. "
+                        f"{_pcg}의 원래 기운이 {_합화오행}으로 변질되어 원국의 균형이 올해 흔들립니다. "
+                        f"평소와 다른 판단 착오나 예상치 못한 변수가 생길 수 있습니다.",
+                        "주의"))
+
+            # 원국 내 천간합 체크 (년간↔월간, 월간↔일간, 일간↔시간)
+            _원국_합 = []
+            for _a, _b in [(3,2),(2,1),(1,0)]:  # 년-월, 월-일, 일-시
+                _cg_a = pils[_a].get("cg",""); _cg_b = pils[_b].get("cg","")
+                if not _cg_a or not _cg_b: continue
+                _pair2 = frozenset({_cg_a, _cg_b})
+                if _pair2 in _TG_HAP_OH:
+                    _원국_합.append((_PIL_LBL.get(_a,""), _cg_a,
+                                     _PIL_LBL.get(_b,""), _cg_b,
+                                     _TG_HAP_OH[_pair2], _TG_HAP_NAME[_pair2]))
+
+            for _lb_a, _cg_a, _lb_b, _cg_b, _oh, _nm in _원국_합:
+                _danger_signals.append((
+                    f"🔗 원국 {_lb_a}({_cg_a})×{_lb_b}({_cg_b}) 천간합 — 평생 묶인 기운",
+                    f"원국에서 {_lb_a}({_cg_a})와 {_lb_b}({_cg_b})가 {_nm}을 이룹니다. "
+                    f"이 두 천간은 평생 서로 합으로 묶여 있어 해당 육친 관계가 복잡하게 얽히는 경향이 있습니다. "
+                    f"합화 오행은 {_oh}입니다. "
+                    f"이 합이 충(沖)으로 깨지는 운이 오면 인생에 큰 변화가 생깁니다.",
+                    "참고"))
+        except Exception:
+            pass
+
     except Exception:
         pass
 
