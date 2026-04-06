@@ -138,6 +138,13 @@ _AI_SANDBOX_HEADER = """
 
 """
 
+
+# ── 오행·충·천간합 전역 상수 (중복 정의 제거) ────────────────────
+_OH_CG  = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土","己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
+_OH_JJ  = {"子":"水","丑":"土","寅":"木","卯":"木","辰":"土","巳":"火","午":"火","未":"土","申":"金","酉":"金","戌":"土","亥":"水"}
+_OH_ALL = {**_OH_CG, **_OH_JJ}  # CG+JJ 22글자 통합 오행 맵
+_JJCHUNG = {"子":"午","午":"子","丑":"未","未":"丑","寅":"申","申":"寅","卯":"酉","酉":"卯","辰":"戌","戌":"辰","巳":"亥","亥":"巳"}
+_TG_HAP_FS = [frozenset({"甲","己"}),frozenset({"乙","庚"}),frozenset({"丙","辛"}),frozenset({"丁","壬"}),frozenset({"戊","癸"})]
 # 시각 표시용 12지 배열 (24시간 → 지지 매핑) - 모듈 수준 공통 상수
 
 
@@ -1158,8 +1165,7 @@ def _local_saju_engine(pils, name, birth_year, gender, query):
             _sw_ss_m = _sw_m.get("십성_천간","")
             _sw_gan_m = _sw_m.get("세운","")
             _sw_gh_m  = _sw_m.get("길흉","평")
-            _sw_oh_m  = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
-                         "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}.get((_sw_gan_m[:1] if _sw_gan_m else ""),"")
+            _sw_oh_m  = _OH_CG.get((_sw_gan_m[:1] if _sw_gan_m else ""),"")
             _ys_ohs_m = ys.get("종합_용신",[]) if isinstance(ys.get("종합_용신",[]),list) else []
             _is_ys_m  = _sw_oh_m in _ys_ohs_m
             _GH_KR_M  = {"길":"✅ 재물 좋음","+":"✅ 재물 좋음","평":"⚖️ 보통","흉":"⚠️ 조심","-":"⚠️ 조심"}
@@ -2232,8 +2238,7 @@ def _local_saju_engine(pils, name, birth_year, gender, query):
             sw_jj = sw.get("jj", "")
             iljj  = pils[1]["jj"] if len(pils) > 1 else ""
             _pjjs = [p.get("jj","") for p in pils]
-            _CIF  = {"子":"午","午":"子","丑":"未","未":"丑","寅":"申","申":"寅",
-                     "卯":"酉","酉":"卯","辰":"戌","戌":"辰","巳":"亥","亥":"巳"}
+            _CIF  = _JJCHUNG
 
             geop_cnt   = sum(1 for p in pils if TEN_GODS_MATRIX.get(ilgan,{}).get(p.get("cg",""),"") == "劫財(겁재)")
             pjjs_ss    = [TEN_GODS_MATRIX.get(ilgan,{}).get(p.get("cg",""),"") for p in pils]
@@ -2358,8 +2363,7 @@ def _local_saju_engine(pils, name, birth_year, gender, query):
             sw_gh = sw.get("길흉", "")
             sw_jj = sw.get("jj", "")
             _pjjs2 = [p.get("jj","") for p in pils]
-            _CAC   = {"子":"午","午":"子","丑":"未","未":"丑","寅":"申","申":"寅",
-                      "卯":"酉","酉":"卯","辰":"戌","戌":"辰","巳":"亥","亥":"巳"}
+            _CAC   = _JJCHUNG
             chung_h = [j for j in _pjjs2 if _CAC.get(sw_jj,"") == j]
 
             # 원국 편관 개수
@@ -2555,8 +2559,7 @@ def _local_saju_engine(pils, name, birth_year, gender, query):
             peon_g_biz= sum(1 for p in pils if TEN_GODS_MATRIX.get(ilgan,{}).get(p.get("cg",""),"") == "偏官(편관)")
 
             # 충 발동
-            _CHUNG_B = {"子":"午","午":"子","丑":"未","未":"丑","寅":"申","申":"寅",
-                        "卯":"酉","酉":"卯","辰":"戌","戌":"辰","巳":"亥","亥":"巳"}
+            _CHUNG_B = _JJCHUNG
             _pjjs_b  = [p.get("jj","") for p in pils]
             chung_b  = [j for j in _pjjs_b if _CHUNG_B.get(sw_jj,"") == j]
 
@@ -2670,8 +2673,7 @@ def _local_saju_engine(pils, name, birth_year, gender, query):
             sw_gh = sw.get("길흉", "")
             sw_jj = sw.get("jj", "")
             _pjjs_l = [p.get("jj","") for p in pils]
-            _CHUNG_L = {"子":"午","午":"子","丑":"未","未":"丑","寅":"申","申":"寅",
-                        "卯":"酉","酉":"卯","辰":"戌","戌":"辰","巳":"亥","亥":"巳"}
+            _CHUNG_L = _JJCHUNG
             chung_l = [j for j in _pjjs_l if _CHUNG_L.get(sw_jj,"") == j]
             ys_l    = get_yongshin_multilayer(pils, birth_year, gender, bm, bd, bh, bmn, current_year)
             oh_sw_l = OH.get(sw.get("세운","")[:1], "")
@@ -2812,7 +2814,7 @@ def _local_saju_engine(pils, name, birth_year, gender, query):
             sw_d = get_yearly_luck(pils, current_year) or {}
             sw_ss_d = sw_d.get("십성_천간","").split("(")[0]
             iljj_d = pils[1]["jj"] if len(pils)>1 else ""
-            _CHUNG_D = {"子":"午","午":"子","丑":"未","未":"丑","寅":"申","申":"寅","卯":"酉","酉":"卯","辰":"戌","戌":"辰","巳":"亥","亥":"巳"}
+            _CHUNG_D = _JJCHUNG
             sw_jj_d = sw_d.get("jj","")
             is_iljj_chung = (_CHUNG_D.get(iljj_d,"") == sw_jj_d)
             _DIV_SS = {"偏官":"⚠️ 배우자와 갈등이 폭발하는 해니라. 권위적 태도와 일방적 결정이 관계를 갈라놓느니라.",
@@ -4524,13 +4526,7 @@ def build_past_events(pils, birth_year, gender):
 
     # ② 천간합 쌍
 
-    TG_HAP = [
-        frozenset(["甲", "己"]),
-        frozenset(["乙", "庚"]),
-        frozenset(["丙", "辛"]),
-        frozenset(["丁", "壬"]),
-        frozenset(["戊", "癸"]),
-    ]
+    TG_HAP = _TG_HAP_FS
 
     # ③ 육합(六合) — 대운×세운 지지가 합을 이루면 긍정 이벤트
 
@@ -6818,13 +6814,7 @@ def _get_dw_alert(ilgan, dw_cg, dw_jj, pils):
                 }
             )
 
-    TG_HAP_PAIRS = [
-        {"甲", "己"},
-        {"乙", "庚"},
-        {"丙", "辛"},
-        {"丁", "壬"},
-        {"戊", "癸"},
-    ]
+    TG_HAP_PAIRS = _TG_HAP_PAIRS
 
     for pair in TG_HAP_PAIRS:
         if dw_cg in pair:
@@ -7207,7 +7197,7 @@ def get_year_detail(y, c2, ilgan, yongshin_ohs, birth_year):
             gil_color = "#888"
 
         # 합 체크 (천간합/지지합)
-        _TG_HAP = [frozenset({"甲","己"}),frozenset({"乙","庚"}),frozenset({"丙","辛"}),frozenset({"丁","壬"}),frozenset({"戊","癸"})]
+        _TG_HAP = _TG_HAP_FS
         _JJ_HAP = [frozenset({"子","丑"}),frozenset({"寅","亥"}),frozenset({"卯","戌"}),frozenset({"辰","酉"}),frozenset({"巳","申"}),frozenset({"午","未"})]
         _tg_hap = frozenset({dw_cg, sw_cg}) in _TG_HAP if dw_cg and sw_cg else False
         _jj_hap = frozenset({dw_jj, sw_jj}) in _JJ_HAP if dw_jj and sw_jj else False
@@ -7963,7 +7953,7 @@ _JIJI_HYEONG = {
     "亥": "亥",
 }
 
-_TG_HAP_PAIRS = [{"甲", "己"}, {"乙", "庚"}, {"丙", "辛"}, {"丁", "壬"}, {"戊", "癸"}]
+_TG_HAP_PAIRS = _TG_HAP_PAIRS
 
 _SAM_HAP = [
     (frozenset({"寅", "午", "戌"}), "火"),
@@ -10625,8 +10615,7 @@ def tab_past_events(pils, birth_year, gender, name=""):
         "겁재": "재물 손실·경쟁 — 각별히 조심해야 하는 해",
     }
     _GS_OH4 = {_str3["sik_oh"], _str3["jae_oh"], _str3["gwan_oh"]} if not _gangja else {_str3["parent_oh"], _str3["ilgan_oh"]}
-    _CHUNG4 = {"子":"午","午":"子","丑":"未","未":"丑","寅":"申","申":"寅",
-               "卯":"酉","酉":"卯","辰":"戌","戌":"辰","巳":"亥","亥":"巳"}
+    _CHUNG4 = _JJCHUNG
     _CHUNG4_DESC = {
         frozenset({"子","午"}): "子午충 — 심장·혈압 주의, 감정 기복 큼",
         frozenset({"丑","未"}): "丑未충 — 토지·재물 분쟁, 가족 갈등",
@@ -11679,8 +11668,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
             gi_ohs = []
         # 기신이 서술형 문자열(오행 없음)인 경우 → sn으로 역산
         if not gi_ohs and isinstance(_gi_raw, str) and _gi_raw:
-            _ilgan_oh2 = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
-                          "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}.get(ilgan, "")
+            _ilgan_oh2 = _OH_CG.get(ilgan, "")
             _BMRV2 = {"木":"水","火":"木","土":"火","金":"土","水":"金"}
             _CTLV2 = {"木":"土","火":"金","土":"水","金":"木","水":"火"}
             if "신강" in sn and _ilgan_oh2:
@@ -12033,10 +12021,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
     }
 
     # ── 오행 구성비 (원국 8글자 기반 실제 카운트) ────────────────
-    _OH_KEY8 = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土","己":"土",
-                "庚":"金","辛":"金","壬":"水","癸":"水",
-                "子":"水","丑":"土","寅":"木","卯":"木","辰":"土","巳":"火",
-                "午":"火","未":"土","申":"金","酉":"金","戌":"土","亥":"水"}
+    _OH_KEY8 = _OH_ALL
     _oh_count = {"木":0,"火":0,"土":0,"金":0,"水":0}
     for _p in pils:
         for _ch in [_p.get("cg",""), _p.get("jj","")]:
@@ -12145,8 +12130,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
         _dw_ss_raw = cross.get("dw_ss","")
 
         # 충(沖) 맵 & 합(合) 맵
-        _CHUNG = {"子":"午","午":"子","丑":"未","未":"丑","寅":"申","申":"寅",
-                  "卯":"酉","酉":"卯","辰":"戌","戌":"辰","巳":"亥","亥":"巳"}
+        _CHUNG = _JJCHUNG
         _HAP   = {"子":"丑","丑":"子","寅":"亥","亥":"寅","卯":"戌","戌":"卯",
                   "辰":"酉","酉":"辰","巳":"申","申":"巳","午":"未","未":"午"}
 
@@ -12434,10 +12418,8 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
             _sn_type = _sn_info.get("신강신약", "")
 
             # 오행 실제 개수 계산
-            _CG_OH2 = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土","己":"土",
-                       "庚":"金","辛":"金","壬":"水","癸":"水"}
-            _JJ_OH2 = {"子":"水","丑":"土","寅":"木","卯":"木","辰":"土","巳":"火",
-                       "午":"火","未":"土","申":"金","酉":"金","戌":"土","亥":"水"}
+            _CG_OH2 = _OH_CG
+            _JJ_OH2 = _OH_JJ
             _oh_cnt2 = {"木":0,"火":0,"土":0,"金":0,"水":0}
             for _p in pils:
                 _c = _CG_OH2.get(_p.get("cg",""),""); _j = _JJ_OH2.get(_p.get("jj",""),"")
@@ -12815,8 +12797,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                 "가을":{"강함":"金", "필요":["木","火"], "주의":"金 과다면 火로 제어"},
                 "겨울":{"강함":"水", "필요":["火","土"], "주의":"水 과다면 火 최우선"},
             }
-            _CG_OH15 = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
-                        "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
+            _CG_OH15 = _OH_CG
 
             _season_born = _SEASON_MAP15.get(_월지15, "")
             _season_info = _SEASON_OH15.get(_season_born, {})
@@ -12831,8 +12812,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
             _TEMP_SCORE15 = {"寅":1,"卯":2,"辰":1,"巳":3,"午":5,"未":4,
                              "申":-1,"酉":-2,"戌":-1,"亥":-3,"子":-5,"丑":-4}
             _OH_TEMP15 = {"木":1,"火":3,"土":0,"金":-1,"水":-3}
-            _JJ_OH15   = {"子":"水","丑":"土","寅":"木","卯":"木","辰":"土",
-                          "巳":"火","午":"火","未":"土","申":"金","酉":"金","戌":"土","亥":"水"}
+            _JJ_OH15   = _OH_JJ
             _temp15 = _TEMP_SCORE15.get(_월지15, 0)
             for _p15 in pils:
                 _oh_cg15 = _CG_OH15.get(_p15.get("cg",""), "")
@@ -13025,11 +13005,8 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                 "亥":-3,"子":-5,"丑":-4,
             }
             _OH_TEMP = {"木":1,"火":3,"土":0,"金":-1,"水":-3}
-            _CG_OH17 = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
-                        "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
-            _JJ_OH17 = {"子":"水","丑":"土","寅":"木","卯":"木","辰":"土",
-                        "巳":"火","午":"火","未":"土","申":"金","酉":"金",
-                        "戌":"土","亥":"水"}
+            _CG_OH17 = _OH_CG
+            _JJ_OH17 = _OH_JJ
             _total_temp = _TEMP_SCORE.get(_월지_조후, 0)
             for _p in pils:
                 _oh_cg17 = _CG_OH17.get(_p.get("cg",""),"")
@@ -13110,8 +13087,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                 frozenset({"丁","壬"}): "丁壬합(목화)",
                 frozenset({"戊","癸"}): "戊癸합(화화)",
             }
-            _CG_OH_T = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
-                        "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
+            _CG_OH_T = _OH_CG
             _PIL_LBL = {0:"시간", 1:"일간", 2:"월간", 3:"년간"}
             _세운_cg  = _yl.get("cg", "")
             _일간_oh  = _CG_OH_T.get(ilgan, "")
@@ -13718,11 +13694,8 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
 
     # ── 운명 전환 처방 렌더링 ──────────────────────────────
     try:
-        _CG_OH_D = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
-                    "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
-        _JJ_OH_D = {"子":"水","丑":"土","寅":"木","卯":"木","辰":"土",
-                    "巳":"火","午":"火","未":"土","申":"金","酉":"金",
-                    "戌":"土","亥":"水"}
+        _CG_OH_D = _OH_CG
+        _JJ_OH_D = _OH_JJ
         _oh_cnt_d = {"木":0,"火":0,"土":0,"金":0,"水":0}
         for _p in pils:
             _o1 = _CG_OH_D.get(_p.get("cg",""),"")
@@ -14412,10 +14385,8 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
         _ys_cal = get_yongshin(pils)
         _yong_cal = _ys_cal.get("종합_용신",[]) if _ys_cal else []
         _gisin_cal= _ys_cal.get("기신",[]) if _ys_cal and isinstance(_ys_cal.get("기신"),list) else []
-        _OH_CAL = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
-                   "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
-        _OH_CAL2= {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
-                   "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
+        _OH_CAL = _OH_CG
+        _OH_CAL2= _OH_CG
         _MON_CG_BASE = {"甲":"丙","乙":"戊","丙":"庚","丁":"壬","戊":"甲",
                         "己":"丙","庚":"戊","辛":"庚","壬":"壬","癸":"甲"}
         _CG_LIST = ["甲","乙","丙","丁","戊","己","庚","辛","壬","癸"]
@@ -14496,10 +14467,8 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
         _ilgan_g = pils[1]["cg"] if len(pils) > 1 else ""
         _ys_g = get_yongshin(pils)
         _yong_g = _ys_g.get("종합_용신",[]) if _ys_g else []
-        _OH_G2 = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
-                  "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
-        _OH_G = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
-                 "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
+        _OH_G2 = _OH_CG
+        _OH_G = _OH_CG
         # 천을귀인 테이블
         _GUIIN_MAP = {
             "甲":["丑","未"],"乙":["子","申"],"丙":["亥","酉"],
@@ -14515,8 +14484,7 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
 
         # 올해 가장 주의할 달 (기신 + 세운 지지 충)
         _orig_jjs_g = {p.get("jj","") for p in pils}
-        _CHUNG_G = {"子":"午","午":"子","丑":"未","未":"丑","寅":"申","申":"寅",
-                    "卯":"酉","酉":"卯","辰":"戌","戌":"辰","巳":"亥","亥":"巳"}
+        _CHUNG_G = _JJCHUNG
         _JJ_LIST_G = ["丑","寅","卯","辰","巳","午","未","申","酉","戌","亥","子"]
         _danger_months = []
         _good_months = []
@@ -14528,8 +14496,7 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
         for _mi_g in range(12):
             _mcg_g = _CG_LIST_G[(_sidx_g + _mi_g) % 10]
             _mjj_g = _JJ_LIST_G[_mi_g]
-            _moh_g = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
-                      "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}.get(_mcg_g,"")
+            _moh_g = _OH_CG.get(_mcg_g,"")
             _chung_g = _CHUNG_G.get(_mjj_g,"")
             _has_chung_g = bool(_chung_g and _chung_g in _orig_jjs_g)
             _is_g_g = _moh_g in (_ys_g.get("기신",[]) if _ys_g and isinstance(_ys_g.get("기신"),list) else [])
@@ -15380,10 +15347,8 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
     try:
         st.markdown("---")
         st.markdown("### 💸 나의 사주 에너지 유형")
-        _CG_OH_R = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
-                    "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
-        _JJ_OH_R = {"子":"水","丑":"土","寅":"木","卯":"木","辰":"土",
-                    "巳":"火","午":"火","未":"土","申":"金","酉":"金","戌":"土","亥":"水"}
+        _CG_OH_R = _OH_CG
+        _JJ_OH_R = _OH_JJ
         _ILGAN_JAE_R = {"甲":"土","乙":"土","丙":"金","丁":"金","戊":"水","己":"水",
                         "庚":"木","辛":"木","壬":"火","癸":"火"}
         _ILGAN_KWAN_R = {"甲":"金","乙":"金","丙":"水","丁":"水","戊":"木","己":"木",
@@ -15801,8 +15766,7 @@ def menu3_past(pils, birth_year, gender, name=""):
         _ys3 = get_yongshin(pils)
         _yong3 = _ys3.get("종합_용신",[])
         _gisin3 = _ys3.get("기신",[]) if isinstance(_ys3.get("기신"), list) else []
-        _OH3 = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
-                "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
+        _OH3 = _OH_CG
 
         _bm3 = max(1,min(12,int(st.session_state.get("birth_month") or 1)))
         _bd3 = max(1,min(31,int(st.session_state.get("birth_day") or 1)))
@@ -16911,8 +16875,7 @@ def menu5_money(pils, birth_year, gender, name="내담자"):
         _ys_mc = get_yongshin(pils) or {}
         _yong_mc = _ys_mc.get("종합_용신",[])
         _gisin_mc = _ys_mc.get("기신",[]) if isinstance(_ys_mc.get("기신"),list) else []
-        _OH_MC = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
-                  "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
+        _OH_MC = _OH_CG
         _MONEY_SS = {"偏財","正財","食神","比肩"}  # 재물 유리 십성
         _DANGER_SS = {"劫財","偏官"}               # 재물 위험 십성
 
@@ -17443,8 +17406,7 @@ def menu6_relations(pils, name, birth_year, gender, marriage_status="미혼"):
         _p_ilgan   = _p_pils[1]["cg"]
         _my_iljj   = pils[1]["jj"]
         _p_iljj    = _p_pils[1]["jj"]
-        _OH_G = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
-                 "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
+        _OH_G = _OH_CG
         _OHN_G = {"木":"목(木)","火":"화(火)","土":"토(土)","金":"금(金)","水":"수(水)"}
         _my_oh = _OH_G.get(_my_ilgan,"")
         _p_oh  = _OH_G.get(_p_ilgan,"")
@@ -17458,8 +17420,7 @@ def menu6_relations(pils, name, birth_year, gender, marriage_status="미혼"):
         _is_geuk_pm  = _SANG_GEUK.get(_p_oh,"") == _my_oh
 
         # 일지 충/합 체크
-        _ILJJ_CHUNG = {"子":"午","午":"子","丑":"未","未":"丑","寅":"申","申":"寅",
-                       "卯":"酉","酉":"卯","辰":"戌","戌":"辰","巳":"亥","亥":"巳"}
+        _ILJJ_CHUNG = _JJCHUNG
         _SAM_HAP_G  = {frozenset(["申","子","辰"]):"水합",frozenset(["寅","午","戌"]):"火합",
                        frozenset(["巳","酉","丑"]):"金합",frozenset(["亥","卯","未"]):"木합"}
         _YOOK_HAP_G = {frozenset(["子","丑"]):"土합",frozenset(["寅","亥"]):"木합",
@@ -17855,10 +17816,8 @@ def menu9_daily(pils, name, birth_year, gender):
         _ys_d = get_yongshin(pils)
         _yong_d  = _ys_d.get("종합_용신",[])
         _gisin_d = _ys_d.get("기신",[]) if isinstance(_ys_d.get("기신"),list) else []
-        _OH_D = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
-                 "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
-        _JJ_OH_D = {"子":"水","丑":"土","寅":"木","卯":"木","辰":"土",
-                    "巳":"火","午":"火","未":"土","申":"金","酉":"金","戌":"土","亥":"水"}
+        _OH_D = _OH_CG
+        _JJ_OH_D = _OH_JJ
         _cg_oh_d = _OH_D.get(today_cg,"")
         _jj_oh_d = _JJ_OH_D.get(today_jj,"")
         _is_yong_d  = _cg_oh_d in _yong_d or _jj_oh_d in _yong_d
@@ -17866,8 +17825,7 @@ def menu9_daily(pils, name, birth_year, gender):
 
         # 충 감지 — 오늘 지지 vs 원국 지지
         _orig_jjs_d = {p.get("jj","") for p in pils}
-        _CHUNG_D = {"子":"午","午":"子","丑":"未","未":"丑","寅":"申","申":"寅",
-                    "卯":"酉","酉":"卯","辰":"戌","戌":"辰","巳":"亥","亥":"巳"}
+        _CHUNG_D = _JJCHUNG
         _chung_target_d = _CHUNG_D.get(today_jj,"")
         _has_chung_d = bool(_chung_target_d and _chung_target_d in _orig_jjs_d)
 
@@ -17937,33 +17895,9 @@ def menu9_daily(pils, name, birth_year, gender):
         "水": "수(水)",
     }
 
-    _CG_OH = {
-        "甲": "木",
-        "乙": "木",
-        "丙": "火",
-        "丁": "火",
-        "戊": "土",
-        "己": "土",
-        "庚": "金",
-        "辛": "金",
-        "壬": "水",
-        "癸": "水",
-    }
+    _CG_OH = _OH_CG
 
-    _JJ_OH = {
-        "子": "水",
-        "丑": "土",
-        "寅": "木",
-        "卯": "木",
-        "辰": "土",
-        "巳": "火",
-        "午": "火",
-        "未": "土",
-        "申": "金",
-        "酉": "金",
-        "戌": "土",
-        "亥": "水",
-    }
+    _JJ_OH = _OH_JJ
 
     _JJ_ANIMAL = {
         "子": "쥐",
@@ -18348,8 +18282,7 @@ def menu10_monthly(pils, name, birth_year, gender):
 
         # 충 감지
         _orig_jjs_m = {p.get("jj","") for p in pils}
-        _CHUNG_M = {"子":"午","午":"子","丑":"未","未":"丑","寅":"申","申":"寅",
-                    "卯":"酉","酉":"卯","辰":"戌","戌":"辰","巳":"亥","亥":"巳"}
+        _CHUNG_M = _JJCHUNG
         _chung_m = _CHUNG_M.get(_ml_jj,"")
         _has_chung_m = bool(_chung_m and _chung_m in _orig_jjs_m)
 
@@ -18537,8 +18470,7 @@ def menu10_monthly(pils, name, birth_year, gender):
         all_days_data.append(day_info)
 
         # 충 감지 추가
-        _CHUNG_M2 = {"子":"午","午":"子","丑":"未","未":"丑","寅":"申","申":"寅",
-                     "卯":"酉","酉":"卯","辰":"戌","戌":"辰","巳":"亥","亥":"巳"}
+        _CHUNG_M2 = _JJCHUNG
         _orig_jjs_m2 = {p.get("jj","") for p in pils}
         _chung_today = _CHUNG_M2.get(jj,"")
         _has_chung_today = bool(_chung_today and _chung_today in _orig_jjs_m2)
@@ -19887,7 +19819,7 @@ def menu8_bihang(pils, name, birth_year, gender):
         _ys3 = get_yongshin(pils)
         _yong3 = _ys3.get("종합_용신",[]) if isinstance(_ys3.get("종합_용신",[]),list) else []
         _gi3 = [o for o in ["木","火","土","金","水"] if o in str(_ys3.get("기신",""))]
-        _OH3 = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土","己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
+        _OH3 = _OH_CG
         _good_m, _bad_m = [], []
         for _m3 in range(1,13):
             _ml3 = get_monthly_luck(pils, _cy3, _m3) or {}
@@ -21428,8 +21360,7 @@ def tab_ai_chat(pils, name, birth_year, gender):
                     _ys_def = get_yongshin(pils)
                     _yong_def = _ys_def.get("종합_용신",[]) if _ys_def else []
                     _gisin_def = _ys_def.get("기신",[]) if _ys_def and isinstance(_ys_def.get("기신"),list) else []
-                    _OH_DEF = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
-                               "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
+                    _OH_DEF = _OH_CG
                     _oh_def = _OH_DEF.get(_gan_def[:1],"") if _gan_def else ""
                     _is_y_def = _oh_def in _yong_def
                     _is_g_def = _oh_def in _gisin_def
@@ -22144,10 +22075,8 @@ def menu14_health(pils, name, birth_year, gender):
         # ── 오행별 건강 취약점 & 예방법 ──────────────────────────
         st.markdown('<div class="gold-section">🔬 오행별 건강 취약점 & 예방법</div>',
                     unsafe_allow_html=True)
-        _CG_OH_H = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
-                    "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
-        _JJ_OH_H = {"子":"水","丑":"土","寅":"木","卯":"木","辰":"土",
-                    "巳":"火","午":"火","未":"土","申":"金","酉":"金","戌":"土","亥":"水"}
+        _CG_OH_H = _OH_CG
+        _JJ_OH_H = _OH_JJ
         _oh_cnt_h = {"木":0,"火":0,"土":0,"金":0,"水":0}
         for _ph in pils:
             _o1h = _CG_OH_H.get(_ph.get("cg",""),""); _o2h = _JJ_OH_H.get(_ph.get("jj",""),"")
@@ -23293,7 +23222,7 @@ def menu_gaewoon(pils, name, birth_year, gender):
     _OH_CHAR_GW   = {"木":"杰·松·林·柳·棟·樹·桂·植·楠·根·桓·栢·梓·桐·楓","火":"炫·煥·炅·炳·熙·燦·烈·炯·赫·熙·燮·煜·熙·炫·炳","土":"圭·培·坤·埈·坰·垠·均·城·基·垣·埴·堯·塤·坯·堅","金":"鎭·鍾·銀·錫·銑·鏞·鑄·鉉·鐸·鐘·錡·鈺·鑑·鑛·鑪","水":"沅·洙·泳·淵·澤·海·湖·洋·漢·泓·渙·涓·溟·濬·瀅"}
 
     # ── 배우자 매칭 ───────────────────────────────────────────────
-    _ILGAN_OH_GW     = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土","己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
+    _ILGAN_OH_GW     = _OH_CG
     _OH_BIRTH_GW     = {"木":"水","火":"木","土":"火","金":"土","水":"金"}
     _ILGAN_DETAIL_GW = {
         "甲":("인(寅)·묘(卯)띠","법조·교육·건설·임업·기획"),"乙":("인(寅)·묘(卯)띠","디자인·원예·심리·패션·교육"),
@@ -23383,8 +23312,8 @@ def menu_gaewoon(pils, name, birth_year, gender):
     _need_temple_gw = any("상문" in s.get("이름","") or "화개" in s.get("이름","") for s in _sinsal_gw)
 
     # ── 홍수맥 판정 ───────────────────────────────────────────────
-    _HSM_CG_OH = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土","己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
-    _HSM_JJ_OH = {"子":"水","丑":"土","寅":"木","卯":"木","辰":"土","巳":"火","午":"火","未":"土","申":"金","酉":"金","戌":"土","亥":"水"}
+    _HSM_CG_OH = _OH_CG
+    _HSM_JJ_OH = _OH_JJ
     _cur_dw_gw = None
     try:
         _bm_gw  = max(1, min(12, int(st.session_state.get("birth_month",  1) or 1)))
@@ -25344,8 +25273,7 @@ def main():
         _day_jj_b = _JJ_B[_delta_b % 12]
 
         # 오행 매핑
-        _OH_B    = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
-                    "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
+        _OH_B    = _OH_CG
         _JJOH_B  = {"子":"水","丑":"土","寅":"木","卯":"木","辰":"土",
                     "巳":"火","午":"火","未":"土","申":"金","酉":"金",
                     "戌":"土","亥":"水"}
@@ -26855,11 +26783,8 @@ def menu16_ohaeng_deep(pils, name, birth_year, gender):
     # ── 색상 상수 ──────────────────────────────────────────────
     _OH_COLOR = {"木":"#2d8a4e","火":"#e53935","土":"#f9a825","金":"#9e9e9e","水":"#1565c0"}
     _OH_NAME  = {"木":"목(木)","火":"화(火)","土":"토(土)","金":"금(金)","水":"수(水)"}
-    _CG_OH    = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
-                 "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
-    _JJ_OH    = {"子":"水","丑":"土","寅":"木","卯":"木","辰":"土",
-                 "巳":"火","午":"火","未":"土","申":"金","酉":"金",
-                 "戌":"土","亥":"水"}
+    _CG_OH    = _OH_CG
+    _JJ_OH    = _OH_JJ
 
     # 양간/음간
     _YANG_CG = {"甲","丙","戊","庚","壬"}
@@ -26976,7 +26901,7 @@ padding:22px 26px;margin-bottom:20px;text-align:center">
 
     # ── SECTION 1 심화: 음양 균형 심층 해석 ──────────────────────
     try:
-        _OH_DEEP  = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土","己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
+        _OH_DEEP  = _OH_CG
         _CG_YY2 = {"甲":"양","乙":"음","丙":"양","丁":"음","戊":"양","己":"음","庚":"양","辛":"음","壬":"양","癸":"음"}
         _JJ_YY2 = {"子":"양","丑":"음","寅":"양","卯":"음","辰":"양","巳":"음","午":"음","未":"음","申":"양","酉":"음","戌":"양","亥":"음"}
         _yang2 = sum(1 for p in pils if _CG_YY2.get(p.get("cg",""))=="양") +                  sum(1 for p in pils if _JJ_YY2.get(p.get("jj",""))=="양")
@@ -27716,8 +27641,7 @@ padding:22px 26px;margin-bottom:20px;text-align:center">
     # _il_sinsal_names: SECTION 5에서 계산된 신살 목록 (SECTION B/C/6에서 사용)
     _il_sinsal_names = list(sinsal_hits.keys()) if (_12_GROUP and 'sinsal_hits' in dir()) else []
     # _OH: 천간→오행 매핑 (SECTION C에서 사용)
-    _OH = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
-           "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
+    _OH = _OH_CG
     # yongshin: 용신 오행 리스트 (SECTION B/C에서 사용)
     try:
         _ys_pre = get_yongshin(pils)
@@ -28390,8 +28314,7 @@ border-radius:14px;padding:16px 20px;margin:16px 0 6px">
                 _risk_reasons.append("겁재 세운(재물손실·사고)")
 
             # 2. 세운이 원국 일지 충 (+25)
-            _CHUNG2 = {"子":"午","午":"子","丑":"未","未":"丑","寅":"申","申":"寅",
-                       "卯":"酉","酉":"卯","辰":"戌","戌":"辰","巳":"亥","亥":"巳"}
+            _CHUNG2 = _JJCHUNG
             if _CHUNG2.get(_sw_jj2,"") == ilji:
                 _risk += 25
                 _risk_reasons.append(f"세운 지지({_sw_jj2})가 일지({ilji}) 충 발동!")
@@ -28547,8 +28470,7 @@ border-radius:14px;padding:16px 20px;margin:16px 0 6px">
 
     try:
         # 로컬 변수 보장
-        _OH = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
-               "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
+        _OH = _OH_CG
         # 천을귀인 원국 확인
         _TY_MAP = {
             "甲":["丑","未"],"乙":["子","申"],"丙":["亥","酉"],"丁":["亥","酉"],
@@ -29179,8 +29101,7 @@ def menu_yearly(pils, name, birth_year, gender):
         _ny_gan = _ny.get("세운","")
         _ys_ny  = get_yongshin(pils)
         _yong_ny= _ys_ny.get("종합_용신",[]) if _ys_ny else []
-        _OH_NY  = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
-                   "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
+        _OH_NY  = _OH_CG
         _ny_oh  = _OH_NY.get(_ny_gan[:1],"") if _ny_gan else ""
         _is_y_ny= _ny_oh in _yong_ny
         _GH_KR2 = {"길":"✅ 길","+":"✅ 길","평":"⚖️ 평","흉":"⚠️ 흉","-":"⚠️ 흉"}
