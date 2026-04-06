@@ -7953,7 +7953,7 @@ _JIJI_HYEONG = {
     "亥": "亥",
 }
 
-_TG_HAP_PAIRS = _TG_HAP_PAIRS
+_TG_HAP_PAIRS = [{"甲","己"},{"乙","庚"},{"丙","辛"},{"丁","壬"},{"戊","癸"}]
 
 _SAM_HAP = [
     (frozenset({"寅", "午", "戌"}), "火"),
