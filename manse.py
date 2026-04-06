@@ -7411,6 +7411,9 @@ def tab_daewoon(pils, birth_year, gender):
     ys = get_yongshin(pils)
 
     yongshin_ohs = ys["종합_용신"]
+    if not isinstance(yongshin_ohs, list):
+        yongshin_ohs = []
+    _dw_gisin_ohs = [oh for oh in ["木","火","土","金","水"] if oh not in yongshin_ohs]
 
     # -- 타임라인 요약 바 --------------------------------
 
@@ -7479,7 +7482,17 @@ def tab_daewoon(pils, birth_year, gender):
 
         is_current = dw["시작연도"] <= current_year <= dw["종료연도"]
 
-        is_yong = _get_yongshin_match(d_ss_cg, yongshin_ohs, ilgan_oh) == "yong"
+        # 4단계 황금기 판별 (천간·지지 오행 모두 체크)
+        _dw_grade_oh_cg = oh_cg
+        _dw_grade_oh_jj = oh_jj
+        if _dw_grade_oh_cg in yongshin_ohs and _dw_grade_oh_jj in yongshin_ohs:
+            _dw_grade = "황금기"; is_yong = True
+        elif _dw_grade_oh_cg in yongshin_ohs or _dw_grade_oh_jj in yongshin_ohs:
+            _dw_grade = "길한"; is_yong = True
+        elif _dw_grade_oh_cg in _dw_gisin_ohs and _dw_grade_oh_jj in _dw_gisin_ohs:
+            _dw_grade = "주의"; is_yong = False
+        else:
+            _dw_grade = "중립"; is_yong = False
 
         alerts = _get_dw_alert(ilgan, dw["cg"], dw["jj"], pils)
 
@@ -7496,12 +7509,20 @@ def tab_daewoon(pils, birth_year, gender):
 
             badge = "<div style='font-size:12px;color:#ff6b00;font-weight:900;letter-spacing:2px;margin-bottom:8px'>-> * 현재 진행 중인 대운 *</div>"
 
-        elif is_yong:
+        elif _dw_grade == "황금기":
             bdr = "border:2px solid #000000;"
+            bg2 = "background:linear-gradient(135deg,#ffffff,#f5fff0);"
+            badge = "<div style='font-size:11px;color:#1a6b2e;font-weight:800;margin-bottom:6px'>🌟 황금기 대운 — 천간·지지 모두 용신. 이 시기를 놓치지 마십시오</div>"
 
-            bg2 = "background:linear-gradient(135deg,#ffffff,#ffffff);"
+        elif _dw_grade == "길한":
+            bdr = "border:2px solid #1a6b2e55;"
+            bg2 = "background:linear-gradient(135deg,#f5fff8,#eefff4);"
+            badge = "<div style='font-size:11px;color:#1a6b2e;font-weight:700;margin-bottom:6px'>✨ 길한 대운 — 용신 기운이 절반 들어온 상승기</div>"
 
-            badge = "<div style='font-size:11px;color:#000000;font-weight:800;margin-bottom:6px'>🌟 용신(用神) 대운 - 이 시기를 놓치지 마십시오</div>"
+        elif _dw_grade == "주의":
+            bdr = "border:2px solid #c0392b55;"
+            bg2 = "background:linear-gradient(135deg,#fff5f5,#ffeeee);"
+            badge = "<div style='font-size:11px;color:#c0392b;font-weight:700;margin-bottom:6px'>⚠️ 주의 대운 — 기신이 강하게 작용. 조심하고 버티는 시기</div>"
 
         else:
             bdr = "border:1px solid #e8e8e8;"
@@ -15544,11 +15565,19 @@ def menu2_lifeline(pils, birth_year, gender, name="내담자"):
     if cur_dw:
         _cdw_ss  = TEN_GODS_MATRIX.get(ilgan, {}).get(cur_dw["cg"], "-")
         _cdw_oh  = OH.get(cur_dw["cg"], "")
-        _is_yong = _get_yongshin_match(_cdw_ss, yongshin_ohs, ilgan_oh) == "yong"
-        _is_gisn = not _is_yong and _cdw_oh not in yongshin_ohs
-        _grade   = "🌟 황금기 대운" if _is_yong else "⚠️ 주의 대운" if _is_gisn else "〰️ 보통 대운"
-        _gbg     = "#1a3d1a" if _is_yong else "#3d1a1a" if _is_gisn else "#1a1a3d"
-        _gc      = "#7fff7f" if _is_yong else "#ffaaaa" if _is_gisn else "#aaaaff"
+        _cdw_jj_oh = OH.get(cur_dw.get("jj",""), "")
+        _gisin_ohs = [oh for oh in ["木","火","土","金","水"] if oh not in yongshin_ohs]
+        # 4단계 황금기 판별 (천간+지지 오행 모두 체크)
+        if _cdw_oh in yongshin_ohs and _cdw_jj_oh in yongshin_ohs:
+            _grade = "🌟 황금기 대운"; _gbg = "#1a3d1a"; _gc = "#7fff7f"
+        elif _cdw_oh in yongshin_ohs or _cdw_jj_oh in yongshin_ohs:
+            _grade = "✨ 길한 대운"; _gbg = "#0d2d1a"; _gc = "#aaffcc"
+        elif _cdw_oh in _gisin_ohs and _cdw_jj_oh in _gisin_ohs:
+            _grade = "⚠️ 주의 대운"; _gbg = "#3d1a1a"; _gc = "#ffaaaa"
+        elif _cdw_oh in _gisin_ohs or _cdw_jj_oh in _gisin_ohs:
+            _grade = "🔶 혼재 대운"; _gbg = "#2d1f0f"; _gc = "#ffcc88"
+        else:
+            _grade = "〰️ 중립 대운"; _gbg = "#1a1a3d"; _gc = "#aaaaff"
         _dd      = DAEWOON_DIRECT.get(_cdw_ss, {})
         _verdict = _dd.get("verdict", f"{_cdw_ss} 대운이 진행 중입니다.")
         _remain  = cur_dw["종료연도"] - current_year
@@ -15676,6 +15705,10 @@ def menu2_lifeline(pils, birth_year, gender, name="내담자"):
     try:
         _local_out = LocalSajuNarrator.lifeline(pils, name, birth_year, gender)
         if _local_out:
+            import re as _re2
+            # 헤딩 글자 크기 정상화: ##/### → 볼드 텍스트로 변환
+            _local_out = _re2.sub(r'^## (.+)$', r'**\1**', _local_out, flags=_re2.MULTILINE)
+            _local_out = _re2.sub(r'^### (.+)$', r'**\1**', _local_out, flags=_re2.MULTILINE)
             st.markdown(_local_out, unsafe_allow_html=True)
     except Exception as _le:
         st.warning(f"⚠️ 대운 분석 오류: {_le}")
