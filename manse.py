@@ -12005,6 +12005,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
 
     # ── 위험 신호 정밀 분석 (4기둥 충합 + 신살위치 + 삼재) ───────
     _danger_signals = []
+    _직설_판정 = []
     try:
         from saju_interpreter import get_12sinsal, get_yearly_luck
         _sinsal_list = get_12sinsal(pils)
@@ -13050,6 +13051,230 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
         except Exception:
             pass
 
+        # ⑲ 지지합(地支合) · 파(破) · 해(害) 정밀 분석
+        try:
+            # 육합(六合) 맵
+            _YUK_HAP = {
+                frozenset({"子","丑"}): "土", frozenset({"寅","亥"}): "木",
+                frozenset({"卯","戌"}): "火", frozenset({"辰","酉"}): "金",
+                frozenset({"巳","申"}): "水", frozenset({"午","未"}): "土",
+            }
+            # 삼합(三合) 그룹 & 합화오행
+            _SAM_HAP = [
+                ({"申","子","辰"}, "水"), ({"寅","午","戌"}, "火"),
+                ({"巳","酉","丑"}, "金"), ({"亥","卯","未"}, "木"),
+            ]
+            # 파(破) 맵
+            _PA_MAP = {
+                "子":"酉","酉":"子","丑":"辰","辰":"丑",
+                "寅":"亥","亥":"寅","卯":"午","午":"卯",
+                "巳":"申","申":"巳","未":"戌","戌":"未",
+            }
+            # 해(害) 맵
+            _HAE_MAP = {
+                "子":"未","未":"子","丑":"午","午":"丑",
+                "寅":"巳","巳":"寅","卯":"辰","辰":"卯",
+                "申":"亥","亥":"申","酉":"戌","戌":"酉",
+            }
+            _JJ_LBL2 = ["시지","일지","월지","년지"]
+            _jj_vals2 = [p.get("jj","") for p in pils]  # [시지,일지,월지,년지]
+            _세운_jj2 = _yl.get("jj","")
+
+            # ── 육합 체크 ──
+            for _idx2, (_jj2, _lb2) in enumerate(zip(_jj_vals2, _JJ_LBL2)):
+                if not _jj2 or not _세운_jj2:
+                    continue
+                _pr2 = frozenset({_세운_jj2, _jj2})
+                if _pr2 in _YUK_HAP:
+                    _합오행2 = _YUK_HAP[_pr2]
+                    if _idx2 == 1:  # 일지합
+                        _danger_signals.append((
+                            f"💞 세운({_세운_jj2}) × 일지({_jj2}) 육합 — 배우자궁이 흔들립니다",
+                            f"세운 지지 {_세운_jj2}와 일지 {_jj2}가 육합을 이룹니다. "
+                            f"합화 오행은 {_합오행2}입니다. "
+                            f"일지는 배우자·몸·일터를 상징하는 자리로, 세운이 이 자리를 합으로 끌어당기면 "
+                            f"배우자 관계 변동, 이직·이사, 건강 변화 등이 나타날 수 있습니다. "
+                            f"기혼자는 외부 이성의 개입 또는 배우자 심리 변화에 주의하십시오.",
+                            "위험"))
+                    elif _idx2 == 2:  # 월지합
+                        _danger_signals.append((
+                            f"🔗 세운({_세운_jj2}) × 월지({_jj2}) 육합 — 직장·가정 기운 변동",
+                            f"세운 지지 {_세운_jj2}와 월지 {_jj2}가 육합({_합오행2}화)을 이룹니다. "
+                            f"월지는 직장·형제·사회 환경을 상징합니다. "
+                            f"올해 직장 환경이나 가정 분위기에 예상치 못한 변화가 생길 수 있습니다.",
+                            "주의"))
+                    elif _idx2 == 3:  # 년지합
+                        _danger_signals.append((
+                            f"🔗 세운({_세운_jj2}) × 년지({_jj2}) 육합 — 부모·조상 자리 흔들림",
+                            f"세운 지지 {_세운_jj2}와 년지 {_jj2}가 육합({_합오행2}화)을 이룹니다. "
+                            f"년지는 조상·부모·초년 뿌리를 상징합니다. "
+                            f"부모님 건강·관계, 가문의 변화, 고향과 관련된 일이 올해 부각될 수 있습니다.",
+                            "참고"))
+                    else:  # 시지합
+                        _danger_signals.append((
+                            f"🔗 세운({_세운_jj2}) × 시지({_jj2}) 육합 — 자녀·말년 기운 움직임",
+                            f"세운 지지 {_세운_jj2}와 시지 {_jj2}가 육합({_합오행2}화)을 이룹니다. "
+                            f"시지는 자녀·부하·말년을 상징합니다. "
+                            f"자녀 관련 변화나 아랫사람과의 관계가 올해 이슈가 될 수 있습니다.",
+                            "참고"))
+
+            # ── 삼합/반합 체크 ──
+            _원국_jj_set = set(j for j in _jj_vals2 if j)
+            for _sh_group, _sh_oh in _SAM_HAP:
+                if _세운_jj2 not in _sh_group:
+                    continue
+                _원국_교집합 = _sh_group & _원국_jj_set
+                _나머지 = _sh_group - {_세운_jj2}
+                if len(_원국_교집합) >= 2:  # 삼합 완성
+                    _완성멤버 = sorted(_원국_교집합 | {_세운_jj2})
+                    _danger_signals.append((
+                        f"🌀 세운 포함 삼합 완성({'/'.join(_완성멤버)}) → {_sh_oh}기운 폭발",
+                        f"{'·'.join(_완성멤버)} 삼합이 세운에서 완성됩니다. "
+                        f"{_sh_oh} 오행 기운이 급격히 강화되어 관련 육친·사건이 폭발적으로 부각됩니다. "
+                        f"{'재성 폭증 → 재물 or 이성 집착' if _sh_oh in ('金','木') else '관성 폭증 → 권력·직장 급변' if _sh_oh == '水' else '비겁 과다 → 지출·경쟁 급증' if _sh_oh == '火' else '인성 폭증 → 학업·이사·부동산 변동'}",
+                        "위험"))
+                elif _세운_jj2 in _sh_group and len(_원국_교집합) == 1:  # 반합
+                    _반합멤버 = sorted(_원국_교집합 | {_세운_jj2})
+                    _danger_signals.append((
+                        f"⚡ 세운 포함 반합({'/'.join(_반합멤버)}) — {_sh_oh} 기운 부분 활성화",
+                        f"{'·'.join(_반합멤버)} 반합이 형성됩니다. "
+                        f"삼합의 절반이 이루어져 {_sh_oh} 기운이 어느 정도 강화됩니다. "
+                        f"완전한 삼합보다는 약하지만 해당 오행 관련 사건이 올해 드러날 수 있습니다.",
+                        "주의"))
+
+            # ── 파(破) 체크 ──
+            if _세운_jj2 in _PA_MAP:
+                _파_상대 = _PA_MAP[_세운_jj2]
+                for _idx2, (_jj2, _lb2) in enumerate(zip(_jj_vals2, _JJ_LBL2)):
+                    if _jj2 == _파_상대:
+                        if _idx2 == 1:  # 일지파
+                            _danger_signals.append((
+                                f"💥 세운({_세운_jj2}) × 일지({_jj2}) 파(破) — 건강·배우자 손상",
+                                f"세운 지지 {_세운_jj2}가 일지 {_jj2}를 파(破)합니다. "
+                                f"파는 '갑작스러운 손상'을 뜻합니다. "
+                                f"배우자 자리가 깨지면 부부 마찰이 격화되거나 본인 건강에 갑작스러운 문제가 생길 수 있습니다. "
+                                f"수술·사고·이별에 각별히 주의하십시오.",
+                                "위험"))
+                        else:
+                            _danger_signals.append((
+                                f"💥 세운({_세운_jj2}) × {_lb2}({_jj2}) 파(破) — {_lb2} 손상",
+                                f"세운 지지 {_세운_jj2}가 {_lb2} {_jj2}를 파합니다. "
+                                f"해당 자리(육친)에 갑작스러운 손상이나 단절이 생길 수 있습니다.",
+                                "주의"))
+
+            # ── 해(害) 체크 ──
+            if _세운_jj2 in _HAE_MAP:
+                _해_상대 = _HAE_MAP[_세운_jj2]
+                for _idx2, (_jj2, _lb2) in enumerate(zip(_jj_vals2, _JJ_LBL2)):
+                    if _jj2 == _해_상대:
+                        if _idx2 == 1:  # 일지해
+                            _danger_signals.append((
+                                f"🩸 세운({_세운_jj2}) × 일지({_jj2}) 해(害) — 몸·배우자 암적 손해",
+                                f"세운 지지 {_세운_jj2}가 일지 {_jj2}를 해(害)합니다. "
+                                f"해는 '눈에 안 보이는 암적 손해'를 뜻합니다. "
+                                f"배우자와의 사이에서 오해·배신이 서서히 쌓이거나, "
+                                f"건강상 만성적인 문제가 올해 드러날 수 있습니다.",
+                                "위험"))
+                        else:
+                            _danger_signals.append((
+                                f"🩸 세운({_세운_jj2}) × {_lb2}({_jj2}) 해(害) — 암적 손해",
+                                f"세운 지지 {_세운_jj2}가 {_lb2} {_jj2}를 해합니다. "
+                                f"겉으로 드러나지 않는 방해·손해·배신이 발생할 수 있습니다.",
+                                "주의"))
+        except Exception:
+            pass
+
+        # ⑳ 직설 판정 (외도·해고·이혼·재물손실·건강이변)
+        try:
+            _sinsal_names = [s.get("이름","") if isinstance(s,dict) else str(s) for s in _sinsal_list] if isinstance(_sinsal_list, list) else []
+            _일지_jj    = _jj_vals[1]  # 일지
+            _월지_jj    = _jj_vals[2]  # 월지
+            _세운_jj3   = _yl.get("jj","")
+            _세운_cg3   = _yl.get("cg","")
+            _일지_충    = _CHUNG.get(_일지_jj,"")
+            _월지_충    = _CHUNG.get(_월지_jj,"")
+
+            # ① 외도·바람 위험
+            _도화_있음  = any("도화" in s for s in _sinsal_names)
+            _일지합_발동 = frozenset({_세운_jj3, _일지_jj}) in _YUK_HAP if _세운_jj3 and _일지_jj else False
+            if _도화_있음 and _일지합_발동:
+                _직설_판정.append((
+                    "💔 외도·바람기 위험 최고조",
+                    f"도화살 보유 + 세운이 일지를 합으로 끌어당깁니다({_세운_jj3}×{_일지_jj} 육합). "
+                    f"배우자 자리가 외부 이성에게 흔들리는 전형적인 구조입니다. "
+                    f"기혼자는 배우자의 외도 또는 본인의 탈선 충동에 특별히 주의해야 합니다. "
+                    f"독신자는 불건전한 로맨스·유혹에 노출될 수 있습니다.",
+                    "위험"))
+            elif _도화_있음 and (_세운_jj3 == _일지_충):
+                _직설_판정.append((
+                    "💔 이성 구설·관계 혼란 주의",
+                    f"도화살 보유 + 세운이 일지를 충(沖)합니다({_세운_jj3}→{_일지_jj} 충). "
+                    f"이성 관계에서 갑작스러운 이별이나 구설이 생길 수 있습니다.",
+                    "주의"))
+
+            # ② 직장 해고·퇴사 위험
+            _sipsong_labels = cross.get("sw_ss","") or ""
+            _상관_있음 = "상관" in _sipsong_labels
+            _편관_있음 = "편관" in _sipsong_labels
+            _월지충_발동 = (_세운_jj3 == _월지_충) if _세운_jj3 and _월지_충 else False
+            _일지충_발동 = (_세운_jj3 == _일지_충) if _세운_jj3 and _일지_충 else False
+            if (_상관_있음 or _편관_있음) and _월지충_발동:
+                _직설_판정.append((
+                    "🚪 직장 이탈·해고 위험 — 올해 직장이 흔들립니다",
+                    f"{'상관' if _상관_있음 else '편관'} 세운 + 세운이 월지를 충({_세운_jj3}→{_월지_jj} 충)합니다. "
+                    f"월지는 직장·직업 자리입니다. "
+                    f"{'상관은 직장 규율과 충돌·반항심을 자극합니다. 스스로 뛰쳐나오거나 충동적 사직에 주의하십시오.' if _상관_있음 else '편관은 외부 압력·인사이동·갑작스러운 해고를 상징합니다. 인사 불이익이나 직장 내 갈등에 대비하십시오.'}",
+                    "위험"))
+
+            # ③ 이혼·별거 위험
+            _삼재_있음 = any("삼재" in s for s in _sinsal_names)
+            if gender == "여" and _일지충_발동 and _상관_있음:
+                _직설_판정.append((
+                    "⚡ 이혼·별거 위험 (여성) — 배우자궁이 두 방향에서 흔들립니다",
+                    f"여성 사주에서 상관 세운 + 세운이 일지를 충({_세운_jj3}→{_일지_jj} 충)합니다. "
+                    f"상관은 '남편성(정관)을 극(剋)하는 기운'이며, 일지 충은 배우자 자리를 직접 흔듭니다. "
+                    f"이 두 조건이 동시에 발동하면 부부 사이에 심각한 균열이 생깁니다. "
+                    f"올해 이혼·별거 논의가 수면 위로 떠오를 수 있습니다. 감정적 결정은 삼가십시오.",
+                    "위험"))
+            elif gender == "남" and _일지충_발동 and _편관_있음:
+                _직설_판정.append((
+                    "⚡ 이혼·별거 위험 (남성) — 배우자 관계 파국 주의",
+                    f"남성 사주에서 편관 세운 + 세운이 일지를 충({_세운_jj3}→{_일지_jj} 충)합니다. "
+                    f"편관은 갑작스러운 충격·권위적 압박을 의미하며, 일지 충은 배우자 자리를 강타합니다. "
+                    f"배우자와의 마찰이 폭발하거나, 외부 요인으로 가정이 흔들릴 수 있습니다. "
+                    f"올해 부부 관계에 특별한 주의가 필요합니다.",
+                    "위험"))
+
+            # ④ 재물 손실
+            _겁재_있음 = "겁재" in _sipsong_labels
+            if _겁재_있음 and _삼재_있음:
+                _직설_판정.append((
+                    "💸 재물 손실 위험 — 겁재 세운 + 삼재 중첩",
+                    f"겁재 세운은 타인에 의한 재물 손실·경쟁자 등장을 상징합니다. "
+                    f"여기에 삼재살이 겹치면 투자 손실·사기·도난·지출 폭증으로 이어질 수 있습니다. "
+                    f"올해 보증·투자·동업은 절대 금물입니다. 현금 보유를 늘리고 고위험 자산을 줄이십시오.",
+                    "위험"))
+            elif _겁재_있음:
+                _직설_판정.append((
+                    "⚠️ 겁재 세운 — 경쟁자·지출 증가",
+                    f"겁재 세운에는 뜻밖의 경쟁자 등장, 형제·친구로 인한 손재(損財)가 발생할 수 있습니다. "
+                    f"동업·투자·보증은 신중하게 검토하십시오.",
+                    "주의"))
+
+            # ⑤ 건강 이변
+            _백호_있음 = any("백호" in s for s in _sinsal_names)
+            if _백호_있음 and _일지충_발동:
+                _직설_판정.append((
+                    "🩺 건강 이변·사고 위험 최고조 — 백호살 + 일지충",
+                    f"백호살 보유 + 세운이 일지를 충({_세운_jj3}→{_일지_jj} 충)합니다. "
+                    f"백호살은 피(血), 수술, 사고를 상징하는 강력한 신살입니다. "
+                    f"일지 충이 더해지면 갑작스러운 사고·수술·입원 위험이 크게 높아집니다. "
+                    f"운전, 고위험 스포츠, 수술 일정 등에 각별히 주의하십시오. "
+                    f"이 시기 건강검진을 받아두는 것이 강력히 권장됩니다.",
+                    "위험"))
+        except Exception:
+            pass
+
     except Exception:
         pass
 
@@ -13111,6 +13336,44 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
             f"{sw_kr or '올해'} 세운이 {name}님에게 비교적 순탄하게 "
             f"흐르는 해입니다. 조용히 내실을 다지십시오."
         )
+        lines.append("</div>")
+        lines.append("")
+
+    # ⑳ 직설 판정 렌더링
+    if _직설_판정:
+        _판정_위험 = [(t,b) for t,b,g in _직설_판정 if g == "위험"]
+        _판정_주의 = [(t,b) for t,b,g in _직설_판정 if g == "주의"]
+        lines.append("---")
+        lines.append("")
+        lines.append("### 🔮 직설 사주 판정 — 올해 실제로 무슨 일이 생기나")
+        lines.append("")
+        lines.append(
+            "<div style='background:#1a0a2e;border:2px solid #9b59b6;border-radius:10px;"
+            "padding:16px;margin:8px 0;color:#f0e6ff'>"
+        )
+        lines.append(
+            "<p style='color:#d8b4fe;font-size:0.85em;margin:0 0 12px 0'>"
+            "⚠️ 아래는 사주 구조와 올해 세운의 충돌을 분석한 직설적 판정입니다. "
+            "절대적 운명이 아닌 '가능성이 높은 패턴'이므로 참고만 하십시오.</p>"
+        )
+        if _판정_위험:
+            for _t, _b in _판정_위험:
+                lines.append(
+                    f"<div style='background:rgba(220,53,69,0.2);border-left:4px solid #dc3545;"
+                    f"padding:10px;border-radius:4px;margin:8px 0'>"
+                )
+                lines.append(f"<strong style='color:#ff6b7a'>{_t}</strong><br/>")
+                lines.append(f"<span style='color:#f0e6ff;font-size:0.95em'>{_b}</span>")
+                lines.append("</div>")
+        if _판정_주의:
+            for _t, _b in _판정_주의:
+                lines.append(
+                    f"<div style='background:rgba(255,165,0,0.15);border-left:4px solid #ffa500;"
+                    f"padding:10px;border-radius:4px;margin:8px 0'>"
+                )
+                lines.append(f"<strong style='color:#ffd700'>{_t}</strong><br/>")
+                lines.append(f"<span style='color:#f0e6ff;font-size:0.95em'>{_b}</span>")
+                lines.append("</div>")
         lines.append("</div>")
         lines.append("")
 
