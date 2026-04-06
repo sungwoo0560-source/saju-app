@@ -7232,6 +7232,91 @@ def get_year_detail(y, c2, ilgan, yongshin_ohs, birth_year):
         sd_dw = SIPSONG_DETAIL.get(dw_ss, {})
         sd_sw = SIPSONG_DETAIL.get(sw_ss, {})
 
+        # 세운 십성 한글 추출 ("偏官(편관)" → "편관")
+        _SS_KR2 = {
+            "偏財(편재)":"편재","正財(정재)":"정재","食神(식신)":"식신","傷官(상관)":"상관",
+            "偏官(편관)":"편관","正官(정관)":"정관","偏印(편인)":"편인","正印(정인)":"정인",
+            "比肩(비견)":"비견","劫財(겁재)":"겁재",
+        }
+        sw_ss_kr = _SS_KR2.get(sw_ss, sw_ss)
+
+        _SS_ANNUAL = {
+            "편관": {
+                "핵심": "권력·압박·시험의 해",
+                "설명": "위에서 압박이 내려오고 주변 경쟁이 치열해집니다.",
+                "추천": "규칙 준수, 몸 낮추기, 법적 문제 사전 점검",
+                "주의": "충동적 행동, 윗사람과 충돌, 과로",
+                "전략": "버티면 이기는 해입니다. 절대 튀지 마십시오.",
+            },
+            "정관": {
+                "핵심": "명예·안정·사회적 인정의 해",
+                "설명": "성실함이 인정받고 사회적 지위가 올라가는 해입니다.",
+                "추천": "성실한 자기 관리, 대외 활동 확대, 자격증·승진 도전",
+                "주의": "지나친 완벽주의, 융통성 부족",
+                "전략": "지금 하는 일에 집중하면 반드시 인정받습니다.",
+            },
+            "편재": {
+                "핵심": "투기·이성·사업 기회의 해",
+                "설명": "기회가 쏟아지지만 욕심을 부리면 다 잃습니다.",
+                "추천": "새로운 수입원 발굴, 적극적 사교 활동",
+                "주의": "충동 투자, 이성 문제, 과소비",
+                "전략": "기회는 오지만 욕심을 부리면 다 잃습니다.",
+            },
+            "정재": {
+                "핵심": "착실한 재물 축적의 해",
+                "설명": "꾸준히 모으면 반드시 결실을 보는 해입니다.",
+                "추천": "저축·안전 자산 투자, 현업에 충실",
+                "주의": "무리한 확장, 보증·동업",
+                "전략": "착실하게 모으는 해입니다. 큰 도박은 금물.",
+            },
+            "식신": {
+                "핵심": "창의·복록·여유의 해",
+                "설명": "하고 싶은 것을 시작하기 가장 좋은 해입니다.",
+                "추천": "새로운 취미·창업·콘텐츠 활동 시작",
+                "주의": "게으름, 과식·과음, 현실 안주",
+                "전략": "하고 싶은 것을 시작하기 가장 좋은 해입니다.",
+            },
+            "상관": {
+                "핵심": "변화·충돌·창조적 파괴의 해",
+                "설명": "기존 것을 혁신하고 새로운 분야에 도전하는 해입니다.",
+                "추천": "기존 것을 혁신, 새로운 분야 도전",
+                "주의": "윗사람 충돌, 충동 퇴사·이혼, 구설",
+                "전략": "말을 줄이고 행동으로 보여주십시오.",
+            },
+            "비견": {
+                "핵심": "경쟁·독립·자아 확립의 해",
+                "설명": "혼자 힘으로 서는 연습을 하는 해입니다.",
+                "추천": "독립·창업 준비, 자기계발, 네트워크 확장",
+                "주의": "경쟁자 출현, 고집 부리기, 동업 분쟁",
+                "전략": "혼자 힘으로 서는 연습을 하십시오.",
+            },
+            "겁재": {
+                "핵심": "재물 손실·경쟁 극심의 해",
+                "설명": "지키는 것이 이기는 해입니다.",
+                "추천": "지출 최소화, 저축만, 현상 유지",
+                "주의": "투자·보증·동업·도박 절대 금지",
+                "전략": "지키는 것이 이기는 해입니다.",
+            },
+            "편인": {
+                "핵심": "연구·직관·변화의 해",
+                "설명": "실력을 쌓는 해입니다. 지금 배운 것이 나중에 빛납니다.",
+                "추천": "공부·자격증·내면 성장, 창의적 작업",
+                "주의": "현실 도피, 과도한 의존, 결정 미루기",
+                "전략": "실력을 쌓는 해입니다. 지금 배운 것이 나중에 빛납니다.",
+            },
+            "정인": {
+                "핵심": "학문·안정·내실의 해",
+                "설명": "완벽하게 준비되길 기다리지 마십시오.",
+                "추천": "학습·자격증·멘토 찾기, 내실 다지기",
+                "주의": "너무 준비만 하다 실행 못함, 의존성",
+                "전략": "완벽하게 준비되길 기다리지 마십시오. 충분히 됐을 때 움직이십시오.",
+            },
+        }
+        _GIL_ICON = {"대길":"🟢","길":"🔵","평":"🟡","흉":"🟠","대흉":"🔴"}
+        gil_icon = _GIL_ICON.get(gil, "🟡")
+
+        sw_annual = _SS_ANNUAL.get(sw_ss_kr, {})
+
         _core_parts = []
         if dw_cg_interp:
             _core_parts.append(dw_cg_interp.split(".")[0] + ".")
@@ -7241,7 +7326,10 @@ def get_year_detail(y, c2, ilgan, yongshin_ohs, birth_year):
             _core_parts.append("용신 대운과 세운이 겹치는 최고의 발복기입니다. 준비한 것을 과감히 실행하십시오.")
         elif not d_is_y and not s_is_y and "흉" in gil:
             _core_parts.append("기신 대운과 세운이 겹치는 시기. 무리한 확장을 자제하고 내실을 다지십시오.")
-        core_text = " ".join(_core_parts[:2]) if _core_parts else f"{dw_ss} 대운에 {sw_ss} 세운이 더해지는 해입니다."
+        if sw_annual:
+            core_text = sw_annual["설명"]
+        else:
+            core_text = " ".join(_core_parts[:2]) if _core_parts else f"{dw_ss} 대운에 {sw_ss} 세운이 더해지는 해입니다."
 
         # 분야별 예측
         career = sd_dw.get("직업", "") or f"{dw_ss} 기운의 분야에서 활동이 유리합니다."
@@ -7270,10 +7358,11 @@ def get_year_detail(y, c2, ilgan, yongshin_ohs, birth_year):
         return {
             "year": y, "kr_age": _kr_age,
             "dw_str": dw_str, "sw_str": sw_str,
-            "dw_ss": dw_ss, "sw_ss": sw_ss,
-            "badge": badge, "gil_color": gil_color,
+            "dw_ss": dw_ss, "sw_ss": sw_ss, "sw_ss_kr": sw_ss_kr,
+            "badge": badge, "gil_color": gil_color, "gil_icon": gil_icon,
             "hap_icon": hap_icon,
             "core_text": core_text,
+            "sw_annual": sw_annual,
             "career": career, "finance": finance,
             "relation": relation, "health": health,
             "keywords": keywords,
@@ -10794,7 +10883,10 @@ def render_future_10years(pils, birth_year, gender, yongshin_ohs, year_sel, ilga
         sw_ss = det["sw_ss"]
         is_cur = (y == year_sel)
 
-        label = f"{'▶ ' if is_cur else ''}{y}년 ({age}세)  大運:{dw_str} / 세운:{sw_str}  {badge}{hap_icon}"
+        gil_icon = det.get("gil_icon", "🟡")
+        sw_ss_kr = det.get("sw_ss_kr", sw_ss)
+        sw_annual = det.get("sw_annual", {})
+        label = f"{'▶ ' if is_cur else ''}{y}년 ({age}세) — {sw_str} [{sw_ss}] {badge} {gil_icon}{hap_icon}"
 
         with st.expander(label, expanded=is_cur):
 
@@ -10828,14 +10920,29 @@ def render_future_10years(pils, birth_year, gender, yongshin_ohs, year_sel, ilga
             )
             st.markdown(_hdr, unsafe_allow_html=True)
 
-            # 핵심 기운 텍스트
-            st.markdown(
-                f"<div style='background:#fffdf0;border-left:4px solid #c5a059;"
-                f"padding:10px 14px;border-radius:0 8px 8px 0;margin-bottom:12px;"
-                f"font-size:13px;color:#333;line-height:1.8'>"
-                f"💡 <b>이 해의 핵심:</b> {det['core_text']}</div>",
-                unsafe_allow_html=True,
-            )
+            # 핵심 기운 텍스트 — 세운 십성별 개인화
+            if sw_annual:
+                _annual_html = (
+                    f"<div style='background:#fffdf0;border-left:4px solid #c5a059;"
+                    f"padding:12px 16px;border-radius:0 8px 8px 0;margin-bottom:12px;"
+                    f"font-size:13px;color:#333;line-height:1.9'>"
+                    f"<div style='font-size:14px;font-weight:800;color:#7b4f00;margin-bottom:6px'>"
+                    f"{sw_ss_kr}: {sw_annual.get('핵심','')}</div>"
+                    f"올해 세운의 핵심 기운은 <b>{sw_ss_kr}</b>입니다. "
+                    f"{sw_annual.get('설명','')}<br/><br/>"
+                    f"✅ <b>추천:</b> {sw_annual.get('추천','')}<br/>"
+                    f"⚠️ <b>주의:</b> {sw_annual.get('주의','')}<br/>"
+                    f"💡 <b>핵심 전략:</b> {sw_annual.get('전략','')}"
+                    f"</div>"
+                )
+            else:
+                _annual_html = (
+                    f"<div style='background:#fffdf0;border-left:4px solid #c5a059;"
+                    f"padding:10px 14px;border-radius:0 8px 8px 0;margin-bottom:12px;"
+                    f"font-size:13px;color:#333;line-height:1.8'>"
+                    f"💡 <b>이 해의 핵심:</b> {det['core_text']}</div>"
+                )
+            st.markdown(_annual_html, unsafe_allow_html=True)
 
             # 분야별 4칸 그리드
             _grid = (
