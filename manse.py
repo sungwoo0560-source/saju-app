@@ -13587,6 +13587,61 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                     f"계단·빙판길·등산 시 각별히 조심하십시오.",
                     "주의"
                 ))
+
+            # 홍염살(紅艶殺) — 일간 기준
+            _HONGYUM = {
+                "甲":"午","乙":"申","丙":"寅","丁":"未",
+                "戊":"辰","己":"辰","庚":"戌","辛":"酉",
+                "壬":"子","癸":"申",
+            }
+            _hongyum_jj = _HONGYUM.get(ilgan,"")
+
+            if _hongyum_jj:
+                # 원국에 홍염살 있는지
+                _hongyum_in_chart = []
+                for _i, _jj in enumerate(_원국_지지2):
+                    if _jj == _hongyum_jj:
+                        _hongyum_in_chart.append(["시지","일지","월지","년지"][_i])
+
+                # 세운에 홍염살 발동
+                _hongyum_sw = (_세운_jj_s == _hongyum_jj)
+
+                if _hongyum_sw and _hongyum_in_chart:
+                    _danger_signals.append((
+                        "💋 홍염살 최강 발동 — 이성 문제 극도 주의",
+                        f"{ilgan}일간의 홍염살은 {_hongyum_jj}입니다. "
+                        f"원국 {'·'.join(_hongyum_in_chart)}에도 있고 "
+                        f"올해 세운({_세운_jj_s})까지 홍염살이 겹쳤습니다. "
+                        f"홍염살은 이성을 강하게 끌어당기는 색정(色情)의 기운입니다. "
+                        f"올해 이성 문제로 인한 스캔들·불륜·치정 사건이 "
+                        f"실제로 일어날 수 있습니다. "
+                        f"기혼자는 배우자 외 이성과의 접촉을 철저히 자제하십시오. "
+                        f"미혼자도 상대의 신상을 반드시 확인하십시오. "
+                        f"홍염살이 강할수록 이성에게 치명적으로 끌리는 유혹이 강해집니다.",
+                        "위험"
+                    ))
+                elif _hongyum_sw:
+                    _danger_signals.append((
+                        "💋 올해 홍염살 발동 — 이성 유혹 극도 주의",
+                        f"올해 세운지지({_세운_jj_s})가 {ilgan}일간의 홍염살입니다. "
+                        f"올해 특별히 이성에게 강하게 끌리거나 "
+                        f"이성이 강하게 접근하는 상황이 생깁니다. "
+                        f"이 유혹은 매우 달콤하게 느껴지지만 "
+                        f"결말은 대부분 상처로 끝납니다. "
+                        f"기혼자는 올해 이성 관계에서 선을 분명히 그으십시오.",
+                        "위험"
+                    ))
+                elif _hongyum_in_chart:
+                    _danger_signals.append((
+                        f"💋 홍염살 보유 — {'·'.join(_hongyum_in_chart)} 위치",
+                        f"원국 {'·'.join(_hongyum_in_chart)}에 홍염살({_hongyum_jj})이 있습니다. "
+                        f"이성을 무의식적으로 끌어당기는 매력이 있습니다. "
+                        f"연애운이 끊이지 않지만 감정 소모도 큽니다. "
+                        f"일지에 홍염살이 있으면 배우자가 이성에게 인기가 많은 구조입니다. "
+                        f"홍염살 운(세운·대운)이 겹치는 해에 이성 문제가 터집니다. "
+                        f"이 기운을 예술·연예·서비스업으로 승화시키면 큰 성공을 거둡니다.",
+                        "참고"
+                    ))
         except Exception:
             pass
 
