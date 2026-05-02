@@ -8220,24 +8220,30 @@ def get_yongshin_multilayer(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0, 
     }
 
 
-def get_crossing_interpretation(pils, cur_year):
+def get_crossing_interpretation(pils, cur_year, birth_year=None, birth_month=None, birth_day=None, gender=None):
     """세운×대운 교차 해석 — 대운 십성과 세운 십성의 조합으로 핵심 키워드 반환"""
     try:
         ilgan = pils[1]["cg"]
-        birth_year = pils[0]["year"] if pils[0] and "year" in pils[0] else 1980
-        birth_month = 1
-        birth_day = 1
+        # 새 파라미터 우선, 없으면 기존 fallback (호환성 유지)
+        _by = birth_year if birth_year is not None else (
+            pils[0]["year"] if pils[0] and "year" in pils[0] else 1980
+        )
+        _bm = birth_month if birth_month is not None else 1
+        _bd = birth_day if birth_day is not None else 1
+        _gd = gender if gender is not None else "남"
         birth_hour = 12
         birth_minute = 0
         daewoon = SajuCoreEngine.get_daewoon(
-            pils, birth_year, birth_month, birth_day,
-            birth_hour, birth_minute, gender="남"
+            pils, _by, _bm, _bd,
+            birth_hour, birth_minute, gender=_gd
         )
         cur_dw = next((d for d in daewoon if d["시작연도"] <= cur_year <= d["종료연도"]), None)
-        sw = get_yearly_luck(pils, cur_year)
+        sw = get_yearly_luck(pils, cur_year) or {}
 
         if not cur_dw or not sw:
-            return {"summary": "", "finance": "", "career": "", "health": "", "relation": ""}
+            return {"summary": "", "finance": "", "career": "", "health": "", "relation": "",
+                    "dw_ss": "", "sw_ss": "", "sw_gil": "평",
+                    "dw_start_age": "", "dw_end_age": ""}
 
         dw_ss = TEN_GODS_MATRIX.get(ilgan, {}).get(cur_dw.get("cg", ""), "")
         sw_ss = sw.get("십성_천간", "")
@@ -8284,7 +8290,9 @@ def get_crossing_interpretation(pils, cur_year):
         }
     except Exception as _e:
         _saju_log.debug("[crossing_interp] %s", _e)
-        return {"summary": "", "finance": "", "career": "", "health": "", "relation": ""}
+        return {"summary": "", "finance": "", "career": "", "health": "", "relation": "",
+                "dw_ss": "", "sw_ss": "", "sw_gil": "평",
+                "dw_start_age": "", "dw_end_age": ""}
 
 
 def get_relationship_reading(pils, gender="남", marriage_status="미혼"):
@@ -8858,7 +8866,7 @@ def _nar_ch6_daewoon(ctx):
     # 세운×대운 교차 해석
     cross = {}
     try:
-        cross = get_crossing_interpretation(pils, current_year) if pils else {}
+        cross = get_crossing_interpretation(pils, current_year, birth_year=birth_year) if pils else {}
     except Exception:
         _saju_log.warning("[_nar_ch6_daewoon] 오류: %s", sys.exc_info()[1])
 
@@ -11670,7 +11678,7 @@ def _nar_future(ctx):
 
             # 세운×대운 교차 분석 (연도별)
             try:
-                cross_y = get_crossing_interpretation(pils, y) if pils else {}
+                cross_y = get_crossing_interpretation(pils, y, birth_year=birth_year, gender=gender) if pils else {}
                 if cross_y.get("summary"):
                     result.append(f"  [교차분석] {cross_y['summary']}\n")
             except Exception:
@@ -11903,7 +11911,7 @@ def _nar_wealth(ctx):
     # 세운×대운 교차 해석 (재물 섹션용)
     cross_money = {}
     try:
-        cross_money = get_crossing_interpretation(pils, current_year) if pils else {}
+        cross_money = get_crossing_interpretation(pils, current_year, birth_year=birth_year, gender=gender) if pils else {}
     except Exception:
         _saju_log.warning("[_nar_wealth] 오류: %s", sys.exc_info()[1])
 

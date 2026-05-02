@@ -1882,7 +1882,6 @@ def get_ilgan_strength(ilgan, pils):
 
 
 
-@st.cache_data
 def get_yearly_luck(pils, current_year):
     """세운 계산"""
 

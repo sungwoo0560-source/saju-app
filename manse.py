@@ -5134,6 +5134,7 @@ def build_life_analysis(pils, gender):
     성향 / 재물 / 직업 / 연애 / 주의사항 5가지 출력
 
     """
+    if not pils or len(pils) < 2: return {}
 
     ilgan = pils[1]["cg"]
 
@@ -6102,6 +6103,7 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
         "ohaeng":     "음양오행",
         "tojeong":    "토정비결",
         "current_situation": "현재상황",
+        "yearly":     "연도별운세",
     }
     _label = _TAB_LABEL.get(tab_name, tab_name)
 
@@ -11630,13 +11632,17 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
     cur_age   = cur_year - birth_year + 1
     _season   = "봄" if cur_month in [3,4,5] else "여름" if cur_month in [6,7,8] else "가을" if cur_month in [9,10,11] else "겨울"
 
-    # ── 고민 추론 카드 ─────────────────────────────────────
-    render_worry_inference(pils, birth_year, gender)
-
     # ── 데이터 수집 ────────────────────────────────────────
     try:
         from saju_interpreter import get_crossing_interpretation
-        cross = get_crossing_interpretation(pils, cur_year)
+        cross = get_crossing_interpretation(
+            pils,
+            cur_year,
+            birth_year=birth_year,
+            birth_month=st.session_state.get("birth_month", 1),
+            birth_day=st.session_state.get("birth_day", 1),
+            gender=gender,
+        )
     except Exception:
         cross = {}
 
@@ -13733,6 +13739,15 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
     lines.append(f"*{cur_year}년 · 한국나이 {cur_age}세(만 {cur_age-1}세) · {_dw_label}{_age_range} · {_sw_label}*")
     lines.append("")
 
+    # 1. 공감 질문
+    lines.append(f"### 💬 {hard_q}")
+    lines.append("")
+
+    # 2. 세운 기반 현황 서술
+    lines.append(hard_body)
+    lines.append("")
+    lines.append("---")
+
     # 0. 위험 신호 카드 — 3등급 분류
     _signals_danger  = [(t,b) for t,b,g in _danger_signals if g == "위험"]
     _signals_caution = [(t,b) for t,b,g in _danger_signals if g == "주의"]
@@ -14107,7 +14122,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
         if _운명처방:
             lines.append("---")
             lines.append("")
-            lines.append(f"### 🌟 {name}님의 운명을 바꾸는 처방")
+            lines.append(f"### 🌟 {name}님의 운명을 바꾸는 핵심 전략")
             lines.append("")
             lines.append(
                 "<div style='background:#f0f8ff;border-left:4px solid #0066cc;"
@@ -14127,16 +14142,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
     except Exception:
         pass
 
-    lines.append("---")
-    lines.append("")
-
-    # 1. 공감 질문
-    lines.append(f"### 💬 {hard_q}")
-    lines.append("")
-
-    # 2. 세운 기반 현황 서술
-    lines.append(hard_body)
-    lines.append("")
+    lines.append("\n## 🔬 당신 분석\n")
 
     # 2-1. [NEW] 일간 개인화 분석
     if _ilgan_now_msg:
@@ -14227,6 +14233,8 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
         lines.append(_iljj_partner_msg)
         lines.append("")
 
+    lines.append("\n## 🎁 처방\n")
+
     # 6. 용신 처방 (계절 반영)
     if yong_rx:
         lines.append("---")
@@ -14237,7 +14245,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
     # 7. 기신 주의
     if gi_detail:
         lines.append("---")
-        lines.append(f"### ⚠️ 지금 조심해야 할 것")
+        lines.append(f"### 🛡️ 지금 조심해야 할 것")
         lines.append(gi_detail)
         lines.append("")
 
@@ -14331,7 +14339,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
 
     if _gaeun_items:
         lines.append("---")
-        lines.append("### 🔮 지금 당신에게 맞는 개운법")
+        lines.append("### 🌈 지금 당신에게 맞는 개운법")
         lines.append("")
         lines.append("<div style='background:#f8f0ff;border-left:4px solid #9b59b6;padding:12px;border-radius:6px;margin:8px 0'>")
         for _gt, _gb in _gaeun_items:
@@ -14433,6 +14441,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
     )
     st.markdown("\n".join(lines), unsafe_allow_html=True)
 
+    render_worry_inference(pils, birth_year, gender)
     render_pdf_download_btn("current_situation", pils, name, birth_year, gender)
 
 
@@ -18612,8 +18621,6 @@ def menu9_daily(pils, name, birth_year, gender):
 
     render_pdf_download_btn("daily", pils, name, birth_year, gender)
 
-    render_pdf_download_btn("daily", pils, name, birth_year, gender)
-
 
 def menu10_monthly(pils, name, birth_year, gender):
     """🔟 월별 운세 - 이달의 주의해야 할 날짜 특화 분석"""
@@ -19561,8 +19568,6 @@ def menu11_yearly(pils, name, birth_year, gender):
 
     render_pdf_download_btn("monthly", pils, name, birth_year, gender)
 
-    render_pdf_download_btn("monthly", pils, name, birth_year, gender)
-
 
 def menu8_bihang(pils, name, birth_year, gender):
     """8️⃣ 특급 비방록 - 용신 기반 전통 비방 처방전"""
@@ -19801,6 +19806,69 @@ def menu8_bihang(pils, name, birth_year, gender):
         """,
             unsafe_allow_html=True,
         )
+
+    # ============================
+    # 부동명왕 비방 — 흉살 감지 시 자동 출력
+    # ============================
+    try:
+        sinsal_raw = get_12sinsal(pils)
+        sinsal_list = []
+        if isinstance(sinsal_raw, dict):
+            for v in sinsal_raw.values():
+                if isinstance(v, list):
+                    sinsal_list.extend([str(x) for x in v])
+                elif isinstance(v, str):
+                    sinsal_list.append(v)
+        elif isinstance(sinsal_raw, list):
+            sinsal_list = [str(x) for x in sinsal_raw]
+    except Exception:
+        sinsal_list = []
+
+    BUDONG_SINSAL = ["백호살", "겁살", "귀문관살", "망신살"]
+    detected = [s for s in BUDONG_SINSAL if any(s in item for item in sinsal_list)]
+
+    if detected:
+        with st.expander("🔥 부동명왕(不動明王) 비방 — 흉살 제압 특급 처방", expanded=False):
+            st.markdown(
+                f"""
+<div style="background:linear-gradient(135deg,#1a0000,#2e0000);border:2px solid #ff4444;border-radius:14px;padding:20px;margin-bottom:16px">
+<div style="color:#ffaa00;font-size:12px;letter-spacing:3px;margin-bottom:6px">⚠️ 흉살 감지 — 부동명왕 긴급 처방</div>
+<div style="color:#fff;font-size:16px;font-weight:900;margin-bottom:10px">🔥 부동명왕(不動明王) 비방록</div>
+<div style="color:#ffcccc;font-size:13px;line-height:2">
+감지된 흉살: <b style="color:#ff6666">{"&nbsp;·&nbsp;".join(detected)}</b><br>
+이 살들이 겹치면 사고수·구설수·배신이 따른다. 부동명왕의 화염으로 제압하라.
+</div>
+</div>
+<div style="background:#fff8f0;border-left:4px solid #ff6600;padding:16px;border-radius:8px;margin-bottom:14px">
+<div style="font-size:14px;font-weight:900;color:#b74000;margin-bottom:8px">📿 부동명왕이란?</div>
+<div style="font-size:13px;color:#333;line-height:1.9">
+불교 밀교(密敎)의 수호신. 대일여래(大日如來)의 분노 화신으로,<br>
+오른손의 검으로 악을 베고 왼손의 밧줄로 중생을 묶어 구제한다.<br>
+불꽃 후광(火焰光)으로 모든 흉살과 장애를 태워 없앤다.<br>
+<b>겉은 분노, 속은 자비</b> — 흔들리지 않는 절대 의지의 화신이니라.
+</div>
+</div>
+<div style="background:#fff0f0;border:1px solid #e53935;border-radius:8px;padding:16px;margin-bottom:14px">
+<div style="font-size:14px;font-weight:900;color:#b71c1c;margin-bottom:10px">🙏 기도법 처방 (만신 전수)</div>
+<div style="font-size:13px;color:#222;line-height:2.1">
+① 새벽 3시~5시 사이, 남동쪽을 향해 앉아라.<br>
+② 붉은 초 1쌍을 켜고 향을 피워라.<br>
+③ "나무부동명왕(南無不動明王)"을 108번 외워라.<br>
+④ 외울 때마다 손가락을 꺾어 세고, 끝나면 절 3번.<br>
+⑤ 초가 다 탈 때까지 그 자리를 지켜라.<br>
+<span style="color:#b71c1c;font-weight:900">⑥ 이것을 7일 연속 행하면 흉살의 기운이 꺾이기 시작한다.</span>
+</div>
+</div>
+<div style="background:#1a1a2e;color:#f7e695;padding:14px 18px;border-radius:10px;font-size:13px;line-height:2;border:1px solid #d4af37">
+<b>🌟 개운(開運) 처방</b><br>
+- 색상: 붉은색·주황색 계열 착용 (화기 보완)<br>
+- 방위: 남동쪽이 길방 — 책상·침대 방향 조정<br>
+- 오행: 火(화) 기운 강화 — 촛불·붉은 꽃·홍색 소품<br>
+- 금기: 이 기간 중 흰색·검은색 착용 삼가
+</div>
+""",
+                unsafe_allow_html=True,
+            )
 
     # 기신 차단 신탁
 

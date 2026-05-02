@@ -7,6 +7,27 @@ manse.py에서 from saju_ui import * 로 사용
 import streamlit as st
 
 
+def get_ohang_color(char):
+    """오행별 (배경색, 글자색) 반환 — 천간·지지 공통"""
+    wood_cg  = ["甲", "乙"];  fire_cg  = ["丙", "丁"]
+    earth_cg = ["戊", "己"];  metal_cg = ["庚", "辛"];  water_cg = ["壬", "癸"]
+    wood_jj  = ["寅", "卯"];  fire_jj  = ["巳", "午"]
+    earth_jj = ["辰", "戌", "丑", "未"];  metal_jj = ["申", "酉"];  water_jj = ["亥", "子"]
+    colors = {
+        "wood":  ("#2d8a4e", "#ffffff"),
+        "fire":  ("#e53935", "#ffffff"),
+        "earth": ("#f9a825", "#1a1a1a"),
+        "metal": ("#9e9e9e", "#ffffff"),
+        "water": ("#1565c0", "#ffffff"),
+    }
+    if char in wood_cg  + wood_jj:   return colors["wood"]
+    if char in fire_cg  + fire_jj:   return colors["fire"]
+    if char in earth_cg + earth_jj:  return colors["earth"]
+    if char in metal_cg + metal_jj:  return colors["metal"]
+    if char in water_cg + water_jj:  return colors["water"]
+    return ("#555555", "#ffffff")
+
+
 def inject_global_css():
     """전역 CSS — 전통 한지 크림 톤 + 프리미엄 앱 스타일 (st.set_page_config 직후 호출)"""
     st.markdown(
@@ -426,7 +447,7 @@ def render_daewoon_card(
     }
     _dw_html = ""
     for _ch in dw_str:
-        _bg, _fg = _get_ohang_color(_ch)
+        _bg, _fg = get_ohang_color(_ch)
         _dw_html += f"<span style='{_badge_style}background:{_bg};color:{_fg}'>{_ch}</span>"
     _dw_kr = "".join(_GZ_KR.get(c, c) for c in dw_str)
 
