@@ -27,3 +27,13 @@ fix_*.py
 
 # Streamlit 캐시
 .streamlit/cache/
+
+# 개인 작업 메모
+backup_inventory.txt
+blocks_report.txt
+daewoon_display_bug.txt
+menu8_*.txt
+pre_patch_check.txt
+
+# 임시 진단 스크립트
+diag*.py
