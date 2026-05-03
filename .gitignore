@@ -10,3 +10,20 @@ saju_save.json
 history_memory.json
 usage_stats.json
 lotto_data.json
+
+# 백업 파일
+*.bak_*
+
+# 진단/감사 텍스트
+*_audit.txt
+*_diagnose.txt
+emergency_diagnose.txt
+pdf_audit.txt
+root_cause_audit.txt
+ultra_diagnose.txt
+
+# 임시 패치 스크립트
+fix_*.py
+
+# Streamlit 캐시
+.streamlit/cache/
