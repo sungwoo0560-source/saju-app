@@ -18844,7 +18844,7 @@ def menu10_monthly(pils, name, birth_year, gender):
 
     _yr_cg_idx = (year - 1924) % 10
     _yr_gan_idx = _yr_cg_idx % 5
-    month_idx = (_yr_gan_idx * 2 + 2 + (month - 1)) % 10
+    month_idx = (_yr_gan_idx * 2 + 2 + (month - 2) % 12) % 10
 
     month_cg = CG[month_idx]
 
@@ -18988,7 +18988,7 @@ def menu10_monthly(pils, name, birth_year, gender):
 
     week_summaries = [week_summary(week_data[i]) for i in range(5)]
 
-    month_name_key, month_overall = MONTHLY_SS_MEANING.get(month_ss, MONTHLY_SS_MEANING["-"])
+    month_name_key, month_overall = MONTHLY_SS_MEANING.get((month_ss.split("(")[-1].rstrip(")") if "(" in month_ss else month_ss), MONTHLY_SS_MEANING["-"])
 
     # -- 종합 콘텐츠 렌더링 ----------------------------------
 

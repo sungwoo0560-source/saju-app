@@ -7286,8 +7286,8 @@ class LocalSajuNarrator:
         # 이번 연도 세운천간 인덱스 계산
         _yr_cg_idx = (cur_year - 1924) % 10
         _yr_cg = _CG[_yr_cg_idx]
-        _yr_gan_base = {"甲":0,"乙":0,"丙":2,"丁":2,"戊":4,
-                        "己":4,"庚":6,"辛":6,"壬":8,"癸":8}.get(_yr_cg, 0)
+        _yr_gan_base = {"甲":2,"己":2,"乙":4,"庚":4,"丙":6,
+                        "辛":6,"丁":8,"壬":8,"戊":0,"癸":0}.get(_yr_cg, 0)
 
         # 십성 → 한자(한글) 변환
         _SS_KR = {"食神":"食神(식신)","傷官":"傷官(상관)","偏財":"偏財(편재)",
@@ -7412,7 +7412,7 @@ class LocalSajuNarrator:
             m_raw = today.month + i
             yr    = cur_year + (m_raw - 1) // 12
             m     = ((m_raw - 1) % 12) + 1
-            _m_cg_idx = (_yr_gan_base + (m - 1)) % 10
+            _m_cg_idx = (_yr_gan_base + (m - 2) % 12) % 10
             m_cg  = _CG[_m_cg_idx]
             m_oh  = _OH.get(m_cg, "")
             m_ss  = TEN_GODS_MATRIX.get(ilgan, {}).get(m_cg, "")
@@ -7435,7 +7435,7 @@ class LocalSajuNarrator:
             yr    = cur_year + (m_raw - 1) // 12
             m     = ((m_raw - 1) % 12) + 1
 
-            _m_cg_idx = (_yr_gan_base + (m - 1)) % 10
+            _m_cg_idx = (_yr_gan_base + (m - 2) % 12) % 10
             m_cg    = _CG[_m_cg_idx]
             m_jj    = _JJ_MONTHS[m - 1] if m - 1 < len(_JJ_MONTHS) else ""
             m_oh    = _OH.get(m_cg, "")
