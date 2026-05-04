@@ -4663,7 +4663,7 @@ class LocalSajuNarrator:
                     "accident": {"grade": risk_grade, "risk": accident_risk["위험도"], "reason": accident_risk["원인"], "months": risk_months},
                     "health": {"grade": health_grade, "risk": health_rs["위험도"], "disease": health_rs["질환"], "prevention": health_rs["예방"]}
                 }
-            except:
+            except Exception:
                 yr_health_map[yr] = None
         
         # 연도별 카드 출력
@@ -6664,7 +6664,7 @@ class LocalSajuNarrator:
         for _dw_k in dw_list[:6]:
             _dw_cg_k   = _dw_k.get("cg", "")
             _dw_jj_k   = _dw_k.get("jj", "")
-            _dw_age_k  = _dw_k.get("age", "?")
+            _dw_age_k  = _dw_k.get("시작나이", "?")
             _dw_oh_cg_k = _KIGAN_OH_K.get(_dw_cg_k, "")
             _dw_oh_jj_k = _JIJI_OH_K.get(_dw_jj_k, "")
 
@@ -11226,11 +11226,12 @@ def _nar_report(ctx):
 
     # 1. 추출 및 데이터 변환 (형님 엔진 데이터)
     display_name = name
-    ilgan = clean_hanja(pils[1]["cg"]) if pils[1] else ""
+    _ilgan_raw = pils[1]["cg"] if len(pils) > 1 and pils[1] else ""
+    ilgan = clean_hanja(_ilgan_raw)
     char_desc = ILGAN_CHAR_DESC.get(ilgan, {})
     ilgan_kr = char_desc.get("상징", "")
 
-    strength_info = get_ilgan_strength(pils[1]["cg"], pils)
+    strength_info = get_ilgan_strength(_ilgan_raw, pils)
     sn = strength_info.get("신강신약", "중화")
 
     gyeokguk = get_gyeokguk(pils)

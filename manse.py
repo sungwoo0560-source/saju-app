@@ -11007,7 +11007,7 @@ def menu_monthly(pils, birth_year, gender):
 
     MONTH_JJ = ["寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥", "子", "丑"]
     ilgan = pils[1]["cg"]
-    year_cg = pils[0]["cg"]
+    year_cg = CG[(current_year - 1924) % 10]
     year_gan_idx = CG.index(year_cg) % 5
 
     GIL_MAP = {
@@ -18010,7 +18010,7 @@ def menu6_relations(pils, name, birth_year, gender, marriage_status="미혼"):
         if isinstance(_gm, list):
             for _g in _gm[:4]:
                 if isinstance(_g, dict):
-                    st.markdown(f"**{_g.get('궁','')}**: {_g.get('설명','')}")
+                    st.markdown(f"**{_g.get('궁','')}**: {_g.get('desc','')}")
     except Exception as _se:
         pass
 
@@ -18628,9 +18628,9 @@ def menu10_monthly(pils, name, birth_year, gender):
     # ── 이달 개인화 운기 요약 카드 ──────────────────────────────
     try:
         _ml = get_monthly_luck(pils, cur_year, datetime.now().month) or {}
-        _ml_ss  = _ml.get("십성_천간","")
-        _ml_jj  = _ml.get("지지","")
-        _ml_oh  = _ml.get("오행_천간","")
+        _ml_ss  = _ml.get("십성","")
+        _ml_jj  = _ml.get("지","")
+        _ml_oh  = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土","己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}.get(_ml.get("간",""),"")
         _ys_m   = get_yongshin(pils)
         _yong_m = _ys_m.get("종합_용신",[])
         _gisin_m= _ys_m.get("기신",[]) if isinstance(_ys_m.get("기신"),list) else []
@@ -18842,7 +18842,9 @@ def menu10_monthly(pils, name, birth_year, gender):
 
     # 월건(月建) 계산
 
-    month_idx = (year * 12 + month - 1) % 10
+    _yr_cg_idx = (year - 1924) % 10
+    _yr_gan_idx = _yr_cg_idx % 5
+    month_idx = (_yr_gan_idx * 2 + 2 + (month - 1)) % 10
 
     month_cg = CG[month_idx]
 

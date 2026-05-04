@@ -677,10 +677,10 @@ class ManseCalendarEngine:
 
 def calc_gunghap(pils_a, pils_b, name_a="나", name_b="상대"):
 
-    # [년, 월, 일, 시] 순서에서 일간은 index 2
+    # get_pillars() 반환 순서: [시(0), 일(1), 월(2), 년(3)] → 일간은 index 1
 
-    ilgan_a = pils_a[2]["cg"]
-    ilgan_b = pils_b[2]["cg"]
+    ilgan_a = pils_a[1]["cg"]
+    ilgan_b = pils_b[1]["cg"]
 
     jj_a = [p["jj"] for p in pils_a]
     jj_b = [p["jj"] for p in pils_b]
@@ -690,7 +690,7 @@ def calc_gunghap(pils_a, pils_b, name_a="나", name_b="상대"):
 
     gen_map = {"木": "火", "火": "土", "土": "金", "金": "水", "水": "木"}
 
-    ctrl_map = {"木": "土", "火": "金", "土": "수", "金": "木", "水": "火"}
+    ctrl_map = {"木": "土", "火": "金", "土": "水", "金": "木", "水": "火"}
 
     if gen_map.get(oh_a) == oh_b:
         ilgan_rel = (

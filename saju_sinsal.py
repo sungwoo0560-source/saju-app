@@ -876,7 +876,7 @@ def get_extra_sinsal(pils):
         })
 
     # 괴강살(魁罡殺) – 일주(일간+일지) 기준
-    ilju_str = (pils[1]["cg"] + pils[1]["jj"]) if pils[1] else ""
+    ilju_str = (pils[1]["cg"] + pils[1]["jj"]) if len(pils) > 1 and pils[1] else ""
     if ilju_str in GOEGANG_ILJU:
         stars.append({
             "name": f"괴강살(魁罡殺) [{ilju_str}]",
