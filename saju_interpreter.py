@@ -7472,30 +7472,35 @@ class LocalSajuNarrator:
                 except Exception:
                     pass
 
-            lines.append(
-                f"### {yr}년 {m}월 [{m_jj_kr}] {m_ss_kr} — {gilhyung}{cur_tag}"
-            )
-            lines.append(f"> {_JJ_SEASON.get(m_jj, '흐름의 달')}")
-            lines.append("")
-            lines.append(f"💰 **재물**: {_SS_MONEY.get(m_ss_key, '수입·지출 균형 유지. 무리한 투자 자제.')}")
-            lines.append(f"💼 **직업**: {_SS_JOB.get(m_ss_key, '꾸준히 맡은 일에 집중하십시오.')}")
-            lines.append(f"💑 **관계**: {_SS_RELATION.get(m_ss_key, '기존 인간관계를 소중히 유지하십시오.')}")
-            lines.append(f"🏥 **건강**: {_SS_HEALTH.get(m_ss_key, _JJ_HEALTH.get(m_jj, '무리하지 말고 규칙적인 생활을 유지하십시오.'))}")
-            # 길흉일 출력
-            _gil_str  = ", ".join(f"{_d}일" for _d in _gil_days[:5]) or "없음"
-            _hyung_str= ", ".join(f"{_d}일" for _d in _hyung_days[:3]) or "없음"
-            lines.append(
-                f"📅 **길일** ({len(_gil_days)}일): {_gil_str}  |  "
-                f"⛔ **흉일** ({len(_hyung_days)}일): {_hyung_str}"
-            )
-            lines.append(f"⭐ **이달의 행동**: {_JJ_ACTION.get(m_jj, '유연하게 대처하십시오.')}")
-
-            if is_ys:
-                lines.append(f"\n> 🌟 용신 오행({OHN.get(m_oh, m_oh)})의 달 — 중요한 결정·계약·새 시작을 이 달에 집중하십시오.")
-            elif is_gs:
-                lines.append(f"\n> ⛔ 기신 오행({OHN.get(m_oh, m_oh)})의 달 — 무리한 확장·투자·계약을 피하고 기존 것을 지키십시오.")
-
-            lines.append("")
+            if i < 2:
+                lines.append(f"### {yr}년 {m}월 [{m_jj_kr}] {m_ss_kr} {gilhyung} — {_JJ_SEASON.get(m_jj, '흐름의 달')}{cur_tag}")
+                lines.append("")
+                lines.append(
+                    f"💰 {_SS_MONEY.get(m_ss_key, '수입·지출 균형 유지. 무리한 투자 자제.')} / "
+                    f"💼 {_SS_JOB.get(m_ss_key, '꾸준히 맡은 일에 집중하십시오.')} / "
+                    f"💑 {_SS_RELATION.get(m_ss_key, '기존 인간관계를 소중히 유지하십시오.')} / "
+                    f"🏥 {_SS_HEALTH.get(m_ss_key, _JJ_HEALTH.get(m_jj, '무리하지 말고 규칙적인 생활을 유지하십시오.'))}"
+                )
+                lines.append(
+                    f"⭐ {_JJ_ACTION.get(m_jj, '유연하게 대처하십시오.')}  |  "
+                    f"📅 길일 {len(_gil_days)}일 / ⛔ 흉일 {len(_hyung_days)}일"
+                )
+                if is_ys:
+                    lines.append(f"\n> 🌟 용신 오행({OHN.get(m_oh, m_oh)})의 달 — 중요한 결정·계약·새 시작을 이 달에 집중하십시오.")
+                elif is_gs:
+                    lines.append(f"\n> ⛔ 기신 오행({OHN.get(m_oh, m_oh)})의 달 — 무리한 확장·투자·계약을 피하고 기존 것을 지키십시오.")
+                lines.append("")
+            else:
+                if i == 2:
+                    lines.append("")
+                    lines.append("**📅 향후 4개월 요약:**")
+                _season_short = _JJ_SEASON.get(m_jj, '흐름의 달').split(' — ')[0]
+                _summary = f"  • {yr}년 {m}월 [{m_jj_kr}] {m_ss_kr} {gilhyung} — {_season_short}"
+                if is_ys:
+                    _summary += f" | 🌟 용신({OHN.get(m_oh, m_oh)})"
+                elif is_gs:
+                    _summary += f" | ⛔ 기신({OHN.get(m_oh, m_oh)})"
+                lines.append(_summary)
 
         return "\n".join(lines)
 
