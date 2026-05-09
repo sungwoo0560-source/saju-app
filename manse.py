@@ -23268,6 +23268,21 @@ def render_manse_grid(pils, birth_year, birth_month, birth_day, birth_hour, birt
     except Exception:
         strength_info = {"신강신약": "중화", "helper_score": 50}
 
+    # gi_ohs fallback — 서술형 기신 문자열이면 sn 기반 역산
+    if not gi_ohs:
+        try:
+            _sn_t = strength_info.get("신강신약", "")
+            _ilgan_oh_t = _OH_CG.get(ilgan, "")
+            _BMRV_T = {"木":"水","火":"木","土":"火","金":"土","水":"金"}
+            _CTLV_T = {"木":"土","火":"金","土":"水","金":"木","水":"火"}
+            if "신강" in _sn_t and _ilgan_oh_t:
+                gi_ohs = [o for o in [_BMRV_T.get(_ilgan_oh_t,""), _ilgan_oh_t] if o]
+            elif "신약" in _sn_t and _ilgan_oh_t:
+                _gk_t = next((k for k,v in _CTLV_T.items() if v == _ilgan_oh_t), "")
+                gi_ohs = [o for o in [_gk_t, _CTLV_T.get(_ilgan_oh_t,"")] if o]
+        except Exception:
+            pass
+
     try:
         dw_list = SajuCoreEngine.get_daewoon(
             pils, birth_year, birth_month, birth_day, birth_hour, birth_minute, gender
@@ -23470,8 +23485,8 @@ def render_manse_grid(pils, birth_year, birth_month, birth_day, birth_hour, birt
                 unsafe_allow_html=True,
             )
         # 용신/기신
-        yong_str = " ".join([OHN.get(o, o) for o in yong_ohs]) if yong_ohs else "-"
-        gi_str   = " ".join([OHN.get(o, o) for o in gi_ohs])   if gi_ohs   else "-"
+        yong_str = "·".join(yong_ohs[:2]) if yong_ohs else "-"
+        gi_str   = "·".join(gi_ohs[:2])   if gi_ohs   else "-"
         st.markdown(
             f"""<div style="background:#f0fff4;border-radius:6px;padding:6px 10px;margin-top:6px;font-size:12px">
 <span style="color:#2d8a4e;font-weight:700">✦ 용신:</span> {yong_str}<br>
