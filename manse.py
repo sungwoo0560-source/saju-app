@@ -14199,7 +14199,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
     # 5-1. [NEW] 오행 구성비 분석
     lines.append("---")
     lines.append(f"### ⚖️ {name}님 사주 오행 구성 — 이것이 당신의 평생 약점입니다")
-    lines.append(f"**원국 오행 분포:** {_oh_bar}{_oh_weak_msg}{_oh_over_msg}")
+    lines.append(f"**원국 8자 구성 (단순 개수):** {_oh_bar}{_oh_weak_msg}{_oh_over_msg}")
     if _oh_zero:
         _zero_detail = {
             "木": "木이 없으면 → 결단력·추진력 부족, 새 시작이 무서움, 간·담낭 선천 취약",
@@ -23257,8 +23257,9 @@ def render_manse_grid(pils, birth_year, birth_month, birth_day, birth_hour, birt
 
     try:
         ys_data = get_yongshin(pils)
-        yong_ohs = ys_data.get("용신_오행", []) if ys_data else []
-        gi_ohs   = ys_data.get("기신_오행", []) if ys_data else []
+        yong_ohs = ys_data.get("종합_용신", []) if ys_data else []
+        _gi_raw  = ys_data.get("기신", []) if ys_data else []
+        gi_ohs   = _gi_raw if isinstance(_gi_raw, list) else [x.strip() for x in str(_gi_raw).replace("·",",").split(",") if x.strip() in ["木","火","土","金","水"]]
     except Exception:
         yong_ohs, gi_ohs = [], []
 
@@ -23441,7 +23442,11 @@ def render_manse_grid(pils, birth_year, birth_month, birth_day, birth_hour, birt
 </div>""",
             unsafe_allow_html=True,
         )
-        # 오행 분포
+        # 오행 분포 (세력 점수 기준)
+        st.markdown(
+            "<div style='font-size:11px;color:#888;margin-bottom:3px'>📊 오행 세력 (가중 점수 기준)</div>",
+            unsafe_allow_html=True,
+        )
         oh_total = sum(oh_str.values()) or 1
         OH_KR = {"木": "목", "火": "화", "土": "토", "金": "금", "水": "수"}
         OH_COLORS = {"木": "#2d8a4e", "火": "#e53935", "土": "#f9a825", "金": "#9e9e9e", "水": "#1565c0"}
