@@ -18147,10 +18147,6 @@ def menu9_daily(pils, name, birth_year, gender):
 
     # return
 
-    st.markdown("---")
-
-    st.markdown("### 🤖 AI 심층 분석")
-
     ilgan = pils[1]["cg"]
 
     today = datetime.now()
@@ -18175,6 +18171,22 @@ def menu9_daily(pils, name, birth_year, gender):
         _ys_d = get_yongshin(pils)
         _yong_d  = _ys_d.get("종합_용신",[])
         _gisin_d = _ys_d.get("기신",[]) if isinstance(_ys_d.get("기신"),list) else []
+        if not _gisin_d:
+            try:
+                from saju_engine import get_ilgan_strength as _gis_fn
+                _ilgan_w = pils[1].get("cg", "")
+                _str_info = _gis_fn(_ilgan_w, pils) if _ilgan_w else {}
+                _sn_w = _str_info.get("신강신약", "") if isinstance(_str_info, dict) else ""
+                _il_oh_w = _OH_CG.get(_ilgan_w, "")
+                _BMRV_W = {"木":"水","火":"木","土":"火","金":"土","水":"金"}
+                _CTLV_W = {"木":"土","火":"金","土":"水","金":"木","水":"火"}
+                if "신강" in _sn_w and _il_oh_w:
+                    _gisin_d = [o for o in [_BMRV_W.get(_il_oh_w,""), _il_oh_w] if o]
+                elif "신약" in _sn_w and _il_oh_w:
+                    _gk_w = next((k for k,v in _CTLV_W.items() if v == _il_oh_w), "")
+                    _gisin_d = [o for o in [_gk_w, _CTLV_W.get(_il_oh_w,"")] if o]
+            except Exception:
+                pass
         _OH_D = _OH_CG
         _JJ_OH_D = _OH_JJ
         _cg_oh_d = _OH_D.get(today_cg,"")
@@ -18196,7 +18208,7 @@ def menu9_daily(pils, name, birth_year, gender):
             _sig_bg = "#3d1a1a"; _sig_tc = "#ffaaaa"
             _chung_msg = f" 원국과 충(沖)이 발생합니다." if _has_chung_d else ""
             _signal = f"🔴 오늘은 조심이 필요한 날.{_chung_msg}"
-            _sig_sub = "큰 결정·서명·투자는 내일로 미루십시오."
+            _sig_sub = "오늘 일진이 원국과 충돌하거나 기신 기운입니다. 큰 결정·서명·투자는 내일로 미루십시오."
         else:
             _sig_bg = "#1a1a3d"; _sig_tc = "#aaaaff"
             _signal = "🟡 오늘은 중립적인 기운의 날."
@@ -18216,31 +18228,6 @@ def menu9_daily(pils, name, birth_year, gender):
         )
     except Exception:
         pass
-
-    # -- 헤더 --------------------------
-
-    st.markdown(
-        f"""
-
-<div style="background:linear-gradient(135deg,#e8f4ff,#ddeeff); border-radius:14px;padding:18px 24px;margin-bottom:16px;text-align:center">
-
-<div style="font-size:22px;font-weight:900;color:#0d47a1;letter-spacing:2px">
-
-        ☀️ {display_name}님의 오늘의 운세
-
-</div>
-
-<div style="font-size:13px;color:#000000;margin-top:6px">
-
-        {today.strftime("%Y년 %m월 %d일")} ({["월", "화", "수", "목", "금", "토", "일"][today.weekday()]}요일)
-
-</div>
-
-</div>
-
-""",
-        unsafe_allow_html=True,
-    )
 
     # -- 일진 심층 해설 (API 있으면 AI, 없으면 로컬 엔진) --------------
 
@@ -18294,7 +18281,7 @@ def menu9_daily(pils, name, birth_year, gender):
         "-": "-",
     }
 
-    _today_ss_kr = _ss_kr_map.get(today_ss, today_ss)
+    _today_ss_kr = _ss_kr_map.get(today_ss.split("(")[0], today_ss.split("(")[0])
 
     _deep = _SS_DAILY_DEEP.get(_today_ss_kr, None)
 
@@ -18305,10 +18292,10 @@ def menu9_daily(pils, name, birth_year, gender):
     else:
         _f1 = f"오늘 일진 {today_cg}{today_jj}의 기운이 {display_name}님의 사주에 영향을 미칩니다."
         _f2, _f3, _f4, _f5 = (
-            "재물운은 보통입니다.",
-            "건강에 유의하십시오.",
-            "대인관계를 신중히 하십시오.",
-            "오늘 하루 계획을 세우고 실천하십시오.",
+            "재물 흐름은 평이합니다. 무리한 지출이나 투자보다는 지키는 데 집중하십시오.",
+            "체력 관리에 신경 쓰십시오. 과로와 수면 부족이 누적되지 않도록 조절이 필요합니다.",
+            "대인관계에서는 듣는 쪽이 유리합니다. 먼저 양보하면 관계가 부드러워집니다.",
+            "오늘 가장 중요한 일 하나를 정해 우선 처리하십시오. 그 하나를 끝내면 충분합니다.",
         )
 
     _oh_label_map = {
@@ -18326,71 +18313,10 @@ def menu9_daily(pils, name, birth_year, gender):
         "金": "금(金)",
         "水": "수(水)",
     }.get(_today_oh_jj, _today_oh_jj)
-    st.markdown(
-            f"""
-
-<div style="background:rgba(255,255,255,0.92);border:1.5px solid #d4af37; border-radius:20px;padding:24px;margin:10px 0 20px;box-shadow:0 8px 30px rgba(212,175,55,0.12)">
-
-<div style="font-size:17px;font-weight:900;color:#b38728;margin-bottom:12px">
-🔮 만신 일진 완전 해설 — {today.strftime("%Y년 %m월 %d일")} ({color_ganzhi_badge(today_cg+today_jj, font_size="18px", padding="2px 7px")}일, {_animal}의 날)
-</div>
-
-<div style="font-size:12px;color:#888;margin-bottom:14px">
-천간 오행: {_oh_cg_label} | 지지 오행: {_oh_jj_label} | 십성: {_today_ss_kr}
-</div>
-
-<div style="display:flex;flex-direction:column;gap:10px">
-
-<div style="background:#f0f7ff;border-left:4px solid #1565c0;border-radius:8px;padding:12px 16px">
-
-<div style="font-size:11px;font-weight:700;color:#1565c0;margin-bottom:4px">🌊 1단계 | 오늘의 천기 흐름</div>
-
-<div style="font-size:13px;color:#333;line-height:1.9">{_f1}</div>
-
-</div>
-
-<div style="background:#f9fff0;border-left:4px solid #2e7d32;border-radius:8px;padding:12px 16px">
-
-<div style="font-size:11px;font-weight:700;color:#2e7d32;margin-bottom:4px">💰 2단계 | 재물 조언</div>
-
-<div style="font-size:13px;color:#333;line-height:1.9">{_f2}</div>
-
-</div>
-
-<div style="background:#fff8f0;border-left:4px solid #e65100;border-radius:8px;padding:12px 16px">
-
-<div style="font-size:11px;font-weight:700;color:#e65100;margin-bottom:4px">🏃 3단계 | 건강과 활력</div>
-
-<div style="font-size:13px;color:#333;line-height:1.9">{_f3}</div>
-
-</div>
-
-<div style="background:#fdf0ff;border-left:4px solid #7b1fa2;border-radius:8px;padding:12px 16px">
-
-<div style="font-size:11px;font-weight:700;color:#7b1fa2;margin-bottom:4px">🤝 4단계 | 대인관계</div>
-
-<div style="font-size:13px;color:#333;line-height:1.9">{_f4}</div>
-
-</div>
-
-<div style="background:#fff3e0;border-left:4px solid #f57f17;border-radius:8px;padding:12px 16px">
-
-<div style="font-size:11px;font-weight:700;color:#f57f17;margin-bottom:4px">⚡ 5단계 | 핵심 실천 한 가지</div>
-
-<div style="font-size:13px;color:#333;line-height:1.9;font-weight:600">{_f5}</div>
-
-</div>
-
-</div>
-
-</div>""",
-        unsafe_allow_html=True,
-    )
-
     # -- 오늘 일진 카드 -----------------
 
 
-    d = DAILY_SS_MSG.get(today_ss, DAILY_SS_MSG["-"])
+    d = DAILY_SS_MSG.get(_today_ss_kr, DAILY_SS_MSG["-"])
 
     level_color = {
         "대길": "#4caf50",
@@ -18422,99 +18348,6 @@ def menu9_daily(pils, name, birth_year, gender):
 <span style="font-size:12px; color:#444"><b>💰 재물운:</b> {d["재물"]}</span>
 
 </div>
-
-</div>
-
-""",
-        unsafe_allow_html=True,
-    )
-
-    # -- 길한 시간 (용신 기반) ----------------
-
-    st.markdown(
-        '<div class="gold-section" style="margin-top:20px">⏰ 오늘의 길한 시간 (용신 기반)</div>',
-        unsafe_allow_html=True,
-    )
-
-    ys = get_yongshin(pils)
-
-    y_ohs = ys.get("종합_용신", [])
-
-    OH_HOUR_MAP = {
-        "木": [("3~5시", "寅"), ("5~7시", "卯")],
-        "火": [("9~11시", "巳"), ("11~13시", "午")],
-        "土": [("7~9시", "辰"), ("13~15시", "未")],
-        "金": [("15~17시", "申"), ("17~19시", "酉")],
-        "水": [("21~23시", "亥"), ("23~1시", "子")],
-    }
-
-    good_hours = []
-
-    for oh in y_ohs:
-        good_hours.extend(OH_HOUR_MAP.get(oh, []))
-
-    if good_hours:
-        tags = "".join([f"<span style='background:#f1f8e9; color:#2e7d32; padding:4px 12px; border-radius:6px; font-size:12px; margin-right:5px'>✅ {t}({jj}시)</span>" for t, jj in good_hours[:3]])
-
-        st.markdown(f"<div>{tags}</div>", unsafe_allow_html=True)
-
-    # -- 300-400자 상세 처방 카드 (행운아이템 + 조심 + 조언) --
-
-    # -- 300-400자 상세 처방 카드 (행운아이템 + 조심 + 조언) --
-
-
-    fp = DAILY_FULL.get(today_ss, DAILY_FULL["-"])
-
-    _today = datetime.now()
-
-    # 날짜+사주원국 기반 시드 -> 매일 다르지만 하루 안에서는 있  동일한 문장
-
-    _pil_seed = hash(tuple((p.get("cg", ""), p.get("jj", "")) for p in pils)) & 0xFFFF
-
-    _date_seed = _today.year * 10000 + _today.month * 100 + _today.day + _pil_seed
-
-    _rng = random.Random(_date_seed)
-
-    advice_text = f"{_rng.choice(fp['intro'])} {_rng.choice(fp['body'])} {_rng.choice(fp['outro'])}"
-
-    st.markdown(
-        f"""
-
-<div style="background:rgba(255,255,255,0.92);backdrop-filter:blur(15px);border:1.5px solid rgba(212,175,55,0.4); border-radius:18px;padding:24px;margin-top:16px;box-shadow:0 6px 25px rgba(0,0,0,0.06)">
-
-<div style="font-size:17px;font-weight:900;color:#333;margin-bottom:16px;display:flex;align-items:center;gap:8px">
-
-<span style="font-size:24px">{fp["icon"]}</span> 💊 오늘의 만신 처방
-
-</div>
-
-<div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px">
-
-<div style="flex:1;min-width:clamp(120px,38vw,180px);background:rgba(76,175,80,0.08);border:1px solid rgba(76,175,80,0.3); border-radius:12px;padding:12px 14px">
-
-<div style="font-size:12px;font-weight:800;color:#2e7d32;margin-bottom:5px">🍀 오늘의 행운 키워드</div>
-
-<div style="font-size:13px;color:#111;line-height:1.7;white-space:normal;word-break:break-all">{fp["lucky"]}</div>
-
-</div>
-
-<div style="flex:1;min-width:clamp(120px,38vw,180px);background:rgba(244,67,54,0.06);border:1px solid rgba(244,67,54,0.25); border-radius:12px;padding:12px 14px">
-
-<div style="font-size:12px;font-weight:800;color:#c62828;margin-bottom:5px">⚠️ 오늘 조심할 것</div>
-
-<div style="font-size:13px;color:#111;line-height:1.7;white-space:normal;word-break:break-all">{fp["caution"]}</div>
-
-</div>
-
-</div>
-
-<div style="background:rgba(212,175,55,0.06);border-left:4px solid #d4af37;padding:14px 16px; border-radius:0 12px 12px 0;font-size:14.5px;color:#222;line-height:2.0">
-
-        💡 <b>핵심 조언:</b> {advice_text}
-
-</div>
-
-<div style="font-size:11px;color:#bbb;text-align:right;margin-top:8px">{len(advice_text)}자</div>
 
 </div>
 
@@ -18588,8 +18421,9 @@ def menu9_daily(pils, name, birth_year, gender):
             "比肩": "🤜 독립적으로 움직일 때 최강. 협업보다 단독 업무에서 성과가 납니다.",
             "偏印": "🔍 새 정보 수집·공부·조사에 좋습니다. 중요한 결정은 오늘 내리지 마세요.",
             "正印": "📚 학습·시험·자격증 공부에 최적. 어른·멘토에게 연락하면 덕을 봅니다.",
+            "-": "오늘은 서두르지 않는 것이 유리합니다. 하던 일을 차분히 마무리하고 내일을 준비하십시오.",
         }
-        _action_today = _ACTION_SS.get(today_ss, "오늘 하루 흐름에 맞게 꾸준히 움직이세요.")
+        _action_today = _ACTION_SS.get(today_ss.split("(")[0], "오늘은 서두르지 않는 것이 유리합니다. 하던 일을 차분히 마무리하고 내일을 준비하십시오.")
 
         st.markdown(
             f"""<div style='background:#f0fff4;border:1.5px solid #27ae60;border-radius:14px;

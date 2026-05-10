@@ -6994,13 +6994,14 @@ class LocalSajuNarrator:
         # ── 오늘 총평 ─────────────────────────────────────────
         gh_msg = {
             "길": "✨ **상승 기류**: 중요한 결정·계약·고백 등 미뤘던 용기를 내기 가장 좋은 날입니다.",
+            "대길": "🌟 **최고 기류**: 오늘은 중요한 결정·계약·시작 모두 유리합니다. 적극적으로 움직이십시오.",
             "+":  "✨ **상승 기류**: 미뤘던 일을 처리하면 속도가 붙고 좋은 소식을 들을 수 있습니다.",
             "평": "⚖️ **평온 유지**: 무난한 하루입니다. 새로운 무리수보다 하던 일을 마무리하십시오.",
             "흉": "🛡️ **수비 모드**: 평소 안 하던 실수가 나올 수 있습니다. 한 템포 쉬어가십시오.",
             "-":  "🛡️ **수비 모드**: 계획이 틀어질 수 있습니다. 운전·말 조심, 중요 결정은 내일로.",
         }
         lines.append(f"### 📍 {name}님의 오늘 총평")
-        lines.append(f"{gh_msg.get(sw_gh, '평온한 기운이 흐릅니다.')}\n")
+        lines.append(f"{gh_msg.get(sw_gh.split('(')[0], '⚖️ **평온 유지**: 무난한 하루입니다.')}\n")
 
         # ── 오늘 일진 십성별 직격 지침 ────────────────────────
         _day_ss_guide = {
@@ -7088,118 +7089,8 @@ class LocalSajuNarrator:
                 lines.append(f"- {d}")
         else:
             lines.append("### 📋 오늘의 지침")
-            lines.append("차분하게 평범한 일상을 성실하게 수행하는 것이 최선의 액운막이입니다.")
+            lines.append("오늘은 새로운 시도보다 기존에 진행하던 일을 차분히 마무리하는 것이 효율적입니다.")
         lines.append("")
-
-        # ── 오늘 시간별 길한 시간대 ───────────────────────────
-        lines.append("### ⏰ 오늘의 시간별 길흉")
-
-        _JJ_HOUR = {
-            "子":"23~01시(자시)","丑":"01~03시(축시)","寅":"03~05시(인시)",
-            "卯":"05~07시(묘시)","辰":"07~09시(진시)","巳":"09~11시(사시)",
-            "午":"11~13시(오시)","未":"13~15시(미시)","申":"15~17시(신시)",
-            "酉":"17~19시(유시)","戌":"19~21시(술시)","亥":"21~23시(해시)",
-        }
-        _JJ_OH = {"子":"水","丑":"土","寅":"木","卯":"木","辰":"土","巳":"火",
-                  "午":"火","未":"土","申":"金","酉":"金","戌":"土","亥":"水"}
-        _JJ_OH_F = {"子":"水","丑":"土","寅":"木","卯":"木","辰":"土","巳":"火",
-                    "午":"火","未":"土","申":"金","酉":"金","戌":"土","亥":"水"}
-
-        _hour_order = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"]
-        _OHN = {"木":"목(木)","火":"화(火)","土":"토(土)","金":"금(金)","水":"수(水)"}
-        _OHN2 = {"木":"목(木)","火":"화(火)","土":"토(土)","金":"금(金)","水":"수(水)"}
-
-        good_hours  = []
-        bad_hours   = []
-        for jj in _hour_order:
-            h_oh = _JJ_OH_F.get(jj, "")
-            if bool(h_oh) and h_oh in yongshin:
-                good_hours.append(f"🌟 {_JJ_HOUR[jj]} — {_OHN2.get(h_oh,h_oh)} 용신 시간")
-            elif is_ys_day and today_oh == h_oh:
-                good_hours.append(f"✅ {_JJ_HOUR[jj]} — 오늘 일진 기운과 일치")
-
-        if good_hours:
-            lines.append("**중요한 만남·계약·결정에 좋은 시간:**")
-            for h in good_hours[:3]:
-                lines.append(f"  - {h}")
-        else:
-            lines.append("오늘은 특별히 길한 시간이 두드러지지 않습니다. 오전 중 집중하는 것이 일반적으로 유리합니다.")
-        lines.append("")
-
-        # ── 개운 처방 ─────────────────────────────────────────
-        lines.append("### 🧭 오늘의 개운 처방")
-
-        _ss_kor_map = {
-            "比肩":"비견","劫財":"겁재","食神":"식신","傷官":"상관",
-            "偏財":"편재","正財":"정재","偏官":"편관","正官":"정관",
-            "偏印":"편인","正印":"정인",
-        }
-        _df_key = _ss_kor_map.get(sw_ss, "-")
-        _df = DAILY_FULL.get(_df_key, DAILY_FULL.get("-", {}))
-        if _df:
-            lines.append(f"- 🗺️ **길한 방향·색상·시간**: {_df.get('lucky','무난한 하루')}")
-            lines.append(f"- 🚫 **오늘 조심할 것**: {_df.get('caution','특이사항 없음')}")
-            _intro_list = _df.get("intro", [])
-            if _intro_list:
-                lines.append(f"\n> 🔮 {random.choice(_intro_list)}")
-
-        # 용신 오행 기반 처방
-        _oh_remedy = {
-            "木": "🌿 동쪽을 향하거나 초록색 소품을 몸 가까이 두십시오. 새벽 산책이 기운을 끌어올립니다.",
-            "火": "🔥 남쪽이 길합니다. 빨간색·주황색 포인트를 활용하고 오전 중 햇빛을 쬐십시오.",
-            "土": "🏔️ 중앙·북동쪽이 유리합니다. 황색·베이지로 안정감을 더하고 규칙적 식사를 챙기십시오.",
-            "金": "⚙️ 서쪽이 길합니다. 흰색·은색·금속 소품이 행운을 부릅니다. 결단은 오전에 하십시오.",
-            "水": "💧 북쪽이 유리합니다. 검정·남색, 충분한 수분 섭취, 명상이나 독서가 도움됩니다.",
-        }
-        _ilg_info = ILGAN_DESC.get(ilgan, {})
-        _lucky_str = _ilg_info.get("lucky", "")
-        if _lucky_str:
-            lines.append(f"\n**일간({ilgan}) 기본 행운**: {_lucky_str}")
-        if yongshin:
-            _remedy = _oh_remedy.get(yongshin[0], "")
-            if _remedy:
-                lines.append(f"**용신({yongshin[0]}) 오늘 처방**: {_remedy}")
-
-        # ── 오늘의 개운(開運) 처방 ─────────────────────────────────
-        lines.append("\n### 🧭 오늘의 개운 처방 (방향·색상·시간·행동)")
-
-        # DAILY_FULL에서 방향/색상/주의 직접 출력
-        _ss_kor_map = {
-            "比肩": "비견", "劫財": "겁재", "食神": "식신", "傷官": "상관",
-            "偏財": "편재", "正財": "정재", "偏官": "편관", "正官": "정관",
-            "偏印": "편인", "正印": "정인",
-        }
-        _df_key = _ss_kor_map.get(sw_ss, "-")
-        _df = DAILY_FULL.get(_df_key, DAILY_FULL.get("-", {}))
-        if _df:
-            lines.append(f"- 🗺️ **길한 방향·색상·시간**: {_df.get('lucky', '무난한 하루')}")
-            lines.append(f"- 🚫 **오늘 조심할 것**: {_df.get('caution', '특이사항 없음')}")
-            # intro 중 1개 랜덤 출력 (만신 어투 한줄)
-            _intro_list = _df.get("intro", [])
-            if _intro_list:
-                lines.append(f"\n> 🔮 {random.choice(_intro_list)}")
-
-        # 일간 기반 행운 방향/색상 (ILGAN_DESC lucky 필드)
-        _ilg_info = ILGAN_DESC.get(b.get("ilgan", "甲"), {})
-        _lucky_str = _ilg_info.get("lucky", "")
-        if _lucky_str:
-            lines.append(f"\n**[내 일간 기본 행운 정보]** {_lucky_str}")
-
-        # 용신 오행 기반 오늘의 행동 처방
-        _yong = b.get("yongshin", [])
-        if _yong:
-            _oh_remedy_map = {
-                "木": "🌿 오늘은 동쪽을 향하거나 초록색 소품을 몸 가까이 두십시오. 나무·식물·새벽 산책이 기운을 끌어올립니다.",
-                "火": "🔥 남쪽이 길합니다. 빨간색·주황색 포인트 아이템을 활용하고 오전 중 햇빛을 쬐십시오.",
-                "土": "🏔️ 중앙·북동쪽이 유리합니다. 황색·베이지 계열로 안정감을 더하고 규칙적인 식사를 챙기십시오.",
-                "金": "⚙️ 서쪽이 길합니다. 흰색·은색·금속 소품이 행운을 부릅니다. 결단이 필요한 일은 오전에 처리하십시오.",
-                "水": "💧 북쪽이 유리합니다. 검정·남색 계열, 충분한 수분 섭취, 명상이나 조용한 독서가 도움이 됩니다.",
-            }
-            for _oh in _yong[:2]:
-                _remedy = _oh_remedy_map.get(_oh, "")
-                if _remedy:
-                    lines.append(f"- 용신({_oh}): {_remedy}")
-                    break  # 1개만
 
         # ── 오늘 신살(신살) 경고 ─────────────────────────────────
         try:
@@ -7221,7 +7112,7 @@ class LocalSajuNarrator:
             }
             if _bad_sinsal:
                 _sinsal_items = []
-                for _s in _bad_sinsal:
+                for _s in _bad_sinsal[:2]:
                     _sname = _s.get("이름", _s.get("name", ""))
                     _sdesc = _s.get("desc", "")
                     _spresc = _SINSAL_PRESCRIPTION.get(_sname, _s.get("caution", "주의하여 행동하십시오."))
