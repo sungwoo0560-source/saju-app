@@ -1980,7 +1980,7 @@ def get_monthly_luck(pils, year, month):
 
     sipsung_jj = TEN_GODS_MATRIX.get(ilgan, {}).get(jj_junggi, "-")
 
-    luck_data = MONTHLY_LUCK_DESC.get(sipsung) or MONTHLY_LUCK_DESC.get(sipsung_jj) or MONTHLY_LUCK_DESC["-"]
+    luck_data = MONTHLY_LUCK_DESC.get(sipsung.split("(")[0]) or MONTHLY_LUCK_DESC.get(sipsung_jj.split("(")[0]) or MONTHLY_LUCK_DESC["-"]
 
     return {
         "월": month,

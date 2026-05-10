@@ -11571,7 +11571,7 @@ def render_worry_inference(pils, birth_year, gender):
             border-radius:16px;padding:20px 24px;margin-bottom:12px;
             box-shadow:0 4px 16px rgba(0,0,0,0.25)">
   <div style="font-size:11px;font-weight:700;color:#d4af37;
-              letter-spacing:2px;margin-bottom:10px">🔮 만신의 첫 진단</div>
+              letter-spacing:2px;margin-bottom:10px">📍 현재 운세 진단</div>
   <div style="display:flex;align-items:flex-start;gap:16px">
     <div style="font-size:44px;min-width:50px;text-align:center;
                 line-height:1">{icon}</div>
@@ -11598,7 +11598,7 @@ def render_worry_inference(pils, birth_year, gender):
     top_worry = result["top_worry"]
     solution = WORRY_SOLUTION.get(top_worry, {})
     if solution:
-        with st.expander("🔮 만신의 처방 — 지금 당장 할 수 있는 개운법", expanded=True):
+        with st.expander("💊 개운 처방 — 지금 실천할 수 있는 것", expanded=True):
             _acts3 = solution.get("즉각행동", [])[:3]
             actions_html = "".join(
                 f'<div style="color:#d0d0d0;padding:4px 0;font-size:13px;">{a}</div>'
@@ -15375,7 +15375,7 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
     )
 
     st.markdown(
-        '<div class="gold-section">📜 종합 사주 해설 - 만신의 풀이</div>',
+        '<div class="gold-section">📜 종합 사주 해설</div>',
         unsafe_allow_html=True,
     )
 
@@ -16893,7 +16893,7 @@ def menu4_future3(
     )
 
     st.markdown(
-        '<div class="gold-section">📜 미래 3년 완전 해설 - 만신의 풀이</div>',
+        '<div class="gold-section">📜 미래 3년 완전 해설</div>',
         unsafe_allow_html=True,
     )
 
@@ -17627,7 +17627,7 @@ def menu5_money(pils, birth_year, gender, name="내담자"):
     )
 
     st.markdown(
-        '<div class="gold-section">📜 재물/사업 완전 해설 - 만신의 풀이</div>',
+        '<div class="gold-section">📜 재물/사업 완전 해설</div>',
         unsafe_allow_html=True,
     )
 
@@ -18031,7 +18031,7 @@ def menu6_relations(pils, name, birth_year, gender, marriage_status="미혼"):
     )
 
     st.markdown(
-        '<div class="gold-section">📜 육친/인간관계 완전 해설 - 만신의 풀이</div>',
+        '<div class="gold-section">📜 육친/인간관계 완전 해설</div>',
         unsafe_allow_html=True,
     )
 
