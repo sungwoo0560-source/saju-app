@@ -3017,44 +3017,6 @@ class LocalSajuNarrator:
             )
         lines.append("")
 
-        # ── 10. 향후 10년 타이밍 표 ─────────────────────────────
-        lines.append("---")
-        lines.append(f"### 📅 {name}님의 향후 10년 핵심 타이밍")
-        lines.append(
-            f"\n앞으로 10년, {name}님이 언제 적극적으로 움직이고 "
-            f"언제 내실을 다져야 하는지 한눈에 보여드립니다.\n"
-        )
-        cur_y_r    = b.get("cur_year", datetime.now().year)
-        _OH_DY     = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
-                      "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
-        _SS_SHORT  = {"食神":"식신","傷官":"상관","偏財":"편재","正財":"정재",
-                      "偏官":"편관","正官":"정관","劫財":"겁재","比肩":"비견",
-                      "偏印":"편인","正印":"정인"}
-        _ACT_SHORT = {
-            "偏財":"투자·사업 확장","正財":"저축·계약 체결",
-            "食神":"창업·부업 시작","傷官":"이직·창작 도전",
-            "偏官":"건강·법적 방어","正官":"승진·자격 도전",
-            "劫財":"현금 지키기",  "比肩":"독립·자기 브랜드",
-            "偏印":"공부·이사",    "正印":"자격증·귀인 만남",
-        }
-        lines.append("| 연도 | 나이 | 세운 | 십성 | 판단 | 핵심 행동 |")
-        lines.append("|---|---|---|---|---|---|")
-        for yr in range(cur_y_r, cur_y_r + 10):
-            try:
-                sw_yr  = get_yearly_luck(pils, yr) or {}
-                sw_ss  = sw_yr.get("십성_천간", "")
-                sw_gan = sw_yr.get("세운", "")
-                sw_gh  = sw_yr.get("길흉", "평")
-                yr_oh  = _OH_DY.get(sw_gan[:1], "") if sw_gan else ""
-                is_ys  = bool(yr_oh) and yr_oh in yongshin_r
-                is_gs  = bool(yr_oh) and yr_oh in gisin_r
-                grade  = "🌟황금기" if is_ys else ("🔴수비" if is_gs else ("✅길" if sw_gh in ["길","+"] else ("⚠️흉" if sw_gh in ["흉","-"] else "⚖️평")))
-                action = _ACT_SHORT.get(sw_ss, "흐름 유지")
-                lines.append(f"| {yr} | {yr-birth_year+1}세 | {sw_gan} | {_SS_SHORT.get(sw_ss,sw_ss)} | {grade} | {action} |")
-            except Exception as _te:
-                _saju_log.warning("[full_report 타이밍] %s", _te)
-        lines.append("")
-
         # ── 추가 섹션 A: 타고난 재능과 최적 직업군 ──────────────
         lines.append("---")
         lines.append(f"### 🎓 {name}님의 타고난 재능과 최적 직업군")
