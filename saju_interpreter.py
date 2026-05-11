@@ -3327,7 +3327,7 @@ class LocalSajuNarrator:
                 ),
             }
             _advice = _DW_ADVICE.get(_cdw_ss, "꾸준한 내실로 다음 황금기를 준비하는 시기입니다.")
-            lines.append(f"**만신의 직격 처방:**\n{_advice}\n")
+            lines.append(f"**처방:**\n{_advice}\n")
 
         # ── 전생애 대운 목록 ────────────────────────────────────
         lines.append("---")
@@ -4299,7 +4299,7 @@ class LocalSajuNarrator:
                         "劫財":"손재·경쟁 조심의 해",  "比肩":"독립·자기 주도의 해",
                         "偏印":"이동·변화 기운의 해",  "正印":"귀인·자격·학업의 해",
                     }
-                    _sw_short = _sw_desc_map.get(sw_ss, "흐름 유지의 해")
+                    _sw_short = _sw_desc_map.get(sw_ss.split("(")[0], "흐름 유지의 해")
                     _cur_txt  = " ← **지금 이 해**" if yr == cur_year else ""
                     lines.append(
                         f"  - **{yr}년** ({yr - birth_year + 1}세): "
@@ -5490,8 +5490,7 @@ class LocalSajuNarrator:
             lines.append(f"- ❌ {_d}")
 
         lines.append(
-            f"\n🔮 만신이 전하는 말씀: {name}님, 천기(天機)가 알려주는 당신의 길은 "
-            f"**{_gyeok_j or '고유한 기운'}**의 흐름을 타는 것입니다. "
+            f"\n{name}님, 격국의 흐름은 **{_gyeok_j or '고유한 기운'}**입니다. "
             "억지로 거스르지 말고, 지금 이 시기의 기운에 맞게 움직이면 반드시 열립니다."
         )
 
@@ -5672,8 +5671,7 @@ class LocalSajuNarrator:
         lines.append("")
 
         lines.append(
-            f"🔮 만신이 전하는 부동산 말씀: {name}님, 집은 단순한 건물이 아니라 "
-            "기운이 모이는 그릇입니다. 용신 방위로 이사하고, "
+            f"{name}님, 용신 방위로 이사하고 "
             "용신 오행 대운에 매입 결정을 내리면 "
             "부동산이 평생 재물을 지키는 든든한 기반이 됩니다. "
             "겁재·편관 세운에 충동적으로 움직이는 것은 반드시 삼가십시오."
@@ -6481,10 +6479,10 @@ class LocalSajuNarrator:
             "좋은 날에 시작한 인연은 그 기운이 평생 이어집니다."
         )
         lines.append(
-            f"\n🔮 만신의 말씀: {name}님, 완벽한 궁합은 없습니다. "
+            f"\n{name}님, 완벽한 궁합은 없습니다. "
             "서로의 부족한 기운을 채워주고 넘치는 기운을 나누는 것이 진정한 인연입니다. "
             f"**{_OH_KR_G.get(_top_oh_g,'')} 오행**의 기운을 가진 분과 만나면 "
-            "자연스럽게 서로를 완성시키는 천생연분의 흐름이 열립니다."
+            "자연스럽게 서로를 완성시키는 흐름이 열립니다."
         )
 
         # ── 자녀 사주 연동 분석 섹션 ────────────────────────────────────────
@@ -6731,7 +6729,7 @@ class LocalSajuNarrator:
         # 마무리 무당 말투
         _KID_OH_KR_K = _OH_KR_K.get(_child_oh_k, _child_oh_k)
         lines.append(
-            f"\n🔮 만신의 말씀: {name}님, 자녀는 부모의 소유가 아니라 "
+            f"\n{name}님, 자녀는 부모의 소유가 아니라 "
             f"하늘이 잠시 맡겨준 귀한 손님입니다. "
             f"{name}님의 팔자 속 자녀성은 **{_KID_OH_KR_K} 오행**의 기운을 품고 있으니, "
             f"그 기운을 꺾지 말고 흘러가도록 도와주는 것이 "
@@ -11348,7 +11346,7 @@ def _nar_future(ctx):
                 "劫財": f"劫財(겁재) 大運은 재물의 기복이 심한 시기입니다. 투기/보증/동업을 피하고 현상 유지에 집중하십시오.",
             }
 
-            desc = DW_SS_DESC.get(dw_ss, f"{dw_ss} 十星 大運으로 {dw['str']}의 기운이 10년간 흐릅니다.")
+            desc = DW_SS_DESC.get(dw_ss.split("(")[0], f"{dw_ss} 十星 大運으로 {dw['str']}의 기운이 10년간 흐릅니다.")
 
             # DAEWOON_INTERP 천간·지지 해석
             dw_cg_interp = DAEWOON_INTERP.get(dw.get("cg", ""), "")
@@ -11545,7 +11543,7 @@ def _nar_future(ctx):
                 _saju_log.warning("[_nar_future] 오류: %s", sys.exc_info()[1])
 
             yd = YEAR_SS_DETAIL.get(
-                sw_ss,
+                sw_ss.split("(")[0],
                 {
                     "총평": f"{y}년 {sw.get('세운', '')} 세운이 흐릅니다.",
                     "돈": "재물 흐름을 주시하십시오.",
@@ -12049,7 +12047,7 @@ def _nar_wealth(ctx):
                     f"",
                     f"",
                     f"",
-                    f"[ 제10장 | 만신의 재물 최종 처방 ]",
+                    f"[ 제10장 | 재물 최종 처방 ]",
                     f"",
                     f"{display_name}님의 재물 운을 한마디로 요약하면:",
                     f'"{combos[0][1].get("재물", "타고난 방식으로 꾸준히 쌓아가는 재물") if combos else "성실함과 전문성으로 재물을 쌓아가는 사주"}"',
@@ -12290,7 +12288,7 @@ def _nar_health(ctx):
                     f"올해 {sw_now.get('세운', '')} 세운에서의 인간관계:",
                     f"{'* 새로운 귀인을 만날 운기입니다. 모임, 행사에 적극적으로 참여하십시오.' if _get_yongshin_match(sw_now.get('십성_천간', ''), yongshin_ohs, ilgan_oh) == 'yong' else '* 인간관계에서 신중함이 요구되는 해입니다. 새로운 동업이나 큰 부탁은 자제하십시오.'}",
                     f"",
-                    f"[ 제8장 | 만신의 인간관계 최종 처방 ]",
+                    f"[ 제8장 | 인간관계 최종 처방 ]",
                     f"",
                     f"{display_name}님의 인간관계 핵심 비결:",
                     f"",

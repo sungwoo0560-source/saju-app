@@ -11021,8 +11021,9 @@ def menu_monthly(pils, birth_year, gender):
         month_gan_idx = (year_gan_idx * 2 + 2 + i) % 10
         month_cg = CG[month_gan_idx]
         sip_cg = TEN_GODS_MATRIX.get(ilgan, {}).get(month_cg, "")
-        gil = GIL_MAP.get(sip_cg, "〰️ 평")
-        detail = SIPSONG_DETAIL.get(sip_cg, {})
+        sip_cg_hj = sip_cg.split("(")[0]
+        gil = GIL_MAP.get(sip_cg_hj, "〰️ 평")
+        detail = SIPSONG_DETAIL.get(sip_cg_hj, {})
         is_current = (current_month == i + 1)
 
         label = f"{'🔆 ' if is_current else ''}{'%02d' % (i + 1)}월 ({month_cg}{jj}) {sip_cg} {gil}"
@@ -11063,8 +11064,9 @@ def menu_daily(pils, birth_year, gender):
     day_jj = JJ[days % 12]
     ilgan = pils[1]["cg"]
     sip = TEN_GODS_MATRIX.get(ilgan, {}).get(day_cg, "")
+    sip_hj = sip.split("(")[0]
 
-    detail = SIPSONG_DETAIL.get(sip, {})
+    detail = SIPSONG_DETAIL.get(sip_hj, {})
     day_oh = OH.get(day_cg, "木")
     body = OHANG_BODY.get(day_oh, {})
 
@@ -11076,7 +11078,7 @@ def menu_daily(pils, birth_year, gender):
         "偏官": "🔴 흉", "劫財": "⚠️ 주의", "傷官": "⚠️ 주의",
         "比肩": "〰️ 평", "正官": "〰️ 평", "偏印": "〰️ 평",
     }
-    gil = GIL_MAP.get(sip, "〰️ 평")
+    gil = GIL_MAP.get(sip_hj, "〰️ 평")
     color = OH_COLOR.get(day_oh, "#555")
     core = detail.get("핵심", "흐름에 맞게 움직이세요.")
     prescription = detail.get("처방", "오늘 하루 작은 것에 감사하며 지내세요.")
@@ -19190,7 +19192,7 @@ def menu11_yearly(pils, name, birth_year, gender):
 
 <div style="font-size:17px;font-weight:900;color:#b38728;margin-bottom:14px">
 
-    🔮 만신 엔진 — {sel_year}년 {display_name}님의 12개월 완전 해설
+    📅 {sel_year}년 {display_name}님의 12개월 월운 해설
 
 </div>
 
