@@ -15033,6 +15033,18 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
     except Exception as _e_y1:
         pass
 
+    # Patch Y-2: 정통 지지 풀이 카드 (일지)
+    try:
+        from saju_zhengtong import render_jiji_card
+        _ilji_jj_y2 = pils[1].get("jj", "") if len(pils) > 1 else ""
+        if _ilji_jj_y2:
+            st.markdown(
+                render_jiji_card(_ilji_jj_y2, display_name, "일지"),
+                unsafe_allow_html=True,
+            )
+    except Exception as _e_y2:
+        pass
+
     # ③ 성향 판독
 
     st.markdown('<div class="gold-section">🧠 성향 판독</div>', unsafe_allow_html=True)
