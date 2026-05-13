@@ -15047,6 +15047,19 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
     except Exception as _e_y2:
         st.warning(f"지지 풀이 로드 실패: {_e_y2}")
 
+    # Patch Y-3: 60갑자 일주 운명 카드
+    try:
+        from saju_zhengtong import render_ilju_card
+        _ilgan_cg_y3 = pils[1].get("cg", "") if len(pils) > 1 else ""
+        _ilji_jj_y3 = pils[1].get("jj", "") if len(pils) > 1 else ""
+        if _ilgan_cg_y3 and _ilji_jj_y3:
+            st.markdown(
+                render_ilju_card(_ilgan_cg_y3, _ilji_jj_y3, display_name),
+                unsafe_allow_html=True,
+            )
+    except Exception as _e_y3:
+        pass
+
     # ③ 성향 판독
 
     st.markdown('<div class="gold-section">🧠 성향 판독</div>', unsafe_allow_html=True)
