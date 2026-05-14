@@ -15052,13 +15052,14 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
         from saju_zhengtong import render_ilju_card
         _ilgan_cg_y3 = pils[1].get("cg", "") if len(pils) > 1 else ""
         _ilji_jj_y3 = pils[1].get("jj", "") if len(pils) > 1 else ""
+        _name_y3 = name or "내담자"
         if _ilgan_cg_y3 and _ilji_jj_y3:
             st.markdown(
-                render_ilju_card(_ilgan_cg_y3, _ilji_jj_y3, display_name),
+                render_ilju_card(_ilgan_cg_y3, _ilji_jj_y3, _name_y3),
                 unsafe_allow_html=True,
             )
     except Exception as _e_y3:
-        pass
+        st.warning(f"일주 60갑자 카드 로드 실패: {_e_y3}")
 
     # ③ 성향 판독
 
