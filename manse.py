@@ -15061,6 +15061,36 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
     except Exception as _e_y3:
         st.warning(f"일주 60갑자 카드 로드 실패: {_e_y3}")
 
+    # Patch Y-4: 정통 명리학 통합 컴포넌트 3종
+    try:
+        from saju_zhengtong import (
+            render_four_pillars_card,
+            render_sipseong_combinations_card,
+            render_ohaeng_cycle_card,
+        )
+        _name_y4 = name or "내담자"
+
+        # ① 4기둥 통합 박스 (무지개 그라데이션)
+        st.markdown(
+            render_four_pillars_card(pils, _name_y4),
+            unsafe_allow_html=True,
+        )
+
+        # ② 십성 조합 감지 박스 (다이아몬드 테마)
+        _sipseong_html = render_sipseong_combinations_card(pils, _name_y4)
+        if _sipseong_html:
+            st.markdown(_sipseong_html, unsafe_allow_html=True)
+
+        # ③ 오행 5단계 순환 시각화 (그레이 테마)
+        _ilgan_cg_y4 = pils[1].get("cg", "") if len(pils) > 1 else ""
+        if _ilgan_cg_y4:
+            st.markdown(
+                render_ohaeng_cycle_card(_ilgan_cg_y4, _name_y4),
+                unsafe_allow_html=True,
+            )
+    except Exception as _e_y4:
+        st.warning(f"Y-4 정통 명리학 통합 카드 로드 실패: {_e_y4}")
+
     # ③ 성향 판독
 
     st.markdown('<div class="gold-section">🧠 성향 판독</div>', unsafe_allow_html=True)

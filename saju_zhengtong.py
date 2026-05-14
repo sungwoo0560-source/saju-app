@@ -5845,3 +5845,701 @@ def render_ilju_card(ilgan_cg: str, ilji_jj: str, name: str = "내담자") -> st
 """
     return html
 
+
+# ── Y-4: 4기둥 통합 + 십성 조합 + 오행 순환 ─────────────────────────────────
+
+# 내부 참조 테이블 (독립 실행 가능, saju_data 비의존)
+_CG_OHAENG = {
+    "甲": "木", "乙": "木", "丙": "火", "丁": "火", "戊": "土",
+    "己": "土", "庚": "金", "辛": "金", "壬": "水", "癸": "水",
+}
+_JJ_OHAENG = {
+    "子": "水", "丑": "土", "寅": "木", "卯": "木", "辰": "土", "巳": "火",
+    "午": "火", "未": "土", "申": "金", "酉": "金", "戌": "土", "亥": "水",
+}
+_CG_KR = {
+    "甲": "갑", "乙": "을", "丙": "병", "丁": "정", "戊": "무",
+    "己": "기", "庚": "경", "辛": "신", "壬": "임", "癸": "계",
+}
+_JJ_KR = {
+    "子": "자", "丑": "축", "寅": "인", "卯": "묘", "辰": "진", "巳": "사",
+    "午": "오", "未": "미", "申": "신", "酉": "유", "戌": "술", "亥": "해",
+}
+_JJ_ORDER = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"]
+
+# 십성 테이블 (일간 기준 천간 십성)
+_TEN_GODS = {
+    "甲": {"甲": "비견", "乙": "겁재", "丙": "식신", "丁": "상관", "戊": "편재",
+           "己": "정재", "庚": "편관", "辛": "정관", "壬": "편인", "癸": "정인"},
+    "乙": {"乙": "비견", "甲": "겁재", "丁": "식신", "丙": "상관", "己": "편재",
+           "戊": "정재", "辛": "편관", "庚": "정관", "癸": "편인", "壬": "정인"},
+    "丙": {"丙": "비견", "丁": "겁재", "戊": "식신", "己": "상관", "庚": "편재",
+           "辛": "정재", "壬": "편관", "癸": "정관", "甲": "편인", "乙": "정인"},
+    "丁": {"丁": "비견", "丙": "겁재", "己": "식신", "戊": "상관", "辛": "편재",
+           "庚": "정재", "癸": "편관", "壬": "정관", "乙": "편인", "甲": "정인"},
+    "戊": {"戊": "비견", "己": "겁재", "庚": "식신", "辛": "상관", "壬": "편재",
+           "癸": "정재", "甲": "편관", "乙": "정관", "丙": "편인", "丁": "정인"},
+    "己": {"己": "비견", "戊": "겁재", "辛": "식신", "庚": "상관", "癸": "편재",
+           "壬": "정재", "乙": "편관", "甲": "정관", "丁": "편인", "丙": "정인"},
+    "庚": {"庚": "비견", "辛": "겁재", "壬": "식신", "癸": "상관", "甲": "편재",
+           "乙": "정재", "丙": "편관", "丁": "정관", "戊": "편인", "己": "정인"},
+    "辛": {"辛": "비견", "庚": "겁재", "癸": "식신", "壬": "상관", "乙": "편재",
+           "甲": "정재", "丁": "편관", "丙": "정관", "己": "편인", "戊": "정인"},
+    "壬": {"壬": "비견", "癸": "겁재", "甲": "식신", "乙": "상관", "丙": "편재",
+           "丁": "정재", "戊": "편관", "己": "정관", "庚": "편인", "辛": "정인"},
+    "癸": {"癸": "비견", "壬": "겁재", "乙": "식신", "甲": "상관", "丁": "편재",
+           "丙": "정재", "己": "편관", "戊": "정관", "辛": "편인", "庚": "정인"},
+}
+
+# 지장간 정기 (주기)
+_JIJANGGAN_MAIN = {
+    "子": "癸", "丑": "癸", "寅": "甲", "卯": "乙", "辰": "戊",
+    "巳": "丙", "午": "丁", "未": "己", "申": "庚", "酉": "辛",
+    "戌": "戊", "亥": "壬",
+}
+
+# 12운성 (음양역, 장생 시작 지지 인덱스)
+_JANGSAENG_IDX = {
+    "甲": 11, "乙": 6,  "丙": 2,  "丁": 9,
+    "戊": 2,  "己": 9,  "庚": 5,  "辛": 0,
+    "壬": 8,  "癸": 3,
+}
+_IS_YANG_GAN = {"甲", "丙", "戊", "庚", "壬"}
+_UNSUNG_LABELS = ["장생", "목욕", "관대", "건록", "제왕", "쇠", "병", "사", "묘", "절", "태", "양"]
+
+
+def _calc_ss(ilgan: str, cg: str) -> str:
+    return _TEN_GODS.get(ilgan, {}).get(cg, "-")
+
+
+def _calc_jj_ss(ilgan: str, jj: str) -> str:
+    main_cg = _JIJANGGAN_MAIN.get(jj, "")
+    return _TEN_GODS.get(ilgan, {}).get(main_cg, "-") if main_cg else "-"
+
+
+def _calc_unsung(ilgan: str, jj: str) -> str:
+    start = _JANGSAENG_IDX.get(ilgan, 0)
+    try:
+        jj_idx = _JJ_ORDER.index(jj)
+    except ValueError:
+        return "-"
+    offset = (jj_idx - start) % 12 if ilgan in _IS_YANG_GAN else (start - jj_idx) % 12
+    return _UNSUNG_LABELS[offset]
+
+
+def _get_all_ss(ilgan: str, pils: list) -> list:
+    """원국 7글자 십성 리스트 (일간 천간 제외)"""
+    result = []
+    for i, p in enumerate(pils):
+        cg = p.get("cg", "")
+        jj = p.get("jj", "")
+        if not (i == 1 and cg == ilgan):
+            ss = _calc_ss(ilgan, cg)
+            if ss and ss != "-":
+                result.append(ss)
+        jj_ss = _calc_jj_ss(ilgan, jj)
+        if jj_ss and jj_ss != "-":
+            result.append(jj_ss)
+    return result
+
+
+# ── 십성 조합 20개 패턴 ───────────────────────────────────────────────────────
+SIPSEONG_COMBINATIONS = {
+    "관인상생": {
+        "한자": "官印相生",
+        "조건": "관성(정관/편관) + 인성(정인/편인) 통기",
+        "별칭": "학자·명예가 귀격",
+        "성격": "지식과 권위를 동시에 추구하는 성향. 윤리적이고 모범적이며 사회적 신뢰를 중시한다. 규칙과 원칙을 철저히 지키며 책임감이 강하다.",
+        "직업": "교수·연구원·판사·검사·의사·공무원·교육계 리더",
+        "재물": "지식·자격·직위를 통해 안정적 수입. 급여 중심의 꾸준한 재물 형성. 큰 투기보다 장기 축적.",
+        "인연": "지적 수준 높은 파트너를 원한다. 깊고 진중한 관계를 선호하며 가볍게 사귀지 않는다.",
+        "주의": "지나친 이상주의·원칙주의로 현실 적응 어려울 수 있음. 유연성 부족 경계.",
+        "임팩트": "사회적 인정과 명예가 평생 따라오는 최고급 귀격 — 한 분야의 권위자가 될 운명.",
+    },
+    "식신생재": {
+        "한자": "食神生財",
+        "조건": "식신 + 정재/편재",
+        "별칭": "사업가·자영업자 부격",
+        "성격": "재능과 표현력이 곧 수입으로 연결되는 유형. 활동적이고 창의적이며 즐기면서 돈을 번다. 여유와 풍요를 삶의 기준으로 삼는다.",
+        "직업": "요식업·콘텐츠 제작·강의·자영업·사업·서비스업·예술 상업화",
+        "재물": "재능 발휘가 곧 재물 창출. 노력 대비 수익이 좋고 사업 수완이 뛰어남. 꾸준히 성장하는 부.",
+        "인연": "표현이 풍부하고 활기찬 관계를 추구. 여유 있고 즐거운 파트너를 선호.",
+        "주의": "과도한 활동으로 건강 소홀. 지출이 빠를 수 있어 저축 습관이 중요.",
+        "임팩트": "타고난 사업 그릇 — 자신의 재능이 재물로 직결되는 행복한 운명.",
+    },
+    "재생관": {
+        "한자": "財生官",
+        "조건": "재성(정재/편재) + 관성(정관/편관)",
+        "별칭": "재물→명예 전환형",
+        "성격": "재물로 사회적 지위를 얻는 유형. 실용적이고 현실적이며 능력을 인정받고 싶어한다. 사업과 권위를 함께 추구.",
+        "직업": "기업인·CEO·정치가·사업가 후 공직 진출·단체장",
+        "재물": "재물이 먼저 쌓이고 그것이 명예로 이어지는 구조. 사업 성공 후 사회적 영향력 확대.",
+        "인연": "실력 있고 안정적인 파트너를 원한다. 능력자에게 끌리는 성향.",
+        "주의": "재물과 명예 동시 추구로 과욕 위험. 한 가지에 집중하는 것이 더 유리.",
+        "임팩트": "돈이 권력이 되는 구조 — 경제적 기반 위에 사회적 위상을 쌓는 운명.",
+    },
+    "살인상생": {
+        "한자": "殺印相生",
+        "조건": "편관(칠살) + 정인/편인",
+        "별칭": "도전을 지혜로 전환하는 강자",
+        "성격": "강한 압박과 역경을 통해 오히려 더 깊어지는 인물. 위기를 기회로 전환하는 능력이 탁월하다. 강인한 정신력.",
+        "직업": "군인·경찰·검사·변호사·외과의사·위기관리 전문가·구조대원",
+        "재물": "어려운 환경 속에서 단련되어 결국 큰 성과를 얻음. 고난 후 반등하는 비선형 성장.",
+        "인연": "강하고 의지할 수 있는 파트너를 선호. 갈등도 성장의 일부로 받아들인다.",
+        "주의": "지나친 고집과 강경함. 타협 능력을 키우면 더 큰 성공이 가능.",
+        "임팩트": "고난이 곧 훈련이 되는 운명 — 역경을 거쳐 진정한 강자로 완성.",
+    },
+    "식상제살": {
+        "한자": "食傷制殺",
+        "조건": "식신/상관 + 편관(칠살)",
+        "별칭": "혁신가·개척자형",
+        "성격": "권위와 제약에 도전하는 창의적 기질. 자신만의 방식으로 문제를 해결하며 틀을 깨는 것에서 에너지를 얻는다.",
+        "직업": "스타트업 창업가·예술가·혁신적 사업가·작가·연구개발·컨설턴트",
+        "재물": "기존 방식을 깨고 새 시장을 만드는 형태로 재물 창출. 고위험·고수익 성향.",
+        "인연": "자유롭고 개성 있는 파트너를 선호. 틀에 박힌 관계는 오래가지 않는다.",
+        "주의": "지나친 도전 정신으로 안정을 해칠 수 있음. 실행 전 충분한 검증 필요.",
+        "임팩트": "시대를 앞서가는 혁신가 — 기존 질서에 도전하여 새 길을 여는 운명.",
+    },
+    "상관패인": {
+        "한자": "傷官佩印",
+        "조건": "상관 + 정인/편인",
+        "별칭": "천재적 언변가·예술가",
+        "성격": "뛰어난 표현력과 비판 정신이 인성의 깊이와 결합된 유형. 날카롭고 통찰력이 있으며 말과 글로 세상을 움직인다.",
+        "직업": "작가·변호사·언론인·강연가·비평가·예술가·교수",
+        "재물": "언어·표현·창작으로 수입 창출. 지식재산 가치가 높음. 청중이 넓을수록 수입 증가.",
+        "인연": "지적 자극을 주는 깊은 관계를 원함. 말이 잘 통하는 파트너가 인연.",
+        "주의": "지나친 비판과 독설로 관계 손상 위험. 표현의 때와 장소를 가릴 것.",
+        "임팩트": "말과 글이 인생의 무기 — 언어로 역사를 남기는 운명.",
+    },
+    "관살혼잡": {
+        "한자": "官殺混雜",
+        "조건": "정관 + 편관 동시 존재",
+        "별칭": "이중 압박·혼재형",
+        "성격": "명예 욕구와 긴장감이 공존하는 구조. 두 방향의 힘이 작용해 결단이 어렵거나 이중적 입장에 처하기 쉽다.",
+        "직업": "합거(合去)·충거(沖去)가 잘 되면 정관격 수준의 명예직. 억부용신 처방이 관건.",
+        "재물": "혼잡 처리 여부에 따라 크게 달라짐. 대운에서 관살이 정리되면 재물 안정.",
+        "인연": "다양한 인간관계가 복잡하게 얽힘. 관계 정리와 선택적 집중이 중요.",
+        "주의": "합거나 충거로 하나를 정리해야 길해짐. 두 방향으로 에너지가 분산되지 않도록.",
+        "임팩트": "정리되면 강력한 관성 — 미정리 상태로는 긴장과 갈등이 반복되는 구조.",
+    },
+    "상관견관": {
+        "한자": "傷官見官",
+        "조건": "상관 + 정관 동시 존재",
+        "별칭": "제도·권위와 충돌하는 도전가",
+        "성격": "자유로운 표현 욕구와 규칙·권위 사이에서 충돌이 잦은 유형. 타고난 반항기와 개성이 있으며 기존 체제에 순응하지 않으려 한다.",
+        "직업": "독립 사업가·프리랜서·자유직·창작 분야가 유리. 조직에서는 갈등 빈번.",
+        "재물": "조직보다 독립 경로에서 더 큰 수입. 자기 방식으로 일할 때 진가가 발휘된다.",
+        "인연": "자유롭고 독립적인 파트너십을 원함. 통제받는 관계는 본능적으로 거부.",
+        "주의": "불필요한 권위와의 마찰 자제. 때로는 체제 안에서 전략적으로 움직이는 것이 유리.",
+        "임팩트": "기존 질서의 경계선에서 새 가능성을 여는 반항아 — 시대가 변하면 선구자가 된다.",
+    },
+    "비겁쟁재": {
+        "한자": "比劫爭財",
+        "조건": "비겁(비견/겁재) 2개 이상 + 재성 존재",
+        "별칭": "경쟁·분산형",
+        "성격": "강한 자아와 경쟁심. 자기 몫을 챙기려는 욕구가 강하며 주변과 재물·권한을 두고 다툼이 생기기 쉽다.",
+        "직업": "독립 사업가·운동선수·경쟁직·영업직·개인 브랜드",
+        "재물": "번 만큼 나가는 구조. 형제·파트너와 재물 분쟁 주의. 혼자보다 협력이 장기적으로 유리.",
+        "인연": "강한 자존심으로 파트너와 주도권 다툼 가능. 서로 존중하는 관계 설정이 중요.",
+        "주의": "재물 분쟁·동업 갈등 주의. 계약서와 협의를 명확히 할 것.",
+        "임팩트": "경쟁 속에서 단련되는 운명 — 협력 관계를 잘 설정하면 큰 성과.",
+    },
+    "재다신약": {
+        "한자": "財多身弱",
+        "조건": "재성 3개 이상 + 비겁·인성 없음",
+        "별칭": "재물에 짓눌린 구조",
+        "성격": "표면적으로 풍요로워 보이지만 정작 본인이 약해 감당하기 어려운 구조. 재물이 오히려 스트레스가 된다.",
+        "직업": "비겁·인성 대운에서 기복 극복 후 안정. 혼자보다 협력이 필수.",
+        "재물": "재물은 많아 보이지만 내 것이 되기 어려운 구조. 대운 흐름에 따라 등락 반복.",
+        "인연": "의지할 수 있는 강한 파트너가 필요. 혼자서 모든 것을 감당하지 말 것.",
+        "주의": "건강 관리 필수. 욕심을 줄이고 힘에 맞는 규모로 운영해야 안전.",
+        "임팩트": "비겁·인성 대운에서 반전 가능 — 환경과 사람이 맞으면 재물과 건강 모두 회복.",
+    },
+    "신왕재왕": {
+        "한자": "身旺財旺",
+        "조건": "비겁 2개 이상 + 재성 2개 이상",
+        "별칭": "재벌형 그릇",
+        "성격": "강한 자아와 두터운 재성이 균형을 이루는 이상적 구조. 도전하면 반드시 성과를 거두는 강인한 성향.",
+        "직업": "CEO·사업가·투자자·금융인·대형 기업 창업",
+        "재물": "강한 신왕으로 큰 재물을 감당하는 그릇. 사업 확장성이 높고 재물이 자연스럽게 따라옴.",
+        "인연": "자신만큼 강하고 능력 있는 파트너와 최고의 시너지를 만들어낸다.",
+        "주의": "오만함 경계. 주변 협력자를 존중해야 더 멀리 갈 수 있음.",
+        "임팩트": "타고난 재벌 그릇 — 의지와 행동이 따른다면 큰 부를 이루는 운명.",
+    },
+    "신왕관왕": {
+        "한자": "身旺官旺",
+        "조건": "비겁 2개 이상 + 관성 2개 이상",
+        "별칭": "권력형 리더",
+        "성격": "강한 자아와 명예 욕구가 결합된 유형. 조직에서 자연스럽게 리더십을 발휘하며 권위 있는 위치를 추구한다.",
+        "직업": "정치인·고위 공무원·군 장성·기업 임원·조직 지도자",
+        "재물": "명예와 지위에서 나오는 안정적 수입. 권력이 곧 재물 창출의 기반이 된다.",
+        "인연": "대등하거나 사회적 지위 있는 파트너를 선호하는 경향.",
+        "주의": "지나친 권위 의식으로 주변과 마찰. 유연성과 겸손이 성공의 열쇠.",
+        "임팩트": "권력의 자리에서 빛나는 운명 — 조직과 국가를 이끄는 타고난 리더.",
+    },
+    "신약무근": {
+        "한자": "身弱無根",
+        "조건": "비겁·인성 모두 없음",
+        "별칭": "의존형·지원 필요형",
+        "성격": "자아가 약하고 외부 환경에 의존하는 구조. 좋은 대운·환경·인맥이 뒷받침될 때 진가를 발휘한다.",
+        "직업": "보조·지원 역할, 파트너십 비즈니스. 독립보다 협력이 유리.",
+        "재물": "좋은 인맥과 환경이 갖춰질 때 재물 형성 가능. 단독 행보보다 팀워크.",
+        "인연": "의지가 되고 지지해주는 강한 파트너가 운명의 열쇠.",
+        "주의": "무리한 독립 자제. 좋은 환경과 사람을 적극적으로 활용할 것.",
+        "임팩트": "환경과 인맥이 운명을 결정 — 올바른 선택과 연결이 모든 것.",
+    },
+    "식상태왕": {
+        "한자": "食傷太旺",
+        "조건": "식신/상관 3개 이상",
+        "별칭": "예술가·표현가형",
+        "성격": "창의력·표현력·자유 추구가 극대화된 유형. 감성이 풍부하며 자신의 방식대로 살고자 하는 욕구가 강하다.",
+        "직업": "예술가·작가·연예인·강사·크리에이터·디자이너·무대 예술",
+        "재물": "표현과 창작이 수입으로 이어지는 구조. 관성이 약해 규칙적 직업보다 자유 활동이 유리.",
+        "인연": "자유롭고 창의적인 관계를 원한다. 구속과 통제는 관계 파탄의 직접 원인.",
+        "주의": "인성(자격·규범)과의 균형 필요. 현실감과 경제 관념을 함께 키울 것.",
+        "임팩트": "자신만의 색깔로 세상을 물들이는 예술가형 운명.",
+    },
+    "인성태왕": {
+        "한자": "印星太旺",
+        "조건": "인성(정인/편인) 3개 이상",
+        "별칭": "학자·종교가·철학자형",
+        "성격": "학문·사색·내면 탐구에 깊이 빠져드는 유형. 실용성보다 지식과 원리를 더 중시하며 자기만의 깊은 세계가 있다.",
+        "직업": "학자·연구원·종교인·철학자·작가·명상 지도자",
+        "재물": "재성이 약할 수 있어 재물보다 명예·지식 중심. 파트너나 환경이 재물을 보완.",
+        "인연": "정신적·지적 교감이 있는 파트너를 원함. 내면을 깊이 이해해주는 사람이 최고의 인연.",
+        "주의": "지나친 의존성·행동력 부족 주의. 실행력과 현실 감각을 함께 키울 것.",
+        "임팩트": "지혜와 내면의 깊이로 세상에 영향을 미치는 학자형 운명.",
+    },
+    "비겁태왕": {
+        "한자": "比劫太旺",
+        "조건": "비겁(비견/겁재) 3개 이상",
+        "별칭": "독립가·창업가형",
+        "성격": "강한 자아와 독립 욕구. 혼자서 무엇이든 해결하려는 성향이 강하며 타인의 간섭을 싫어한다.",
+        "직업": "독립 창업가·자영업자·운동선수·개인 브랜드 사업",
+        "재물": "재성이 분산되기 쉬운 구조. 재물을 지키는 전략과 믿을 수 있는 협력자가 필요.",
+        "인연": "강한 자아 때문에 파트너와 주도권 마찰 빈번. 서로 독립성을 인정하는 관계가 이상적.",
+        "주의": "아집·독단 경계. 협력과 공유의 가치를 배울 것.",
+        "임팩트": "강인한 독립 정신 — 올바른 방향으로 에너지를 집중하면 자수성가의 운명.",
+    },
+    "관성태왕": {
+        "한자": "官星太旺",
+        "조건": "관성(정관/편관) 3개 이상",
+        "별칭": "조직 리더·권위자형",
+        "성격": "강한 규범 의식과 책임감. 사회적 질서를 유지하고 이끄는 것에서 사명감을 느끼는 유형.",
+        "직업": "고위 관료·군 고위직·기업 경영진·판사·원장·기관장",
+        "재물": "지위와 조직에서 나오는 안정적 수입. 재성이 약하면 인성 대운에서 보완.",
+        "인연": "책임감 있고 사회적 지위 있는 파트너와 잘 맞는다.",
+        "주의": "지나친 강압·권위 주의. 관성 과다 시 건강(신장·방광) 관리 요함.",
+        "임팩트": "조직과 사회를 이끄는 권위자 운명 — 책임의 무게만큼 명예가 따른다.",
+    },
+    "재성태왕": {
+        "한자": "財星太旺",
+        "조건": "재성(정재/편재) 3개 이상",
+        "별칭": "거상·CEO형",
+        "성격": "재물과 현실 이익에 집중하는 실용주의자. 눈앞의 기회를 놓치지 않으며 경제적 감각이 탁월하다.",
+        "직업": "무역업·부동산·금융·도매·유통·대형 사업",
+        "재물": "일신이 강해야 재성을 감당 가능. 신강이면 거부의 운명, 신약이면 재물에 눌리는 구조.",
+        "인연": "경제적 안정을 줄 수 있는 파트너를 선호. 실속 있고 현실적인 관계.",
+        "주의": "신약이면 건강이 먼저. 재물보다 자기 관리가 우선.",
+        "임팩트": "경제적 감각과 실행력이 결합하면 거상의 운명 — 일신 강화가 열쇠.",
+    },
+    "재중관경": {
+        "한자": "財中官輕",
+        "조건": "재성 2개 이상 + 관성 1개",
+        "별칭": "사업가 + 가벼운 관운",
+        "성격": "재물 추구는 강하나 명예 욕구는 절제된 유형. 실용적이며 돈이 되는 일에 집중하는 현실주의자.",
+        "직업": "자영업·중소기업 사장·영업직·재무 전문가·유통업",
+        "재물": "재성이 두텁고 관성이 경미하여 사업 경로가 유리. 조직보다 독립에서 더 큰 수익.",
+        "인연": "재물과 안정을 공유할 수 있는 실속 있는 파트너.",
+        "주의": "관성이 약해 사회적 신뢰 구축에 소홀하지 않도록. 평판 관리 필요.",
+        "임팩트": "실속형 사업가 — 조용히 부를 축적하는 현실주의 운명.",
+    },
+    "인성중첩": {
+        "한자": "印星重疊",
+        "조건": "인성(정인/편인) 2개 이상",
+        "별칭": "학문·지식 중시형",
+        "성격": "배움과 자기 계발에 대한 열망이 강한 유형. 자격·학위·지식에서 자부심을 얻는다.",
+        "직업": "교육·연구·자격증 기반 전문직·상담·출판",
+        "재물": "전문 지식을 통한 안정적 수입. 오랜 공부 끝에 전문가로서 경제적 기반 형성.",
+        "인연": "가르치거나 배울 수 있는 지적 파트너십을 선호.",
+        "주의": "지나친 이론 중심으로 행동력 부족 가능. 실전 경험을 병행할 것.",
+        "임팩트": "지식이 권력이 되는 시대의 전문가 — 깊이 있는 공부가 인생 무기.",
+    },
+}
+
+
+def detect_sipseong_combinations(pils: list) -> list:
+    """원국 7글자에서 십성 조합 패턴 감지 (최대 5개)"""
+    if not pils or len(pils) < 2:
+        return []
+    ilgan = pils[1].get("cg", "")
+    if not ilgan:
+        return []
+
+    ss_list = _get_all_ss(ilgan, pils)
+
+    bigyeon = ss_list.count("비견") + ss_list.count("겁재")
+    sikshin = ss_list.count("식신")
+    sanggan = ss_list.count("상관")
+    siksang = sikshin + sanggan
+    jeongjae = ss_list.count("정재")
+    pyeonjae = ss_list.count("편재")
+    jaeseong = jeongjae + pyeonjae
+    jeonggwan = ss_list.count("정관")
+    pyeongwan = ss_list.count("편관")
+    gwanseong = jeonggwan + pyeongwan
+    jeongin = ss_list.count("정인")
+    pyeonin = ss_list.count("편인")
+    inseong = jeongin + pyeonin
+
+    activated = []
+
+    if gwanseong >= 1 and inseong >= 1:
+        activated.append("관인상생")
+    if sikshin >= 1 and jaeseong >= 1:
+        activated.append("식신생재")
+    if jaeseong >= 1 and gwanseong >= 1 and "관인상생" not in activated:
+        activated.append("재생관")
+    if pyeongwan >= 1 and inseong >= 1 and "관인상생" not in activated:
+        activated.append("살인상생")
+    if siksang >= 1 and pyeongwan >= 1:
+        activated.append("식상제살")
+    if sanggan >= 1 and inseong >= 1:
+        activated.append("상관패인")
+    if jeonggwan >= 1 and pyeongwan >= 1:
+        activated.append("관살혼잡")
+    if sanggan >= 1 and jeonggwan >= 1:
+        activated.append("상관견관")
+    if bigyeon >= 2 and jaeseong >= 1 and jaeseong < 2:
+        activated.append("비겁쟁재")
+    if jaeseong >= 3 and bigyeon == 0 and inseong == 0:
+        activated.append("재다신약")
+    if bigyeon >= 2 and jaeseong >= 2 and "비겁쟁재" not in activated:
+        activated.append("신왕재왕")
+    if bigyeon >= 2 and gwanseong >= 2:
+        activated.append("신왕관왕")
+    if bigyeon == 0 and inseong == 0 and len(ss_list) >= 5:
+        activated.append("신약무근")
+    if siksang >= 3:
+        activated.append("식상태왕")
+    if inseong >= 3:
+        activated.append("인성태왕")
+    if bigyeon >= 3:
+        activated.append("비겁태왕")
+    if gwanseong >= 3:
+        activated.append("관성태왕")
+    if jaeseong >= 3 and "재다신약" not in activated:
+        activated.append("재성태왕")
+    if jaeseong >= 2 and gwanseong == 1:
+        activated.append("재중관경")
+    if inseong >= 2 and "관인상생" not in activated and "인성태왕" not in activated:
+        activated.append("인성중첩")
+
+    seen = set()
+    unique = []
+    for item in activated:
+        if item not in seen:
+            seen.add(item)
+            unique.append(item)
+
+    return unique[:5]
+
+
+def generate_four_pillars_synthesis(pils: list) -> str:
+    """4기둥 종합 해석문 생성"""
+    if not pils or len(pils) < 4:
+        return "4기둥 데이터가 부족합니다."
+
+    ilgan = pils[1].get("cg", "")
+    if not ilgan:
+        return "일간 정보가 없습니다."
+
+    ohaeng_count = {"木": 0, "火": 0, "土": 0, "金": 0, "水": 0}
+    for p in pils:
+        cg = p.get("cg", "")
+        jj = p.get("jj", "")
+        if cg in _CG_OHAENG:
+            ohaeng_count[_CG_OHAENG[cg]] += 1
+        if jj in _JJ_OHAENG:
+            ohaeng_count[_JJ_OHAENG[jj]] += 1
+
+    dominant_oh = max(ohaeng_count, key=ohaeng_count.get)
+    min_oh = min(ohaeng_count, key=ohaeng_count.get)
+
+    ss_list = _get_all_ss(ilgan, pils)
+    bigyeon = ss_list.count("비견") + ss_list.count("겁재")
+    inseong = ss_list.count("정인") + ss_list.count("편인")
+    jaeseong = ss_list.count("정재") + ss_list.count("편재")
+    gwanseong = ss_list.count("정관") + ss_list.count("편관")
+    siksang = ss_list.count("식신") + ss_list.count("상관")
+
+    oh_meaning = {
+        "木": "진취·성장", "火": "열정·명예",
+        "土": "안정·신뢰", "金": "결단·원칙", "水": "지혜·축적",
+    }
+    is_strong = (bigyeon + inseong) >= 3
+    strength_desc = "신강(身强)" if is_strong else "신약(身弱)"
+    ilgan_oh = _CG_OHAENG.get(ilgan, "")
+    iljj = pils[1].get("jj", "")
+    iljj_unsung = _calc_unsung(ilgan, iljj)
+
+    dominant_groups = []
+    if bigyeon >= 2:
+        dominant_groups.append("비겁 강세(독립심·경쟁력)")
+    if inseong >= 2:
+        dominant_groups.append("인성 강세(학문·보호)")
+    if jaeseong >= 2:
+        dominant_groups.append("재성 강세(사업·현실)")
+    if gwanseong >= 2:
+        dominant_groups.append("관성 강세(명예·규범)")
+    if siksang >= 2:
+        dominant_groups.append("식상 강세(표현·창의)")
+
+    parts = [
+        f"일간 <b>{ilgan}({_CG_KR.get(ilgan, '')})</b>은 {ilgan_oh} 오행으로 "
+        f"전체 사주는 <b>{strength_desc}</b> 구조입니다.",
+        f"오행 분포에서 <b>{dominant_oh}({oh_meaning.get(dominant_oh, '')})</b>이 가장 강하고 "
+        f"{min_oh} 기운이 가장 약합니다.",
+    ]
+    if dominant_groups:
+        parts.append(f"십성 특성: {', '.join(dominant_groups)}.")
+    parts.append(
+        f"일지 {iljj}({_JJ_KR.get(iljj, '')})은 일간의 <b>{iljj_unsung}</b>에 해당하여 "
+        f"배우자궁·중년운의 핵심 신호입니다."
+    )
+
+    return " ".join(parts)
+
+
+def render_four_pillars_card(pils: list, name: str = "내담자") -> str:
+    """년/월/일/시 4기둥 통합 분석 박스"""
+    if not pils or len(pils) < 4:
+        return ""
+
+    ilgan = pils[1].get("cg", "")
+
+    pillar_defs = [
+        {"idx": 3, "title": "년주(年柱)", "sub": "조상·뿌리·초년운",
+         "border": "#b8860b", "header_bg": "#d4af37", "badge": "조상궁"},
+        {"idx": 2, "title": "월주(月柱)", "sub": "부모·형제·청년운",
+         "border": "#2e7d32", "header_bg": "#388e3c", "badge": "부모궁"},
+        {"idx": 1, "title": "일주(日柱)", "sub": "나·배우자·중년운",
+         "border": "#6a1b9a", "header_bg": "#7b1fa2", "badge": "배우자궁"},
+        {"idx": 0, "title": "시주(時柱)", "sub": "자녀·말년·노년운",
+         "border": "#1565c0", "header_bg": "#1976d2", "badge": "자녀궁"},
+    ]
+
+    oh_emoji = {"木": "🌿", "火": "🔥", "土": "🪨", "金": "⚙️", "水": "💧"}
+
+    cards_html = ""
+    for pd in pillar_defs:
+        p = pils[pd["idx"]]
+        cg = p.get("cg", "")
+        jj = p.get("jj", "")
+        cg_kr = _CG_KR.get(cg, "")
+        jj_kr = _JJ_KR.get(jj, "")
+        cg_oh = _CG_OHAENG.get(cg, "")
+        jj_oh = _JJ_OHAENG.get(jj, "")
+        cg_ss = _calc_ss(ilgan, cg) if ilgan else "-"
+        jj_ss = _calc_jj_ss(ilgan, jj) if ilgan else "-"
+        unsung = _calc_unsung(ilgan, jj) if ilgan else "-"
+        ss_display = "일간(나)" if pd["idx"] == 1 else cg_ss
+
+        cards_html += f"""
+<div style="flex:1 1 22%;min-width:155px;max-width:200px;
+            background:#fff;border:2px solid {pd['border']};border-radius:14px;
+            overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.08);">
+  <div style="background:{pd['header_bg']};color:#fff;padding:10px 12px;text-align:center;">
+    <div style="font-size:12px;font-weight:700;opacity:0.9;">{pd['title']}</div>
+    <div style="font-size:11px;opacity:0.8;">{pd['sub']}</div>
+  </div>
+  <div style="padding:14px 12px;text-align:center;">
+    <div style="font-size:40px;font-weight:900;color:{pd['border']};line-height:1.1;">
+      {cg}<span style="font-size:28px;">{jj}</span>
+    </div>
+    <div style="font-size:13px;color:#555;margin-top:4px;">
+      {cg_kr}({cg_oh}{oh_emoji.get(cg_oh,'')}) · {jj_kr}({jj_oh}{oh_emoji.get(jj_oh,'')})
+    </div>
+    <div style="margin-top:10px;border-top:1px solid #f0f0f0;padding-top:10px;">
+      <div style="font-size:12px;color:#666;line-height:1.8;">
+        <span style="background:{pd['border']}20;color:{pd['border']};
+                     padding:2px 8px;border-radius:10px;font-weight:700;font-size:11px;">
+          {pd['badge']}
+        </span><br>
+        천간: <b style="color:{pd['border']};">{ss_display}</b><br>
+        지지: <b style="color:{pd['border']};">{jj_ss}</b><br>
+        12운성: <b>{unsung}</b>
+      </div>
+    </div>
+  </div>
+</div>"""
+
+    synthesis = generate_four_pillars_synthesis(pils)
+
+    html = f"""
+<div style="background:linear-gradient(135deg,#f8f5ff 0%,#fff8e1 50%,#f0f9ff 100%);
+            border:3px solid #1565c0;border-radius:20px;
+            padding:28px;margin:24px 0;
+            box-shadow:0 12px 32px rgba(21,101,192,0.15);">
+  <div style="font-size:21px;font-weight:900;text-align:center;color:#0d47a1;
+              border-bottom:2px solid #1565c0;padding-bottom:14px;margin-bottom:22px;">
+    🏛️ {name}님의 사주 4기둥 통합 — 천명(天命) 전체도
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;">
+    {cards_html}
+  </div>
+  <div style="margin-top:22px;padding:16px;background:rgba(21,101,192,0.05);
+              border-left:4px solid #1565c0;border-radius:10px;
+              font-size:14px;line-height:1.9;color:#333;">
+    <b style="color:#0d47a1;">🔮 4기둥 종합 분석:</b><br>{synthesis}
+  </div>
+</div>
+"""
+    return html
+
+
+def render_sipseong_combinations_card(pils: list, name: str = "내담자") -> str:
+    """십성 조합 패턴 감지 박스"""
+    activated = detect_sipseong_combinations(pils)
+    if not activated:
+        return ""
+
+    accent_colors = ["#0d47a1", "#1565c0", "#1976d2", "#1e88e5", "#2196f3"]
+    cards_html = ""
+    for i, combo_key in enumerate(activated):
+        combo = SIPSEONG_COMBINATIONS.get(combo_key, {})
+        if not combo:
+            continue
+        color = accent_colors[i % len(accent_colors)]
+        cards_html += f"""
+<div style="background:linear-gradient(135deg,#e3f2fd 0%,#fff 100%);
+            border-left:5px solid {color};border-radius:10px;
+            padding:18px;margin:12px 0;
+            box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+  <div style="font-size:17px;font-weight:900;color:{color};margin-bottom:10px;">
+    💎 {combo.get('한자','')}({combo_key}) — {combo.get('별칭','')}
+  </div>
+  <div style="font-size:13px;color:#444;line-height:1.85;">
+    <b style="color:{color};">핵심:</b> {combo.get('임팩트','')}<br>
+    <b style="color:{color};">성격:</b> {combo.get('성격','')}<br>
+    <b style="color:{color};">직업:</b> {combo.get('직업','')}<br>
+    <b style="color:{color};">재물:</b> {combo.get('재물','')}<br>
+    <b style="color:{color};">인연:</b> {combo.get('인연','')}<br>
+    <b style="color:#c62828;">주의:</b> {combo.get('주의','')}
+  </div>
+</div>"""
+
+    html = f"""
+<div style="background:linear-gradient(135deg,#e8eaf6 0%,#f8f9ff 100%);
+            border:3px solid #283593;border-radius:20px;
+            padding:28px;margin:24px 0;
+            box-shadow:0 12px 32px rgba(40,53,147,0.15);">
+  <div style="font-size:21px;font-weight:900;text-align:center;color:#1a237e;
+              border-bottom:2px solid #283593;padding-bottom:14px;margin-bottom:8px;">
+    💎 {name}님의 사주 십성 조합 — 운명 패턴 감지
+  </div>
+  <div style="font-size:13px;color:#555;text-align:center;margin-bottom:16px;">
+    원국 8글자에서 활성화된 십성 패턴 <b>{len(activated)}개</b>를 분석합니다.
+    (자평진전·적천수 정통 기준)
+  </div>
+  {cards_html}
+</div>
+"""
+    return html
+
+
+def render_ohaeng_cycle_card(ilgan_cg: str, name: str = "내담자") -> str:
+    """일간 오행 기준 5단계 순환 흐름 시각화"""
+    current_oh = _CG_OHAENG.get(ilgan_cg, "")
+
+    stages = [
+        {"idx": 1, "oh": "木", "name": "시작·성장", "color": "#2e7d32",
+         "desc": "봄의 기운. 새로운 시작, 도전, 확장.",
+         "meaning": "나무처럼 위로 뻗는 단계. 의욕과 활력, 미래 지향성이 강하다."},
+        {"idx": 2, "oh": "火", "name": "확산·표현", "color": "#c62828",
+         "desc": "여름의 기운. 절정, 표현, 사회적 활동.",
+         "meaning": "불처럼 사방으로 퍼지는 단계. 열정, 명예, 인기의 시기."},
+        {"idx": 3, "oh": "土", "name": "안정·중재", "color": "#e65100",
+         "desc": "환절기. 균형, 포용, 결실 준비.",
+         "meaning": "대지처럼 모든 것을 받아들이는 단계. 안정과 신뢰를 구축한다."},
+        {"idx": 4, "oh": "金", "name": "결단·정제", "color": "#546e7a",
+         "desc": "가을의 기운. 수확, 정리, 결단.",
+         "meaning": "금속처럼 단단하게 정련되는 단계. 원칙과 결실의 시기."},
+        {"idx": 5, "oh": "水", "name": "저장·지혜", "color": "#1565c0",
+         "desc": "겨울의 기운. 휴식, 축적, 내면 성숙.",
+         "meaning": "물처럼 깊이 스며드는 단계. 지혜, 통찰, 다음 시작을 위한 준비."},
+    ]
+
+    current_idx = next((i for i, s in enumerate(stages) if s["oh"] == current_oh), -1)
+
+    stages_html = ""
+    for i, stage in enumerate(stages):
+        is_cur = (i == current_idx)
+        if is_cur:
+            cell = (
+                f'<div style="border:3px solid {stage["color"]};'
+                f'background:{stage["color"]};color:#fff;'
+                f'border-radius:14px;padding:16px 12px;text-align:center;'
+                f'min-width:105px;transform:scale(1.07);'
+                f'box-shadow:0 6px 20px {stage["color"]}55;">'
+                f'<div style="font-size:24px;font-weight:900;">{stage["idx"]}단계</div>'
+                f'<div style="font-size:26px;font-weight:900;">{stage["oh"]}</div>'
+                f'<div style="font-size:12px;font-weight:700;margin-top:2px;">{stage["name"]}</div>'
+                f'<div style="font-size:11px;margin-top:6px;'
+                f'background:rgba(255,255,255,0.25);border-radius:6px;padding:2px 6px;">'
+                f'★ 현재</div></div>'
+            )
+        else:
+            cell = (
+                f'<div style="border:2px solid #ddd;background:#fafafa;color:#555;'
+                f'border-radius:14px;padding:16px 12px;text-align:center;min-width:105px;">'
+                f'<div style="font-size:20px;font-weight:700;color:#999;">{stage["idx"]}단계</div>'
+                f'<div style="font-size:24px;font-weight:900;color:{stage["color"]};">{stage["oh"]}</div>'
+                f'<div style="font-size:12px;font-weight:600;color:#666;margin-top:2px;">{stage["name"]}</div>'
+                f'</div>'
+            )
+
+        arrow = (
+            "" if i == len(stages) - 1
+            else '<div style="font-size:22px;color:#bbb;margin:0 4px;align-self:center;">→</div>'
+        )
+        stages_html += f'<div style="display:flex;align-items:center;">{cell}{arrow}</div>'
+
+    if current_idx >= 0:
+        cs = stages[current_idx]
+        next_s = stages[(current_idx + 1) % 5]
+        detail = (
+            f'<div style="margin-top:24px;padding:18px;'
+            f'background:linear-gradient(135deg,{cs["color"]}12 0%,#fff 100%);'
+            f'border-left:5px solid {cs["color"]};border-radius:10px;">'
+            f'<div style="font-size:16px;font-weight:900;color:{cs["color"]};margin-bottom:10px;">'
+            f'🎯 {name}님의 현재 단계: {cs["idx"]}단계 {cs["oh"]}({cs["name"]})</div>'
+            f'<div style="font-size:14px;line-height:1.9;color:#333;">'
+            f'<b>의미:</b> {cs["meaning"]}<br>'
+            f'<b>현재 시기 특성:</b> {cs["desc"]}<br>'
+            f'<b>다음 단계:</b> {next_s["oh"]}({next_s["name"]}) — '
+            f'운명의 흐름은 자연스럽게 이 방향으로 이어집니다.</div></div>'
+        )
+    else:
+        detail = ""
+
+    ilgan_kr = _CG_KR.get(ilgan_cg, "")
+    stage_num = current_idx + 1 if current_idx >= 0 else "?"
+
+    html = (
+        f'<div style="background:linear-gradient(135deg,#f5f5f5 0%,#fafafa 100%);'
+        f'border:2px solid #424242;border-radius:16px;'
+        f'padding:24px;margin:20px 0;'
+        f'box-shadow:0 8px 24px rgba(0,0,0,0.08);">'
+        f'<div style="font-size:20px;font-weight:900;text-align:center;color:#212121;margin-bottom:6px;">'
+        f'🌀 {name}님의 오행 순환 단계 — 천명(天命)의 위치</div>'
+        f'<div style="font-size:13px;color:#666;text-align:center;margin-bottom:22px;">'
+        f'우주는 木 → 火 → 土 → 金 → 水 → 다시 木으로 순환합니다. '
+        f'{name}님의 일간 {ilgan_cg}({ilgan_kr})은 오행 순환 <b>{stage_num}단계</b>에 위치합니다.</div>'
+        f'<div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;align-items:stretch;">'
+        f'{stages_html}</div>'
+        f'{detail}'
+        f'</div>'
+    )
+    return html
+
