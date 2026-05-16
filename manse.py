@@ -10519,7 +10519,7 @@ def tab_past_events(pils, birth_year, gender, name=""):
     # ── 섹션2: 과거 사건 (현재 나이 이전만)
     st.markdown(
         f"""<div style="background:linear-gradient(135deg,#1a1a1a,#2c2c2c);border-radius:14px;padding:14px 18px;margin-bottom:12px">
-<div style="color:#f7e695;font-size:15px;font-weight:900">📅 {name if name else "내담자"}님 과거 사건 타임라인 ({birth_year}~{current_year}년 · 만 {_kr_age}세)</div>
+<div style="color:#f7e695;font-size:15px;font-weight:900">📅 {name if name else "내담자"}님 과거 사건 타임라인 ({birth_year}-{current_year}년 · 만 {_kr_age}세)</div>
 <div style="color:#aaa;font-size:12px;margin-top:3px">대운×세운 충·합 교차 계산 — 현재 나이(만 나이) 이전 사건만 표시</div>
 </div>""",
         unsafe_allow_html=True,
@@ -10533,14 +10533,14 @@ def tab_past_events(pils, birth_year, gender, name=""):
         age_s = ev.get("age",""); yr = ev.get("year",""); dom = ev.get("domain","변화")
         dom_lbl = _dom_label(dom)
         desc  = _clean_desc(ev.get("desc",""))
-        age_num = str(age_s).replace("세","").replace("~","").strip()
+        age_num = str(age_s).replace("세","").replace("~","-").strip()
         return (
             f"<div style='display:flex;align-items:flex-start;gap:14px;background:{bg};"
             f"border-left:6px solid {dc};border-radius:12px;padding:14px 16px;margin:6px 0;"
             f"box-shadow:0 1px 4px rgba(0,0,0,0.08)'>"
             f"<div style='min-width:60px;text-align:center;padding-top:2px'>"
-            f"<div style='font-size:22px;font-weight:900;color:{dc};line-height:1'>{age_num}</div>"
-            f"<div style='font-size:10px;color:{dc};font-weight:700'>세</div>"
+            f"<div style='font-size:20px;font-weight:900;color:{dc};line-height:1'>{age_num}</div>"
+            f"<div style='font-size:10px;color:{dc};font-weight:700'>세 (만)</div>"
             f"<div style='font-size:10px;color:#888;margin-top:2px'>{yr}년</div></div>"
             f"<div style='flex:1'>"
             f"<div style='font-size:12px;font-weight:800;color:{dc};margin-bottom:4px'>{dom_lbl}</div>"
@@ -10574,7 +10574,7 @@ def tab_past_events(pils, birth_year, gender, name=""):
             _dom5  = _ev.get("domain","변화")
             _lbl5  = _dom_label(_dom5)
             _yr5   = _ev.get("year","")
-            _age5  = str(_ev.get("age","")).replace("세","").strip()
+            _age5  = str(_ev.get("age","")).replace("세","").replace("~","-").strip()
             _desc5 = _clean_desc(_ev.get("desc",""), maxlen=60)
             _t5_html += (
                 f"<div style='display:flex;align-items:center;gap:12px;background:{_rb};"
