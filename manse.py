@@ -10443,7 +10443,7 @@ def tab_past_events(pils, birth_year, gender, name=""):
     _man_age = _today.year - birth_year
     if (_today.month, _today.day) < (_bm, _bd2):
         _man_age -= 1
-    _kr_age = _man_age + 1
+    _kr_age = _man_age  # 만 나이
     current_year = _today.year
 
     # ── 데이터 계산
@@ -10467,14 +10467,39 @@ def tab_past_events(pils, birth_year, gender, name=""):
     past_events = [e for e in past_events_raw if _parse_age_int(e.get("age","")) < _kr_age]
 
     _DC = {
-        "사고·관재":"#c0392b","건강이상":"#8e44ad","질병·건강":"#8e44ad",
-        "재물손실":"#e67e22","재물획득":"#27ae60","직업변화":"#2980b9",
-        "직업변동":"#2980b9","결혼·교제":"#e91e8c","결혼/이별":"#e91e8c",
-        "이사·이동":"#16a085","이사/이동":"#16a085",
-        "가족이동/환경변화":"#16a085","재물성쇠":"#e67e22",
-        "건강/잔병치레":"#8e44ad",
+        "사고·관재":"#c62828","건강이상":"#7b1fa2","질병·건강":"#7b1fa2",
+        "재물손실":"#c62828","재물획득":"#2e7d32","직업변화":"#1565c0",
+        "직업변동":"#1565c0","결혼·교제":"#e91e63","결혼/이별":"#e91e63",
+        "이사·이동":"#00695c","이사/이동":"#00695c",
+        "가족이동/환경변화":"#f57f17","재물성쇠":"#f57f17",
+        "건강/잔병치레":"#7b1fa2",
     }
-    def _dc(domain): return _DC.get(domain, "#666")
+    _ICON_MAP = {
+        "사고·관재":"💥","건강이상":"🏥","질병·건강":"🏥",
+        "재물손실":"💸","재물획득":"💰","직업변화":"🚪",
+        "직업변동":"🚪","결혼·교제":"💑","결혼/이별":"💔",
+        "이사·이동":"🏠","이사/이동":"🏠",
+        "가족이동/환경변화":"🌀","재물성쇠":"📉",
+        "건강/잔병치레":"🏥",
+    }
+    _LABEL_MAP = {
+        "사고·관재":"💥 사고/수술/관재 — 충 발동으로 강제 멈춤",
+        "건강이상":"🏥 건강 이상 — 몸이 보내는 경고 신호",
+        "질병·건강":"🏥 질병/건강 — 주의가 필요한 시기",
+        "재물손실":"💸 재물 손실 — 부동산·투자·보증 분쟁",
+        "재물획득":"💰 재물 획득 — 수입·사업 성과 피크",
+        "직업변화":"🚪 강제 이직/이사 — 본인 의지 아닌 환경 변화",
+        "직업변동":"🚪 직업 변동 — 방향 전환의 해",
+        "결혼·교제":"💑 인연 결합 — 중요한 만남·결혼",
+        "결혼/이별":"💔 중요 인연 단절 — 가족·연인·친구 중 한 명과 분리",
+        "이사·이동":"🏠 이사/이동 — 터전 변화",
+        "이사/이동":"🏠 이사/이동 — 터전 변화",
+        "가족이동/환경변화":"🌀 환경 급변 — 주변 상황이 한꺼번에 뒤바뀜",
+        "재물성쇠":"📉 재물 기복 — 들어오고 나가는 변동폭 큰 해",
+        "건강/잔병치레":"🏥 건강 주의 — 잔병치레 잦은 시기",
+    }
+    def _dc(domain): return _DC.get(domain, "#555")
+    def _dom_label(domain): return _LABEL_MAP.get(domain, f"🌀 {domain}")
 
     # ── 섹션1: 성향 요약 (3줄)
     st.markdown(
@@ -10494,8 +10519,8 @@ def tab_past_events(pils, birth_year, gender, name=""):
     # ── 섹션2: 과거 사건 (현재 나이 이전만)
     st.markdown(
         f"""<div style="background:linear-gradient(135deg,#1a1a1a,#2c2c2c);border-radius:14px;padding:14px 18px;margin-bottom:12px">
-<div style="color:#f7e695;font-size:15px;font-weight:900">📅 과거 주요 사건 (현재 {_kr_age}세 이전)</div>
-<div style="color:#aaa;font-size:12px;margin-top:3px">대운×세운 충·합 교차 계산 — 현재 나이 이전 사건만 표시</div>
+<div style="color:#f7e695;font-size:15px;font-weight:900">📅 {name if name else "내담자"}님 과거 사건 타임라인 ({birth_year}~{current_year}년 · 만 {_kr_age}세)</div>
+<div style="color:#aaa;font-size:12px;margin-top:3px">대운×세운 충·합 교차 계산 — 현재 나이(만 나이) 이전 사건만 표시</div>
 </div>""",
         unsafe_allow_html=True,
     )
@@ -10504,23 +10529,70 @@ def tab_past_events(pils, birth_year, gender, name=""):
     _change = [e for e in past_events if e not in _crisis]
 
     def _event_row(ev, bg):
-        dc = _dc(ev.get("domain",""))
+        dc    = _dc(ev.get("domain",""))
         age_s = ev.get("age",""); yr = ev.get("year",""); dom = ev.get("domain","변화")
+        dom_lbl = _dom_label(dom)
         desc  = _clean_desc(ev.get("desc",""))
+        age_num = str(age_s).replace("세","").replace("~","").strip()
         return (
-            f"<div style=\'display:flex;align-items:flex-start;gap:12px;background:{bg};border-left:5px solid {dc};border-radius:10px;padding:12px 14px;margin:5px 0\'>"
-            f"<div style=\'min-width:56px;text-align:center\'>"
-            f"<div style=\'font-size:17px;font-weight:900;color:{dc}\'>{age_s}</div>"
-            f"<div style=\'font-size:10px;color:#888\'>{yr}년</div></div>"
-            f"<div style=\'flex:1\'>"
-            f"<span style=\'background:{dc};color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px\'>{dom}</span>"
-            f"<div style=\'font-size:13px;color:#222;line-height:1.8;margin-top:5px\'>{desc}</div>"
+            f"<div style='display:flex;align-items:flex-start;gap:14px;background:{bg};"
+            f"border-left:6px solid {dc};border-radius:12px;padding:14px 16px;margin:6px 0;"
+            f"box-shadow:0 1px 4px rgba(0,0,0,0.08)'>"
+            f"<div style='min-width:60px;text-align:center;padding-top:2px'>"
+            f"<div style='font-size:22px;font-weight:900;color:{dc};line-height:1'>{age_num}</div>"
+            f"<div style='font-size:10px;color:{dc};font-weight:700'>세</div>"
+            f"<div style='font-size:10px;color:#888;margin-top:2px'>{yr}년</div></div>"
+            f"<div style='flex:1'>"
+            f"<div style='font-size:12px;font-weight:800;color:{dc};margin-bottom:4px'>{dom_lbl}</div>"
+            f"<div style='font-size:13px;color:#333;line-height:1.8'>{desc}</div>"
             f"</div></div>"
         )
 
+    # ── TOP 5 결정적 사건 박스
+    _IMPACT_SCORE = {
+        "사고·관재":10,"재물손실":9,"건강이상":8,"질병·건강":8,"건강/잔병치레":6,
+        "결혼/이별":9,"가족이동/환경변화":7,"재물성쇠":6,
+        "직업변화":5,"직업변동":5,"이사·이동":4,"이사/이동":4,"결혼·교제":4,"재물획득":3,
+    }
+    _top5_pool = sorted(
+        past_events,
+        key=lambda e: _IMPACT_SCORE.get(e.get("domain",""), 2),
+        reverse=True
+    )[:5]
+    if _top5_pool:
+        _RANK_COLORS = ["#c62828","#e53935","#f57f17","#1565c0","#2e7d32"]
+        _RANK_BG     = ["#fff0f0","#fff5f5","#fffbf0","#f0f4ff","#f0fff4"]
+        _t5_html = (
+            f"<div style='background:linear-gradient(135deg,#1a0a0a,#2d1515);"
+            f"border:2px solid #c62828;border-radius:16px;padding:18px 20px;margin:12px 0'>"
+            f"<div style='color:#ff8a80;font-size:14px;font-weight:900;margin-bottom:14px;letter-spacing:0.5px'>"
+            f"🚨 {name if name else '내담자'}님 인생 결정적 {len(_top5_pool)}대 사건</div>"
+        )
+        for _rank, _ev in enumerate(_top5_pool):
+            _rc = _RANK_COLORS[_rank]
+            _rb = _RANK_BG[_rank]
+            _dom5  = _ev.get("domain","변화")
+            _lbl5  = _dom_label(_dom5)
+            _yr5   = _ev.get("year","")
+            _age5  = str(_ev.get("age","")).replace("세","").strip()
+            _desc5 = _clean_desc(_ev.get("desc",""), maxlen=60)
+            _t5_html += (
+                f"<div style='display:flex;align-items:center;gap:12px;background:{_rb};"
+                f"border-left:5px solid {_rc};border-radius:10px;padding:10px 14px;margin:6px 0'>"
+                f"<div style='font-size:26px;font-weight:900;color:{_rc};min-width:32px;text-align:center;line-height:1'>{_rank+1}</div>"
+                f"<div style='flex:1'>"
+                f"<div style='font-size:11px;color:{_rc};font-weight:800'>{_lbl5}</div>"
+                f"<div style='font-size:13px;color:#222;font-weight:700;margin:2px 0'>"
+                f"{_yr5}년 · {_age5}세 (만)</div>"
+                f"<div style='font-size:12px;color:#555;line-height:1.6'>{_desc5}</div>"
+                f"</div></div>"
+            )
+        _t5_html += "</div>"
+        st.markdown(_t5_html, unsafe_allow_html=True)
+
     if _crisis:
         st.markdown(
-            "<div style=\'font-size:12px;font-weight:800;color:#c0392b;letter-spacing:1px;margin:10px 0 6px;padding-left:10px;border-left:3px solid #c0392b\'>🔴 사고·위기·손실 — 조심해야 했던 때</div>",
+            "<div style='font-size:12px;font-weight:800;color:#c62828;letter-spacing:1px;margin:10px 0 6px;padding-left:10px;border-left:3px solid #c62828'>🔴 사고·위기·손실 — 조심해야 했던 때</div>",
             unsafe_allow_html=True,
         )
         for ev in _crisis[:8]:
@@ -10528,14 +10600,14 @@ def tab_past_events(pils, birth_year, gender, name=""):
 
     if _change:
         st.markdown(
-            "<div style=\'font-size:12px;font-weight:800;color:#2980b9;letter-spacing:1px;margin:14px 0 6px;padding-left:10px;border-left:3px solid #2980b9\'>🔄 직업·이동·인연 — 흐름이 바뀐 때</div>",
+            "<div style='font-size:12px;font-weight:800;color:#1565c0;letter-spacing:1px;margin:14px 0 6px;padding-left:10px;border-left:3px solid #1565c0'>🔄 직업·이동·인연 — 흐름이 바뀐 때</div>",
             unsafe_allow_html=True,
         )
         for ev in _change[:8]:
             st.markdown(_event_row(ev, "#f5faff"), unsafe_allow_html=True)
 
     if not past_events:
-        st.info(f"현재 나이({_kr_age}세) 이전에 감지된 주요 사건이 없습니다.")
+        st.info(f"만 {_kr_age}세 이전에 감지된 주요 사건이 없습니다.")
 
     st.markdown('<hr style="border:none;border-top:1px solid #e0d8c0;margin:20px 0">', unsafe_allow_html=True)
 
@@ -10559,7 +10631,7 @@ def tab_past_events(pils, birth_year, gender, name=""):
         _sw3_ss  = _norm_ss(_sw3.get("십성_천간", ""))
         _sw3_oh  = _sw3.get("오행_천간", "")
         _sw3_jj  = _sw3.get("jj", "")
-        _age3    = _y3 - birth_year + 1
+        _age3    = _y3 - birth_year  # 만 나이
         if _sw3_ss in _MONEY_SET3:
             _tag = "⭐" if _sw3_oh in _ys_oh3 else ""
             _money_yrs.append(f"{_y3}년({_age3}세){_tag}")
@@ -10593,75 +10665,6 @@ def tab_past_events(pils, birth_year, gender, name=""):
         else:
             st.info("과거 인연 피크 연도 없음")
 
-    st.markdown('<hr style="border:none;border-top:1px solid #e0d8c0;margin:20px 0">', unsafe_allow_html=True)
-
-    # ── 섹션4: 앞으로 10년 예측 (연도별 전수 출력)
-    st.markdown(
-        f"""<div style="background:linear-gradient(135deg,#0d2137,#1a3a5c);border-radius:14px;padding:14px 18px;margin-bottom:12px">
-<div style="color:#a8d8ff;font-size:15px;font-weight:900">🔮 앞으로 10년 예측 ({_kr_age}세 ~ {_kr_age+10}세)</div>
-<div style="color:#8ab;font-size:12px;margin-top:3px">세운 십성 + 용신/기신 + 충 발동 — 전 연도 출력</div>
-</div>""",
-        unsafe_allow_html=True,
-    )
-
-    _SS_FUTURE = {
-        "식신": "풍요와 여유 — 먹거리와 즐거움이 따르는 해",
-        "상관": "자기표현·이직 충동 — 틀을 깨려는 에너지 강함",
-        "편재": "돈의 유동 — 들어오고 나가는 재물 움직임 큼",
-        "정재": "안정 수입 — 성실한 노력이 결실로 이어지는 해",
-        "편관": "직업 압박 — 버티면 명예 따름. 건강 주의",
-        "정관": "안정과 인정 — 규율과 신뢰가 쌓이는 해",
-        "편인": "학습·이동·변화 — 새로운 길 모색",
-        "정인": "귀인·학업·안정 — 배움과 지혜가 쌓이는 해",
-        "비견": "독립·경쟁 — 혼자 힘으로 버티는 해",
-        "겁재": "재물 손실·경쟁 — 각별히 조심해야 하는 해",
-    }
-    _GS_OH4 = {_str3["sik_oh"], _str3["jae_oh"], _str3["gwan_oh"]} if not _gangja else {_str3["parent_oh"], _str3["ilgan_oh"]}
-    _CHUNG4 = _JJCHUNG
-    _CHUNG4_DESC = {
-        frozenset({"子","午"}): "子午충 — 심장·혈압 주의, 감정 기복 큼",
-        frozenset({"丑","未"}): "丑未충 — 토지·재물 분쟁, 가족 갈등",
-        frozenset({"寅","申"}): "寅申충 — 교통사고·수술·강제 이직 주의",
-        frozenset({"卯","酉"}): "卯酉충 — 관재·이직·이성 갈등",
-        frozenset({"辰","戌"}): "辰戌충 — 부동산·재물 손실, 터전 변동",
-        frozenset({"巳","亥"}): "巳亥충 — 이별·사기·비밀 누설 주의",
-    }
-    _orig_jjs4 = [p.get("jj","") for p in pils if p.get("jj","")]
-
-    for _y4 in range(current_year, current_year + 10):
-        _sw4    = get_yearly_luck(pils, _y4) or {}
-        _sw4_ss = _norm_ss(_sw4.get("십성_천간", ""))
-        _sw4_oh = _sw4.get("오행_천간", "")
-        _sw4_jj = _sw4.get("jj", "")
-        _sw4_cg = _sw4.get("cg", "")
-        _age4   = _y4 - birth_year + 1
-        # 충 감지
-        _hit_jj4 = next((_oj for _oj in _orig_jjs4 if _CHUNG4.get(_sw4_jj,"") == _oj), "")
-        _chung4_desc = _CHUNG4_DESC.get(frozenset({_sw4_jj, _hit_jj4}), "") if _hit_jj4 else ""
-        # 용신/기신 판별
-        _is_ys4 = _sw4_oh in _ys_oh3
-        _is_gs4 = _sw4_oh in _GS_OH4
-        # 아이콘 + 태그
-        if _hit_jj4:
-            _icon4 = "⚡"; _tag4 = "변동 주의의 해"; _bg4 = "#fff8e1"; _bc4 = "#f39c12"
-        elif _is_ys4:
-            _icon4 = "✅"; _tag4 = "재물/기회의 해";  _bg4 = "#f0fff4"; _bc4 = "#27ae60"
-        elif _is_gs4:
-            _icon4 = "⚠️"; _tag4 = "수비/방어의 해";  _bg4 = "#fff5f5"; _bc4 = "#e74c3c"
-        else:
-            _icon4 = "📍"; _tag4 = "평년";             _bg4 = "#f8f9fa"; _bc4 = "#95a5a6"
-        _ss_desc4 = _SS_FUTURE.get(_sw4_ss, f"{_sw4_ss} 세운")
-        _extra4   = f" | {_chung4_desc}" if _chung4_desc else ""
-        st.markdown(
-            f"<div style='background:{_bg4};border-left:4px solid {_bc4};border-radius:8px;"
-            f"padding:9px 14px;margin:4px 0;font-size:13px;color:#222'>"
-            f"<b style='color:{_bc4}'>{_icon4} {_y4}년({_age4}세)</b> "
-            f"<span style='color:#666;font-size:12px'>{_sw4_cg}{_sw4_jj} 세운</span> — "
-            f"{_sw4_ss} 세운 — {_ss_desc4}{_extra4} "
-            f"<span style='float:right;font-size:11px;color:{_bc4};font-weight:700'>{_tag4}</span>"
-            f"</div>",
-            unsafe_allow_html=True,
-        )
 
 
 def tab_cross_analysis(pils, birth_year, gender):
