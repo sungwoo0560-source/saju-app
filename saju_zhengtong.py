@@ -6815,3 +6815,353 @@ def render_final_verdict_card(pils, name="내담자"):
 </div>
 """
     return html
+
+
+def detect_life_risk_signals(pils, saewoon_data=None):
+    """7대 운명 코드 자동 감지: 바람/사고/횡재/이혼/병/결혼/사업"""
+    if not pils or len(pils) < 4:
+        return {}
+
+    ilgan = pils[1].get("cg", "")
+    iljj  = pils[1].get("jj", "")
+
+    all_cg = [p.get("cg", "") for p in pils]
+    all_jj = [p.get("jj", "") for p in pils]
+
+    # 도화살 — 일지 기준
+    iljj_dohwa_map = {
+        "申":"酉","子":"酉","辰":"酉",
+        "寅":"卯","午":"卯","戌":"卯",
+        "亥":"子","卯":"子","未":"子",
+        "巳":"午","酉":"午","丑":"午",
+    }
+    iljj_dohwa = iljj_dohwa_map.get(iljj, "")
+    dohwa_count = sum(1 for jj in all_jj if jj == iljj_dohwa)
+
+    # 충(沖)
+    chung_pairs = [("子","午"),("丑","未"),("寅","申"),("卯","酉"),("辰","戌"),("巳","亥")]
+    chung_count = 0
+    iljj_chung = False
+    for a, b in chung_pairs:
+        if a in all_jj and b in all_jj:
+            chung_count += 1
+            if iljj in (a, b):
+                iljj_chung = True
+
+    # 합(合)
+    hap_pairs = [("子","丑"),("寅","亥"),("卯","戌"),("辰","酉"),("巳","申"),("午","未")]
+    hap_count = sum(1 for a, b in hap_pairs if a in all_jj and b in all_jj)
+
+    # 양인살
+    yangin_map = {"甲":"卯","乙":"辰","丙":"午","丁":"未","戊":"午",
+                  "己":"未","庚":"酉","辛":"戌","壬":"子","癸":"丑"}
+    has_yangin = yangin_map.get(ilgan, "") in all_jj
+
+    # 백호살
+    baekho_iljus = ["甲辰","乙未","丙戌","丁丑","戊辰","壬戌","癸丑"]
+    has_baekho = (ilgan + iljj) in baekho_iljus
+
+    # 활성 십성 조합
+    activated_combos = detect_sipseong_combinations(pils)
+
+    # 천을귀인
+    cheonueul_map = {
+        "甲":["丑","未"],"戊":["丑","未"],"庚":["丑","未"],
+        "乙":["子","申"],"己":["子","申"],
+        "丙":["亥","酉"],"丁":["亥","酉"],
+        "壬":["卯","巳"],"癸":["卯","巳"],
+        "辛":["寅","午"],
+    }
+    has_cheonueul = any(jj in cheonueul_map.get(ilgan, []) for jj in all_jj)
+
+    # 십성 카운트
+    ss_list = _get_all_ss(ilgan, pils)
+    sikshin   = ss_list.count("식신")
+    sanggan   = ss_list.count("상관")
+    jeongjae  = ss_list.count("정재")
+    pyeonjae  = ss_list.count("편재")
+    jaeseong  = jeongjae + pyeonjae
+    jeonggwan = ss_list.count("정관")
+    pyeongwan = ss_list.count("편관")
+    gwanseong = jeonggwan + pyeongwan
+    bigyeon   = ss_list.count("비견") + ss_list.count("겁재")
+
+    results = {}
+
+    # 1. 바람기/외도
+    baram_score = 0
+    baram_reasons = []
+    if dohwa_count >= 2:
+        baram_score += 30
+        baram_reasons.append(f"도화살 {dohwa_count}개 — 이성 끌림 강함")
+    if hap_count >= 2:
+        baram_score += 25
+        baram_reasons.append(f"지지합 {hap_count}개 — 새로운 인연 다발")
+    if sanggan >= 2:
+        baram_score += 20
+        baram_reasons.append("상관 과다 — 자유로운 연애 성향")
+    if iljj in ["寅","申","巳","亥"]:
+        baram_score += 15
+        baram_reasons.append("배우자궁 역마 — 이동·외도 가능성")
+    if pyeonjae >= 2 and ilgan in ["甲","丙","戊","庚","壬"]:
+        baram_score += 20
+        baram_reasons.append("양일간 + 편재 다발 — 외도 신호")
+    if baram_score >= 60:
+        baram_level, baram_msg = "🔴 매우 높음", "원국에서 바람 기운이 매우 강하게 발동합니다. 배우자/연인과의 신뢰 관리 필수. 도화·합 운에서 결정적 사건이 일어날 수 있습니다."
+    elif baram_score >= 40:
+        baram_level, baram_msg = "🟡 보통", "이성 인연이 자주 들어오는 사주. 한 사람에게 집중하지 않으면 갈등이 생깁니다."
+    elif baram_score >= 20:
+        baram_level, baram_msg = "🟢 낮음", "외도 위험은 낮으나 도화 운에서는 주의가 필요합니다."
+    else:
+        baram_level, baram_msg = "✅ 매우 낮음", "원국에서 외도 기운은 매우 약합니다."
+    results["바람기"] = {"점수": min(baram_score,100), "등급": baram_level, "이유": baram_reasons, "메시지": baram_msg, "아이콘": "💔"}
+
+    # 2. 사고수
+    sago_score = 0
+    sago_reasons = []
+    if has_yangin:
+        sago_score += 30
+        sago_reasons.append("양인살 — 수술·사고 위험 신호")
+    if has_baekho:
+        sago_score += 30
+        sago_reasons.append("백호살 — 큰 사고·혈광 위험")
+    if iljj_chung:
+        sago_score += 25
+        sago_reasons.append("일지 충 — 배우자궁 충돌, 사고 가능")
+    if chung_count >= 2:
+        sago_score += 20
+        sago_reasons.append(f"지지 충 {chung_count}개 — 변동·사고 다발")
+    if pyeongwan >= 2:
+        sago_score += 15
+        sago_reasons.append("편관 과다 — 외부 충격 잦음")
+    if sago_score >= 60:
+        sago_level, sago_msg = "🔴 매우 높음", "원국에 사고·수술 기운이 강합니다. 양인/충 운에서 결정적 사건 발생 가능. 정기 검진과 안전 운전 필수."
+    elif sago_score >= 40:
+        sago_level, sago_msg = "🟡 보통", "충 발동 해/달에는 안전사고 주의. 무리한 신체 활동 자제."
+    elif sago_score >= 20:
+        sago_level, sago_msg = "🟢 낮음", "큰 사고 기운은 약하나 일상적 주의 필요."
+    else:
+        sago_level, sago_msg = "✅ 매우 낮음", "사고 기운이 거의 없는 안정적 사주."
+    results["사고수"] = {"점수": min(sago_score,100), "등급": sago_level, "이유": sago_reasons, "메시지": sago_msg, "아이콘": "⚠️"}
+
+    # 3. 횡재수
+    hwangjae_score = 0
+    hwangjae_reasons = []
+    if "식신생재" in activated_combos:
+        hwangjae_score += 30
+        hwangjae_reasons.append("식신생재 — 재능이 돈으로 직결")
+    if "신왕재왕" in activated_combos:
+        hwangjae_score += 35
+        hwangjae_reasons.append("신왕재왕 — 큰 재물 그릇 (재벌급)")
+    if pyeonjae >= 2:
+        hwangjae_score += 20
+        hwangjae_reasons.append("편재 다발 — 큰 한 방 가능성")
+    if has_cheonueul and jaeseong >= 1:
+        hwangjae_score += 25
+        hwangjae_reasons.append("천을귀인 + 재성 — 귀인 통한 횡재")
+    if "재생관" in activated_combos:
+        hwangjae_score += 15
+        hwangjae_reasons.append("재생관 — 돈→명예 전환 운명")
+    if hwangjae_score >= 60:
+        hwangjae_level, hwangjae_msg = "🌟 매우 강함", "횡재·대박 기운이 매우 강한 사주! 정재대운 + 식상세운에서 결정적 한 방. 사업·투자 적기 잘 잡으면 부자 그릇."
+    elif hwangjae_score >= 40:
+        hwangjae_level, hwangjae_msg = "✨ 강함", "재물 기운이 강한 편. 편재 운에서 큰 수익 가능."
+    elif hwangjae_score >= 20:
+        hwangjae_level, hwangjae_msg = "💡 보통", "횡재보다 꾸준한 저축형. 노력 대비 보상."
+    else:
+        hwangjae_level, hwangjae_msg = "🪙 약함", "큰 횡재보다 안정적 수입에 집중하는 사주."
+    results["횡재수"] = {"점수": min(hwangjae_score,100), "등급": hwangjae_level, "이유": hwangjae_reasons, "메시지": hwangjae_msg, "아이콘": "💰"}
+
+    # 4. 이혼·이별
+    ihon_score = 0
+    ihon_reasons = []
+    if iljj_chung:
+        ihon_score += 35
+        ihon_reasons.append("일지(배우자궁) 충 — 배우자 갈등")
+    if "관살혼잡" in activated_combos:
+        ihon_score += 30
+        ihon_reasons.append("관살혼잡 — 인연이 복잡함")
+    if "비겁쟁재" in activated_combos and pyeonjae >= 1:
+        ihon_score += 20
+        ihon_reasons.append("비겁쟁재 + 편재 — 배우자 빼앗김 신호")
+    if dohwa_count >= 3:
+        ihon_score += 15
+        ihon_reasons.append("도화 과다 — 이성 관계 복잡")
+    if gwanseong == 0 and ilgan in ["甲","丙","戊","庚","壬"]:
+        ihon_score += 10
+        ihon_reasons.append("관성 부재(남자) — 자녀·책임 약함")
+    if ihon_score >= 60:
+        ihon_level, ihon_msg = "🔴 매우 높음", "원국에서 이혼/이별 기운이 매우 강합니다. 충 운에서 결정적 위기. 부부 상담·신뢰 회복 노력 필수."
+    elif ihon_score >= 40:
+        ihon_level, ihon_msg = "🟡 주의", "결혼 생활 중 갈등 시기 반복 가능. 대화와 양보가 핵심."
+    elif ihon_score >= 20:
+        ihon_level, ihon_msg = "🟢 안정", "일반적 부부 관계. 큰 위기 기운은 없음."
+    else:
+        ihon_level, ihon_msg = "✅ 매우 안정", "결혼 생활 안정형. 평생 배우자와 동반자 관계."
+    results["이혼·이별"] = {"점수": min(ihon_score,100), "등급": ihon_level, "이유": ihon_reasons, "메시지": ihon_msg, "아이콘": "💔"}
+
+    # 5. 큰 병/중병
+    byeong_score = 0
+    byeong_reasons = []
+    oh_count = {"木":0,"火":0,"土":0,"金":0,"水":0}
+    for p in pils:
+        cg = p.get("cg","")
+        jj = p.get("jj","")
+        if cg in _CG_OHAENG: oh_count[_CG_OHAENG[cg]] += 1
+        if jj in _JJ_OHAENG: oh_count[_JJ_OHAENG[jj]] += 1
+    zero_oh = [o for o, c in oh_count.items() if c == 0]
+    if zero_oh:
+        byeong_score += 20 * len(zero_oh)
+        byeong_reasons.append(f"오행 결핍: {','.join(zero_oh)} — 해당 장기 취약")
+    if has_yangin and has_baekho:
+        byeong_score += 30
+        byeong_reasons.append("양인 + 백호 — 수술·중병 신호")
+    if iljj_chung and pyeongwan >= 1:
+        byeong_score += 20
+        byeong_reasons.append("일지 충 + 편관 — 급성 질환 위험")
+    if "재다신약" in activated_combos:
+        byeong_score += 15
+        byeong_reasons.append("재다신약 — 과로·번아웃 만성")
+    if byeong_score >= 60:
+        byeong_level, byeong_msg = "🔴 매우 높음", "원국에서 큰 병·수술 기운이 강합니다. 정기 종합 검진 필수. 결핍 오행 영양 보충, 무리한 활동 자제."
+    elif byeong_score >= 40:
+        byeong_level, byeong_msg = "🟡 주의", "특정 장기 취약. 환절기·기신년에 건강 관리 집중."
+    elif byeong_score >= 20:
+        byeong_level, byeong_msg = "🟢 양호", "건강 기운 보통. 평소 생활 습관 유지."
+    else:
+        byeong_level, byeong_msg = "✅ 매우 양호", "건강 기운이 안정적. 큰 병 위험 매우 낮음."
+    results["큰병"] = {"점수": min(byeong_score,100), "등급": byeong_level, "이유": byeong_reasons, "메시지": byeong_msg, "아이콘": "🏥"}
+
+    # 6. 결혼 인연
+    gyeolhon_score = 0
+    gyeolhon_reasons = []
+    if hap_count >= 1:
+        gyeolhon_score += 30
+        gyeolhon_reasons.append(f"지지합 {hap_count}개 — 인연 끌어들임")
+    if has_cheonueul:
+        gyeolhon_score += 25
+        gyeolhon_reasons.append("천을귀인 — 좋은 배우자 인연")
+    if jeongjae >= 1 and ilgan in ["甲","丙","戊","庚","壬"]:
+        gyeolhon_score += 20
+        gyeolhon_reasons.append("남자 + 정재 — 안정적 배우자")
+    if jeonggwan >= 1 and ilgan in ["乙","丁","己","辛","癸"]:
+        gyeolhon_score += 20
+        gyeolhon_reasons.append("여자 + 정관 — 듬직한 배우자")
+    if "관인상생" in activated_combos:
+        gyeolhon_score += 15
+        gyeolhon_reasons.append("관인상생 — 격있는 배우자 인연")
+    if gyeolhon_score >= 60:
+        gyeolhon_level, gyeolhon_msg = "🌟 최상급 인연", "결혼 인연 기운이 매우 좋은 사주. 합 운/천을귀인 활성 해에 평생 반려자를 만날 가능성 매우 높음."
+    elif gyeolhon_score >= 40:
+        gyeolhon_level, gyeolhon_msg = "✨ 좋음", "안정적인 결혼 인연. 정재/정관 운에서 결혼 가능성."
+    elif gyeolhon_score >= 20:
+        gyeolhon_level, gyeolhon_msg = "💡 보통", "노력하면 좋은 인연 가능. 합 운에서 적극적 활동."
+    else:
+        gyeolhon_level, gyeolhon_msg = "🤔 신중", "결혼 인연 기운 약함. 자기 성장 후 자연스러운 인연 추천."
+    results["결혼인연"] = {"점수": min(gyeolhon_score,100), "등급": gyeolhon_level, "이유": gyeolhon_reasons, "메시지": gyeolhon_msg, "아이콘": "💕"}
+
+    # 7. 사업운
+    saup_score = 0
+    saup_reasons = []
+    if "식신생재" in activated_combos:
+        saup_score += 30
+        saup_reasons.append("식신생재 — 타고난 사업 그릇")
+    if "신왕재왕" in activated_combos:
+        saup_score += 30
+        saup_reasons.append("신왕재왕 — 큰 사업 가능")
+    if "재성태왕" in activated_combos:
+        saup_score += 20
+        saup_reasons.append("재성태왕 — 거상·CEO형")
+    if "비겁쟁재" in activated_combos:
+        saup_score -= 20
+        saup_reasons.append("⚠️ 비겁쟁재 — 동업·재물 분쟁 위험")
+    if "재다신약" in activated_combos:
+        saup_score -= 25
+        saup_reasons.append("⚠️ 재다신약 — 사업 부담 위험")
+    if pyeonjae >= 1 and bigyeon == 1:
+        saup_score += 15
+        saup_reasons.append("편재 + 비견 균형 — 사업 적합")
+    if saup_score >= 50:
+        saup_level, saup_msg = "🌟 사업가 그릇", "사업 성공 기운이 강한 사주. 식상생재 대운에서 대박 가능. 단, 동업보다 단독 경영 추천."
+    elif saup_score >= 25:
+        saup_level, saup_msg = "✨ 사업 가능", "사업 가능형. 신중한 자금 운영과 적절한 시기 선택이 핵심."
+    elif saup_score >= 0:
+        saup_level, saup_msg = "💼 직장형", "사업보다 안정적 직장이 유리. 사업 시 작게 시작 추천."
+    else:
+        saup_level, saup_msg = "⚠️ 사업 위험", "사업 시 손실 위험 큼. 직장 또는 전문직 추천."
+    results["사업운"] = {"점수": max(min(saup_score,100),0), "등급": saup_level, "이유": saup_reasons, "메시지": saup_msg, "아이콘": "💼"}
+
+    return results
+
+
+def render_life_risk_card(pils, name="내담자"):
+    """7대 운명 코드 박스 — 광고 임팩트 최대화"""
+    results = detect_life_risk_signals(pils)
+    if not results:
+        return ""
+
+    color_map = {
+        "🔴": "#c62828", "🟡": "#f57f17", "🟢": "#2e7d32", "✅": "#1565c0",
+        "🌟": "#7b1fa2", "✨": "#1976d2", "💡": "#388e3c", "🪙": "#757575",
+        "🤔": "#5e35b1", "⚠": "#e65100",
+    }
+
+    cards = ""
+    for key, data in results.items():
+        icon    = data["아이콘"]
+        level   = data["등급"]
+        score   = data["점수"]
+        reasons = data["이유"]
+        msg     = data["메시지"]
+
+        emoji = level[0] if level else "🟢"
+        color = color_map.get(emoji, "#666")
+
+        reasons_html = ""
+        if reasons:
+            reasons_html = '<div style="margin-top:8px;font-size:12px;color:#666;"><b>🔍 발동 요인:</b><br>'
+            for r in reasons[:3]:
+                reasons_html += f"• {r}<br>"
+            reasons_html += "</div>"
+
+        cards += f"""
+<div style="background:#fff;border:2px solid {color};border-radius:12px;
+            padding:18px;margin:12px 0;
+            box-shadow:0 4px 12px rgba(0,0,0,0.08);">
+  <div style="display:flex;justify-content:space-between;align-items:center;
+              border-bottom:1px solid #f0f0f0;padding-bottom:10px;margin-bottom:10px;">
+    <div style="font-size:18px;font-weight:900;color:{color};">
+      {icon} {key} — {level}
+    </div>
+    <div style="font-size:14px;font-weight:700;color:{color};
+                background:{color}15;padding:4px 12px;border-radius:20px;">
+      {score}/100
+    </div>
+  </div>
+  <div style="font-size:14px;line-height:1.7;color:#333;">{msg}</div>
+  {reasons_html}
+</div>
+"""
+
+    html = f"""
+<div style="background:linear-gradient(135deg,#fff5f5 0%,#fffbf0 50%,#f0fff4 100%);
+            border:3px solid #c62828;border-radius:22px;
+            padding:30px;margin:24px 0;
+            box-shadow:0 16px 40px rgba(198,40,40,0.18);">
+  <div style="text-align:center;margin-bottom:20px;">
+    <div style="font-size:13px;color:#b71c1c;letter-spacing:2px;font-weight:700;">★ 진짜 궁금한 7가지 ★</div>
+    <div style="font-size:24px;font-weight:900;color:#5d4037;margin-top:6px;">
+      🔮 {name}님 사주 충격 진단
+    </div>
+    <div style="font-size:13px;color:#666;margin-top:6px;">
+      바람·사고·횡재·이혼·병·결혼·사업 — 일반인이 진짜 궁금한 7대 운명 코드 자동 감지
+    </div>
+  </div>
+  {cards}
+  <div style="text-align:center;margin-top:18px;padding-top:16px;
+              border-top:1px dashed #c62828;font-size:11px;color:#999;">
+    ⚖️ 본 진단은 정통 명리학 원리 기반 참고 자료입니다. 의료·법률 상담 아닙니다.
+  </div>
+</div>
+"""
+    return html

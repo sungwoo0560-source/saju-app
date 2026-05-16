@@ -15120,6 +15120,16 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
     except Exception as _e_y4:
         st.warning(f"Y-4 정통 명리학 통합 카드 로드 실패: {_e_y4}")
 
+    # Patch Y-9: 7대 운명 코드 박스 (FINAL VERDICT 직전)
+    try:
+        from saju_zhengtong import render_life_risk_card
+        st.markdown(
+            render_life_risk_card(pils, _name_y4),
+            unsafe_allow_html=True,
+        )
+    except Exception as _e_y9:
+        st.warning(f"Y-9 운명 코드 박스 로드 실패: {_e_y9}")
+
     # Patch Y-6-D: 최종 결론 박스
     try:
         from saju_zhengtong import render_final_verdict_card
