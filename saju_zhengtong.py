@@ -3017,7 +3017,7 @@ ILJU_60GAPJA = {
         "납음설명": "샘 속 깊이에서 솟아나는 물. 겉은 금(金)의 강경함이나 내면에 맑은 지혜의 흐름이 있다.",
         "천간": "甲",
         "지지": "申",
-        "12운성": "절(絶)",
+        "12운성": "절(絶 — 기운이 잠시 끊긴 자리)",
         "공망": "午未",
         "별칭": "바위 사이를 뚫고 흐르는 샘물",
         "본성": (
@@ -3082,7 +3082,7 @@ ILJU_60GAPJA = {
         "납음설명": "샘 속 깊이에서 솟아나는 물. 섬세한 내면의 지혜가 끊임없이 흘러나오는 기운.",
         "천간": "乙",
         "지지": "酉",
-        "12운성": "절(絶)",
+        "12운성": "절(絶 — 기운이 잠시 끊긴 자리)",
         "공망": "午未",
         "별칭": "달 아래 홀로 핀 국화",
         "본성": (
@@ -3397,11 +3397,11 @@ ILJU_60GAPJA = {
     "庚寅": {
         "한글": "경인",
         "순번": 27,
-        "납음오행": "송백목(松柏木)",
+        "납음오행": "송백목(松柏木 — 겨울 소나무)",
         "납음설명": "소나무와 잣나무. 혹독한 겨울 서리 속에서도 푸름을 잃지 않는 절의와 강인함의 상징.",
         "천간": "庚",
         "지지": "寅",
-        "12운성": "절(絶)",
+        "12운성": "절(絶 — 기운이 잠시 끊긴 자리)",
         "공망": "午未",
         "별칭": "서리 맞은 한겨울 소나무",
         "본성": (
@@ -3474,11 +3474,11 @@ ILJU_60GAPJA = {
     "辛卯": {
         "한글": "신묘",
         "순번": 28,
-        "납음오행": "송백목(松柏木)",
+        "납음오행": "송백목(松柏木 — 겨울 소나무)",
         "납음설명": "소나무와 잣나무. 부드러운 외면 아래 굽히지 않는 절의와 세밀한 완성도의 힘.",
         "천간": "辛",
         "지지": "卯",
-        "12운성": "절(絶)",
+        "12운성": "절(絶 — 기운이 잠시 끊긴 자리)",
         "공망": "午未",
         "별칭": "봄비 속에 홀로 피는 야생화",
         "본성": (
@@ -5752,12 +5752,12 @@ def render_ilju_card(ilgan_cg: str, ilji_jj: str, name: str = "내담자") -> st
 
   <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px;">
     <div style="background:rgba(106,27,154,0.08);border-radius:8px;padding:10px;">
-      <div style="font-size:11px;font-weight:800;color:#4a148c;margin-bottom:4px;">🔥 납음오행</div>
+      <div style="font-size:11px;font-weight:800;color:#4a148c;margin-bottom:4px;">🔥 납음오행(納音五行 — 60갑자별 숨은 오행)</div>
       <div style="font-size:13px;font-weight:700;color:#6a1b9a;">{nabeum}</div>
       <div style="font-size:11px;color:#7b1fa2;line-height:1.5;">{nabeum_d}</div>
     </div>
     <div style="background:rgba(106,27,154,0.08);border-radius:8px;padding:10px;">
-      <div style="font-size:11px;font-weight:800;color:#4a148c;margin-bottom:4px;">⚡ 12운성 · 공망</div>
+      <div style="font-size:11px;font-weight:800;color:#4a148c;margin-bottom:4px;">⚡ 12운성(十二運星 — 일간의 강약 단계) · 공망(空亡 — 비어있는 자리, 헛수고 주의)</div>
       <div style="font-size:13px;font-weight:700;color:#6a1b9a;">{wunsung}</div>
       <div style="font-size:11px;color:#7b1fa2;">공망: {gongmang}</div>
     </div>
@@ -6543,3 +6543,227 @@ def render_ohaeng_cycle_card(ilgan_cg: str, name: str = "내담자") -> str:
     )
     return html
 
+
+def render_quick_summary_card(pils, name="내담자", saewoon_data=None, yongshin=None, gisin=None):
+    """종합운세 탭 최상단 — 30초 한눈 요약 카드"""
+    if not pils or len(pils) < 4:
+        return ""
+
+    ilgan = pils[1].get("cg", "")
+    iljj = pils[1].get("jj", "")
+    ilju_key = ilgan + iljj
+
+    ilju_info = ILJU_60GAPJA.get(ilju_key, {})
+    nickname = ilju_info.get("별칭", "")
+
+    activated = detect_sipseong_combinations(pils)
+
+    strengths_raw = ilju_info.get("강점", "")
+    strengths = [s.strip() for s in strengths_raw.split(",")][:3] if strengths_raw else ["결단력", "추진력", "의지력"]
+
+    weaknesses_raw = ilju_info.get("약점", "")
+    weaknesses = [w.strip() for w in weaknesses_raw.split(",")][:3] if weaknesses_raw else ["고집", "융통성 부족", "감정 표현"]
+
+    fate_line = nickname or "정통 명리학 풀이가 진행됩니다."
+
+    combo_summary = ""
+    if activated:
+        combo_names = []
+        for k in activated[:3]:
+            combo = SIPSEONG_COMBINATIONS.get(k, {})
+            alias = combo.get("별칭", k)
+            combo_names.append(alias)
+        combo_summary = " + ".join(combo_names) + "의 복합형 운명"
+    else:
+        combo_summary = f"{ilgan}{iljj} 일주 — 정통 명리학 기반 분석"
+
+    yong_str = ""
+    if yongshin:
+        if isinstance(yongshin, dict):
+            yong_list = yongshin.get("종합_용신", [])
+            if isinstance(yong_list, list):
+                yong_str = "·".join(yong_list[:2])
+            else:
+                yong_str = str(yong_list)
+        elif isinstance(yongshin, list):
+            yong_str = "·".join(yongshin[:2])
+        else:
+            yong_str = str(yongshin)
+
+    gisin_str = ""
+    if gisin:
+        if isinstance(gisin, list):
+            gisin_str = "·".join(gisin[:2])
+        else:
+            gisin_str = str(gisin)
+
+    actions = [
+        f"용신 {yong_str} 강화 — 검정·파랑 색상, 북쪽 방향 활용" if yong_str else "용신 오행 색상 활용",
+        "5~9월 적극 행동 (용신 활성월) — 이 시기에 중요 결정 실행",
+        "정기 건강검진 + 보증·동업 금지 (편관 세운 주의)",
+    ]
+
+    strengths_html = "".join([
+        f'<div style="background:#e8f5e9;border-left:4px solid #2e7d32;'
+        f'padding:8px 12px;margin:6px 0;border-radius:6px;font-size:14px;">'
+        f'<b style="color:#2e7d32;">{i+1}.</b> {s}</div>'
+        for i, s in enumerate(strengths)
+    ])
+    weaknesses_html = "".join([
+        f'<div style="background:#fff3e0;border-left:4px solid #e65100;'
+        f'padding:8px 12px;margin:6px 0;border-radius:6px;font-size:14px;">'
+        f'<b style="color:#e65100;">{i+1}.</b> {w}</div>'
+        for i, w in enumerate(weaknesses)
+    ])
+    actions_html = "".join([
+        f'<div style="background:#e3f2fd;border-left:4px solid #1565c0;'
+        f'padding:10px 12px;margin:6px 0;border-radius:6px;font-size:14px;line-height:1.6;">'
+        f'<b style="color:#1565c0;">[{i+1}]</b> {a}</div>'
+        for i, a in enumerate(actions)
+    ])
+
+    html = f"""
+<div style="background:linear-gradient(135deg,#fffde7 0%,#fff8e1 50%,#fff3e0 100%);
+            border:3px solid #d4af37;border-radius:22px;
+            padding:30px;margin:20px 0 30px 0;
+            box-shadow:0 16px 40px rgba(212,175,55,0.25);">
+
+  <div style="text-align:center;margin-bottom:24px;">
+    <div style="font-size:13px;color:#8b6914;letter-spacing:2px;font-weight:700;">★ 30초 한눈 요약 ★</div>
+    <div style="font-size:24px;font-weight:900;color:#5d4037;margin-top:6px;">
+      🎯 {name}님 사주 핵심 결론
+    </div>
+    <div style="font-size:13px;color:#8b6914;margin-top:6px;">
+      아래 박스만 봐도 본인 사주의 핵심을 모두 이해할 수 있습니다
+    </div>
+  </div>
+
+  <!-- 운명 한 줄 -->
+  <div style="background:#fff;border:2px solid #d4af37;border-radius:14px;
+              padding:20px;margin-bottom:18px;text-align:center;">
+    <div style="font-size:13px;color:#8b6914;font-weight:700;margin-bottom:8px;">
+      📌 {name}님의 운명 한 줄 요약
+    </div>
+    <div style="font-size:18px;font-weight:900;color:#5d4037;line-height:1.6;">
+      "{combo_summary}"
+    </div>
+    <div style="font-size:14px;color:#6d4c41;margin-top:8px;font-style:italic;">
+      🌟 {fate_line}
+    </div>
+  </div>
+
+  <!-- 2단 그리드: 강점 vs 약점 -->
+  <div style="display:flex;flex-wrap:wrap;gap:14px;margin-bottom:18px;">
+    <div style="flex:1 1 45%;min-width:240px;
+                background:#fff;border:2px solid #2e7d32;border-radius:12px;padding:16px;">
+      <div style="font-size:16px;font-weight:900;color:#2e7d32;margin-bottom:10px;
+                  border-bottom:1px solid #c8e6c9;padding-bottom:8px;">
+        💪 강점 TOP 3
+      </div>
+      {strengths_html}
+    </div>
+    <div style="flex:1 1 45%;min-width:240px;
+                background:#fff;border:2px solid #e65100;border-radius:12px;padding:16px;">
+      <div style="font-size:16px;font-weight:900;color:#e65100;margin-bottom:10px;
+                  border-bottom:1px solid #ffe0b2;padding-bottom:8px;">
+        ⚠️ 약점 TOP 3
+      </div>
+      {weaknesses_html}
+    </div>
+  </div>
+
+  <!-- 2026년 액션 -->
+  <div style="background:#fff;border:2px solid #1565c0;border-radius:12px;padding:18px;
+              margin-bottom:18px;">
+    <div style="font-size:16px;font-weight:900;color:#0d47a1;margin-bottom:12px;
+                border-bottom:1px solid #bbdefb;padding-bottom:8px;">
+      🎯 2026년 지금 당장 해야 할 3가지
+    </div>
+    {actions_html}
+  </div>
+
+  <!-- 용신/기신 요약 -->
+  <div style="display:flex;gap:12px;flex-wrap:wrap;">
+    <div style="flex:1 1 45%;min-width:200px;background:#e8f5e9;border-left:5px solid #2e7d32;
+                border-radius:8px;padding:14px;">
+      <div style="font-size:13px;color:#2e7d32;font-weight:700;">✅ 내 운을 살리는 오행 (용신)</div>
+      <div style="font-size:20px;font-weight:900;color:#1b5e20;margin-top:4px;">
+        {yong_str or '계산 중'}
+      </div>
+      <div style="font-size:12px;color:#2e7d32;margin-top:4px;">
+        이 오행 색상·방향·계절을 적극 활용하십시오
+      </div>
+    </div>
+    <div style="flex:1 1 45%;min-width:200px;background:#ffebee;border-left:5px solid #c62828;
+                border-radius:8px;padding:14px;">
+      <div style="font-size:13px;color:#c62828;font-weight:700;">⛔ 내 운을 막는 오행 (기신)</div>
+      <div style="font-size:20px;font-weight:900;color:#b71c1c;margin-top:4px;">
+        {gisin_str or '계산 중'}
+      </div>
+      <div style="font-size:12px;color:#c62828;margin-top:4px;">
+        이 오행 강한 시기는 신중 모드 유지
+      </div>
+    </div>
+  </div>
+
+  <div style="text-align:center;margin-top:20px;padding-top:16px;border-top:1px dashed #d4af37;
+              font-size:12px;color:#8b6914;">
+    ↓ 자세한 풀이는 아래로 스크롤 ↓
+  </div>
+</div>
+"""
+    return html
+
+
+def render_final_verdict_card(pils, name="내담자"):
+    """정통 명리학 분석 종합 결론 — 사용자가 가장 마지막에 보는 결론"""
+    if not pils or len(pils) < 4:
+        return ""
+
+    ilgan = pils[1].get("cg", "")
+    iljj = pils[1].get("jj", "")
+    activated = detect_sipseong_combinations(pils)
+
+    if not activated:
+        verdict = f"{ilgan}{iljj} 일주의 강한 의지와 결단력이 인생의 무기입니다."
+    else:
+        top_combo = activated[0]
+        combo_info = SIPSEONG_COMBINATIONS.get(top_combo, {})
+        verdict = combo_info.get("임팩트", "정통 명리학 종합 분석 결과입니다.")
+
+    advices = [
+        "💎 강점을 살리고 약점을 의식하면 사주가 곧 인생 설계도가 됩니다.",
+        "🌊 용신 오행을 일상에서 활용하면 막힌 기운이 뚫립니다.",
+        "🎯 운명은 정해진 것이 아니라, 패와 날씨를 읽는 법입니다.",
+    ]
+
+    advices_html = "".join([
+        f'<div style="font-size:14px;color:#fff;line-height:1.8;margin:6px 0;">{a}</div>'
+        for a in advices
+    ])
+
+    html = f"""
+<div style="background:linear-gradient(135deg,#1a237e 0%,#283593 50%,#3949ab 100%);
+            border-radius:20px;padding:32px;margin:24px 0;
+            box-shadow:0 16px 40px rgba(26,35,126,0.3);color:#fff;">
+  <div style="text-align:center;margin-bottom:20px;">
+    <div style="font-size:13px;letter-spacing:3px;color:#bbdefb;font-weight:700;">★ FINAL VERDICT ★</div>
+    <div style="font-size:22px;font-weight:900;margin-top:6px;">
+      🌟 {name}님의 정통 명리학 종합 결론
+    </div>
+  </div>
+  <div style="background:rgba(255,255,255,0.12);border-radius:14px;padding:20px;margin-bottom:18px;
+              text-align:center;border:1px solid rgba(255,255,255,0.2);">
+    <div style="font-size:18px;font-weight:700;line-height:1.7;color:#fff8e1;">
+      "{verdict}"
+    </div>
+  </div>
+  <div style="border-top:1px dashed rgba(255,255,255,0.3);padding-top:16px;">
+    {advices_html}
+  </div>
+  <div style="text-align:center;margin-top:18px;font-size:12px;color:#bbdefb;">
+    — 천명(天命)은 정해져 있으나, 그것을 활용하는 것은 본인의 의지입니다 —
+  </div>
+</div>
+"""
+    return html
