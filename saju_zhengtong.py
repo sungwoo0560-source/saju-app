@@ -6559,7 +6559,22 @@ def render_quick_summary_card(pils, name="내담자", saewoon_data=None, yongshi
     activated = detect_sipseong_combinations(pils)
 
     strengths_raw = ilju_info.get("강점", "")
-    strengths = [s.strip() for s in strengths_raw.split(",")][:3] if strengths_raw else ["결단력", "추진력", "의지력"]
+    base_strengths = [s.strip() for s in strengths_raw.split(",")] if strengths_raw else ["결단력", "추진력", "의지력"]
+
+    combo_strengths = []
+    if "관인상생" in activated:
+        combo_strengths.append("학문·명예 인복")
+    elif "식신생재" in activated:
+        combo_strengths.append("사업·재능 발휘")
+    elif "재생관" in activated:
+        combo_strengths.append("재물→명예 전환력")
+    elif "신왕재왕" in activated:
+        combo_strengths.append("재벌급 재물 그릇")
+
+    if combo_strengths:
+        strengths = combo_strengths[:1] + base_strengths[:2]
+    else:
+        strengths = base_strengths[:3]
 
     weaknesses_raw = ilju_info.get("약점", "")
     weaknesses = [w.strip() for w in weaknesses_raw.split(",")][:3] if weaknesses_raw else ["고집", "융통성 부족", "감정 표현"]
@@ -6580,27 +6595,60 @@ def render_quick_summary_card(pils, name="내담자", saewoon_data=None, yongshi
     yong_str = ""
     if yongshin:
         if isinstance(yongshin, dict):
-            yong_list = yongshin.get("종합_용신", [])
-            if isinstance(yong_list, list):
-                yong_str = "·".join(yong_list[:2])
-            else:
-                yong_str = str(yong_list)
+            yong_list = (
+                yongshin.get("종합_용신") or
+                yongshin.get("용신") or
+                yongshin.get("yongshin") or
+                []
+            )
+            if isinstance(yong_list, list) and yong_list:
+                yong_str = "·".join([str(y) for y in yong_list[:2]])
+            elif isinstance(yong_list, str):
+                yong_str = yong_list
         elif isinstance(yongshin, list):
-            yong_str = "·".join(yongshin[:2])
+            yong_str = "·".join([str(y) for y in yongshin[:2]])
         else:
             yong_str = str(yongshin)
 
     gisin_str = ""
     if gisin:
-        if isinstance(gisin, list):
-            gisin_str = "·".join(gisin[:2])
+        if isinstance(gisin, dict):
+            gisin_list = (
+                gisin.get("종합_기신") or
+                gisin.get("기신") or
+                gisin.get("gisin") or
+                []
+            )
+            if isinstance(gisin_list, list) and gisin_list:
+                gisin_str = "·".join([str(g) for g in gisin_list[:2]])
+            elif isinstance(gisin_list, str):
+                gisin_str = gisin_list
+        elif isinstance(gisin, list):
+            gisin_str = "·".join([str(g) for g in gisin[:2]])
         else:
             gisin_str = str(gisin)
 
+    yong_action_map = {
+        "水": "검정·남색 색상, 북쪽 방향, 독서·명상 활용",
+        "木": "초록·청록 색상, 동쪽 방향, 숲·공원 산책",
+        "火": "빨강·주황 색상, 남쪽 방향, 햇볕·사교 모임",
+        "土": "노랑·갈색 색상, 중앙·환절기, 부동산·저축",
+        "金": "흰색·은색 색상, 서쪽 방향, 정리·결단",
+    }
+    first_yong = ""
+    if yongshin:
+        if isinstance(yongshin, dict):
+            _yl = yongshin.get("종합_용신") or yongshin.get("용신") or []
+            if _yl and isinstance(_yl, list):
+                first_yong = _yl[0]
+        elif isinstance(yongshin, list) and yongshin:
+            first_yong = yongshin[0]
+    yong_color_action = yong_action_map.get(first_yong, "용신 오행 색상 활용")
+
     actions = [
-        f"용신 {yong_str} 강화 — 검정·파랑 색상, 북쪽 방향 활용" if yong_str else "용신 오행 색상 활용",
-        "5~9월 적극 행동 (용신 활성월) — 이 시기에 중요 결정 실행",
-        "정기 건강검진 + 보증·동업 금지 (편관 세운 주의)",
+        f"용신 {yong_str} 강화 — {yong_color_action}" if yong_str else "용신 오행 색상 활용",
+        "올해 대길월(4·9·11월) 중요 결정 — 길흉 캘린더 참고",
+        "보증·동업 금지 + 정기 건강검진 (편관 세운 주의)",
     ]
 
     strengths_html = "".join([

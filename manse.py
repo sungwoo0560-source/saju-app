@@ -14451,12 +14451,25 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
     # ── 고민 자동 추론 카드 (맨 위) ──────────────────────────
     render_worry_inference(pils, birth_year, gender)
 
-    # Patch Y-6: 한눈 요약 카드 (최상단)
+    # Patch Y-6: 한눈 요약 카드 (최상단) — Y-7 수정
     try:
         from saju_zhengtong import render_quick_summary_card
         _name_y6 = name or "내담자"
-        _yong_y6 = yongshin if 'yongshin' in dir() else None
-        _gisin_y6 = gisin if 'gisin' in dir() else None
+
+        # yongshin/gisin 직접 계산
+        _yong_y6 = None
+        _gisin_y6 = None
+        try:
+            _ys_y6 = get_yongshin(pils)
+            if _ys_y6:
+                _yong_y6 = _ys_y6
+                _gisin_list_y6 = _ys_y6.get("기신", [])
+                if isinstance(_gisin_list_y6, list) and _gisin_list_y6:
+                    _gisin_y6 = _gisin_list_y6
+        except Exception:
+            _yong_y6 = None
+            _gisin_y6 = None
+
         _quick_html = render_quick_summary_card(
             pils, _name_y6,
             yongshin=_yong_y6,
