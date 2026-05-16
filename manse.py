@@ -13740,16 +13740,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
     lines.append(f"*{cur_year}년 · 한국나이 {cur_age}세(만 {cur_age-1}세) · {_dw_label}{_age_range} · {_sw_label}*")
     lines.append("")
 
-    # 1. 공감 질문
-    lines.append(f"### 💬 {hard_q}")
-    lines.append("")
-
-    # 2. 세운 기반 현황 서술
-    lines.append(hard_body)
-    lines.append("")
-    lines.append("---")
-
-    # 0. 위험 신호 카드 — 3등급 분류
+    # 위험 신호 카드 — 3등급 분류
     _signals_danger  = [(t,b) for t,b,g in _danger_signals if g == "위험"]
     _signals_caution = [(t,b) for t,b,g in _danger_signals if g == "주의"]
     _signals_info    = [(t,b) for t,b,g in _danger_signals if g == "참고"]
@@ -14090,59 +14081,8 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                 "처방": "말을 줄이고 긍정적인 언어 습관을 만드십시오. 말이 곧 운입니다."
             })
 
-        # 진단 결과 렌더링
-        if _공통점_해당:
-            lines.append("---")
-            lines.append(f"### 🔍 {name}님, 운이 안 풀리는 이유가 보입니다")
-            lines.append("")
-            lines.append(
-                f"전통 사주명리학에서 운이 잘 풀리지 않는 사람들의 공통적 특징이 있습니다. "
-                f"{name}님의 사주에서 **{len(_공통점_해당)}가지**가 해당됩니다."
-            )
-            lines.append("")
-            lines.append(
-                "<div style='background:#fff5f5;border-left:4px solid #cc0000;"
-                "padding:12px 16px;border-radius:6px;margin:8px 0'>"
-            )
-            for _gp in _공통점_해당:
-                lines.append(f"**{_gp['번호']} — {_gp['제목']}**")
-                lines.append("")
-                lines.append(_gp["내용"])
-                lines.append("")
-                lines.append(f"💊 **처방:** {_gp['처방']}")
-                lines.append("")
-                lines.append("---")
-            lines.append(
-                f"이 {len(_공통점_해당)}가지를 알아차린 지금 이 순간이 "
-                f"바로 **{name}님의 운을 바꾸는 시작점**입니다."
-            )
-            lines.append("</div>")
-            lines.append("")
-
-        if _운명처방:
-            lines.append("---")
-            lines.append("")
-            lines.append(f"### 🌟 {name}님의 운명을 바꾸는 핵심 전략")
-            lines.append("")
-            lines.append(
-                "<div style='background:#f0f8ff;border-left:4px solid #0066cc;"
-                "padding:12px;border-radius:6px;margin:8px 0'>"
-            )
-            if _최우선_행동:
-                lines.append(f"⭐ {_최우선_행동}")
-                lines.append("")
-            for _rx in _운명처방:
-                lines.append(f"**{_rx['제목']}**")
-                lines.append("")
-                lines.append(_rx["내용"])
-                lines.append("")
-                lines.append("---")
-            lines.append("</div>")
-            lines.append("")
     except Exception:
         pass
-
-    lines.append("\n## 🔬 당신 분석\n")
 
     # 2-1. [NEW] 일간 개인화 분석
     if _ilgan_now_msg:
@@ -14184,11 +14124,6 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
         lines.append(_gil_personal)
         lines.append("")
 
-    # 4-1. [NEW] 나이대 고민 테마
-    lines.append("---")
-    lines.append(f"### 📅 {name}님 나이({cur_age}세)에서 오는 구조적 고민")
-    lines.append(_age_theme)
-    lines.append("")
 
     # 5. 신강신약 개인 맥락 (일간 표시)
     if sn_cmt:
@@ -14198,40 +14133,6 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
         lines.append(sn_cmt)
         lines.append("")
 
-    # 5-1. [NEW] 오행 구성비 분석
-    lines.append("---")
-    lines.append(f"### ⚖️ {name}님 사주 오행 구성 — 이것이 당신의 평생 약점입니다")
-    lines.append(f"**원국 8자 구성 (단순 개수):** {_oh_bar}{_oh_weak_msg}{_oh_over_msg}")
-    if _oh_zero:
-        _zero_detail = {
-            "木": "木이 없으면 → 결단력·추진력 부족, 새 시작이 무서움, 간·담낭 선천 취약",
-            "火": "火가 없으면 → 표현력·사교성 부족, 인정받는 게 어색함, 심장·혈압 선천 취약",
-            "土": "土가 없으면 → 중심 잡기 어려움, 불안감 만성화, 위·비장 선천 취약",
-            "金": "金이 없으면 → 마무리·결단 약함, 원칙 없이 흔들림, 폐·대장 선천 취약",
-            "水": "水가 없으면 → 지혜·유연성 부족, 고집·아집이 강해짐, 신장·방광 선천 취약",
-        }
-        for _z in _oh_zero:
-            if _z in _zero_detail:
-                lines.append(f"  \n🔴 {_zero_detail[_z]}")
-    if _oh_over:
-        _over_detail = {
-            "木": "木이 3개 이상 → 간 수치 이상·과음·분노조절 문제, 욱하는 성격 강화",
-            "火": "火가 3개 이상 → 고혈압·심장 부담·과열·충동, 말실수 빈번",
-            "土": "土가 3개 이상 → 위장 질환·비만·당뇨 위험, 고집·변화 거부 극단화",
-            "金": "金이 3개 이상 → 폐·대장·피부 질환, 완벽주의·냉정함이 관계 파괴",
-            "水": "水가 3개 이상 → 신장·방광·우울증, 우유부단·비밀주의 심화",
-        }
-        for _ov in _oh_over:
-            if _ov in _over_detail:
-                lines.append(f"  \n🟡 {_over_detail[_ov]}")
-    lines.append("")
-
-    # 5-2. [NEW] 일지 배우자/파트너 신호
-    if _iljj_partner_msg:
-        lines.append("---")
-        lines.append(f"### 💑 일지 {iljj} — 지금 배우자·파트너에게 보내는 신호")
-        lines.append(_iljj_partner_msg)
-        lines.append("")
 
     lines.append("\n## 🎁 처방\n")
 
@@ -14417,21 +14318,6 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
         if _키 in _출력된_텍스트:
             _나온_용어.append((_용어, _풀이))
 
-    if _나온_용어:
-        lines.append("---")
-        lines.append("### 📖 오늘 나온 한자 용어 풀이")
-        lines.append("")
-        lines.append(
-            "<div style='background:#f8f8f8;border-left:4px solid #888;"
-            "padding:12px;border-radius:6px;margin:8px 0;font-size:13px'>"
-        )
-        lines.append("**📖 오늘 분석에서 나온 한자 용어 풀이**")
-        lines.append("")
-        for _용어, _풀이 in _나온_용어[:15]:
-            lines.append(f"**{_용어}** — {_풀이}")
-            lines.append("")
-        lines.append("</div>")
-        lines.append("")
 
     st.markdown(
         "<style>.stMarkdown p{word-break:keep-all;line-height:2;font-size:15px;color:#1a1a1a}"
@@ -14479,6 +14365,13 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
             st.markdown(_quick_html, unsafe_allow_html=True)
     except Exception as _e_y6:
         st.warning(f"Y-6 한눈 요약 카드 로드 실패: {_e_y6}")
+
+    # Patch Y-9-A: 7대 운명 코드 박스 (충격 임팩트)
+    try:
+        from saju_zhengtong import render_life_risk_card
+        st.markdown(render_life_risk_card(pils, _name_y6), unsafe_allow_html=True)
+    except Exception as _e_y9a:
+        st.warning(f"Y-9-A 운명 코드 박스 로드 실패: {_e_y9a}")
 
     # ── 로컬 엔진 항상 먼저 출력 ─────────────────────────────
 
@@ -15119,16 +15012,6 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
             )
     except Exception as _e_y4:
         st.warning(f"Y-4 정통 명리학 통합 카드 로드 실패: {_e_y4}")
-
-    # Patch Y-9: 7대 운명 코드 박스 (FINAL VERDICT 직전)
-    try:
-        from saju_zhengtong import render_life_risk_card
-        st.markdown(
-            render_life_risk_card(pils, _name_y4),
-            unsafe_allow_html=True,
-        )
-    except Exception as _e_y9:
-        st.warning(f"Y-9 운명 코드 박스 로드 실패: {_e_y9}")
 
     # Patch Y-6-D: 최종 결론 박스
     try:
