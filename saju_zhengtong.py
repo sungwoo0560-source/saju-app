@@ -6544,8 +6544,72 @@ def render_ohaeng_cycle_card(ilgan_cg: str, name: str = "내담자") -> str:
     return html
 
 
+DOSA_VERDICT = {
+    "甲子":"물 위의 큰 나무 — 흔들려도 안 쓰러지는 사람",
+    "乙丑":"겨울 들판의 풀 — 추위 속에서 끝까지 버티는 사람",
+    "丙寅":"새벽 태양 — 누구보다 먼저 일어나 길을 여는 사람",
+    "丁卯":"촛불 — 약해 보여도 끝까지 밝히는 사람",
+    "戊辰":"용의 등에 앉은 산 — 움직이지 않으면 누구도 흔들 수 없음",
+    "己巳":"타오르는 들판 — 평소엔 조용하나 한 번 불 붙으면 못 멈춤",
+    "庚午":"달리는 칼 — 멈추지 않는 추진력",
+    "辛未":"여름 끝의 보석 — 깊은 곳에 빛을 숨긴 사람",
+    "壬申":"큰 강의 원숭이 — 영리하고 자유로운 영혼",
+    "癸酉":"가을 비 — 차갑지만 모든 걸 정화하는 사람",
+    "甲戌":"산 위의 큰 나무 — 외로움을 견디는 자존심",
+    "乙亥":"물 위의 풀 — 흐름을 거스르지 않는 지혜",
+    "丙子":"물 위의 태양 — 빛나지만 결코 가라앉지 않음",
+    "丁丑":"겨울 촛불 — 약함 속의 강함",
+    "戊寅":"산 속의 호랑이 — 침묵하다 한 번에 덮침",
+    "己卯":"들판의 토끼 — 빠르고 영민한 생존자",
+    "庚辰":"용을 부리는 검 — 큰 권력의 그릇",
+    "辛巳":"불 속의 보석 — 시련이 만든 진짜 강자",
+    "壬午":"한낮의 큰 물 — 뜨거움과 차가움의 공존",
+    "癸未":"여름 비 — 갈증을 풀어주는 귀한 존재",
+    "甲申":"쇠 도끼에 맞선 큰 나무 — 부서져도 다시 일어남",
+    "乙酉":"쇠 위에 핀 작은 꽃 — 약해 보이나 끈질김",
+    "丙戌":"산 위의 큰 불 — 멀리서도 보이는 존재감",
+    "丁亥":"바다 위의 등불 — 외로운 길잡이",
+    "戊子":"물 위의 큰 산 — 절대 무너지지 않음",
+    "己丑":"겨울 들판 — 모든 걸 품는 어머니의 땅",
+    "庚寅":"강철로 만든 외로운 검 — 의리 하나로 사는 사람",
+    "辛卯":"토끼를 잡는 칼 — 정확하고 빠른 결단",
+    "壬辰":"용의 등에 앉은 큰 물 — 거대한 가능성",
+    "癸巳":"뱀 위의 비 — 영민함과 직관의 화신",
+    "甲午":"한낮의 큰 나무 — 누구보다 빛나는 자",
+    "乙未":"여름 끝의 풀 — 인내의 끝에 결실",
+    "丙申":"쇠를 녹이는 태양 — 무엇이든 변화시키는 힘",
+    "丁酉":"쇠를 비추는 촛불 — 섬세한 통찰",
+    "戊戌":"산 위의 큰 산 — 절대 흔들리지 않는 자",
+    "己亥":"바다 위의 들판 — 깊고 너른 마음",
+    "庚子":"물 위의 칼 — 차갑지만 정확한 사람",
+    "辛丑":"겨울 보석 — 시린 아름다움",
+    "壬寅":"호랑이를 품은 큰 물 — 야망과 카리스마",
+    "癸卯":"토끼 위의 비 — 부드러움 속의 날카로움",
+    "甲辰":"용을 부리는 큰 나무 — 권력의 화신",
+    "乙巳":"불 속의 풀 — 시련의 끝에 피는 꽃",
+    "丙午":"한낮의 태양 — 누구도 못 막는 추진력",
+    "丁未":"여름 끝의 촛불 — 따뜻한 마무리의 손",
+    "戊申":"쇠를 품은 산 — 무거운 책임의 사람",
+    "己酉":"쇠 위의 들판 — 정제된 의리",
+    "庚戌":"산 위의 칼 — 외로운 정점",
+    "辛亥":"바다 위의 보석 — 깊이 빛나는 사람",
+    "壬子":"큰 강의 큰 물 — 자유와 깊이의 끝",
+    "癸丑":"겨울 비 — 시린 자비",
+    "甲寅":"호랑이를 닮은 큰 나무 — 타고난 리더",
+    "乙卯":"들판의 풀 — 부드럽지만 끝까지 자라남",
+    "丙辰":"용 위의 태양 — 압도적 권위",
+    "丁巳":"뱀을 품은 촛불 — 영민한 카리스마",
+    "戊午":"한낮의 큰 산 — 누구도 못 넘는 자",
+    "己未":"여름 끝의 들판 — 모든 걸 품는 그릇",
+    "庚申":"쇠 위의 칼 — 절대 안 굽히는 사람",
+    "辛酉":"쇠 위의 보석 — 차갑고 완벽한 자",
+    "壬戌":"산 위의 큰 물 — 깊이를 알 수 없는 사람",
+    "癸亥":"바다의 비 — 끝없이 흐르는 자",
+}
+
+
 def render_quick_summary_card(pils, name="내담자", saewoon_data=None, yongshin=None, gisin=None):
-    """종합운세 탭 최상단 — 30초 한눈 요약 카드"""
+    """종합운세 탭 최상단 — 도사 직설 진단 카드"""
     if not pils or len(pils) < 4:
         return ""
 
@@ -6591,6 +6655,8 @@ def render_quick_summary_card(pils, name="내담자", saewoon_data=None, yongshi
         combo_summary = " + ".join(combo_names) + "의 복합형 운명"
     else:
         combo_summary = f"{ilgan}{iljj} 일주 — 정통 명리학 기반 분석"
+
+    dosa_verdict = DOSA_VERDICT.get(ilju_key, nickname or f"{ilgan}{iljj} — 강한 의지로 자신의 길을 가는 사람")
 
     yong_str = ""
     if yongshin:
@@ -6677,12 +6743,12 @@ def render_quick_summary_card(pils, name="내담자", saewoon_data=None, yongshi
             box-shadow:0 16px 40px rgba(212,175,55,0.25);">
 
   <div style="text-align:center;margin-bottom:24px;">
-    <div style="font-size:13px;color:#8b6914;letter-spacing:2px;font-weight:700;">★ 30초 한눈 요약 ★</div>
+    <div style="font-size:13px;color:#8b6914;letter-spacing:2px;font-weight:700;">★ 도사 직설 진단 ★</div>
     <div style="font-size:24px;font-weight:900;color:#5d4037;margin-top:6px;">
-      🎯 {name}님 사주 핵심 결론
+      🎯 {name}님, 당신을 한 줄로 정리합니다
     </div>
     <div style="font-size:13px;color:#8b6914;margin-top:6px;">
-      아래 박스만 봐도 본인 사주의 핵심을 모두 이해할 수 있습니다
+      읽고 나면 — 소름이 돋을 겁니다. 끝까지 보세요.
     </div>
   </div>
 
@@ -6690,13 +6756,13 @@ def render_quick_summary_card(pils, name="내담자", saewoon_data=None, yongshi
   <div style="background:#fff;border:2px solid #d4af37;border-radius:14px;
               padding:20px;margin-bottom:18px;text-align:center;">
     <div style="font-size:13px;color:#8b6914;font-weight:700;margin-bottom:8px;">
-      📌 {name}님의 운명 한 줄 요약
+      📌 당신은 — 한 문장으로 이런 사람입니다
     </div>
     <div style="font-size:18px;font-weight:900;color:#5d4037;line-height:1.6;">
-      "{combo_summary}"
+      "{dosa_verdict}"
     </div>
     <div style="font-size:14px;color:#6d4c41;margin-top:8px;font-style:italic;">
-      🌟 {fate_line}
+      ✦ {combo_summary}
     </div>
   </div>
 
@@ -6706,7 +6772,7 @@ def render_quick_summary_card(pils, name="내담자", saewoon_data=None, yongshi
                 background:#fff;border:2px solid #2e7d32;border-radius:12px;padding:16px;">
       <div style="font-size:16px;font-weight:900;color:#2e7d32;margin-bottom:10px;
                   border-bottom:1px solid #c8e6c9;padding-bottom:8px;">
-        💪 강점 TOP 3
+        💎 당신의 진짜 무기 3가지
       </div>
       {strengths_html}
     </div>
@@ -6714,7 +6780,7 @@ def render_quick_summary_card(pils, name="내담자", saewoon_data=None, yongshi
                 background:#fff;border:2px solid #e65100;border-radius:12px;padding:16px;">
       <div style="font-size:16px;font-weight:900;color:#e65100;margin-bottom:10px;
                   border-bottom:1px solid #ffe0b2;padding-bottom:8px;">
-        ⚠️ 약점 TOP 3
+        🗡️ 당신을 막고 있는 3가지
       </div>
       {weaknesses_html}
     </div>
@@ -6725,7 +6791,7 @@ def render_quick_summary_card(pils, name="내담자", saewoon_data=None, yongshi
               margin-bottom:18px;">
     <div style="font-size:16px;font-weight:900;color:#0d47a1;margin-bottom:12px;
                 border-bottom:1px solid #bbdefb;padding-bottom:8px;">
-      🎯 2026년 지금 당장 해야 할 3가지
+      ⚡ 2026년 — 당신이 반드시 해야 할 3가지
     </div>
     {actions_html}
   </div>
@@ -6734,29 +6800,29 @@ def render_quick_summary_card(pils, name="내담자", saewoon_data=None, yongshi
   <div style="display:flex;gap:12px;flex-wrap:wrap;">
     <div style="flex:1 1 45%;min-width:200px;background:#e8f5e9;border-left:5px solid #2e7d32;
                 border-radius:8px;padding:14px;">
-      <div style="font-size:13px;color:#2e7d32;font-weight:700;">✅ 내 운을 살리는 오행 (용신)</div>
+      <div style="font-size:13px;color:#2e7d32;font-weight:700;">✅ 당신을 살리는 기운</div>
       <div style="font-size:20px;font-weight:900;color:#1b5e20;margin-top:4px;">
         {yong_str or '계산 중'}
       </div>
       <div style="font-size:12px;color:#2e7d32;margin-top:4px;">
-        이 오행 색상·방향·계절을 적극 활용하십시오
+        이걸 외면하면 5년이 그냥 갑니다
       </div>
     </div>
     <div style="flex:1 1 45%;min-width:200px;background:#ffebee;border-left:5px solid #c62828;
                 border-radius:8px;padding:14px;">
-      <div style="font-size:13px;color:#c62828;font-weight:700;">⛔ 내 운을 막는 오행 (기신)</div>
+      <div style="font-size:13px;color:#c62828;font-weight:700;">⛔ 당신을 죽이는 기운</div>
       <div style="font-size:20px;font-weight:900;color:#b71c1c;margin-top:4px;">
         {gisin_str or '계산 중'}
       </div>
       <div style="font-size:12px;color:#c62828;margin-top:4px;">
-        이 오행 강한 시기는 신중 모드 유지
+        이 기운 만나면 무조건 멈추세요
       </div>
     </div>
   </div>
 
   <div style="text-align:center;margin-top:20px;padding-top:16px;border-top:1px dashed #d4af37;
               font-size:12px;color:#8b6914;">
-    ↓ 자세한 풀이는 아래로 스크롤 ↓
+    ↓ 더 자세한 진단은 아래로 — 마음 단단히 ↓
   </div>
 </div>
 """
@@ -6780,9 +6846,9 @@ def render_final_verdict_card(pils, name="내담자"):
         verdict = combo_info.get("임팩트", "정통 명리학 종합 분석 결과입니다.")
 
     advices = [
-        "💎 강점을 살리고 약점을 의식하면 사주가 곧 인생 설계도가 됩니다.",
-        "🌊 용신 오행을 일상에서 활용하면 막힌 기운이 뚫립니다.",
-        "🎯 운명은 정해진 것이 아니라, 패와 날씨를 읽는 법입니다.",
+        "💎 당신의 무기는 의지입니다. 휘둘러도 되지만, 자신은 베지 마세요.",
+        "🌊 운이 막혔다면 — 검정과 파랑을 가까이 두세요. 그게 답입니다.",
+        "🎯 운명은 — 안 바뀝니다. 그러나 어떻게 살지는 당신이 정합니다.",
     ]
 
     advices_html = "".join([
@@ -6795,9 +6861,9 @@ def render_final_verdict_card(pils, name="내담자"):
             border-radius:20px;padding:32px;margin:24px 0;
             box-shadow:0 16px 40px rgba(26,35,126,0.3);color:#fff;">
   <div style="text-align:center;margin-bottom:20px;">
-    <div style="font-size:13px;letter-spacing:3px;color:#bbdefb;font-weight:700;">★ FINAL VERDICT ★</div>
+    <div style="font-size:13px;letter-spacing:3px;color:#bbdefb;font-weight:700;">★ 도사의 최종 진단 ★</div>
     <div style="font-size:22px;font-weight:900;margin-top:6px;">
-      🌟 {name}님의 정통 명리학 종합 결론
+      ⚖️ {name}님 — 천명(天命) 한 줄
     </div>
   </div>
   <div style="background:rgba(255,255,255,0.12);border-radius:14px;padding:20px;margin-bottom:18px;
@@ -6810,7 +6876,7 @@ def render_final_verdict_card(pils, name="내담자"):
     {advices_html}
   </div>
   <div style="text-align:center;margin-top:18px;font-size:12px;color:#bbdefb;">
-    — 천명(天命)은 정해져 있으나, 그것을 활용하는 것은 본인의 의지입니다 —
+    — 사주는 거울입니다. 진짜 변화는 당신의 결심에서 시작됩니다 —
   </div>
 </div>
 """
