@@ -7043,13 +7043,13 @@ def detect_life_risk_signals(pils, saewoon_data=None):
         baram_score += 20
         baram_reasons.append("양일간 + 편재 다발 — 외도 신호")
     if baram_score >= 60:
-        baram_level, baram_msg = "🔴 매우 높음", "원국에서 바람 기운이 매우 강하게 발동합니다. 배우자/연인과의 신뢰 관리 필수. 도화·합 운에서 결정적 사건이 일어날 수 있습니다."
+        baram_level, baram_msg = "🔴 매우 높음", "🩸 당신 사주 — 바람 기운이 칼처럼 박혀있습니다. 배우자/연인 — 지금 당장 신뢰 다잡지 않으면 무너집니다."
     elif baram_score >= 40:
-        baram_level, baram_msg = "🟡 보통", "이성 인연이 자주 들어오는 사주. 한 사람에게 집중하지 않으면 갈등이 생깁니다."
+        baram_level, baram_msg = "🟡 보통", "⚡ 당신은 — 이성이 끊임없이 끌리는 사주. 한 사람에 집중 안 하면 — 가정이 깨집니다."
     elif baram_score >= 20:
-        baram_level, baram_msg = "🟢 낮음", "외도 위험은 낮으나 도화 운에서는 주의가 필요합니다."
+        baram_level, baram_msg = "🟢 낮음", "🟢 평소엔 안전 — 단, 도화 운 만나면 흔들립니다."
     else:
-        baram_level, baram_msg = "✅ 매우 낮음", "원국에서 외도 기운은 매우 약합니다."
+        baram_level, baram_msg = "✅ 매우 낮음", "✅ 당신은 — 바람 안 피웁니다. 천성이 그렇습니다."
     results["바람기"] = {"점수": min(baram_score,100), "등급": baram_level, "이유": baram_reasons, "메시지": baram_msg, "아이콘": "💔"}
 
     # 2. 사고수
@@ -7071,13 +7071,13 @@ def detect_life_risk_signals(pils, saewoon_data=None):
         sago_score += 15
         sago_reasons.append("편관 과다 — 외부 충격 잦음")
     if sago_score >= 60:
-        sago_level, sago_msg = "🔴 매우 높음", "원국에 사고·수술 기운이 강합니다. 양인/충 운에서 결정적 사건 발생 가능. 정기 검진과 안전 운전 필수."
+        sago_level, sago_msg = "🔴 매우 높음", "💀 당신 사주 — 칼이 들어와 있습니다. 충 운 만나면 — 수술대 올라갑니다. 안전, 운전, 보험 — 지금 챙기세요."
     elif sago_score >= 40:
-        sago_level, sago_msg = "🟡 보통", "충 발동 해/달에는 안전사고 주의. 무리한 신체 활동 자제."
+        sago_level, sago_msg = "🟡 보통", "⚠️ 충 발동 해 — 사고가 옵니다. 평소 두 배 조심하세요."
     elif sago_score >= 20:
-        sago_level, sago_msg = "🟢 낮음", "큰 사고 기운은 약하나 일상적 주의 필요."
+        sago_level, sago_msg = "🟢 낮음", "🟢 큰 사고 기운은 약함 — 그래도 평소 운전·안전 챙기세요."
     else:
-        sago_level, sago_msg = "✅ 매우 낮음", "사고 기운이 거의 없는 안정적 사주."
+        sago_level, sago_msg = "✅ 매우 낮음", "✅ 당신은 — 사고 안 납니다. 운이 받쳐줍니다."
     results["사고수"] = {"점수": min(sago_score,100), "등급": sago_level, "이유": sago_reasons, "메시지": sago_msg, "아이콘": "⚠️"}
 
     # 3. 횡재수
@@ -7099,13 +7099,13 @@ def detect_life_risk_signals(pils, saewoon_data=None):
         hwangjae_score += 15
         hwangjae_reasons.append("재생관 — 돈→명예 전환 운명")
     if hwangjae_score >= 60:
-        hwangjae_level, hwangjae_msg = "🌟 매우 강함", "횡재·대박 기운이 매우 강한 사주! 정재대운 + 식상세운에서 결정적 한 방. 사업·투자 적기 잘 잡으면 부자 그릇."
+        hwangjae_level, hwangjae_msg = "🌟 매우 강함", "💰 당신은 — 큰돈을 만질 운명입니다. 정재대운+식상세운 만나면 — 인생 한 방. 단, 준비 안 되어 있으면 못 잡습니다."
     elif hwangjae_score >= 40:
-        hwangjae_level, hwangjae_msg = "✨ 강함", "재물 기운이 강한 편. 편재 운에서 큰 수익 가능."
+        hwangjae_level, hwangjae_msg = "✨ 강함", "✨ 큰돈 들어옵니다 — 편재 운 만나면. 단, 빨리 나갈 수도 있으니 — 즉시 안전 자산에 묶으세요."
     elif hwangjae_score >= 20:
-        hwangjae_level, hwangjae_msg = "💡 보통", "횡재보다 꾸준한 저축형. 노력 대비 보상."
+        hwangjae_level, hwangjae_msg = "💡 보통", "💡 한 방은 없습니다 — 그러나 꾸준히 모이면 결국 큽니다."
     else:
-        hwangjae_level, hwangjae_msg = "🪙 약함", "큰 횡재보다 안정적 수입에 집중하는 사주."
+        hwangjae_level, hwangjae_msg = "🪙 약함", "🪙 횡재는 — 기대 마세요. 월급·저축이 당신 길입니다."
     results["횡재수"] = {"점수": min(hwangjae_score,100), "등급": hwangjae_level, "이유": hwangjae_reasons, "메시지": hwangjae_msg, "아이콘": "💰"}
 
     # 4. 이혼·이별
@@ -7127,13 +7127,13 @@ def detect_life_risk_signals(pils, saewoon_data=None):
         ihon_score += 10
         ihon_reasons.append("관성 부재(남자) — 자녀·책임 약함")
     if ihon_score >= 60:
-        ihon_level, ihon_msg = "🔴 매우 높음", "원국에서 이혼/이별 기운이 매우 강합니다. 충 운에서 결정적 위기. 부부 상담·신뢰 회복 노력 필수."
+        ihon_level, ihon_msg = "🔴 매우 높음", "💔 당신 사주 — 배우자궁에 칼이 박혀있습니다. 충 운 만나면 — 갈라섭니다. 지금 부부 관계 — 다시 보세요."
     elif ihon_score >= 40:
-        ihon_level, ihon_msg = "🟡 주의", "결혼 생활 중 갈등 시기 반복 가능. 대화와 양보가 핵심."
+        ihon_level, ihon_msg = "🟡 주의", "🟡 결혼 생활 — 갈등이 반복됩니다. 대화 안 하면 — 멀어집니다."
     elif ihon_score >= 20:
-        ihon_level, ihon_msg = "🟢 안정", "일반적 부부 관계. 큰 위기 기운은 없음."
+        ihon_level, ihon_msg = "🟢 안정", "🟢 평범한 부부 운 — 큰 위기는 없습니다."
     else:
-        ihon_level, ihon_msg = "✅ 매우 안정", "결혼 생활 안정형. 평생 배우자와 동반자 관계."
+        ihon_level, ihon_msg = "✅ 매우 안정", "✅ 당신 결혼은 — 안전합니다. 끝까지 갑니다."
     results["이혼·이별"] = {"점수": min(ihon_score,100), "등급": ihon_level, "이유": ihon_reasons, "메시지": ihon_msg, "아이콘": "💔"}
 
     # 5. 큰 병/중병
@@ -7159,14 +7159,14 @@ def detect_life_risk_signals(pils, saewoon_data=None):
         byeong_score += 15
         byeong_reasons.append("재다신약 — 과로·번아웃 만성")
     if byeong_score >= 60:
-        byeong_level, byeong_msg = "🔴 매우 높음", "원국에서 큰 병·수술 기운이 강합니다. 정기 종합 검진 필수. 결핍 오행 영양 보충, 무리한 활동 자제."
+        byeong_level, byeong_msg = "🔴 매우 높음", "🏥 당신 사주 — 큰 병이 옵니다. 정기 검진 — 지금부터 무조건. 한 살 늦으면 — 후회합니다."
     elif byeong_score >= 40:
-        byeong_level, byeong_msg = "🟡 주의", "특정 장기 취약. 환절기·기신년에 건강 관리 집중."
+        byeong_level, byeong_msg = "🟡 주의", "🟡 약한 장기 있습니다 — 환절기마다 챙기세요."
     elif byeong_score >= 20:
-        byeong_level, byeong_msg = "🟢 양호", "건강 기운 보통. 평소 생활 습관 유지."
+        byeong_level, byeong_msg = "🟢 양호", "🟢 건강 평균 — 평소 습관 유지하면 OK."
     else:
-        byeong_level, byeong_msg = "✅ 매우 양호", "건강 기운이 안정적. 큰 병 위험 매우 낮음."
-    results["큰병"] = {"점수": min(byeong_score,100), "등급": byeong_level, "이유": byeong_reasons, "메시지": byeong_msg, "아이콘": "🏥"}
+        byeong_level, byeong_msg = "✅ 매우 양호", "✅ 건강 운 — 타고났습니다. 큰 병 안 옵니다."
+    results["큰병"] = {"점수": min(max(byeong_score, 15), 100), "등급": byeong_level, "이유": byeong_reasons, "메시지": byeong_msg, "아이콘": "🏥"}
 
     # 6. 결혼 인연
     gyeolhon_score = 0
@@ -7187,13 +7187,13 @@ def detect_life_risk_signals(pils, saewoon_data=None):
         gyeolhon_score += 15
         gyeolhon_reasons.append("관인상생 — 격있는 배우자 인연")
     if gyeolhon_score >= 60:
-        gyeolhon_level, gyeolhon_msg = "🌟 최상급 인연", "결혼 인연 기운이 매우 좋은 사주. 합 운/천을귀인 활성 해에 평생 반려자를 만날 가능성 매우 높음."
+        gyeolhon_level, gyeolhon_msg = "🌟 최상급 인연", "💕 당신 사주 — 최고의 배우자 인연. 합 운/천을귀인 활성 해에 — 평생 반려자 만납니다. 놓치지 마세요."
     elif gyeolhon_score >= 40:
-        gyeolhon_level, gyeolhon_msg = "✨ 좋음", "안정적인 결혼 인연. 정재/정관 운에서 결혼 가능성."
+        gyeolhon_level, gyeolhon_msg = "✨ 좋음", "✨ 좋은 결혼 인연 옵니다 — 정재/정관 운에서."
     elif gyeolhon_score >= 20:
-        gyeolhon_level, gyeolhon_msg = "💡 보통", "노력하면 좋은 인연 가능. 합 운에서 적극적 활동."
+        gyeolhon_level, gyeolhon_msg = "💡 보통", "💡 인연 — 노력해야 옵니다. 가만히 있으면 — 안 옵니다."
     else:
-        gyeolhon_level, gyeolhon_msg = "🤔 신중", "결혼 인연 기운 약함. 자기 성장 후 자연스러운 인연 추천."
+        gyeolhon_level, gyeolhon_msg = "🤔 신중", "🤔 인연 운 약함 — 자기 성장 먼저. 그게 답입니다."
     results["결혼인연"] = {"점수": min(gyeolhon_score,100), "등급": gyeolhon_level, "이유": gyeolhon_reasons, "메시지": gyeolhon_msg, "아이콘": "💕"}
 
     # 7. 사업운
@@ -7218,14 +7218,14 @@ def detect_life_risk_signals(pils, saewoon_data=None):
         saup_score += 15
         saup_reasons.append("편재 + 비견 균형 — 사업 적합")
     if saup_score >= 50:
-        saup_level, saup_msg = "🌟 사업가 그릇", "사업 성공 기운이 강한 사주. 식상생재 대운에서 대박 가능. 단, 동업보다 단독 경영 추천."
+        saup_level, saup_msg = "🌟 사업가 그릇", "💼 당신은 — 타고난 사업가. 식상생재 대운 만나면 — 대박. 단, 동업 절대 X. 혼자 가세요."
     elif saup_score >= 25:
-        saup_level, saup_msg = "✨ 사업 가능", "사업 가능형. 신중한 자금 운영과 적절한 시기 선택이 핵심."
+        saup_level, saup_msg = "✨ 사업 가능", "✨ 사업 가능 — 단, 자금 관리 못하면 무너집니다. 시기 잘 보세요."
     elif saup_score >= 0:
-        saup_level, saup_msg = "💼 직장형", "사업보다 안정적 직장이 유리. 사업 시 작게 시작 추천."
+        saup_level, saup_msg = "💼 직장형", "💼 직장이 — 당신 길입니다. 사업하면 — 작게, 천천히."
     else:
-        saup_level, saup_msg = "⚠️ 사업 위험", "사업 시 손실 위험 큼. 직장 또는 전문직 추천."
-    results["사업운"] = {"점수": max(min(saup_score,100),0), "등급": saup_level, "이유": saup_reasons, "메시지": saup_msg, "아이콘": "💼"}
+        saup_level, saup_msg = "⚠️ 사업 위험", "⚠️ 사업 — 손대지 마세요. 직장·전문직이 당신을 살립니다."
+    results["사업운"] = {"점수": max(min(saup_score, 100), 10), "등급": saup_level, "이유": saup_reasons, "메시지": saup_msg, "아이콘": "💼"}
 
     return results
 
