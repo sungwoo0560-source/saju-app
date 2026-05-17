@@ -6607,6 +6607,73 @@ DOSA_VERDICT = {
     "癸亥":"바다의 비 — 끝없이 흐르는 자",
 }
 
+DOSA_VERDICT_EXTREME = {
+    "甲子":"물 위의 큰 나무 — 흔들려도 안 쓰러진 사람",
+    "乙丑":"겨울 들판의 풀 — 추위 속에서 끝까지 버틴 사람",
+    "丙寅":"새벽 태양 — 누구보다 먼저 일어나 길을 연 사람",
+    "丁卯":"촛불 — 약해 보여도 끝까지 밝힌 사람",
+    "戊辰":"용을 누른 산 — 움직이지 않으면 누구도 못 흔든 사람",
+    "己巳":"타오르는 들판 — 한 번 불 붙으면 못 멈춘 사람",
+    "庚午":"달리는 칼 — 멈추지 않는 추진력의 사람",
+    "辛未":"여름 끝의 보석 — 깊은 곳에 빛을 숨긴 사람",
+    "壬申":"큰 강의 원숭이 — 영리하고 자유로운 사람",
+    "癸酉":"가을 비 — 차갑지만 모든 걸 정화한 사람",
+    "甲戌":"산 위의 큰 나무 — 외로움을 견딘 자존심",
+    "乙亥":"물 위의 풀 — 흐름을 거스르지 않은 지혜",
+    "丙子":"물 위의 태양 — 가라앉지 않은 사람",
+    "丁丑":"겨울 촛불 — 약함 속의 강함",
+    "戊寅":"산 속의 호랑이 — 침묵하다 한 번에 덮친 사람",
+    "己卯":"들판의 토끼 — 빠르고 영민한 생존자",
+    "庚辰":"용을 부리는 검 — 큰 권력의 그릇",
+    "辛巳":"불 속의 보석 — 시련이 만든 진짜 강자",
+    "壬午":"한낮의 큰 물 — 뜨거움과 차가움의 공존",
+    "癸未":"여름 비 — 갈증을 풀어준 귀한 존재",
+    "甲申":"쇠 도끼에 맞선 큰 나무 — 부서져도 다시 일어난 사람",
+    "乙酉":"쇠 위에 핀 작은 꽃 — 약해 보이나 끈질긴 사람",
+    "丙戌":"산 위의 큰 불 — 멀리서도 보인 존재감",
+    "丁亥":"바다 위의 등불 — 외로운 길잡이",
+    "戊子":"물 위의 큰 산 — 절대 무너지지 않은 사람",
+    "己丑":"겨울 들판 — 모든 걸 품은 어머니의 땅",
+    "庚寅":"강철로 만든 외로운 칼 — 의리 하나로 산 사람",
+    "辛卯":"토끼를 잡는 칼 — 정확하고 빠른 결단",
+    "壬辰":"용의 등에 앉은 큰 물 — 거대한 가능성",
+    "癸巳":"뱀 위의 비 — 영민함과 직관의 화신",
+    "甲午":"한낮의 큰 나무 — 누구보다 빛난 사람",
+    "乙未":"여름 끝의 풀 — 인내의 끝에 결실",
+    "丙申":"쇠를 녹이는 태양 — 무엇이든 변화시킨 힘",
+    "丁酉":"쇠를 비추는 촛불 — 섬세한 통찰",
+    "戊戌":"산 위의 큰 산 — 절대 흔들리지 않은 사람",
+    "己亥":"바다 위의 들판 — 깊고 너른 마음",
+    "庚子":"물 위의 칼 — 차갑지만 정확한 사람",
+    "辛丑":"겨울 보석 — 시린 아름다움",
+    "壬寅":"호랑이를 품은 큰 물 — 야망과 카리스마",
+    "癸卯":"토끼 위의 비 — 부드러움 속의 날카로움",
+    "甲辰":"용을 부리는 큰 나무 — 권력의 화신",
+    "乙巳":"불 속의 풀 — 시련의 끝에 핀 꽃",
+    "丙午":"한낮의 태양 — 누구도 못 막은 추진력",
+    "丁未":"여름 끝의 촛불 — 따뜻한 마무리의 손",
+    "戊申":"쇠를 품은 산 — 무거운 책임의 사람",
+    "己酉":"쇠 위의 들판 — 정제된 의리",
+    "庚戌":"산 위의 칼 — 외로운 정점",
+    "辛亥":"바다 위의 보석 — 깊이 빛난 사람",
+    "壬子":"큰 강의 큰 물 — 자유와 깊이의 끝",
+    "癸丑":"겨울 비 — 시린 자비",
+    "甲寅":"호랑이를 닮은 큰 나무 — 타고난 리더",
+    "乙卯":"들판의 풀 — 부드럽지만 끝까지 자란 사람",
+    "丙辰":"용 위의 태양 — 압도적 권위",
+    "丁巳":"뱀을 품은 촛불 — 영민한 카리스마",
+    "戊午":"한낮의 큰 산 — 누구도 못 넘은 사람",
+    "己未":"여름 끝의 들판 — 모든 걸 품은 그릇",
+    "庚申":"쇠 위의 칼 — 절대 안 굽힌 사람",
+    "辛酉":"쇠 위의 보석 — 차갑고 완벽한 사람",
+    "壬戌":"산 위의 큰 물 — 깊이를 알 수 없는 사람",
+    "癸亥":"바다의 비 — 끝없이 흐르는 사람",
+}
+
+
+def get_dosa_verdict(ilju_key):
+    return DOSA_VERDICT_EXTREME.get(ilju_key, "자기 길을 끝까지 간 사람")
+
 
 def render_quick_summary_card(pils, name="내담자", saewoon_data=None, yongshin=None, gisin=None):
     """종합운세 탭 최상단 — 도사 직설 진단 카드"""
@@ -6656,7 +6723,7 @@ def render_quick_summary_card(pils, name="내담자", saewoon_data=None, yongshi
     else:
         combo_summary = f"{ilgan}{iljj} 일주 — 정통 명리학 기반 분석"
 
-    dosa_verdict = DOSA_VERDICT.get(ilju_key, nickname or f"{ilgan}{iljj} — 강한 의지로 자신의 길을 가는 사람")
+    dosa_verdict = DOSA_VERDICT_EXTREME.get(ilju_key, nickname or f"{ilgan}{iljj} — 자기 길을 끝까지 간 사람")
 
     yong_str = ""
     if yongshin:
@@ -6712,9 +6779,9 @@ def render_quick_summary_card(pils, name="내담자", saewoon_data=None, yongshi
     yong_color_action = yong_action_map.get(first_yong, "용신 오행 색상 활용")
 
     actions = [
-        f"용신 {yong_str} 강화 — {yong_color_action}" if yong_str else "용신 오행 색상 활용",
-        "올해 대길월(4·9·11월) 중요 결정 — 길흉 캘린더 참고",
-        "보증·동업 금지 + 정기 건강검진 (편관 세운 주의)",
+        f"용신 {yong_str} — 지금 당장 {yong_color_action}. 이게 당신 생명선입니다" if yong_str else "용신 오행 색상 — 지금 당장 몸에 두세요. 이게 당신 생명선입니다",
+        "올해 4·9·11월이 당신의 전부입니다 — 이 달 놓치면 1년이 날아갑니다",
+        "보증·동업·큰돈 — 2026년은 무조건 금지입니다. 어기면 5년 후회합니다",
     ]
 
     strengths_html = "".join([
@@ -6743,9 +6810,9 @@ def render_quick_summary_card(pils, name="내담자", saewoon_data=None, yongshi
             box-shadow:0 16px 40px rgba(212,175,55,0.25);">
 
   <div style="text-align:center;margin-bottom:24px;">
-    <div style="font-size:13px;color:#8b6914;letter-spacing:2px;font-weight:700;">★ 도사 직설 진단 ★</div>
+    <div style="font-size:13px;color:#8b6914;letter-spacing:2px;font-weight:700;">★ 도사의 즉결 진단 ★</div>
     <div style="font-size:24px;font-weight:900;color:#5d4037;margin-top:6px;">
-      🎯 {name}님, 당신을 한 줄로 정리합니다
+      🩸 {name}님 — 한 마디로 말합니다
     </div>
     <div style="font-size:13px;color:#8b6914;margin-top:6px;">
       읽고 나면 — 소름이 돋을 겁니다. 끝까지 보세요.
@@ -6756,7 +6823,7 @@ def render_quick_summary_card(pils, name="내담자", saewoon_data=None, yongshi
   <div style="background:#fff;border:2px solid #d4af37;border-radius:14px;
               padding:20px;margin-bottom:18px;text-align:center;">
     <div style="font-size:13px;color:#8b6914;font-weight:700;margin-bottom:8px;">
-      📌 당신은 — 한 문장으로 이런 사람입니다
+      🩸 당신은 — 이런 사람입니다
     </div>
     <div style="font-size:18px;font-weight:900;color:#5d4037;line-height:1.6;">
       "{dosa_verdict}"
@@ -6772,7 +6839,7 @@ def render_quick_summary_card(pils, name="내담자", saewoon_data=None, yongshi
                 background:#fff;border:2px solid #2e7d32;border-radius:12px;padding:16px;">
       <div style="font-size:16px;font-weight:900;color:#2e7d32;margin-bottom:10px;
                   border-bottom:1px solid #c8e6c9;padding-bottom:8px;">
-        💎 당신의 진짜 무기 3가지
+        💎 당신의 진짜 무기 (이걸 쓰십시오)
       </div>
       {strengths_html}
     </div>
@@ -6780,7 +6847,7 @@ def render_quick_summary_card(pils, name="내담자", saewoon_data=None, yongshi
                 background:#fff;border:2px solid #e65100;border-radius:12px;padding:16px;">
       <div style="font-size:16px;font-weight:900;color:#e65100;margin-bottom:10px;
                   border-bottom:1px solid #ffe0b2;padding-bottom:8px;">
-        🗡️ 당신을 막고 있는 3가지
+        🩸 당신을 죽이고 있는 3가지 (지금 끊으세요)
       </div>
       {weaknesses_html}
     </div>
@@ -6791,7 +6858,7 @@ def render_quick_summary_card(pils, name="내담자", saewoon_data=None, yongshi
               margin-bottom:18px;">
     <div style="font-size:16px;font-weight:900;color:#0d47a1;margin-bottom:12px;
                 border-bottom:1px solid #bbdefb;padding-bottom:8px;">
-      ⚡ 2026년 — 당신이 반드시 해야 할 3가지
+      ⚡ 2026년 — 안 하면 끝장인 3가지
     </div>
     {actions_html}
   </div>
@@ -6805,7 +6872,7 @@ def render_quick_summary_card(pils, name="내담자", saewoon_data=None, yongshi
         {yong_str or '계산 중'}
       </div>
       <div style="font-size:12px;color:#2e7d32;margin-top:4px;">
-        이걸 외면하면 5년이 그냥 갑니다
+        외면하면 — 5년이 그냥 사라집니다
       </div>
     </div>
     <div style="flex:1 1 45%;min-width:200px;background:#ffebee;border-left:5px solid #c62828;
@@ -6815,14 +6882,14 @@ def render_quick_summary_card(pils, name="내담자", saewoon_data=None, yongshi
         {gisin_str or '계산 중'}
       </div>
       <div style="font-size:12px;color:#c62828;margin-top:4px;">
-        이 기운 만나면 무조건 멈추세요
+        만나면 — 무조건 멈추세요. 안 멈추면 다칩니다
       </div>
     </div>
   </div>
 
   <div style="text-align:center;margin-top:20px;padding-top:16px;border-top:1px dashed #d4af37;
               font-size:12px;color:#8b6914;">
-    ↓ 더 자세한 진단은 아래로 — 마음 단단히 ↓
+    ↓ 진짜 진단은 — 이제부터입니다 ↓
   </div>
 </div>
 """
@@ -6836,19 +6903,22 @@ def render_final_verdict_card(pils, name="내담자"):
 
     ilgan = pils[1].get("cg", "")
     iljj = pils[1].get("jj", "")
+    ilju_key = f"{ilgan}{iljj}"
     activated = detect_sipseong_combinations(pils)
 
-    if not activated:
-        verdict = f"{ilgan}{iljj} 일주의 강한 의지와 결단력이 인생의 무기입니다."
-    else:
-        top_combo = activated[0]
-        combo_info = SIPSEONG_COMBINATIONS.get(top_combo, {})
-        verdict = combo_info.get("임팩트", "정통 명리학 종합 분석 결과입니다.")
+    verdict = DOSA_VERDICT_EXTREME.get(ilju_key, "")
+    if not verdict:
+        if not activated:
+            verdict = f"{ilju_key} — 자기 길을 끝까지 간 사람입니다."
+        else:
+            top_combo = activated[0]
+            combo_info = SIPSEONG_COMBINATIONS.get(top_combo, {})
+            verdict = combo_info.get("임팩트", f"{ilju_key} — 자기 길을 끝까지 간 사람입니다.")
 
     advices = [
-        "💎 당신의 무기는 의지입니다. 휘둘러도 되지만, 자신은 베지 마세요.",
-        "🌊 운이 막혔다면 — 검정과 파랑을 가까이 두세요. 그게 답입니다.",
-        "🎯 운명은 — 안 바뀝니다. 그러나 어떻게 살지는 당신이 정합니다.",
+        "🩸 지금 당장 멈추세요 — 버릇처럼 해온 그 선택이 당신을 갉아먹고 있습니다.",
+        "⚡ 운이 막혔다면 — 검정·파랑을 몸 가까이 두십시오. 이게 지금 당신 처방입니다.",
+        "🎯 운명은 — 안 바뀝니다. 그러나 어떻게 쓸지는 오늘 당신이 결정합니다.",
     ]
 
     advices_html = "".join([
@@ -6861,9 +6931,9 @@ def render_final_verdict_card(pils, name="내담자"):
             border-radius:20px;padding:32px;margin:24px 0;
             box-shadow:0 16px 40px rgba(26,35,126,0.3);color:#fff;">
   <div style="text-align:center;margin-bottom:20px;">
-    <div style="font-size:13px;letter-spacing:3px;color:#bbdefb;font-weight:700;">★ 도사의 최종 진단 ★</div>
+    <div style="font-size:13px;letter-spacing:3px;color:#bbdefb;font-weight:700;">★ 도사의 마지막 한 마디 ★</div>
     <div style="font-size:22px;font-weight:900;margin-top:6px;">
-      ⚖️ {name}님 — 천명(天命) 한 줄
+      ⚖️ {name}님 — 천명(天命)을 봤습니다
     </div>
   </div>
   <div style="background:rgba(255,255,255,0.12);border-radius:14px;padding:20px;margin-bottom:18px;
@@ -6876,7 +6946,7 @@ def render_final_verdict_card(pils, name="내담자"):
     {advices_html}
   </div>
   <div style="text-align:center;margin-top:18px;font-size:12px;color:#bbdefb;">
-    — 사주는 거울입니다. 진짜 변화는 당신의 결심에서 시작됩니다 —
+    — 사주는 칼입니다. 이 칼을 어디에 쓸지는 — 당신이 정하십시오 —
   </div>
 </div>
 """

@@ -14369,6 +14369,16 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
     except Exception as _e_y6:
         st.warning(f"Y-6 한눈 요약 카드 로드 실패: {_e_y6}")
 
+    # Y-11 EXTREME: 도사 직설 인트로
+    _ilgan_x = pils[1].get("cg", "") if pils and len(pils) > 1 else ""
+    _iljj_x  = pils[1].get("jj", "") if pils and len(pils) > 1 else ""
+    st.markdown(
+        f"<div style='font-size:13px;color:#8b0000;font-weight:800;text-align:center;"
+        f"margin:8px 0 16px;letter-spacing:1px;'>"
+        f"⚠️ {name}님은 {_ilgan_x}{_iljj_x}입니다 — 아래는 도사가 직접 본 당신의 진짜 모습입니다.</div>",
+        unsafe_allow_html=True,
+    )
+
     # Patch Y-9-A: 7대 운명 코드 박스 (충격 임팩트)
     try:
         from saju_zhengtong import render_life_risk_card
@@ -14645,7 +14655,7 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
             f"border-radius:16px;padding:22px 26px;border:2px solid #d4af3744;"
             f"margin-bottom:16px;'>"
             f"<div style='font-size:11px;color:#d4af37;letter-spacing:3px;"
-            f"font-weight:900;margin-bottom:12px'>🔍 도사가 본 {name}님의 진짜 모습</div>"
+            f"font-weight:900;margin-bottom:12px'>🩸 도사가 본 {name}님의 진짜 속살</div>"
             f"<div style='font-size:14px;color:#f0e6ff;line-height:2.0;'>"
             f"{_strategy_txt}</div>"
             f"<div style='display:flex;gap:20px;margin-top:14px;flex-wrap:wrap'>"
@@ -14737,7 +14747,7 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
         _ss12 = get_12sinsal(pils)
         _active = [s for s in _ss12 if s.get("해당지지") == _sw_jj]
         if _active:
-            st.markdown("#### ⚡ 올해 당신에게 발동 중인 신살 — 읽고 반드시 행동하십시오")
+            st.markdown("#### 🩸 올해 발동 중인 신살 — 지금 이게 당신을 치고 있습니다")
             for _s in _active:
                 _sname = _s.get("이름", "")
                 _icon  = _s.get("icon", "")
