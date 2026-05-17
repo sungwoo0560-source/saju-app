@@ -6675,6 +6675,74 @@ def get_dosa_verdict(ilju_key):
     return DOSA_VERDICT_EXTREME.get(ilju_key, "자기 길을 끝까지 간 사람")
 
 
+SAJU_SUMMARY = {
+    "甲子": "甲木 일간에 子水 정인. 학문·성장형 사주.",
+    "乙丑": "乙木 일간에 丑土 편재. 끈기·축적형 사주.",
+    "丙寅": "丙火 일간에 寅木 편인. 추진·개척형 사주.",
+    "丁卯": "丁火 일간에 卯木 편인. 섬세·예술형 사주.",
+    "戊辰": "戊土 일간에 辰土 비견. 안정·신뢰형 사주.",
+    "己巳": "己土 일간에 巳火 정인. 학습·인내형 사주.",
+    "庚午": "庚金 일간에 午火 정관. 명예·추진형 사주.",
+    "辛未": "辛金 일간에 未土 편인. 정밀·완벽형 사주.",
+    "壬申": "壬水 일간에 申金 편인. 영민·자유형 사주.",
+    "癸酉": "癸水 일간에 酉金 편인. 정화·통찰형 사주.",
+    "甲戌": "甲木 일간에 戌土 편재. 강인·자존형 사주.",
+    "乙亥": "乙木 일간에 亥水 정인. 유연·지혜형 사주.",
+    "丙子": "丙火 일간에 子水 정관. 명예·책임형 사주.",
+    "丁丑": "丁火 일간에 丑土 식신. 따뜻·헌신형 사주.",
+    "戊寅": "戊土 일간에 寅木 편관. 권위·압박형 사주.",
+    "己卯": "己土 일간에 卯木 편관. 영민·실용형 사주.",
+    "庚辰": "庚金 일간에 辰土 편인. 권력·책임형 사주.",
+    "辛巳": "辛金 일간에 巳火 정관. 정밀·명예형 사주.",
+    "壬午": "壬水 일간에 午火 정재. 안정·실속형 사주.",
+    "癸未": "癸水 일간에 未土 편관. 인내·압박형 사주.",
+    "甲申": "甲木 일간에 申金 편관. 강인·돌파형 사주.",
+    "乙酉": "乙木 일간에 酉金 편관. 유연·인내형 사주.",
+    "丙戌": "丙火 일간에 戌土 식신. 활동·표현형 사주.",
+    "丁亥": "丁火 일간에 亥水 정관. 신중·통찰형 사주.",
+    "戊子": "戊土 일간에 子水 정재. 안정·실속형 사주.",
+    "己丑": "己土 일간에 丑土 비견. 신뢰·포용형 사주.",
+    "庚寅": "庚金 일간에 寅木 편재. 양인(酉) + 귀문(寅未) 발동. 결단·추진형 사주.",
+    "辛卯": "辛金 일간에 卯木 편재. 정밀·결단형 사주.",
+    "壬辰": "壬水 일간에 辰土 편관. 카리스마·야망형 사주.",
+    "癸巳": "癸水 일간에 巳火 정재. 영민·실속형 사주.",
+    "甲午": "甲木 일간에 午火 상관. 표현·창의형 사주.",
+    "乙未": "乙木 일간에 未土 편재. 인내·결실형 사주.",
+    "丙申": "丙火 일간에 申金 편재. 활동·변화형 사주.",
+    "丁酉": "丁火 일간에 酉金 편재. 섬세·통찰형 사주.",
+    "戊戌": "戊土 일간에 戌土 비견. 안정·자존형 사주.",
+    "己亥": "己土 일간에 亥水 정재. 포용·신뢰형 사주.",
+    "庚子": "庚金 일간에 子水 상관. 정확·표현형 사주.",
+    "辛丑": "辛金 일간에 丑土 편인. 정밀·인내형 사주.",
+    "壬寅": "壬水 일간에 寅木 식신. 야망·카리스마형 사주.",
+    "癸卯": "癸水 일간에 卯木 식신. 영민·창의형 사주.",
+    "甲辰": "甲木 일간에 辰土 편재. 권력·자존형 사주.",
+    "乙巳": "乙木 일간에 巳火 상관. 표현·열정형 사주.",
+    "丙午": "丙火 일간에 午火 겁재. 추진·경쟁형 사주.",
+    "丁未": "丁火 일간에 未土 식신. 따뜻·헌신형 사주.",
+    "戊申": "戊土 일간에 申金 식신. 책임·실용형 사주.",
+    "己酉": "己土 일간에 酉金 식신. 정밀·실용형 사주.",
+    "庚戌": "庚金 일간에 戌土 편인. 권위·자존형 사주.",
+    "辛亥": "辛金 일간에 亥水 상관. 정밀·통찰형 사주.",
+    "壬子": "壬水 일간에 子水 겁재. 자유·깊이형 사주.",
+    "癸丑": "癸水 일간에 丑土 편관. 인내·자비형 사주.",
+    "甲寅": "甲木 일간에 寅木 비견. 리더·추진형 사주.",
+    "乙卯": "乙木 일간에 卯木 비견. 끈기·성장형 사주.",
+    "丙辰": "丙火 일간에 辰土 식신. 권위·표현형 사주.",
+    "丁巳": "丁火 일간에 巳火 겁재. 영민·카리스마형 사주.",
+    "戊午": "戊土 일간에 午火 정인. 안정·명예형 사주.",
+    "己未": "己土 일간에 未土 비견. 포용·결실형 사주.",
+    "庚申": "庚金 일간에 申金 비견. 결단·자존형 사주.",
+    "辛酉": "辛金 일간에 酉金 비견. 정밀·완벽형 사주.",
+    "壬戌": "壬水 일간에 戌土 편관. 깊이·책임형 사주.",
+    "癸亥": "癸水 일간에 亥水 겁재. 자유·통찰형 사주.",
+}
+
+
+def get_saju_summary(ilju_key):
+    return SAJU_SUMMARY.get(ilju_key, f"{ilju_key} — 사주 요약")
+
+
 def render_quick_summary_card(pils, name="내담자", saewoon_data=None, yongshin=None, gisin=None):
     """종합운세 탭 최상단 — 도사 직설 진단 카드"""
     if not pils or len(pils) < 4:
@@ -6723,7 +6791,7 @@ def render_quick_summary_card(pils, name="내담자", saewoon_data=None, yongshi
     else:
         combo_summary = f"{ilgan}{iljj} 일주 — 정통 명리학 기반 분석"
 
-    dosa_verdict = DOSA_VERDICT_EXTREME.get(ilju_key, nickname or f"{ilgan}{iljj} — 자기 길을 끝까지 간 사람")
+    dosa_verdict = get_saju_summary(ilju_key) or (nickname or f"{ilgan}{iljj} — 사주 요약")
 
     yong_str = ""
     if yongshin:
@@ -6779,9 +6847,9 @@ def render_quick_summary_card(pils, name="내담자", saewoon_data=None, yongshi
     yong_color_action = yong_action_map.get(first_yong, "용신 오행 색상 활용")
 
     actions = [
-        f"용신 {yong_str} — 지금 당장 {yong_color_action}. 이게 당신 생명선입니다" if yong_str else "용신 오행 색상 — 지금 당장 몸에 두세요. 이게 당신 생명선입니다",
-        "올해 4·9·11월이 당신의 전부입니다 — 이 달 놓치면 1년이 날아갑니다",
-        "보증·동업·큰돈 — 2026년은 무조건 금지입니다. 어기면 5년 후회합니다",
+        f"용신 {yong_str} 보강 — {yong_color_action}" if yong_str else "용신 오행 보강 — 해당 색상·방향·음식 활용",
+        "4·9·11월이 길월(吉月) — 중요한 결정은 이 시기에 집중하세요",
+        "보증·동업 주의 — 겁살(劫殺) 발동 시기에 외부 충격 위험",
     ]
 
     strengths_html = "".join([
@@ -6810,12 +6878,12 @@ def render_quick_summary_card(pils, name="내담자", saewoon_data=None, yongshi
             box-shadow:0 16px 40px rgba(212,175,55,0.25);">
 
   <div style="text-align:center;margin-bottom:24px;">
-    <div style="font-size:13px;color:#8b6914;letter-spacing:2px;font-weight:700;">★ 도사의 즉결 진단 ★</div>
+    <div style="font-size:13px;color:#8b6914;letter-spacing:2px;font-weight:700;">★ {name}님 사주 핵심 진단 ★</div>
     <div style="font-size:24px;font-weight:900;color:#5d4037;margin-top:6px;">
-      🩸 {name}님 — 한 마디로 말합니다
+      🎯 {name}님 사주 핵심 결론
     </div>
     <div style="font-size:13px;color:#8b6914;margin-top:6px;">
-      읽고 나면 — 소름이 돋을 겁니다. 끝까지 보세요.
+      원국에서 계산된 사실 기반 진단입니다.
     </div>
   </div>
 
@@ -6823,7 +6891,7 @@ def render_quick_summary_card(pils, name="내담자", saewoon_data=None, yongshi
   <div style="background:#fff;border:2px solid #d4af37;border-radius:14px;
               padding:20px;margin-bottom:18px;text-align:center;">
     <div style="font-size:13px;color:#8b6914;font-weight:700;margin-bottom:8px;">
-      🩸 당신은 — 이런 사람입니다
+      🎯 {name}님의 사주 요약
     </div>
     <div style="font-size:18px;font-weight:900;color:#5d4037;line-height:1.6;">
       "{dosa_verdict}"
@@ -6839,7 +6907,7 @@ def render_quick_summary_card(pils, name="내담자", saewoon_data=None, yongshi
                 background:#fff;border:2px solid #2e7d32;border-radius:12px;padding:16px;">
       <div style="font-size:16px;font-weight:900;color:#2e7d32;margin-bottom:10px;
                   border-bottom:1px solid #c8e6c9;padding-bottom:8px;">
-        💎 당신의 진짜 무기 (이걸 쓰십시오)
+        💎 {name}님의 사주 강점 3가지
       </div>
       {strengths_html}
     </div>
@@ -6847,7 +6915,7 @@ def render_quick_summary_card(pils, name="내담자", saewoon_data=None, yongshi
                 background:#fff;border:2px solid #e65100;border-radius:12px;padding:16px;">
       <div style="font-size:16px;font-weight:900;color:#e65100;margin-bottom:10px;
                   border-bottom:1px solid #ffe0b2;padding-bottom:8px;">
-        🩸 당신을 죽이고 있는 3가지 (지금 끊으세요)
+        ⚠️ {name}님의 사주 약점 3가지
       </div>
       {weaknesses_html}
     </div>
@@ -6858,7 +6926,7 @@ def render_quick_summary_card(pils, name="내담자", saewoon_data=None, yongshi
               margin-bottom:18px;">
     <div style="font-size:16px;font-weight:900;color:#0d47a1;margin-bottom:12px;
                 border-bottom:1px solid #bbdefb;padding-bottom:8px;">
-      ⚡ 2026년 — 안 하면 끝장인 3가지
+      🎯 올해 {name}님 사주 처방 3가지
     </div>
     {actions_html}
   </div>
@@ -6867,29 +6935,29 @@ def render_quick_summary_card(pils, name="내담자", saewoon_data=None, yongshi
   <div style="display:flex;gap:12px;flex-wrap:wrap;">
     <div style="flex:1 1 45%;min-width:200px;background:#e8f5e9;border-left:5px solid #2e7d32;
                 border-radius:8px;padding:14px;">
-      <div style="font-size:13px;color:#2e7d32;font-weight:700;">✅ 당신을 살리는 기운</div>
+      <div style="font-size:13px;color:#2e7d32;font-weight:700;">✅ 용신(用神) — {name}님께 유리한 기운</div>
       <div style="font-size:20px;font-weight:900;color:#1b5e20;margin-top:4px;">
         {yong_str or '계산 중'}
       </div>
       <div style="font-size:12px;color:#2e7d32;margin-top:4px;">
-        외면하면 — 5년이 그냥 사라집니다
+        이 기운을 보강하면 운이 열립니다
       </div>
     </div>
     <div style="flex:1 1 45%;min-width:200px;background:#ffebee;border-left:5px solid #c62828;
                 border-radius:8px;padding:14px;">
-      <div style="font-size:13px;color:#c62828;font-weight:700;">⛔ 당신을 죽이는 기운</div>
+      <div style="font-size:13px;color:#c62828;font-weight:700;">⛔ 기신(忌神) — {name}님께 불리한 기운</div>
       <div style="font-size:20px;font-weight:900;color:#b71c1c;margin-top:4px;">
         {gisin_str or '계산 중'}
       </div>
       <div style="font-size:12px;color:#c62828;margin-top:4px;">
-        만나면 — 무조건 멈추세요. 안 멈추면 다칩니다
+        이 기운 강한 시기는 신중하게 대처하세요
       </div>
     </div>
   </div>
 
   <div style="text-align:center;margin-top:20px;padding-top:16px;border-top:1px dashed #d4af37;
               font-size:12px;color:#8b6914;">
-    ↓ 진짜 진단은 — 이제부터입니다 ↓
+    ↓ 자세한 사주 풀이는 아래에 있습니다 ↓
   </div>
 </div>
 """
@@ -6906,19 +6974,19 @@ def render_final_verdict_card(pils, name="내담자"):
     ilju_key = f"{ilgan}{iljj}"
     activated = detect_sipseong_combinations(pils)
 
-    verdict = DOSA_VERDICT_EXTREME.get(ilju_key, "")
-    if not verdict:
+    verdict = get_saju_summary(ilju_key)
+    if not verdict or verdict == f"{ilju_key} — 사주 요약":
         if not activated:
-            verdict = f"{ilju_key} — 자기 길을 끝까지 간 사람입니다."
+            verdict = f"{ilju_key} 일주 — 원국 분석 기반 진단입니다."
         else:
             top_combo = activated[0]
             combo_info = SIPSEONG_COMBINATIONS.get(top_combo, {})
-            verdict = combo_info.get("임팩트", f"{ilju_key} — 자기 길을 끝까지 간 사람입니다.")
+            verdict = combo_info.get("임팩트", f"{ilju_key} 일주 — 원국 분석 기반 진단입니다.")
 
     advices = [
-        "🩸 지금 당장 멈추세요 — 버릇처럼 해온 그 선택이 당신을 갉아먹고 있습니다.",
-        "⚡ 운이 막혔다면 — 검정·파랑을 몸 가까이 두십시오. 이게 지금 당신 처방입니다.",
-        "🎯 운명은 — 안 바뀝니다. 그러나 어떻게 쓸지는 오늘 당신이 결정합니다.",
+        "💎 강점을 활용하고 약점을 의식하면 사주가 인생의 지도가 됩니다.",
+        "🌊 용신 오행을 일상에서 활용하면 막힌 운이 열립니다.",
+        "🎯 사주는 정해진 운명이 아니라, {name}님이 가진 패와 흐름의 안내서입니다.",
     ]
 
     advices_html = "".join([
@@ -6931,9 +6999,9 @@ def render_final_verdict_card(pils, name="내담자"):
             border-radius:20px;padding:32px;margin:24px 0;
             box-shadow:0 16px 40px rgba(26,35,126,0.3);color:#fff;">
   <div style="text-align:center;margin-bottom:20px;">
-    <div style="font-size:13px;letter-spacing:3px;color:#bbdefb;font-weight:700;">★ 도사의 마지막 한 마디 ★</div>
+    <div style="font-size:13px;letter-spacing:3px;color:#bbdefb;font-weight:700;">★ {name}님 사주 종합 결론 ★</div>
     <div style="font-size:22px;font-weight:900;margin-top:6px;">
-      ⚖️ {name}님 — 천명(天命)을 봤습니다
+      ⚖️ {name}님 사주 종합 진단
     </div>
   </div>
   <div style="background:rgba(255,255,255,0.12);border-radius:14px;padding:20px;margin-bottom:18px;
@@ -6946,7 +7014,7 @@ def render_final_verdict_card(pils, name="내담자"):
     {advices_html}
   </div>
   <div style="text-align:center;margin-top:18px;font-size:12px;color:#bbdefb;">
-    — 사주는 칼입니다. 이 칼을 어디에 쓸지는 — 당신이 정하십시오 —
+    — 사주는 거울입니다. 진짜 변화는 {name}님의 결심에서 시작됩니다 —
   </div>
 </div>
 """
@@ -7043,9 +7111,9 @@ def detect_life_risk_signals(pils, saewoon_data=None):
         baram_score += 20
         baram_reasons.append("양일간 + 편재 다발 — 외도 신호")
     if baram_score >= 60:
-        baram_level, baram_msg = "🔴 매우 높음", "🩸 당신 사주 — 바람 기운이 칼처럼 박혀있습니다. 배우자/연인 — 지금 당장 신뢰 다잡지 않으면 무너집니다."
+        baram_level, baram_msg = "🔴 매우 높음", "바람기 기운이 강한 사주입니다. 도화·합 운에서 이성 인연이 자주 들어옵니다.\n→ 배우자/연인과의 신뢰 관리가 중요합니다."
     elif baram_score >= 40:
-        baram_level, baram_msg = "🟡 보통", "⚡ 당신은 — 이성이 끊임없이 끌리는 사주. 한 사람에 집중 안 하면 — 가정이 깨집니다."
+        baram_level, baram_msg = "🟡 보통", "이성 인연이 자주 들어오는 사주입니다.\n→ 한 사람에 집중하지 않으면 갈등이 생길 수 있습니다."
     elif baram_score >= 20:
         baram_level, baram_msg = "🟢 낮음", "🟢 평소엔 안전 — 단, 도화 운 만나면 흔들립니다."
     else:
@@ -7071,7 +7139,7 @@ def detect_life_risk_signals(pils, saewoon_data=None):
         sago_score += 15
         sago_reasons.append("편관 과다 — 외부 충격 잦음")
     if sago_score >= 60:
-        sago_level, sago_msg = "🔴 매우 높음", "💀 당신 사주 — 칼이 들어와 있습니다. 충 운 만나면 — 수술대 올라갑니다. 안전, 운전, 보험 — 지금 챙기세요."
+        sago_level, sago_msg = "🔴 매우 높음", "사고·수술 기운이 강한 사주입니다. 양인살·충 발동 시기에 주의하세요.\n→ 안전·운전·정기 검진을 챙기세요."
     elif sago_score >= 40:
         sago_level, sago_msg = "🟡 보통", "⚠️ 충 발동 해 — 사고가 옵니다. 평소 두 배 조심하세요."
     elif sago_score >= 20:
@@ -7099,7 +7167,7 @@ def detect_life_risk_signals(pils, saewoon_data=None):
         hwangjae_score += 15
         hwangjae_reasons.append("재생관 — 돈→명예 전환 운명")
     if hwangjae_score >= 60:
-        hwangjae_level, hwangjae_msg = "🌟 매우 강함", "💰 당신은 — 큰돈을 만질 운명입니다. 정재대운+식상세운 만나면 — 인생 한 방. 단, 준비 안 되어 있으면 못 잡습니다."
+        hwangjae_level, hwangjae_msg = "🌟 매우 강함", "횡재·대박 기운이 강한 사주입니다. 정재대운 + 식상세운에서 큰 한 방 가능합니다.\n→ 단, 준비가 되어 있지 않으면 잡기 어렵습니다."
     elif hwangjae_score >= 40:
         hwangjae_level, hwangjae_msg = "✨ 강함", "✨ 큰돈 들어옵니다 — 편재 운 만나면. 단, 빨리 나갈 수도 있으니 — 즉시 안전 자산에 묶으세요."
     elif hwangjae_score >= 20:
@@ -7127,7 +7195,7 @@ def detect_life_risk_signals(pils, saewoon_data=None):
         ihon_score += 10
         ihon_reasons.append("관성 부재(남자) — 자녀·책임 약함")
     if ihon_score >= 60:
-        ihon_level, ihon_msg = "🔴 매우 높음", "💔 당신 사주 — 배우자궁에 칼이 박혀있습니다. 충 운 만나면 — 갈라섭니다. 지금 부부 관계 — 다시 보세요."
+        ihon_level, ihon_msg = "🔴 매우 높음", "이혼/이별 기운이 강한 사주입니다. 일지 충 발동 시기에 주의하세요.\n→ 부부 관계를 돌아보고 대화를 늘리세요."
     elif ihon_score >= 40:
         ihon_level, ihon_msg = "🟡 주의", "🟡 결혼 생활 — 갈등이 반복됩니다. 대화 안 하면 — 멀어집니다."
     elif ihon_score >= 20:
@@ -7159,7 +7227,7 @@ def detect_life_risk_signals(pils, saewoon_data=None):
         byeong_score += 15
         byeong_reasons.append("재다신약 — 과로·번아웃 만성")
     if byeong_score >= 60:
-        byeong_level, byeong_msg = "🔴 매우 높음", "🏥 당신 사주 — 큰 병이 옵니다. 정기 검진 — 지금부터 무조건. 한 살 늦으면 — 후회합니다."
+        byeong_level, byeong_msg = "🔴 매우 높음", "큰 병·수술 기운이 있는 사주입니다.\n→ 정기 검진과 환절기 건강 관리가 중요합니다."
     elif byeong_score >= 40:
         byeong_level, byeong_msg = "🟡 주의", "🟡 약한 장기 있습니다 — 환절기마다 챙기세요."
     elif byeong_score >= 20:
@@ -7187,7 +7255,7 @@ def detect_life_risk_signals(pils, saewoon_data=None):
         gyeolhon_score += 15
         gyeolhon_reasons.append("관인상생 — 격있는 배우자 인연")
     if gyeolhon_score >= 60:
-        gyeolhon_level, gyeolhon_msg = "🌟 최상급 인연", "💕 당신 사주 — 최고의 배우자 인연. 합 운/천을귀인 활성 해에 — 평생 반려자 만납니다. 놓치지 마세요."
+        gyeolhon_level, gyeolhon_msg = "🌟 최상급 인연", "결혼 인연이 매우 좋은 사주입니다. 합 운/천을귀인 활성 해에 평생 반려자를 만날 가능성이 높습니다."
     elif gyeolhon_score >= 40:
         gyeolhon_level, gyeolhon_msg = "✨ 좋음", "✨ 좋은 결혼 인연 옵니다 — 정재/정관 운에서."
     elif gyeolhon_score >= 20:
@@ -7218,7 +7286,7 @@ def detect_life_risk_signals(pils, saewoon_data=None):
         saup_score += 15
         saup_reasons.append("편재 + 비견 균형 — 사업 적합")
     if saup_score >= 50:
-        saup_level, saup_msg = "🌟 사업가 그릇", "💼 당신은 — 타고난 사업가. 식상생재 대운 만나면 — 대박. 단, 동업 절대 X. 혼자 가세요."
+        saup_level, saup_msg = "🌟 사업가 그릇", "사업 성공 기운이 강한 사주입니다. 식상생재 대운에서 대박 가능합니다.\n→ 단, 동업보다 단독 경영이 유리합니다."
     elif saup_score >= 25:
         saup_level, saup_msg = "✨ 사업 가능", "✨ 사업 가능 — 단, 자금 관리 못하면 무너집니다. 시기 잘 보세요."
     elif saup_score >= 0:

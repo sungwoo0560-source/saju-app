@@ -14390,13 +14390,13 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
     except Exception as _e_y6:
         st.warning(f"Y-6 한눈 요약 카드 로드 실패: {_e_y6}")
 
-    # Y-11 EXTREME: 도사 직설 인트로
+    # Y-12: 사주 정밀 진단 인트로
     _ilgan_x = pils[1].get("cg", "") if pils and len(pils) > 1 else ""
     _iljj_x  = pils[1].get("jj", "") if pils and len(pils) > 1 else ""
     st.markdown(
-        f"<div style='font-size:13px;color:#8b0000;font-weight:800;text-align:center;"
-        f"margin:8px 0 16px;letter-spacing:1px;'>"
-        f"⚠️ {name}님은 {_ilgan_x}{_iljj_x}입니다 — 아래는 도사가 직접 본 당신의 진짜 모습입니다.</div>",
+        f"<div style='font-size:13px;color:#3d5a80;font-weight:700;text-align:center;"
+        f"margin:8px 0 16px;letter-spacing:0.5px;'>"
+        f"🎯 {name}님은 {_ilgan_x}{_iljj_x} 일주입니다 — 아래는 원국에서 계산된 사실 기반 진단입니다.</div>",
         unsafe_allow_html=True,
     )
 
@@ -14676,7 +14676,7 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
             f"border-radius:16px;padding:22px 26px;border:2px solid #d4af3744;"
             f"margin-bottom:16px;'>"
             f"<div style='font-size:11px;color:#d4af37;letter-spacing:3px;"
-            f"font-weight:900;margin-bottom:12px'>🩸 도사가 본 {name}님의 진짜 속살</div>"
+            f"font-weight:900;margin-bottom:12px'>🔍 {name}님 사주의 핵심</div>"
             f"<div style='font-size:14px;color:#f0e6ff;line-height:2.0;'>"
             f"{_strategy_txt}</div>"
             f"<div style='display:flex;gap:20px;margin-top:14px;flex-wrap:wrap'>"
@@ -14751,16 +14751,16 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
     # ── 발동 중인 신살 강조 (세운 지지 기준) ─────────────────
     try:
         _SINSAL_ADVICE = {
-            "겁살(劫殺)":   "🩸 당신 사주 — 겁살이 박혀있습니다. 보증·동업·투기 — 손대는 순간 무너집니다. 한 번 — 당했을 겁니다. 또 하면 — 못 일어납니다.",
+            "겁살(劫殺)":   "겁살(劫殺) 발동 — 외부의 갑작스러운 손재·변동이 따르는 기운입니다.\n→ 보증·동업·투기는 피하세요. 현금 보유를 늘리고 충동적 지출을 자제하세요.",
             "재살(災殺)":   "사고·관재 발동 — 이동 중 한 템포 느리게. 보험 먼저 챙기십시오.",
             "천살(天殺)":   "윗사람과 충돌 직전입니다. 먼저 말하지 말고 — 들으십시오. 한 번만 참으면 넘어갑니다.",
             "지살(地殺)":   "이사·이직의 때입니다. 두려워하지 마십시오 — 더 좋은 환경이 기다립니다.",
             "년살(도화살)": "이성운·인연운이 폭발하는 시기입니다. 외모 관리와 사람 만남 — 지금 투자할 때입니다.",
             "월살(고초살)": "지금 힘들다면 — 당연합니다. 버티면 됩니다. 지금 쌓는 것이 다음 10년을 만듭니다.",
             "망신살":       "입을 조심하십시오. 구설이 들어오는 시기입니다. SNS·술자리 발언 — 절제가 최선입니다.",
-            "장성살":       "⚔️ 당신은 — 타고난 우두머리. 조직 이끄세요. 따라가는 자리는 — 당신을 죽입니다.",
+            "장성살":       "장성살(將星殺) — 리더십과 통솔력의 기운이 있습니다.\n→ 군·경·경영·스포츠 등 조직을 이끄는 역할이 잘 맞습니다.",
             "반안살":       "꾸준히 쌓는 시기입니다. 지금 하는 노력이 중년의 토대가 됩니다. 멈추지 마십시오.",
-            "역마살":       "🚂 당신은 — 한 곳에 못 있는 사람. 이동·여행·해외 — 이 안에 답이 있습니다. 묶이면 — 시들어 갑니다.",
+            "역마살":       "역마살(驛馬殺) — 이동과 변화의 기운이 있습니다.\n한 곳에 오래 있으면 답답함을 느낄 수 있습니다.\n→ 무역·영업·여행·운송·IT 분야가 잘 맞습니다.\n→ 충동적인 이직·이사는 신중히 결정하세요.",
             "육해살":       "가까운 사람이 등을 찌릅니다. 돈거래·보증 — 지금 당장 끊으십시오.",
             "화개살":       "혼자 있는 시간이 지금 가장 귀합니다. 깊이 생각한 그것이 창의성의 씨앗이 됩니다.",
         }
