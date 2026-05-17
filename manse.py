@@ -14390,6 +14390,29 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
     except Exception as _e_y6:
         st.warning(f"Y-6 한눈 요약 카드 로드 실패: {_e_y6}")
 
+    # Y-13: 정통 만세력 보드 (시각 표)
+    try:
+        from saju_zhengtong import render_manse_board
+        from datetime import datetime as _dt_y13
+
+        _dw_board = []
+        try:
+            _dw_board = get_10year_luck_table(pils, birth_year, gender) or []
+        except Exception:
+            _dw_board = []
+
+        _cur_yr_board = _dt_y13.now().year
+
+        st.markdown(
+            render_manse_board(
+                pils, name or "내담자", birth_year, gender or "男",
+                daewoon_list=_dw_board, current_year=_cur_yr_board,
+            ),
+            unsafe_allow_html=True,
+        )
+    except Exception as _e_board:
+        st.warning(f"만세력 보드 로드 실패: {_e_board}")
+
     # Y-12: 종합 사주 평론서
     try:
         from saju_zhengtong import render_jonghap_pyongron

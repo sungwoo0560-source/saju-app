@@ -7640,3 +7640,265 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
 </div>
 """
     return html
+
+
+def render_manse_board(pils, name="내담자", birth_year=1969, gender="男",
+                        daewoon_list=None, current_year=2026):
+    """정통 사주 상담소 스타일 만세력 보드. 원국 4기둥 + 대운 + 세운 시각 표."""
+    if not pils or len(pils) < 4:
+        return ""
+
+    from datetime import datetime as _dt
+
+    CG_KR = {"甲":"갑","乙":"을","丙":"병","丁":"정","戊":"무",
+              "己":"기","庚":"경","辛":"신","壬":"임","癸":"계"}
+    JJ_KR = {"子":"자","丑":"축","寅":"인","卯":"묘","辰":"진","巳":"사",
+              "午":"오","未":"미","申":"신","酉":"유","戌":"술","亥":"해"}
+    CG_COLOR = {
+        "甲":"#2e7d32","乙":"#388e3c",
+        "丙":"#c62828","丁":"#d32f2f",
+        "戊":"#e65100","己":"#f57f17",
+        "庚":"#424242","辛":"#616161",
+        "壬":"#1565c0","癸":"#1976d2",
+    }
+    JJ_COLOR = {
+        "寅":"#2e7d32","卯":"#388e3c",
+        "巳":"#c62828","午":"#d32f2f",
+        "辰":"#e65100","未":"#f57f17","戌":"#fbc02d","丑":"#f9a825",
+        "申":"#424242","酉":"#616161",
+        "亥":"#1565c0","子":"#1976d2",
+    }
+
+    sj = pils[3]; wj = pils[2]; iz = pils[1]; tj = pils[0]
+    cg_list = [tj.get("cg",""), iz.get("cg",""), wj.get("cg",""), sj.get("cg","")]
+    jj_list = [tj.get("jj",""), iz.get("jj",""), wj.get("jj",""), sj.get("jj","")]
+    ilgan = iz.get("cg","")
+    nyeon_jj = sj.get("jj","")
+
+    # 인라인 십성 계산 (순환 import 방지)
+    def _ss(ig, cg):
+        OH = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
+              "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
+        YY = {"甲":"陽","乙":"陰","丙":"陽","丁":"陰","戊":"陽",
+              "己":"陰","庚":"陽","辛":"陰","壬":"陽","癸":"陰"}
+        GEN = {"木":"火","火":"土","土":"金","金":"水","水":"木"}
+        CTL = {"木":"土","火":"金","土":"水","金":"木","水":"火"}
+        if not ig or not cg: return ""
+        io, o = OH.get(ig,""), OH.get(cg,"")
+        sy = (YY.get(ig,"") == YY.get(cg,""))
+        if io == o:         return "비견" if sy else "겁재"
+        if GEN.get(o) == io: return "편인" if sy else "정인"
+        if GEN.get(io) == o: return "식신" if sy else "상관"
+        if CTL.get(o) == io: return "편관" if sy else "정관"
+        if CTL.get(io) == o: return "편재" if sy else "정재"
+        return ""
+
+    # 지장간
+    JJ_JG = {
+        "子":"壬·癸","丑":"癸·辛·己","寅":"戊·丙·甲","卯":"甲·乙",
+        "辰":"乙·癸·戊","巳":"戊·庚·丙","午":"丙·己·丁","未":"丁·乙·己",
+        "申":"戊·壬·庚","酉":"庚·辛","戌":"辛·丁·戊","亥":"戊·甲·壬",
+    }
+
+    # 12운성
+    UNSEONG = {
+        "甲":{"亥":"장생","子":"목욕","丑":"관대","寅":"건록","卯":"제왕","辰":"쇠","巳":"병","午":"사","未":"묘","申":"절","酉":"태","戌":"양"},
+        "乙":{"午":"장생","巳":"목욕","辰":"관대","卯":"건록","寅":"제왕","丑":"쇠","子":"병","亥":"사","戌":"묘","酉":"절","申":"태","未":"양"},
+        "丙":{"寅":"장생","卯":"목욕","辰":"관대","巳":"건록","午":"제왕","未":"쇠","申":"병","酉":"사","戌":"묘","亥":"절","子":"태","丑":"양"},
+        "丁":{"酉":"장생","申":"목욕","未":"관대","午":"건록","巳":"제왕","辰":"쇠","卯":"병","寅":"사","丑":"묘","子":"절","亥":"태","戌":"양"},
+        "戊":{"寅":"장생","卯":"목욕","辰":"관대","巳":"건록","午":"제왕","未":"쇠","申":"병","酉":"사","戌":"묘","亥":"절","子":"태","丑":"양"},
+        "己":{"酉":"장생","申":"목욕","未":"관대","午":"건록","巳":"제왕","辰":"쇠","卯":"병","寅":"사","丑":"묘","子":"절","亥":"태","戌":"양"},
+        "庚":{"巳":"장생","午":"목욕","未":"관대","申":"건록","酉":"제왕","戌":"쇠","亥":"병","子":"사","丑":"묘","寅":"절","卯":"태","辰":"양"},
+        "辛":{"子":"장생","亥":"목욕","戌":"관대","酉":"건록","申":"제왕","未":"쇠","午":"병","巳":"사","辰":"묘","卯":"절","寅":"태","丑":"양"},
+        "壬":{"申":"장생","酉":"목욕","戌":"관대","亥":"건록","子":"제왕","丑":"쇠","寅":"병","卯":"사","辰":"묘","巳":"절","午":"태","未":"양"},
+        "癸":{"卯":"장생","寅":"목욕","丑":"관대","子":"건록","亥":"제왕","戌":"쇠","酉":"병","申":"사","未":"묘","午":"절","巳":"태","辰":"양"},
+    }
+
+    # 년지 기준 12신살
+    SHINSAL_MAP = {
+        "子":{"申":"지살","酉":"도화","戌":"월살","亥":"망신","子":"장성","丑":"반안","寅":"역마","卯":"육해","辰":"화개","巳":"겁살","午":"재살","未":"천살"},
+        "丑":{"巳":"지살","午":"도화","未":"월살","申":"망신","酉":"장성","戌":"반안","亥":"역마","子":"육해","丑":"화개","寅":"겁살","卯":"재살","辰":"천살"},
+        "寅":{"寅":"지살","卯":"도화","辰":"월살","巳":"망신","午":"장성","未":"반안","申":"역마","酉":"육해","戌":"화개","亥":"겁살","子":"재살","丑":"천살"},
+        "卯":{"亥":"지살","子":"도화","丑":"월살","寅":"망신","卯":"장성","辰":"반안","巳":"역마","午":"육해","未":"화개","申":"겁살","酉":"재살","戌":"천살"},
+        "辰":{"申":"지살","酉":"도화","戌":"월살","亥":"망신","子":"장성","丑":"반안","寅":"역마","卯":"육해","辰":"화개","巳":"겁살","午":"재살","未":"천살"},
+        "巳":{"巳":"지살","午":"도화","未":"월살","申":"망신","酉":"장성","戌":"반안","亥":"역마","子":"육해","丑":"화개","寅":"겁살","卯":"재살","辰":"천살"},
+        "午":{"寅":"지살","卯":"도화","辰":"월살","巳":"망신","午":"장성","未":"반안","申":"역마","酉":"육해","戌":"화개","亥":"겁살","子":"재살","丑":"천살"},
+        "未":{"亥":"지살","子":"도화","丑":"월살","寅":"망신","卯":"장성","辰":"반안","巳":"역마","午":"육해","未":"화개","申":"겁살","酉":"재살","戌":"천살"},
+        "申":{"申":"지살","酉":"도화","戌":"월살","亥":"망신","子":"장성","丑":"반안","寅":"역마","卯":"육해","辰":"화개","巳":"겁살","午":"재살","未":"천살"},
+        "酉":{"巳":"지살","午":"도화","未":"월살","申":"망신","酉":"장성","戌":"반안","亥":"역마","子":"육해","丑":"화개","寅":"겁살","卯":"재살","辰":"천살"},
+        "戌":{"寅":"지살","卯":"도화","辰":"월살","巳":"망신","午":"장성","未":"반안","申":"역마","酉":"육해","戌":"화개","亥":"겁살","子":"재살","丑":"천살"},
+        "亥":{"亥":"지살","子":"도화","丑":"월살","寅":"망신","卯":"장성","辰":"반안","巳":"역마","午":"육해","未":"화개","申":"겁살","酉":"재살","戌":"천살"},
+    }
+
+    cur_age = current_year - birth_year
+
+    # ── 셀 헬퍼 ──────────────────────────────────
+    def _hdr(text, bg="#3e2723", fg="#fff", sz=12, extra=""):
+        return (f'<td style="background:{bg};color:{fg};font-size:{sz}px;'
+                f'font-weight:700;text-align:center;padding:7px 3px;'
+                f'border:1px solid #bbb;{extra}">{text}</td>')
+
+    def _cg_td(cg, highlight=False):
+        c = CG_COLOR.get(cg, "#666")
+        brd = "border:3px solid #c62828;" if highlight else "border:1px solid #bbb;"
+        kr = CG_KR.get(cg, "")
+        return (f'<td style="background:{c};color:#fff;font-size:22px;font-weight:900;'
+                f'text-align:center;padding:12px 4px;{brd}">'
+                f'{cg}<br><span style="font-size:10px;font-weight:500;">{kr}</span></td>')
+
+    def _jj_td(jj, highlight=False):
+        c = JJ_COLOR.get(jj, "#666")
+        brd = "border:3px solid #c62828;" if highlight else "border:1px solid #bbb;"
+        kr = JJ_KR.get(jj, "")
+        return (f'<td style="background:{c};color:#fff;font-size:22px;font-weight:900;'
+                f'text-align:center;padding:12px 4px;{brd}">'
+                f'{jj}<br><span style="font-size:10px;font-weight:500;">{kr}</span></td>')
+
+    def _info(text, bg="#faf5ee", fg="#3e2723", sz=11, highlight=False):
+        brd = "border:3px solid #c62828;" if highlight else "border:1px solid #bbb;"
+        return (f'<td style="background:{bg};color:{fg};font-size:{sz}px;'
+                f'text-align:center;padding:6px 3px;{brd}">{text}</td>')
+
+    # ── 1단: 사주 명식 표 ─────────────────────────
+    col_labels = ["시주(時)", "일주(日) ★", "월주(月)", "년주(年)"]
+    ss_row = [_ss(ilgan, cg) for cg in cg_list]
+    ss_row[1] = "일간(나)"  # 일간 자리는 고정
+    us_row = [UNSEONG.get(ilgan, {}).get(jj, "—") for jj in jj_list]
+    sh_row = [SHINSAL_MAP.get(nyeon_jj, {}).get(jj, "—") for jj in jj_list]
+
+    r_hdr = "".join(_hdr(col_labels[i], "#3e2723" if i != 1 else "#c62828") for i in range(4))
+    r_ss  = "".join(_info(ss_row[i]) for i in range(4))
+    r_cg  = "".join(_cg_td(cg_list[i], i == 1) for i in range(4))
+    r_jj  = "".join(_jj_td(jj_list[i]) for i in range(4))
+    r_jg  = "".join(_info(JJ_JG.get(jj_list[i], "—"), "#fff3e0", "#bf360c", 10) for i in range(4))
+    r_us  = "".join(_info(us_row[i], "#e3f2fd", "#0d47a1", 10) for i in range(4))
+    r_sh  = "".join(_info(sh_row[i], "#e8f5e9", "#1b5e20", 10) for i in range(4))
+
+    saju_table = f"""
+<div style="margin:16px 0 8px;">
+  <div style="font-size:13px;color:#6b4423;font-weight:700;text-align:center;margin-bottom:8px;letter-spacing:2px;">
+    📋 사주 명식(四柱命式)
+  </div>
+  <table style="width:100%;border-collapse:collapse;table-layout:fixed;">
+    <tr>{r_hdr}</tr>
+    <tr>{r_ss}</tr>
+    <tr>{r_cg}</tr>
+    <tr>{r_jj}</tr>
+    <tr><td colspan="4" style="background:#f5f5f5;color:#888;font-size:10px;padding:3px 6px;border:1px solid #bbb;">지장간(支藏干)</td></tr>
+    <tr>{r_jg}</tr>
+    <tr><td colspan="4" style="background:#f5f5f5;color:#888;font-size:10px;padding:3px 6px;border:1px solid #bbb;">12운성(運星)</td></tr>
+    <tr>{r_us}</tr>
+    <tr><td colspan="4" style="background:#f5f5f5;color:#888;font-size:10px;padding:3px 6px;border:1px solid #bbb;">12신살(神殺) — 년지 기준</td></tr>
+    <tr>{r_sh}</tr>
+  </table>
+</div>"""
+
+    # ── 2단: 대운 표 ────────────────────────────
+    daewoon_table = ""
+    if daewoon_list and isinstance(daewoon_list, list):
+        dw_items = [d for d in daewoon_list if isinstance(d, dict)][:10]
+        if dw_items:
+            r_age = r_dss = r_dcg = r_djj = r_dus = ""
+            for dw in dw_items:
+                age  = dw.get("시작나이", "?")
+                dcg  = dw.get("cg", "")
+                djj  = dw.get("jj", "")
+                hl   = bool(dw.get("is_current", False))
+                dss  = _ss(ilgan, dcg)
+                dus  = UNSEONG.get(ilgan, {}).get(djj, "—")
+                brd  = "border:3px solid #c62828;" if hl else "border:1px solid #bbb;"
+                r_age += (f'<td style="background:#3e2723;color:#fff;font-size:13px;'
+                          f'font-weight:700;text-align:center;padding:7px 3px;{brd}">{age}</td>')
+                r_dss += _info(dss, highlight=hl)
+                r_dcg += _cg_td(dcg, hl)
+                r_djj += _jj_td(djj, hl)
+                r_dus += _info(dus, "#e3f2fd", "#0d47a1", 10, hl)
+
+            daewoon_table = f"""
+<div style="margin:16px 0 8px;">
+  <div style="font-size:13px;color:#6b4423;font-weight:700;text-align:center;margin-bottom:8px;letter-spacing:2px;">
+    🌊 대운(大運) — 10년 단위
+  </div>
+  <div style="overflow-x:auto;">
+  <table style="width:100%;border-collapse:collapse;table-layout:fixed;min-width:560px;">
+    <tr>{r_age}</tr>
+    <tr>{r_dss}</tr>
+    <tr>{r_dcg}</tr>
+    <tr>{r_djj}</tr>
+    <tr>{r_dus}</tr>
+  </table>
+  </div>
+  <div style="font-size:10px;color:#c62828;margin-top:6px;text-align:center;font-weight:700;">
+    빨간 박스 = 현재 진행 중 대운
+  </div>
+</div>"""
+
+    # ── 3단: 세운 표 ────────────────────────────
+    GAPJA60 = ['甲子','乙丑','丙寅','丁卯','戊辰','己巳','庚午','辛未','壬申','癸酉',
+               '甲戌','乙亥','丙子','丁丑','戊寅','己卯','庚辰','辛巳','壬午','癸未',
+               '甲申','乙酉','丙戌','丁亥','戊子','己丑','庚寅','辛卯','壬辰','癸巳',
+               '甲午','乙未','丙申','丁酉','戊戌','己亥','庚子','辛丑','壬寅','癸卯',
+               '甲辰','乙巳','丙午','丁未','戊申','己酉','庚戌','辛亥','壬子','癸丑',
+               '甲寅','乙卯','丙辰','丁巳','戊午','己未','庚申','辛酉','壬戌','癸亥']
+
+    def _yr_ganji(yr):
+        return GAPJA60[(yr - 1984) % 60]
+
+    r_yr = r_yss = r_ycg = r_yjj = ""
+    for offset in range(-3, 7):
+        yr = current_year + offset
+        gj = _yr_ganji(yr)
+        ycg, yjj = gj[0], gj[1]
+        hl = (yr == current_year)
+        yss = _ss(ilgan, ycg)
+        brd = "border:3px solid #c62828;" if hl else "border:1px solid #bbb;"
+        yr_bg = "#c62828" if hl else "#3e2723"
+        r_yr  += (f'<td style="background:{yr_bg};color:#fff;font-size:12px;'
+                  f'font-weight:700;text-align:center;padding:7px 2px;{brd}">{yr}</td>')
+        r_yss += _info(yss, highlight=hl)
+        r_ycg += _cg_td(ycg, hl)
+        r_yjj += _jj_td(yjj, hl)
+
+    sewoon_table = f"""
+<div style="margin:16px 0 8px;">
+  <div style="font-size:13px;color:#6b4423;font-weight:700;text-align:center;margin-bottom:8px;letter-spacing:2px;">
+    📅 세운(歲運) — 매년 운세
+  </div>
+  <div style="overflow-x:auto;">
+  <table style="width:100%;border-collapse:collapse;table-layout:fixed;min-width:560px;">
+    <tr>{r_yr}</tr>
+    <tr>{r_yss}</tr>
+    <tr>{r_ycg}</tr>
+    <tr>{r_yjj}</tr>
+  </table>
+  </div>
+  <div style="font-size:10px;color:#c62828;margin-top:6px;text-align:center;font-weight:700;">
+    빨간 박스 = {current_year}년 (현재)
+  </div>
+</div>"""
+
+    # ── 전체 조합 ─────────────────────────────
+    html = f"""
+<div style="background:#fff;border:3px solid #3e2723;border-radius:16px;
+            padding:22px 18px;margin:18px 0;
+            box-shadow:0 8px 24px rgba(62,39,35,0.15);
+            font-family:'Noto Sans KR',sans-serif;">
+
+  <div style="text-align:center;margin-bottom:16px;border-bottom:2px solid #6b4423;padding-bottom:12px;">
+    <div style="font-size:12px;color:#8b6914;letter-spacing:4px;font-weight:700;">⚱️ 정통 명리학 만세력 ⚱️</div>
+    <div style="font-size:20px;font-weight:900;color:#3e2723;margin-top:6px;">{name}님 만세력 보드</div>
+    <div style="font-size:11px;color:#6b4423;margin-top:4px;">{birth_year}년생 {gender} — {current_year}년 기준</div>
+  </div>
+
+  {saju_table}
+  <hr style="border:none;border-top:1px dashed #6b4423;margin:18px 0;">
+  {daewoon_table}
+  <hr style="border:none;border-top:1px dashed #6b4423;margin:18px 0;">
+  {sewoon_table}
+
+  <div style="text-align:center;font-size:10px;color:#8b6914;margin-top:14px;padding-top:10px;border-top:1px dashed #6b4423;">
+    색상 — 木(녹) · 火(빨) · 土(주황) · 金(회) · 水(파)&nbsp;&nbsp;|&nbsp;&nbsp;★ 일주(日柱) = 본인
+  </div>
+</div>
+"""
+    return html
