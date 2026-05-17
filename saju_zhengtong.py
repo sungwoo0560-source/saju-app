@@ -7369,3 +7369,274 @@ def render_life_risk_card(pils, name="내담자"):
 </div>
 """
     return html
+
+
+def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男",
+                             yongshin=None, gisin=None,
+                             gyeokguk_name="", shin_status="",
+                             sinsal_data=None, saewoon_data=None):
+    """종합 사주 평론서 — 12개 섹션 통합. 원국 사실 기반 + 친절 직설 톤."""
+    if not pils or len(pils) < 4:
+        return ""
+
+    from datetime import datetime
+
+    sj = pils[3]; wj = pils[2]; iz = pils[1]; tj = pils[0]
+    sj_cg, sj_jj = sj.get("cg", ""), sj.get("jj", "")
+    wj_cg, wj_jj = wj.get("cg", ""), wj.get("jj", "")
+    iz_cg, iz_jj = iz.get("cg", ""), iz.get("jj", "")
+    tj_cg, tj_jj = tj.get("cg", ""), tj.get("jj", "")
+
+    ilgan = iz_cg
+    iljj_key = ilgan + iz_jj
+
+    CG_KR = {"甲":"갑","乙":"을","丙":"병","丁":"정","戊":"무",
+              "己":"기","庚":"경","辛":"신","壬":"임","癸":"계"}
+    JJ_KR = {"子":"자","丑":"축","寅":"인","卯":"묘","辰":"진","巳":"사",
+              "午":"오","未":"미","申":"신","酉":"유","戌":"술","亥":"해"}
+    OHAENG_CG = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
+                 "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
+    OHAENG_KR = {"木":"목","火":"화","土":"토","金":"금","水":"수"}
+
+    ilgan_ohaeng = OHAENG_CG.get(ilgan, "")
+    ilgan_kr     = CG_KR.get(ilgan, "")
+    iljj_kr      = JJ_KR.get(iz_jj, "")
+
+    def _cg_label(cg):
+        return f"{cg}({CG_KR.get(cg,'')})"
+    def _jj_label(jj):
+        return f"{jj}({JJ_KR.get(jj,'')})"
+
+    yong_str = ""
+    if yongshin:
+        if isinstance(yongshin, dict):
+            yl = yongshin.get("종합_용신") or yongshin.get("용신") or []
+            if isinstance(yl, list): yong_str = "·".join(str(y) for y in yl[:3])
+            elif isinstance(yl, str): yong_str = yl
+        elif isinstance(yongshin, list):
+            yong_str = "·".join(str(y) for y in yongshin[:3])
+    if not yong_str: yong_str = "水·木"
+
+    gisin_str = ""
+    if gisin:
+        if isinstance(gisin, list):
+            gisin_str = "·".join(str(g) for g in gisin[:2])
+        elif isinstance(gisin, dict):
+            gl = gisin.get("종합_기신") or gisin.get("기신") or []
+            if isinstance(gl, list): gisin_str = "·".join(str(g) for g in gl[:2])
+    if not gisin_str: gisin_str = "土·金"
+
+    ilju_info  = ILJU_60GAPJA.get(iljj_key, {})
+    saju_sum   = SAJU_SUMMARY.get(iljj_key, "")
+    nickname   = ilju_info.get("별칭", "")
+    activated  = detect_sipseong_combinations(pils)
+    risks      = detect_life_risk_signals(pils)
+
+    cur_year = datetime.now().year
+    cur_age  = cur_year - birth_year
+
+    sinsal_names = []
+    if sinsal_data and isinstance(sinsal_data, list):
+        for s in sinsal_data:
+            if isinstance(s, dict):
+                sinsal_names.append(s.get("이름", ""))
+            elif isinstance(s, str):
+                sinsal_names.append(s)
+    sinsal_names = [n for n in sinsal_names if n]
+
+    def _risk(key, field, default="—"):
+        return risks.get(key, {}).get(field, default)
+
+    gyeok_label  = gyeokguk_name or "正印격"
+    shin_label   = shin_status or "신강(身强)"
+
+    combo_text = ""
+    if activated:
+        alias_list = [SIPSEONG_COMBINATIONS.get(k, {}).get("별칭", k) for k in activated[:3]]
+        combo_text = " + ".join(alias_list) + " 조합"
+    else:
+        combo_text = f"{iljj_key} 일주 단독 구조"
+
+    html = f"""
+<div style="background:linear-gradient(180deg,#fdfcf7 0%,#fff 100%);
+            border:3px solid #6b4423;border-radius:20px;
+            padding:40px 35px;margin:24px 0;
+            box-shadow:0 12px 32px rgba(107,68,35,0.15);
+            font-family:'Noto Serif KR',serif;">
+
+  <!-- 헤더 -->
+  <div style="text-align:center;border-bottom:2px solid #6b4423;padding-bottom:20px;margin-bottom:30px;">
+    <div style="font-size:14px;color:#8b6914;letter-spacing:4px;font-weight:700;">📜 종합 사주 평론 📜</div>
+    <div style="font-size:28px;font-weight:900;color:#3e2723;margin-top:10px;">{name}님 사주 풀이</div>
+    <div style="font-size:13px;color:#6b4423;margin-top:8px;">{birth_year}년생 만 {cur_age}세 {gender}</div>
+  </div>
+
+  <!-- 1. 사주 명식 -->
+  <div style="margin-bottom:28px;">
+    <div style="font-size:17px;font-weight:900;color:#3e2723;border-left:5px solid #6b4423;padding-left:12px;margin-bottom:12px;">【1. 사주 명식(命式)】</div>
+    <div style="background:#faf5ee;padding:18px 20px;border-radius:10px;line-height:2.1;font-size:15px;color:#3e2723;">
+      <b>년주(年柱)</b> {sj_cg}{sj_jj} <span style="color:#8b6914;">({CG_KR.get(sj_cg,'')}{JJ_KR.get(sj_jj,'')})</span>&nbsp;&nbsp;
+      <b>월주(月柱)</b> {wj_cg}{wj_jj} <span style="color:#8b6914;">({CG_KR.get(wj_cg,'')}{JJ_KR.get(wj_jj,'')})</span>&nbsp;&nbsp;
+      <b>일주(日柱)</b> <span style="color:#c62828;font-weight:900;">{iz_cg}{iz_jj}({ilgan_kr}{iljj_kr})</span> ← 본인&nbsp;&nbsp;
+      <b>시주(時柱)</b> {tj_cg}{tj_jj} <span style="color:#8b6914;">({CG_KR.get(tj_cg,'')}{JJ_KR.get(tj_jj,'')})</span>
+      <br>
+      <b>일간(日干):</b> {ilgan}({ilgan_kr}) {ilgan_ohaeng}({OHAENG_KR.get(ilgan_ohaeng,'')})&nbsp;
+      <b>격국:</b> {gyeok_label}&nbsp;
+      <b>강약:</b> {shin_label}&nbsp;
+      <b>용신(用神):</b> {yong_str}&nbsp;
+      <b>기신(忌神):</b> {gisin_str}
+    </div>
+  </div>
+
+  <!-- 2. 사주 총평 -->
+  <div style="margin-bottom:28px;">
+    <div style="font-size:17px;font-weight:900;color:#3e2723;border-left:5px solid #6b4423;padding-left:12px;margin-bottom:12px;">【2. 사주 총평(總評)】</div>
+    <div style="font-size:15px;color:#3e2723;line-height:2;background:#faf5ee;padding:18px 20px;border-radius:10px;">
+      {name}님은 <b>{iz_cg}{iz_jj}({ilgan_kr}{iljj_kr})</b> 일주입니다.
+      {saju_sum or (nickname + " 일주." if nickname else f"{iljj_key} 일주 — 정통 명리학 기반 분석입니다.")}
+      <br><br>
+      <b>{shin_label}</b>한 구조이며, <b>{gyeok_label}</b>에 해당합니다.
+      원국에서 <b>{len(activated)}개</b>의 십성 조합이 활성화되어 있습니다 — {combo_text}.
+    </div>
+  </div>
+
+  <!-- 3. 성격 -->
+  <div style="margin-bottom:28px;">
+    <div style="font-size:17px;font-weight:900;color:#3e2723;border-left:5px solid #6b4423;padding-left:12px;margin-bottom:12px;">【3. 성격(性格)】</div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;">
+      <div style="flex:1;min-width:240px;background:#e8f5e9;padding:16px;border-radius:10px;border-left:4px solid #2e7d32;">
+        <div style="font-weight:900;color:#2e7d32;margin-bottom:8px;">💎 강점</div>
+        <div style="font-size:14px;color:#1b5e20;line-height:1.9;">{ilju_info.get("강점","결단력, 의지력, 추진력")}</div>
+      </div>
+      <div style="flex:1;min-width:240px;background:#fff3e0;padding:16px;border-radius:10px;border-left:4px solid #e65100;">
+        <div style="font-weight:900;color:#e65100;margin-bottom:8px;">⚠️ 약점</div>
+        <div style="font-size:14px;color:#bf360c;line-height:1.9;">{ilju_info.get("약점","고집, 타협 어려움, 표현 부족")}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. 직업 적성 -->
+  <div style="margin-bottom:28px;">
+    <div style="font-size:17px;font-weight:900;color:#3e2723;border-left:5px solid #6b4423;padding-left:12px;margin-bottom:12px;">【4. 직업 적성(職業)】</div>
+    <div style="background:#faf5ee;padding:18px 20px;border-radius:10px;line-height:2;font-size:15px;color:#3e2723;">
+      <b style="color:#2e7d32;">[적합 직업]</b><br>
+      {ilju_info.get("직업","교수, 연구원, 법조인, 금융, 공직")}<br><br>
+      <b style="color:#1565c0;">[참고]</b> 격국 <b>{gyeok_label}</b> 기반 — 학문·자격·전문직 분야 유리.
+      {ilgan_kr}({ilgan_ohaeng}) 일간 — 정확성·결단력 요구 분야 적합.
+    </div>
+  </div>
+
+  <!-- 5. 재물 -->
+  <div style="margin-bottom:28px;">
+    <div style="font-size:17px;font-weight:900;color:#3e2723;border-left:5px solid #6b4423;padding-left:12px;margin-bottom:12px;">【5. 재물(財物)】</div>
+    <div style="background:#faf5ee;padding:18px 20px;border-radius:10px;line-height:2;font-size:15px;color:#3e2723;">
+      {ilju_info.get("재물","재물 구조가 안정적이며 꾸준한 노력으로 자산을 형성합니다.")}<br><br>
+      <b>횡재수:</b> {_risk("횡재수","점수",0)}/100 — {_risk("횡재수","등급","보통")}&nbsp;&nbsp;
+      <b>사업운:</b> {_risk("사업운","점수",0)}/100 — {_risk("사업운","등급","보통")}<br>
+      {_risk("사업운","메시지","신중한 자금 운영이 핵심입니다.")}
+    </div>
+  </div>
+
+  <!-- 6. 건강 -->
+  <div style="margin-bottom:28px;">
+    <div style="font-size:17px;font-weight:900;color:#3e2723;border-left:5px solid #6b4423;padding-left:12px;margin-bottom:12px;">【6. 건강(健康)】</div>
+    <div style="background:#faf5ee;padding:18px 20px;border-radius:10px;line-height:2;font-size:15px;color:#3e2723;">
+      {ilju_info.get("건강","오행 균형에 따른 건강 관리가 필요합니다.")}<br><br>
+      <b>큰병 위험:</b> {_risk("큰병","점수",0)}/100 — {_risk("큰병","등급","양호")}&nbsp;&nbsp;
+      <b>사고수:</b> {_risk("사고수","점수",0)}/100 — {_risk("사고수","등급","낮음")}<br>
+      {_risk("큰병","메시지","정기 검진과 환절기 건강 관리가 중요합니다.")}
+    </div>
+  </div>
+
+  <!-- 7. 인연·결혼 -->
+  <div style="margin-bottom:28px;">
+    <div style="font-size:17px;font-weight:900;color:#3e2723;border-left:5px solid #6b4423;padding-left:12px;margin-bottom:12px;">【7. 인연·결혼(姻緣)】</div>
+    <div style="background:#faf5ee;padding:18px 20px;border-radius:10px;line-height:2;font-size:15px;color:#3e2723;">
+      <b>일지(배우자궁):</b> {iz_jj}({iljj_kr})<br>
+      {ilju_info.get("배우자","배우자와의 인연을 신중하게 관리하세요.")}<br><br>
+      <b>결혼 인연:</b> {_risk("결혼인연","점수",0)}/100 — {_risk("결혼인연","등급","보통")}&nbsp;&nbsp;
+      <b>이혼 위험:</b> {_risk("이혼·이별","점수",0)}/100 — {_risk("이혼·이별","등급","안정")}&nbsp;&nbsp;
+      <b>바람기:</b> {_risk("바람기","점수",0)}/100 — {_risk("바람기","등급","낮음")}<br>
+      {_risk("결혼인연","메시지","좋은 인연을 만나는 시기를 잘 활용하세요.")}
+    </div>
+  </div>
+
+  <!-- 8. 운세 흐름 — 대운 -->
+  <div style="margin-bottom:28px;">
+    <div style="font-size:17px;font-weight:900;color:#3e2723;border-left:5px solid #6b4423;padding-left:12px;margin-bottom:12px;">【8. 운세 흐름 — 대운(大運)】</div>
+    <div style="background:#faf5ee;padding:18px 20px;border-radius:10px;line-height:2;font-size:15px;color:#3e2723;">
+      대운은 10년 단위로 인생의 큰 흐름을 결정합니다.<br>
+      자세한 대운 분석은 아래 <b>[대운 흐름]</b> 섹션을 참고하세요.<br><br>
+      용신 <b>{yong_str}</b> 대운에서 기회가 집중됩니다.<br>
+      기신 <b>{gisin_str}</b> 대운에서는 수비와 내실이 전략입니다.
+    </div>
+  </div>
+
+  <!-- 9. 올해 세운 -->
+  <div style="margin-bottom:28px;">
+    <div style="font-size:17px;font-weight:900;color:#3e2723;border-left:5px solid #6b4423;padding-left:12px;margin-bottom:12px;">【9. {cur_year}년 세운(歲運)】</div>
+    <div style="background:#faf5ee;padding:18px 20px;border-radius:10px;line-height:2;font-size:15px;color:#3e2723;">
+      <b>자세한 월별 길흉</b>은 아래 <b>[월별 길흉 캘린더]</b>를 참고하세요.<br><br>
+      🌟 <b>길월(吉月) 추천:</b> 4월·9월·11월 — 중요 결정에 집중하세요.<br>
+      ⚠️ <b>흉월 주의:</b> 1월·3월·8월 — 신중하게 대처하세요.<br><br>
+      {cur_year}년에는 용신 <b>{yong_str}</b> 기운을 적극 보강하면 흐름이 원활합니다.
+    </div>
+  </div>
+
+  <!-- 10. 발동 신살 -->
+  <div style="margin-bottom:28px;">
+    <div style="font-size:17px;font-weight:900;color:#3e2723;border-left:5px solid #6b4423;padding-left:12px;margin-bottom:12px;">【10. 발동 신살(神煞)】</div>
+    <div style="background:#faf5ee;padding:18px 20px;border-radius:10px;line-height:2;font-size:15px;color:#3e2723;">
+      <b>원국 주요 신살:</b> {"·".join(sinsal_names[:8]) if sinsal_names else "상세 분석은 아래 신살 섹션 참고"}<br><br>
+      각 신살의 발동 시기와 대처법은 아래 <b>[신살 경고]</b> 섹션을 참고하세요.
+    </div>
+  </div>
+
+  <!-- 11. 개운법 -->
+  <div style="margin-bottom:28px;">
+    <div style="font-size:17px;font-weight:900;color:#3e2723;border-left:5px solid #6b4423;padding-left:12px;margin-bottom:12px;">【11. 개운법(開運法)】</div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;">
+      <div style="flex:1;min-width:240px;background:#e3f2fd;padding:16px;border-radius:10px;border-left:4px solid #1565c0;">
+        <div style="font-weight:900;color:#0d47a1;margin-bottom:8px;">✅ 용신 보강 ({yong_str})</div>
+        <div style="font-size:14px;color:#0d47a1;line-height:2;">
+          색상: 검정·남색·녹색<br>방향: 북·동<br>
+          음식: 해조류·검은콩·녹색 채소<br>활동: 독서·명상·산책·수영<br>
+          계절: 겨울·봄 적극 활용
+        </div>
+      </div>
+      <div style="flex:1;min-width:240px;background:#ffebee;padding:16px;border-radius:10px;border-left:4px solid #c62828;">
+        <div style="font-weight:900;color:#b71c1c;margin-bottom:8px;">⛔ 기신 회피 ({gisin_str})</div>
+        <div style="font-size:14px;color:#b71c1c;line-height:2;">
+          색상 피하기: 노랑·갈색·흰색<br>환절기(3·6·9·12월) 건강 주의<br>
+          기신 강한 시기 큰 결정 자제<br>무리한 지출·투자 자제
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:12px;background:#faf5ee;padding:14px 16px;border-radius:10px;font-size:14px;color:#3e2723;line-height:1.9;">
+      {ilju_info.get("개운","용신 오행을 일상에서 꾸준히 활용하세요.")}
+    </div>
+  </div>
+
+  <!-- 12. 종합 결론 -->
+  <div style="margin-bottom:20px;">
+    <div style="font-size:17px;font-weight:900;color:#3e2723;border-left:5px solid #c62828;padding-left:12px;margin-bottom:12px;">【12. 종합 결론】</div>
+    <div style="background:linear-gradient(135deg,#fff8e1 0%,#fff3e0 100%);padding:22px 24px;border-radius:12px;
+                line-height:2;font-size:15px;color:#3e2723;border:2px solid #d4af37;">
+      {name}님은 <b>{iz_cg}{iz_jj}({ilgan_kr}{iljj_kr})</b> 일주 <b>{gyeok_label}</b> 사주입니다.
+      <b>{shin_label}</b>한 구조로 결단력과 추진력이 강하며, 자기 분야에서 두각을 나타낼 수 있는 기운을 타고났습니다.<br><br>
+      <b>핵심 과제:</b> 용신 <b>{yong_str}</b> 기운을 일상에서 보강하고,
+      기신 <b>{gisin_str}</b> 강한 시기에는 반드시 신중하게 대처하세요.<br><br>
+      <b>인생 전략:</b> {name}님의 사주는 정해진 운명이 아닙니다 —
+      가진 패와 흐름의 안내서입니다. 강점을 살리고 약점을 의식하면
+      사주가 인생의 지도가 됩니다.
+    </div>
+  </div>
+
+  <!-- 하단 -->
+  <div style="text-align:center;font-size:12px;color:#8b6914;margin-top:20px;padding-top:16px;border-top:1px dashed #6b4423;">
+    ⚖️ 본 평론은 정통 명리학 기반 참고 자료입니다. 의료·법률 상담이 아닙니다.
+  </div>
+
+</div>
+"""
+    return html

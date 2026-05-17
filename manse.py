@@ -14390,6 +14390,72 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
     except Exception as _e_y6:
         st.warning(f"Y-6 한눈 요약 카드 로드 실패: {_e_y6}")
 
+    # Y-12: 종합 사주 평론서
+    try:
+        from saju_zhengtong import render_jonghap_pyongron
+
+        _yong_pyong = None
+        _gisin_pyong = None
+        try:
+            _ys_p = get_yongshin(pils)
+            if isinstance(_ys_p, dict):
+                _yong_pyong = _ys_p
+                _gl_p = _ys_p.get("기신", [])
+                if isinstance(_gl_p, list) and _gl_p:
+                    _gisin_pyong = _gl_p
+            elif isinstance(_ys_p, list):
+                _yong_pyong = _ys_p
+        except Exception:
+            _yong_pyong = ["水", "木"]
+
+        if not _gisin_pyong:
+            _opp_p = {"水": "土", "木": "金", "火": "水", "土": "木", "金": "火"}
+            if isinstance(_yong_pyong, dict):
+                _yl_p = _yong_pyong.get("종합_용신") or _yong_pyong.get("용신") or ["水"]
+                _gisin_pyong = [_opp_p.get(y, "土") for y in (_yl_p if isinstance(_yl_p, list) else ["水"])[:2]]
+            elif isinstance(_yong_pyong, list) and _yong_pyong:
+                _gisin_pyong = [_opp_p.get(y, "土") for y in _yong_pyong[:2]]
+            else:
+                _gisin_pyong = ["土", "金"]
+
+        _gyeok_p = ""
+        try:
+            _gg_p = get_gyeokguk(pils)
+            if isinstance(_gg_p, dict):
+                _gyeok_p = _gg_p.get("격국명", "") or _gg_p.get("name", "")
+            elif isinstance(_gg_p, str):
+                _gyeok_p = _gg_p
+        except Exception:
+            pass
+
+        _shin_p = ""
+        try:
+            _ilgan_p = pils[1].get("cg", "") if pils and len(pils) > 1 else ""
+            _shin_p = get_ilgan_strength(_ilgan_p, pils).get("label", "신강(身强)")
+        except Exception:
+            _shin_p = "신강(身强)"
+
+        _sinsal_p = []
+        try:
+            _sn_p = get_12sinsal(pils) or []
+            _es_p = get_extra_sinsal(pils) or []
+            if isinstance(_sn_p, list): _sinsal_p.extend(_sn_p)
+            if isinstance(_es_p, list): _sinsal_p.extend(_es_p)
+        except Exception:
+            pass
+
+        st.markdown(
+            render_jonghap_pyongron(
+                pils, name or "내담자", birth_year, gender or "男",
+                yongshin=_yong_pyong, gisin=_gisin_pyong,
+                gyeokguk_name=_gyeok_p, shin_status=_shin_p,
+                sinsal_data=_sinsal_p,
+            ),
+            unsafe_allow_html=True,
+        )
+    except Exception as _e_pyong:
+        st.warning(f"종합 사주 평론서 로드 실패: {_e_pyong}")
+
     # Y-12: 사주 정밀 진단 인트로
     _ilgan_x = pils[1].get("cg", "") if pils and len(pils) > 1 else ""
     _iljj_x  = pils[1].get("jj", "") if pils and len(pils) > 1 else ""
