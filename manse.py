@@ -15174,21 +15174,6 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
         unsafe_allow_html=True,
     )
 
-    # ⑦ 직업 조언
-
-    if occupation and occupation != "선택 안 함":
-        st.markdown(
-            '<div class="gold-section">💼 직업 적합도 분석</div>',
-            unsafe_allow_html=True,
-        )
-
-        try:
-            tab_career(pils, gender)
-
-        except Exception as e:
-            st.warning(f"직업 분석 오류: {e}")
-
-
     # ── 大運·歲運·月運 길흉월 분석 ────────────────────────
 
     st.markdown(
