@@ -15683,14 +15683,50 @@ def menu2_lifeline(pils, birth_year, gender, name="내담자"):
             }
             _age_s2 = cur_dw["시작연도"] - birth_year + 1
             _age_e2 = cur_dw["종료연도"] - birth_year + 1
-            st.info(
-                f"**현재 {_dw_cg2}{_dw_jj2} 대운**\n\n"
-                f"🌊 천간: {_DW_CG_DESC.get(_dw_cg2, f'{_dw_cg2} 대운')}\n\n"
-                f"🌍 지지: {_DW_JJ_DESC.get(_dw_jj2, f'{_dw_jj2} 기운')}\n\n"
-                f"📅 기간: {cur_dw['시작연도']}~{cur_dw['종료연도']}년 "
-                f"(만 {_age_s2}세 ~ {_age_e2}세)\n\n"
-                f"💡 이 대운에서 가장 중요한 것: 대운 천간과 지지의 기운을 파악하고 "
-                f"그 방향으로 에너지를 집중하십시오."
+            _dw2_oh_cg = OH.get(_dw_cg2, "")
+            _dw2_oh_jj = OH.get(_dw_jj2, "")
+            _dw2_is_yong = _dw2_oh_cg in yongshin_ohs and _dw2_oh_jj in yongshin_ohs
+            _dw2_is_half = (_dw2_oh_cg in yongshin_ohs) ^ (_dw2_oh_jj in yongshin_ohs)
+            _gisin2 = [o for o in ["木","火","土","金","水"] if o not in yongshin_ohs]
+            _dw2_is_bad  = _dw2_oh_cg in _gisin2 and _dw2_oh_jj in _gisin2
+            if _dw2_is_yong:
+                _dw2_verdict = f"<b>지금이 인생 황금기 대운입니다.</b> 망설이지 마세요 — 이 시기에 한 결정들이 10년을 결정합니다."
+                _dw2_action  = f"창업·이직·투자·결혼 — <b>모든 중요한 결정을 지금 {cur_dw['종료연도']}년 전에 실행하세요.</b>"
+                _dw2_col     = "#27ae60"
+                _dw2_bg      = "#0d2d0d"
+            elif _dw2_is_half:
+                _dw2_verdict = f"천간·지지 중 하나만 용신 — <b>절반은 황금기, 절반은 주의 구간</b>입니다."
+                _dw2_action  = f"용신 기운이 강한 세운(년도)에 중요한 결정을 집중하세요. 기신 세운에는 수비 모드."
+                _dw2_col     = "#d4af37"
+                _dw2_bg      = "#1a1a00"
+            elif _dw2_is_bad:
+                _dw2_verdict = f"<b>지금은 수비기 대운입니다.</b> 큰 결정·투자·변화는 다음 용신 대운까지 기다리세요."
+                _dw2_action  = f"내실 다지기 집중 — 자격·기술·자산 준비. <b>보증·동업·투기 절대 X.</b>"
+                _dw2_col     = "#e74c3c"
+                _dw2_bg      = "#2d0d0d"
+            else:
+                _dw2_verdict = f"중립 대운 — 큰 기복 없이 흘러가는 시기. 꾸준함이 가장 강한 전략입니다."
+                _dw2_action  = f"용신 오행({', '.join(yongshin_ohs)}) 방향으로 에너지를 집중하십시오."
+                _dw2_col     = "#7f8c8d"
+                _dw2_bg      = "#1a1a2a"
+            _remain2 = cur_dw["종료연도"] - datetime.now().year
+            st.markdown(
+                f"<div style='background:{_dw2_bg};border-radius:14px;padding:20px 24px;"
+                f"margin:12px 0;border:2px solid {_dw2_col}66;'>"
+                f"<div style='font-size:11px;color:{_dw2_col};letter-spacing:2px;font-weight:700;margin-bottom:8px'>"
+                f"🎯 현재 {_dw_cg2}{_dw_jj2} 대운 — 직격 진단</div>"
+                f"<div style='font-size:18px;font-weight:900;color:#fff;margin-bottom:10px'>"
+                f"{_dw2_verdict}</div>"
+                f"<div style='font-size:13px;color:#e0e0e0;line-height:1.9;margin-bottom:8px'>"
+                f"🌊 <b>천간 {_dw_cg2}:</b> {_DW_CG_DESC.get(_dw_cg2, f'{_dw_cg2} 대운')}<br>"
+                f"🌍 <b>지지 {_dw_jj2}:</b> {_DW_JJ_DESC.get(_dw_jj2, f'{_dw_jj2} 기운')}</div>"
+                f"<div style='background:rgba(255,255,255,0.08);border-radius:8px;padding:10px 14px;"
+                f"font-size:13px;color:{_dw2_col};font-weight:700;'>"
+                f"💎 행동 지침: {_dw2_action}<br>"
+                f"<span style='color:#aaa;font-weight:400;font-size:12px'>"
+                f"📅 {cur_dw['시작연도']}~{cur_dw['종료연도']}년 (만 {_age_s2}~{_age_e2}세) · <b>{_remain2}년 남음</b></span>"
+                f"</div></div>",
+                unsafe_allow_html=True,
             )
     except Exception:
         pass
@@ -15763,6 +15799,40 @@ def menu3_past(pils, birth_year, gender, name=""):
                 st.markdown(
                     f"<div style='background:#f9f6f0;border:1px solid #c9a84c;border-radius:10px;"
                     f"padding:14px;font-size:13px;color:#3d2800;line-height:1.9'>{_sum3}</div>",
+                    unsafe_allow_html=True
+                )
+                # 과거 직격 임팩트 카드
+                _n3 = name or '내담자'
+                _gold_cnt3 = len(_gold3)
+                _bad_cnt3  = len(_bad3)
+                _past_impact_title = (
+                    f"🏆 {_n3}님 — 황금기 {_gold_cnt3}번, 수비기 {_bad_cnt3}번 경험"
+                )
+                _past_verdict3 = ""
+                if _gold_cnt3 >= 2:
+                    _past_verdict3 = f"과거 대운 중 <b>{_gold_cnt3}번</b>의 황금기가 있었습니다. 그 시기에 내린 결정들이 지금의 {_n3}님 자산·경력·관계를 만들었습니다."
+                elif _gold_cnt3 == 1:
+                    _past_verdict3 = f"황금기 대운 <b>1번</b>이 있었습니다. 그 시기 {_n3}님이 움직인 것들이 지금의 기반입니다."
+                else:
+                    _past_verdict3 = f"과거 대운이 모두 수비기였습니다. 이 기간의 단련이 {_n3}님의 진짜 내공입니다."
+                if _bad_cnt3 >= 2:
+                    _past_verdict3 += f"<br>수비기 <b>{_bad_cnt3}번</b> — 그 고난을 버텨온 것이 {_n3}님의 가장 큰 자산입니다."
+                _future_hint3 = ""
+                _cur_dw_now3 = next((d for d in _dws3 if d.get("시작연도",0) <= _cy3 <= d.get("종료연도",9999)), None)
+                if _cur_dw_now3:
+                    _cur_oh3 = _OH3.get(_cur_dw_now3.get("cg","")[:1],"")
+                    if _cur_oh3 in _yong3:
+                        _future_hint3 = f"<br>📌 <b>지금({_cy3}년)이 황금기 대운입니다.</b> 지금 바로 움직이세요."
+                    elif _cur_oh3 in _gisin3:
+                        _future_hint3 = f"<br>📌 <b>지금({_cy3}년)은 수비기 대운입니다.</b> 내실을 다지는 시기 — 큰 결정은 다음 황금기까지 참으세요."
+                st.markdown(
+                    f"<div style='background:linear-gradient(135deg,#1a1a2e,#16213e);"
+                    f"border-radius:14px;padding:18px 22px;margin:12px 0;"
+                    f"border:2px solid #d4af3766;'>"
+                    f"<div style='font-size:11px;color:#d4af37;letter-spacing:2px;font-weight:700;margin-bottom:8px'>📊 과거 대운 직격 진단</div>"
+                    f"<div style='font-size:18px;font-weight:900;color:#fff;margin-bottom:10px'>{_past_impact_title}</div>"
+                    f"<div style='font-size:13px;color:#e0d5c0;line-height:1.9'>"
+                    f"{_past_verdict3}{_future_hint3}</div></div>",
                     unsafe_allow_html=True
                 )
     except Exception:
@@ -16567,6 +16637,60 @@ def menu5_money(pils, birth_year, gender, name="내담자"):
         gender=gender,
     )
     cur_dw = next((d for d in daewoon if d["시작연도"] <= current_year <= d["종료연도"]), None) or {}
+
+    # ── 재물 직격 요약 카드 (결론 먼저) ──────────────────────────
+    try:
+        from saju_zhengtong import detect_life_risk_signals
+        _m5_risks = detect_life_risk_signals(pils)
+        _m5_hoeng = _m5_risks.get("횡재수", {})
+        _m5_biz   = _m5_risks.get("사업운", {})
+        _m5_hs    = _m5_hoeng.get("점수", 0)
+        _m5_bs    = _m5_biz.get("점수", 0)
+        _m5_hg    = _m5_hoeng.get("등급", "보통")
+        _m5_bg    = _m5_biz.get("등급", "보통")
+        _m5_hm    = _m5_hoeng.get("메시지", "")
+        _m5_bm    = _m5_biz.get("메시지", "")
+        _m5_yong  = yongshin_ohs[0] if yongshin_ohs else ilgan_oh
+        _cur_dw_str5 = cur_dw.get("str","?") if cur_dw else "?"
+        _cur_dw_ss5  = TEN_GODS_MATRIX.get(ilgan,{}).get(cur_dw.get("cg",""),"-") if cur_dw else "-"
+        _cur_dw_oh5  = OH.get(cur_dw.get("cg",""),"") if cur_dw else ""
+        _dw_is_yong5 = _cur_dw_oh5 in yongshin_ohs
+        if _m5_hs >= 60 or _m5_bs >= 60:
+            _m5_bg_color = "#0d2d0d"
+            _m5_bd_color = "#27ae60"
+            _m5_verdict  = f"횡재수 {_m5_hs}/100 · 사업운 {_m5_bs}/100 — <b>재물 기운 강합니다.</b>"
+        elif _m5_hs >= 35 or _m5_bs >= 35:
+            _m5_bg_color = "#1a2d1a"
+            _m5_bd_color = "#d4af37"
+            _m5_verdict  = f"횡재수 {_m5_hs}/100 · 사업운 {_m5_bs}/100 — 재물 운 <b>보통~양호</b>."
+        else:
+            _m5_bg_color = "#2d1a1a"
+            _m5_bd_color = "#e74c3c"
+            _m5_verdict  = f"횡재수 {_m5_hs}/100 · 사업운 {_m5_bs}/100 — 큰돈보다 <b>안정 자산</b> 집중 시기."
+        _dw_msg5 = (
+            f"현재 <b>{_cur_dw_str5}({_cur_dw_ss5}) 대운</b> — "
+            + ("용신 대운. <b>재물 기회가 집중됩니다.</b> 지금 바로 움직이세요." if _dw_is_yong5 else
+               "기신 대운. <b>보증·동업·투기 절대 X.</b> 안정 모드로 내실을 다지세요.")
+        )
+        st.markdown(
+            f"<div style='background:linear-gradient(135deg,{_m5_bg_color},#000);"
+            f"border-radius:16px;padding:20px 24px;margin-bottom:20px;"
+            f"border:2px solid {_m5_bd_color}66;'>"
+            f"<div style='font-size:11px;color:{_m5_bd_color};letter-spacing:2px;font-weight:700;margin-bottom:8px'>💰 재물운 직격 진단</div>"
+            f"<div style='font-size:20px;font-weight:900;color:#fff;margin-bottom:10px'>{_m5_verdict}</div>"
+            f"<div style='font-size:13px;color:#e0e0e0;line-height:1.9;margin-bottom:8px'>"
+            f"<b>📌 사주가 말하는 것:</b><br>"
+            f"• {_m5_hm if _m5_hm else f'횡재수: {_m5_hg}'}<br>"
+            f"• {_m5_bm if _m5_bm else f'사업운: {_m5_bg}'}</div>"
+            f"<div style='background:rgba(255,255,255,0.08);border-radius:8px;padding:10px 14px;"
+            f"font-size:12px;color:#ccc;'>{_dw_msg5}</div>"
+            f"<div style='margin-top:10px;font-size:12px;color:#aaa;'>"
+            f"🎯 용신 <b style='color:{_m5_bd_color}'>{_m5_yong}</b> 기운 강한 대운·세운 — 100% 집중 시기입니다.</div>"
+            f"</div>",
+            unsafe_allow_html=True
+        )
+    except Exception:
+        pass
 
     # ① 타고난 재물 그릇
     st.markdown(f'<div class="gold-section">💎 {name}님 — ① 타고난 재물 그릇 분석</div>', unsafe_allow_html=True)
@@ -17409,26 +17533,38 @@ def menu6_relations(pils, name, birth_year, gender, marriage_status="미혼"):
                   "❤️ 극복 가능")
         _bar = "█" * (_score//10) + "░" * (10-_score//10)
 
-        # 관계 해석
+        # 관계 해석 — 직격 임팩트 버전
         _rel_desc = ""
         if _is_saeng_pm:
-            _rel_desc = f"상대방({_OHN_G.get(_p_oh,'')})이 나({_OHN_G.get(_my_oh,'')})를 생(生)해주는 관계. 상대가 나를 성장시켜주는 천생연분 구조입니다."
+            _rel_desc = f"상대방({_OHN_G.get(_p_oh,'')}) → 나({_OHN_G.get(_my_oh,'')}) <b>생(生)</b> — 상대가 {name}님을 살려줍니다. 만나면 만날수록 {name}님이 성장합니다."
         elif _is_saeng_mp:
-            _rel_desc = f"내({_OHN_G.get(_my_oh,'')})가 상대방({_OHN_G.get(_p_oh,'')})을 생(生)해주는 관계. 내가 상대를 이끌고 지지하는 구조입니다."
+            _rel_desc = f"나({_OHN_G.get(_my_oh,'')}) → 상대방({_OHN_G.get(_p_oh,'')}) <b>생(生)</b> — {name}님이 상대를 이끌고 키우는 구조. 헌신형 관계입니다."
         elif _is_geuk_pm:
-            _rel_desc = f"상대방({_OHN_G.get(_p_oh,'')})이 나({_OHN_G.get(_my_oh,'')})를 극(剋)하는 관계. 처음엔 강하게 끌리지만 마찰이 생기기 쉽습니다."
+            _rel_desc = f"상대방({_OHN_G.get(_p_oh,'')}) → 나({_OHN_G.get(_my_oh,'')}) <b>극(剋)</b> — 상대가 {name}님을 압박합니다. 처음엔 강하게 끌리지만 <b>장기적으로 에너지 소모 큽니다.</b>"
         elif _is_geuk_mp:
-            _rel_desc = f"내가 상대방을 극(剋)하는 관계. 내가 주도하지만 상대가 눌리는 구조입니다."
+            _rel_desc = f"나({_OHN_G.get(_my_oh,'')}) → 상대방({_OHN_G.get(_p_oh,'')}) <b>극(剋)</b> — {name}님이 주도권을 쥐는 구조. 상대가 눌릴 수 있어 <b>갈등 시 양보가 관계 유지 핵심입니다.</b>"
         else:
-            _rel_desc = f"비화(比和) 관계 — 같은 오행끼리라 편하지만 경쟁도 생깁니다."
+            _rel_desc = f"비화(比和) — 같은 오행끼리라 편하지만 경쟁·의존 패턴 발생합니다. <b>서로 독립성을 지키는 것이 핵심입니다.</b>"
 
         _hap_desc = ""
         if _has_yook_hap:
-            _hap_desc = f"✅ 일지 육합({_YOOK_HAP_G.get(_iljj_pair,'합')}) — 두 사람의 배우자 자리가 자연스럽게 합(合)을 이룹니다."
+            _hap_desc = f"✅ <b>일지 육합({_YOOK_HAP_G.get(_iljj_pair,'합')})</b> — 두 배우자 자리가 자연 합(合). 함께 있으면 안정됩니다."
         if _sam_hap_name:
-            _hap_desc += f" ✅ 삼합({_sam_hap_name}) — 강력한 인연의 끈이 있습니다."
+            _hap_desc += f" ✅ <b>삼합({_sam_hap_name})</b> — 강력한 인연의 끈. 헤어져도 다시 만나는 운입니다."
         if _has_iljj_chung:
-            _hap_desc += f" ⚠️ 일지 충(沖) — 두 사람의 배우자 자리가 충돌합니다. 결혼 후 갈등 주의."
+            _hap_desc += f" ⚠️ <b>일지 충(沖)</b> — 배우자 자리 정면 충돌. 결혼 후 마찰·이별 위험 높습니다. 상호 배려 없으면 <b>반드시</b> 충돌합니다."
+
+        # 점수별 직격 행동 지침
+        if _score >= 85:
+            _action6 = f"<b>📌 사주가 말하는 것:</b> {name}님과 이 사람은 100번 중 85번 이상 잘 맞습니다. 인연을 놓치지 마세요."
+        elif _score >= 70:
+            _action6 = f"<b>📌 사주가 말하는 것:</b> 좋은 궁합입니다. 단, <b>약점 보완 노력</b>이 있을 때 100% 시너지납니다."
+        elif _score >= 55:
+            _action6 = f"<b>📌 사주가 말하는 것:</b> 무난한 궁합 — 특별히 좋지도 나쁘지도 않습니다. <b>서로의 차이를 이해하는 훈련</b>이 핵심입니다."
+        elif _score >= 40:
+            _action6 = f"<b>📌 사주가 말하는 것:</b> 노력 필요 — 방치하면 마찰이 쌓입니다. <b>소통·양보·규칙</b> 없이는 장기 유지 어렵습니다."
+        else:
+            _action6 = f"<b>📌 사주가 말하는 것:</b> 극복 가능하지만 <b>상당한 의지와 노력</b>이 필요합니다. 사주만으로 결정하지 말고 충분히 검토하세요."
 
         st.markdown(
             f"<div style='background:linear-gradient(135deg,#1a0d2e,#2d1f5e);"
@@ -17450,16 +17586,19 @@ def menu6_relations(pils, name, birth_year, gender, marriage_status="미혼"):
             f"<div style='font-size:12px;color:#e8a0f0'>{_OHN_G.get(_p_oh,'')}</div>"
             f"</div></div>"
             f"<div style='text-align:center;margin-bottom:16px'>"
-            f"<div style='font-size:36px;font-weight:900;color:#fff'>{_score}점</div>"
-            f"<div style='font-size:16px;color:#e8a0f0;font-weight:700'>{_grade}</div>"
-            f"<div style='font-size:14px;color:#888;letter-spacing:2px'>`{_bar}`</div>"
+            f"<div style='font-size:40px;font-weight:900;color:#fff'>{_score}점</div>"
+            f"<div style='font-size:18px;color:#e8a0f0;font-weight:900'>{_grade}</div>"
+            f"<div style='font-size:13px;color:#888;letter-spacing:2px;margin-top:4px'>{_bar}</div>"
             f"</div>"
             f"<div style='background:rgba(255,255,255,0.08);border-radius:10px;"
-            f"padding:12px;margin-bottom:10px;font-size:13px;color:#e8d5f5;line-height:1.8'>"
+            f"padding:12px;margin-bottom:10px;font-size:13px;color:#e8d5f5;line-height:1.9'>"
             f"<b>오행 관계:</b> {_rel_desc}</div>"
             f"<div style='background:rgba(255,255,255,0.06);border-radius:10px;"
-            f"padding:12px;font-size:13px;color:#e8d5f5;line-height:1.8'>"
-            f"<b>일지 합·충:</b> {_hap_desc if _hap_desc else '특별한 합·충 없음'}</div>"
+            f"padding:12px;margin-bottom:10px;font-size:13px;color:#e8d5f5;line-height:1.9'>"
+            f"<b>일지 합·충:</b> {_hap_desc if _hap_desc else '특별한 합·충 없음.'}</div>"
+            f"<div style='background:rgba(212,175,55,0.15);border-radius:10px;"
+            f"padding:12px;border:1px solid #d4af3755;font-size:13px;color:#ffe080;line-height:1.9'>"
+            f"{_action6}</div>"
             f"</div>",
             unsafe_allow_html=True,
         )
