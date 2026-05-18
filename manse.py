@@ -15496,7 +15496,7 @@ def menu2_lifeline(pils, birth_year, gender, name="내담자"):
             f"""<div style='background:{_gbg};border-radius:16px;padding:20px 24px;
             margin-bottom:20px;border:2px solid {_gc}33;'>
             <div style='font-size:11px;color:{_gc};letter-spacing:2px;
-            font-weight:700;margin-bottom:8px'>🔮 지금 당신의 대운</div>
+            font-weight:700;margin-bottom:8px'>🔮 지금 {name}님의 대운</div>
             <div style='display:flex;justify-content:space-between;align-items:center;
             margin-bottom:12px;'>
             <div>
@@ -15757,9 +15757,9 @@ def menu3_past(pils, birth_year, gender, name=""):
             if _gold3 or _bad3:
                 _sum3 = ""
                 if _gold3:
-                    _sum3 += f"✅ <b>황금기 대운:</b> {' / '.join(_gold3)} — 이 시기 시작한 일들이 가장 잘 풀렸을 것입니다.<br>"
+                    _sum3 += f"✅ <b>황금기 대운:</b> {' / '.join(_gold3)} — {name or '내담자'}님이 이 시기에 시작한 일들이 가장 잘 풀렸을 것입니다.<br>"
                 if _bad3:
-                    _sum3 += f"⚠️ <b>수비기 대운:</b> {' / '.join(_bad3)} — 이 시기의 고난이 지금의 내공이 되었습니다."
+                    _sum3 += f"⚠️ <b>수비기 대운:</b> {' / '.join(_bad3)} — 이 시기의 고난이 {name or '내담자'}님의 지금 내공이 되었습니다."
                 st.markdown(
                     f"<div style='background:#f9f6f0;border:1px solid #c9a84c;border-radius:10px;"
                     f"padding:14px;font-size:13px;color:#3d2800;line-height:1.9'>{_sum3}</div>",
@@ -15880,11 +15880,11 @@ def menu4_future3(
     current_age = current_year - birth_year + 1
 
     st.markdown(
-        """
+        f"""
 
 <div style="background:#f0fff8;border:2px solid #27ae6055;border-radius:12px; padding:14px 18px;margin-bottom:14px">
 
-<div style="font-size:13px;font-weight:700;color:#1b5e20;margin-bottom:4px">🔮 미래 3년 집중 분석</div>
+<div style="font-size:13px;font-weight:700;color:#1b5e20;margin-bottom:4px">🔮 {name}님 미래 3년 집중 분석</div>
 
 <div style="font-size:12px;color:#000000;line-height:1.8">
 
@@ -16483,7 +16483,7 @@ def menu4_future3(
     )
 
     try:
-        narrative = build_rich_narrative(pils, birth_year, gender, "", section="future")
+        narrative = build_rich_narrative(pils, birth_year, gender, name if name else "내담자", section="future")
 
         blocks = narrative.split("-" * 55)
 
@@ -16569,7 +16569,7 @@ def menu5_money(pils, birth_year, gender, name="내담자"):
     cur_dw = next((d for d in daewoon if d["시작연도"] <= current_year <= d["종료연도"]), None) or {}
 
     # ① 타고난 재물 그릇
-    st.markdown('<div class="gold-section">💎 ① 타고난 재물 그릇 분석</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="gold-section">💎 {name}님 — ① 타고난 재물 그릇 분석</div>', unsafe_allow_html=True)
     _GYEOK_MONEY = {
         "식신격": ("중·대형", "꾸준히 먹고사는 복록. 부업·창작으로 자산을 늘림. 안정적 수입원이 다양함."),
         "정관격": ("중형", "조직에서 안정적 수입. 재테크보다 직업적 성취로 자산 형성."),
@@ -17217,7 +17217,7 @@ def menu5_money(pils, birth_year, gender, name="내담자"):
     )
 
     try:
-        narrative = build_rich_narrative(pils, birth_year, gender, "", section="money")
+        narrative = build_rich_narrative(pils, birth_year, gender, name if name else "내담자", section="money")
 
         sections = narrative.split("【")
 
@@ -17787,16 +17787,16 @@ def menu9_daily(pils, name, birth_year, gender):
 
         if _is_yong_d and not _has_chung_d:
             _sig_bg = "#1a3d1a"; _sig_tc = "#7fff7f"
-            _signal = f"🟢 오늘은 용신 기운의 날! 적극적으로 움직이십시오."
+            _signal = f"🟢 {display_name}님 — 오늘은 용신 기운의 날! 적극적으로 움직이십시오."
             _sig_sub = "중요한 결정·미팅·계약·시작에 유리한 날입니다."
         elif _is_gisin_d or _has_chung_d:
             _sig_bg = "#3d1a1a"; _sig_tc = "#ffaaaa"
             _chung_msg = f" 원국과 충(沖)이 발생합니다." if _has_chung_d else ""
-            _signal = f"🔴 오늘은 조심이 필요한 날.{_chung_msg}"
+            _signal = f"🔴 {display_name}님 — 오늘은 조심이 필요한 날.{_chung_msg}"
             _sig_sub = "오늘 일진이 원국과 충돌하거나 기신 기운입니다. 큰 결정·서명·투자는 내일로 미루십시오."
         else:
             _sig_bg = "#1a1a3d"; _sig_tc = "#aaaaff"
-            _signal = "🟡 오늘은 중립적인 기운의 날."
+            _signal = f"🟡 {display_name}님 — 오늘은 중립적인 기운의 날."
             _sig_sub = "평소대로 꾸준히 나아가는 것이 최선입니다."
 
         st.markdown(
@@ -18075,16 +18075,17 @@ def menu10_monthly(pils, name, birth_year, gender):
             "正印": "학습·자격·귀인의 달. 배움과 연구에 집중하십시오.",
         }
 
+        _mname = name if name else "내담자"
         if _is_yong_m and not _has_chung_m:
             _mbg = "#1a3d1a"; _mtc = "#7fff7f"
-            _msig = "🟢 이달은 용신 운! 적극 공세의 달"
+            _msig = f"🟢 {_mname}님 — 이달은 용신 운! 적극 공세의 달"
         elif _is_gisin_m or _has_chung_m:
             _mbg = "#3d1a1a"; _mtc = "#ffaaaa"
             _chung_msg_m = " 원국과 충(沖) 발생." if _has_chung_m else ""
-            _msig = f"🔴 이달은 수비 전략의 달.{_chung_msg_m}"
+            _msig = f"🔴 {_mname}님 — 이달은 수비 전략의 달.{_chung_msg_m}"
         else:
             _mbg = "#1a1a3d"; _mtc = "#aaaaff"
-            _msig = "🟡 이달은 중립 — 내실 다지기"
+            _msig = f"🟡 {_mname}님 — 이달은 중립 운. 내실 다지기"
 
         _mdesc = _MON_SS_DESC.get(_ml_ss, f"{_ml_ss} 기운의 달입니다.")
         st.markdown(
