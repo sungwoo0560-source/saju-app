@@ -7111,13 +7111,13 @@ def detect_life_risk_signals(pils, saewoon_data=None):
         baram_score += 20
         baram_reasons.append("양일간 + 편재 다발 — 외도 신호")
     if baram_score >= 60:
-        baram_level, baram_msg = "🔴 매우 높음", "바람기(도화) 기운이 강한 사주입니다. 도화·합 운에서 이성 인연이 반복적으로 들어옵니다.\n→ 배우자/연인과의 신뢰 관리가 필수입니다."
+        baram_level, baram_msg = "🔴 매우 높음", "外桃花 강력 발동. 평생 이성 관계 주의.\n→ 합·충 운에 외도 위험 최대. 의식적 자기 통제 필수."
     elif baram_score >= 40:
-        baram_level, baram_msg = "🟡 보통", "이성 인연이 자주 들어오는 사주입니다.\n→ 한 사람에 집중하지 않으면 반드시 갈등이 생깁니다."
+        baram_level, baram_msg = "🟡 보통", "도화·합 강함. 합 운에 외도 위험. 자기 통제 필수.\n→ 한 사람에 집중하지 않으면 반드시 갈등이 생깁니다."
     elif baram_score >= 20:
-        baram_level, baram_msg = "🟢 낮음", "🟢 평소엔 안전 — 단, 도화 운 만나면 흔들립니다."
+        baram_level, baram_msg = "🟢 낮음", "🟢 평소 안전 — 단, 도화 운 만나면 흔들립니다. 충동 인연 주의."
     else:
-        baram_level, baram_msg = "✅ 매우 낮음", "✅ 당신은 — 바람 안 피웁니다. 천성이 그렇습니다."
+        baram_level, baram_msg = "✅ 매우 낮음", "원국 외도 기운 매우 약함. 안정 인연 타입."
     results["바람기"] = {"점수": min(baram_score,100), "등급": baram_level, "이유": baram_reasons, "메시지": baram_msg, "아이콘": "💔"}
 
     # 2. 사고수
@@ -7139,13 +7139,13 @@ def detect_life_risk_signals(pils, saewoon_data=None):
         sago_score += 15
         sago_reasons.append("편관 과다 — 외부 충격 잦음")
     if sago_score >= 60:
-        sago_level, sago_msg = "🔴 매우 높음", "사고·수술 기운이 강한 사주입니다. 양인살·충 발동 시기에 각별히 주의하세요.\n→ 안전·운전·정기 검진은 선택이 아닌 필수입니다."
+        sago_level, sago_msg = "🔴 매우 높음", "양인 + 충 + 칠살 — 평생 사고수. 보험·안전 필수.\n→ 안전·운전·정기 검진은 선택이 아닌 필수입니다."
     elif sago_score >= 40:
-        sago_level, sago_msg = "🟡 보통", "⚠️ 충 발동 해 — 사고가 옵니다. 평소 두 배 조심하세요."
+        sago_level, sago_msg = "🟡 보통", "양인 발동. 충 운에 사고·수술 위험 ↑.\n→ 충 운 해에 평소 두 배 조심하세요."
     elif sago_score >= 20:
-        sago_level, sago_msg = "🟢 낮음", "🟢 큰 사고 기운은 약함 — 그래도 평소 운전·안전 챙기세요."
+        sago_level, sago_msg = "🟢 낮음", "양인 1개 — 일상 주의 수준.\n→ 큰 사고 기운은 약합니다. 평소 운전·안전 챙기세요."
     else:
-        sago_level, sago_msg = "✅ 매우 낮음", "✅ 당신은 — 사고 안 납니다. 운이 받쳐줍니다."
+        sago_level, sago_msg = "✅ 매우 낮음", "건강 운 타고남. 사고 기운 매우 약함."
     results["사고수"] = {"점수": min(sago_score,100), "등급": sago_level, "이유": sago_reasons, "메시지": sago_msg, "아이콘": "⚠️"}
 
     # 3. 횡재수
@@ -7167,13 +7167,13 @@ def detect_life_risk_signals(pils, saewoon_data=None):
         hwangjae_score += 15
         hwangjae_reasons.append("재생관 — 돈→명예 전환 운명")
     if hwangjae_score >= 60:
-        hwangjae_level, hwangjae_msg = "🌟 매우 강함", "횡재·대박 기운이 강한 사주입니다. 정재대운 + 식상세운에서 큰 전환점이 옵니다.\n→ 준비된 사람만 잡을 수 있습니다. 지금부터 준비하세요."
+        hwangjae_level, hwangjae_msg = "🌟 매우 강함", "재물 그릇 큰 사주. 사업·투자 적기 못 놓치면 큰 부.\n→ 준비된 사람만 잡을 수 있습니다. 지금부터 준비하세요."
     elif hwangjae_score >= 40:
-        hwangjae_level, hwangjae_msg = "✨ 강함", "✨ 큰돈 들어옵니다 — 편재 운 만나면. 단, 빨리 나갈 수도 있으니 — 즉시 안전 자산에 묶으세요."
+        hwangjae_level, hwangjae_msg = "✨ 강함", "편재 + 식신생재 — 큰돈 들어옴. 들어오면 즉시 묶을 것.\n→ 빨리 나갈 수도 있으니 즉시 안전 자산에 고정하세요."
     elif hwangjae_score >= 20:
-        hwangjae_level, hwangjae_msg = "💡 보통", "💡 한 방은 없습니다 — 그러나 꾸준히 모이면 결국 큽니다."
+        hwangjae_level, hwangjae_msg = "💡 보통", "꾸준한 직장형. 큰 횡재 X. 안정 저축이 답.\n→ 꾸준히 모이면 결국 큽니다."
     else:
-        hwangjae_level, hwangjae_msg = "🪙 약함", "🪙 횡재는 — 기대 마세요. 월급·저축이 당신 길입니다."
+        hwangjae_level, hwangjae_msg = "🪙 약함", "🪙 횡재는 기대 마세요. 월급·저축이 당신 길입니다."
     results["횡재수"] = {"점수": min(hwangjae_score,100), "등급": hwangjae_level, "이유": hwangjae_reasons, "메시지": hwangjae_msg, "아이콘": "💰"}
 
     # 4. 이혼·이별
@@ -7195,13 +7195,13 @@ def detect_life_risk_signals(pils, saewoon_data=None):
         ihon_score += 10
         ihon_reasons.append("관성 부재(남자) — 자녀·책임 약함")
     if ihon_score >= 60:
-        ihon_level, ihon_msg = "🔴 매우 높음", "이혼/이별 기운이 강한 사주입니다. 일지 충 발동 시기에 각별히 주의하세요.\n→ 지금 대화가 없다면 반드시 먼저 시작하세요."
+        ihon_level, ihon_msg = "🔴 매우 높음", "일지 충 + 비겁쟁재 — 이혼 위험 강력. 신중 결정.\n→ 지금 대화가 없다면 반드시 먼저 시작하세요."
     elif ihon_score >= 40:
-        ihon_level, ihon_msg = "🟡 주의", "🟡 결혼 생활 — 갈등이 반복됩니다. 대화 안 하면 — 멀어집니다."
+        ihon_level, ihon_msg = "🟡 주의", "충 발동 주의. 갈등 시기 대화 늘릴 것.\n→ 멀어집니다. 지금 대화하세요."
     elif ihon_score >= 20:
-        ihon_level, ihon_msg = "🟢 안정", "🟢 평범한 부부 운 — 큰 위기는 없습니다."
+        ihon_level, ihon_msg = "🟢 안정", "배우자궁 안정. 큰 위기 X."
     else:
-        ihon_level, ihon_msg = "✅ 매우 안정", "✅ 당신 결혼은 — 안전합니다. 끝까지 갑니다."
+        ihon_level, ihon_msg = "✅ 매우 안정", "✅ 당신 결혼은 안전합니다. 끝까지 갑니다."
     results["이혼·이별"] = {"점수": min(ihon_score,100), "등급": ihon_level, "이유": ihon_reasons, "메시지": ihon_msg, "아이콘": "💔"}
 
     # 5. 큰 병/중병
@@ -7227,13 +7227,13 @@ def detect_life_risk_signals(pils, saewoon_data=None):
         byeong_score += 15
         byeong_reasons.append("재다신약 — 과로·번아웃 만성")
     if byeong_score >= 60:
-        byeong_level, byeong_msg = "🔴 매우 높음", "큰 병·수술 기운이 있는 사주입니다.\n→ 정기 검진과 환절기 건강 관리는 필수입니다. 미루면 안 됩니다."
+        byeong_level, byeong_msg = "🔴 매우 높음", "충 + 약한 오행 + 신살 — 큰 병 가능. 정기 검진 필수.\n→ 미루면 안 됩니다."
     elif byeong_score >= 40:
-        byeong_level, byeong_msg = "🟡 주의", "🟡 약한 장기 있습니다 — 환절기마다 챙기세요."
+        byeong_level, byeong_msg = "🟡 주의", "오행 불균형 — 환절기 주의.\n→ 약한 장기 있습니다. 환절기마다 챙기세요."
     elif byeong_score >= 20:
-        byeong_level, byeong_msg = "🟢 양호", "🟢 건강 평균 — 평소 습관 유지하면 OK."
+        byeong_level, byeong_msg = "🟢 양호", "건강 평균 — 평소 습관 유지하면 OK."
     else:
-        byeong_level, byeong_msg = "✅ 매우 양호", "✅ 건강 운 — 타고났습니다. 큰 병 안 옵니다."
+        byeong_level, byeong_msg = "✅ 매우 양호", "건강 운 타고남. 큰 병 X."
     results["큰병"] = {"점수": min(max(byeong_score, 15), 100), "등급": byeong_level, "이유": byeong_reasons, "메시지": byeong_msg, "아이콘": "🏥"}
 
     # 6. 결혼 인연
@@ -7255,13 +7255,13 @@ def detect_life_risk_signals(pils, saewoon_data=None):
         gyeolhon_score += 15
         gyeolhon_reasons.append("관인상생 — 격있는 배우자 인연")
     if gyeolhon_score >= 60:
-        gyeolhon_level, gyeolhon_msg = "🌟 최상급 인연", "결혼 인연이 매우 좋은 사주입니다. 합 운/천을귀인 활성 해에 반드시 적극적으로 움직이세요.\n→ 그 해를 놓치면 아쉬움이 남습니다."
+        gyeolhon_level, gyeolhon_msg = "🌟 최상급 인연", "최상급 인연 — 합 운에 평생 반려자.\n→ 합 운/천을귀인 활성 해에 반드시 적극적으로 움직이세요. 그 해를 놓치면 아쉬움이 남습니다."
     elif gyeolhon_score >= 40:
         gyeolhon_level, gyeolhon_msg = "✨ 좋음", "✨ 좋은 결혼 인연 옵니다 — 정재/정관 운에서."
     elif gyeolhon_score >= 20:
-        gyeolhon_level, gyeolhon_msg = "💡 보통", "💡 인연 — 노력해야 옵니다. 가만히 있으면 — 안 옵니다."
+        gyeolhon_level, gyeolhon_msg = "💡 보통", "평범한 인연. 자연스러운 흐름.\n→ 노력해야 옵니다. 가만히 있으면 안 옵니다."
     else:
-        gyeolhon_level, gyeolhon_msg = "🤔 신중", "🤔 인연 운 약함 — 자기 성장 먼저. 그게 답입니다."
+        gyeolhon_level, gyeolhon_msg = "🔍 신중", "인연 약함. 자기 성장 우선.\n→ 자기 성장이 최고의 인연 전략입니다."
     results["결혼인연"] = {"점수": min(gyeolhon_score,100), "등급": gyeolhon_level, "이유": gyeolhon_reasons, "메시지": gyeolhon_msg, "아이콘": "💕"}
 
     # 7. 사업운
@@ -7286,13 +7286,13 @@ def detect_life_risk_signals(pils, saewoon_data=None):
         saup_score += 15
         saup_reasons.append("편재 + 비견 균형 — 사업 적합")
     if saup_score >= 50:
-        saup_level, saup_msg = "🌟 사업가 그릇", "사업 성공 기운이 강한 사주입니다. 식상생재 대운이 오면 단독으로 움직이세요.\n→ 동업은 반드시 피하세요."
+        saup_level, saup_msg = "🌟 사업가 그릇", "타고난 사업가. 식상생재 + 단독경영 황금기.\n→ 동업은 반드시 피하세요. 단독으로 움직이세요."
     elif saup_score >= 25:
-        saup_level, saup_msg = "✨ 사업 가능", "✨ 사업 가능 — 단, 자금 관리 못하면 무너집니다. 시기 잘 보세요."
+        saup_level, saup_msg = "✨ 사업 가능", "직장 + 부업 병행 적합.\n→ 자금 관리 못하면 무너집니다. 시기 잘 보세요."
     elif saup_score >= 0:
-        saup_level, saup_msg = "💼 직장형", "💼 직장이 — 당신 길입니다. 사업하면 — 작게, 천천히."
+        saup_level, saup_msg = "💼 직장형", "직장이 당신 길입니다. 사업하면 작게, 천천히."
     else:
-        saup_level, saup_msg = "⚠️ 사업 위험", "⚠️ 사업 — 손대지 마세요. 직장·전문직이 당신을 살립니다."
+        saup_level, saup_msg = "⚠️ 사업 위험", "⚠️ 사업 손대지 마세요. 직장·전문직이 당신을 살립니다."
     results["사업운"] = {"점수": max(min(saup_score, 100), 10), "등급": saup_level, "이유": saup_reasons, "메시지": saup_msg, "아이콘": "💼"}
 
     return results
@@ -7490,18 +7490,18 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
                          "전문 분야에서 두각을 나타낼 수 있는 구조입니다.")
 
     SINSAL_EXPLAIN = {
-        "역마살": ("이동·변화·해외의 기운", "무역·영업·해외 진출에 유리합니다. 충동적 이직·이사는 신중히."),
-        "도화살": ("타고난 매력과 예술적 기운", "연예·방송·서비스 분야에서 빛납니다. 이성 구설수 조심."),
-        "화개살": ("종교·철학·예술의 고독한 학자형 기운", "학문·연구 분야에서 독보적 성취 가능합니다."),
-        "겁살": ("외부의 갑작스러운 손재 위험 기운", "보증·동업·투기는 반드시 피하세요."),
-        "재살": ("사고수·관재수 발생 가능성 기운", "이동 중 안전 주의, 법적 분쟁 예방 필수입니다."),
-        "천살": ("윗사람·권위자와 마찰 발생 기운", "조직 내 처신을 지혜롭게 하세요."),
-        "장성살": ("타고난 리더십과 통솔력 기운", "군·경·경영·스포츠 등 조직을 이끄는 역할에 적합합니다."),
-        "양인살": ("강한 추진력이지만 양날의 검 기운", "잘 쓰면 큰 성공. 사고·수술 위험이 따르므로 안전 주의."),
-        "귀문관살": ("직감·영감이 발달한 기운", "신경이 예민해 불면·우울 주의. 명상·규칙 수면 필수."),
-        "천을귀인": ("위기에 귀인이 나타나는 기운", "6월·12월 인연을 잘 관리하세요."),
-        "문창귀인": ("학문·글재주·언어 기운", "교육·작가·강사·법조 분야에서 빛납니다."),
-        "월덕귀인": ("덕망과 인복 기운", "주변 사람들이 자연스럽게 돕는 귀인 구조입니다."),
+        "역마살": ("이동·변화·해외의 기운", "무역·영업·해외 진출에 유리합니다.<br>→ 충동적 이직·이사는 반드시 신중히. 목적 있는 이동만 허용하세요."),
+        "도화살": ("타고난 매력과 예술적 기운", "연예·방송·서비스 분야에서 빛납니다.<br>→ 이성 구설수 조심. 합 운에 인연 넘침 — 기혼자 각별히 주의."),
+        "화개살": ("종교·철학·예술의 고독한 학자형 기운", "학문·연구 분야에서 독보적 성취 가능합니다.<br>→ 혼자 깊이 파고드는 힘. 단체 활동보다 개인 전문성 키우세요."),
+        "겁살": ("외부의 갑작스러운 손재 위험 기운", "보증·동업·투기 절대 X.<br>→ 현금 비중 ↑, 충동 지출·계약 자제. 외부 충격에 대비하세요."),
+        "재살": ("사고수·관재수 발생 가능성 기운", "이동 중 안전 주의, 법적 분쟁 예방 필수입니다.<br>→ 계약서 꼼꼼히. 이동·운전 중 두 배 조심."),
+        "천살": ("윗사람·권위자와 마찰 발생 기운", "조직 내 처신을 지혜롭게 하세요.<br>→ 상관과 충돌 시 손해는 내 쪽. 표현 방식 조절이 핵심."),
+        "장성살": ("타고난 리더십과 통솔력 기운", "군·경·경영·스포츠 등 조직을 이끄는 역할에 적합합니다.<br>→ 혼자보다 팀을 이끌 때 진가 발휘. 리더 역할 적극 수용하세요."),
+        "양인살": ("강한 추진력이지만 양날의 검 기운", "잘 쓰면 큰 성공 — 군·경·외과·검사로 승화 가능.<br>→ 사고·수술 평생 따라옴. 충 운에 위험 ↑. 안전·보험 필수."),
+        "귀문관살": ("직감·영감이 발달한 기운", "예술·상담·역술 천직 — 직감이 남보다 정확합니다.<br>→ 신경 예민. 불면·우울 주의. 명상·규칙 수면 필수."),
+        "천을귀인": ("위기에 귀인이 나타나는 기운", "활성월: 6월·12월 — 이때 인연·재물 조력자 반드시 나타납니다.<br>→ 이 시기 중요 결정·만남을 집중하세요."),
+        "문창귀인": ("학문·글재주·언어 기운", "교육·작가·강사·법조 분야에서 빛납니다.<br>→ 글쓰기·강의·소통 능력이 경쟁력. 이 방면 집중 투자하세요."),
+        "월덕귀인": ("덕망과 인복 기운", "주변 사람들이 자연스럽게 돕는 귀인 구조입니다.<br>→ 인맥·관계에 투자하세요. 귀인이 결정적 순간에 나타납니다."),
     }
     sinsal_rows = ""
     for _sn in sinsal_names[:6]:
@@ -7567,7 +7567,11 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
       격국은 <b>{gyeok_label}</b>입니다.<br>
       → {gyeok_explain}<br><br>
       원국에서 <b>{len(activated)}개</b>의 십성 조합이 활성화되어 있습니다 — {combo_text}.<br>
-      → 즉 {name}님 인생에서 이 패턴들이 반복적으로 나타납니다.
+      → 즉 {name}님 인생에서 이 패턴들이 반복적으로 나타납니다.<br><br>
+      <b>📌 핵심 운명 구조:</b><br>
+      → <b>{ilgan_meta}</b> 기운 + <b>{gyeok_label}</b> — 이것이 {name}님 삶의 패턴을 결정합니다.<br>
+      → <b>{shin_label}</b>: {shin_explain}<br>
+      → 용신 <b>{yong_str}</b> 대운 시기 — {name}님 인생 진짜 황금기입니다.
     </div>
   </div>
 
@@ -7604,12 +7608,17 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
   <div style="margin-bottom:28px;">
     <div style="font-size:17px;font-weight:900;color:#3e2723;border-left:5px solid #6b4423;padding-left:12px;margin-bottom:12px;">【5. 재물(財物)】</div>
     <div style="background:#faf5ee;padding:18px 20px;border-radius:10px;line-height:2;font-size:15px;color:#3e2723;">
+      <b>재물 종합 분석:</b><br>
+      · 횡재수: <b>{_risk("횡재수","점수",0)}/100</b> — {_risk("횡재수","등급","보통")}<br>
+      · 사업운: <b>{_risk("사업운","점수",0)}/100</b> — {_risk("사업운","등급","보통")}<br><br>
       {ilju_info.get("재물","재물 구조가 안정적이며 꾸준한 노력으로 자산을 형성합니다.")}<br><br>
-      <b>횡재수:</b> {_risk("횡재수","점수",0)}/100 — {_risk("횡재수","등급","보통")}&nbsp;&nbsp;
-      <b>사업운:</b> {_risk("사업운","점수",0)}/100 — {_risk("사업운","등급","보통")}<br>
+      <b>📌 사주가 말하는 것:</b><br>
+      {_risk("횡재수","메시지","횡재 기운을 잘 관리하세요.")}<br>
       {_risk("사업운","메시지","신중한 자금 운영이 핵심입니다.")}<br><br>
+      <b>🎯 행동 지침:</b><br>
       → 용신 <b>{yong_str}</b> 기운이 강한 시기에 재물 기회가 집중됩니다.<br>
-      → 기신 <b>{gisin_str}</b> 기운이 강한 시기에는 보증·동업·투기는 반드시 피하세요.
+      → 기신 <b>{gisin_str}</b> 강한 시기 — 보증·동업·투기 절대 X.<br>
+      → 큰돈 들어오면 즉시 안전 자산에 고정하세요.
     </div>
   </div>
 
@@ -7708,22 +7717,29 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
     <div style="font-size:17px;font-weight:900;color:#3e2723;border-left:5px solid #c62828;padding-left:12px;margin-bottom:12px;">【12. 종합 결론】</div>
     <div style="background:linear-gradient(135deg,#fff8e1 0%,#fff3e0 100%);padding:22px 24px;border-radius:12px;
                 line-height:2;font-size:15px;color:#3e2723;border:2px solid #d4af37;">
-      <b>한 줄로 정리하면 —</b> {name}님은 <b>{ilgan_meta}</b> 기운의
-      <b>{iz_cg}{iz_jj}({ilgan_kr}{iljj_kr})</b> 일주 <b>{gyeok_label}</b> 사주입니다.<br><br>
-      <b>[지금 {name}님이 해야 할 것]</b><br>
-      1. 강점인 {ilju_info.get("강점","결단력·추진력").split(",")[0].strip()}을 자기 분야에서 적극 활용하세요.<br>
-      2. 약점인 {ilju_info.get("약점","고집").split(",")[0].strip()}을 의식하고 부드럽게 풀어내세요.<br>
-      3. 용신 <b>{yong_str}</b> 기운을 일상에서 보강하세요 (색상·음식·방향).<br>
-      4. 길월(4·9·11월)에 중요한 결정을 집중하세요.<br>
-      5. 기신 <b>{gisin_str}</b> 강한 시기에는 보증·동업·투기를 반드시 피하세요.<br><br>
-      {name}님의 사주는 정해진 운명이 아닙니다 —<br>
-      <b>강점을 살리고 약점을 보완하면, 사주가 인생의 지도가 됩니다.</b>
+      <b>{name}님 — {iz_cg}{iz_jj}({ilgan_kr}{iljj_kr}) 일주, {shin_label} {gyeok_label} 사주입니다.</b><br><br>
+      <b>핵심 운명:</b><br>
+      · <b>{ilgan_meta}</b> 기운 — {gyeok_explain}<br>
+      · 활성 조합 {len(activated)}개 — {combo_text}<br><br>
+      <b>[지금 {name}님이 해야 할 5가지]</b><br>
+      1. 강점 <b>{ilju_info.get("강점","결단력·추진력").split(",")[0].strip()}</b> — 자기 분야에서 100% 활용<br>
+      2. 약점 <b>{ilju_info.get("약점","고집").split(",")[0].strip()}</b> — 의식하고 부드럽게<br>
+      3. 용신 <b>{yong_str}</b> — 색상·음식·방향 일상 보강<br>
+      4. 길월 4·9·11월 — 모든 중요한 결정 집중<br>
+      5. 보증·동업·투기 — 기신 <b>{gisin_str}</b> 강한 시기 절대 X<br><br>
+      <b>🌟 {name}님 황금기:</b><br>
+      용신 <b>{yong_str}</b> 대운 시기 — 인생 진짜 황금기입니다.<br>
+      지금의 준비가 그 시기를 만듭니다.<br><br>
+      <b>📌 사주는 정해진 운명이 아닙니다.</b><br>
+      {name}님이 가진 패와 흐름의 안내서입니다.<br>
+      강점 살리고 약점 보완하면 — 사주가 인생의 지도가 됩니다.
     </div>
   </div>
 
   <!-- 하단 -->
   <div style="text-align:center;font-size:12px;color:#8b6914;margin-top:20px;padding-top:16px;border-top:1px dashed #6b4423;">
-    ⚖️ 본 평론은 정통 명리학 기반 참고 자료입니다. 의료·법률 상담이 아닙니다.
+    ⚖️ 본 평론은 정통 명리학(자평진전·적천수·궁통보감) 원리에 기반한 참고 자료입니다.
+    의료·법률·재무 전문가의 진단을 대체하지 않으며, 모든 의사결정의 최종 책임은 본인에게 있습니다.
   </div>
 
 </div>

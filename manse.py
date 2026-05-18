@@ -11614,7 +11614,7 @@ def infer_current_worry(pils, birth_year, gender, marital_status=None):
 
 
 def render_worry_inference(pils, birth_year, gender, marital_status=None):
-    """고민 자동 추론 — 결혼/이혼/바람기 점수 기반 중립 메시지"""
+    """고민 자동 추론 — 결혼/이혼/바람기 점수 기반 임팩트 메시지"""
     try:
         from saju_zhengtong import detect_life_risk_signals
         _risks_in = detect_life_risk_signals(pils)
@@ -11623,67 +11623,84 @@ def render_worry_inference(pils, birth_year, gender, marital_status=None):
         _aff = _risks_in.get("바람기", {}).get("점수", 20)
 
         _name = st.session_state.get("saju_name", "")
-        _name_str = f"{_name}님은 " if _name and _name != "내담자" else ""
+        _name_str = f"<b>{_name}님</b> " if _name and _name != "내담자" else ""
 
         if _mar >= 60:
-            _title = "💕 인연 운이 매우 좋은 사주입니다"
+            _title = "💕 결혼 인연 — 최상급 사주"
             _desc = (
-                f"{_name_str}결혼·인연 기운이 강한 사주입니다 (결혼 인연 {_mar}/100). "
-                f"이혼 위험은 {_div}/100으로 낮고, 바람기는 {_aff}/100입니다."
-                f"<br><br>"
-                f"• 싱글이라면 → 좋은 인연을 만날 가능성이 매우 높습니다."
-                f"<br>"
-                f"• 기혼이라면 → 안정적인 관계를 유지하는 시기입니다."
-                f"<br><br>"
-                f"천을귀인 활성월(6·12월)과 길월(4·9·11월)에 인연 흐름이 좋습니다."
+                f"{_name_str}결혼 인연: <b>{_mar}/100 — 최상급.</b><br>"
+                f"이혼 위험 {_div}/100, 바람기 {_aff}/100 — 모두 낮음.<br><br>"
+                f"<b>📌 사주가 말하는 것:</b><br>"
+                f"• 천을귀인 — 격 있는 배우자 인연<br>"
+                f"• 합(合) 기운 — 배우자궁 활성<br>"
+                f"• 관인상생 구조 — 사회적 지위 동반 인연<br><br>"
+                f"<b>🎯 결정적 시기:</b><br>"
+                f"• 천을귀인 활성: 6월·12월<br>"
+                f"• 길월: 4·9·11월<br><br>"
+                f"<b>💎 행동 지침:</b><br>"
+                f"싱글이면 6월·12월에 적극 움직이세요. 그 시기 인연이 평생을 갑니다.<br>"
+                f"기혼이면 충(沖) 발동 해에 배우자 갈등 주의."
             )
             _color = "#1a237e"
         elif _div >= 60:
-            _title = "⚠️ 인연·관계 주의 시기"
+            _title = "⚠️ 배우자 관계 — 결정적 시기"
             _desc = (
-                f"이혼·이별 기운이 강합니다 ({_div}/100). "
-                f"기존 관계에 갈등이 생기지 않도록 대화를 늘리고, "
-                f"신중한 결정이 필요한 시기입니다."
+                f"<b>이혼·이별 점수: {_div}/100 — 강한 발동.</b><br><br>"
+                f"<b>📌 발동 신살:</b><br>"
+                f"일지 충 — 배우자궁 흔들림 직격<br><br>"
+                f"<b>🔴 절대 금지:</b><br>"
+                f"• 큰 결정 보류 (이혼·이사·이직)<br>"
+                f"• 충동적 언행 — 한 번 깨지면 복구 어려움<br><br>"
+                f"<b>💎 해법:</b><br>"
+                f"용신 보강 + 천을귀인 활성월(6·12월) 활용."
             )
             _color = "#b71c1c"
         elif _aff >= 50:
-            _title = "🌹 이성 인연이 활발한 시기"
+            _title = "🌹 도화·합 발동 — 이성 인연 폭발"
             _desc = (
-                f"도화·합의 기운이 강하게 들어옵니다 ({_aff}/100). "
-                f"기혼자는 신중한 관계 관리가 필요하고, "
-                f"싱글은 새로운 인연을 만날 가능성이 높습니다."
+                f"<b>도화·합 점수: {_aff}/100 — 강함.</b><br><br>"
+                f"이성에게 매력적으로 보이는 시기. 합 운에 새 인연 들어옵니다.<br><br>"
+                f"<b>📌 기혼자 경고:</b><br>"
+                f"이 시기 외도 발생 — 평생 후회 가능. 절대 선 넘지 마세요.<br><br>"
+                f"<b>📌 싱글:</b><br>"
+                f"좋은 인연 만날 최적기. 적극 움직이세요."
             )
             _color = "#e65100"
         elif _mar >= 40:
-            _title = "💑 평범한 인연 흐름"
+            _title = "💑 인연 — 평범한 흐름"
             _desc = (
-                f"인연 기운은 보통입니다 (결혼 인연 {_mar}/100). "
-                f"적극적인 만남이 필요하다면 4·9·11월(길월)을 활용하세요. "
-                f"큰 변화 없이 자기 성장에 집중해도 좋은 시기입니다."
+                f"<b>결혼 인연: {_mar}/100 — 보통.</b><br><br>"
+                f"적극적 만남보다 자기 성장에 집중하면 인연은 따라옵니다.<br>"
+                f"4월·9월·11월(길월)에 인연 들어올 가능성 ↑."
             )
             _color = "#283593"
         else:
-            _title = "🌱 자기 성장에 집중할 시기"
+            _title = "🌱 인연 — 약함, 자기 성장기"
             _desc = (
-                f"현재 인연 기운은 약합니다 ({_mar}/100). "
-                f"무리한 인연 추구보다는 자기 매력과 역량을 다지는 시기입니다. "
-                f"자기 성숙 후에 진짜 맞는 인연이 나타납니다."
+                f"<b>결혼 인연: {_mar}/100 — 약함.</b><br><br>"
+                f"지금 인연을 무리하게 찾지 마세요. 자기 매력·역량 다질 시기.<br>"
+                f"용신 보강 + 자기 성숙 후 — 진짜 인연 들어옵니다."
             )
             _color = "#424242"
+
+        _disclaimer = (
+            '<div style="font-size:10px;color:#aaa;margin-top:14px;padding-top:10px;'
+            'border-top:1px dashed rgba(255,255,255,0.2);">'
+            '⚖️ 본 분석은 정통 명리학 원리에 기반한 참고 자료입니다. '
+            '실제 의사결정은 본인의 판단과 전문가 상담이 우선되어야 합니다.'
+            '</div>'
+        )
 
         st.markdown(
             f"""
 <div style="background:linear-gradient(135deg,{_color} 0%,#000 100%);
             border-radius:14px;padding:24px;margin:16px 0;color:#fff;">
   <div style="font-size:13px;color:#ffd54f;letter-spacing:3px;font-weight:700;">📍 현재 운세 진단</div>
-  <div style="font-size:20px;font-weight:900;margin-top:8px;">{_title}</div>
-  <div style="font-size:14px;margin-top:10px;line-height:1.9;color:#e8eaf6;">
+  <div style="font-size:22px;font-weight:900;margin-top:8px;">{_title}</div>
+  <div style="font-size:14px;margin-top:14px;line-height:1.9;color:#e8eaf6;">
     {_desc}
   </div>
-  <div style="font-size:11px;margin-top:14px;color:#9fa8da;padding-top:10px;
-              border-top:1px solid rgba(255,255,255,0.15);">
-    결혼인연 {_mar}/100 · 이혼위험 {_div}/100 · 바람기 {_aff}/100
-  </div>
+  {_disclaimer}
 </div>
 """,
             unsafe_allow_html=True,
@@ -26591,6 +26608,26 @@ return false;">▲</a>
     total_lines = get_total_lines()
 
     render_pdf_download_btn("ohaeng", pils, name, birth_year, gender)
+
+    st.markdown(
+        """
+<div style="background:#f5f5f5;border-top:2px solid #d4af37;padding:20px;
+            margin-top:40px;border-radius:8px;font-size:12px;color:#555;
+            line-height:1.8;">
+  <div style="font-weight:700;color:#3e2723;font-size:13px;margin-bottom:8px;">
+    ⚖️ 법적 고지 및 면책 사항
+  </div>
+  본 만세력 사주 천명풀이 서비스는 정통 명리학(자평진전·적천수·궁통보감 등)의 원리에 기반하여
+  사주 원국·격국·용신·신살·대운·세운을 계산하고 해석하는 <b>참고 자료</b>를 제공합니다.<br><br>
+  • 본 분석은 <b>의료·법률·재무·심리 전문가의 진단·조언을 대체하지 않습니다.</b><br>
+  • 모든 의사결정의 최종 책임은 사용자 본인에게 있습니다.<br>
+  • 분석 결과의 해석은 개인의 환경·노력·선택에 따라 달라질 수 있습니다.<br>
+  • 본 서비스는 종교·미신적 목적이 아닌 동양 철학적 인사이트 제공을 목적으로 합니다.<br><br>
+  © 2026 만세력 사주 천명풀이 — 정통 명리학 기반 디지털 명리 서비스
+</div>
+""",
+        unsafe_allow_html=True,
+    )
 
 
 
