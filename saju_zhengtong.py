@@ -7457,6 +7457,72 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
     else:
         combo_text = f"{iljj_key} 일주 단독 구조"
 
+    ILGAN_META = {
+        "甲": "큰 나무 같은 곧고 진취적인", "乙": "유연한 풀잎 같은 섬세하고 끈질긴",
+        "丙": "태양 같은 밝고 열정적인",    "丁": "촛불 같은 따뜻하고 섬세한",
+        "戊": "큰 산 같은 묵직하고 안정적인","己": "논밭 같은 포용력 있고 현실적인",
+        "庚": "강철 같은 결단력 있고 단단한","辛": "보석 같은 정밀하고 섬세한",
+        "壬": "큰 강 같은 넓고 포용적인",   "癸": "이슬비 같은 부드럽고 지혜로운",
+    }
+    ilgan_meta = ILGAN_META.get(ilgan, "")
+
+    _shin_core = "신강" if "신강" in shin_label else ("신약" if "신약" in shin_label else "중화")
+    SHIN_EXPLAIN = {
+        "신강": "일간의 힘이 강해 추진력·자기 주도성이 강한 타입입니다. 강한 에너지를 잘 발산해야 — 고집과 충돌로 번지지 않습니다.",
+        "신약": "일간의 힘이 약해 좋은 조력자·환경이 중요한 타입입니다. 혼자보다 팀·파트너와 함께할 때 성과가 납니다.",
+        "중화": "음양이 균형 잡혀 상황 대응력이 뛰어난 타입입니다. 지나친 극단 선택을 피하고 현재 대운 흐름에 맞게 유연하게 움직이세요.",
+    }
+    shin_explain = SHIN_EXPLAIN.get(_shin_core, "")
+
+    GYEOK_EXPLAIN = {
+        "正印": "학문·자격·전문직에서 두각을 나타낼 수 있는 귀격(貴格) 구조입니다.",
+        "偏印": "독창적 전문성과 창의력이 강점인 구조입니다. 남과 다른 독보적 분야를 개척하세요.",
+        "食神": "재능으로 돈을 버는 구조입니다. 자신의 특기를 사업화할 때 빛납니다.",
+        "傷官": "혁신·예술·기획에서 탁월한 기운입니다. 기존 질서에 도전하는 창의력이 무기입니다.",
+        "偏財": "큰돈을 다룰 그릇을 타고난 구조입니다. 성과 기반 보상에서 진가가 발휘됩니다.",
+        "正財": "꾸준한 자산 형성에 유리한 구조입니다. 저축과 부동산이 최고의 전략입니다.",
+        "偏官": "강인한 추진력과 리더십의 구조입니다. 군·경·의료 등 긴장감 속에서 빛납니다.",
+        "正官": "명예와 조직에서 신뢰를 쌓는 구조입니다. 공직·대기업·법조에서 두각을 나타냅니다.",
+        "比肩": "독립적·자수성가형 구조입니다. 스스로 결정하고 실행할 때 성과가 납니다.",
+        "劫財": "경쟁·협상·영업에서 강한 기운입니다. 동업 재물 분쟁 조심 필요합니다.",
+    }
+    gyeok_explain = next((v for k, v in GYEOK_EXPLAIN.items() if k in gyeok_label),
+                         "전문 분야에서 두각을 나타낼 수 있는 구조입니다.")
+
+    SINSAL_EXPLAIN = {
+        "역마살": ("이동·변화·해외의 기운", "무역·영업·해외 진출에 유리합니다. 충동적 이직·이사는 신중히."),
+        "도화살": ("타고난 매력과 예술적 기운", "연예·방송·서비스 분야에서 빛납니다. 이성 구설수 조심."),
+        "화개살": ("종교·철학·예술의 고독한 학자형 기운", "학문·연구 분야에서 독보적 성취 가능합니다."),
+        "겁살": ("외부의 갑작스러운 손재 위험 기운", "보증·동업·투기는 반드시 피하세요."),
+        "재살": ("사고수·관재수 발생 가능성 기운", "이동 중 안전 주의, 법적 분쟁 예방 필수입니다."),
+        "천살": ("윗사람·권위자와 마찰 발생 기운", "조직 내 처신을 지혜롭게 하세요."),
+        "장성살": ("타고난 리더십과 통솔력 기운", "군·경·경영·스포츠 등 조직을 이끄는 역할에 적합합니다."),
+        "양인살": ("강한 추진력이지만 양날의 검 기운", "잘 쓰면 큰 성공. 사고·수술 위험이 따르므로 안전 주의."),
+        "귀문관살": ("직감·영감이 발달한 기운", "신경이 예민해 불면·우울 주의. 명상·규칙 수면 필수."),
+        "천을귀인": ("위기에 귀인이 나타나는 기운", "6월·12월 인연을 잘 관리하세요."),
+        "문창귀인": ("학문·글재주·언어 기운", "교육·작가·강사·법조 분야에서 빛납니다."),
+        "월덕귀인": ("덕망과 인복 기운", "주변 사람들이 자연스럽게 돕는 귀인 구조입니다."),
+    }
+    sinsal_rows = ""
+    for _sn in sinsal_names[:6]:
+        _key = next((k for k in SINSAL_EXPLAIN if k in _sn), None)
+        if _key:
+            _meaning, _advice = SINSAL_EXPLAIN[_key]
+            sinsal_rows += (
+                '<div style="margin-bottom:10px;padding:10px 14px;background:#fff8e1;'
+                'border-left:3px solid #f9a825;border-radius:6px;">'
+                f'<b>{_sn}</b> — {_meaning}<br>'
+                f'<span style="color:#555;font-size:13px;">→ {_advice}</span></div>'
+            )
+        else:
+            sinsal_rows += (
+                '<div style="margin-bottom:10px;padding:10px 14px;background:#fff8e1;'
+                'border-left:3px solid #f9a825;border-radius:6px;">'
+                f'<b>{_sn}</b></div>'
+            )
+    if not sinsal_rows:
+        sinsal_rows = '<div style="color:#666;">주요 신살 분석은 아래 신살 섹션을 참고하세요.</div>'
+
     html = f"""
 <div style="background:linear-gradient(180deg,#fdfcf7 0%,#fff 100%);
             border:3px solid #6b4423;border-radius:20px;
@@ -7492,11 +7558,16 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
   <div style="margin-bottom:28px;">
     <div style="font-size:17px;font-weight:900;color:#3e2723;border-left:5px solid #6b4423;padding-left:12px;margin-bottom:12px;">【2. 사주 총평(總評)】</div>
     <div style="font-size:15px;color:#3e2723;line-height:2;background:#faf5ee;padding:18px 20px;border-radius:10px;">
-      {name}님은 <b>{iz_cg}{iz_jj}({ilgan_kr}{iljj_kr})</b> 일주입니다.
+      {name}님은 <b>{iz_cg}{iz_jj}({ilgan_kr}{iljj_kr})</b> 일주로 태어나셨습니다.<br>
+      쉽게 말하면 — <b>{ilgan}({ilgan_kr})</b> 일간은 <b>{ilgan_meta}</b> 기운입니다.<br>
       {saju_sum or (nickname + " 일주." if nickname else f"{iljj_key} 일주 — 정통 명리학 기반 분석입니다.")}
       <br><br>
-      <b>{shin_label}</b>한 구조이며, <b>{gyeok_label}</b>에 해당합니다.
-      원국에서 <b>{len(activated)}개</b>의 십성 조합이 활성화되어 있습니다 — {combo_text}.
+      또한 <b>{shin_label}</b> 사주입니다.<br>
+      → {shin_explain}<br><br>
+      격국은 <b>{gyeok_label}</b>입니다.<br>
+      → {gyeok_explain}<br><br>
+      원국에서 <b>{len(activated)}개</b>의 십성 조합이 활성화되어 있습니다 — {combo_text}.<br>
+      → 즉 {name}님 인생에서 이 패턴들이 반복적으로 나타납니다.
     </div>
   </div>
 
@@ -7505,12 +7576,14 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
     <div style="font-size:17px;font-weight:900;color:#3e2723;border-left:5px solid #6b4423;padding-left:12px;margin-bottom:12px;">【3. 성격(性格)】</div>
     <div style="display:flex;gap:16px;flex-wrap:wrap;">
       <div style="flex:1;min-width:240px;background:#e8f5e9;padding:16px;border-radius:10px;border-left:4px solid #2e7d32;">
-        <div style="font-weight:900;color:#2e7d32;margin-bottom:8px;">💎 강점</div>
+        <div style="font-weight:900;color:#2e7d32;margin-bottom:8px;">💎 강점 — {name}님이 활용할 무기들</div>
         <div style="font-size:14px;color:#1b5e20;line-height:1.9;">{ilju_info.get("강점","결단력, 의지력, 추진력")}</div>
+        <div style="font-size:13px;color:#2e7d32;margin-top:8px;">→ 이런 강점이 {name}님을 신뢰받는 사람으로 만듭니다.</div>
       </div>
       <div style="flex:1;min-width:240px;background:#fff3e0;padding:16px;border-radius:10px;border-left:4px solid #e65100;">
-        <div style="font-weight:900;color:#e65100;margin-bottom:8px;">⚠️ 약점</div>
+        <div style="font-weight:900;color:#e65100;margin-bottom:8px;">⚠️ 약점 — 의식적으로 보완할 부분</div>
         <div style="font-size:14px;color:#bf360c;line-height:1.9;">{ilju_info.get("약점","고집, 타협 어려움, 표현 부족")}</div>
+        <div style="font-size:13px;color:#e65100;margin-top:8px;">→ 이 부분을 인식하고 부드럽게 풀면 인간관계가 달라집니다.</div>
       </div>
     </div>
   </div>
@@ -7519,10 +7592,11 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
   <div style="margin-bottom:28px;">
     <div style="font-size:17px;font-weight:900;color:#3e2723;border-left:5px solid #6b4423;padding-left:12px;margin-bottom:12px;">【4. 직업 적성(職業)】</div>
     <div style="background:#faf5ee;padding:18px 20px;border-radius:10px;line-height:2;font-size:15px;color:#3e2723;">
-      <b style="color:#2e7d32;">[적합 직업]</b><br>
+      <b style="color:#2e7d32;">{name}님께 적합한 직업 분야:</b><br>
       {ilju_info.get("직업","교수, 연구원, 법조인, 금융, 공직")}<br><br>
-      <b style="color:#1565c0;">[참고]</b> 격국 <b>{gyeok_label}</b> 기반 — 학문·자격·전문직 분야 유리.
-      {ilgan_kr}({ilgan_ohaeng}) 일간 — 정확성·결단력 요구 분야 적합.
+      <b style="color:#1565c0;">[적합한 이유]</b><br>
+      · 격국 <b>{gyeok_label}</b> → {gyeok_explain}<br>
+      · <b>{ilgan}({ilgan_kr})</b> 일간 — {ilgan_meta} 기운이라 정확성·결단력 요구 분야에서 두각을 나타냅니다.
     </div>
   </div>
 
@@ -7533,7 +7607,9 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
       {ilju_info.get("재물","재물 구조가 안정적이며 꾸준한 노력으로 자산을 형성합니다.")}<br><br>
       <b>횡재수:</b> {_risk("횡재수","점수",0)}/100 — {_risk("횡재수","등급","보통")}&nbsp;&nbsp;
       <b>사업운:</b> {_risk("사업운","점수",0)}/100 — {_risk("사업운","등급","보통")}<br>
-      {_risk("사업운","메시지","신중한 자금 운영이 핵심입니다.")}
+      {_risk("사업운","메시지","신중한 자금 운영이 핵심입니다.")}<br><br>
+      → 용신 <b>{yong_str}</b> 기운이 강한 시기에 재물 기회가 집중됩니다.<br>
+      → 기신 <b>{gisin_str}</b> 기운이 강한 시기에는 보증·동업·투기는 반드시 피하세요.
     </div>
   </div>
 
@@ -7544,7 +7620,9 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
       {ilju_info.get("건강","오행 균형에 따른 건강 관리가 필요합니다.")}<br><br>
       <b>큰병 위험:</b> {_risk("큰병","점수",0)}/100 — {_risk("큰병","등급","양호")}&nbsp;&nbsp;
       <b>사고수:</b> {_risk("사고수","점수",0)}/100 — {_risk("사고수","등급","낮음")}<br>
-      {_risk("큰병","메시지","정기 검진과 환절기 건강 관리가 중요합니다.")}
+      {_risk("큰병","메시지","정기 검진과 환절기 건강 관리가 중요합니다.")}<br><br>
+      → <b>{ilgan}({ilgan_kr})</b> 일간 — {ilgan_meta} 기운이라 오행 불균형이 건강에 직접 영향을 줍니다.<br>
+      → 용신 <b>{yong_str}</b> 오행 보강 + 정기 건강검진이 핵심입니다.
     </div>
   </div>
 
@@ -7552,12 +7630,14 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
   <div style="margin-bottom:28px;">
     <div style="font-size:17px;font-weight:900;color:#3e2723;border-left:5px solid #6b4423;padding-left:12px;margin-bottom:12px;">【7. 인연·결혼(姻緣)】</div>
     <div style="background:#faf5ee;padding:18px 20px;border-radius:10px;line-height:2;font-size:15px;color:#3e2723;">
-      <b>일지(배우자궁):</b> {iz_jj}({iljj_kr})<br>
+      <b>{name}님의 배우자궁(일지)은 {iz_jj}({iljj_kr})입니다.</b><br>
       {ilju_info.get("배우자","배우자와의 인연을 신중하게 관리하세요.")}<br><br>
       <b>결혼 인연:</b> {_risk("결혼인연","점수",0)}/100 — {_risk("결혼인연","등급","보통")}&nbsp;&nbsp;
       <b>이혼 위험:</b> {_risk("이혼·이별","점수",0)}/100 — {_risk("이혼·이별","등급","안정")}&nbsp;&nbsp;
       <b>바람기:</b> {_risk("바람기","점수",0)}/100 — {_risk("바람기","등급","낮음")}<br>
-      {_risk("결혼인연","메시지","좋은 인연을 만나는 시기를 잘 활용하세요.")}
+      {_risk("결혼인연","메시지","좋은 인연을 만나는 시기를 잘 활용하세요.")}<br><br>
+      → 배우자궁 <b>{iz_jj}({iljj_kr})</b>는 {name}님 삶의 방식과 파트너십 패턴을 보여줍니다.<br>
+      → 용신 <b>{yong_str}</b> 기운이 강한 해에 인연·결혼 운이 강하게 옵니다.
     </div>
   </div>
 
@@ -7565,10 +7645,13 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
   <div style="margin-bottom:28px;">
     <div style="font-size:17px;font-weight:900;color:#3e2723;border-left:5px solid #6b4423;padding-left:12px;margin-bottom:12px;">【8. 운세 흐름 — 대운(大運)】</div>
     <div style="background:#faf5ee;padding:18px 20px;border-radius:10px;line-height:2;font-size:15px;color:#3e2723;">
-      대운은 10년 단위로 인생의 큰 흐름을 결정합니다.<br>
-      자세한 대운 분석은 아래 <b>[대운 흐름]</b> 섹션을 참고하세요.<br><br>
-      용신 <b>{yong_str}</b> 대운에서 기회가 집중됩니다.<br>
-      기신 <b>{gisin_str}</b> 대운에서는 수비와 내실이 전략입니다.
+      대운(大運)은 10년마다 바뀌는 인생의 큰 계절입니다.<br>
+      → 마치 봄·여름·가을·겨울처럼 — 10년마다 삶의 환경이 달라집니다.<br><br>
+      <b>용신 대운</b> <b>{yong_str}</b> 기운이 들어오는 10년 → 기회가 집중되는 시기입니다.<br>
+      → 이 시기에 적극적으로 투자·전진하세요.<br>
+      <b>기신 대운</b> <b>{gisin_str}</b> 기운이 들어오는 10년 → 수비와 내실의 시기입니다.<br>
+      → 이 시기에는 확장보다 지키는 것이 전략입니다.<br><br>
+      자세한 대운별 분석은 아래 <b>[대운 흐름]</b> 섹션을 참고하세요.
     </div>
   </div>
 
@@ -7576,9 +7659,12 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
   <div style="margin-bottom:28px;">
     <div style="font-size:17px;font-weight:900;color:#3e2723;border-left:5px solid #6b4423;padding-left:12px;margin-bottom:12px;">【9. {cur_year}년 세운(歲運)】</div>
     <div style="background:#faf5ee;padding:18px 20px;border-radius:10px;line-height:2;font-size:15px;color:#3e2723;">
-      <b>자세한 월별 길흉</b>은 아래 <b>[월별 길흉 캘린더]</b>를 참고하세요.<br><br>
-      🌟 <b>길월(吉月) 추천:</b> 4월·9월·11월 — 중요 결정에 집중하세요.<br>
-      ⚠️ <b>흉월 주의:</b> 1월·3월·8월 — 신중하게 대처하세요.<br><br>
+      세운(歲運)은 올해 1년의 흐름을 결정하는 기운입니다.<br>
+      → 대운(10년)이 큰 계절이라면, 세운(1년)은 그 안의 날씨입니다.<br><br>
+      🌟 <b>길월(吉月) 추천:</b> 4월·9월·11월<br>
+      → 용신 기운이 강한 달 — 중요 결정·시작에 집중하세요.<br>
+      ⚠️ <b>흉월 주의:</b> 1월·3월·8월<br>
+      → 기신 기운이 강한 달 — 큰 결정 자제, 신중하게 대처하세요.<br><br>
       {cur_year}년에는 용신 <b>{yong_str}</b> 기운을 적극 보강하면 흐름이 원활합니다.
     </div>
   </div>
@@ -7587,8 +7673,8 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
   <div style="margin-bottom:28px;">
     <div style="font-size:17px;font-weight:900;color:#3e2723;border-left:5px solid #6b4423;padding-left:12px;margin-bottom:12px;">【10. 발동 신살(神煞)】</div>
     <div style="background:#faf5ee;padding:18px 20px;border-radius:10px;line-height:2;font-size:15px;color:#3e2723;">
-      <b>원국 주요 신살:</b> {"·".join(sinsal_names[:8]) if sinsal_names else "상세 분석은 아래 신살 섹션 참고"}<br><br>
-      각 신살의 발동 시기와 대처법은 아래 <b>[신살 경고]</b> 섹션을 참고하세요.
+      <b>{name}님 원국에 자리한 주요 신살:</b><br><br>
+      {sinsal_rows}
     </div>
   </div>
 
@@ -7622,13 +7708,16 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
     <div style="font-size:17px;font-weight:900;color:#3e2723;border-left:5px solid #c62828;padding-left:12px;margin-bottom:12px;">【12. 종합 결론】</div>
     <div style="background:linear-gradient(135deg,#fff8e1 0%,#fff3e0 100%);padding:22px 24px;border-radius:12px;
                 line-height:2;font-size:15px;color:#3e2723;border:2px solid #d4af37;">
-      {name}님은 <b>{iz_cg}{iz_jj}({ilgan_kr}{iljj_kr})</b> 일주 <b>{gyeok_label}</b> 사주입니다.
-      <b>{shin_label}</b>한 구조로 결단력과 추진력이 강하며, 자기 분야에서 두각을 나타낼 수 있는 기운을 타고났습니다.<br><br>
-      <b>핵심 과제:</b> 용신 <b>{yong_str}</b> 기운을 일상에서 보강하고,
-      기신 <b>{gisin_str}</b> 강한 시기에는 반드시 신중하게 대처하세요.<br><br>
-      <b>인생 전략:</b> {name}님의 사주는 정해진 운명이 아닙니다 —
-      가진 패와 흐름의 안내서입니다. 강점을 살리고 약점을 의식하면
-      사주가 인생의 지도가 됩니다.
+      <b>한 줄로 정리하면 —</b> {name}님은 <b>{ilgan_meta}</b> 기운의
+      <b>{iz_cg}{iz_jj}({ilgan_kr}{iljj_kr})</b> 일주 <b>{gyeok_label}</b> 사주입니다.<br><br>
+      <b>[지금 {name}님이 해야 할 것]</b><br>
+      1. 강점인 {ilju_info.get("강점","결단력·추진력").split(",")[0].strip()}을 자기 분야에서 적극 활용하세요.<br>
+      2. 약점인 {ilju_info.get("약점","고집").split(",")[0].strip()}을 의식하고 부드럽게 풀어내세요.<br>
+      3. 용신 <b>{yong_str}</b> 기운을 일상에서 보강하세요 (색상·음식·방향).<br>
+      4. 길월(4·9·11월)에 중요한 결정을 집중하세요.<br>
+      5. 기신 <b>{gisin_str}</b> 강한 시기에는 보증·동업·투기를 반드시 피하세요.<br><br>
+      {name}님의 사주는 정해진 운명이 아닙니다 —<br>
+      <b>강점을 살리고 약점을 보완하면, 사주가 인생의 지도가 됩니다.</b>
     </div>
   </div>
 
