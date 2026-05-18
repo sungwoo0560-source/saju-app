@@ -7439,7 +7439,7 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
     if sinsal_data and isinstance(sinsal_data, list):
         for s in sinsal_data:
             if isinstance(s, dict):
-                sinsal_names.append(s.get("이름", ""))
+                sinsal_names.append(s.get("이름") or s.get("name") or "")
             elif isinstance(s, str):
                 sinsal_names.append(s)
     sinsal_names = [n for n in sinsal_names if n]

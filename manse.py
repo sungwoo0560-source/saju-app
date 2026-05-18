@@ -11614,98 +11614,82 @@ def infer_current_worry(pils, birth_year, gender, marital_status=None):
 
 
 def render_worry_inference(pils, birth_year, gender, marital_status=None):
-    """고민 자동 추론 결과를 카드로 렌더링"""
-    result = infer_current_worry(pils, birth_year, gender, marital_status)
-    if not result:
-        return
+    """고민 자동 추론 — 결혼/이혼/바람기 점수 기반 중립 메시지"""
+    try:
+        from saju_zhengtong import detect_life_risk_signals
+        _risks_in = detect_life_risk_signals(pils)
+        _mar = _risks_in.get("결혼인연", {}).get("점수", 50)
+        _div = _risks_in.get("이혼·이별", {}).get("점수", 30)
+        _aff = _risks_in.get("바람기", {}).get("점수", 20)
 
-    icon = result["icon"]
-    label = result["label"]
-    title = result["title"]
-    message = result["message"]
-    sw_cg_ss = result["sw_cg_ss"]
-    sw_jj_ss = result["sw_jj_ss"]
-    dw_cg_ss = result["dw_cg_ss"]
-    dw_jj_ss = result["dw_jj_ss"]
-    year = result["year"]
-    second_label = result["second_label"]
-    second_icon = result["second_icon"]
+        _name = st.session_state.get("saju_name", "")
+        _name_str = f"{_name}님은 " if _name and _name != "내담자" else ""
 
-    badge_html = ""
-    if result["has_chung"]:
-        badge_html += "<span style='background:#e53935;color:#fff;border-radius:6px;padding:1px 7px;font-size:11px;font-weight:700;margin-right:4px'>⚡ 충(沖)기운</span>"
-    if result["has_dowhwa"]:
-        badge_html += "<span style='background:#e91e63;color:#fff;border-radius:6px;padding:1px 7px;font-size:11px;font-weight:700;margin-right:4px'>🍑 도화기운</span>"
-    if result["has_hap"]:
-        badge_html += "<span style='background:#7b1fa2;color:#fff;border-radius:6px;padding:1px 7px;font-size:11px;font-weight:700;margin-right:4px'>🔗 합(合)기운</span>"
+        if _mar >= 60:
+            _title = "💕 인연 운이 매우 좋은 사주입니다"
+            _desc = (
+                f"{_name_str}결혼·인연 기운이 강한 사주입니다 (결혼 인연 {_mar}/100). "
+                f"이혼 위험은 {_div}/100으로 낮고, 바람기는 {_aff}/100입니다."
+                f"<br><br>"
+                f"• 싱글이라면 → 좋은 인연을 만날 가능성이 매우 높습니다."
+                f"<br>"
+                f"• 기혼이라면 → 안정적인 관계를 유지하는 시기입니다."
+                f"<br><br>"
+                f"천을귀인 활성월(6·12월)과 길월(4·9·11월)에 인연 흐름이 좋습니다."
+            )
+            _color = "#1a237e"
+        elif _div >= 60:
+            _title = "⚠️ 인연·관계 주의 시기"
+            _desc = (
+                f"이혼·이별 기운이 강합니다 ({_div}/100). "
+                f"기존 관계에 갈등이 생기지 않도록 대화를 늘리고, "
+                f"신중한 결정이 필요한 시기입니다."
+            )
+            _color = "#b71c1c"
+        elif _aff >= 50:
+            _title = "🌹 이성 인연이 활발한 시기"
+            _desc = (
+                f"도화·합의 기운이 강하게 들어옵니다 ({_aff}/100). "
+                f"기혼자는 신중한 관계 관리가 필요하고, "
+                f"싱글은 새로운 인연을 만날 가능성이 높습니다."
+            )
+            _color = "#e65100"
+        elif _mar >= 40:
+            _title = "💑 평범한 인연 흐름"
+            _desc = (
+                f"인연 기운은 보통입니다 (결혼 인연 {_mar}/100). "
+                f"적극적인 만남이 필요하다면 4·9·11월(길월)을 활용하세요. "
+                f"큰 변화 없이 자기 성장에 집중해도 좋은 시기입니다."
+            )
+            _color = "#283593"
+        else:
+            _title = "🌱 자기 성장에 집중할 시기"
+            _desc = (
+                f"현재 인연 기운은 약합니다 ({_mar}/100). "
+                f"무리한 인연 추구보다는 자기 매력과 역량을 다지는 시기입니다. "
+                f"자기 성숙 후에 진짜 맞는 인연이 나타납니다."
+            )
+            _color = "#424242"
 
-    second_html = ""
-    if second_label:
-        second_html = (
-            f'<div style="margin-top:6px;font-size:12px;color:#aaa">'
-            f'두 번째로 강한 기운 → {second_icon} {second_label}도 함께 얽혀 있습니다.</div>'
-        )
-
-    ss_html = (
-        f"<span style='color:#b38728;font-weight:700'>{year}년</span> "
-        f"세운 <b>{sw_cg_ss}·{sw_jj_ss}</b> / "
-        f"대운 <b>{dw_cg_ss}·{dw_jj_ss}</b>"
-    )
-
-    st.markdown(
-        f"""
-<div style="background:linear-gradient(135deg,#1a1a2e,#16213e);
-            border:1.5px solid rgba(212,175,55,0.5);
-            border-radius:16px;padding:20px 24px;margin-bottom:12px;
-            box-shadow:0 4px 16px rgba(0,0,0,0.25)">
-  <div style="font-size:11px;font-weight:700;color:#d4af37;
-              letter-spacing:2px;margin-bottom:10px">📍 현재 운세 진단</div>
-  <div style="display:flex;align-items:flex-start;gap:16px">
-    <div style="font-size:44px;min-width:50px;text-align:center;
-                line-height:1">{icon}</div>
-    <div style="flex:1">
-      <div style="font-size:20px;font-weight:900;color:#fff;margin-bottom:6px">
-        {title}
-      </div>
-      <div style="font-size:13px;color:#ccc;line-height:1.8;margin-bottom:10px">
-        {message}
-      </div>
-      <div style="font-size:11px;color:#aaa;margin-bottom:8px">
-        {ss_html}
-      </div>
-      <div>{badge_html}</div>
-      {second_html}
+        st.markdown(
+            f"""
+<div style="background:linear-gradient(135deg,{_color} 0%,#000 100%);
+            border-radius:14px;padding:24px;margin:16px 0;color:#fff;">
+  <div style="font-size:13px;color:#ffd54f;letter-spacing:3px;font-weight:700;">📍 현재 운세 진단</div>
+  <div style="font-size:20px;font-weight:900;margin-top:8px;">{_title}</div>
+  <div style="font-size:14px;margin-top:10px;line-height:1.9;color:#e8eaf6;">
+    {_desc}
   </div>
+  <div style="font-size:11px;margin-top:14px;color:#9fa8da;padding-top:10px;
+              border-top:1px solid rgba(255,255,255,0.15);">
+    결혼인연 {_mar}/100 · 이혼위험 {_div}/100 · 바람기 {_aff}/100
   </div>
 </div>
 """,
-        unsafe_allow_html=True,
-    )
-
-    # ── 개운법 expander (핵심 처방 3가지만) ──────────────────────
-    top_worry = result["top_worry"]
-    solution = WORRY_SOLUTION.get(top_worry, {})
-    if solution:
-        with st.expander("💊 개운 처방 — 지금 실천할 수 있는 것", expanded=True):
-            _acts3 = solution.get("즉각행동", [])[:3]
-            actions_html = "".join(
-                f'<div style="color:#d0d0d0;padding:4px 0;font-size:13px;">{a}</div>'
-                for a in _acts3
-            )
-            st.markdown(
-                f"""
-<div style="background:#1a1a1a;border:1px solid #f7e695;border-radius:12px;padding:16px 20px;">
-  <div style="color:#f7e695;font-size:14px;font-weight:700;margin-bottom:4px;">⚡ 핵심 처방</div>
-  <div style="color:#e0e0e0;font-size:13px;margin-bottom:12px;">{solution.get('핵심처방', '')}</div>
-  <div style="color:#f7e695;font-size:14px;font-weight:700;margin-bottom:4px;">✅ 지금 당장 할 것</div>
-  {actions_html}
-  <div style="margin-top:12px;background:#1a2a1a;border:1px solid #4a7a4a;border-radius:8px;padding:10px;">
-    <span style="color:#7aff7a;font-size:12px;font-weight:700;">🌿 비방: </span>
-    <span style="color:#e0e0e0;font-size:12px;">{solution.get('비방', '')}</span>
-  </div>
-</div>""",
-                unsafe_allow_html=True,
-            )
+            unsafe_allow_html=True,
+        )
+    except Exception:
+        pass
 
 
 def menu_current_situation(pils, name, birth_year, gender, marriage_status=None):
