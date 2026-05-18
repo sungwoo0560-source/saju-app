@@ -11419,7 +11419,7 @@ WORRY_MESSAGE = {
 }
 
 
-def infer_current_worry(pils, birth_year, gender):
+def infer_current_worry(pils, birth_year, gender, marital_status=None):
     """현재 대운+세운 십성 조합으로 고민 유형을 자동 추론한다.
 
     Returns:
@@ -11521,25 +11521,74 @@ def infer_current_worry(pils, birth_year, gender):
         _msgs = WORRY_MESSAGE.get(top_worry, [_fallback_msg])
         message = random.choice(_msgs)
 
-        # 연애_결혼이 top이면 실제 점수로 title/message 정확화
+        # 연애_결혼이 top이면 결혼 상태 + 점수 기반으로 정확화
         if top_worry == "연애_결혼":
-            if _div_r >= 60:
-                title = "⚠️ 배우자 관계 주의 시기"
-                message = (f"이혼·이별 기운이 강하게 들어오고 있습니다 ({_div_r}/100). "
-                           f"배우자와 작은 갈등이 큰 일로 번지지 않도록 대화를 늘리세요.")
-            elif _aff_r >= 50:
-                title = "🌹 이성 인연이 활발한 시기"
-                message = (f"도화·합의 기운이 강합니다 ({_aff_r}/100). "
-                           f"기혼자는 신중한 관계 관리가 필요한 시기입니다.")
-            elif _mar_r >= 60 and _div_r <= 30:
-                title = "💑 인연 운이 안정적입니다"
-                message = (f"결혼 인연이 매우 좋은 사주입니다 ({_mar_r}/100). "
-                           f"이혼 위험도 낮고 ({_div_r}/100) 배우자궁이 안정되어 있습니다. "
-                           f"현재의 관계를 잘 가꾸어 가시면 됩니다.")
-            elif _mar_r < 40:
-                title = "🔍 새로운 인연을 찾는 시기"
-                message = (f"현재 결혼 인연 기운은 보통입니다 ({_mar_r}/100). "
-                           f"적극적으로 인연을 찾거나 자기 성장에 집중하시면 좋습니다.")
+            _ms = marital_status
+            if _ms is None:
+                try:
+                    import streamlit as _st_ms
+                    _ms = _st_ms.session_state.get("in_marriage", "선택안함")
+                except Exception:
+                    _ms = "선택안함"
+            if _ms in ("미혼 (싱글)", "미혼", "싱글"):
+                _ms_norm = "싱글"
+            elif _ms == "기혼":
+                _ms_norm = "기혼"
+            elif _ms in ("이혼/사별", "이혼/별거", "사별", "재혼", "이혼"):
+                _ms_norm = "이혼"
+            else:
+                _ms_norm = None  # 선택안함
+
+            if _ms_norm == "싱글":
+                if _mar_r >= 70:
+                    title = "💕 좋은 인연이 들어올 시기입니다"
+                    message = (f"결혼 인연이 매우 좋은 사주입니다 ({_mar_r}/100). "
+                               f"합 운/천을귀인이 활성화되는 시기에 적극적으로 움직이세요. "
+                               f"새로운 인연을 만날 가능성이 높습니다.")
+                elif _mar_r >= 40:
+                    title = "🔍 인연을 만들어가는 시기"
+                    message = (f"인연 기운은 보통입니다 ({_mar_r}/100). "
+                               f"적극적인 만남보다는 자기 성장과 매력을 다지는 시기입니다.")
+                else:
+                    title = "🌱 자기 성장에 집중할 시기"
+                    message = (f"지금은 연애보다 자기 자신을 가꾸는 시기입니다. "
+                               f"진짜 맞는 인연은 자기 성숙 후에 나타납니다.")
+            elif _ms_norm == "기혼":
+                if _div_r >= 60:
+                    title = "⚠️ 배우자 관계 주의 시기"
+                    message = (f"이혼·이별 기운이 들어옵니다 ({_div_r}/100). "
+                               f"배우자와 대화를 늘리세요.")
+                elif _aff_r >= 50:
+                    title = "🌹 이성 인연 활발 — 신중 관리"
+                    message = (f"도화·합 기운이 강합니다 ({_aff_r}/100). "
+                               f"기혼자는 관계 관리 필수입니다.")
+                else:
+                    title = "💑 부부 관계 안정적"
+                    message = (f"결혼 운 양호 ({_mar_r}/100), 이혼 위험 낮음 ({_div_r}/100). "
+                               f"현재 관계를 잘 가꾸어 가시면 됩니다.")
+            elif _ms_norm == "이혼":
+                title = "🌅 새로운 시작의 시기"
+                message = (f"지난 인연은 흘려 보내고 새 출발 준비하세요. "
+                           f"인연 기운은 {_mar_r}/100입니다.")
+            else:
+                # 선택안함 — 점수 기반 기본 로직
+                if _div_r >= 60:
+                    title = "⚠️ 배우자 관계 주의 시기"
+                    message = (f"이혼·이별 기운이 강하게 들어오고 있습니다 ({_div_r}/100). "
+                               f"배우자와 작은 갈등이 큰 일로 번지지 않도록 대화를 늘리세요.")
+                elif _aff_r >= 50:
+                    title = "🌹 이성 인연이 활발한 시기"
+                    message = (f"도화·합의 기운이 강합니다 ({_aff_r}/100). "
+                               f"기혼자는 신중한 관계 관리가 필요한 시기입니다.")
+                elif _mar_r >= 60 and _div_r <= 30:
+                    title = "💑 인연 운이 안정적입니다"
+                    message = (f"결혼 인연이 매우 좋은 사주입니다 ({_mar_r}/100). "
+                               f"이혼 위험도 낮고 ({_div_r}/100) 배우자궁이 안정되어 있습니다. "
+                               f"현재의 관계를 잘 가꾸어 가시면 됩니다.")
+                elif _mar_r < 40:
+                    title = "🔍 새로운 인연을 찾는 시기"
+                    message = (f"현재 결혼 인연 기운은 보통입니다 ({_mar_r}/100). "
+                               f"적극적으로 인연을 찾거나 자기 성장에 집중하시면 좋습니다.")
 
         return {
             "top_worry": top_worry,
@@ -11564,9 +11613,9 @@ def infer_current_worry(pils, birth_year, gender):
         return None
 
 
-def render_worry_inference(pils, birth_year, gender):
+def render_worry_inference(pils, birth_year, gender, marital_status=None):
     """고민 자동 추론 결과를 카드로 렌더링"""
-    result = infer_current_worry(pils, birth_year, gender)
+    result = infer_current_worry(pils, birth_year, gender, marital_status)
     if not result:
         return
 
@@ -12094,7 +12143,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
     _ilgan_now_msg = _ILGAN_NOW.get(ilgan, "")
 
     # ── 나이대별 고민 테마 (결혼상태 분기) ──────────────────────
-    if marriage_status == "미혼":
+    if marriage_status in ("미혼", "미혼 (싱글)", "선택안함", None):
         if cur_age < 25:
             _age_theme = f"**{cur_age}세 미혼 — 진로·취업·정체성**이 동시에 흔들리는 시기입니다. '나는 뭘 해야 하나'라는 질문이 밤마다 반복된다면 정상입니다. 지금 당장 완벽한 답을 찾으려 하지 마십시오."
         elif cur_age < 30:
@@ -14364,7 +14413,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
     )
     st.markdown("\n".join(lines), unsafe_allow_html=True)
 
-    render_worry_inference(pils, birth_year, gender)
+    render_worry_inference(pils, birth_year, gender, marriage_status)
     render_pdf_download_btn("current_situation", pils, name, birth_year, gender)
 
 
@@ -25018,7 +25067,7 @@ def main():
         _ss["in_unknown_time"] = False
 
     if "in_marriage" not in _ss:
-        _ss["in_marriage"] = "미혼"
+        _ss["in_marriage"] = "선택안함"
 
     if "in_occupation" not in _ss:
         _ss["in_occupation"] = "선택 안 함"
@@ -25676,8 +25725,8 @@ def main():
         info_col1, info_col2 = st.columns(2)
         with info_col1:
             st.selectbox(
-                "결혼 유무",
-                ["미혼", "기혼", "이혼/별거", "사별", "재혼"],
+                "결혼 상태 (선택안하셔도 됩니다)",
+                ["선택안함", "미혼 (싱글)", "기혼", "이혼/사별"],
                 key="in_marriage",
             )
         with info_col2:
@@ -26155,12 +26204,11 @@ def main():
             display_name = name if name else "내담자"
 
             marriage_icon = {
-                "미혼": "💚",
+                "미혼": "💚", "미혼 (싱글)": "💚",
                 "기혼": "💑",
-                "이혼/별거": "💔",
-                "사별": "🖤",
-                "재혼": "🌸",
-            }.get(_ss.get("in_marriage", "미혼"), "")
+                "이혼/별거": "💔", "이혼/사별": "💔",
+                "사별": "🖤", "재혼": "🌸",
+            }.get(_ss.get("in_marriage", "선택안함"), "")
 
             occ_short = _ss.get("in_occupation", "") if _ss.get("in_occupation", "") != "선택 안 함" else ""
 
@@ -26218,8 +26266,9 @@ def main():
 
             info_tags = ""
 
-            if _ss.get("in_marriage", "미혼") != "미혼":
-                info_tags += f"<span style='font-size:12px;background:#edfffb;padding:3px 10px;border-radius:12px;margin:2px'>{marriage_icon} {_ss.get('in_marriage', '미혼')}</span> "
+            _mar_tag = _ss.get("in_marriage", "선택안함")
+            if _mar_tag not in ("선택안함", "미혼", ""):
+                info_tags += f"<span style='font-size:12px;background:#edfffb;padding:3px 10px;border-radius:12px;margin:2px'>{marriage_icon} {_mar_tag}</span> "
 
             if occ_short:
                 info_tags += f"<span style='font-size:12px;background:#e8f3ff;padding:3px 10px;border-radius:12px;margin:2px'>💼 {occ_short}</span>"

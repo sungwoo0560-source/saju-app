@@ -5575,7 +5575,7 @@ class LocalSajuNarrator:
                         "연이 좋습니다. 짜릿함보다 안정감을 주는 만남이 지속됩니다."
                     )
             else:
-                if marriage in ("기혼","유부남","유부녀","이혼","이혼/별거","사별","재혼"):
+                if marriage in ("기혼","유부남","유부녀","이혼","이혼/별거","이혼/사별","사별","재혼"):
                     lines.append(
                         f"관성(남편성)이 원국에 강하게 드러나지 않는 구조입니다. "
                         f"이는 남편이 눈에 띄지 않지만 묵묵하고 안정적인 타입임을 나타냅니다. "
@@ -5602,7 +5602,7 @@ class LocalSajuNarrator:
                         "내조형 배우자를 만나 가정을 안정적으로 꾸리는 타입입니다."
                     )
             else:
-                if marriage in ("기혼","유부남","유부녀","이혼","이혼/별거","사별","재혼"):
+                if marriage in ("기혼","유부남","유부녀","이혼","이혼/별거","이혼/사별","사별","재혼"):
                     lines.append(
                         f"재성(아내성)이 원국에 강하게 드러나지 않는 구조입니다. "
                         f"이는 배우자가 {name}님의 삶 속에서 조용하지만 든든한 내조 역할을 한다는 의미입니다. "
@@ -5617,7 +5617,7 @@ class LocalSajuNarrator:
 
 
         # ── 4. 결혼 최적 시기 (용신/인연 대운·세운) ────────────────
-        if marriage in ("기혼","유부남","유부녀","이혼","이혼/별거","사별","재혼"):
+        if marriage in ("기혼","유부남","유부녀","이혼","이혼/별거","이혼/사별","사별","재혼"):
             lines.append("\n### 📅 현재 부부 관계 & 배우자운 분석")
         else:
             lines.append("\n### 📅 결혼·인연 최적 시기")
@@ -5667,7 +5667,7 @@ class LocalSajuNarrator:
 
         if _love_peaks:
             lines.append(
-                f"\n향후 10년 중 {name}님에게 " + ("배우자 관계가 강화되거나 주의가 필요한 시기:" if marriage in ("기혼","유부남","유부녀","이혼","이혼/별거","사별","재혼") else "인연과 결혼 기운이 가장 활성화되는 시기:")
+                f"\n향후 10년 중 {name}님에게 " + ("배우자 관계가 강화되거나 주의가 필요한 시기:" if marriage in ("기혼","유부남","유부녀","이혼","이혼/별거","이혼/사별","사별","재혼") else "인연과 결혼 기운이 가장 활성화되는 시기:")
             )
             for p in _love_peaks[:5]:
                 lines.append(f"  - {p}")
@@ -5677,7 +5677,7 @@ class LocalSajuNarrator:
                 f"억지로 만남을 찾기보다 자신을 성장시키면 자연스럽게 인연이 찾아옵니다."
             )
 
-        if marriage in ("기혼","유부남","유부녀","이혼","이혼/별거","사별","재혼"):
+        if marriage in ("기혼","유부남","유부녀","이혼","이혼/별거","이혼/사별","사별","재혼"):
             lines.append(
                 f"\n👉 현재 **기혼** 상태입니다. "
                 f"올해 {cur_year}년 세운 십성은 **{sw_ss}** 기운으로, "
@@ -5688,7 +5688,7 @@ class LocalSajuNarrator:
                 lines.append("💑 배우자 인연이 강화되는 해입니다. 부부 사이가 더욱 돈독해질 수 있습니다.")
             else:
                 lines.append("올해는 부부 관계보다 개인적인 성장과 사업에 에너지가 집중됩니다.")
-        elif sw_ss in _love_ss_target and marriage in ("미혼","싱글",""):
+        elif sw_ss in _love_ss_target and marriage in ("미혼","미혼 (싱글)","싱글","선택안함",""):
             lines.append(
                 f"\n👉 **올해({cur_year}년)** 인연 기운이 활성화되어 있습니다. "
                 "만남의 자리를 주저하지 마십시오!"
@@ -7341,7 +7341,7 @@ def get_yukjin(ilgan, pils, gender="남", marriage="미혼"):
         where = ", ".join(found.get(fam_label, []))
 
         # 기혼인데 배우자성 없음 → 별도 처리
-        _is_married = marriage in ("기혼","유부남","유부녀","이혼","이혼/별거","사별","재혼")
+        _is_married = marriage in ("기혼","유부남","유부녀","이혼","이혼/별거","이혼/사별","사별","재혼")
         _is_spouse = any(k in fam_label for k in ["남편","아내","배우자"])
         if not has and _is_married and _is_spouse:
             _adj_msg = (no_msg.split(". ")[0] +
@@ -8307,7 +8307,7 @@ def _nar_ch8_flow(ctx):
 
     # 기혼 여부에 따른 판단 분리
     marriage = ctx.get("marriage", "미혼")
-    _is_married = marriage in ("기혼","유부남","유부녀","이혼","이혼/별거","사별","재혼")
+    _is_married = marriage in ("기혼","유부남","유부녀","이혼","이혼/별거","이혼/사별","사별","재혼")
 
     if _is_married:
         if _LOVE_RISK >= 5:
