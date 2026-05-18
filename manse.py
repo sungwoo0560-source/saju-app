@@ -11485,13 +11485,27 @@ def infer_current_worry(pils, birth_year, gender):
         except Exception as e:
             _saju_log.warning("[infer_current_worry] 오류: %s", str(e)[:60])
 
+        # 연애_결혼 위험도: 실제 점수 기반 (도화/합만 보던 로직 정확화)
+        try:
+            from saju_zhengtong import detect_life_risk_signals as _dlrs
+            _risks_r = _dlrs(pils)
+            _div_r = _risks_r.get("이혼·이별", {}).get("점수", 30)
+            _aff_r = _risks_r.get("바람기", {}).get("점수", 20)
+            _mar_r = _risks_r.get("결혼인연", {}).get("점수", 50)
+        except Exception:
+            _div_r, _aff_r, _mar_r = 30, 20, 50
+
         # 특수 조건 보정
         if has_chung:
             top_cat = max(scores, key=scores.get) if scores else None
             if top_cat:
                 scores[top_cat] = int(scores[top_cat] * 1.5)
+        # 도화/합 boost: 안정적 결혼(결혼 70↑ + 이혼 30↓)이면 boost 안 함
         if has_dowhwa or has_hap:
-            scores["연애_결혼"] = scores.get("연애_결혼", 0) + 4
+            if _div_r >= 50 or _aff_r >= 50:
+                scores["연애_결혼"] = scores.get("연애_결혼", 0) + 4
+            elif not (_mar_r >= 60 and _div_r <= 30):
+                scores["연애_결혼"] = scores.get("연애_결혼", 0) + 2
 
         if not scores:
             return None
@@ -11506,6 +11520,26 @@ def infer_current_worry(pils, birth_year, gender):
         title = WORRY_TITLE.get(top_worry, f"🔮 {label} 기운이 강하게 들어오고 있군요")
         _msgs = WORRY_MESSAGE.get(top_worry, [_fallback_msg])
         message = random.choice(_msgs)
+
+        # 연애_결혼이 top이면 실제 점수로 title/message 정확화
+        if top_worry == "연애_결혼":
+            if _div_r >= 60:
+                title = "⚠️ 배우자 관계 주의 시기"
+                message = (f"이혼·이별 기운이 강하게 들어오고 있습니다 ({_div_r}/100). "
+                           f"배우자와 작은 갈등이 큰 일로 번지지 않도록 대화를 늘리세요.")
+            elif _aff_r >= 50:
+                title = "🌹 이성 인연이 활발한 시기"
+                message = (f"도화·합의 기운이 강합니다 ({_aff_r}/100). "
+                           f"기혼자는 신중한 관계 관리가 필요한 시기입니다.")
+            elif _mar_r >= 60 and _div_r <= 30:
+                title = "💑 인연 운이 안정적입니다"
+                message = (f"결혼 인연이 매우 좋은 사주입니다 ({_mar_r}/100). "
+                           f"이혼 위험도 낮고 ({_div_r}/100) 배우자궁이 안정되어 있습니다. "
+                           f"현재의 관계를 잘 가꾸어 가시면 됩니다.")
+            elif _mar_r < 40:
+                title = "🔍 새로운 인연을 찾는 시기"
+                message = (f"현재 결혼 인연 기운은 보통입니다 ({_mar_r}/100). "
+                           f"적극적으로 인연을 찾거나 자기 성장에 집중하시면 좋습니다.")
 
         return {
             "top_worry": top_worry,
@@ -14336,9 +14370,6 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
 
 def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
     """[1. Comprehensive Report] - Pillars, Personality, Gyeokguk, Yongshin"""
-
-    # ── 고민 자동 추론 카드 (맨 위) ──────────────────────────
-    render_worry_inference(pils, birth_year, gender)
 
     # Patch Y-6: 한눈 요약 카드 (최상단) — Y-7 수정
     try:
