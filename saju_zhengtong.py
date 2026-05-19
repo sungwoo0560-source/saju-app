@@ -7141,7 +7141,7 @@ def detect_life_risk_signals(pils, saewoon_data=None):
     if sago_score >= 60:
         sago_level, sago_msg = "🔴 매우 높음", "양인 + 충 + 칠살 — 평생 사고수. 보험·안전 필수.\n→ 안전·운전·정기 검진은 선택이 아닌 필수입니다."
     elif sago_score >= 40:
-        sago_level, sago_msg = "🟡 보통", "양인 발동. 충 운에 사고·수술 위험 ↑.\n→ 충 운 해에 평소 두 배 조심하세요."
+        sago_level, sago_msg = "🟡 보통", "양인 발동. 충(沖) 운 해 — 운전·이동·수술 절대 조심.\n→ 이 해에 무리하면 반드시 후회합니다. 두 배 더 안전하게 사세요."
     elif sago_score >= 20:
         sago_level, sago_msg = "🟢 낮음", "양인 1개 — 일상 주의 수준.\n→ 큰 사고 기운은 약합니다. 평소 운전·안전 챙기세요."
     else:
@@ -7167,7 +7167,7 @@ def detect_life_risk_signals(pils, saewoon_data=None):
         hwangjae_score += 15
         hwangjae_reasons.append("재생관 — 돈→명예 전환 운명")
     if hwangjae_score >= 60:
-        hwangjae_level, hwangjae_msg = "🌟 매우 강함", "재물 그릇 큰 사주. 사업·투자 적기 못 놓치면 큰 부.\n→ 준비된 사람만 잡을 수 있습니다. 지금부터 준비하세요."
+        hwangjae_level, hwangjae_msg = "🌟 매우 강함", "재물 그릇 큰 사주. 용신 대운에 큰돈 한 번에 들어옴.\n→ 단, 준비 없이 들어오면 한 번에 다 날아갑니다. 지금 당장 준비하세요."
     elif hwangjae_score >= 40:
         hwangjae_level, hwangjae_msg = "✨ 강함", "편재 + 식신생재 — 큰돈 들어옴. 들어오면 즉시 묶을 것.\n→ 빨리 나갈 수도 있으니 즉시 안전 자산에 고정하세요."
     elif hwangjae_score >= 20:
@@ -7255,7 +7255,7 @@ def detect_life_risk_signals(pils, saewoon_data=None):
         gyeolhon_score += 15
         gyeolhon_reasons.append("관인상생 — 격있는 배우자 인연")
     if gyeolhon_score >= 60:
-        gyeolhon_level, gyeolhon_msg = "🌟 최상급 인연", "최상급 인연 — 합 운에 평생 반려자.\n→ 합 운/천을귀인 활성 해에 반드시 적극적으로 움직이세요. 그 해를 놓치면 아쉬움이 남습니다."
+        gyeolhon_level, gyeolhon_msg = "🌟 최상급 인연", "60갑자 중 상위 5% 결혼 인연 사주. 합 운·천을귀인 활성 해 — 반드시 적극 움직이세요.\n→ 이 시기 못 잡으면 5년 후회합니다. 단 한 번의 기회를 절대 놓치지 마세요."
     elif gyeolhon_score >= 40:
         gyeolhon_level, gyeolhon_msg = "✨ 좋음", "✨ 좋은 결혼 인연 옵니다 — 정재/정관 운에서."
     elif gyeolhon_score >= 20:
@@ -7290,7 +7290,7 @@ def detect_life_risk_signals(pils, saewoon_data=None):
     elif saup_score >= 25:
         saup_level, saup_msg = "✨ 사업 가능", "직장 + 부업 병행 적합.\n→ 자금 관리 못하면 무너집니다. 시기 잘 보세요."
     elif saup_score >= 0:
-        saup_level, saup_msg = "💼 직장형", "직장이 당신 길입니다. 사업하면 작게, 천천히."
+        saup_level, saup_msg = "💼 직장형", "직장·전문직이 반드시 당신을 살립니다.\n→ 사업 유혹에 흔들리면 10년 후 반드시 후회합니다."
     else:
         saup_level, saup_msg = "⚠️ 사업 위험", "⚠️ 사업 손대지 마세요. 직장·전문직이 당신을 살립니다."
     results["사업운"] = {"점수": max(min(saup_score, 100), 10), "등급": saup_level, "이유": saup_reasons, "메시지": saup_msg, "아이콘": "💼"}
@@ -7735,12 +7735,12 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
       <b>핵심 운명:</b><br>
       · <b>{ilgan_meta}</b> 기운 — {gyeok_explain}<br>
       · 활성 조합 {len(activated)}개 — {combo_text}<br><br>
-      <b>[지금 {name}님이 해야 할 5가지]</b><br>
-      1. 강점 <b>{ilju_info.get("강점","결단력·추진력").split(",")[0].strip()}</b> — 자기 분야에서 100% 활용<br>
-      2. 약점 <b>{ilju_info.get("약점","고집").split(",")[0].strip()}</b> — 의식하고 부드럽게<br>
-      3. 용신 <b>{yong_str}</b> — 색상·음식·방향 일상 보강<br>
-      4. 길월 4·9·11월 — 모든 중요한 결정 집중<br>
-      5. 보증·동업·투기 — 기신 <b>{gisin_str}</b> 강한 시기 절대 X<br><br>
+      <b>🔴 [지금 당장 해야 할 5가지 — 안 하면 반드시 후회합니다]</b><br>
+      1. 🔴 용신 <b>{yong_str}</b> 매일 보강 — 색상·음식·방향 실천. 아는 것만으로는 절대 바뀌지 않습니다<br>
+      2. 🔴 기신 <b>{gisin_str}</b> 강한 시기 — 보증·동업·투기 절대 X. 이 시기 무리하면 100% 후회합니다<br>
+      3. 🔴 길월에 중요 결정 집중 — 흉월에 큰 결정 내리면 반드시 힘들어집니다. 이건 통계입니다<br>
+      4. 🔴 용신 대운 황금기 10년 — 이 시기를 놓치면 다음 황금기까지 기다려야 합니다<br>
+      5. 🔴 강점 <b>{ilju_info.get("강점","결단력·추진력").split(",")[0].strip()}</b> 100% 활용 + 약점 <b>{ilju_info.get("약점","고집").split(",")[0].strip()}</b> 의식적 보완 필수<br><br>
       <b>🌟 {name}님 황금기:</b><br>
       용신 <b>{yong_str}</b> 대운 시기 — 인생 진짜 황금기입니다.<br>
       지금의 준비가 그 시기를 만듭니다.<br><br>

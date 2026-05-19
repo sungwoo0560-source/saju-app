@@ -6104,6 +6104,7 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
         "tojeong":    "토정비결",
         "current_situation": "현재상황",
         "yearly":     "연도별운세",
+        "jonghap_full": "종합사주풀이",
     }
     _label = _TAB_LABEL.get(tab_name, tab_name)
 
@@ -6318,6 +6319,178 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
                     y = _sec("🎯 현재 상황 진단", y)
                     _txt = LocalSajuNarrator.full_report(pils, name, birth_year, gender)
                     y = _write(_txt[:3000], y, size=9)
+
+                elif tab_name == "jonghap_full":
+                    _CG_KR = {"甲":"갑","乙":"을","丙":"병","丁":"정","戊":"무",
+                              "己":"기","庚":"경","辛":"신","壬":"임","癸":"계"}
+                    _JJ_KR = {"子":"자","丑":"축","寅":"인","卯":"묘","辰":"진","巳":"사",
+                              "午":"오","未":"미","申":"신","酉":"유","戌":"술","亥":"해"}
+                    _OH_MAP = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
+                               "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
+                    _jf_cg = [p.get("cg","") for p in pils]
+                    _jf_jj = [p.get("jj","") for p in pils]
+                    _jf_ilgan = _jf_cg[1]
+
+                    # ── 1. 사주명식 ──────────────────────────────────────
+                    y = _sec("📋 1. 사주 명식(命式)", y)
+                    y = _write(f"년주: {_jf_cg[3]}{_jf_jj[3]}({_CG_KR.get(_jf_cg[3],'')}{_JJ_KR.get(_jf_jj[3],'')})", y, size=10)
+                    y = _write(f"월주: {_jf_cg[2]}{_jf_jj[2]}({_CG_KR.get(_jf_cg[2],'')}{_JJ_KR.get(_jf_jj[2],'')})", y, size=10)
+                    y = _write(f"일주: {_jf_cg[1]}{_jf_jj[1]}({_CG_KR.get(_jf_cg[1],'')}{_JJ_KR.get(_jf_jj[1],'')})", y, size=10, color=(0.7,0.1,0.1))
+                    y = _write(f"시주: {_jf_cg[0]}{_jf_jj[0]}({_CG_KR.get(_jf_cg[0],'')}{_JJ_KR.get(_jf_jj[0],'')})", y, size=10)
+                    y -= 3*mm
+
+                    # ── 2. 일간 본질 ─────────────────────────────────────
+                    y = _sec("🌟 2. 일간 본질(日干本質)", y)
+                    _ILGAN_META_PDF = {
+                        "甲":"큰 나무 — 곧고 진취적. 리더십과 원칙. 굽히지 않는 의지.",
+                        "乙":"유연한 풀잎 — 섬세하고 끈질김. 상황 적응력 탁월.",
+                        "丙":"태양 — 밝고 열정적. 카리스마. 주변을 빛나게 함.",
+                        "丁":"촛불 — 따뜻하고 섬세. 꼼꼼한 집중력. 인내의 빛.",
+                        "戊":"큰 산 — 묵직하고 안정적. 믿음직스러운 보호자형.",
+                        "己":"논밭 — 포용력과 현실감각. 실용적이고 착실.",
+                        "庚":"강철 — 결단력과 단단함. 독립성. 원칙주의.",
+                        "辛":"보석 — 정밀하고 섬세. 완벽주의. 날카로운 판단.",
+                        "壬":"큰 강 — 넓은 포용. 지혜. 흐름을 읽는 능력.",
+                        "癸":"이슬비 — 부드럽고 지혜로움. 분석력과 직감.",
+                    }
+                    y = _write(f"일간 {_jf_ilgan}({_CG_KR.get(_jf_ilgan,'')}) — 오행 {_OH_MAP.get(_jf_ilgan,'')}", y, size=10)
+                    y = _write(_ILGAN_META_PDF.get(_jf_ilgan,""), y, size=9)
+                    y -= 3*mm
+
+                    # ── 3. 격국·용신·기신 ────────────────────────────────
+                    y = _sec("⚡ 3. 격국·용신·기신", y)
+                    _jf_ys = get_yongshin(pils) or {}
+                    _jf_yn  = _jf_ys.get("종합_용신") or _jf_ys.get("용신") or []
+                    _jf_gi  = _jf_ys.get("종합_기신") or _jf_ys.get("기신") or []
+                    _jf_gyeok = _jf_ys.get("격국","") or ""
+                    _jf_shin  = _jf_ys.get("신강약","") or ""
+                    _jf_yns = "·".join(_jf_yn[:3]) if isinstance(_jf_yn, list) else str(_jf_yn)
+                    _jf_gis = "·".join(_jf_gi[:2]) if isinstance(_jf_gi, list) else str(_jf_gi)
+                    if not _jf_yns: _jf_yns = "水·木"
+                    if not _jf_gis: _jf_gis = "土·金"
+                    y = _write(f"격국: {_jf_gyeok or '미분류'}  |  강약: {_jf_shin or '중화'}", y, size=10)
+                    y = _write(f"용신(用神): {_jf_yns} — 황금기를 여는 열쇠. 이 기운 대운에 전진하세요.", y, size=9)
+                    y = _write(f"기신(忌神): {_jf_gis} — 이 기운 강할 때 절대 무리 X.", y, size=9)
+                    y -= 3*mm
+
+                    # ── 4. 오행분포 ──────────────────────────────────────
+                    y = _sec("🌿 4. 오행 분포(五行分布)", y)
+                    try:
+                        from saju_engine import calc_ohaeng_strength
+                        _jf_ohs = calc_ohaeng_strength(pils[1]["cg"], pils)
+                        _jf_oh_sorted = sorted(_jf_ohs.items(), key=lambda x: -x[1])
+                        _OH_KR2 = {"木":"목(木)","火":"화(火)","土":"토(土)","金":"금(金)","水":"수(水)"}
+                        _OH_BODY = {"木":"간·담·눈","火":"심장·혈관","土":"위장·비장","金":"폐·대장","水":"신장·방광"}
+                        for _oh2, _sc2 in _jf_oh_sorted:
+                            _tag2 = "과다(취약)" if _sc2 >= 3 else ("강" if _sc2 == 2 else ("중" if _sc2 == 1 else "결핍(보강필수)"))
+                            y = _write(f"{_OH_KR2.get(_oh2,_oh2)} {_sc2}개 [{_tag2}] — 취약장기: {_OH_BODY.get(_oh2,'')}", y, size=9)
+                    except Exception:
+                        y = _write("오행 분포: 사주 8글자 기준 산출 (calc_ohaeng_strength)", y, size=9)
+                    y -= 3*mm
+
+                    # ── 5. 십성분석 ──────────────────────────────────────
+                    y = _sec("🔢 5. 십성 분석(十星分析)", y)
+                    _jf_full = LocalSajuNarrator.full_report(pils, name, birth_year, gender)
+                    y = _write(_jf_full[:1800], y, size=9)
+                    y -= 3*mm
+
+                    # ── 6. 신살전체 ──────────────────────────────────────
+                    y = _sec("🗡️ 6. 발동 신살(神煞) 전체", y)
+                    try:
+                        from saju_sinsal import get_12sinsal, get_extra_sinsal
+                        _jf_ss12 = get_12sinsal(pils) or []
+                        _jf_ssex = get_extra_sinsal(pils) or []
+                        _all_sinsal = []
+                        for _s in _jf_ss12 + _jf_ssex:
+                            _n = _s.get("name") or _s.get("이름","") if isinstance(_s, dict) else str(_s)
+                            _d = _s.get("desc") or _s.get("설명","") if isinstance(_s, dict) else ""
+                            if _n: _all_sinsal.append((_n, _d))
+                        if _all_sinsal:
+                            y = _write(f"발동 신살 {len(_all_sinsal)}개 확인:", y, size=9)
+                            for _sn, _sd in _all_sinsal[:10]:
+                                y = _write(f"• {_sn}: {_sd[:60] if _sd else '(상세 설명 앱 참조)'}", y, size=8)
+                        else:
+                            y = _write("특별 신살 없음 — 안정적 원국 구조", y, size=9)
+                    except Exception:
+                        y = _write("신살: 데이터 로드 중 오류 (앱에서 확인하세요)", y, size=9)
+                    y -= 3*mm
+
+                    # ── 7. 대운 8개 ──────────────────────────────────────
+                    y = _sec("🌊 7. 대운 흐름(大運) 8개", y)
+                    _jf_life = LocalSajuNarrator.lifeline(pils, name, birth_year, gender)
+                    y = _write(_jf_life[:2000], y, size=9)
+                    y -= 3*mm
+
+                    # ── 8. 세운+월별 ─────────────────────────────────────
+                    y = _sec("📅 8. 향후 3년 세운·월운", y)
+                    try:
+                        for _yr3 in range(_cur_yr, _cur_yr + 3):
+                            _yd3 = get_yearly_luck(pils, _yr3) or {}
+                            _ss3 = _yd3.get("십성_천간","")
+                            _gh3 = _yd3.get("길흉","평")
+                            _age3 = _yr3 - birth_year + 1
+                            y = _write(f"[{_yr3}년 {_age3}세] {_ss3} [{_gh3}]", y, size=10)
+                            _mons3 = get_monthly_luck(pils, _yr3) or []
+                            _gm3 = [str(m.get("월","")) for m in _mons3 if m.get("길흉","") == "길"]
+                            _bm3 = [str(m.get("월","")) for m in _mons3 if m.get("길흉","") == "흉"]
+                            if _gm3: y = _write(f"  길월 {','.join(_gm3[:4])}월 — 계약·결정·시작 집중", y, size=9)
+                            if _bm3: y = _write(f"  흉월 {','.join(_bm3[:4])}월 — 큰 결정 절대 X", y, size=9)
+                    except Exception:
+                        y = _write(f"{_cur_yr}~{_cur_yr+2}년 세운 분석 (앱에서 상세 확인)", y, size=9)
+                    y -= 3*mm
+
+                    # ── 9. 7대 운명코드 ──────────────────────────────────
+                    y = _sec("🔴 9. 7대 운명 코드 직격 진단", y)
+                    try:
+                        from saju_zhengtong import detect_life_risk_signals as _jf_drs
+                        _jf_risks = _jf_drs(pils)
+                        _RISK_PDF = {
+                            "바람기":"바람기·외도","사고수":"사고수·수술","횡재수":"횡재수·재물",
+                            "이혼·이별":"이혼·이별","큰병":"큰병·중병","결혼인연":"결혼·인연","사업운":"사업운",
+                        }
+                        for _rk, _rv in _jf_risks.items():
+                            _rs = _rv.get("점수",0)
+                            _rl = _rv.get("등급","")
+                            _rm = _rv.get("메시지","")
+                            _rm_clean = _re.sub(r'\n', ' ', _rm)[:100]
+                            y = _write(f"{_RISK_PDF.get(_rk,_rk)}: {_rs}/100 {_rl}", y, size=10)
+                            y = _write(f"  → {_rm_clean}", y, size=8, color=(0.4,0.2,0.1))
+                    except Exception:
+                        y = _write("운명 코드 분석 불가 — saju_zhengtong 필요", y, size=9)
+                    y -= 3*mm
+
+                    # ── 10. 십성조합 ─────────────────────────────────────
+                    y = _sec("⚙️ 10. 십성 조합(十星組合) 패턴", y)
+                    _jf_fut = LocalSajuNarrator.future3(pils, name, birth_year, gender)
+                    y = _write(_jf_fut[:1500], y, size=9)
+                    y -= 3*mm
+
+                    # ── 11. 평론서 요약 ──────────────────────────────────
+                    y = _sec("📜 11. 재물·사업 핵심 분석", y)
+                    _jf_mon = LocalSajuNarrator.money(pils, name, birth_year, gender)
+                    y = _write(_jf_mon[:1500], y, size=9)
+                    y -= 3*mm
+
+                    # ── 12. 관계·인연 ────────────────────────────────────
+                    y = _sec("💑 12. 관계·인연 분석", y)
+                    _jf_rel = LocalSajuNarrator.relations(pils, name, birth_year, gender)
+                    y = _write(_jf_rel[:1500], y, size=9)
+                    y -= 3*mm
+
+                    # ── 13. 행동지침 5가지 ───────────────────────────────
+                    y = _sec("🎯 13. 지금 당장 해야 할 5가지", y)
+                    y = _write(f"① 용신 {_jf_yns} 매일 보강 — 색상·방향·음식 실천. 아는 것만으로는 바뀌지 않습니다.", y, size=10, color=(0.65,0.1,0.1))
+                    y = _write(f"② 기신 {_jf_gis} 강한 시기 — 보증·동업·투기·큰 지출 절대 X. 반드시 후회합니다.", y, size=10, color=(0.65,0.1,0.1))
+                    y = _write(f"③ 길월에 중요 결정 집중 — 흉월에 큰 결정 내리면 100% 힘들어집니다.", y, size=10, color=(0.65,0.1,0.1))
+                    y = _write(f"④ 용신 대운 황금기 — 이 10년을 놓치면 다음 황금기까지 기다려야 합니다.", y, size=10, color=(0.65,0.1,0.1))
+                    y = _write(f"⑤ 위 분석을 출력해 매일 1번 읽으세요. 사주는 아는 것이 아닌 실천이 전부입니다.", y, size=10, color=(0.65,0.1,0.1))
+                    y -= 3*mm
+
+                    # ── 14. 법적 면책 ────────────────────────────────────
+                    y = _sec("⚖️ 14. 법적 면책 고지", y)
+                    y = _write("본 사주 분석은 정통 명리학(자평진전·적천수·궁통보감) 원리에 기반한 참고 자료입니다.", y, size=8, color=(0.5,0.5,0.5))
+                    y = _write("의료·법률·재무 전문가의 진단을 대체하지 않으며, 모든 의사결정의 최종 책임은 본인에게 있습니다.", y, size=8, color=(0.5,0.5,0.5))
+                    y = _write("사주 해석은 통계적 패턴에 기반하며 개인의 노력과 환경에 따라 결과가 달라질 수 있습니다.", y, size=8, color=(0.5,0.5,0.5))
 
                 # 푸터
                 c.setFont(_BF, 8)
@@ -11626,20 +11799,20 @@ def render_worry_inference(pils, birth_year, gender, marital_status=None):
         _name_str = f"<b>{_name}님</b> " if _name and _name != "내담자" else ""
 
         if _mar >= 60:
-            _title = "💕 결혼 인연 — 최상급 사주"
+            _title = "💕 결혼 인연 — 60갑자 상위 5% 최상급 사주"
             _desc = (
-                f"{_name_str}결혼 인연: <b>{_mar}/100 — 최상급.</b><br>"
-                f"이혼 위험 {_div}/100, 바람기 {_aff}/100 — 모두 낮음.<br><br>"
-                f"<b>📌 사주가 말하는 것:</b><br>"
-                f"• 천을귀인 — 격 있는 배우자 인연<br>"
-                f"• 합(合) 기운 — 배우자궁 활성<br>"
+                f"{_name_str}결혼 인연: <b>{_mar}/100 — 60갑자 중 상위 5%.</b><br>"
+                f"이혼 위험 {_div}/100, 바람기 {_aff}/100 — 낮음.<br><br>"
+                f"<b>📌 사주가 반드시 말하는 것:</b><br>"
+                f"• 천을귀인 — 격 있는 배우자 인연이 <b>반드시</b> 옵니다<br>"
+                f"• 합(合) 기운 — 배우자궁 완전 활성<br>"
                 f"• 관인상생 구조 — 사회적 지위 동반 인연<br><br>"
-                f"<b>🎯 결정적 시기:</b><br>"
+                f"<b>🎯 결정적 시기 — 이 시기 놓치면 5년 후회:</b><br>"
                 f"• 천을귀인 활성: 6월·12월<br>"
                 f"• 길월: 4·9·11월<br><br>"
                 f"<b>💎 행동 지침:</b><br>"
-                f"싱글이면 6월·12월에 적극 움직이세요. 그 시기 인연이 평생을 갑니다.<br>"
-                f"기혼이면 충(沖) 발동 해에 배우자 갈등 주의."
+                f"싱글이면 6월·12월에 <b>반드시 적극 움직이세요.</b> 그 시기 인연이 평생을 갑니다.<br>"
+                f"기혼이면 충(沖) 발동 해에 배우자 갈등 — 먼저 대화를 시작하세요."
             )
             _color = "#1a237e"
         elif _div >= 60:
@@ -26758,7 +26931,7 @@ return false;">▲</a>
 
     total_lines = get_total_lines()
 
-    render_pdf_download_btn("ohaeng", pils, name, birth_year, gender)
+    render_pdf_download_btn("jonghap_full", pils, name, birth_year, gender)
 
     st.markdown(
         """
