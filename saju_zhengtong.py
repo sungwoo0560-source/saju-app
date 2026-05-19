@@ -7117,7 +7117,7 @@ def detect_life_risk_signals(pils, saewoon_data=None):
     elif baram_score >= 20:
         baram_level, baram_msg = "🟢 낮음", "🟢 평소 안전 — 단, 도화 운 만나면 흔들립니다. 충동 인연 주의."
     else:
-        baram_level, baram_msg = "✅ 매우 낮음", "원국 외도 기운 매우 약함. 안정 인연 타입."
+        baram_level, baram_msg = "✅ 매우 낮음", "✅ 천성이 외도 안 합니다 — 의리형.\n→ 단, 도화 운(합 발동 해) 들어오면 이성 인연 자주.\n→ 기혼자는 의식적으로 자기 통제."
     results["바람기"] = {"점수": min(baram_score,100), "등급": baram_level, "이유": baram_reasons, "메시지": baram_msg, "아이콘": "💔"}
 
     # 2. 사고수
@@ -7143,7 +7143,7 @@ def detect_life_risk_signals(pils, saewoon_data=None):
     elif sago_score >= 40:
         sago_level, sago_msg = "🟡 보통", "양인 발동. 충(沖) 운 해 — 운전·이동·수술 절대 조심.\n→ 이 해에 무리하면 반드시 후회합니다. 두 배 더 안전하게 사세요."
     elif sago_score >= 20:
-        sago_level, sago_msg = "🟢 낮음", "양인 1개 — 일상 주의 수준.\n→ 큰 사고 기운은 약합니다. 평소 운전·안전 챙기세요."
+        sago_level, sago_msg = "🟢 낮음", "⚔️ 양인살 박힌 사주 — 평생 사고·수술 따라옵니다.\n→ 운전·과로·격투 절대 X. 보험 미리 챙기세요."
     else:
         sago_level, sago_msg = "✅ 매우 낮음", "건강 운 타고남. 사고 기운 매우 약함."
     results["사고수"] = {"점수": min(sago_score,100), "등급": sago_level, "이유": sago_reasons, "메시지": sago_msg, "아이콘": "⚠️"}
@@ -7169,7 +7169,7 @@ def detect_life_risk_signals(pils, saewoon_data=None):
     if hwangjae_score >= 60:
         hwangjae_level, hwangjae_msg = "🌟 매우 강함", "재물 그릇 큰 사주. 용신 대운에 큰돈 한 번에 들어옴.\n→ 단, 준비 없이 들어오면 한 번에 다 날아갑니다. 지금 당장 준비하세요."
     elif hwangjae_score >= 40:
-        hwangjae_level, hwangjae_msg = "✨ 강함", "편재 + 식신생재 — 큰돈 들어옴. 들어오면 즉시 묶을 것.\n→ 빨리 나갈 수도 있으니 즉시 안전 자산에 고정하세요."
+        hwangjae_level, hwangjae_msg = "✨ 강함", "💰 평생 단 한 번 — 큰돈 잡는 사주.\n→ 용신 대운에 결정적 재물 기회 옵니다. 그 전에 준비하세요.\n→ 보증·동업 절대 X — 한 번에 다 날아갑니다."
     elif hwangjae_score >= 20:
         hwangjae_level, hwangjae_msg = "💡 보통", "꾸준한 직장형. 큰 횡재 X. 안정 저축이 답.\n→ 꾸준히 모이면 결국 큽니다."
     else:
@@ -7199,7 +7199,7 @@ def detect_life_risk_signals(pils, saewoon_data=None):
     elif ihon_score >= 40:
         ihon_level, ihon_msg = "🟡 주의", "충 발동 주의. 갈등 시기 대화 늘릴 것.\n→ 멀어집니다. 지금 대화하세요."
     elif ihon_score >= 20:
-        ihon_level, ihon_msg = "🟢 안정", "배우자궁 안정. 큰 위기 X."
+        ihon_level, ihon_msg = "🟢 안정", "💑 배우자궁 안정 — 큰 위기 없음.\n→ 단, 충(沖) 운 해 — 일시적 갈등 가능.\n→ 그 해 부부 대화 의식적으로 늘리세요."
     else:
         ihon_level, ihon_msg = "✅ 매우 안정", "✅ 당신 결혼은 안전합니다. 끝까지 갑니다."
     results["이혼·이별"] = {"점수": min(ihon_score,100), "등급": ihon_level, "이유": ihon_reasons, "메시지": ihon_msg, "아이콘": "💔"}
@@ -7233,7 +7233,7 @@ def detect_life_risk_signals(pils, saewoon_data=None):
     elif byeong_score >= 20:
         byeong_level, byeong_msg = "🟢 양호", "건강 평균 — 평소 습관 유지하면 OK."
     else:
-        byeong_level, byeong_msg = "✅ 매우 양호", "건강 운 타고남. 큰 병 X."
+        byeong_level, byeong_msg = "✅ 매우 양호", "✅ 건강 타고난 사주 — 큰 병 없음.\n→ 단, 오행 불균형 장기 — 환절기(3·6·9·12월) 정기 검진 필수."
     results["큰병"] = {"점수": min(max(byeong_score, 15), 100), "등급": byeong_level, "이유": byeong_reasons, "메시지": byeong_msg, "아이콘": "🏥"}
 
     # 6. 결혼 인연
@@ -7255,7 +7255,7 @@ def detect_life_risk_signals(pils, saewoon_data=None):
         gyeolhon_score += 15
         gyeolhon_reasons.append("관인상생 — 격있는 배우자 인연")
     if gyeolhon_score >= 60:
-        gyeolhon_level, gyeolhon_msg = "🌟 최상급 인연", "60갑자 중 상위 5% 결혼 인연 사주. 합 운·천을귀인 활성 해 — 반드시 적극 움직이세요.\n→ 이 시기 못 잡으면 5년 후회합니다. 단 한 번의 기회를 절대 놓치지 마세요."
+        gyeolhon_level, gyeolhon_msg = "🌟 최상급 인연", "💎 60갑자 중 상위 5% — 평생 단 한 번 그 인연이 옵니다.\n→ 천을귀인 활성월(6월·12월) — 사람 만나는 자리 의무로 가세요.\n→ 이 시기 못 잡으면 평생 후회입니다."
     elif gyeolhon_score >= 40:
         gyeolhon_level, gyeolhon_msg = "✨ 좋음", "✨ 좋은 결혼 인연 옵니다 — 정재/정관 운에서."
     elif gyeolhon_score >= 20:
@@ -7290,7 +7290,7 @@ def detect_life_risk_signals(pils, saewoon_data=None):
     elif saup_score >= 25:
         saup_level, saup_msg = "✨ 사업 가능", "직장 + 부업 병행 적합.\n→ 자금 관리 못하면 무너집니다. 시기 잘 보세요."
     elif saup_score >= 0:
-        saup_level, saup_msg = "💼 직장형", "직장·전문직이 반드시 당신을 살립니다.\n→ 사업 유혹에 흔들리면 10년 후 반드시 후회합니다."
+        saup_level, saup_msg = "💼 직장형", "💼 사업하면 100% 망하는 구조.\n→ 비겁쟁재·재다신약 — 동업·투자자 받으면 즉시 분쟁.\n→ 직장 + 작은 부업만. 사업 유혹에 흔들리면 반드시 후회합니다."
     else:
         saup_level, saup_msg = "⚠️ 사업 위험", "⚠️ 사업 손대지 마세요. 직장·전문직이 당신을 살립니다."
     results["사업운"] = {"점수": max(min(saup_score, 100), 10), "등급": saup_level, "이유": saup_reasons, "메시지": saup_msg, "아이콘": "💼"}
@@ -7493,14 +7493,14 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
         "역마살": ("이동·변화·해외의 기운", "무역·영업·해외 진출에 유리합니다.<br>→ 충동적 이직·이사는 반드시 신중히. 목적 있는 이동만 허용하세요."),
         "도화살": ("타고난 매력과 예술적 기운", "연예·방송·서비스 분야에서 빛납니다.<br>→ 이성 구설수 조심. 합 운에 인연 넘침 — 기혼자 각별히 주의."),
         "화개살": ("종교·철학·예술의 고독한 학자형 기운", "학문·연구 분야에서 독보적 성취 가능합니다.<br>→ 혼자 깊이 파고드는 힘. 단체 활동보다 개인 전문성 키우세요."),
-        "겁살": ("외부의 갑작스러운 손재 위험 기운", "보증·동업·투기 절대 X.<br>→ 현금 비중 ↑, 충동 지출·계약 자제. 외부 충격에 대비하세요."),
+        "겁살": ("외부 갑작스러운 손재 위험 신살", f"<b>⚡ {name}님 — 평생 보증·동업·투기 절대 X.</b><br>→ <b>발동</b>: 갑작스러운 외부 충격으로 돈 사라짐.<br>→ <b>절대 X</b>: 친구 보증, 가족 사업 투자, 부동산 투기.<br>→ <b>해법</b>: 현금 비중 ↑, 안전 자산 묶기. 비겁 운에 특히 주의."),
         "재살": ("사고수·관재수 발생 가능성 기운", "이동 중 안전 주의, 법적 분쟁 예방 필수입니다.<br>→ 계약서 꼼꼼히. 이동·운전 중 두 배 조심."),
         "천살": ("윗사람·권위자와 마찰 발생 기운", "조직 내 처신을 지혜롭게 하세요.<br>→ 상관과 충돌 시 손해는 내 쪽. 표현 방식 조절이 핵심."),
         "장성살": ("타고난 리더십과 통솔력 기운", "군·경·경영·스포츠 등 조직을 이끄는 역할에 적합합니다.<br>→ 혼자보다 팀을 이끌 때 진가 발휘. 리더 역할 적극 수용하세요."),
-        "양인살": ("강한 추진력이지만 양날의 검 기운", "잘 쓰면 큰 성공 — 군·경·외과·검사로 승화 가능.<br>→ 사고·수술 평생 따라옴. 충 운에 위험 ↑. 안전·보험 필수."),
+        "양인살": ("양날의 검 — 최강 추진력 + 평생 사고", f"<b>⚔️ {name}님 핵심 신살 — 양날의 검.</b><br>→ <b>잘 쓰면</b>: 군·경·외과·검사 — 자기 분야 최강 추진력.<br>→ <b>못 쓰면</b>: 사고·수술 평생 따라옵니다. 충 운에 위험 폭발.<br>→ <b>해법</b>: 정기 검진·안전·보험 미리 챙기세요. 이건 선택이 아닙니다."),
         "귀문관살": ("직감·영감이 발달한 기운", "예술·상담·역술 천직 — 직감이 남보다 정확합니다.<br>→ 신경 예민. 불면·우울 주의. 명상·규칙 수면 필수."),
-        "천을귀인": ("위기에 귀인이 나타나는 기운", "활성월: 6월·12월 — 이때 인연·재물 조력자 반드시 나타납니다.<br>→ 이 시기 중요 결정·만남을 집중하세요."),
-        "문창귀인": ("학문·글재주·언어 기운", "교육·작가·강사·법조 분야에서 빛납니다.<br>→ 글쓰기·강의·소통 능력이 경쟁력. 이 방면 집중 투자하세요."),
+        "천을귀인": ("위기에 반드시 귀인이 나타나는 기운", f"<b>🌟 {name}님 사주의 최강 보물 — 위기마다 귀인 등장.</b><br>→ <b>활성월: 6월·12월</b> — 매년 두 번 귀인·인연·재물 반드시 나타납니다.<br>→ <b>이 시기 절대 거절 X</b>: 사람·미팅·기회 모두 잡으세요.<br>→ <b>운명이 바뀌는 시기</b>가 이 달입니다."),
+        "문창귀인": ("학문·글·말 능력 최강 신살", f"<b>📚 {name}님 — 글·말 능력 60갑자 중 상위.</b><br>→ <b>직업</b>: 강의·작가·교육·법조·역술 — 무조건 강점입니다.<br>→ <b>표현하는 일 절대 피하지 마세요.</b> 이것이 {name}님 밥줄입니다.<br>→ 콘텐츠·강의·책 — 부수입 가능. 지금 시작하세요."),
         "월덕귀인": ("덕망과 인복 기운", "주변 사람들이 자연스럽게 돕는 귀인 구조입니다.<br>→ 인맥·관계에 투자하세요. 귀인이 결정적 순간에 나타납니다."),
         # Y-21 추가
         "홍염살": ("타고난 이성 흡인력·매력 기운", "연예·방송·미용·서비스 분야에서 빛납니다.<br>→ 이성 구설 주의. 합 운에 인연 넘침 — <b>기혼자 절대 경계.</b>"),
@@ -7539,20 +7539,20 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
     html = f"""
 <div style="background:linear-gradient(180deg,#fdfcf7 0%,#fff 100%);
             border:3px solid #6b4423;border-radius:20px;
-            padding:40px 35px;margin:24px 0;
+            padding:clamp(20px, 5vw, 40px) clamp(15px, 4vw, 35px);margin:24px 0;
             box-shadow:0 12px 32px rgba(107,68,35,0.15);
             font-family:'Noto Serif KR',serif;">
 
   <!-- 헤더 -->
   <div style="text-align:center;border-bottom:2px solid #6b4423;padding-bottom:20px;margin-bottom:30px;">
     <div style="font-size:14px;color:#8b6914;letter-spacing:4px;font-weight:700;">📜 종합 사주 평론 📜</div>
-    <div style="font-size:28px;font-weight:900;color:#3e2723;margin-top:10px;">{name}님 사주 풀이</div>
+    <div style="font-size:clamp(20px, 5vw, 28px);font-weight:900;color:#3e2723;margin-top:10px;">{name}님 사주 풀이</div>
     <div style="font-size:13px;color:#6b4423;margin-top:8px;">{birth_year}년생 만 {cur_age}세 {gender}</div>
   </div>
 
   <!-- 1. 사주 명식 -->
   <div style="margin-bottom:28px;">
-    <div style="font-size:17px;font-weight:900;color:#3e2723;border-left:5px solid #6b4423;padding-left:12px;margin-bottom:12px;">【1. 사주 명식(命式)】</div>
+    <div style="font-size:clamp(14px, 3.5vw, 17px);font-weight:900;color:#3e2723;border-left:5px solid #6b4423;padding-left:12px;margin-bottom:12px;">【1. 사주 명식(命式)】</div>
     <div style="background:#faf5ee;padding:18px 20px;border-radius:10px;line-height:2.1;font-size:15px;color:#3e2723;">
       <b>년주(年柱)</b> {sj_cg}{sj_jj} <span style="color:#8b6914;">({CG_KR.get(sj_cg,'')}{JJ_KR.get(sj_jj,'')})</span>&nbsp;&nbsp;
       <b>월주(月柱)</b> {wj_cg}{wj_jj} <span style="color:#8b6914;">({CG_KR.get(wj_cg,'')}{JJ_KR.get(wj_jj,'')})</span>&nbsp;&nbsp;
@@ -7569,7 +7569,7 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
 
   <!-- 2. 사주 총평 -->
   <div style="margin-bottom:28px;">
-    <div style="font-size:17px;font-weight:900;color:#3e2723;border-left:5px solid #6b4423;padding-left:12px;margin-bottom:12px;">【2. 사주 총평(總評)】</div>
+    <div style="font-size:clamp(14px, 3.5vw, 17px);font-weight:900;color:#3e2723;border-left:5px solid #6b4423;padding-left:12px;margin-bottom:12px;">【2. 사주 총평(總評)】</div>
     <div style="font-size:15px;color:#3e2723;line-height:2;background:#faf5ee;padding:18px 20px;border-radius:10px;">
       {name}님은 <b>{iz_cg}{iz_jj}({ilgan_kr}{iljj_kr})</b> 일주로 태어나셨습니다.<br>
       쉽게 말하면 — <b>{ilgan}({ilgan_kr})</b> 일간은 <b>{ilgan_meta}</b> 기운입니다.<br>
@@ -7590,7 +7590,7 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
 
   <!-- 3. 성격 -->
   <div style="margin-bottom:28px;">
-    <div style="font-size:17px;font-weight:900;color:#3e2723;border-left:5px solid #6b4423;padding-left:12px;margin-bottom:12px;">【3. 성격(性格)】</div>
+    <div style="font-size:clamp(14px, 3.5vw, 17px);font-weight:900;color:#3e2723;border-left:5px solid #6b4423;padding-left:12px;margin-bottom:12px;">【3. 성격(性格)】</div>
     <div style="display:flex;gap:16px;flex-wrap:wrap;">
       <div style="flex:1;min-width:240px;background:#e8f5e9;padding:16px;border-radius:10px;border-left:4px solid #2e7d32;">
         <div style="font-weight:900;color:#2e7d32;margin-bottom:8px;">💎 강점 — {name}님이 활용할 무기들</div>
@@ -7607,8 +7607,8 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
 
   <!-- 4. 직업 적성 -->
   <div style="margin-bottom:28px;">
-    <div style="font-size:17px;font-weight:900;color:#3e2723;border-left:5px solid #6b4423;padding-left:12px;margin-bottom:12px;">【4. 직업 적성(職業)】</div>
-    <div style="background:#faf5ee;padding:18px 20px;border-radius:10px;line-height:2;font-size:15px;color:#3e2723;">
+    <div style="font-size:clamp(14px, 3.5vw, 17px);font-weight:900;color:#3e2723;border-left:5px solid #6b4423;padding-left:12px;margin-bottom:12px;">【4. 직업 적성(職業)】</div>
+    <div style="background:#faf5ee;padding:18px 20px;border-radius:10px;line-height:2;font-size:clamp(13px, 3vw, 15px);color:#3e2723;">
       <b style="color:#2e7d32;">{name}님께 적합한 직업 분야:</b><br>
       {ilju_info.get("직업","교수, 연구원, 법조인, 금융, 공직")}<br><br>
       <b style="color:#1565c0;">[적합한 이유]</b><br>
@@ -7619,8 +7619,8 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
 
   <!-- 5. 재물 -->
   <div style="margin-bottom:28px;">
-    <div style="font-size:17px;font-weight:900;color:#3e2723;border-left:5px solid #6b4423;padding-left:12px;margin-bottom:12px;">【5. 재물(財物)】</div>
-    <div style="background:#faf5ee;padding:18px 20px;border-radius:10px;line-height:2;font-size:15px;color:#3e2723;">
+    <div style="font-size:clamp(14px, 3.5vw, 17px);font-weight:900;color:#3e2723;border-left:5px solid #6b4423;padding-left:12px;margin-bottom:12px;">【5. 재물(財物)】</div>
+    <div style="background:#faf5ee;padding:18px 20px;border-radius:10px;line-height:2;font-size:clamp(13px, 3vw, 15px);color:#3e2723;">
       <b>재물 종합 분석:</b><br>
       · 횡재수: <b>{_risk("횡재수","점수",0)}/100</b> — {_risk("횡재수","등급","보통")}<br>
       · 사업운: <b>{_risk("사업운","점수",0)}/100</b> — {_risk("사업운","등급","보통")}<br><br>
@@ -7637,8 +7637,8 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
 
   <!-- 6. 건강 -->
   <div style="margin-bottom:28px;">
-    <div style="font-size:17px;font-weight:900;color:#3e2723;border-left:5px solid #6b4423;padding-left:12px;margin-bottom:12px;">【6. 건강(健康)】</div>
-    <div style="background:#faf5ee;padding:18px 20px;border-radius:10px;line-height:2;font-size:15px;color:#3e2723;">
+    <div style="font-size:clamp(14px, 3.5vw, 17px);font-weight:900;color:#3e2723;border-left:5px solid #6b4423;padding-left:12px;margin-bottom:12px;">【6. 건강(健康)】</div>
+    <div style="background:#faf5ee;padding:18px 20px;border-radius:10px;line-height:2;font-size:clamp(13px, 3vw, 15px);color:#3e2723;">
       {ilju_info.get("건강","오행 균형에 따른 건강 관리가 필요합니다.")}<br><br>
       <b>큰병 위험:</b> {_risk("큰병","점수",0)}/100 — {_risk("큰병","등급","양호")}&nbsp;&nbsp;
       <b>사고수:</b> {_risk("사고수","점수",0)}/100 — {_risk("사고수","등급","낮음")}<br>
@@ -7650,8 +7650,8 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
 
   <!-- 7. 인연·결혼 -->
   <div style="margin-bottom:28px;">
-    <div style="font-size:17px;font-weight:900;color:#3e2723;border-left:5px solid #6b4423;padding-left:12px;margin-bottom:12px;">【7. 인연·결혼(姻緣)】</div>
-    <div style="background:#faf5ee;padding:18px 20px;border-radius:10px;line-height:2;font-size:15px;color:#3e2723;">
+    <div style="font-size:clamp(14px, 3.5vw, 17px);font-weight:900;color:#3e2723;border-left:5px solid #6b4423;padding-left:12px;margin-bottom:12px;">【7. 인연·결혼(姻緣)】</div>
+    <div style="background:#faf5ee;padding:18px 20px;border-radius:10px;line-height:2;font-size:clamp(13px, 3vw, 15px);color:#3e2723;">
       <b>{name}님의 배우자궁(일지)은 {iz_jj}({iljj_kr})입니다.</b><br>
       {ilju_info.get("배우자","배우자궁이 삶의 동반자 패턴을 결정합니다. 이 자리의 기운이 {name}님의 결혼 생활에 직접 영향을 줍니다.")}<br><br>
       <b>결혼 인연:</b> <b>{_risk("결혼인연","점수",0)}/100</b> — {_risk("결혼인연","등급","보통")}&nbsp;&nbsp;
@@ -7666,8 +7666,8 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
 
   <!-- 8. 운세 흐름 — 대운 -->
   <div style="margin-bottom:28px;">
-    <div style="font-size:17px;font-weight:900;color:#3e2723;border-left:5px solid #6b4423;padding-left:12px;margin-bottom:12px;">【8. 운세 흐름 — 대운(大運)】</div>
-    <div style="background:#faf5ee;padding:18px 20px;border-radius:10px;line-height:2;font-size:15px;color:#3e2723;">
+    <div style="font-size:clamp(14px, 3.5vw, 17px);font-weight:900;color:#3e2723;border-left:5px solid #6b4423;padding-left:12px;margin-bottom:12px;">【8. 운세 흐름 — 대운(大運)】</div>
+    <div style="background:#faf5ee;padding:18px 20px;border-radius:10px;line-height:2;font-size:clamp(13px, 3vw, 15px);color:#3e2723;">
       대운(大運)은 10년마다 바뀌는 인생의 큰 계절입니다.<br>
       → 마치 봄·여름·가을·겨울처럼 — 10년마다 삶의 환경이 달라집니다.<br><br>
       <b>🌟 용신 대운</b> <b>{yong_str}</b> 기운이 들어오는 10년 → <b>인생 황금기입니다.</b><br>
@@ -7680,8 +7680,8 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
 
   <!-- 9. 올해 세운 -->
   <div style="margin-bottom:28px;">
-    <div style="font-size:17px;font-weight:900;color:#3e2723;border-left:5px solid #6b4423;padding-left:12px;margin-bottom:12px;">【9. {cur_year}년 세운(歲運)】</div>
-    <div style="background:#faf5ee;padding:18px 20px;border-radius:10px;line-height:2;font-size:15px;color:#3e2723;">
+    <div style="font-size:clamp(14px, 3.5vw, 17px);font-weight:900;color:#3e2723;border-left:5px solid #6b4423;padding-left:12px;margin-bottom:12px;">【9. {cur_year}년 세운(歲運)】</div>
+    <div style="background:#faf5ee;padding:18px 20px;border-radius:10px;line-height:2;font-size:clamp(13px, 3vw, 15px);color:#3e2723;">
       세운(歲運)은 올해 1년의 흐름을 결정하는 기운입니다.<br>
       → 대운(10년)이 큰 계절이라면, 세운(1년)은 그 안의 날씨입니다.<br><br>
       🌟 <b>길월(吉月) — 반드시 활용할 달:</b> 4월·9월·11월<br>
@@ -7694,8 +7694,8 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
 
   <!-- 10. 발동 신살 -->
   <div style="margin-bottom:28px;">
-    <div style="font-size:17px;font-weight:900;color:#3e2723;border-left:5px solid #6b4423;padding-left:12px;margin-bottom:12px;">【10. 발동 신살(神煞)】</div>
-    <div style="background:#faf5ee;padding:18px 20px;border-radius:10px;line-height:2;font-size:15px;color:#3e2723;">
+    <div style="font-size:clamp(14px, 3.5vw, 17px);font-weight:900;color:#3e2723;border-left:5px solid #6b4423;padding-left:12px;margin-bottom:12px;">【10. 발동 신살(神煞)】</div>
+    <div style="background:#faf5ee;padding:18px 20px;border-radius:10px;line-height:2;font-size:clamp(13px, 3vw, 15px);color:#3e2723;">
       <b>{name}님 원국에 자리한 주요 신살:</b><br><br>
       {sinsal_rows}
     </div>
@@ -7703,7 +7703,7 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
 
   <!-- 11. 개운법 -->
   <div style="margin-bottom:28px;">
-    <div style="font-size:17px;font-weight:900;color:#3e2723;border-left:5px solid #6b4423;padding-left:12px;margin-bottom:12px;">【11. 개운법(開運法)】</div>
+    <div style="font-size:clamp(14px, 3.5vw, 17px);font-weight:900;color:#3e2723;border-left:5px solid #6b4423;padding-left:12px;margin-bottom:12px;">【11. 개운법(開運法)】</div>
     <div style="display:flex;gap:16px;flex-wrap:wrap;">
       <div style="flex:1;min-width:240px;background:#e3f2fd;padding:16px;border-radius:10px;border-left:4px solid #1565c0;">
         <div style="font-weight:900;color:#0d47a1;margin-bottom:8px;">✅ 용신 보강 ({yong_str})</div>
@@ -7728,7 +7728,7 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
 
   <!-- 12. 종합 결론 -->
   <div style="margin-bottom:20px;">
-    <div style="font-size:17px;font-weight:900;color:#3e2723;border-left:5px solid #c62828;padding-left:12px;margin-bottom:12px;">【12. 종합 결론】</div>
+    <div style="font-size:clamp(14px, 3.5vw, 17px);font-weight:900;color:#3e2723;border-left:5px solid #c62828;padding-left:12px;margin-bottom:12px;">【12. 종합 결론】</div>
     <div style="background:linear-gradient(135deg,#fff8e1 0%,#fff3e0 100%);padding:22px 24px;border-radius:12px;
                 line-height:2;font-size:15px;color:#3e2723;border:2px solid #d4af37;">
       <b>{name}님 — {iz_cg}{iz_jj}({ilgan_kr}{iljj_kr}) 일주, {shin_label} {gyeok_label} 사주입니다.</b><br><br>
@@ -7740,13 +7740,14 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
       2. 🔴 기신 <b>{gisin_str}</b> 강한 시기 — 보증·동업·투기 절대 X. 이 시기 무리하면 100% 후회합니다<br>
       3. 🔴 길월에 중요 결정 집중 — 흉월에 큰 결정 내리면 반드시 힘들어집니다. 이건 통계입니다<br>
       4. 🔴 용신 대운 황금기 10년 — 이 시기를 놓치면 다음 황금기까지 기다려야 합니다<br>
-      5. 🔴 강점 <b>{ilju_info.get("강점","결단력·추진력").split(",")[0].strip()}</b> 100% 활용 + 약점 <b>{ilju_info.get("약점","고집").split(",")[0].strip()}</b> 의식적 보완 필수<br><br>
+      5. 🔴 강점 <b>{ilju_info.get("강점","결단력·추진력").split(",")[0].strip()}</b> — 자기 분야에서 100% 발휘. <b>망설이면 묻힙니다.</b><br>
+      &nbsp;&nbsp;&nbsp;→ 다른 사람 눈치 보지 마세요. 이 강점이 {name}님을 살립니다.<br><br>
       <b>🌟 {name}님 황금기:</b><br>
-      용신 <b>{yong_str}</b> 대운 시기 — 인생 진짜 황금기입니다.<br>
-      지금의 준비가 그 시기를 만듭니다.<br><br>
+      용신 <b>{yong_str}</b> 대운 시기 — 인생 진짜 황금기. 그 10년을 준비 없이 맞이하면 그냥 지나갑니다.<br><br>
       <b>📌 사주는 정해진 운명이 아닙니다.</b><br>
-      {name}님이 가진 패와 흐름의 안내서입니다.<br>
-      강점 살리고 약점 보완하면 — 사주가 인생의 지도가 됩니다.
+      <b>{name}님 — 이미 하늘이 주신 패는 최상급입니다.</b><br>
+      이제 그 패를 어떻게 쓸지 — {name}님의 결심에 달렸습니다.<br>
+      오늘부터 — 한 가지씩 실천하세요. <b>운명이 바뀝니다.</b>
     </div>
   </div>
 
@@ -7861,16 +7862,16 @@ def render_manse_board(pils, name="내담자", birth_year=1969, gender="男",
         c = CG_COLOR.get(cg, "#666")
         brd = "border:3px solid #c62828;" if highlight else "border:1px solid #bbb;"
         kr = CG_KR.get(cg, "")
-        return (f'<td style="background:{c};color:#fff;font-size:22px;font-weight:900;'
-                f'text-align:center;padding:12px 4px;{brd}">'
+        return (f'<td style="background:{c};color:#fff;font-size:clamp(14px, 4vw, 22px);font-weight:900;'
+                f'text-align:center;padding:clamp(6px, 2vw, 12px) clamp(2px, 1vw, 4px);{brd}">'
                 f'{cg}<br><span style="font-size:10px;font-weight:500;">{kr}</span></td>')
 
     def _jj_td(jj, highlight=False):
         c = JJ_COLOR.get(jj, "#666")
         brd = "border:3px solid #c62828;" if highlight else "border:1px solid #bbb;"
         kr = JJ_KR.get(jj, "")
-        return (f'<td style="background:{c};color:#fff;font-size:22px;font-weight:900;'
-                f'text-align:center;padding:12px 4px;{brd}">'
+        return (f'<td style="background:{c};color:#fff;font-size:clamp(14px, 4vw, 22px);font-weight:900;'
+                f'text-align:center;padding:clamp(6px, 2vw, 12px) clamp(2px, 1vw, 4px);{brd}">'
                 f'{jj}<br><span style="font-size:10px;font-weight:500;">{kr}</span></td>')
 
     def _info(text, bg="#faf5ee", fg="#3e2723", sz=11, highlight=False):
@@ -8005,7 +8006,7 @@ def render_manse_board(pils, name="내담자", birth_year=1969, gender="男",
 
   <div style="text-align:center;margin-bottom:16px;border-bottom:2px solid #6b4423;padding-bottom:12px;">
     <div style="font-size:12px;color:#8b6914;letter-spacing:4px;font-weight:700;">⚱️ 정통 명리학 만세력 ⚱️</div>
-    <div style="font-size:20px;font-weight:900;color:#3e2723;margin-top:6px;">{name}님 만세력 보드</div>
+    <div style="font-size:clamp(14px, 3.5vw, 20px);font-weight:900;color:#3e2723;margin-top:6px;">{name}님 만세력 보드</div>
     <div style="font-size:11px;color:#6b4423;margin-top:4px;">{birth_year}년생 {gender} — {current_year}년 기준</div>
   </div>
 

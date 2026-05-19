@@ -11799,19 +11799,20 @@ def render_worry_inference(pils, birth_year, gender, marital_status=None):
         _name_str = f"<b>{_name}님</b> " if _name and _name != "내담자" else ""
 
         if _mar >= 60:
-            _title = "💕 결혼 인연 — 60갑자 상위 5% 최상급 사주"
+            _title = "💎 결혼 인연 — 최상급 사주 (60갑자 중 상위 5%)"
             _desc = (
                 f"{_name_str}결혼 인연: <b>{_mar}/100 — 60갑자 중 상위 5%.</b><br>"
                 f"이혼 위험 {_div}/100, 바람기 {_aff}/100 — 낮음.<br><br>"
                 f"<b>📌 사주가 반드시 말하는 것:</b><br>"
                 f"• 천을귀인 — 격 있는 배우자 인연이 <b>반드시</b> 옵니다<br>"
                 f"• 합(合) 기운 — 배우자궁 완전 활성<br>"
-                f"• 관인상생 구조 — 사회적 지위 동반 인연<br><br>"
-                f"<b>🎯 결정적 시기 — 이 시기 놓치면 5년 후회:</b><br>"
+                f"• 평생 단 한 번 그 인연 — 이 구조가 불러옵니다<br><br>"
+                f"<b>🎯 평생 단 한 번의 그 인연 — 결정적 시기:</b><br>"
                 f"• 천을귀인 활성: 6월·12월<br>"
                 f"• 길월: 4·9·11월<br><br>"
                 f"<b>💎 행동 지침:</b><br>"
-                f"싱글이면 6월·12월에 <b>반드시 적극 움직이세요.</b> 그 시기 인연이 평생을 갑니다.<br>"
+                f"싱글이면 6월·12월 — <b>사람 만나는 자리 무조건 가세요. 의무입니다.</b><br>"
+                f"이 시기 못 잡으면 5년 후회. <b>평생 가는 후회입니다.</b><br>"
                 f"기혼이면 충(沖) 발동 해에 배우자 갈등 — 먼저 대화를 시작하세요."
             )
             _color = "#1a237e"
@@ -11867,9 +11868,9 @@ def render_worry_inference(pils, birth_year, gender, marital_status=None):
         st.markdown(
             f"""
 <div style="background:linear-gradient(135deg,{_color} 0%,#000 100%);
-            border-radius:14px;padding:24px;margin:16px 0;color:#fff;">
+            border-radius:14px;padding:clamp(16px, 4vw, 24px);margin:16px 0;color:#fff;">
   <div style="font-size:13px;color:#ffd54f;letter-spacing:3px;font-weight:700;">📍 현재 운세 진단</div>
-  <div style="font-size:22px;font-weight:900;margin-top:8px;">{_title}</div>
+  <div style="font-size:clamp(17px, 4.5vw, 22px);font-weight:900;margin-top:8px;">{_title}</div>
   <div style="font-size:14px;margin-top:14px;line-height:1.9;color:#e8eaf6;">
     {_desc}
   </div>
