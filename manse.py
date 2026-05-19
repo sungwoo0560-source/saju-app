@@ -24134,11 +24134,22 @@ def menu_gaewoon(pils, name, birth_year, gender):
             ("LocalFont",    _os.path.join(_os.path.dirname(__file__), "fonts", "NanumGothic.ttf"), None),
         ]
         _BASE = "Helvetica"
+        # 이미 등록된 폰트 재사용 (중복 등록 방지)
+        _registered_fonts = getattr(pdfmetrics, '_fonts', {})
         for _fn, _fp, _fi in _FONT_CANDS:
-            if _os.path.exists(_fp):
+            if _fn in _registered_fonts:
+                _BASE = _fn
+                break
+        if _BASE == "Helvetica":
+            for _fn, _fp, _fi in _FONT_CANDS:
+                if not _os.path.exists(_fp):
+                    continue
                 try:
                     if _fi is not None:
-                        pdfmetrics.registerFont(TTFont(_fn, _fp, subfontIndex=_fi))
+                        try:
+                            pdfmetrics.registerFont(TTFont(_fn, _fp, subfontIndex=_fi))
+                        except Exception:
+                            pdfmetrics.registerFont(TTFont(_fn, _fp))
                     else:
                         pdfmetrics.registerFont(TTFont(_fn, _fp))
                     _BASE = _fn

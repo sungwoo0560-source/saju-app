@@ -192,12 +192,25 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str=""):
 
             BASE_FONT = "Helvetica"
 
-            # 1순위: 로컬 TTF 폰트 (한글 전용)
+            # 이미 등록된 폰트 재사용 (중복 등록 방지)
+            _registered = getattr(pdfmetrics, '_fonts', {})
             for _fn, _fp, _fi in _FONT_CANDIDATES:
-                if os.path.exists(_fp):
+                if _fn in _registered:
+                    BASE_FONT = _fn
+                    break
+
+            # 1순위: 로컬 TTF/TTC 폰트 (한글 전용)
+            if BASE_FONT == "Helvetica":
+                for _fn, _fp, _fi in _FONT_CANDIDATES:
+                    if not os.path.exists(_fp):
+                        continue
                     try:
                         if _fi is not None:
-                            pdfmetrics.registerFont(TTFont(_fn, _fp, subfontIndex=_fi))
+                            # TTC 파일: subfontIndex 없이도 시도
+                            try:
+                                pdfmetrics.registerFont(TTFont(_fn, _fp, subfontIndex=_fi))
+                            except Exception:
+                                pdfmetrics.registerFont(TTFont(_fn, _fp))
                         else:
                             pdfmetrics.registerFont(TTFont(_fn, _fp))
                         BASE_FONT = _fn
