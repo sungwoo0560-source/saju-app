@@ -14044,6 +14044,20 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
     lines.append(f"*{cur_year}년 · 한국나이 {cur_age}세(만 {cur_age-1}세) · {_dw_label}{_age_range} · {_sw_label}*")
     lines.append("")
 
+    # ── 지금 상황 진단 — 세운 십성 기반 공감 서술 ──────────────────
+    if hard_q or hard_body:
+        lines.append(
+            f'<div style="background:linear-gradient(135deg,#1a237e 0%,#283593 100%);'
+            f'border-radius:14px;padding:clamp(16px,4vw,24px);margin:16px 0;color:#fff;">'
+            f'<div style="font-size:12px;color:#90caf9;letter-spacing:2px;font-weight:700;margin-bottom:10px;">'
+            f'💭 {sw_kr or "올해"} 세운 흐름 — {name}님 지금 상황 진단</div>'
+            f'<div style="font-size:clamp(15px,4vw,17px);font-weight:900;line-height:1.7;margin-bottom:14px;">'
+            f'{hard_q}</div>'
+            f'<div style="font-size:clamp(13px,3.5vw,14px);line-height:2;color:#e8eaf6;">{hard_body}</div>'
+            f'</div>'
+        )
+        lines.append("")
+
     # Y-28: 발동 신살 풀세트 박스 (위험신호 직전)
     try:
         from saju_zhengtong import calc_all_sinsal_extended as _cse28
