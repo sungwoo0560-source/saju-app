@@ -6129,15 +6129,17 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
                 MARGIN = 18 * mm
                 BOT = 20 * mm
 
-                # 폰트 등록 (Windows → Linux → 프로젝트 내장 → 네트워크 순)
+                # 폰트 등록 Y-29: CJK(한자+한글) 우선 — NotoSansKR 최우선
                 _FONTS_Y27 = [
-                    ("NanumGothic", os.path.join(os.path.dirname(__file__), "fonts", "NanumGothic.ttf"), None),
-                    ("Malgun",      "C:/Windows/Fonts/malgun.ttf",   None),
-                    ("MalgunBD",    "C:/Windows/Fonts/malgunbd.ttf", None),
+                    ("NotoSansKR",  os.path.join(os.path.dirname(__file__), "fonts", "NotoSansKR-Regular.ttf"), None),
+                    ("Batang",      "C:/Windows/Fonts/batang.ttc",   0),
                     ("Gulim",       "C:/Windows/Fonts/gulim.ttc",    0),
+                    ("Malgun",      "C:/Windows/Fonts/malgun.ttf",   None),
+                    ("NotoSansCJKL","/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc", 0),
+                    ("NotoSansCJK2","/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc", 0),
+                    ("NotoSansCJK3","/usr/share/fonts/opentype/noto/NotoSansCJKkr-Regular.otf", None),
                     ("NanumGothicL","/usr/share/fonts/truetype/nanum/NanumGothic.ttf", None),
-                    ("UnDotum",     "/usr/share/fonts/truetype/unfonts-core/UnDotum.ttf", None),
-                    ("NotoSansCJK", "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc", 0),
+                    ("NanumGothic", os.path.join(os.path.dirname(__file__), "fonts", "NanumGothic.ttf"), None),
                 ]
                 _BF = "Helvetica"
                 _reg_fonts = getattr(pdfmetrics, '_fonts', {})
@@ -6166,13 +6168,14 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
                         import requests as _rq27
                         _cache27 = os.path.join(os.path.dirname(__file__), ".font_cache")
                         os.makedirs(_cache27, exist_ok=True)
-                        _fcache = os.path.join(_cache27, "NanumGothic.ttf")
+                        _fcache = os.path.join(_cache27, "NotoSansKR-Regular.ttf")
                         if not os.path.exists(_fcache):
                             for _furl in [
+                                "https://github.com/google/fonts/raw/main/ofl/notosanskr/NotoSansKR%5Bwght%5D.ttf",
                                 "https://github.com/google/fonts/raw/main/ofl/nanumgothic/NanumGothic-Regular.ttf",
                             ]:
                                 try:
-                                    _fr = _rq27.get(_furl, timeout=10)
+                                    _fr = _rq27.get(_furl, timeout=15)
                                     if _fr.status_code == 200 and len(_fr.content) > 100000:
                                         with open(_fcache, "wb") as _ff27:
                                             _ff27.write(_fr.content)
@@ -6180,8 +6183,8 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
                                 except Exception:
                                     pass
                         if os.path.exists(_fcache):
-                            pdfmetrics.registerFont(TTFont("NanumGothic", _fcache))
-                            _BF = "NanumGothic"
+                            pdfmetrics.registerFont(TTFont("NotoSansKR", _fcache))
+                            _BF = "NotoSansKR"
                     except Exception:
                         pass
 
@@ -24380,17 +24383,18 @@ def menu_gaewoon(pils, name, birth_year, gender):
 
         _buf = _io.BytesIO()
 
-        # 폰트 로딩 (saju_report.py 방식)
+        # 폰트 로딩 Y-29: CJK(한자+한글) 우선 — NotoSansKR 최우선
         _FONT_CANDS = [
-            ("Malgun",       "C:/Windows/Fonts/malgun.ttf",    None),
+            ("NotoSansKR",   _os.path.join(_os.path.dirname(__file__), "fonts", "NotoSansKR-Regular.ttf"), None),
             ("Batang",       "C:/Windows/Fonts/batang.ttc",    0),
             ("Gulim",        "C:/Windows/Fonts/gulim.ttc",     0),
-            ("Dotum",        "C:/Windows/Fonts/dotum.ttc",     0),
-            ("NanumGothicW", _os.path.expanduser("~/AppData/Local/Microsoft/Windows/Fonts/NanumGothic.ttf"), None),
+            ("Malgun",       "C:/Windows/Fonts/malgun.ttf",    None),
+            ("NotoSansCJKL", "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc", 0),
+            ("NotoSansCJK2", "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc", 0),
+            ("NotoSansCJK3", "/usr/share/fonts/opentype/noto/NotoSansCJKkr-Regular.otf", None),
             ("NanumGothic",  "/usr/share/fonts/truetype/nanum/NanumGothic.ttf",     None),
             ("NanumGothicB", "/usr/share/fonts/truetype/nanum/NanumGothicBold.ttf", None),
             ("UnDotum",      "/usr/share/fonts/truetype/unfonts-core/UnDotum.ttf",  None),
-            ("BaekmukGulim", "/usr/share/fonts/truetype/baekmuk/gulim.ttf",         None),
             ("LocalFont",    _os.path.join(_os.path.dirname(__file__), "fonts", "NanumGothic.ttf"), None),
         ]
         _BASE = "Helvetica"
@@ -24421,14 +24425,14 @@ def menu_gaewoon(pils, name, birth_year, gender):
                 import requests as _req
                 _cache_dir = _os.path.join(_os.path.dirname(__file__), ".font_cache")
                 _os.makedirs(_cache_dir, exist_ok=True)
-                _font_path = _os.path.join(_cache_dir, "NanumGothic.ttf")
+                _font_path = _os.path.join(_cache_dir, "NotoSansKR-Regular.ttf")
                 if not _os.path.exists(_font_path):
                     for _url in [
+                        "https://github.com/google/fonts/raw/main/ofl/notosanskr/NotoSansKR%5Bwght%5D.ttf",
                         "https://github.com/google/fonts/raw/main/ofl/nanumgothic/NanumGothic-Regular.ttf",
-                        "https://github.com/naver/nanumfont/raw/master/fonts/NanumGothic.ttf",
                     ]:
                         try:
-                            _r = _req.get(_url, timeout=10)
+                            _r = _req.get(_url, timeout=15)
                             if _r.status_code == 200 and len(_r.content) > 100000:
                                 with open(_font_path, "wb") as _ff:
                                     _ff.write(_r.content)
@@ -24436,8 +24440,8 @@ def menu_gaewoon(pils, name, birth_year, gender):
                         except Exception:
                             continue
                 if _os.path.exists(_font_path):
-                    pdfmetrics.registerFont(TTFont("NanumGothic", _font_path))
-                    _BASE = "NanumGothic"
+                    pdfmetrics.registerFont(TTFont("NotoSansKR", _font_path))
+                    _BASE = "NotoSansKR"
             except Exception:
                 pass
 
