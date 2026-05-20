@@ -6129,21 +6129,61 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
                 MARGIN = 18 * mm
                 BOT = 20 * mm
 
-                # 폰트 등록
-                _FONTS = [
-                    ("Malgun", "C:/Windows/Fonts/malgun.ttf"),
-                    ("NanumGothic", "/usr/share/fonts/truetype/nanum/NanumGothic.ttf"),
-                    ("UnDotum", "/usr/share/fonts/truetype/unfonts-core/UnDotum.ttf"),
+                # 폰트 등록 (Windows → Linux → 프로젝트 내장 → 네트워크 순)
+                _FONTS_Y27 = [
+                    ("NanumGothic", os.path.join(os.path.dirname(__file__), "fonts", "NanumGothic.ttf"), None),
+                    ("Malgun",      "C:/Windows/Fonts/malgun.ttf",   None),
+                    ("MalgunBD",    "C:/Windows/Fonts/malgunbd.ttf", None),
+                    ("Gulim",       "C:/Windows/Fonts/gulim.ttc",    0),
+                    ("NanumGothicL","/usr/share/fonts/truetype/nanum/NanumGothic.ttf", None),
+                    ("UnDotum",     "/usr/share/fonts/truetype/unfonts-core/UnDotum.ttf", None),
+                    ("NotoSansCJK", "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc", 0),
                 ]
                 _BF = "Helvetica"
-                for _fn, _fp in _FONTS:
-                    if os.path.exists(_fp):
+                _reg_fonts = getattr(pdfmetrics, '_fonts', {})
+                for _fn27, _fp27, _fi27 in _FONTS_Y27:
+                    if _fn27 in _reg_fonts:
+                        _BF = _fn27
+                        break
+                if _BF == "Helvetica":
+                    for _fn27, _fp27, _fi27 in _FONTS_Y27:
+                        if not os.path.exists(_fp27):
+                            continue
                         try:
-                            pdfmetrics.registerFont(TTFont(_fn, _fp))
-                            _BF = _fn
+                            if _fi27 is not None:
+                                try:
+                                    pdfmetrics.registerFont(TTFont(_fn27, _fp27, subfontIndex=_fi27))
+                                except Exception:
+                                    pdfmetrics.registerFont(TTFont(_fn27, _fp27))
+                            else:
+                                pdfmetrics.registerFont(TTFont(_fn27, _fp27))
+                            _BF = _fn27
                             break
                         except Exception:
                             pass
+                if _BF == "Helvetica":
+                    try:
+                        import requests as _rq27
+                        _cache27 = os.path.join(os.path.dirname(__file__), ".font_cache")
+                        os.makedirs(_cache27, exist_ok=True)
+                        _fcache = os.path.join(_cache27, "NanumGothic.ttf")
+                        if not os.path.exists(_fcache):
+                            for _furl in [
+                                "https://github.com/google/fonts/raw/main/ofl/nanumgothic/NanumGothic-Regular.ttf",
+                            ]:
+                                try:
+                                    _fr = _rq27.get(_furl, timeout=10)
+                                    if _fr.status_code == 200 and len(_fr.content) > 100000:
+                                        with open(_fcache, "wb") as _ff27:
+                                            _ff27.write(_fr.content)
+                                        break
+                                except Exception:
+                                    pass
+                        if os.path.exists(_fcache):
+                            pdfmetrics.registerFont(TTFont("NanumGothic", _fcache))
+                            _BF = "NanumGothic"
+                    except Exception:
+                        pass
 
                 c = canvas.Canvas(_buf, pagesize=A4)
                 y = H - MARGIN
