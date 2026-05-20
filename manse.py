@@ -14041,6 +14041,52 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
     lines.append(f"*{cur_year}년 · 한국나이 {cur_age}세(만 {cur_age-1}세) · {_dw_label}{_age_range} · {_sw_label}*")
     lines.append("")
 
+    # Y-28: 발동 신살 풀세트 박스 (위험신호 직전)
+    try:
+        from saju_zhengtong import calc_all_sinsal_extended as _cse28
+        from saju_sinsal import get_12sinsal as _gs12_28, get_extra_sinsal as _gex28
+        _es28  = _gex28(pils) or []
+        _sn28  = _gs12_28(pils) or []
+        _ext28 = _cse28(pils) or []
+        _all28 = []
+        _seen28 = set()
+        for _s28 in _es28 + _sn28 + _ext28:
+            if not isinstance(_s28, dict):
+                continue
+            _nm28 = _s28.get("이름") or _s28.get("name") or ""
+            if _nm28 and _nm28 not in _seen28:
+                _seen28.add(_nm28)
+                _all28.append(_s28)
+        if _all28:
+            _sin_items28 = ""
+            for _s28 in _all28[:15]:
+                _nm28   = _s28.get("이름", _s28.get("name", ""))
+                _icon28 = _s28.get("아이콘", "⭐")
+                _pos28  = _s28.get("위치", "")
+                _res28  = _s28.get("결과", _s28.get("의미", _s28.get("desc", "")))
+                _gr28   = _s28.get("등급", "")
+                _col28  = "#c62828" if "강력" in _gr28 else "#90caf9"
+                _sin_items28 += (
+                    f'<div style="background:rgba(255,255,255,0.08);border-left:3px solid {_col28};'
+                    f'padding:10px 14px;margin:6px 0;border-radius:6px;">'
+                    f'<div style="font-weight:900;font-size:14px;color:#fff;margin-bottom:3px;">'
+                    f'{_icon28} {_nm28}{f" ({_pos28})" if _pos28 else ""}</div>'
+                    f'<div style="font-size:12px;color:#e8eaf6;line-height:1.7;">{str(_res28)[:120]}</div>'
+                    f'</div>'
+                )
+            lines.append(
+                f'<div style="background:linear-gradient(135deg,#3e2723 0%,#5d4037 100%);'
+                f'border-radius:14px;padding:clamp(16px,4vw,24px);margin:20px 0;color:#fff;">'
+                f'<div style="font-size:13px;color:#ffd54f;letter-spacing:3px;font-weight:700;">⭐ {name}님 사주 발동 신살 풀세트</div>'
+                f'<div style="font-size:18px;font-weight:900;margin:8px 0;">발동 신살 {len(_all28)}개 — 인생 운명 신호</div>'
+                f'{_sin_items28}'
+                f'<div style="font-size:11px;margin-top:12px;color:#ffd54f;padding-top:10px;'
+                f'border-top:1px dashed rgba(255,255,255,0.2);">⚖️ 정통 명리학 신살 계산 기반 분석입니다.</div>'
+                f'</div>'
+            )
+    except Exception:
+        pass
+
     # 위험 신호 카드 — 3등급 분류
     _signals_danger  = [(t,b) for t,b,g in _danger_signals if g == "위험"]
     _signals_caution = [(t,b) for t,b,g in _danger_signals if g == "주의"]
