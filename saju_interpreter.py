@@ -7274,7 +7274,7 @@ def get_yukjin(ilgan, pils, gender="남", marriage="미혼"):
                 if fam not in found:
                     found[fam] = []
 
-                found[fam].append(f"{label}({p['str']})")
+                found[fam].append(f"{label}({p.get('cg','')}{p.get('jj','')})")
 
     result = []
 

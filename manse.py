@@ -17620,37 +17620,13 @@ def menu5_money(pils, birth_year, gender, name="내담자"):
     try:
         narrative = build_rich_narrative(pils, birth_year, gender, name if name else "내담자", section="money")
 
-        sections = narrative.split("【")
-
-        for sec in sections:
-            if not sec.strip():
-                continue
-
-            lines = sec.strip().split("\n")
-
-            title = lines[0].replace("】", "").strip() if lines else ""
-
-            body = "\n".join(lines[1:]).strip() if len(lines) > 1 else ""
-
-            if title:
-                st.markdown(
-                    f"""
-
-<div style="background:linear-gradient(135deg,#eaffdc,#f5ffdc); border-left:4px solid #000000;border-radius:10px; padding:18px 22px;margin:10px 0">
-
-<div style="font-size:14px;font-weight:900;color:#000000;margin-bottom:10px">
-
-                        【 {title} 】
-
-</div>
-
-<div style="font-size:13px;color:#2a4a00;line-height:2.0;white-space:pre-wrap">{body}</div>
-
-</div>
-
-""",
-                    unsafe_allow_html=True,
-                )
+        if narrative and len(narrative) > 50:
+            st.markdown(
+                f'<div style="background:#f8fdf0;border-left:4px solid #4caf50;border-radius:10px;'
+                f'padding:18px 22px;margin:10px 0;font-size:13px;color:#2a4a00;'
+                f'line-height:2.0;white-space:pre-wrap">{narrative}</div>',
+                unsafe_allow_html=True,
+            )
 
     except Exception as e:
         st.warning(f"재물 해설 오류: {e}")
@@ -18039,78 +18015,13 @@ def menu6_relations(pils, name, birth_year, gender, marriage_status="미혼"):
     try:
         narrative = build_rich_narrative(pils, birth_year, gender, name if name else "내담자", section="relations")
 
-        sections = narrative.split("【")
-
-        for sec in sections:
-            if not sec.strip():
-                continue
-
-            lines = sec.strip().split("\n")
-
-            title = lines[0].replace("】", "").strip() if lines else ""
-
-            body = "\n".join(lines[1:]).strip() if len(lines) > 1 else ""
-
-            if not title:
-                continue
-
-            # 육친 파트 vs 일반 파트
-
-            if "*" in body:
-                # 육친 개별 카드
-
-                sub_items = body.split("*")
-
-                if title:
-                    st.markdown(
-                        f"<div style='font-size:14px;font-weight:900;color:#c39bd3;margin:12px 0 6px'>【 {title} 】</div>",
-                        unsafe_allow_html=True,
-                    )
-
-                for item in sub_items:
-                    if not item.strip():
-                        continue
-
-                    item_lines = item.strip().split("\n")
-
-                    item_title = item_lines[0].strip()
-
-                    item_body = "\n".join(item_lines[1:]).strip()
-
-                    st.markdown(
-                        f"""
-
-<div style="background:#f5f5f5;border-left:4px solid #9b59b6; border-radius:10px;padding:14px 18px;margin:6px 0">
-
-<div style="font-size:13px;font-weight:700;color:#c39bd3;margin-bottom:6px">* {item_title}</div>
-
-<div style="font-size:13px;color:#e8d0f8;line-height:1.9;white-space:pre-wrap">{item_body}</div>
-
-</div>
-
-""",
-                        unsafe_allow_html=True,
-                    )
-
-            else:
-                st.markdown(
-                    f"""
-
-<div style="background:linear-gradient(135deg,#ffdcff,#ffdcff); border-left:4px solid #9b59b6;border-radius:10px; padding:18px 22px;margin:10px 0">
-
-<div style="font-size:14px;font-weight:900;color:#c39bd3;margin-bottom:10px">
-
-                        【 {title} 】
-
-</div>
-
-<div style="font-size:13px;color:#e8d0f8;line-height:2.0;white-space:pre-wrap">{body}</div>
-
-</div>
-
-""",
-                    unsafe_allow_html=True,
-                )
+        if narrative and len(narrative) > 50:
+            st.markdown(
+                f'<div style="background:#fdf4ff;border-left:4px solid #9b59b6;border-radius:10px;'
+                f'padding:18px 22px;margin:10px 0;font-size:13px;color:#3a0a4a;'
+                f'line-height:2.0;white-space:pre-wrap">{narrative}</div>',
+                unsafe_allow_html=True,
+            )
 
     except Exception as e:
         st.warning(f"인간관계 해설 오류: {e}")
