@@ -7517,24 +7517,26 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
         "백호대살": ("강력한 추진력·사고수 기운", "군·경·의료·스포츠 등 강한 직종에서 탁월합니다.<br>→ <b>사고·수술·피 관련 위험 평생 따라옴.</b> 안전·보험은 선택이 아닌 필수."),
     }
     # Y-28: 기존 sinsal_data + calc_all_sinsal_extended 통합
+    # 확장 신살(홍염살·천을귀인 등)을 앞에 배치 — 기존 sinsal_names는 뒤에 이어붙임
     try:
         _ext_sinsal = calc_all_sinsal_extended(pils)
     except Exception:
         _ext_sinsal = []
 
-    # 확장 신살 → 이름 기준 중복 제거 후 sinsal_names에 추가
-    _ext_seen = set(sinsal_names)
-    for _es in _ext_sinsal:
-        _esn = _es.get("이름", "")
-        if _esn and _esn not in _ext_seen:
-            sinsal_names.append(_esn)
-            _ext_seen.add(_esn)
+    _ext_names_ordered = [_es.get("이름", "") for _es in _ext_sinsal if _es.get("이름", "")]
+    _base_names = sinsal_names
+    _merged_seen = set()
+    sinsal_names = []
+    for _n in _ext_names_ordered + _base_names:
+        if _n and _n not in _merged_seen:
+            _merged_seen.add(_n)
+            sinsal_names.append(_n)
 
     # 확장 신살 상세 dict → 이름 키로 빠른 참조
     _ext_detail = {_es.get("이름", ""): _es for _es in _ext_sinsal}
 
     sinsal_rows = ""
-    for _sn in sinsal_names[:12]:
+    for _sn in sinsal_names[:20]:
         # SINSAL_EXPLAIN 우선, 없으면 확장 신살 상세 참조
         _key = next((k for k in SINSAL_EXPLAIN if k in _sn), None)
         if _key:

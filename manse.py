@@ -14161,7 +14161,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                 _all28.append(_s28)
         if _all28:
             _sin_items28 = ""
-            for _s28 in _all28[:15]:
+            for _s28 in _all28[:20]:
                 _nm28   = _s28.get("이름", _s28.get("name", ""))
                 _icon28 = _s28.get("아이콘", "⭐")
                 _pos28  = _s28.get("위치", "")
