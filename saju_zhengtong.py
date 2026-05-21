@@ -7931,7 +7931,8 @@ def render_manse_board(pils, name="내담자", birth_year=1969, gender="男",
   <div style="font-size:13px;color:#6b4423;font-weight:700;text-align:center;margin-bottom:8px;letter-spacing:2px;">
     📋 사주 명식(四柱命式)
   </div>
-  <table style="width:100%;border-collapse:collapse;table-layout:fixed;">
+  <div style="overflow-x:auto;">
+  <table style="width:100%;border-collapse:collapse;table-layout:fixed;min-width:320px;">
     <tr>{r_hdr}</tr>
     <tr>{r_ss}</tr>
     <tr>{r_cg}</tr>
@@ -7943,6 +7944,7 @@ def render_manse_board(pils, name="내담자", birth_year=1969, gender="男",
     <tr><td colspan="4" style="background:#f5f5f5;color:#888;font-size:10px;padding:3px 6px;border:1px solid #bbb;">12신살(神殺) — 년지 기준</td></tr>
     <tr>{r_sh}</tr>
   </table>
+  </div>
 </div>"""
 
     # ── 2단: 대운 표 ────────────────────────────

@@ -6364,8 +6364,56 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
 
                 elif tab_name == "current_situation":
                     y = _sec("🎯 현재 상황 진단", y)
-                    _txt = LocalSajuNarrator.full_report(pils, name, birth_year, gender)
-                    y = _write(_txt[:3000], y, size=9)
+                    try:
+                        _CG_KR2 = {"甲":"갑","乙":"을","丙":"병","丁":"정","戊":"무",
+                                   "己":"기","庚":"경","辛":"신","壬":"임","癸":"계"}
+                        _JJ_KR2 = {"子":"자","丑":"축","寅":"인","卯":"묘","辰":"진","巳":"사",
+                                   "午":"오","未":"미","申":"신","酉":"유","戌":"술","亥":"해"}
+                        _cs_cg = [p.get("cg","") for p in pils]
+                        _cs_jj = [p.get("jj","") for p in pils]
+                        y = _write("[사주 원국]", y, size=10)
+                        y = _write(f"년주: {_cs_cg[3]}{_cs_jj[3]}({_CG_KR2.get(_cs_cg[3],'')}{_JJ_KR2.get(_cs_jj[3],'')})", y, size=9)
+                        y = _write(f"월주: {_cs_cg[2]}{_cs_jj[2]}({_CG_KR2.get(_cs_cg[2],'')}{_JJ_KR2.get(_cs_jj[2],'')})", y, size=9)
+                        y = _write(f"일주: {_cs_cg[1]}{_cs_jj[1]}({_CG_KR2.get(_cs_cg[1],'')}{_JJ_KR2.get(_cs_jj[1],'')})", y, size=9, color=(0.7,0.1,0.1))
+                        y = _write(f"시주: {_cs_cg[0]}{_cs_jj[0]}({_CG_KR2.get(_cs_cg[0],'')}{_JJ_KR2.get(_cs_jj[0],'')})", y, size=9)
+                        y -= 3 * mm
+                        _cs_sw = get_yearly_luck(pils, _cur_yr) or {}
+                        _cs_ss = _cs_sw.get("십성_천간", "")
+                        _cs_gh = _cs_sw.get("길흉", "")
+                        _cs_cg2 = _cs_sw.get("cg", "")
+                        _cs_jj2 = _cs_sw.get("jj", "")
+                        y = _write(f"[{_cur_yr}년 세운]  {_cs_cg2}{_cs_jj2} — {_cs_ss} [{_cs_gh}]", y, size=10)
+                        y -= 2 * mm
+                        try:
+                            from saju_sinsal import get_12sinsal, get_extra_sinsal
+                            _cs_s12 = get_12sinsal(pils) or []
+                            _cs_sex = get_extra_sinsal(pils) or []
+                            _cs_all = list(_cs_s12) + list(_cs_sex)
+                            if _cs_all:
+                                y = _write("[발동 신살]", y, size=10)
+                                for _s in _cs_all[:8]:
+                                    _sn = _s.get("이름") or _s.get("name") or ""
+                                    _sp = _s.get("위치", "")
+                                    if _sn:
+                                        y = _write(f"· {_sn}{(' ('+_sp+')') if _sp else ''}", y, size=9)
+                        except Exception:
+                            pass
+                        y -= 2 * mm
+                        _cs_ys = get_yongshin(pils)
+                        _cs_yong = _cs_ys.get("종합_용신", []) if _cs_ys else []
+                        _OH_RX2 = {
+                            "木": "동쪽 방향, 초록색 활용, 새벽 산책",
+                            "火": "남쪽 방향, 붉은색 활용, 햇빛 쬐기",
+                            "土": "황토색 활용, 규칙적 생활",
+                            "金": "서쪽 방향, 흰색 활용, 원칙 세우기",
+                            "水": "북쪽 방향, 검은색 활용, 독서·명상",
+                        }
+                        if _cs_yong:
+                            y = _write("[용신 처방]", y, size=10)
+                            for _oh in _cs_yong[:3]:
+                                y = _write(f"용신({_oh}): {_OH_RX2.get(_oh, '')}", y, size=9)
+                    except Exception as _cs_e:
+                        y = _write(f"현재 상황 진단 오류: {_cs_e}", y, size=9)
 
                 elif tab_name == "jonghap_full":
                     _CG_KR = {"甲":"갑","乙":"을","丙":"병","丁":"정","戊":"무",
