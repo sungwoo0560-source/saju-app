@@ -21823,104 +21823,6 @@ def menu7_ai(pils, name, birth_year, gender):
     except Exception as _e:
         st.warning(f"⚠️ 오류: {str(_e)[:80]}")
 
-    # -- 빠른 질문 버튼 (30개 직격 질문, 카테고리별) --
-    st.markdown('<div class="gold-section">🎯 직격 질문 선택 (원하는 항목을 바로 누르세요)</div>',
-                unsafe_allow_html=True)
-
-    _ALL_QUESTIONS = {
-        "💰 돈·사업": [
-            "올해 돈 벌리는 시기가 언제야?",
-            "지금 사업 시작해도 괜찮아?",
-            "투자해도 되는 시기야?",
-            "지금 빚 내도 돼?",
-            "사업이 망할 것 같아, 접어야 해?",
-            "내 재물 그릇이 얼마나 커?",
-        ],
-        "💼 직장·커리어": [
-            "지금 이직해도 돼?",
-            "퇴사하고 창업해도 될까?",
-            "나한테 맞는 직업이 뭐야?",
-            "올해 승진 가능해?",
-            "직장에서 잘릴 것 같아",
-            "지금 이 직장 계속 다녀야 해?",
-        ],
-        "❤️ 연애·결혼": [
-            "이 사람이 나한테 진심이야?",
-            "연애·결혼 인연이 언제 와?",
-            "지금 만나는 사람이랑 결혼해도 돼?",
-            "배우자가 바람피우고 있어?",
-            "이별 후 재회 가능해?",
-            "나랑 안 맞는 이성 유형이 뭐야?",
-        ],
-        "🚨 위기·사고수": [
-            "올해 사고수가 있어?",
-            "소송·법적 분쟁 위험 있어?",
-            "올해 건강 조심할 게 있어?",
-            "큰 손재수가 오는 시기야?",
-            "주변에 나를 해치는 사람이 있어?",
-            "올해 가장 조심해야 할 게 뭐야?",
-        ],
-        "🔮 운명·성격": [
-            "나는 왜 이렇게 힘들게 살아?",
-            "내 타고난 성격의 장단점은?",
-            "내 인생 최대 전성기는 언제야?",
-            "지금 내 대운이 좋은 거야 나쁜 거야?",
-            "올해가 내 인생 전환점이야?",
-            "나한테 귀인이 오는 시기는?",
-        ],
-    }
-
-    _cat_names = list(_ALL_QUESTIONS.keys())
-    _q_tabs = st.tabs(_cat_names)
-    for _ti, _cat in enumerate(_cat_names):
-        _qs = _ALL_QUESTIONS[_cat]
-        with _q_tabs[_ti]:
-            _qc = st.columns(3)
-            for _qi, _q in enumerate(_qs):
-                if _qc[_qi % 3].button(_q, key=f"qq_{_ti}_{_qi}", use_container_width=True):
-                    st.session_state["ai_quick_input"] = _q
-    if st.session_state.get("ai_quick_input"):
-        _auto_q = st.session_state["ai_quick_input"]
-        st.markdown(
-            f"<div style='background:rgba(201,168,76,0.1);border:1px solid #c9a84c;border-radius:10px;"
-            f"padding:10px 16px;margin:8px 0;font-size:13px;color:#3d2800'>"
-            f"💬 선택한 질문: <b>{_auto_q}</b></div>",
-            unsafe_allow_html=True,
-        )
-        try:
-            _ilgan = pils[1]["cg"]
-            _ilp = ILGAN_PROFILE.get(_ilgan, {})
-            _daewoon = SajuCoreEngine.get_daewoon(
-                pils, birth_year,
-                st.session_state.get("birth_month", 1),
-                st.session_state.get("birth_day", 1),
-                st.session_state.get("birth_hour", 12),
-                st.session_state.get("birth_minute", 0),
-                gender=gender,
-            )
-            _cur_dw = next((d for d in _daewoon if d["시작연도"] <= datetime.now().year <= d["종료연도"]), {})
-            _gy = get_gyeokguk(pils)
-            _ys = get_yongshin(pils)
-            _sw = get_yearly_luck(pils, datetime.now() or {}.year)
-            _ctx_lines = [
-                f"[사주 컨텍스트] 이름:{name} / 일간:{_ilgan}({_ilp.get('한글','')}) / 격국:{_gy.get('격국명','?') if _gy else '?'}",
-                f"용신:{_ys.get('종합_용신',[])} / 현재대운:{_cur_dw.get('str','?')} / 올해세운:{_sw.get('세운','?')}({_sw.get('십성_천간','?')})",
-                f"[질문] {_auto_q}",
-            ]
-            _ai_resp = get_ai_interpretation("\n".join(_ctx_lines))
-            if not _ai_resp:
-                _ai_resp = LocalSajuNarrator.quick_answer(_auto_q, pils, birth_year, gender) if hasattr(LocalSajuNarrator, "quick_answer") else ""
-            if _ai_resp:
-                st.markdown(
-                    f"<div style='background:linear-gradient(145deg,#faf7f0,#f2ebe0);border:1px solid #c9a84c;"
-                    f"border-radius:14px;padding:18px;margin:8px 0;font-size:14px;color:#3d2800;line-height:2'>"
-                    f"<div style='font-size:11px;font-weight:700;color:#c9a84c;margin-bottom:8px'>🔮 만신의 답</div>"
-                    f"{_ai_resp}</div>",
-                    unsafe_allow_html=True,
-                )
-        except Exception as _qe:
-            st.warning(f"⚠️ 오류: {str(_qe)[:80]}")
-
     # -- AI 상담 메인 (E-Version Chat) --
 
     tab_ai_chat(pils, name, birth_year, gender)
@@ -26854,9 +26756,6 @@ def main():
                         )
             except Exception as _sn_e:
                 _saju_log.debug("[sinsal banner] %s", _sn_e)
-
-            # 🌌 MASTER QUICK CONSULT BAR (메뉴 바로 위 배치)
-            quick_consult_bar(pils, name, birth_year, gender)
 
             # ── 커스텀 탭 네비게이션 (버튼 방식) ─────────────────────
             _TAB_DEFS = [
