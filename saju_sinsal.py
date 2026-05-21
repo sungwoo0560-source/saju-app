@@ -953,6 +953,17 @@ def get_extra_sinsal(pils):
         stars.append({"name":"금여성(金輿星)",
                       "desc":"귀한 결혼 인연 구조 — 배우자가 인생을 바꿔주는 귀인형 인연"})
 
+    # 위치 정보 없는 신살에 기본값 추가 (Y-32)
+    _plbl = ["시주", "일주", "월주", "년주"]
+    _jj_pos_map = {}
+    for _pi, _pp in enumerate(pils[:4]):
+        _jpv = _pp.get("jj", "")
+        if _jpv:
+            _jj_pos_map.setdefault(_jpv, []).append(_plbl[_pi])
+    for _star in stars:
+        if "위치" not in _star:
+            _star["위치"] = "원국"
+
     return stars
 
 
