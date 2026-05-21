@@ -7570,6 +7570,44 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
     if not sinsal_rows:
         sinsal_rows = '<div style="color:#666;">주요 신살 분석은 아래 신살 섹션을 참고하세요.</div>'
 
+    # ── 용신/기신별 개운 정보 (Section 9·11 개인화) ──────────────────
+    _YONG_OH1 = (yong_str or "水").split("·")[0].split("(")[0].strip()
+    _GI_OH1   = (gisin_str or "土").split("·")[0].split("(")[0].strip()
+
+    _GILWOL_MAP = {
+        "木": "1월·2월·3월 <span style='color:#888;font-size:12px;'>(봄 — 木 기운 최강)</span>",
+        "火": "4월·5월·6월 <span style='color:#888;font-size:12px;'>(여름 — 火 기운 최강)</span>",
+        "土": "3월·6월·9월·12월 <span style='color:#888;font-size:12px;'>(환절기 — 土 기운 최강)</span>",
+        "金": "7월·8월·9월 <span style='color:#888;font-size:12px;'>(가을 — 金 기운 최강)</span>",
+        "水": "10월·11월·12월 <span style='color:#888;font-size:12px;'>(겨울 — 水 기운 최강)</span>",
+    }
+    _흉WOL_MAP = {
+        "木": "7월·8월 <span style='color:#888;font-size:12px;'>(金이 木을 극함)</span>",
+        "火": "10월·11월 <span style='color:#888;font-size:12px;'>(水가 火를 극함)</span>",
+        "土": "1월·2월 <span style='color:#888;font-size:12px;'>(木이 土를 극함)</span>",
+        "金": "4월·5월 <span style='color:#888;font-size:12px;'>(火가 金을 극함)</span>",
+        "水": "3월·6월·9월 <span style='color:#888;font-size:12px;'>(土가 水를 극함)</span>",
+    }
+    _gilwol_str = _GILWOL_MAP.get(_YONG_OH1, "용신 기운이 강한 달")
+    _흉wol_str  = _흉WOL_MAP.get(_GI_OH1,   "기신 기운이 강한 달")
+
+    _YONG_KAEWOON_TBL = {
+        "木": "색상: 초록·녹색·청색<br>방향: 동쪽<br>음식: 신맛·새싹채소·견과류·키위<br>활동: 등산·스트레칭·목공·독서<br>계절: 봄(1~3월) 적극 활용",
+        "火": "색상: 빨강·주황·분홍·자주<br>방향: 남쪽<br>음식: 쓴맛·견과류·불로 조리한 음식·홍삼<br>활동: 운동·사교·발표·공연<br>계절: 여름(4~6월) 적극 활용",
+        "土": "색상: 노랑·황토색·베이지·갈색<br>방향: 중앙<br>음식: 단맛·뿌리채소·고구마·황색 음식<br>활동: 명상·정원 가꾸기·요가·봉사<br>계절: 환절기(3·6·9·12월) 활용",
+        "金": "색상: 흰색·은색·금색·회색<br>방향: 서쪽<br>음식: 매운맛·흰 음식·도라지·더덕<br>활동: 규칙적 생활·경쟁·도전·단련<br>계절: 가을(7~9월) 적극 활용",
+        "水": "색상: 검정·남색·파랑·보라<br>방향: 북쪽<br>음식: 짠맛·해조류·검은콩·검은깨·물<br>활동: 독서·명상·수영·산책·여행<br>계절: 겨울(10~12월) 적극 활용",
+    }
+    _GI_AVOID_TBL = {
+        "木": "색상 자제: 초록·녹색<br>봄(1~3월) 무리한 확장·계약 자제<br>기신 강한 시기 큰 결정 금지<br>충동적 시작 주의",
+        "火": "색상 자제: 빨강·주황<br>여름(4~6월) 과열·과로 주의<br>기신 강한 시기 큰 결정 금지<br>감정적 결정 주의",
+        "土": "색상 자제: 노랑·갈색·황토<br>환절기(3·6·9·12월) 건강 집중 관리<br>무리한 지출·투자·보증 절대 X<br>부동산 무리한 매입 금지",
+        "金": "색상 자제: 흰색·은색<br>가을(7~9월) 과도한 추진·독단 자제<br>기신 강한 시기 큰 결정 금지<br>냉정한 결단보다 협의 우선",
+        "水": "색상 자제: 검정·남색<br>겨울(10~12월) 방종·과소비 주의<br>기신 강한 시기 큰 결정 금지<br>도박·투기·무리한 대출 절대 X",
+    }
+    _kaewoon_yong = _YONG_KAEWOON_TBL.get(_YONG_OH1, "용신 오행의 색·방향·음식을 일상에서 활용하세요.")
+    _kaewoon_gi   = _GI_AVOID_TBL.get(_GI_OH1, "기신 오행의 색·방향 자제, 기신 강한 시기 큰 결정 금지")
+
     html = f"""
 <div style="background:linear-gradient(180deg,#fdfcf7 0%,#fff 100%);
             border:3px solid #6b4423;border-radius:20px;
@@ -7604,21 +7642,17 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
   <!-- 2. 사주 총평 -->
   <div style="margin-bottom:28px;">
     <div style="font-size:clamp(14px, 3.5vw, 17px);font-weight:900;color:#3e2723;border-left:5px solid #6b4423;padding-left:12px;margin-bottom:12px;">【2. 사주 총평(總評)】</div>
-    <div style="font-size:15px;color:#3e2723;line-height:2;background:#faf5ee;padding:18px 20px;border-radius:10px;">
-      {name}님은 <b>{iz_cg}{iz_jj}({ilgan_kr}{iljj_kr})</b> 일주로 태어나셨습니다.<br>
-      쉽게 말하면 — <b>{ilgan}({ilgan_kr})</b> 일간은 <b>{ilgan_meta}</b> 기운입니다.<br>
-      {saju_sum or (nickname + " 일주." if nickname else f"{iljj_key} 일주 — 정통 명리학 기반 분석입니다.")}
+    <div style="font-size:15px;color:#3e2723;line-height:2.1;background:#faf5ee;padding:18px 20px;border-radius:10px;">
+      <b style="font-size:16px;">{name}님은 <span style="color:#c62828;">{iz_cg}{iz_jj}({ilgan_kr}{iljj_kr}) 일주</span>입니다.</b><br>
+      {saju_sum or (f"<b>{nickname}</b> — {ilgan_meta} 기운." if nickname else f"{iljj_key} 일주 — {ilgan_meta} 기운의 사주입니다.")}
       <br><br>
-      또한 <b>{shin_label}</b> 사주입니다.<br>
-      → {shin_explain}<br><br>
-      격국은 <b>{gyeok_label}</b>입니다.<br>
-      → {gyeok_explain}<br><br>
-      원국에서 <b>{len(activated)}개</b>의 십성 조합이 활성화되어 있습니다 — {combo_text}.<br>
-      → 즉 {name}님 인생에서 이 패턴들이 반복적으로 나타납니다.<br><br>
-      <b>📌 핵심 운명 구조:</b><br>
-      → <b>{ilgan_meta}</b> 기운 + <b>{gyeok_label}</b> — 이것이 {name}님 삶의 패턴을 결정합니다.<br>
-      → <b>{shin_label}</b>: {shin_explain}<br>
-      → 용신 <b>{yong_str}</b> 대운 시기 — {name}님 인생 진짜 황금기입니다.
+      <b>▶ 강약(强弱): {shin_label}</b><br>
+      {shin_explain}<br><br>
+      <b>▶ 격국(格局): {gyeok_label}</b><br>
+      {gyeok_explain}<br><br>
+      <b>📌 {name}님 운명의 핵심 구조:</b><br>
+      → <b>{ilgan_meta}</b> + <b>{gyeok_label}</b> + <b>{shin_label}</b> — 이 세 가지가 {name}님 삶의 모든 선택과 결과를 결정합니다.<br>
+      → 용신 <b>{yong_str}</b> 대운이 오는 10년 — {name}님의 진짜 황금기입니다. 준비 없이 맞이하면 그냥 지나갑니다.
     </div>
   </div>
 
@@ -7655,17 +7689,16 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
   <div style="margin-bottom:28px;">
     <div style="font-size:clamp(14px, 3.5vw, 17px);font-weight:900;color:#3e2723;border-left:5px solid #6b4423;padding-left:12px;margin-bottom:12px;">【5. 재물(財物)】</div>
     <div style="background:#faf5ee;padding:18px 20px;border-radius:10px;line-height:2;font-size:clamp(13px, 3vw, 15px);color:#3e2723;">
-      <b>재물 종합 분석:</b><br>
-      · 횡재수: <b>{_risk("횡재수","점수",0)}/100</b> — {_risk("횡재수","등급","보통")}<br>
-      · 사업운: <b>{_risk("사업운","점수",0)}/100</b> — {_risk("사업운","등급","보통")}<br><br>
+      <b>{name}님의 재물 구조:</b><br>
       {ilju_info.get("재물","재물 구조가 안정적이며 꾸준한 노력으로 자산을 형성합니다.")}<br><br>
-      <b>📌 사주가 말하는 것:</b><br>
-      {_risk("횡재수","메시지","횡재 기운을 잘 관리하세요.")}<br>
-      {_risk("사업운","메시지","신중한 자금 운영이 핵심입니다.")}<br><br>
-      <b>🎯 행동 지침:</b><br>
-      → 용신 <b>{yong_str}</b> 기운이 강한 시기에 재물 기회가 집중됩니다.<br>
-      → 기신 <b>{gisin_str}</b> 강한 시기 — 보증·동업·투기 절대 X.<br>
-      → 큰돈 들어오면 즉시 안전 자산에 고정하세요.
+      <b>📊 재물 위험도 진단:</b><br>
+      · 횡재수: <b>{_risk("횡재수","점수",0)}/100</b> — {_risk("횡재수","등급","보통")} &nbsp;|&nbsp; 사업운: <b>{_risk("사업운","점수",0)}/100</b> — {_risk("사업운","등급","보통")}<br>
+      → {_risk("횡재수","메시지","횡재 기운은 관리가 전략입니다.")}<br>
+      → {_risk("사업운","메시지","신중한 자금 운영이 핵심입니다.")}<br><br>
+      <b>🔴 재물 절대 원칙:</b><br>
+      → 용신 <b>{yong_str}</b> 기운이 강한 시기(길월)에만 큰 투자·계약 결정하세요.<br>
+      → 기신 <b>{gisin_str}</b> 강한 시기 — <b>보증·동업·투기 절대 X.</b> 이 시기에 욕심 부리면 100% 후회합니다.<br>
+      → 큰돈 들어오면 즉시 안전 자산에 고정. 유동성으로 놔두면 반드시 새어나갑니다.
     </div>
   </div>
 
@@ -7686,15 +7719,16 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
   <div style="margin-bottom:28px;">
     <div style="font-size:clamp(14px, 3.5vw, 17px);font-weight:900;color:#3e2723;border-left:5px solid #6b4423;padding-left:12px;margin-bottom:12px;">【7. 인연·결혼(姻緣)】</div>
     <div style="background:#faf5ee;padding:18px 20px;border-radius:10px;line-height:2;font-size:clamp(13px, 3vw, 15px);color:#3e2723;">
-      <b>{name}님의 배우자궁(일지)은 {iz_jj}({iljj_kr})입니다.</b><br>
-      {ilju_info.get("배우자","배우자궁이 삶의 동반자 패턴을 결정합니다. 이 자리의 기운이 {name}님의 결혼 생활에 직접 영향을 줍니다.")}<br><br>
-      <b>결혼 인연:</b> <b>{_risk("결혼인연","점수",0)}/100</b> — {_risk("결혼인연","등급","보통")}&nbsp;&nbsp;
-      <b>이혼 위험:</b> <b>{_risk("이혼·이별","점수",0)}/100</b> — {_risk("이혼·이별","등급","안정")}&nbsp;&nbsp;
-      <b>바람기:</b> <b>{_risk("바람기","점수",0)}/100</b> — {_risk("바람기","등급","낮음")}<br><br>
-      <b>📌 사주가 말하는 것:</b><br>
-      {_risk("결혼인연","메시지","용신 대운에 인연이 집중됩니다. 이 시기를 절대 놓치지 마세요.")}<br>
-      {_risk("이혼·이별","메시지","안정적 인연 구조입니다.")}<br><br>
-      → 용신 <b>{yong_str}</b> 기운이 강한 해 — 인연·결혼 운이 <b>반드시</b> 강하게 옵니다. 그 해를 놓치지 마세요.
+      <b>{name}님의 배우자궁(일지): {iz_jj}({iljj_kr})</b><br>
+      {ilju_info.get("배우자", f"일지 {iz_jj}({iljj_kr}) 기운이 {name}님의 배우자 기질과 결혼 생활 패턴을 결정합니다.")}<br><br>
+      <b>📊 인연 구조 진단:</b><br>
+      · 결혼 인연: <b>{_risk("결혼인연","점수",0)}/100</b> — {_risk("결혼인연","등급","보통")} &nbsp;|&nbsp; 이혼 위험: <b>{_risk("이혼·이별","점수",0)}/100</b> — {_risk("이혼·이별","등급","안정")} &nbsp;|&nbsp; 바람기: <b>{_risk("바람기","점수",0)}/100</b> — {_risk("바람기","등급","낮음")}<br><br>
+      <b>📌 인연의 법칙:</b><br>
+      → {_risk("결혼인연","메시지","용신 대운에 인연이 집중됩니다. 이 시기를 절대 놓치지 마세요.")}<br>
+      → {_risk("이혼·이별","메시지","안정적 인연 구조입니다.")}<br><br>
+      <b>🔴 놓치면 안 되는 인연의 시기:</b><br>
+      → 용신 <b>{yong_str}</b> 대운·세운이 겹치는 해 — 그 해에 반드시 적극적으로 움직이세요.<br>
+      → 이 시기를 망설이다 보내면, 다음 기회는 10년 뒤입니다.
     </div>
   </div>
 
@@ -7702,13 +7736,13 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
   <div style="margin-bottom:28px;">
     <div style="font-size:clamp(14px, 3.5vw, 17px);font-weight:900;color:#3e2723;border-left:5px solid #6b4423;padding-left:12px;margin-bottom:12px;">【8. 운세 흐름 — 대운(大運)】</div>
     <div style="background:#faf5ee;padding:18px 20px;border-radius:10px;line-height:2;font-size:clamp(13px, 3vw, 15px);color:#3e2723;">
-      대운(大運)은 10년마다 바뀌는 인생의 큰 계절입니다.<br>
-      → 마치 봄·여름·가을·겨울처럼 — 10년마다 삶의 환경이 달라집니다.<br><br>
-      <b>🌟 용신 대운</b> <b>{yong_str}</b> 기운이 들어오는 10년 → <b>인생 황금기입니다.</b><br>
-      → 이 시기에 창업·투자·이직·결혼 — 모든 중요 결정을 집중하세요. <b>이 10년을 놓치면 다음 황금기까지 기다려야 합니다.</b><br>
-      <b>⚠️ 기신 대운</b> <b>{gisin_str}</b> 기운이 들어오는 10년 → <b>수비기입니다.</b><br>
-      → 보증·동업·무리한 투자 절대 X. 내실을 다지고 다음 황금기를 준비하세요.<br><br>
-      <b>📌 지금 어느 대운인지가 {name}님 삶에서 가장 중요한 정보입니다.</b> 위 [대운 흐름] 탭에서 확인하세요.
+      대운(大運)은 10년마다 바뀌는 인생의 큰 물결입니다. 아무리 열심히 해도 대운이 역방향이면 결과가 안 나옵니다. 반대로 대운이 맞으면 절반만 해도 두 배 결과가 납니다.<br><br>
+      <b>🌟 용신 대운 — {yong_str} 기운이 오는 10년 = 인생 황금기</b><br>
+      → 이 시기 창업·투자·이직·결혼 모든 결정 집중하세요. <b>이 10년을 준비 없이 보내면 다음 황금기까지 기다려야 합니다.</b><br><br>
+      <b>⚠️ 기신 대운 — {gisin_str} 기운이 오는 10년 = 수비기</b><br>
+      → 보증·동업·무리한 투자 절대 X. 힘을 빼지 말고 내실만 다지십시오.<br><br>
+      <b>📌 지금 {name}님이 어느 대운에 있는지가 가장 중요한 정보입니다.</b><br>
+      → [대운 흐름] 탭에서 현재 대운과 남은 기간을 반드시 확인하세요.
     </div>
   </div>
 
@@ -7718,11 +7752,11 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
     <div style="background:#faf5ee;padding:18px 20px;border-radius:10px;line-height:2;font-size:clamp(13px, 3vw, 15px);color:#3e2723;">
       세운(歲運)은 올해 1년의 흐름을 결정하는 기운입니다.<br>
       → 대운(10년)이 큰 계절이라면, 세운(1년)은 그 안의 날씨입니다.<br><br>
-      🌟 <b>길월(吉月) — 반드시 활용할 달:</b> 4월·9월·11월<br>
-      → 용신 기운 강한 달. <b>중요 결정·계약·시작은 이 달에 집중하세요.</b><br>
-      ⚠️ <b>흉월 — 절대 조심할 달:</b> 1월·3월·8월<br>
-      → 기신 기운 강한 달. <b>큰 결정·투자·계약 절대 X.</b> 이 달에 무리하면 반드시 후회합니다.<br><br>
-      {cur_year}년 전략: 길월에 모든 에너지 집중, 흉월에 수비 모드. 이것만 지켜도 실패 확률이 반으로 줍니다.
+      🌟 <b>길월(吉月) — {name}님이 반드시 활용할 달:</b> {_gilwol_str}<br>
+      → 용신 <b>{yong_str}</b> 기운이 가장 강한 달. <b>중요 결정·계약·시작을 이 달에 집중하세요.</b><br>
+      ⚠️ <b>흉월(凶月) — 절대 조심할 달:</b> {_흉wol_str}<br>
+      → 기신 <b>{gisin_str}</b> 기운이 강해지는 달. <b>큰 결정·투자·계약 절대 X.</b> 이 달에 무리하면 반드시 후회합니다.<br><br>
+      {cur_year}년 전략: 길월에 모든 에너지 집중 → 흉월에 수비 모드. 이것만 지켜도 실패 확률이 반으로 줍니다.
     </div>
   </div>
 
@@ -7742,16 +7776,13 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
       <div style="flex:1;min-width:240px;background:#e3f2fd;padding:16px;border-radius:10px;border-left:4px solid #1565c0;">
         <div style="font-weight:900;color:#0d47a1;margin-bottom:8px;">✅ 용신 보강 ({yong_str})</div>
         <div style="font-size:14px;color:#0d47a1;line-height:2;">
-          색상: 검정·남색·녹색<br>방향: 북·동<br>
-          음식: 해조류·검은콩·녹색 채소<br>활동: 독서·명상·산책·수영<br>
-          계절: 겨울·봄 적극 활용
+          {_kaewoon_yong}
         </div>
       </div>
       <div style="flex:1;min-width:240px;background:#ffebee;padding:16px;border-radius:10px;border-left:4px solid #c62828;">
         <div style="font-weight:900;color:#b71c1c;margin-bottom:8px;">⛔ 기신 회피 ({gisin_str})</div>
         <div style="font-size:14px;color:#b71c1c;line-height:2;">
-          색상 피하기: 노랑·갈색·흰색<br>환절기(3·6·9·12월) 건강 주의<br>
-          기신 강한 시기 큰 결정 자제<br>무리한 지출·투자 자제
+          {_kaewoon_gi}
         </div>
       </div>
     </div>
