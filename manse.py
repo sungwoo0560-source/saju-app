@@ -6213,6 +6213,8 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
                             if c.stringWidth(raw, _BF, size) <= max_w:
                                 if y < BOT + 8 * mm:
                                     y = _new_page()
+                                    c.setFont(_BF, size)        # Y-33: 페이지 break 후 폰트 재적용
+                                    c.setFillColorRGB(*color)
                                 c.drawString(MARGIN, y, raw)
                                 y -= (size * 0.45) * mm
                                 break
@@ -6225,6 +6227,8 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
                                     hi = mid
                             if y < BOT + 8 * mm:
                                 y = _new_page()
+                                c.setFont(_BF, size)            # Y-33: 페이지 break 후 폰트 재적용
+                                c.setFillColorRGB(*color)
                             c.drawString(MARGIN, y, raw[:lo])
                             y -= (size * 0.45) * mm
                             raw = raw[lo:].lstrip()
