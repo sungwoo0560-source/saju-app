@@ -15808,6 +15808,8 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
     except Exception as _kakao_e:
         pass  # 공유 버튼 오류 시 조용히 무시
 
+    render_pdf_download_btn("jonghap_full", pils, name, birth_year, gender)
+
 
 def menu2_lifeline(pils, birth_year, gender, name="내담자"):
     """2️⃣ 인생 흐름 (대운 100년) - 프리미엄 글래스모피즘 UI"""
@@ -27031,8 +27033,6 @@ return false;">▲</a>
     )
 
     total_lines = get_total_lines()
-
-    render_pdf_download_btn("jonghap_full", pils, name, birth_year, gender)
 
     st.markdown(
         """
