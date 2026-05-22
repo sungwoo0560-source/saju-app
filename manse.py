@@ -6323,19 +6323,56 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
                     y = _write(_txt, y, size=9)
 
                 elif tab_name == "gaewoon":
-                    y = _sec("🌟 개운 처방", y)
-                    _ys = get_yongshin(pils)
-                    _yong = _ys.get("종합_용신", []) if _ys else []
-                    _OHN_G = {"木": "목(木)", "火": "화(火)", "土": "토(土)", "金": "금(金)", "水": "수(水)"}
-                    _OH_RX = {
-                        "木": "동쪽 방향, 초록색 활용, 새벽 산책, 나무·식물 가까이",
-                        "火": "남쪽 방향, 붉은색 활용, 밝은 사교활동, 햇빛 쬐기",
-                        "土": "중앙·황토색 활용, 규칙적 생활, 황색 계열 음식",
-                        "金": "서쪽 방향, 흰색·은색 활용, 원칙 세우기, 금속 소품",
-                        "水": "북쪽 방향, 검은색 활용, 독서·명상, 물가 산책",
+                    _gw_ys = get_yongshin(pils) or {}
+                    _gw_yong = _gw_ys.get("종합_용신", []) if _gw_ys else []
+                    _gw_gi   = _gw_ys.get("종합_기신", []) if _gw_ys else []
+                    _gw_gyeok = _gw_ys.get("격국","") or "미분류"
+                    _gw_shin  = _gw_ys.get("신강약","") or "중화"
+                    _OHN_G = {"木":"목(木)","火":"화(火)","土":"토(土)","金":"금(金)","水":"수(水)"}
+                    _GW_RX = {
+                        "木":{"방향":"동쪽(東)","색상":"초록·녹색","음식":"신맛·새싹채소·식초","활동":"새벽산책·숲길·원예","계절":"봄(1~3월)"},
+                        "火":{"방향":"남쪽(南)","색상":"빨강·주황","음식":"쓴맛·홍삼·고추","활동":"햇빛쬐기·사교모임·명상","계절":"여름(4~6월)"},
+                        "土":{"방향":"중앙·황토","색상":"황색·베이지","음식":"단맛·황색음식·잡곡","활동":"규칙적생활·흙밟기·봉사","계절":"환절기(3·6·9·12월)"},
+                        "金":{"방향":"서쪽(西)","색상":"흰색·은색","음식":"매운맛·무·마늘","활동":"원칙세우기·금속소품·단호함","계절":"가을(7~9월)"},
+                        "水":{"방향":"북쪽(北)","색상":"검정·남색","음식":"짠맛·해조류·검정콩","활동":"독서·명상·물가산책","계절":"겨울(10~12월)"},
                     }
-                    for _y_oh in _yong[:3]:
-                        y = _write(f"용신({_OHN_G.get(_y_oh, '')}) 개운법: {_OH_RX.get(_y_oh, '')}", y, size=9)
+                    _GW_AV = {
+                        "木":"붉은색·남쪽·불 관련 장소 자제. 충동적 결정 피할 것.",
+                        "火":"검정색·북쪽·음습한 장소 자제. 과로·스트레스 극도 주의.",
+                        "土":"봄·초록·신맛 과다 자제. 변화·이사·이직 시기 주의.",
+                        "金":"황색·중앙·흙 관련 일 자제. 무리한 고집·원칙 충돌 주의.",
+                        "水":"흰색·서쪽·건조한 환경 자제. 말 많고 감정기복 주의.",
+                    }
+                    y = _sec("🌟 1. 용신(用神) 개운 처방", y)
+                    if _gw_yong:
+                        y = _write(f"격국: {_gw_gyeok}  |  강약: {_gw_shin}", y, size=10)
+                        y = _write(f"용신: {' · '.join([_OHN_G.get(o,o) for o in _gw_yong[:3]])}", y, size=10, color=(0.7,0.1,0.1))
+                        y -= 2*mm
+                        for _oh in _gw_yong[:3]:
+                            _rx = _GW_RX.get(_oh, {})
+                            y = _write(f"[{_OHN_G.get(_oh,_oh)} 용신 — 매일 실천 처방]", y, size=10, color=(0.1,0.4,0.1))
+                            y = _write(f"  방향: {_rx.get('방향','')}  |  색상: {_rx.get('색상','')}  |  계절(길월): {_rx.get('계절','')}", y, size=9)
+                            y = _write(f"  음식: {_rx.get('음식','')}  |  활동: {_rx.get('활동','')}", y, size=9)
+                            y -= 2*mm
+                    else:
+                        y = _write("용신 정보를 산출하지 못했습니다. 앱에서 사주 입력 후 확인하세요.", y, size=9)
+                    y = _sec("🚫 2. 기신(忌神) 회피 원칙", y)
+                    if _gw_gi:
+                        y = _write(f"기신: {' · '.join([_OHN_G.get(o,o) for o in _gw_gi[:2]])}", y, size=10, color=(0.65,0.1,0.1))
+                        y -= 2*mm
+                        for _oh in _gw_gi[:2]:
+                            y = _write(f"[{_OHN_G.get(_oh,_oh)} 기신 강할 때 반드시 피할 것]", y, size=10, color=(0.6,0.1,0.1))
+                            y = _write(f"  {_GW_AV.get(_oh,'')}", y, size=9)
+                            y = _write(f"  → 기신 대운·세운에서 보증·투기·큰 계약 절대 금지", y, size=9, color=(0.6,0.1,0.1))
+                            y -= 2*mm
+                    y = _sec("📋 3. 실천 지침 5가지", y)
+                    _gw_yns = "·".join([_OHN_G.get(o,o) for o in _gw_yong[:2]]) if _gw_yong else "용신"
+                    _gw_gis = "·".join([_OHN_G.get(o,o) for o in _gw_gi[:2]]) if _gw_gi else "기신"
+                    y = _write(f"① {_gw_yns} 색상을 매일 착용 — 속옷·소품 하나라도 용신색으로 바꾸세요.", y, size=9)
+                    y = _write(f"② 아침에 {_gw_yns} 방향으로 앉아 하루를 시작하세요.", y, size=9)
+                    y = _write(f"③ 길월(용신 계절)에 중요 계약·만남·결정을 집중하세요.", y, size=9)
+                    y = _write(f"④ {_gw_gis} 강한 시기에 큰 결정·투자·이사 절대 자제.", y, size=9)
+                    y = _write(f"⑤ 이 처방을 출력해 매일 아침 1번 읽으세요. 지식이 아닌 실천이 운명을 바꿉니다.", y, size=9)
 
                 elif tab_name == "ohaeng":
                     y = _sec("☯️ 음양오행 심층 분석", y)
@@ -6503,13 +6540,99 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
                     _jf_jj = [p.get("jj","") for p in pils]
                     _jf_ilgan = _jf_cg[1]
 
-                    # ── 1. 사주명식 ──────────────────────────────────────
-                    y = _sec("📋 1. 사주 명식(命式)", y)
-                    y = _write(f"년주: {_jf_cg[3]}{_jf_jj[3]}({_CG_KR.get(_jf_cg[3],'')}{_JJ_KR.get(_jf_jj[3],'')})", y, size=10)
-                    y = _write(f"월주: {_jf_cg[2]}{_jf_jj[2]}({_CG_KR.get(_jf_cg[2],'')}{_JJ_KR.get(_jf_jj[2],'')})", y, size=10)
-                    y = _write(f"일주: {_jf_cg[1]}{_jf_jj[1]}({_CG_KR.get(_jf_cg[1],'')}{_JJ_KR.get(_jf_jj[1],'')})", y, size=10, color=(0.7,0.1,0.1))
-                    y = _write(f"시주: {_jf_cg[0]}{_jf_jj[0]}({_CG_KR.get(_jf_cg[0],'')}{_JJ_KR.get(_jf_jj[0],'')})", y, size=10)
-                    y -= 3*mm
+                    # ── 1. 사주명식 — 만세력 보드 시각 표 ─────────────────
+                    y = _sec("📋 1. 사주 명식(命式) — 만세력 보드", y)
+                    _B_OH_M = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
+                               "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
+                    _B_JJ_OH = {"寅":"木","卯":"木","巳":"火","午":"火",
+                                "辰":"土","未":"土","戌":"土","丑":"土",
+                                "申":"金","酉":"金","亥":"水","子":"水"}
+                    _B_OH_COL = {"木":(0.18,0.49,0.20),"火":(0.78,0.16,0.16),
+                                 "土":(0.90,0.40,0.06),"金":(0.26,0.26,0.26),"水":(0.08,0.39,0.75)}
+                    _B_JJ_JG = {"子":"壬·癸","丑":"癸·辛·己","寅":"戊·丙·甲","卯":"甲·乙",
+                                "辰":"乙·癸·戊","巳":"戊·庚·丙","午":"丙·己·丁","未":"丁·乙·己",
+                                "申":"戊·壬·庚","酉":"庚·辛","戌":"辛·丁·戊","亥":"戊·甲·壬"}
+                    _B_JJ_MAIN = {"子":"壬","丑":"己","寅":"甲","卯":"乙","辰":"戊","巳":"丙",
+                                  "午":"丁","未":"己","申":"庚","酉":"辛","戌":"戊","亥":"壬"}
+                    def _b_ss(ig, cg):
+                        _O2={"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土","己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
+                        _Y2={"甲":"陽","乙":"陰","丙":"陽","丁":"陰","戊":"陽","己":"陰","庚":"陽","辛":"陰","壬":"陽","癸":"陰"}
+                        _GN={"木":"火","火":"土","土":"金","金":"水","水":"木"}
+                        _CT={"木":"土","火":"金","土":"水","金":"木","水":"火"}
+                        if not ig or not cg: return "-"
+                        io,o=_O2.get(ig,""),_O2.get(cg,"")
+                        sy=(_Y2.get(ig,"")==_Y2.get(cg,""))
+                        if io==o: return "비견" if sy else "겁재"
+                        if _GN.get(o)==io: return "편인" if sy else "정인"
+                        if _GN.get(io)==o: return "식신" if sy else "상관"
+                        if _CT.get(o)==io: return "편관" if sy else "정관"
+                        if _CT.get(io)==o: return "편재" if sy else "정재"
+                        return "-"
+                    _ig_b = _jf_cg[1]
+                    _b_cw = (W - 2*MARGIN) / 4
+                    # 헤더
+                    _by = y
+                    c.setFillColorRGB(0.15,0.12,0.05)
+                    c.rect(MARGIN, _by - 8*mm, W-2*MARGIN, 8*mm, fill=1, stroke=0)
+                    c.setFillColorRGB(0.97,0.88,0.38)
+                    c.setFont(_BF, 10)
+                    for _bci, _bh in enumerate(["시주(時)","일주(日)","월주(月)","년주(年)"]):
+                        c.drawCentredString(MARGIN+_bci*_b_cw+_b_cw/2, _by-5.5*mm, _bh)
+                    _by -= 8*mm
+                    # 천간 십성 행
+                    c.setFillColorRGB(0.93,0.91,0.87)
+                    c.rect(MARGIN, _by-6*mm, W-2*MARGIN, 6*mm, fill=1, stroke=0)
+                    c.setFillColorRGB(0.3,0.3,0.3); c.setFont(_BF, 8)
+                    for _bci, _bpi in enumerate([0,1,2,3]):
+                        c.drawCentredString(MARGIN+_bci*_b_cw+_b_cw/2, _by-4*mm, _b_ss(_ig_b,_jf_cg[_bpi]))
+                    _by -= 6*mm
+                    # 천간 행 (큰 글자)
+                    for _bci, _bpi in enumerate([0,1,2,3]):
+                        _bcg = _jf_cg[_bpi]
+                        _boh = _B_OH_M.get(_bcg,"")
+                        _bcol = _B_OH_COL.get(_boh,(0.1,0.1,0.1))
+                        _bbg = (0.95,0.90,0.80) if _bpi==1 else (0.98,0.97,0.95)
+                        c.setFillColorRGB(*_bbg)
+                        c.rect(MARGIN+_bci*_b_cw, _by-13*mm, _b_cw, 13*mm, fill=1, stroke=0)
+                        c.setFillColorRGB(*_bcol); c.setFont(_BF, 20)
+                        c.drawCentredString(MARGIN+_bci*_b_cw+_b_cw/2, _by-8.5*mm, _bcg)
+                        c.setFillColorRGB(0.4,0.4,0.4); c.setFont(_BF, 8)
+                        c.drawCentredString(MARGIN+_bci*_b_cw+_b_cw/2, _by-12*mm, f"{_CG_KR.get(_bcg,'')}({_boh})")
+                    _by -= 13*mm
+                    # 지지 행 (큰 글자)
+                    for _bci, _bpi in enumerate([0,1,2,3]):
+                        _bjj = _jf_jj[_bpi]
+                        _boh2 = _B_JJ_OH.get(_bjj,"")
+                        _bcol2 = _B_OH_COL.get(_boh2,(0.1,0.1,0.1))
+                        _bbg2 = (0.92,0.88,0.78) if _bpi==1 else (0.97,0.95,0.93)
+                        c.setFillColorRGB(*_bbg2)
+                        c.rect(MARGIN+_bci*_b_cw, _by-13*mm, _b_cw, 13*mm, fill=1, stroke=0)
+                        c.setFillColorRGB(*_bcol2); c.setFont(_BF, 20)
+                        c.drawCentredString(MARGIN+_bci*_b_cw+_b_cw/2, _by-8.5*mm, _bjj)
+                        c.setFillColorRGB(0.4,0.4,0.4); c.setFont(_BF, 8)
+                        c.drawCentredString(MARGIN+_bci*_b_cw+_b_cw/2, _by-12*mm, f"{_JJ_KR.get(_bjj,'')}({_boh2})")
+                    _by -= 13*mm
+                    # 지지 십성 행
+                    c.setFillColorRGB(0.93,0.91,0.87)
+                    c.rect(MARGIN, _by-6*mm, W-2*MARGIN, 6*mm, fill=1, stroke=0)
+                    c.setFillColorRGB(0.3,0.3,0.3); c.setFont(_BF, 8)
+                    for _bci, _bpi in enumerate([0,1,2,3]):
+                        _bjj = _jf_jj[_bpi]
+                        c.drawCentredString(MARGIN+_bci*_b_cw+_b_cw/2, _by-4*mm, _b_ss(_ig_b,_B_JJ_MAIN.get(_bjj,"")))
+                    _by -= 6*mm
+                    # 지장간 행
+                    c.setFillColorRGB(0.96,0.94,0.90)
+                    c.rect(MARGIN, _by-7*mm, W-2*MARGIN, 7*mm, fill=1, stroke=0)
+                    c.setFillColorRGB(0.35,0.30,0.20); c.setFont(_BF, 8)
+                    for _bci, _bpi in enumerate([0,1,2,3]):
+                        c.drawCentredString(MARGIN+_bci*_b_cw+_b_cw/2, _by-4.5*mm, _B_JJ_JG.get(_jf_jj[_bpi],"-"))
+                    _by -= 7*mm
+                    # 테두리 + 세로선
+                    c.setStrokeColorRGB(0.55,0.45,0.25); c.setLineWidth(0.7)
+                    c.rect(MARGIN, _by, W-2*MARGIN, y-_by, stroke=1, fill=0)
+                    for _bci in range(1,4):
+                        c.line(MARGIN+_bci*_b_cw, _by, MARGIN+_bci*_b_cw, y)
+                    y = _by - 5*mm
 
                     # ── 2. 일간 본질 ─────────────────────────────────────
                     y = _sec("🌟 2. 일간 본질(日干本質)", y)
