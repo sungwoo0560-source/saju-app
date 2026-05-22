@@ -63,6 +63,21 @@ try:
     from saju_data import ILGAN_PROFILE
 except ImportError:
     ILGAN_PROFILE = {}
+# Y-46: ILGAN_PROFILE 별칭 키 + 운명 추가
+_ILGAN_DESTINY = {
+    "甲": "큰 그릇 — 늦게 빛남", "乙": "꽃 같은 매력 — 사람 인연으로 성공",
+    "丙": "태양형 — 빠르게 빛남", "丁": "깊이 빛남 — 좁고 깊게",
+    "戊": "안정 그릇 — 천천히 쌓이는 재물", "己": "풍요 그릇 — 따뜻한 부자",
+    "庚": "강철 그릇 — 큰 결단으로 성공", "辛": "보석 그릇 — 정밀한 재능으로 성공",
+    "壬": "바다 그릇 — 넓은 세상 도전", "癸": "샘물 그릇 — 깊은 지혜로 성공",
+}
+for _ig_46, _ip_46 in ILGAN_PROFILE.items():
+    _ip_46.setdefault("강점", _ip_46.get("장점", ""))
+    _ip_46.setdefault("약점", _ip_46.get("단점", ""))
+    _ip_46.setdefault("재물본질", _ip_46.get("재물", "")[:30])
+    _ip_46.setdefault("인연본질", _ip_46.get("연애", "")[:30])
+    _ip_46.setdefault("건강본질", _ip_46.get("건강", "")[:30])
+    _ip_46.setdefault("운명", _ILGAN_DESTINY.get(_ig_46, ""))
 from saju_sinsal import *
 try:
     from saju_sinsal import get_gongmang
@@ -1872,6 +1887,18 @@ class LocalSajuNarrator:
             f"**{birth_year}년생 {age}세 {g_str}** — {_yn}년 {_mn}월 {_dn}일 {_hn}시 생"
         )
         lines.append("")
+
+        # ── Y-46: ILGAN_PROFILE 본질·강점·약점·운명 블록 ────────
+        _OH_FR = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
+                  "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
+        _ip_fr = ILGAN_PROFILE.get(ilgan, {})
+        if _ip_fr:
+            lines.append(
+                f"💎 **{ilgan}({_OH_FR.get(ilgan,'')}) 일간 본질**: {_ip_fr.get('본질','')}"
+            )
+            lines.append(f"**강점**: {_ip_fr.get('강점', _ip_fr.get('장점',''))}")
+            lines.append(f"**약점**: {_ip_fr.get('약점', _ip_fr.get('단점',''))}")
+            lines.append(f"**운명**: {_ip_fr.get('운명','')}\n")
 
         # ── 선천적 성격 — 정통사주 스타일 긴 서술 ───────────────
         # ── 0단계: 현 상태 진단 (공감) ─────────────────────────
@@ -5578,6 +5605,15 @@ class LocalSajuNarrator:
             f"어떤 시기에 중요한 인연이 찾아오는지 살펴보겠습니다.\n"
         )
 
+        # ── ILGAN_PROFILE 인연 본질 ───────────────────────────────
+        _ip_r = ILGAN_PROFILE.get(ilgan, {})
+        if _ip_r:
+            lines.append(f"### 💎 {ilgan}일간 인연 본질")
+            lines.append(f"**[원인]** {_ip_r.get('본질', '')} 이 본질이 인연을 끌어당기는 방식을 결정합니다.")
+            lines.append(f"**[결과]** 인연 스타일: {_ip_r.get('인연본질', _ip_r.get('연애', '')[:30])}")
+            lines.append(f"**[행동]** → 강점 '{_ip_r.get('강점', _ip_r.get('장점', ''))[:20]}'이 빛나는 환경에서 최고의 인연이 찾아옵니다.")
+            lines.append(f"**[경고]** ⚠️ 약점 '{_ip_r.get('약점', _ip_r.get('단점', ''))[:20]}'이 인연을 놓치는 가장 큰 원인입니다.\n")
+
         # ── 1. 배우자 자리 (일주론) ──────────────────────────────
         lines.append(f"### 🏡 {name}님의 배우자 자리 — 일주로 보는 인연상")
 
@@ -6608,6 +6644,13 @@ class LocalSajuNarrator:
             f"{name}님의 일간 **{ilgan}**({_ILGAN_HEALTH.get(ilgan, ('',''))[0]})과 "
             f"사주 오행 균형을 바탕으로 선천적 취약 부위와 관리법을 분석합니다.\n"
         )
+
+        # ── Y-46: 일간 건강 본질 블록 ────────────────────────────
+        _ip_h = ILGAN_PROFILE.get(ilgan, {})
+        if _ip_h:
+            lines.append(
+                f"💎 **{ilgan} 일간 건강 본질**: {_ip_h.get('건강본질', _ip_h.get('건강',''))}\n"
+            )
 
         # ── 1. 일간 선천 취약 부위 ────────────────────────────────
         _il_weak, _il_desc = _ILGAN_HEALTH.get(ilgan, ("기타", "일반적 건강 관리가 필요합니다."))
