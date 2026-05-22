@@ -4439,6 +4439,15 @@ class LocalSajuNarrator:
             f"이 두 가지를 함께 알아야 재물운을 제대로 활용할 수 있습니다.\n"
         )
 
+        # ── ILGAN_PROFILE 재물 본질 ─────────────────────────────────
+        _ip_m = ILGAN_PROFILE.get(ilgan, {})
+        if _ip_m:
+            lines.append(f"### 🌱 {ilgan}일간 재물 본질")
+            lines.append(f"**[원인]** {_ip_m.get('본질', '')} 이 본질이 재물 형성 방식을 결정합니다.")
+            lines.append(f"**[결과]** 재물 패턴: {_ip_m.get('재물', '')}")
+            lines.append(f"**[행동]** → 강점 '{_ip_m.get('장점', '')}' — 이 강점이 발휘되는 직업 분야: {_ip_m.get('직업', '')}")
+            lines.append(f"**[경고]** ⚠️ {_ip_m.get('처방', '')}\n")
+
         # ── 1. 재물 그릇 크기 판단 (신강신약 + 재성 개수) ──────────
         lines.append("### 💎 내 재물 그릇의 크기와 형태")
 

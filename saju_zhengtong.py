@@ -7608,6 +7608,118 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
     _kaewoon_yong = _YONG_KAEWOON_TBL.get(_YONG_OH1, "용신 오행의 색·방향·음식을 일상에서 활용하세요.")
     _kaewoon_gi   = _GI_AVOID_TBL.get(_GI_OH1, "기신 오행의 색·방향 자제, 기신 강한 시기 큰 결정 금지")
 
+    # ── Y-46: ILGAN_PROFILE 개인화 + 12섹션 인과 박스 ──────────────────
+    try:
+        from saju_data import ILGAN_PROFILE as _IP46
+    except Exception:
+        _IP46 = {}
+    _ip = _IP46.get(ilgan, {})
+    _ip_bunjil   = _ip.get("본질",  ilgan_meta + " 기운의 일간입니다.")
+    _ip_jangjeom = _ip.get("장점",  "추진력·결단력·의지")
+    _ip_danjeom  = _ip.get("단점",  "고집·유연성 부족")
+    _ip_jigeob   = _ip.get("직업",  "전문직·공직")
+    _ip_jaemul   = _ip.get("재물",  "꾸준한 노력으로 자산 형성")
+    _ip_geongang = _ip.get("건강",  "오행 균형 관리 필요")
+    _ip_yeonae   = _ip.get("연애",  "이상형을 오래 기다리는 타입")
+    _ip_cheobang = _ip.get("처방",  "균형과 유연함을 기르는 것이 핵심")
+
+    def _cb(title, cause, when, warn):
+        return (
+            '<div style="background:#fdf4ff;padding:14px 16px;margin-top:12px;'
+            'border-left:4px solid #7c3aed;border-radius:8px;font-size:14px;line-height:2;">'
+            f'<strong>💎 {title}</strong><br><br>'
+            f'<strong>[그래서]</strong> {cause}<br><br>'
+            f'<strong>[이럴 때]</strong> {when}<br>'
+            f'<strong>[조심]</strong> ⚠️ {warn}'
+            '</div>'
+        )
+
+    _ip_bunjil_s  = _ip_bunjil[:50]
+    _ip_jang_s    = _ip_jangjeom.split(',')[0].split('·')[0].strip()
+    _ip_dan_s     = _ip_danjeom.split(',')[0].split('·')[0].strip()
+    _ip_jigeob_s  = _ip_jigeob.split('·')[0].split(',')[0].strip()
+    _ip_jaemul_s  = _ip_jaemul[:40]
+    _ip_geongang_s= _ip_geongang.split('.')[0].split('·')[0].strip()
+    _ip_yeonae_s  = _ip_yeonae[:40]
+    _ip_cheobang_s= _ip_cheobang[:50]
+    _gilwol_plain = _gilwol_str.split('<')[0].strip()
+    _shin_adv = ("에너지를 발산하는 방향으로 일하면 성과가 납니다"
+                 if _shin_core == "신강" else
+                 "좋은 파트너·팀을 활용할 때 가장 빛납니다")
+
+    _causal1 = _cb(
+        f"{name}님 명식 인과",
+        f"일간 {ilgan}({ilgan_kr}) — {_ip_bunjil_s} 이 구조가 4기둥 전체를 이끕니다.",
+        f"격국 {gyeok_label}과 용신 {yong_str}이 활성화되는 시기에 집중적으로 행동하세요. 그 시기가 황금기입니다.",
+        f"명식을 이해하지 못하면 황금기가 그냥 지나갑니다."
+    )
+    _causal2 = _cb(
+        f"{name}님 총평 인과",
+        f"{ilgan}({ilgan_kr}) 일간이라서 {_ip_bunjil_s} 이 본질이 삶의 모든 선택을 이끕니다.",
+        f"{_shin_core} 사주이므로 {_shin_adv}.",
+        f"본성을 거스르는 선택은 반드시 후회로 돌아옵니다. 지금 하는 일이 본성과 맞는지 점검하세요."
+    )
+    _causal3 = _cb(
+        f"{name}님 성격 인과",
+        f"일간 {ilgan}({ilgan_kr})이라서 '{_ip_jangjeom}' 강점이 생겼고, 동시에 '{_ip_danjeom}' 약점도 따라옵니다.",
+        f"강점 '{_ip_jang_s}'은 지금 당장 직업과 인간관계에서 100% 활용하세요.",
+        f"약점 '{_ip_dan_s}'을 인식하지 못하면 가장 가까운 사람과 반드시 충돌합니다."
+    )
+    _causal4 = _cb(
+        f"{name}님 직업 인과",
+        f"일간 {ilgan}({ilgan_kr}) + 격국 {gyeok_label} 조합이라서 {_ip_jigeob_s} 계열에서 자연스럽게 두각을 나타냅니다.",
+        f"용신 {yong_str} 대운에 이직·창업·도전 결정을 내리세요. 이 타이밍이 성공을 결정합니다.",
+        f"적성과 다른 직업을 선택하면 아무리 노력해도 절반의 결과만 나옵니다."
+    )
+    _causal5 = _cb(
+        f"{name}님 재물 인과",
+        f"일간 {ilgan}({ilgan_kr})이라서 재물 형성 방식이 '{_ip_jaemul_s}' 패턴입니다.",
+        f"용신 {yong_str} 기운이 강한 길월({_gilwol_plain})에만 큰 투자·계약을 하세요. 이때 결정한 것이 자산이 됩니다.",
+        f"기신 {gisin_str} 강한 시기에 욕심 부리면 100% 후회합니다. 이 시기의 투자는 결코 돌아오지 않습니다."
+    )
+    _causal6 = _cb(
+        f"{name}님 건강 인과",
+        f"일간 {ilgan}({ilgan_kr})이라서 선천적으로 '{_ip_geongang_s}' 부위가 약합니다.",
+        f"용신 {yong_str} 오행을 보강하는 음식·활동을 매일 실천하세요. 건강 운도 바뀝니다.",
+        f"취약 부위를 방치하면 기신 대운에 큰 건강 위기가 찾아옵니다. 예방이 전부입니다."
+    )
+    _causal7 = _cb(
+        f"{name}님 인연 인과",
+        f"일간 {ilgan}({ilgan_kr}) 일지 {iz_jj}({iljj_kr}) 구조라서 연애 패턴이 '{_ip_yeonae_s}' 스타일입니다.",
+        f"용신 {yong_str} 대운·세운에 인연이 집중됩니다. 그 시기에 반드시 적극적으로 움직이세요.",
+        f"인연의 타이밍을 망설이면 다음 기회는 10년 뒤입니다. 준비보다 만남이 먼저입니다."
+    )
+    _causal8 = _cb(
+        f"{name}님 대운 인과",
+        f"일간 {ilgan}({ilgan_kr}) {_ip_bunjil_s} 본질 때문에 용신 {yong_str} 대운에 특히 강하게 빛납니다.",
+        f"용신 {yong_str} 대운이 시작되는 해를 목표로 역방향 계획을 세우세요. 그 10년이 인생 전부입니다.",
+        f"대운을 모르고 움직이는 것은 밤길을 지도 없이 가는 것입니다. 현재 대운을 반드시 파악하세요."
+    )
+    _causal9 = _cb(
+        f"{name}님 {cur_year}년 세운 인과",
+        f"{ilgan}({ilgan_kr}) 일간이라서 {cur_year}년 세운의 영향을 '{_ip_jaemul_s}' 방향으로 받습니다.",
+        f"길월({_gilwol_plain})에 중요 결정 집중 → 흉월에 수비. 이것만 지켜도 실패가 반으로 줍니다.",
+        f"흉월에 계약·투자·중요 결정을 내리면 반드시 문제가 생깁니다. 달력에 길월·흉월을 표시해 두세요."
+    )
+    _causal10 = _cb(
+        f"{name}님 신살 인과",
+        f"일간 {ilgan}({ilgan_kr}) {_ip_bunjil_s} 이 본질 때문에 발동 신살의 영향이 더 강하게 나타납니다.",
+        f"길한 신살(천을귀인·문창귀인 등)이 활성화되는 시기를 파악하고 그 시기에 집중적으로 행동하세요.",
+        f"흉한 신살(겁살·양인살 등)을 방치하면 가장 중요한 시기에 예상치 못한 충격이 옵니다."
+    )
+    _causal11 = _cb(
+        f"{name}님 개운 인과",
+        f"처방의 핵심: '{_ip_cheobang_s}' — 이것이 {name}님 삶 전체의 열쇠입니다.",
+        f"용신 {yong_str} 오행을 매일 실천하세요. 알고 있어도 실천하지 않으면 아무것도 바뀌지 않습니다.",
+        f"기신 {gisin_str} 회피를 게을리 하면 개운의 효과가 절반으로 줄어듭니다."
+    )
+    _causal12 = _cb(
+        f"{name}님 종합 인과",
+        f"일간 {ilgan}({ilgan_kr}) + {gyeok_label} + {shin_label} — {_ip_cheobang_s}",
+        f"오늘부터 딱 하나만: 용신 {yong_str} 오행을 일상에 넣으세요. 색상·음식·방향 하나만 바꿔도 흐름이 달라집니다.",
+        f"아는 것으로 끝내면 평생 지금 이 자리입니다. 실천이 운명을 바꿉니다."
+    )
+
     html = f"""
 <div style="background:linear-gradient(180deg,#fdfcf7 0%,#fff 100%);
             border:3px solid #6b4423;border-radius:20px;
@@ -7636,6 +7748,7 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
       <b>강약:</b> {shin_label}&nbsp;
       <b>용신(用神):</b> {yong_str}&nbsp;
       <b>기신(忌神):</b> {gisin_str}
+      {_causal1}
     </div>
   </div>
 
@@ -7653,6 +7766,7 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
       <b>📌 {name}님 운명의 핵심 구조:</b><br>
       → <b>{ilgan_meta}</b> + <b>{gyeok_label}</b> + <b>{shin_label}</b> — 이 세 가지가 {name}님 삶의 모든 선택과 결과를 결정합니다.<br>
       → 용신 <b>{yong_str}</b> 대운이 오는 10년 — {name}님의 진짜 황금기입니다. 준비 없이 맞이하면 그냥 지나갑니다.
+      {_causal2}
     </div>
   </div>
 
@@ -7671,6 +7785,7 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
         <div style="font-size:13px;color:#e65100;margin-top:8px;">→ 이 부분을 인식하고 부드럽게 풀면 인간관계가 달라집니다.</div>
       </div>
     </div>
+    <div style="margin-top:4px;">{_causal3}</div>
   </div>
 
   <!-- 4. 직업 적성 -->
@@ -7682,6 +7797,7 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
       <b style="color:#1565c0;">[적합한 이유]</b><br>
       · 격국 <b>{gyeok_label}</b> → {gyeok_explain}<br>
       · <b>{ilgan}({ilgan_kr})</b> 일간 — {ilgan_meta} 기운이라 정확성·결단력 요구 분야에서 두각을 나타냅니다.
+      {_causal4}
     </div>
   </div>
 
@@ -7699,6 +7815,7 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
       → 용신 <b>{yong_str}</b> 기운이 강한 시기(길월)에만 큰 투자·계약 결정하세요.<br>
       → 기신 <b>{gisin_str}</b> 강한 시기 — <b>보증·동업·투기 절대 X.</b> 이 시기에 욕심 부리면 100% 후회합니다.<br>
       → 큰돈 들어오면 즉시 안전 자산에 고정. 유동성으로 놔두면 반드시 새어나갑니다.
+      {_causal5}
     </div>
   </div>
 
@@ -7712,6 +7829,7 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
       {_risk("큰병","메시지","정기 검진과 환절기 건강 관리가 중요합니다.")}<br><br>
       → <b>{ilgan}({ilgan_kr})</b> 일간 — {ilgan_meta} 기운이라 오행 불균형이 건강에 직접 영향을 줍니다.<br>
       → 용신 <b>{yong_str}</b> 오행 보강 + 정기 건강검진이 핵심입니다.
+      {_causal6}
     </div>
   </div>
 
@@ -7729,6 +7847,7 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
       <b>🔴 놓치면 안 되는 인연의 시기:</b><br>
       → 용신 <b>{yong_str}</b> 대운·세운이 겹치는 해 — 그 해에 반드시 적극적으로 움직이세요.<br>
       → 이 시기를 망설이다 보내면, 다음 기회는 10년 뒤입니다.
+      {_causal7}
     </div>
   </div>
 
@@ -7743,6 +7862,7 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
       → 보증·동업·무리한 투자 절대 X. 힘을 빼지 말고 내실만 다지십시오.<br><br>
       <b>📌 지금 {name}님이 어느 대운에 있는지가 가장 중요한 정보입니다.</b><br>
       → [대운 흐름] 탭에서 현재 대운과 남은 기간을 반드시 확인하세요.
+      {_causal8}
     </div>
   </div>
 
@@ -7757,6 +7877,7 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
       ⚠️ <b>흉월(凶月) — 절대 조심할 달:</b> {_흉wol_str}<br>
       → 기신 <b>{gisin_str}</b> 기운이 강해지는 달. <b>큰 결정·투자·계약 절대 X.</b> 이 달에 무리하면 반드시 후회합니다.<br><br>
       {cur_year}년 전략: 길월에 모든 에너지 집중 → 흉월에 수비 모드. 이것만 지켜도 실패 확률이 반으로 줍니다.
+      {_causal9}
     </div>
   </div>
 
@@ -7766,6 +7887,7 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
     <div style="background:#faf5ee;padding:18px 20px;border-radius:10px;line-height:2;font-size:clamp(13px, 3vw, 15px);color:#3e2723;">
       <b>{name}님 원국에 자리한 주요 신살:</b><br><br>
       {sinsal_rows}
+      {_causal10}
     </div>
   </div>
 
@@ -7788,6 +7910,7 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
     </div>
     <div style="margin-top:12px;background:#faf5ee;padding:14px 16px;border-radius:10px;font-size:14px;color:#3e2723;line-height:1.9;">
       {ilju_info.get("개운","용신 오행을 일상에서 꾸준히 활용하세요.")}
+      {_causal11}
     </div>
   </div>
 
@@ -7813,6 +7936,7 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
       <b>{name}님 — 이미 하늘이 주신 패는 최상급입니다.</b><br>
       이제 그 패를 어떻게 쓸지 — {name}님의 결심에 달렸습니다.<br>
       오늘부터 — 한 가지씩 실천하세요. <b>운명이 바뀝니다.</b>
+      {_causal12}
     </div>
   </div>
 
