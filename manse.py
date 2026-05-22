@@ -6292,6 +6292,7 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
                 elif tab_name == "health":
                     y = _sec("🏥 건강 분석", y)
                     _txt = LocalSajuNarrator.full_report(pils, name, birth_year, gender)
+                    y = _write(_txt, y, size=9)
                     _OH_HEALTH = {
                         "木": "간·담·눈·근육 — 스트레스성 질환, 과로 주의",
                         "火": "심장·소장·혈관 — 혈압·심장·정신건강 주의",
@@ -6339,7 +6340,7 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
                 elif tab_name == "ohaeng":
                     y = _sec("☯️ 음양오행 심층 분석", y)
                     _txt = LocalSajuNarrator.full_report(pils, name, birth_year, gender)
-                    y = _write(_txt[:3000], y, size=9)
+                    y = _write(_txt, y, size=9)
 
                 elif tab_name == "tojeong":
                     y = _sec("📜 토정비결", y)
@@ -6363,7 +6364,6 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
                     y = _write(_TJ.get(_ss_t, f"{_cur_yr}년 {_ss_t} 기운의 해입니다."), y, size=9)
 
                 elif tab_name == "current_situation":
-                    y = _sec("🎯 현재 상황 진단", y)
                     try:
                         _CG_KR2 = {"甲":"갑","乙":"을","丙":"병","丁":"정","戊":"무",
                                    "己":"기","庚":"경","辛":"신","壬":"임","癸":"계"}
@@ -6371,47 +6371,124 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
                                    "午":"오","未":"미","申":"신","酉":"유","戌":"술","亥":"해"}
                         _cs_cg = [p.get("cg","") for p in pils]
                         _cs_jj = [p.get("jj","") for p in pils]
-                        y = _write("[사주 원국]", y, size=10)
-                        y = _write(f"년주: {_cs_cg[3]}{_cs_jj[3]}({_CG_KR2.get(_cs_cg[3],'')}{_JJ_KR2.get(_cs_jj[3],'')})", y, size=9)
-                        y = _write(f"월주: {_cs_cg[2]}{_cs_jj[2]}({_CG_KR2.get(_cs_cg[2],'')}{_JJ_KR2.get(_cs_jj[2],'')})", y, size=9)
-                        y = _write(f"일주: {_cs_cg[1]}{_cs_jj[1]}({_CG_KR2.get(_cs_cg[1],'')}{_JJ_KR2.get(_cs_jj[1],'')})", y, size=9, color=(0.7,0.1,0.1))
-                        y = _write(f"시주: {_cs_cg[0]}{_cs_jj[0]}({_CG_KR2.get(_cs_cg[0],'')}{_JJ_KR2.get(_cs_jj[0],'')})", y, size=9)
-                        y -= 3 * mm
+
+                        # ── 1. 사주 원국 ──────────────────────────────────
+                        y = _sec("📋 1. 사주 원국", y)
+                        y = _write(f"년주: {_cs_cg[3]}{_cs_jj[3]}({_CG_KR2.get(_cs_cg[3],'')}{_JJ_KR2.get(_cs_jj[3],'')})", y, size=10)
+                        y = _write(f"월주: {_cs_cg[2]}{_cs_jj[2]}({_CG_KR2.get(_cs_cg[2],'')}{_JJ_KR2.get(_cs_jj[2],'')})", y, size=10)
+                        y = _write(f"일주: {_cs_cg[1]}{_cs_jj[1]}({_CG_KR2.get(_cs_cg[1],'')}{_JJ_KR2.get(_cs_jj[1],'')})", y, size=10, color=(0.7,0.1,0.1))
+                        y = _write(f"시주: {_cs_cg[0]}{_cs_jj[0]}({_CG_KR2.get(_cs_cg[0],'')}{_JJ_KR2.get(_cs_jj[0],'')})", y, size=10)
+                        y -= 3*mm
+
+                        # ── 2. 세운 분석 ──────────────────────────────────
+                        y = _sec(f"🗓️ 2. {_cur_yr}년 세운(歲運)", y)
                         _cs_sw = get_yearly_luck(pils, _cur_yr) or {}
                         _cs_ss = _cs_sw.get("십성_천간", "")
                         _cs_gh = _cs_sw.get("길흉", "")
                         _cs_cg2 = _cs_sw.get("cg", "")
                         _cs_jj2 = _cs_sw.get("jj", "")
-                        y = _write(f"[{_cur_yr}년 세운]  {_cs_cg2}{_cs_jj2} — {_cs_ss} [{_cs_gh}]", y, size=10)
-                        y -= 2 * mm
+                        y = _write(f"올해 세운간지: {_cs_cg2}{_cs_jj2}  |  십성: {_cs_ss}  |  길흉: {_cs_gh}", y, size=10)
+                        _CS_SW_MSG = {
+                            "正官": "명예·승진·조직 신뢰가 높아지는 해. 공식적 행동으로 결과를 만드세요.",
+                            "偏官": "도전·극복의 해. 강하게 버티면 크게 성장합니다. 건강 주의.",
+                            "正財": "성실한 노력이 재물로 쌓이는 해. 꾸준한 저축과 실행이 핵심.",
+                            "偏財": "예상치 못한 기회와 수입의 해. 적극적으로 움직이세요.",
+                            "食神": "재능과 표현이 빛나는 해. 부업·새 분야 도전에 최적.",
+                            "傷官": "변화·혁신의 해. 기존 틀을 깨는 도전이 성과를 냅니다.",
+                            "比肩": "독립·자립의 해. 경쟁이 심해지나 자신감으로 돌파 가능.",
+                            "劫財": "재물 기복 주의. 충동 지출·투기 자제. 내실 다지기.",
+                            "偏印": "이동·변화의 해. 학습·이직·이사 기운 강함.",
+                            "正印": "학문·귀인의 해. 배움과 자격증이 운명을 바꿉니다.",
+                        }
+                        _cs_msg = _CS_SW_MSG.get(_cs_ss, f"{_cs_ss} 기운의 한 해.")
+                        y = _write(_cs_msg, y, size=9)
+                        y -= 2*mm
+
+                        # ── 3. 발동 신살 전체 ─────────────────────────────
+                        y = _sec("⭐ 3. 발동 신살(神煞) 전체", y)
                         try:
                             from saju_sinsal import get_12sinsal, get_extra_sinsal
+                            from saju_zhengtong import calc_all_sinsal_extended as _cs_cse
                             _cs_s12 = get_12sinsal(pils) or []
                             _cs_sex = get_extra_sinsal(pils) or []
-                            _cs_all = list(_cs_s12) + list(_cs_sex)
-                            if _cs_all:
-                                y = _write("[발동 신살]", y, size=10)
-                                for _s in _cs_all[:8]:
-                                    _sn = _s.get("이름") or _s.get("name") or ""
-                                    _sp = _s.get("위치", "")
-                                    if _sn:
-                                        y = _write(f"· {_sn}{(' ('+_sp+')') if _sp else ''}", y, size=9)
+                            _cs_ext = _cs_cse(pils) or []
+                            _cs_all_s, _cs_seen_s = [], set()
+                            for _s in _cs_ext + _cs_s12 + _cs_sex:
+                                if not isinstance(_s, dict): continue
+                                _sn2 = _s.get("이름") or _s.get("name") or ""
+                                if _sn2 and _sn2 not in _cs_seen_s:
+                                    _cs_seen_s.add(_sn2)
+                                    _cs_all_s.append(_s)
+                            y = _write(f"원국 발동 신살 {len(_cs_all_s)}개:", y, size=10)
+                            for _s2 in _cs_all_s:
+                                _sn2 = _s2.get("이름") or _s2.get("name") or ""
+                                _sp2 = _s2.get("위치","")
+                                _sm2 = _s2.get("결과") or _s2.get("의미") or _s2.get("desc","")
+                                _sw2 = _s2.get("주의","")
+                                _sg2 = _s2.get("등급","")
+                                _col2 = (0.7,0.1,0.1) if "강력" in _sg2 else (0.1,0.1,0.1)
+                                _line2 = f"• {_sn2}"
+                                if _sp2: _line2 += f" [{_sp2}]"
+                                if _sm2: _line2 += f" — {str(_sm2)[:70]}"
+                                y = _write(_line2, y, size=9, color=_col2)
+                                if _sw2:
+                                    y = _write(f"  ⚠️ {str(_sw2)[:80]}", y, size=8, color=(0.6,0.1,0.1))
+                        except Exception:
+                            y = _write("신살 로드 오류", y, size=9)
+                        y -= 3*mm
+
+                        # ── 4. 종합 사주 해설 ──────────────────────────────
+                        y = _sec("📖 4. 종합 사주 해설", y)
+                        _cs_full = LocalSajuNarrator.full_report(pils, name, birth_year, gender)
+                        y = _write(_cs_full, y, size=9)
+                        y -= 3*mm
+
+                        # ── 5. 향후 3년 흐름 ──────────────────────────────
+                        y = _sec("🔮 5. 향후 3년 핵심 흐름", y)
+                        _cs_fut = LocalSajuNarrator.future3(pils, name, birth_year, gender)
+                        y = _write(_cs_fut, y, size=9)
+                        y -= 3*mm
+
+                        # ── 6. 재물·사업 분석 ─────────────────────────────
+                        y = _sec("💰 6. 재물·사업 분석", y)
+                        _cs_mon = LocalSajuNarrator.money(pils, name, birth_year, gender)
+                        y = _write(_cs_mon, y, size=9)
+                        y -= 3*mm
+
+                        # ── 7. 위험 신호 진단 ─────────────────────────────
+                        try:
+                            from saju_zhengtong import detect_life_risk_signals as _cs_drs
+                            _cs_risks = _cs_drs(pils)
+                            if _cs_risks:
+                                y = _sec("🚨 7. 위험 신호 진단", y)
+                                _RISK_LBL = {"바람기":"바람기·외도","사고수":"사고수","횡재수":"횡재수",
+                                             "이혼·이별":"이혼위험","큰병":"큰병","결혼인연":"결혼인연","사업운":"사업운"}
+                                for _rk, _rv in _cs_risks.items():
+                                    _rs = _rv.get("점수",0)
+                                    _rl = _rv.get("등급","")
+                                    _rm = _re.sub(r'\n',' ', _rv.get("메시지",""))[:120]
+                                    y = _write(f"{_RISK_LBL.get(_rk,_rk)}: {_rs}/100  [{_rl}]", y, size=10)
+                                    if _rm:
+                                        y = _write(f"  → {_rm}", y, size=8, color=(0.5,0.1,0.1))
+                                y -= 2*mm
                         except Exception:
                             pass
-                        y -= 2 * mm
+
+                        # ── 8. 개운 처방 ──────────────────────────────────
                         _cs_ys = get_yongshin(pils)
                         _cs_yong = _cs_ys.get("종합_용신", []) if _cs_ys else []
                         _OH_RX2 = {
-                            "木": "동쪽 방향, 초록색 활용, 새벽 산책",
-                            "火": "남쪽 방향, 붉은색 활용, 햇빛 쬐기",
-                            "土": "황토색 활용, 규칙적 생활",
-                            "金": "서쪽 방향, 흰색 활용, 원칙 세우기",
-                            "水": "북쪽 방향, 검은색 활용, 독서·명상",
+                            "木": "동쪽·초록색·새벽산책·새싹채소·신맛",
+                            "火": "남쪽·붉은색·햇빛·홍삼·쓴맛",
+                            "土": "중앙·황토색·규칙적 생활·황색음식·단맛",
+                            "金": "서쪽·흰색·은색·원칙·금속 소품·매운맛",
+                            "水": "북쪽·검은색·독서·명상·해조류·짠맛",
                         }
                         if _cs_yong:
-                            y = _write("[용신 처방]", y, size=10)
+                            y = _sec("🌟 8. 개운 처방", y)
                             for _oh in _cs_yong[:3]:
-                                y = _write(f"용신({_oh}): {_OH_RX2.get(_oh, '')}", y, size=9)
+                                y = _write(f"용신({_oh}): {_OH_RX2.get(_oh,'')}", y, size=9)
+
                     except Exception as _cs_e:
                         y = _write(f"현재 상황 진단 오류: {_cs_e}", y, size=9)
 
@@ -6486,7 +6563,7 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
                     # ── 5. 십성분석 ──────────────────────────────────────
                     y = _sec("🔢 5. 십성 분석(十星分析)", y)
                     _jf_full = LocalSajuNarrator.full_report(pils, name, birth_year, gender)
-                    y = _write(_jf_full[:1800], y, size=9)
+                    y = _write(_jf_full, y, size=9)
                     y -= 3*mm
 
                     # ── 6. 신살전체 ──────────────────────────────────────
@@ -6513,7 +6590,7 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
                     # ── 7. 대운 8개 ──────────────────────────────────────
                     y = _sec("🌊 7. 대운 흐름(大運) 8개", y)
                     _jf_life = LocalSajuNarrator.lifeline(pils, name, birth_year, gender)
-                    y = _write(_jf_life[:2000], y, size=9)
+                    y = _write(_jf_life, y, size=9)
                     y -= 3*mm
 
                     # ── 8. 세운+월별 ─────────────────────────────────────
@@ -6557,19 +6634,19 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
                     # ── 10. 십성조합 ─────────────────────────────────────
                     y = _sec("⚙️ 10. 십성 조합(十星組合) 패턴", y)
                     _jf_fut = LocalSajuNarrator.future3(pils, name, birth_year, gender)
-                    y = _write(_jf_fut[:1500], y, size=9)
+                    y = _write(_jf_fut, y, size=9)
                     y -= 3*mm
 
                     # ── 11. 평론서 요약 ──────────────────────────────────
                     y = _sec("📜 11. 재물·사업 핵심 분석", y)
                     _jf_mon = LocalSajuNarrator.money(pils, name, birth_year, gender)
-                    y = _write(_jf_mon[:1500], y, size=9)
+                    y = _write(_jf_mon, y, size=9)
                     y -= 3*mm
 
                     # ── 12. 관계·인연 ────────────────────────────────────
                     y = _sec("💑 12. 관계·인연 분석", y)
                     _jf_rel = LocalSajuNarrator.relations(pils, name, birth_year, gender)
-                    y = _write(_jf_rel[:1500], y, size=9)
+                    y = _write(_jf_rel, y, size=9)
                     y -= 3*mm
 
                     # ── 13. 행동지침 5가지 ───────────────────────────────
@@ -6586,6 +6663,46 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
                     y = _write("본 사주 분석은 정통 명리학(자평진전·적천수·궁통보감) 원리에 기반한 참고 자료입니다.", y, size=8, color=(0.5,0.5,0.5))
                     y = _write("의료·법률·재무 전문가의 진단을 대체하지 않으며, 모든 의사결정의 최종 책임은 본인에게 있습니다.", y, size=8, color=(0.5,0.5,0.5))
                     y = _write("사주 해석은 통계적 패턴에 기반하며 개인의 노력과 환경에 따라 결과가 달라질 수 있습니다.", y, size=8, color=(0.5,0.5,0.5))
+
+                elif tab_name == "yearly":
+                    y = _sec(f"📅 {_cur_yr}년 연간 운세 분석", y)
+                    # 세운 정보
+                    _yr_sw = get_yearly_luck(pils, _cur_yr) or {}
+                    _yr_ss = _yr_sw.get("십성_천간", "")
+                    _yr_gh = _yr_sw.get("길흉", "평")
+                    _yr_cg = _yr_sw.get("cg", "")
+                    _yr_jj = _yr_sw.get("jj", "")
+                    _yr_age = _cur_yr - birth_year + 1
+                    y = _write(f"{_cur_yr}년 {_yr_age}세  세운간지: {_yr_cg}{_yr_jj}  십성: {_yr_ss}  길흉: {_yr_gh}", y, size=10)
+                    y -= 2*mm
+                    # 향후 3년 서술
+                    y = _sec("🔮 향후 3년 핵심 흐름", y)
+                    _yr_fut = LocalSajuNarrator.future3(pils, name, birth_year, gender)
+                    y = _write(_yr_fut, y, size=9)
+                    y -= 3*mm
+                    # 월별 길흉
+                    y = _sec(f"📆 {_cur_yr}년 월별 길흉 분석", y)
+                    try:
+                        _yr_mons = get_monthly_luck(pils, _cur_yr) or []
+                        for _ym in _yr_mons:
+                            _ym_mon = _ym.get("월", "")
+                            _ym_ss  = _ym.get("십성_천간", "")
+                            _ym_gh  = _ym.get("길흉", "평")
+                            _ym_col = (0.1,0.4,0.1) if _ym_gh=="길" else ((0.6,0.1,0.1) if _ym_gh=="흉" else (0.1,0.1,0.1))
+                            _ym_tag = "▲ 길월 — 계약·결정·시작 집중" if _ym_gh=="길" else ("▼ 흉월 — 큰 결정 절대 X" if _ym_gh=="흉" else "― 평월 — 현상 유지")
+                            y = _write(f"{_ym_mon:>2}월 [{_ym_ss}] {_ym_tag}", y, size=9, color=_ym_col)
+                    except Exception:
+                        y = _write(f"{_cur_yr}년 월별 분석 불가 — 앱에서 확인하세요", y, size=9)
+                    y -= 3*mm
+                    # 재물운
+                    y = _sec("💰 재물·사업 분석", y)
+                    _yr_mon = LocalSajuNarrator.money(pils, name, birth_year, gender)
+                    y = _write(_yr_mon, y, size=9)
+                    y -= 3*mm
+                    # 관계·인연
+                    y = _sec("💑 관계·인연 분석", y)
+                    _yr_rel = LocalSajuNarrator.relations(pils, name, birth_year, gender)
+                    y = _write(_yr_rel, y, size=9)
 
                 # 푸터
                 c.setFont(_BF, 8)
