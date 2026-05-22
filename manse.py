@@ -6291,7 +6291,7 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
 
                 elif tab_name == "health":
                     y = _sec("🏥 건강 분석", y)
-                    _txt = LocalSajuNarrator.full_report(pils, name, birth_year, gender)
+                    _txt = LocalSajuNarrator.health(pils, name, birth_year, gender)
                     y = _write(_txt, y, size=9)
                     _OH_HEALTH = {
                         "木": "간·담·눈·근육 — 스트레스성 질환, 과로 주의",
