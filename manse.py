@@ -25020,7 +25020,18 @@ def menu_gaewoon(pils, name, birth_year, gender):
 
     render_pdf_download_btn("gaewoon", pils, name, birth_year, gender)
 
+_Y51_DEPLOY = "Y-51: 2026-05-24 cache clear"
+
 def main():
+
+    # Y-51: 배포 버전이 바뀔 때 캐시 강제 클리어
+    if st.session_state.get('_y51_cache_cleared') != _Y51_DEPLOY:
+        try:
+            st.cache_data.clear()
+            st.cache_resource.clear()
+        except Exception:
+            pass
+        st.session_state['_y51_cache_cleared'] = _Y51_DEPLOY
 
     # -- 페이지 설정 ---------------------------------
 
