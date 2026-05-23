@@ -1680,6 +1680,15 @@ def _get_dw_ss_j(ilgan, dw):
     jjg = JIJANGGAN.get(dw.get("jj", ""), [""])[-1] if JIJANGGAN.get(dw.get("jj", "")) else ""
     return TEN_GODS_MATRIX.get(ilgan, {}).get(jjg, "-")
 
+# Y-50: gender 정규화 헬퍼
+def _normalize_gender(gender):
+    """男/女/남/여/남성/여성/male/female/M/F 모두 처리"""
+    if not gender:
+        return False
+    g = str(gender).strip().lower()
+    male_keywords = ('남', '남성', '남자', 'male', 'm')
+    return any(g == k or g.startswith(k) for k in male_keywords) or str(gender).strip() == '男'
+
 class LocalSajuNarrator:
     """만세력 계산 결과를 받아 사람의 언어로 풀어주는 완전 로컬 해석 엔진"""
 
@@ -7968,7 +7977,7 @@ def get_yukjin(ilgan, pils, gender="남", marriage="미혼"):
         ),
     ]
 
-    if gender == "남":
+    if _normalize_gender(gender):
         checks += [
             (
                 "아내(正財)",
@@ -8953,7 +8962,7 @@ def _nar_ch8_flow(ctx):
     _love_type = "중립"
 
     # 성별별 배우자성 세운
-    if gender == "남":
+    if _normalize_gender(gender):
         if "偏財" in sw_ss_cg:
             _LOVE_RISK += 3
             _love_reasons.append("편재(偏財) 세운 — 이성 인연·여성 문제 직접 발동")
@@ -9167,8 +9176,8 @@ def _nar_ch8_flow(ctx):
     _score_love = 3
     if has_dowhwa: _score_love = min(10, _score_love + 3)
     if has_hap:    _score_love = min(10, _score_love + 2)
-    if gender == "남" and ("偏財" in sw_ss_cg or "正財" in sw_ss_cg): _score_love = min(10, _score_love + 2)
-    if gender == "여" and ("偏官" in sw_ss_cg or "正官" in sw_ss_cg): _score_love = min(10, _score_love + 2)
+    if _normalize_gender(gender) and ("偏財" in sw_ss_cg or "正財" in sw_ss_cg): _score_love = min(10, _score_love + 2)
+    if not _normalize_gender(gender) and ("偏官" in sw_ss_cg or "正官" in sw_ss_cg): _score_love = min(10, _score_love + 2)
     _score_love = max(1, _score_love)
 
     # 직업 (base 5, 높을수록 좋음)
@@ -11123,8 +11132,8 @@ def _nar_future(ctx):
                     f"* {'지금이 새 사업을 시작하기에 좋은 흐름입니다.' if _get_yongshin_match(sw_now.get('십성_천간', ''), yongshin_ohs, ilgan_oh) == 'yong' else '새 사업은 다음 용신 세운이 올 때까지 기다리십시오.'}",
                     f"",
                     f"[연애] 연애, 결혼 최적 시기:",
-                    f"* {'재성(남성) / 관성(여성) 세운이 오는 해가 결혼, 인연의 최적 시기입니다.' if gender == '남' else ''}",
-                    f"* {'이 3년 중 ' + str(current_year) + '년이 이성 인연에 가장 활성화된 해입니다.' if (sw_now.get('십성_천간', '') in (['정재', '편재'] if gender == '남' else ['정관', '편관'])) else '적극적인 활동을 통해 인연의 기회를 만드십시오.'}",
+                    f"* {'재성(남성) / 관성(여성) 세운이 오는 해가 결혼, 인연의 최적 시기입니다.' if _normalize_gender(gender) else ''}",
+                    f"* {'이 3년 중 ' + str(current_year) + '년이 이성 인연에 가장 활성화된 해입니다.' if (sw_now.get('십성_천간', '') in (['정재', '편재'] if _normalize_gender(gender) else ['정관', '편관'])) else '적극적인 활동을 통해 인연의 기회를 만드십시오.'}",
                     f"",
                     f"[건강] 건강 주의 시기:",
                     f"* 편관, 겁재 세운은 건강 이상이 생기기 쉬운 시기입니다",
@@ -11670,8 +11679,8 @@ def _nar_health(ctx):
                     f"* {iljj_kr}({iljj}) 일지 | {'안정과 포용력을 가진 배우자' if iljj in ['丑(축)', '辰(진)', '戌(술)', '未(미)'] else '열정적이고 활기찬 배우자' if iljj in ['午(오)', '巳(사)', '寅(인)'] else '논리적이고 실력 있는 배우자' if iljj in ['申(신)', '酉(유)', '亥(해)', '子(자)'] else '성장하는 에너지를 가진 배우자' if iljj in ['卯(묘)'] else '포용력 있는 배우자'}를 만나는 운입니다.",
                     f"",
                     f"이성 인연이 강해지는 시기:",
-                    f"* {'재성(財星) 세운 | 편재, 정재 세운이 올 때 이성 인연이 활성화됩니다.' if gender == '남' else '* 관성(官星) 세운 | 정관, 편관 세운이 올 때 이성 인연이 활성화됩니다.'}",
-                    f"* 현재 대운 {cur_dw['str'] if cur_dw else '-'} | {'이성 인연이 활성화되는 대운입니다' if cur_dw_ss in (['정재', '편재'] if gender == '남' else ['정관', '편관']) else '배우자 운보다 다른 분야가 강조되는 대운입니다'}",
+                    f"* {'재성(財星) 세운 | 편재, 정재 세운이 올 때 이성 인연이 활성화됩니다.' if _normalize_gender(gender) else '* 관성(官星) 세운 | 정관, 편관 세운이 올 때 이성 인연이 활성화됩니다.'}",
+                    f"* 현재 대운 {cur_dw['str'] if cur_dw else '-'} | {'이성 인연이 활성화되는 대운입니다' if cur_dw_ss in (['정재', '편재'] if _normalize_gender(gender) else ['정관', '편관']) else '배우자 운보다 다른 분야가 강조되는 대운입니다'}",
                     f"",
                     f"이상적인 파트너의 특징:",
                     f"* 용신 {yong_kr} 오행을 가진 사람과 궁합이 잘 맞습니다",
@@ -11695,8 +11704,8 @@ def _nar_health(ctx):
                     f"",
                     f"[ 제5장 | 연애, 결혼 심층 분석 ]",
                     f"",
-                    f"{'남성' if gender == '남' else '여성'} {ilgan_kr} 일간의 연애 스타일:",
-                    f"* {ILGAN_PROFILE.get(ilgan, {}).get('연애', char.get('연애_남', '') if gender == '남' else char.get('연애_여', ''))}",
+                    f"{'남성' if _normalize_gender(gender) else '여성'} {ilgan_kr} 일간의 연애 스타일:",
+                    f"* {ILGAN_PROFILE.get(ilgan, {}).get('연애', char.get('연애_남', '') if _normalize_gender(gender) else char.get('연애_여', ''))}",
                     f"",
                     f"배우자 자리 {iljj_kr}({iljj}) 심층 해석:",
                     f"  일지 십성: {rr.get('파트너_십성', '')} — {rr.get('파트너_기질', iljj_kr + '이(가) 배우자 자리에 있습니다.')}",
@@ -11717,8 +11726,8 @@ def _nar_health(ctx):
                     f"",
                     f"결혼 운기 분석:",
                     f"현재 {current_age}세 기준:",
-                    f"* {'재성 대운 — 결혼 에너지가 활성화되어 있습니다.' if cur_dw and cur_dw_ss in (['정재', '편재'] if gender == '남' else ['정관', '편관']) else '관성 대운 — 결혼 에너지가 활성화되어 있습니다.' if cur_dw and cur_dw_ss in (['정관', '편관'] if gender == '남' else ['정재', '편재']) else '지금은 자기 개발에 집중하는 시기. 준비가 되면 인연이 옵니다.'}",
-                    f"* 가장 강한 결혼 기회가 오는 세운: {'정재·편재 세운' if gender == '남' else '정관·편관 세운'}",
+                    f"* {'재성 대운 — 결혼 에너지가 활성화되어 있습니다.' if cur_dw and cur_dw_ss in (['정재', '편재'] if _normalize_gender(gender) else ['정관', '편관']) else '관성 대운 — 결혼 에너지가 활성화되어 있습니다.' if cur_dw and cur_dw_ss in (['정관', '편관'] if _normalize_gender(gender) else ['정재', '편재']) else '지금은 자기 개발에 집중하는 시기. 준비가 되면 인연이 옵니다.'}",
+                    f"* 가장 강한 결혼 기회가 오는 세운: {'정재·편재 세운' if _normalize_gender(gender) else '정관·편관 세운'}",
                     f"",
                     f"[ 제6장 | 직장 내 인간관계 전략 ]",
                     f"",
