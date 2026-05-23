@@ -1864,7 +1864,8 @@ class LocalSajuNarrator:
 
         age = b.get("cur_year", datetime.now().year) - birth_year + 1
 
-        g_str = "남성" if gender == "남" else "여성"
+        _is_male_fr = gender in ("남", "男", "남성", "male", "M")
+        g_str = "남성" if _is_male_fr else "여성"
 
         lines = []
 
@@ -2584,7 +2585,7 @@ class LocalSajuNarrator:
                 )
 
         # 성별 특화 운세
-        if gender == "여":
+        if not _is_male_fr:
             _GEN_SS = {
                 "偏官": f"올해 {name}님은 편관 기운이 강합니다. 이성 인연이 활발해지는 시기이나, 충동적인 만남보다 신중한 선택이 중요합니다.",
                 "正官": f"올해 {name}님은 정관 기운이 강합니다. 안정적인 인연이 다가오는 시기로, 결혼·진지한 교제에 좋은 흐름입니다.",
@@ -2705,6 +2706,39 @@ class LocalSajuNarrator:
         except Exception as _te:
             lines.append(f"향후 타이밍 분석을 불러오지 못했습니다: {_te}")
 
+        # ── Y-50: 종합 인과 분석 5단 ──────────────────────────
+        _OH_FR2 = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
+                   "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
+        lines.append("\n---")
+        lines.append(f"\n## 💎 종합 인과 분석 — {name}님 인생 5단")
+        lines.append(
+            f"\n**[원인]** {name}님은 일간 **{ilgan}({_OH_FR2.get(ilgan,'')})** + "
+            f"월지 **{pils[2].get('jj','')}** 구조로 태어났습니다. "
+            f"이 출발점이 평생 운명의 방향과 강약을 결정합니다."
+        )
+        lines.append(
+            f"\n**[결과]** 그래서 {name}님은 — "
+            f"강점({_ip_fr.get('강점', _ip_fr.get('장점',''))[:20]})이 빛날 때 가장 크게 성장하고, "
+            f"약점({_ip_fr.get('약점', _ip_fr.get('단점',''))[:20]})이 드러날 때 같은 실패를 반복합니다."
+        )
+        lines.append(
+            f"\n**[시기]** {name}님 평생 중 결정적 타이밍:\n"
+            f"- **황금기**: 용신({'/'.join(b.get('yongshin',[])[:2])}) 대운 — 확장·투자·도전\n"
+            f"- **수비기**: 기신({'/'.join(b.get('gisin',[])[:2]) if b.get('gisin') else '해당 없음'}) 대운 — 내실 다지기·보수적 운영\n"
+            f"- **위기**: 충(沖) 발동 해 — 큰 결정 회피·건강 점검 필수"
+        )
+        lines.append(
+            f"\n**[행동]** 지금 당장 실천할 3가지:\n"
+            f"1. 일간 {ilgan} 본질({_ip_fr.get('본질','')[:30]}) — 매일 의식하고 강화\n"
+            f"2. 용신 오행 ({'/'.join(b.get('yongshin',[])[:2])}) 색상·음식·방향 일상 활용\n"
+            f"3. 기신 오행 자극(술·담배·야간 과로) 의식적 절제"
+        )
+        lines.append(
+            f"\n**[경고]** ⚠️ 평생 조심할 3가지:\n"
+            f"1. 충(沖) 발동 해에 큰 투자·이직·수술 X\n"
+            f"2. 약점({_ip_fr.get('약점', _ip_fr.get('단점',''))[:20]}) 무시 → 인간관계 손실·만성 질환\n"
+            f"3. 사주가 보여주는 패턴을 무시하면 같은 실패가 10년 주기로 반복됩니다"
+        )
 
         return "\n".join(lines)
 

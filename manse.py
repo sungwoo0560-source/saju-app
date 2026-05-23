@@ -6772,6 +6772,12 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
                     y = _write(_jf_rel, y, size=9)
                     y -= 3*mm
 
+                    # ── Y-50: full_report 종합 사주 풀이 ────────────────
+                    y = _sec("📜 종합 사주 풀이 — 인과 분석", y)
+                    _jf_full = LocalSajuNarrator.full_report(pils, name, birth_year, gender)
+                    y = _write(_jf_full, y, size=9)
+                    y -= 3*mm
+
                     # ── 13. 행동지침 5가지 ───────────────────────────────
                     y = _sec("🎯 13. 지금 당장 해야 할 5가지", y)
                     y = _write(f"① 용신 {_jf_yns} 매일 보강 — 색상·방향·음식 실천. 아는 것만으로는 바뀌지 않습니다.", y, size=10, color=(0.65,0.1,0.1))
