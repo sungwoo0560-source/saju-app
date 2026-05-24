@@ -15266,7 +15266,14 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
             )
         st.markdown("---")
     except Exception as _e_jk:
-        st.info("적중 박스 로딩 중 — 본문은 정상 출력됩니다.")
+        import traceback as _tb_jk
+        st.error(f"❌ 적중박스 디버그: {type(_e_jk).__name__}: {_e_jk}")
+        st.code(_tb_jk.format_exc(), language="python")
+        _dbg_vars = []
+        for _v in ['_jk_yukjin','_jk_ilgan','_jk_oh','_jk_sinsal',
+                   '_jk_daeun','gender','pils','birth_year']:
+            _dbg_vars.append(f"  {_v} = {'있음' if _v in dir() else '❌없음'}")
+        st.code("변수 존재 여부:\n" + "\n".join(_dbg_vars))
 
     # ── 로컬 엔진 항상 먼저 출력 ─────────────────────────────
 
