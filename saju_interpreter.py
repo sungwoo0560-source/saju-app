@@ -12654,3 +12654,177 @@ def get_jeokjung_affair(gender, ilgan, yukjin_list, sinsal_list, pils):
             line3 = "단, 남편이 무관심해지면 — 정 표현 부족이 원인."
 
     return {"title": title, "line1": line1, "line2": line2, "line3": line3}
+
+
+def get_jeokjung_marriage(gender, ilgan, yukjin_list, sinsal_list, pils):
+    """결혼 시기 + 배우자 성향 적중 박스 반환. pils = [시주,일주,월주,년주].
+    반환: dict {title, line1, line2, line3}
+    """
+    pyun_jae = jung_jae = pyun_gwan = jung_gwan = 0
+    try:
+        for item in yukjin_list:
+            k = item.get("관계", "")
+            if "편재" in k: pyun_jae += 1
+            if "정재" in k: jung_jae += 1
+            if "편관" in k: pyun_gwan += 1
+            if "정관" in k: jung_gwan += 1
+    except Exception:
+        pass
+
+    g = (gender or "")[:1]
+    is_male = g in ["남", "M", "m"]
+
+    # 일지 십성 (배우자 자리) — 위치에 "일지" 포함된 항목
+    ilji_sipsin = ""
+    try:
+        for item in yukjin_list:
+            pos = str(item.get("위치", ""))
+            if "일지" in pos or "day_branch" in pos:
+                ilji_sipsin = item.get("관계", "")
+                break
+    except Exception:
+        pass
+
+    # 일지 지지 글자 (pils[1] = 일주)
+    try:
+        ilji = (pils[1].get("jj", "") if isinstance(pils, list) and len(pils) > 1 else "")[:1]
+    except Exception:
+        ilji = ""
+
+    JIJI_DDI = {
+        "자": "쥐", "축": "소", "인": "호랑이", "묘": "토끼",
+        "진": "용", "사": "뱀", "오": "말", "미": "양",
+        "신": "원숭이", "유": "닭", "술": "개", "해": "돼지",
+    }
+
+    spouse = "당신과 결이 비슷한 사람"
+    if "정관" in ilji_sipsin:   spouse = "성실·책임감 강한 사람"
+    elif "편관" in ilji_sipsin: spouse = "강한 카리스마·도전적 성향"
+    elif "정재" in ilji_sipsin: spouse = "검소·살뜰한 사람"
+    elif "편재" in ilji_sipsin: spouse = "활달·돈 굴리는 감각 좋은 사람"
+    elif "정인" in ilji_sipsin: spouse = "지적·인자·연상 가능성"
+    elif "편인" in ilji_sipsin: spouse = "독특·예술적 감각"
+    elif "식신" in ilji_sipsin: spouse = "온화·낙천적·자녀 잘 키우는 타입"
+    elif "상관" in ilji_sipsin: spouse = "재능·말솜씨 좋고 똑똑한 사람"
+    elif "비견" in ilji_sipsin: spouse = "독립적·자기 일 가진 사람"
+    elif "겁재" in ilji_sipsin: spouse = "경쟁심 강하고 야망 있는 사람"
+
+    title = "💑 당신의 결혼 — 이런 사람·이런 시기입니다"
+
+    if is_male:
+        honjap = (pyun_jae >= 1 and jung_jae >= 1)
+        jae_total = pyun_jae + jung_jae
+        if honjap:
+            line1 = "재성혼잡 — 첫 결혼 후 변동 가능. 첫 결심 신중하게."
+        elif jae_total == 0:
+            line1 = "무재(無財) — 결혼이 늦거나 만혼. 30대 후반 이후가 진짜 인연."
+        elif jung_jae >= 2:
+            line1 = "정재 多 — 안정 추구형. 20대 후반~30대 초반 결혼 적기."
+        elif pyun_jae >= 2:
+            line1 = "편재 多 — 자유연애·연상연하 다양. 30대 초중반 결혼 多."
+        elif pyun_jae == 1 and jung_jae == 0:
+            line1 = "편재 1개 — 큰 인연 한 번 또는 연상연하. 30대 중후반 결혼 가능."
+        elif jung_jae == 1 and pyun_jae == 0:
+            line1 = "정재 1개 — 한 사람과 차근차근. 20대 후반~30대 초반 적기."
+        else:
+            line1 = "재성 균형 — 본인이 결심하는 그 시기가 결혼 적기."
+    else:
+        honjap = (pyun_gwan >= 1 and jung_gwan >= 1)
+        gwan_total = pyun_gwan + jung_gwan
+        if honjap:
+            line1 = "관성혼잡 — 첫 결혼 후 변동 가능. 첫 결심 신중하게."
+        elif gwan_total == 0:
+            line1 = "무관(無官) — 결혼이 늦거나 만혼. 30대 중반 이후가 진짜 인연."
+        elif jung_gwan >= 2:
+            line1 = "정관 多 — 안정 추구형. 20대 후반~30대 초반 결혼 적기."
+        elif pyun_gwan >= 2:
+            line1 = "편관 多 — 강렬한 인연·연상 또는 능력자. 30대 초중반 결혼 多."
+        elif pyun_gwan == 1 and jung_gwan == 0:
+            line1 = "편관 1개 — 강한 남자 한 번 만남. 30대 중반 결혼 가능."
+        elif jung_gwan == 1 and pyun_gwan == 0:
+            line1 = "정관 1개 — 안정형 남편. 20대 후반~30대 초반 적기."
+        else:
+            line1 = "관성 균형 — 본인이 결심하는 그 시기가 결혼 적기."
+
+    if ilji and ilji in JIJI_DDI:
+        line2 = f"배우자 자리 = {ilji}({JIJI_DDI[ilji]}띠) — {spouse}."
+    else:
+        line2 = f"배우자 성향 — {spouse}."
+
+    if is_male and pyun_jae >= 1 and jung_jae >= 1:
+        line3 = "한 번 흔들리면 두 번 옵니다. 첫 결정에 사활."
+    elif (not is_male) and pyun_gwan >= 1 and jung_gwan >= 1:
+        line3 = "한 번 흔들리면 두 번 옵니다. 첫 결정에 사활."
+    elif "재" in ilji_sipsin and is_male:
+        line3 = "배우자 자리에 재성 — 결혼이 인생 안정의 핵심 변수."
+    elif "관" in ilji_sipsin and not is_male:
+        line3 = "배우자 자리에 관성 — 좋은 남편이 인생을 풉니다."
+    else:
+        line3 = "결혼 후 한 발 양보하는 사람이 — 진짜 승자."
+
+    return {"title": title, "line1": line1, "line2": line2, "line3": line3}
+
+
+def get_jeokjung_children(gender, ilgan, yukjin_list, pils):
+    """자녀 수 + 첫째 성별 + 노후 자녀 덕 적중 박스 반환.
+    반환: dict {title, line1, line2, line3}
+    """
+    sik_count = 0
+    sik_sigan = False
+    try:
+        for item in yukjin_list:
+            k = item.get("관계", "")
+            pos = str(item.get("위치", ""))
+            if "식신" in k or "상관" in k:
+                sik_count += 1
+                if "시" in pos:
+                    sik_sigan = True
+    except Exception:
+        pass
+
+    # 시주 천간·지지 (pils[0] = 시주)
+    try:
+        sig_cg = (pils[0].get("cg", "") if isinstance(pils, list) and len(pils) > 0 else "")[:1]
+        sig_jj = (pils[0].get("jj", "") if isinstance(pils, list) and len(pils) > 0 else "")[:1]
+    except Exception:
+        sig_cg = ""
+        sig_jj = ""
+
+    YANG_STEMS    = {"갑", "병", "무", "경", "임"}
+    YANG_BRANCHES = {"자", "인", "진", "오", "신", "술"}
+    cg_yang = sig_cg in YANG_STEMS
+    jj_yang = sig_jj in YANG_BRANCHES
+
+    if sig_cg and sig_jj:
+        if cg_yang and jj_yang:
+            first_child = "첫째 아들 가능성 높음"
+        elif (not cg_yang) and (not jj_yang):
+            first_child = "첫째 딸 가능성 높음"
+        elif jj_yang:
+            first_child = "첫째 아들 — 단, 혼합 (확률 약간 우세)"
+        else:
+            first_child = "첫째 딸 — 단, 혼합 (확률 약간 우세)"
+    else:
+        first_child = "아들·딸 모두 가능"
+
+    title = "👶 당신의 자녀 — 이렇게 됩니다"
+
+    if sik_count >= 3:
+        line1 = f"식상(食傷) {sik_count}개 — 자녀 인연 풍부. 다자녀 가능 구조."
+    elif sik_count == 2:
+        line1 = "식상 2개 — 자녀 2명 전후. 한 명에 그치지 않는 구조."
+    elif sik_count == 1:
+        line1 = "식상 1개 — 자녀 1~2명. 적게 낳고 정성껏 키우는 타입."
+    else:
+        line1 = "식상 약함 — 자녀가 늦거나 만산(晚産). 1명에 그칠 가능성."
+
+    line2 = first_child + "."
+
+    if sik_sigan:
+        line3 = "시주에 식상 — 자녀가 가까이 있고, 노후에 자녀 덕 봅니다."
+    elif sik_count >= 1:
+        line3 = "자녀와 거리감 가능 — 본인이 먼저 다가가는 노력 필요."
+    else:
+        line3 = "자녀 없이도 충실히 사는 인생 — 그것도 본인의 길."
+
+    return {"title": title, "line1": line1, "line2": line2, "line3": line3}
