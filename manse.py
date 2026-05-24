@@ -15029,6 +15029,111 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
 def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
     """[1. Comprehensive Report] - Pillars, Personality, Gyeokguk, Yongshin"""
 
+    # ════════════════════════════════════════════
+    # JONGHAP-SSOT : 개발자 진단판 (URL ?dev=1 활성화)
+    # 사용자에겐 안 보임 — 개발자 전용
+    # ════════════════════════════════════════════
+    try:
+        try:
+            _dev_mode = st.query_params.get("dev", "") == "1"
+        except Exception:
+            try:
+                _dev_mode = st.experimental_get_query_params().get("dev", [""])[0] == "1"
+            except Exception:
+                _dev_mode = False
+    except Exception:
+        _dev_mode = False
+
+    if _dev_mode:
+        with st.expander("🔍 SSOT 진단판 — 데이터 진실 한눈 확인", expanded=True):
+            _ssot = {}
+            import saju_interpreter as _si_ssot
+
+            # 일간·입력값
+            try:
+                _ssot["일간 (pils[1].cg)"] = (pils[1].get("cg", "")
+                    if isinstance(pils, list) and len(pils) > 1 else "❌")
+            except Exception as _e: _ssot["일간"] = f"❌ {_e}"
+            _ssot["birth_year"] = birth_year
+            _ssot["gender"]     = gender
+            _ssot["name"]       = name
+
+            # 강약 (모순 진원지!)
+            try:
+                from saju_engine import get_ilgan_strength as _gis_ssot
+                _ilg_ssot = pils[1].get("cg", "") if isinstance(pils, list) and len(pils) > 1 else ""
+                _r_ssot = _gis_ssot(_ilg_ssot, pils)
+                _ssot["강약 get_ilgan_strength()"] = str(_r_ssot)[:250]
+            except Exception as _e:
+                _ssot["강약 get_ilgan_strength()"] = f"❌ {_e}"
+
+            # 격국
+            try:
+                if hasattr(_si_ssot, "get_gyeokguk"):
+                    _ssot["격국 get_gyeokguk()"] = str(_si_ssot.get_gyeokguk(pils))[:250]
+            except Exception as _e:
+                _ssot["격국 get_gyeokguk()"] = f"❌ {_e}"
+
+            # 용신·오행·기신
+            try:
+                if hasattr(_si_ssot, "get_yongshin"):
+                    _ys_ssot = _si_ssot.get_yongshin(pils) or {}
+                    if isinstance(_ys_ssot, dict):
+                        _ssot["용신 (종합_용신)"] = str(_ys_ssot.get("종합_용신")
+                            or _ys_ssot.get("용신") or "?")[:120]
+                        _ssot["오행분포"] = str(_ys_ssot.get("오행분포")
+                            or _ys_ssot.get("오행") or _ys_ssot.get("oh_cnt") or {})[:250]
+                        _ssot["기신"] = str(_ys_ssot.get("기신") or "?")[:120]
+            except Exception as _e:
+                _ssot["용신 get_yongshin()"] = f"❌ {_e}"
+
+            # 육친
+            try:
+                if hasattr(_si_ssot, "get_yukjin"):
+                    _ilg2_ssot = pils[1].get("cg", "") if isinstance(pils, list) and len(pils) > 1 else ""
+                    _yk_ssot = _si_ssot.get_yukjin(_ilg2_ssot, pils, gender) or []
+                    _ssot["육친 개수"] = len(_yk_ssot)
+                    _ssot["육친 샘플(앞3)"] = str(_yk_ssot[:3])[:250]
+            except Exception as _e:
+                _ssot["육친 get_yukjin()"] = f"❌ {_e}"
+
+            # 신살
+            try:
+                if hasattr(_si_ssot, "get_12sinsal"):
+                    _ssot["12신살"] = str(_si_ssot.get_12sinsal(pils))[:250]
+            except Exception as _e:
+                _ssot["12신살"] = f"❌ {_e}"
+            try:
+                if hasattr(_si_ssot, "get_extra_sinsal"):
+                    _ssot["추가신살"] = str(_si_ssot.get_extra_sinsal(pils))[:250]
+            except Exception as _e:
+                _ssot["추가신살"] = f"❌ {_e}"
+
+            # pils 구조 덤프
+            try:
+                _ssot["pils 구조"] = str([
+                    {"cg": _pp.get("cg",""), "jj": _pp.get("jj",""), "오행": _pp.get("오행","")}
+                    for _pp in (pils or [])
+                ])[:300]
+            except Exception as _e:
+                _ssot["pils 구조"] = f"❌ {_e}"
+
+            # 표시
+            for _k, _v in _ssot.items():
+                st.markdown(f"**`{_k}`** → `{_v}`")
+
+            # 모순 자동 감지 가이드
+            st.markdown("---")
+            st.markdown("**🚨 모순 자동 감지 가이드**")
+            st.caption(
+                "위 `강약 get_ilgan_strength()` 반환값을 본문 평론([1]·[2]) 표시값과 비교하세요. "
+                "다르면 → 본문 어딘가에서 별도 계산이 일어나는 것. "
+                "오행분포로 직접 검증: 일간 오행이 분포 합의 20% 미만이면 '극신약'이 정답."
+            )
+    # ════════════════════════════════════════════
+    # SSOT 끝
+    # ════════════════════════════════════════════
+
     # Patch Y-6: 한눈 요약 카드 (최상단) — Y-7 수정
     try:
         from saju_zhengtong import render_quick_summary_card
@@ -15266,14 +15371,9 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
             )
         st.markdown("---")
     except Exception as _e_jk:
-        import traceback as _tb_jk
-        st.error(f"❌ 적중박스 디버그: {type(_e_jk).__name__}: {_e_jk}")
-        st.code(_tb_jk.format_exc(), language="python")
-        _dbg_vars = []
-        for _v in ['_jk_yukjin','_jk_ilgan','_jk_oh','_jk_sinsal',
-                   '_jk_daeun','gender','pils','birth_year']:
-            _dbg_vars.append(f"  {_v} = {'있음' if _v in dir() else '❌없음'}")
-        st.code("변수 존재 여부:\n" + "\n".join(_dbg_vars))
+        # 적중 박스 영역 폴백 (사용자에겐 조용히)
+        # 개발자는 ?dev=1 진단판에서 확인
+        pass
 
     # ── 로컬 엔진 항상 먼저 출력 ─────────────────────────────
 
