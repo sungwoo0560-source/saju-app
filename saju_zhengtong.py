@@ -7448,7 +7448,8 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
         return risks.get(key, {}).get(field, default)
 
     gyeok_label  = gyeokguk_name or "正印격"
-    shin_label   = shin_status or "신강(身强)"
+    # JONGHAP-FIX-2: 하드코딩 default 제거 (호출자가 반드시 전달)
+    shin_label = (shin_status or "").strip() or "(강약 미전달)"
 
     combo_text = ""
     if activated:

@@ -15248,9 +15248,9 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
         _shin_p = ""
         try:
             _ilgan_p = pils[1].get("cg", "") if pils and len(pils) > 1 else ""
-            _shin_p = get_ilgan_strength(_ilgan_p, pils).get("label", "신강(身强)")
+            _shin_p = get_ilgan_strength(_ilgan_p, pils).get("신강신약", "")
         except Exception:
-            _shin_p = "신강(身强)"
+            _shin_p = ""
 
         _sinsal_p = []
         try:
