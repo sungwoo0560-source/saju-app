@@ -12296,3 +12296,249 @@ def get_monthly_timing(pils, birth_year, gender, target_year=None, focus="재물
 
     except Exception as e:
         return {"year": cur_year, "focus": focus, "peak": [], "caution": [], "summary": f"분석 오류: {e}"}
+
+
+# ════════════════════════════════════════════════════════════
+# JEOKJUNG-4 : 적중 박스 4종 (직장/건강/횡재/귀인)
+# 광고 진입자 첫 화면 임팩트용 — 계산 결과만 읽어 텍스트 생성
+# ════════════════════════════════════════════════════════════
+
+def get_jeokjung_job(yukjin_list, ilgan_strength, pils):
+    """십성 분포 + 일간 강약으로 직장/사업 적중 박스 반환.
+    반환: dict {title, line1, line2, line3}
+    """
+    cnt = {"정관":0,"편관":0,"정재":0,"편재":0,
+           "식신":0,"상관":0,"정인":0,"편인":0,
+           "비견":0,"겁재":0}
+    try:
+        for item in yukjin_list:
+            k = item.get("관계","")
+            for key in cnt:
+                if key in k:
+                    cnt[key] += 1
+    except Exception:
+        pass
+
+    gwan = cnt["정관"] + cnt["편관"]
+    jae  = cnt["정재"] + cnt["편재"]
+    sik  = cnt["식신"] + cnt["상관"]
+    inn  = cnt["정인"] + cnt["편인"]
+    bg   = cnt["비견"] + cnt["겁재"]
+
+    if cnt["정관"] >= 1 and inn >= 1:
+        title = "💼 당신은 지금 — 조직에 속한 사람입니다"
+        line1 = "정관(正官)에 인성이 받쳐주는 구조입니다."
+        line2 = "공직·대기업·공기업·전문직 — 이 라인 안에 있을 겁니다."
+        line3 = "윗사람 인정으로 자리 잡았습니다. 그게 당신의 무기입니다."
+    elif gwan >= 2:
+        title = "💼 당신은 지금 — 책임지는 자리에 있습니다"
+        line1 = "관성(官星)이 강합니다. 사람을 통솔하거나 압박받는 자리."
+        line2 = "직장 안에서도 — 그냥 사원이 아닙니다. 책임이 따르는 위치."
+        line3 = "스트레스 많죠? 그게 당신을 키우는 겁니다."
+    elif cnt["편재"] >= 2 or (cnt["편재"] >= 1 and sik >= 2):
+        title = "💼 당신은 지금 — 직장 밖에서 돈 버는 사람입니다"
+        line1 = "편재 + 식상 구조. 조직보다 시장에 강합니다."
+        line2 = "사업·프리랜서·영업·개인장사 — 본인 손으로 돈 만집니다."
+        line3 = "월급쟁이로는 답답해서 못 삽니다."
+    elif bg >= 3:
+        title = "💼 당신은 지금 — 자기 일을 하는 사람입니다"
+        line1 = "비겁(比劫)이 강합니다. 위에 사람 두고는 못 삽니다."
+        line2 = "독립·자영업·동업·1인 사업 — 이 길 위에 있을 겁니다."
+        line3 = "조직 들어가도 결국 뛰쳐나옵니다. 그게 당신 본성입니다."
+    elif inn >= 2:
+        title = "💼 당신은 지금 — 머리로 먹고사는 사람입니다"
+        line1 = "인성(印星)이 강합니다. 손보다 머리·문서로 사는 구조."
+        line2 = "교육·연구·기획·자격증·전문직 — 이 안에서 안정됩니다."
+        line3 = "몸 쓰는 일은 안 맞습니다. 빨리 지칩니다."
+    elif sik >= 3:
+        title = "💼 당신은 지금 — 자기 재능으로 사는 사람입니다"
+        line1 = "식상(食傷)이 강합니다. 말·글·기술·창작이 무기."
+        line2 = "조직보다 — 본인 이름으로 일할 때 가장 빛납니다."
+        line3 = "정해진 틀 안에 가두면 답답해 합니다."
+    else:
+        title = "💼 당신은 지금 — 자리 잡는 중입니다"
+        line1 = "특정 십성이 압도하지 않는 균형 구조."
+        line2 = "어디든 적응 가능하지만, 한 방향을 못 정해 흔들립니다."
+        line3 = "결단할 시기 — 미루면 30대 후반에 다시 흔들립니다."
+
+    return {"title": title, "line1": line1, "line2": line2, "line3": line3}
+
+
+def get_jeokjung_health(oh_cnt, pils, sinsal_list):
+    """오행 부족/과다 + 충형 + 백호/양인으로 신체 부위 적중 박스 반환.
+    반환: dict {title, line1, line2, line3}
+    """
+    try:
+        m_ = int(oh_cnt.get("목",0) + oh_cnt.get("木",0))
+        h_ = int(oh_cnt.get("화",0) + oh_cnt.get("火",0))
+        t_ = int(oh_cnt.get("토",0) + oh_cnt.get("土",0))
+        g_ = int(oh_cnt.get("금",0) + oh_cnt.get("金",0))
+        s_ = int(oh_cnt.get("수",0) + oh_cnt.get("水",0))
+    except Exception:
+        m_ = h_ = t_ = g_ = s_ = 1
+
+    weak = []
+    if m_ <= 1: weak.append("木")
+    if h_ <= 1: weak.append("火")
+    if t_ <= 1: weak.append("土")
+    if g_ <= 1: weak.append("金")
+    if s_ <= 1: weak.append("水")
+
+    sinsal_str = " ".join(str(x) for x in sinsal_list) if sinsal_list else ""
+    has_baekho = "백호" in sinsal_str
+    has_yangin = "양인" in sinsal_str or "羊刃" in sinsal_str
+
+    parts_map = {
+        "木": "간·담·신경·근육·어깨",
+        "火": "심장·혈압·눈·소장",
+        "土": "위장·비장·소화·복부",
+        "金": "폐·대장·피부·기관지·뼈",
+        "水": "신장·방광·허리·생식기·귀",
+    }
+
+    if not weak:
+        title = "🏥 당신은 지금 — 큰 병은 없지만 피로 누적입니다"
+        line1 = "오행 분포가 고른 편입니다. 결정적 약점은 없습니다."
+        line2 = "다만 — 잠을 푹 자도 피곤한 그 느낌, 익숙하죠?"
+        line3 = "만성피로·번아웃 주의. 큰 병보다 만성이 더 무섭습니다."
+    else:
+        main = weak[0]
+        sub = weak[1] if len(weak) >= 2 else None
+        parts = parts_map.get(main, "전신")
+        title = f"🏥 당신은 지금 — {parts.split('·')[0]} 쪽이 약합니다"
+        line1 = f"{main}기운이 약합니다. → {parts} 계통 만성 부담."
+        if sub:
+            sub_parts = parts_map.get(sub, "")
+            line2 = f"여기에 {sub} 부족까지 겹쳐 — {sub_parts.split('·')[0]} 쪽도 같이 무리됩니다."
+        else:
+            line2 = "큰 병 아닙니다. 그런데 — 신호는 계속 옵니다."
+        if has_baekho:
+            line3 = "⚠️ 백호살까지 박혀있어 — 수술수·사고수 한 번은 옵니다. 검진 미루지 마세요."
+        elif has_yangin:
+            line3 = "⚠️ 양인까지 박혀있어 — 칼·쇠·날 조심. 운전·작업 주의."
+        else:
+            line3 = "검진 한 번 받으세요. 미루면 40대에 터집니다."
+
+    return {"title": title, "line1": line1, "line2": line2, "line3": line3}
+
+
+def get_jeokjung_windfall(yukjin_list, daeun_list, birth_year):
+    """편재 유무 + 과거 대운 재성 시기로 목돈 적중 박스 반환.
+    반환: dict {title, line1, line2, line3}
+    """
+    pyun_jae = 0
+    jung_jae = 0
+    sik = 0
+    try:
+        for item in yukjin_list:
+            k = item.get("관계","")
+            if "편재" in k: pyun_jae += 1
+            if "정재" in k: jung_jae += 1
+            if "식신" in k or "상관" in k: sik += 1
+    except Exception:
+        pass
+
+    hit_years = []
+    try:
+        from datetime import datetime
+        now_y = datetime.now().year
+        for du in daeun_list:
+            sy = int(du.get("시작연도", 0))
+            if sy <= 0 or sy > now_y:
+                continue
+            stem = du.get("cg","") or du.get("천간","")
+            if stem:
+                hit_years.append(sy)
+    except Exception:
+        pass
+
+    if pyun_jae >= 2 and sik >= 1:
+        title = "💰 당신은 — 큰돈 한 번은 만지는 사주입니다"
+        line1 = "편재 + 식상생재(食傷生財) 구조. 횡재형 그릇입니다."
+        if hit_years:
+            yrs = ", ".join(str(y) for y in hit_years[:3])
+            line2 = f"{yrs}년 즈음 — 목돈 들어왔거나 큰 거래 있었을 겁니다."
+        else:
+            line2 = "30대 중후반 이후 — 첫 큰 돈이 들어옵니다."
+        line3 = "단, 지키는 능력이 약해 — 들어온 만큼 새기 쉽습니다. 부동산으로 묶으세요."
+    elif jung_jae >= 1 or pyun_jae >= 1:
+        title = "💰 당신은 — 꾸준히 모으는 타입입니다"
+        line1 = "재성이 있긴 한데 — 한 방형은 아닙니다."
+        line2 = "월급·계약·꾸준한 수입 — 이게 당신 길입니다."
+        line3 = "주식·코인·도박 — 손대면 다 잃습니다. 본인 그릇 알고 사세요."
+    else:
+        title = "💰 당신은 — 돈보다 사람이 따르는 사주입니다"
+        line1 = "재성이 약하거나 없습니다. 직접 돈 좇으면 빠져나갑니다."
+        line2 = "사람·기술·이름값으로 돈이 따라오는 구조."
+        line3 = "본인이 돈 좇기 시작하면 — 그때부터 꼬입니다. 일에 집중하세요."
+
+    return {"title": title, "line1": line1, "line2": line2, "line3": line3}
+
+
+def get_jeokjung_guiin(ilgan, pils, yukjin_list):
+    """천을귀인 띠 변환 + 십성별 귀인 유형 적중 박스 반환.
+    반환: dict {title, line1, line2, line3}
+    """
+    GUIIN_MAP = {
+        "갑": ["축","미"], "무": ["축","미"], "경": ["축","미"],
+        "을": ["자","신"], "기": ["자","신"],
+        "병": ["해","유"], "정": ["해","유"],
+        "신": ["인","오"],
+        "임": ["사","묘"], "계": ["사","묘"],
+    }
+    JIJI_DDI = {
+        "자":"쥐","축":"소","인":"호랑이","묘":"토끼","진":"용","사":"뱀",
+        "오":"말","미":"양","신":"원숭이","유":"닭","술":"개","해":"돼지",
+    }
+
+    ig = (ilgan or "").strip()[:1]
+    guiin_ji = GUIIN_MAP.get(ig, [])
+    ddi_list = [JIJI_DDI.get(j, "") for j in guiin_ji if j in JIJI_DDI]
+    ddi_str = "·".join([d+"띠" for d in ddi_list if d]) if ddi_list else "특정 띠"
+
+    own_branches = []
+    try:
+        for p in pils:
+            v = p.get("jj","")
+            if v:
+                own_branches.append(str(v)[:1])
+    except Exception:
+        pass
+    has_inner = any(g in own_branches for g in guiin_ji)
+
+    cnt_inn = 0; cnt_gwan = 0; cnt_bg = 0; cnt_sik = 0
+    try:
+        for item in yukjin_list:
+            k = item.get("관계","")
+            if "정인" in k or "편인" in k: cnt_inn += 1
+            if "정관" in k or "편관" in k: cnt_gwan += 1
+            if "비견" in k or "겁재" in k: cnt_bg += 1
+            if "식신" in k or "상관" in k: cnt_sik += 1
+    except Exception:
+        pass
+
+    if cnt_inn >= 2:
+        person_type = "윗사람·스승·연장자"
+        direction = "위에서 끌어주는 형태"
+    elif cnt_gwan >= 2:
+        person_type = "직장 상사·공식 라인의 사람"
+        direction = "조직 안에서 만남"
+    elif cnt_sik >= 2:
+        person_type = "후배·제자·아랫사람"
+        direction = "아래서 받쳐주는 형태"
+    elif cnt_bg >= 2:
+        person_type = "형제·동료·오랜 친구"
+        direction = "옆에서 같이 가는 형태"
+    else:
+        person_type = "예상 못 한 곳의 사람"
+        direction = "우연히 마주치는 형태"
+
+    title = f"✨ 당신의 귀인 — {ddi_str} 입니다"
+    line1 = f"천을귀인이 {'·'.join(guiin_ji) if guiin_ji else '미상'}({ddi_str}). 위기 때 이 사람들이 옵니다."
+    if has_inner:
+        line2 = f"이미 본인 사주에 귀인이 박혀있습니다(內藏). → {person_type}이 가까이 있을 가능성 높음."
+    else:
+        line2 = f"외부에서 옵니다. → {person_type} 형태로, {direction}."
+    line3 = "2026~2027년 — 천을귀인 활성화 핵심 구간. 이때 만난 사람 놓치지 마세요."
+
+    return {"title": title, "line1": line1, "line2": line2, "line3": line3}

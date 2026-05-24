@@ -15185,6 +15185,84 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
     except Exception as _e_y9a:
         st.warning(f"Y-9-A 운명 코드 박스 로드 실패: {_e_y9a}")
 
+    # ════════════════════════════════════════════
+    # JEOKJUNG-4 : 적중 박스 4종 (광고 진입자용)
+    # ════════════════════════════════════════════
+    try:
+        from saju_interpreter import (
+            get_jeokjung_job, get_jeokjung_health,
+            get_jeokjung_windfall, get_jeokjung_guiin,
+        )
+        _jk_ilgan = _ilgan_x  # Y-12 블록에서 이미 계산됨
+
+        # yukjin_list — calc_sipsung 결과를 관계 키 형식으로 변환
+        _jk_ss_raw = calc_sipsung(_jk_ilgan, pils)
+        _jk_yukjin = []
+        for _ss in _jk_ss_raw:
+            if _ss.get("cg_ss", "-") != "-":
+                _jk_yukjin.append({"관계": _ss["cg_ss"]})
+            if _ss.get("jj_ss", "-") != "-":
+                _jk_yukjin.append({"관계": _ss["jj_ss"]})
+
+        # oh_cnt — pils의 오행 카운트
+        _jk_oh = {"木": 0, "火": 0, "土": 0, "金": 0, "水": 0}
+        for _p in pils:
+            _oh = _p.get("오행", "")
+            if _oh in _jk_oh:
+                _jk_oh[_oh] += 1
+
+        # sinsal
+        _jk_sinsal = []
+        try:
+            _jk_sinsal.extend(get_12sinsal(pils) or [])
+            _jk_sinsal.extend(get_extra_sinsal(pils) or [])
+        except Exception:
+            pass
+
+        # daeun
+        _jk_daeun = []
+        try:
+            _jk_daeun = get_10year_luck_table(pils, birth_year, gender) or []
+        except Exception:
+            pass
+
+        # ilgan_strength label
+        _jk_ilstr = ""
+        try:
+            _jk_ilstr = get_ilgan_strength(_jk_ilgan, pils).get("label", "")
+        except Exception:
+            pass
+
+        jk_job = get_jeokjung_job(_jk_yukjin, _jk_ilstr, pils)
+        jk_hea = get_jeokjung_health(_jk_oh, pils, _jk_sinsal)
+        jk_win = get_jeokjung_windfall(_jk_yukjin, _jk_daeun, birth_year)
+        jk_gui = get_jeokjung_guiin(_jk_ilgan, pils, _jk_yukjin)
+
+        st.markdown("---")
+        st.markdown(
+            "<div style='background:#fff5f5;border-left:6px solid #c0392b;"
+            "padding:14px 16px;border-radius:6px;margin:14px 0;'>"
+            "<h3 style='margin:0 0 8px 0;color:#c0392b;'>🎯 도사 적중 — 지금 이 4가지, 맞죠?</h3>"
+            "<p style='margin:0;color:#555;font-size:14px;'>아래 4개 박스 — 끝까지 읽고 본인이 판단하세요.</p>"
+            "</div>",
+            unsafe_allow_html=True,
+        )
+        for _jk in [jk_job, jk_hea, jk_win, jk_gui]:
+            st.markdown(
+                f"<div style='background:#fafafa;border:1px solid #e0e0e0;"
+                f"border-left:5px solid #2c3e50;padding:12px 16px;"
+                f"border-radius:6px;margin:10px 0;'>"
+                f"<h4 style='margin:0 0 6px 0;color:#2c3e50;'>{_jk['title']}</h4>"
+                f"<p style='margin:4px 0;color:#333;font-size:15px;'>{_jk['line1']}</p>"
+                f"<p style='margin:4px 0;color:#333;font-size:15px;'>{_jk['line2']}</p>"
+                f"<p style='margin:4px 0;color:#c0392b;font-size:15px;font-weight:600;'>{_jk['line3']}</p>"
+                f"</div>",
+                unsafe_allow_html=True,
+            )
+        st.markdown("---")
+    except Exception as _e_jk:
+        st.info("적중 박스 로딩 중 — 본문은 정상 출력됩니다.")
+
     # ── 로컬 엔진 항상 먼저 출력 ─────────────────────────────
 
     try:
