@@ -15192,6 +15192,7 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
         from saju_interpreter import (
             get_jeokjung_job, get_jeokjung_health,
             get_jeokjung_windfall, get_jeokjung_guiin,
+            get_jeokjung_affair,
         )
         _jk_ilgan = _ilgan_x  # Y-12 블록에서 이미 계산됨
 
@@ -15237,17 +15238,18 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
         jk_hea = get_jeokjung_health(_jk_oh, pils, _jk_sinsal)
         jk_win = get_jeokjung_windfall(_jk_yukjin, _jk_daeun, birth_year)
         jk_gui = get_jeokjung_guiin(_jk_ilgan, pils, _jk_yukjin)
+        jk_aff = get_jeokjung_affair(gender, _jk_ilgan, _jk_yukjin, _jk_sinsal, pils)
 
         st.markdown("---")
         st.markdown(
             "<div style='background:#fff5f5;border-left:6px solid #c0392b;"
             "padding:14px 16px;border-radius:6px;margin:14px 0;'>"
-            "<h3 style='margin:0 0 8px 0;color:#c0392b;'>🎯 도사 적중 — 지금 이 4가지, 맞죠?</h3>"
-            "<p style='margin:0;color:#555;font-size:14px;'>아래 4개 박스 — 끝까지 읽고 본인이 판단하세요.</p>"
+            "<h3 style='margin:0 0 8px 0;color:#c0392b;'>🎯 도사 적중 — 지금 이 5가지, 맞죠?</h3>"
+            "<p style='margin:0;color:#555;font-size:14px;'>아래 5개 박스 — 끝까지 읽고 본인이 판단하세요.</p>"
             "</div>",
             unsafe_allow_html=True,
         )
-        for _jk in [jk_job, jk_hea, jk_win, jk_gui]:
+        for _jk in [jk_job, jk_hea, jk_win, jk_gui, jk_aff]:
             st.markdown(
                 f"<div style='background:#fafafa;border:1px solid #e0e0e0;"
                 f"border-left:5px solid #2c3e50;padding:12px 16px;"

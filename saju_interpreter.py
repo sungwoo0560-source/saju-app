@@ -12542,3 +12542,115 @@ def get_jeokjung_guiin(ilgan, pils, yukjin_list):
     line3 = "2026~2027년 — 천을귀인 활성화 핵심 구간. 이때 만난 사람 놓치지 마세요."
 
     return {"title": title, "line1": line1, "line2": line2, "line3": line3}
+
+
+def get_jeokjung_affair(gender, ilgan, yukjin_list, sinsal_list, pils):
+    """성별 기반 이성 인연 적중 박스 반환. pils는 [시주,일주,월주,년주] 리스트.
+    반환: dict {title, line1, line2, line3}
+    """
+    pyun_jae = jung_jae = pyun_gwan = jung_gwan = sik = bg = 0
+    try:
+        for item in yukjin_list:
+            k = item.get("관계", "")
+            if "편재" in k: pyun_jae += 1
+            if "정재" in k: jung_jae += 1
+            if "편관" in k: pyun_gwan += 1
+            if "정관" in k: jung_gwan += 1
+            if "식신" in k or "상관" in k: sik += 1
+            if "비견" in k or "겁재" in k: bg += 1
+    except Exception:
+        pass
+
+    sinsal_str = " ".join(str(x) for x in sinsal_list) if sinsal_list else ""
+    has_dohwa    = "도화" in sinsal_str
+    has_hongyeom = "홍염" in sinsal_str
+    has_yangin   = "양인" in sinsal_str or "羊刃" in sinsal_str
+
+    # 시지 도화 체크 (시주 = pils[0])
+    DOHWA_BR = {"자", "오", "묘", "유"}
+    try:
+        hour_b = (pils[0].get("jj", "") if isinstance(pils, list) and pils else "")[:1]
+    except Exception:
+        hour_b = ""
+    sigi_dohwa = hour_b in DOHWA_BR
+
+    g = (gender or "")[:1]
+    is_male = g in ["남", "M", "m"]
+
+    if is_male:
+        jae_total = pyun_jae + jung_jae
+        honjap = (pyun_jae >= 1 and jung_jae >= 1)
+
+        if honjap and (has_dohwa or has_hongyeom):
+            title = "💔 당신은 — 이성 인연이 끊이지 않는 사주입니다"
+            line1 = "정재 + 편재 혼잡(混雜)에 도화·홍염까지 박혔습니다."
+            line2 = "결혼해도 — 본인이 마음 단속 안 하면 한 번은 흔들립니다."
+            line3 = "스쳐가는 인연 많습니다. 한 번 사고 나면 가정 무너집니다."
+        elif honjap:
+            title = "💔 당신은 — 여자 인연이 복잡한 사주입니다"
+            line1 = "재성혼잡 — 본처 외에도 마음 가는 사람 생기는 구조."
+            line2 = "한 사람에게 정착하기 어려운 사주입니다."
+            line3 = "조심하지 않으면 — 40대에 한 번 흔들립니다."
+        elif has_yangin and jae_total >= 1:
+            title = "💔 당신은 — 한 번 꽂히면 못 빠져나오는 사주입니다"
+            line1 = "양인 + 재성. 평소엔 무덤덤한데 한 번 빠지면 끝까지."
+            line2 = "본인이 가장 위험한 줄 — 본인만 모릅니다."
+            line3 = "결혼 후 외부 자극 차단 — 그게 본인 안전장치입니다."
+        elif has_dohwa or has_hongyeom or sigi_dohwa:
+            title = "💔 당신은 — 이성에게 인기 많은 사주입니다"
+            line1 = "도화·홍염 박힘 — 나이 들어도 매력 유지됩니다."
+            line2 = "여자가 먼저 다가오는 케이스 많을 겁니다."
+            extra = " 특히 시지 도화 — 말년 마음 단속 필수." if sigi_dohwa else ""
+            line3 = "본인이 자제하면 그저 인기 많은 사람으로 끝납니다." + extra
+        elif jae_total == 0:
+            title = "💔 당신은 — 여자 인연이 약한 사주입니다"
+            line1 = "무재(無財) 구조. 이성에 큰 욕심 없고 인연도 늦습니다."
+            line2 = "결혼해도 — 정 표현이 서툴러 배우자가 답답해 합니다."
+            line3 = "오히려 외도 가능성은 낮습니다. 그게 본인 강점."
+        else:
+            title = "💔 당신은 — 한 사람에게 충실한 사주입니다"
+            line1 = "재성이 안정적 — 한 번 정한 사람 끝까지 가는 구조."
+            line2 = "외도 가능성 낮습니다."
+            line3 = "단, 표현 부족 — 배우자가 무관심으로 느낄 수 있음."
+    else:
+        gwan_total = pyun_gwan + jung_gwan
+        honjap = (pyun_gwan >= 1 and jung_gwan >= 1)
+
+        if honjap and (has_dohwa or has_hongyeom):
+            title = "💔 당신은 — 이성 인연이 끊이지 않는 사주입니다"
+            line1 = "정관 + 편관 혼잡에 도화·홍염까지. 인기와 갈등 둘 다 강함."
+            line2 = "남자가 끊이지 않습니다. 단, 정착이 어려운 구조."
+            line3 = "결혼 전 신중하게 — 한 번 흔들리면 두 번 옵니다."
+        elif honjap:
+            title = "💔 당신은 — 남자 인연이 복잡한 사주입니다"
+            line1 = "관성혼잡 — 한 사람에게 정 붙이기 어렵습니다."
+            line2 = "본남 외에도 마음 가는 사람 등장하는 구조."
+            line3 = "조심하지 않으면 — 40대에 한 번 흔들립니다."
+        elif sik >= 3 and gwan_total <= 1:
+            title = "💔 당신은 — 남편이 답답해할 사주입니다"
+            line1 = "식상 강 + 관성 약 — 남자를 누르는 구조."
+            line2 = "본인은 답답해서 직진하는데 — 남편은 도망갑니다."
+            line3 = "결혼 후 한 발 양보 — 그게 가정의 안전장치."
+        elif bg >= 3:
+            title = "💔 당신은 — 남편 단속이 더 중요한 사주입니다"
+            line1 = "비겁 강 — 남편이 다른 여자에게 흔들릴 수 있는 구조."
+            line2 = "본인이 외도하기보다 — 배우자 단속이 핵심."
+            line3 = "결혼 상대는 — 책임감 있는 사람으로 골라야 합니다."
+        elif has_dohwa or has_hongyeom or sigi_dohwa:
+            title = "💔 당신은 — 남자에게 인기 많은 사주입니다"
+            line1 = "도화·홍염 박힘 — 나이 들어도 매력 유지됩니다."
+            line2 = "남자가 먼저 다가오는 케이스 많을 겁니다."
+            extra = " 특히 시지 도화 — 말년 마음 단속 필수." if sigi_dohwa else ""
+            line3 = "본인이 자제하면 그저 인기 많은 사람으로 끝납니다." + extra
+        elif gwan_total == 0:
+            title = "💔 당신은 — 남자 인연이 약한 사주입니다"
+            line1 = "무관(無官) 구조. 남자에 큰 미련 없고 결혼도 늦습니다."
+            line2 = "독립적이고 본인 일에 몰두 — 그게 당신의 길."
+            line3 = "외도 가능성 낮습니다. 결혼 자체를 신중히."
+        else:
+            title = "💔 당신은 — 한 사람에게 충실한 사주입니다"
+            line1 = "관성이 안정적 — 한 번 선택한 사람 끝까지 갑니다."
+            line2 = "외도 가능성 낮습니다."
+            line3 = "단, 남편이 무관심해지면 — 정 표현 부족이 원인."
+
+    return {"title": title, "line1": line1, "line2": line2, "line3": line3}
