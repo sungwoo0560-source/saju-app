@@ -12442,9 +12442,14 @@ def get_jeokjung_windfall(yukjin_list, daeun_list, birth_year):
     try:
         from datetime import datetime
         now_y = datetime.now().year
+        now_age = now_y - int(birth_year or 0)
         for du in daeun_list:
             sy = int(du.get("시작연도", 0))
             if sy <= 0 or sy > now_y:
+                continue
+            age_at = sy - int(birth_year or 0)
+            # JONGHAP-FIX-1: 어린 시절·현재 이후 제외 (20세~현재 나이까지만)
+            if not (20 <= age_at <= max(20, now_age)):
                 continue
             stem = du.get("cg","") or du.get("천간","")
             if stem:
@@ -12491,10 +12496,14 @@ def get_jeokjung_guiin(ilgan, pils, yukjin_list):
         "오":"말","미":"양","신":"원숭이","유":"닭","술":"개","해":"돼지",
     }
 
+    # JONGHAP-FIX-1: 한자 일간 → 한글 변환
+    _HANJA2HAN = {"甲":"갑","乙":"을","丙":"병","丁":"정","戊":"무",
+                  "己":"기","庚":"경","辛":"신","壬":"임","癸":"계"}
     ig = (ilgan or "").strip()[:1]
+    ig = _HANJA2HAN.get(ig, ig)
     guiin_ji = GUIIN_MAP.get(ig, [])
     ddi_list = [JIJI_DDI.get(j, "") for j in guiin_ji if j in JIJI_DDI]
-    ddi_str = "·".join([d+"띠" for d in ddi_list if d]) if ddi_list else "특정 띠"
+    ddi_str = "·".join([d+"띠" for d in ddi_list if d]) if ddi_list else "특정 띠(일간 추출 실패)"
 
     own_branches = []
     try:
@@ -12626,6 +12635,16 @@ def get_jeokjung_affair(gender, ilgan, yukjin_list, sinsal_list, pils):
             line1 = "관성혼잡 — 한 사람에게 정 붙이기 어렵습니다."
             line2 = "본남 외에도 마음 가는 사람 등장하는 구조."
             line3 = "조심하지 않으면 — 40대에 한 번 흔들립니다."
+        elif pyun_gwan >= 2 and jung_gwan == 0:
+            title = "💔 당신은 — 강한 남자와 부딪히는 사주입니다"
+            line1 = "편관 多 — 압박 강하고 능력 있는 남자와 인연."
+            line2 = "결혼해도 권위적·통제력 강한 남편 가능성."
+            line3 = "한 사람에게 헌신하지만 — 부딪힘이 잦습니다."
+        elif jung_gwan >= 2 and pyun_gwan == 0:
+            title = "💔 당신은 — 안정형 남편 만나는 사주입니다"
+            line1 = "정관 多 — 책임감 있고 성실한 남자 인연."
+            line2 = "관계 안정적이고 외도 가능성 매우 낮음."
+            line3 = "단, 본인이 답답해 할 수 있음 — 표현이 무딘 남편."
         elif sik >= 3 and gwan_total <= 1:
             title = "💔 당신은 — 남편이 답답해할 사주입니다"
             line1 = "식상 강 + 관성 약 — 남자를 누르는 구조."
@@ -12774,11 +12793,33 @@ def get_jeokjung_children(gender, ilgan, yukjin_list, pils):
     try:
         for item in yukjin_list:
             k = item.get("관계", "")
-            pos = str(item.get("위치", ""))
+            pos = str(item.get("위치", "")).lower()
             if "식신" in k or "상관" in k:
                 sik_count += 1
-                if "시" in pos:
+                # JONGHAP-FIX-1: 시주 위치 매칭 광범위화
+                if any(x in pos for x in ["시", "hour", "시간", "시지", "시주"]):
                     sik_sigan = True
+    except Exception:
+        pass
+    # JONGHAP-FIX-1: 시주 천간 직접 검증 (보조 체크)
+    try:
+        _SIK_STEMS = {
+            "갑": {"병", "정"}, "을": {"정", "병"},
+            "병": {"무", "기"}, "정": {"기", "무"},
+            "무": {"경", "신"}, "기": {"신", "경"},
+            "경": {"임", "계"}, "신": {"계", "임"},
+            "임": {"갑", "을"}, "계": {"을", "갑"},
+        }
+        _h2h = {"甲":"갑","乙":"을","丙":"병","丁":"정","戊":"무",
+                "己":"기","庚":"경","辛":"신","壬":"임","癸":"계"}
+        _ig = (ilgan or "").strip()[:1]
+        _ig = _h2h.get(_ig, _ig)
+        _sig_cg = (pils[0].get("cg", "") if isinstance(pils, list) and len(pils) > 0 else "")[:1]
+        _sig_cg = _h2h.get(_sig_cg, _sig_cg)
+        if _sig_cg in _SIK_STEMS.get(_ig, set()):
+            sik_sigan = True
+            if sik_count == 0:
+                sik_count = 1
     except Exception:
         pass
 
