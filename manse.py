@@ -15583,7 +15583,13 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
         _ilgan_s = pils[1]["cg"] if len(pils) > 1 else ""
         _ys_s = get_yongshin(pils)
         _yong_s = _ys_s.get("종합_용신",[]) if _ys_s else []
-        _gisin_s = _ys_s.get("기신",[]) if _ys_s and isinstance(_ys_s.get("기신"),list) else []
+        _gisin_s_raw = _ys_s.get("기신", []) if _ys_s else []
+        if isinstance(_gisin_s_raw, list):
+            _gisin_s = _gisin_s_raw
+        elif isinstance(_gisin_s_raw, str) and _gisin_s_raw:
+            _gisin_s = [_gisin_s_raw]
+        else:
+            _gisin_s = []
         _gk_s = get_gyeokguk(pils)
         _gkn_s = _gk_s.get("격국명","") if _gk_s else ""
         _sn_s = get_ilgan_strength(_ilgan_s, pils)
@@ -15637,7 +15643,8 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
 
         _strategy_txt = _ILGAN_STRATEGY.get(_ilgan_s, f"{_ilgan_s}일간의 기운으로 살아가고 있습니다.")
         _yong_str_s = " · ".join([_OHN_S.get(y,"") for y in _yong_s[:2]]) if _yong_s else "분석 중"
-        _gisin_str_s = " · ".join([_OHN_S.get(g,"") for g in _gisin_s[:2] if isinstance(g,str)]) if _gisin_s else "없음"
+        # JONGHAP-FIX-6: 빈 문자열 fallback (saju_zhengtong L7428 패턴 통일)
+        _gisin_str_s = (" · ".join([_OHN_S.get(g, g) for g in _gisin_s[:2] if isinstance(g, str)])) or "土·金"
 
         st.markdown("---")
         st.markdown(
