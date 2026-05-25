@@ -12575,6 +12575,30 @@ def get_jeokjung_affair(gender, ilgan, yukjin_list, sinsal_list, pils):
     has_hongyeom = "홍염" in sinsal_str
     has_yangin   = "양인" in sinsal_str or "羊刃" in sinsal_str
 
+    # JONGHAP-FIX-3: 신살 리스트 누락 대응 - 일지·일간 직접 검출
+    try:
+        _DOHWA_BR_ALL = {"자", "오", "묘", "유"}
+        _HONGYEOM_MAP = {
+            "갑": "오", "을": "신", "병": "인", "정": "미", "무": "진",
+            "기": "진", "경": "술", "신": "유", "임": "자", "계": "신",
+        }
+        _h2h_fix3 = {"甲": "갑", "乙": "을", "丙": "병", "丁": "정", "戊": "무",
+                     "己": "기", "庚": "경", "辛": "신", "壬": "임", "癸": "계"}
+        _ig_fix3 = _h2h_fix3.get((ilgan or "")[:1], (ilgan or "")[:1])
+        _all_branches = set()
+        for _p in (pils or []):
+            _jj = _p.get("jj", "")
+            if _jj:
+                _all_branches.add(_jj[:1])
+        if not has_dohwa and (_all_branches & _DOHWA_BR_ALL):
+            has_dohwa = True
+        if not has_hongyeom:
+            _hy = _HONGYEOM_MAP.get(_ig_fix3, "")
+            if _hy and _hy in _all_branches:
+                has_hongyeom = True
+    except Exception:
+        pass
+
     # 시지 도화 체크 (시주 = pils[0])
     DOHWA_BR = {"자", "오", "묘", "유"}
     try:
@@ -12600,6 +12624,16 @@ def get_jeokjung_affair(gender, ilgan, yukjin_list, sinsal_list, pils):
             line1 = "재성혼잡 — 본처 외에도 마음 가는 사람 생기는 구조."
             line2 = "한 사람에게 정착하기 어려운 사주입니다."
             line3 = "조심하지 않으면 — 40대에 한 번 흔들립니다."
+        elif pyun_jae >= 2 and (has_dohwa or has_hongyeom):
+            title = "💔 당신은 — 이성 인연이 끊이지 않는 사주입니다"
+            line1 = "편재 多 + 도화/홍염. 인기와 흔들림이 모두 강한 구조."
+            line2 = "결혼 후에도 다른 여자가 계속 다가옵니다."
+            line3 = "마음 단속 안 하면 — 가정 위험. 본인이 가장 큰 변수."
+        elif jung_jae >= 2 and (has_dohwa or has_hongyeom):
+            title = "💔 당신은 — 인기 많은 안정형 사주입니다"
+            line1 = "정재 多 + 도화. 매력 강하지만 본인은 한 사람."
+            line2 = "여자가 먼저 다가오는 케이스 多."
+            line3 = "단, 시기 따라 마음 흔들릴 수 있음 — 절제가 답."
         elif has_yangin and jae_total >= 1:
             title = "💔 당신은 — 한 번 꽂히면 못 빠져나오는 사주입니다"
             line1 = "양인 + 재성. 평소엔 무덤덤한데 한 번 빠지면 끝까지."
@@ -12635,6 +12669,16 @@ def get_jeokjung_affair(gender, ilgan, yukjin_list, sinsal_list, pils):
             line1 = "관성혼잡 — 한 사람에게 정 붙이기 어렵습니다."
             line2 = "본남 외에도 마음 가는 사람 등장하는 구조."
             line3 = "조심하지 않으면 — 40대에 한 번 흔들립니다."
+        elif pyun_gwan >= 2 and (has_dohwa or has_hongyeom):
+            title = "💔 당신은 — 이성 인연이 끊이지 않는 사주입니다"
+            line1 = "편관 多 + 도화/홍염. 매력 강한 만큼 흔들림도 많은 구조."
+            line2 = "결혼 후에도 다른 인연이 계속 다가옵니다."
+            line3 = "본인 마음 단속 안 하면 — 한 번은 반드시 흔들립니다."
+        elif jung_gwan >= 2 and (has_dohwa or has_hongyeom):
+            title = "💔 당신은 — 인기 많은 안정형 사주입니다"
+            line1 = "정관 多 + 도화. 매력 강하지만 본인은 한 사람 선택."
+            line2 = "남자가 먼저 다가오는 케이스 多."
+            line3 = "단, 시기 따라 마음 흔들릴 수 있음 — 절제가 답."
         elif pyun_gwan >= 2 and jung_gwan == 0:
             title = "💔 당신은 — 강한 남자와 부딪히는 사주입니다"
             line1 = "편관 多 — 압박 강하고 능력 있는 남자와 인연."
@@ -12836,15 +12880,14 @@ def get_jeokjung_children(gender, ilgan, yukjin_list, pils):
     cg_yang = sig_cg in YANG_STEMS
     jj_yang = sig_jj in YANG_BRANCHES
 
+    # JONGHAP-FIX-3: 첫째 성별 단정 → 경향 톤 (시주 음양은 참고치만)
     if sig_cg and sig_jj:
         if cg_yang and jj_yang:
-            first_child = "첫째 아들 가능성 높음"
+            first_child = "첫째 아들 경향 (시주 양·양) — 환경·인연에 따라 달라짐"
         elif (not cg_yang) and (not jj_yang):
-            first_child = "첫째 딸 가능성 높음"
-        elif jj_yang:
-            first_child = "첫째 아들 — 단, 혼합 (확률 약간 우세)"
+            first_child = "첫째 딸 경향 (시주 음·음) — 환경·인연에 따라 달라짐"
         else:
-            first_child = "첫째 딸 — 단, 혼합 (확률 약간 우세)"
+            first_child = "첫째 성별 혼합 — 아들·딸 모두 가능"
     else:
         first_child = "아들·딸 모두 가능"
 
