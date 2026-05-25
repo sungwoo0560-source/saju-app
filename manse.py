@@ -15267,6 +15267,7 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
                 yongshin=_yong_pyong, gisin=_gisin_pyong,
                 gyeokguk_name=_gyeok_p, shin_status=_shin_p,
                 sinsal_data=_sinsal_p,
+                marriage_status=st.session_state.get("marriage_status", "미혼"),
             ),
             unsafe_allow_html=True,
         )

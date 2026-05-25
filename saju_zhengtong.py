@@ -7374,7 +7374,8 @@ def render_life_risk_card(pils, name="내담자"):
 def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男",
                              yongshin=None, gisin=None,
                              gyeokguk_name="", shin_status="",
-                             sinsal_data=None, saewoon_data=None):
+                             sinsal_data=None, saewoon_data=None,
+                             marriage_status="미혼"):
     """종합 사주 평론서 — 12개 섹션 통합. 원국 사실 기반 + 친절 직설 톤."""
     if not pils or len(pils) < 4:
         return ""
@@ -7431,6 +7432,18 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
     nickname   = ilju_info.get("별칭", "")
     activated  = detect_sipseong_combinations(pils)
     risks      = detect_life_risk_signals(pils)
+
+    # JONGHAP-FIX-4: 결혼 상태 정규화
+    if isinstance(marriage_status, bool):
+        marriage_status = "기혼" if marriage_status else "미혼"
+    marriage_status = str(marriage_status or "미혼").strip()
+    _is_married = marriage_status in ("기혼", "결혼")
+    _is_div_wid = marriage_status in ("이혼/사별", "이혼", "사별", "별거")
+    _is_single  = not (_is_married or _is_div_wid)
+    if _is_married:
+        risks.setdefault("결혼인연", {})["메시지"] = "현재 배우자와의 관계 점검 우선 — 갈등 시기 미리 파악하세요."
+    elif _is_div_wid:
+        risks.setdefault("결혼인연", {})["메시지"] = "재혼 인연 가능 — 자기 회복 우선, 용신 운에서 자연스럽게."
 
     cur_year = datetime.now().year
     cur_age  = cur_year - birth_year
@@ -7684,12 +7697,27 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
         f"용신 {yong_str} 오행을 보강하는 음식·활동을 매일 실천하세요. 건강 운도 바뀝니다.",
         f"취약 부위를 방치하면 기신 대운에 큰 건강 위기가 찾아옵니다. 예방이 전부입니다."
     )
-    _causal7 = _cb(
-        f"{name}님 인연 인과",
-        f"일간 {ilgan}({ilgan_kr}) 일지 {iz_jj}({iljj_kr}) 구조라서 연애 패턴이 '{_ip_yeonae_s}' 스타일입니다.",
-        f"용신 {yong_str} 대운·세운에 인연이 집중됩니다. 그 시기에 반드시 적극적으로 움직이세요.",
-        f"인연의 타이밍을 망설이면 다음 기회는 10년 뒤입니다. 준비보다 만남이 먼저입니다."
-    )
+    if _is_married:
+        _causal7 = _cb(
+            f"{name}님 인연 인과",
+            f"일간 {ilgan}({ilgan_kr}) 일지 {iz_jj}({iljj_kr}) 구조라서 배우자와의 관계 패턴이 '{_ip_yeonae_s}' 스타일입니다.",
+            f"용신 {yong_str} 대운에 부부 관계가 강화됩니다. 그 시기에 대화와 신뢰를 쌓으세요.",
+            f"기신 대운에는 갈등이 증폭됩니다. 그 시기 작은 문제도 크게 번질 수 있으니 선제 대화가 핵심."
+        )
+    elif _is_div_wid:
+        _causal7 = _cb(
+            f"{name}님 인연 인과",
+            f"일간 {ilgan}({ilgan_kr}) 일지 {iz_jj}({iljj_kr}) 구조라서 관계 패턴이 '{_ip_yeonae_s}' 스타일입니다.",
+            f"용신 {yong_str} 대운·세운에 새 인연 가능성이 열립니다. 자기 회복이 먼저, 만남은 자연스럽게.",
+            f"서두르면 같은 패턴 반복입니다. 내면 회복 후 용신 운에서 천천히 결정하세요."
+        )
+    else:
+        _causal7 = _cb(
+            f"{name}님 인연 인과",
+            f"일간 {ilgan}({ilgan_kr}) 일지 {iz_jj}({iljj_kr}) 구조라서 연애 패턴이 '{_ip_yeonae_s}' 스타일입니다.",
+            f"용신 {yong_str} 대운·세운에 인연이 집중됩니다. 그 시기에 반드시 적극적으로 움직이세요.",
+            f"인연의 타이밍을 망설이면 다음 기회는 10년 뒤입니다. 준비보다 만남이 먼저입니다."
+        )
     _causal8 = _cb(
         f"{name}님 대운 인과",
         f"일간 {ilgan}({ilgan_kr}) {_ip_bunjil_s} 본질 때문에 용신 {yong_str} 대운에 특히 강하게 빛납니다.",
@@ -7720,6 +7748,59 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
         f"오늘부터 딱 하나만: 용신 {yong_str} 오행을 일상에 넣으세요. 색상·음식·방향 하나만 바꿔도 흐름이 달라집니다.",
         f"아는 것으로 끝내면 평생 지금 이 자리입니다. 실천이 운명을 바꿉니다."
     )
+
+    # JONGHAP-FIX-4: [7] 인연 섹션 분기 HTML 변수
+    if _is_married:
+        _sec7_table = (
+            f'· <b>배우자 관계 안정도:</b> <b>{_risk("결혼인연","점수",0)}/100</b>'
+            f' — {_risk("결혼인연","등급","보통")}'
+            f' &nbsp;|&nbsp; 이혼 위험: <b>{_risk("이혼·이별","점수",0)}/100</b>'
+            f' — {_risk("이혼·이별","등급","안정")}'
+            f' &nbsp;|&nbsp; 바람기: <b>{_risk("바람기","점수",0)}/100</b>'
+            f' — {_risk("바람기","등급","낮음")}'
+        )
+        _sec7_inyon = (
+            f'<b>📌 부부 관계 포인트:</b><br>'
+            f'→ {_risk("결혼인연","메시지","현재 배우자와의 관계 점검 우선.")}<br>'
+            f'→ {_risk("이혼·이별","메시지","안정적 관계 구조입니다.")}<br><br>'
+            f'<b>💑 배우자와 갈등·사고수 주의 시기:</b><br>'
+            f'→ 기신 <b>{gisin_str}</b> 대운·세운이 겹치는 해 — 그 해 부부 대화 의식적으로 늘리세요.<br>'
+            f'→ 충(沖) 발동 시기 미리 파악해 두면 갈등을 예방할 수 있습니다.'
+        )
+    elif _is_div_wid:
+        _sec7_table = (
+            f'· <b>새 인연 가능도:</b> <b>{_risk("결혼인연","점수",0)}/100</b>'
+            f' — {_risk("결혼인연","등급","보통")}'
+            f' &nbsp;|&nbsp; 이별 위험: <b>{_risk("이혼·이별","점수",0)}/100</b>'
+            f' — {_risk("이혼·이별","등급","안정")}'
+            f' &nbsp;|&nbsp; 바람기: <b>{_risk("바람기","점수",0)}/100</b>'
+            f' — {_risk("바람기","등급","낮음")}'
+        )
+        _sec7_inyon = (
+            f'<b>📌 인연의 법칙:</b><br>'
+            f'→ {_risk("결혼인연","메시지","재혼 인연 가능 — 자기 회복 우선.")}<br>'
+            f'→ {_risk("이혼·이별","메시지","안정적 인연 구조입니다.")}<br><br>'
+            f'<b>🔄 새 동반자 인연 가능 시기:</b><br>'
+            f'→ 용신 <b>{yong_str}</b> 대운·세운이 겹치는 해 — 자기 회복 후 자연스러운 만남을 여세요.<br>'
+            f'→ 서두르지 말고 내면이 안정된 후 움직이세요.'
+        )
+    else:
+        _sec7_table = (
+            f'· 결혼 인연: <b>{_risk("결혼인연","점수",0)}/100</b>'
+            f' — {_risk("결혼인연","등급","보통")}'
+            f' &nbsp;|&nbsp; 이혼 위험: <b>{_risk("이혼·이별","점수",0)}/100</b>'
+            f' — {_risk("이혼·이별","등급","안정")}'
+            f' &nbsp;|&nbsp; 바람기: <b>{_risk("바람기","점수",0)}/100</b>'
+            f' — {_risk("바람기","등급","낮음")}'
+        )
+        _sec7_inyon = (
+            f'<b>📌 인연의 법칙:</b><br>'
+            f'→ {_risk("결혼인연","메시지","용신 대운에 인연이 집중됩니다. 이 시기를 절대 놓치지 마세요.")}<br>'
+            f'→ {_risk("이혼·이별","메시지","안정적 인연 구조입니다.")}<br><br>'
+            f'<b>🔴 놓치면 안 되는 인연의 시기:</b><br>'
+            f'→ 용신 <b>{yong_str}</b> 대운·세운이 겹치는 해 — 그 해에 반드시 적극적으로 움직이세요.<br>'
+            f'→ 이 시기를 망설이다 보내면, 다음 기회는 10년 뒤입니다.'
+        )
 
     html = f"""
 <div style="background:linear-gradient(180deg,#fdfcf7 0%,#fff 100%);
@@ -7841,13 +7922,8 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
       <b>{name}님의 배우자궁(일지): {iz_jj}({iljj_kr})</b><br>
       {ilju_info.get("배우자", f"일지 {iz_jj}({iljj_kr}) 기운이 {name}님의 배우자 기질과 결혼 생활 패턴을 결정합니다.")}<br><br>
       <b>📊 인연 구조 진단:</b><br>
-      · 결혼 인연: <b>{_risk("결혼인연","점수",0)}/100</b> — {_risk("결혼인연","등급","보통")} &nbsp;|&nbsp; 이혼 위험: <b>{_risk("이혼·이별","점수",0)}/100</b> — {_risk("이혼·이별","등급","안정")} &nbsp;|&nbsp; 바람기: <b>{_risk("바람기","점수",0)}/100</b> — {_risk("바람기","등급","낮음")}<br><br>
-      <b>📌 인연의 법칙:</b><br>
-      → {_risk("결혼인연","메시지","용신 대운에 인연이 집중됩니다. 이 시기를 절대 놓치지 마세요.")}<br>
-      → {_risk("이혼·이별","메시지","안정적 인연 구조입니다.")}<br><br>
-      <b>🔴 놓치면 안 되는 인연의 시기:</b><br>
-      → 용신 <b>{yong_str}</b> 대운·세운이 겹치는 해 — 그 해에 반드시 적극적으로 움직이세요.<br>
-      → 이 시기를 망설이다 보내면, 다음 기회는 10년 뒤입니다.
+      {_sec7_table}<br><br>
+      {_sec7_inyon}
       {_causal7}
     </div>
   </div>
