@@ -7839,7 +7839,7 @@ def get_year_detail(y, c2, ilgan, yongshin_ohs, birth_year):
 
         # 분야별 예측
         career = sd_dw.get("직업", "") or f"{dw_ss} 기운의 분야에서 활동이 유리합니다."
-        finance = sd_sw.get("재물", "") or f"세운 {sw_ss} — {dw_cg_interp[:30] if dw_cg_interp else '재물 흐름에 주의가 필요합니다.'}"
+        finance = sd_sw.get("재물", "") or f"세운 {sw_ss} — {dw_cg_interp if dw_cg_interp else '재물 흐름에 주의가 필요합니다.'}"
         ilp = ILGAN_PROFILE.get(ilgan, {})
         relation = ilp.get("연애", f"{ilgan} 일간 특유의 관계 방식이 두드러지는 해.")
         oh_health = OHANG_BODY.get(OH.get(dw_cg, ""), {})
@@ -11603,7 +11603,7 @@ def menu_daily(pils, birth_year, gender):
 
     msg = (
         f"오늘은 {day_cg}{day_jj} 일진으로 <b>{sip}</b>의 기운이 흐르는 날입니다. "
-        f"{core[:40]} "
+        f"{core} "
         f"행운 방향은 <b>{OH_DIR.get(day_oh, '중앙')}</b>, "
         f"행운색은 <b>{OH_LUCKY.get(day_oh, '흰색')}</b>을 활용하세요."
     )
@@ -15823,14 +15823,14 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
             f"<div>"
             f"<div style='color:#7fff7f;font-weight:700;margin-bottom:4px'>"
             f"🌟 용신 활성 달</div>"
-            f"<div style='color:#ccc;'>{' · '.join(_good_months[:4]) if _good_months else '없음'}</div>"
+            f"<div style='color:#ccc;'>{' · '.join(_good_months[:4]) if _good_months else '안정 흐름 — 큰 변화 없음'}</div>"
             f"<div style='color:#888;font-size:11px;margin-top:2px'>"
             f"중요한 일은 이 달에 시작하세요</div>"
             f"</div>"
             f"<div>"
             f"<div style='color:#ffaaaa;font-weight:700;margin-bottom:4px'>"
             f"⚠️ 최대 주의 달</div>"
-            f"<div style='color:#ccc;'>{' · '.join(_danger_months[:3]) if _danger_months else '없음'}</div>"
+            f"<div style='color:#ccc;'>{' · '.join(_danger_months[:3]) if _danger_months else '특별 주의월 없음 — 평이한 흐름'}</div>"
             f"<div style='color:#888;font-size:11px;margin-top:2px'>"
             f"이 달엔 중요 결정 보류하세요</div>"
             f"</div>"
@@ -17351,7 +17351,7 @@ def menu4_future3(
                 <div style='font-size:13px;color:#1a5c2a;margin-bottom:4px'>
                 ✅ <b>최적 달:</b> {_peak_str or "해당 없음"}</div>
                 <div style='font-size:13px;color:#c0392b;'>
-                ⛔ <b>피할 달:</b> {_caution_str or "없음"}</div>
+                ⛔ <b>피할 달:</b> {_caution_str or "특별 주의사항 없음"}</div>
                 </div>""",
                 unsafe_allow_html=True,
             )
@@ -30122,3 +30122,4 @@ if __name__ == "__main__":
         import streamlit as _st
         _st.error(f"⚠️ 앱 초기화 오류: {str(_main_err)[:200]}\n\n새로고침(F5)을 눌러 다시 시도하세요.")
         raise
+# HOTFIX-3: FIX-8/9 redeploy trigger

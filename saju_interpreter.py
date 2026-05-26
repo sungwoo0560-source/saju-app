@@ -5799,7 +5799,7 @@ class LocalSajuNarrator:
         # 행동 지침
         lines.append(f"\n**[행동]** 지금 당장:")
         lines.append(f"- 본인의 연애 스타일({_yeonae[:20]}...)을 파트너에게 솔직히 알리세요.")
-        lines.append(f"- 배우자 자리({_iljj_r}) 기운과 맞는 사람: {_bubu.split(' — ')[-1] if ' — ' in _bubu else _bubu[:30]}")
+        lines.append(f"- 배우자 자리({_iljj_r}) 기운과 맞는 사람: {_bubu.split(' — ')[-1] if ' — ' in _bubu else _bubu}")
         lines.append(f"- 기신 오행 파트너는 처음에 강하게 끌려도 장기 갈등 소지 — 신중히.")
 
         # ── 4. 결혼 최적 시기 (용신/인연 대운·세운) ────────────────
@@ -12925,3 +12925,5 @@ def get_jeokjung_children(gender, ilgan, yukjin_list, pils):
         line3 = "자녀 없이도 충실히 사는 인생 — 그것도 본인의 길."
 
     return {"title": title, "line1": line1, "line2": line2, "line3": line3}
+
+# HOTFIX-3: FIX-8/9 redeploy trigger
