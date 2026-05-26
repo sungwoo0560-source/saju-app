@@ -7657,14 +7657,14 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
             '</div>'
         )
 
-    _ip_bunjil_s  = _ip_bunjil[:50]
+    _ip_bunjil_s  = _ip_bunjil
     _ip_jang_s    = _ip_jangjeom.split(',')[0].split('·')[0].strip()
     _ip_dan_s     = _ip_danjeom.split(',')[0].split('·')[0].strip()
     _ip_jigeob_s  = _ip_jigeob.split('·')[0].split(',')[0].strip()
-    _ip_jaemul_s  = _ip_jaemul[:40]
+    _ip_jaemul_s  = _ip_jaemul
     _ip_geongang_s= _ip_geongang.split('.')[0].split('·')[0].strip()
-    _ip_yeonae_s  = _ip_yeonae[:40]
-    _ip_cheobang_s= _ip_cheobang[:50]
+    _ip_yeonae_s  = _ip_yeonae
+    _ip_cheobang_s= _ip_cheobang
     _gilwol_plain = _gilwol_str.split('<')[0].strip()
     _shin_adv = ("에너지를 발산하는 방향으로 일하면 성과가 납니다"
                  if _shin_core == "신강" else
