@@ -15261,14 +15261,17 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
         except Exception:
             pass
 
+        import inspect as _insp_fix
+        _sig_pyong = _insp_fix.signature(render_jonghap_pyongron)
+        _kw_pyong = {
+            "yongshin": _yong_pyong, "gisin": _gisin_pyong,
+            "gyeokguk_name": _gyeok_p, "shin_status": _shin_p,
+            "sinsal_data": _sinsal_p,
+        }
+        if "marriage_status" in _sig_pyong.parameters:
+            _kw_pyong["marriage_status"] = st.session_state.get("marriage_status", "미혼")
         st.markdown(
-            render_jonghap_pyongron(
-                pils, name or "내담자", birth_year, gender or "男",
-                yongshin=_yong_pyong, gisin=_gisin_pyong,
-                gyeokguk_name=_gyeok_p, shin_status=_shin_p,
-                sinsal_data=_sinsal_p,
-                marriage_status=st.session_state.get("marriage_status", "미혼"),
-            ),
+            render_jonghap_pyongron(pils, name or "내담자", birth_year, gender or "男", **_kw_pyong),
             unsafe_allow_html=True,
         )
     except Exception as _e_pyong:
