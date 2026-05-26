@@ -12719,7 +12719,7 @@ def get_jeokjung_affair(gender, ilgan, yukjin_list, sinsal_list, pils):
     return {"title": title, "line1": line1, "line2": line2, "line3": line3}
 
 
-def get_jeokjung_marriage(gender, ilgan, yukjin_list, sinsal_list, pils):
+def get_jeokjung_marriage(gender, ilgan, yukjin_list, sinsal_list, pils, marriage_status="미혼"):
     """결혼 시기 + 배우자 성향 적중 박스 반환. pils = [시주,일주,월주,년주].
     반환: dict {title, line1, line2, line3}
     """
@@ -12824,6 +12824,19 @@ def get_jeokjung_marriage(gender, ilgan, yukjin_list, sinsal_list, pils):
         line3 = "배우자 자리에 관성 — 좋은 남편이 인생을 풉니다."
     else:
         line3 = "결혼 후 한 발 양보하는 사람이 — 진짜 승자."
+
+    # JONGHAP-FIX-7: 결혼 상태별 분기 (기혼/이혼사별 → line1·line3·title 교체, line2 유지)
+    _ms = str(marriage_status or "미혼").strip()
+    _is_married = _ms in ("기혼", "재혼")
+    _is_div_wid = _ms in ("이혼/사별", "이혼", "사별", "별거")
+    if _is_married:
+        title = "💑 당신의 결혼 — 현재 관계 진단"
+        line1 = "갈등 시기 미리 알기 — 기신 대운·세운 겹치는 해 주의."
+        line3 = "한 발 양보하는 사람이 — 진짜 승자."
+    elif _is_div_wid:
+        title = "💑 당신의 인연 — 새 동반자 가능 시기"
+        line1 = "용신 대운·세운 — 자기 회복 후 자연스러운 만남."
+        line3 = "서두르지 말고 내면 안정 후."
 
     return {"title": title, "line1": line1, "line2": line2, "line3": line3}
 
