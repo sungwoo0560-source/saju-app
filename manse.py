@@ -26778,6 +26778,7 @@ def main():
             # 세션 스테이트에 최종 반영 (Key Binding 영구화)
 
             st.session_state["saju_pils"] = pils
+            _ss["active_tab"] = 0  # NEW-3: 재계산 시 종합운세 탭으로 복귀
 
             st.session_state["birth_year"] = b_year
 
