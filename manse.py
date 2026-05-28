@@ -17178,7 +17178,7 @@ def menu4_future3(
 
     st.markdown('<div class="gold-section">💑 인연/배우자운 (3년)</div>', unsafe_allow_html=True)
 
-    if marriage_status in ("미혼", "이혼/별거"):
+    if marriage_status != "기혼":
         MARRY_SS = {"正財", "偏財"} if gender == "남" else {"正官", "偏官"}
 
         for yd in years_data:
