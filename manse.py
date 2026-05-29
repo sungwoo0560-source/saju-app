@@ -33,7 +33,7 @@ if "render_quick_consult_header" not in dir():
         _st.markdown(
             "<div style='background:linear-gradient(135deg,#1a1a2e,#16213e);"
             "border-radius:12px;padding:12px 16px;margin-bottom:8px;'>"
-            "<span style='color:#d4af37;font-size:15px;font-weight:900;'>🔮 만신 직격 상담창</span>"
+            "<span style='color:#d4af37;font-size:15px;font-weight:900;'>💬 직격 상담창</span>"
             "<span style='color:#aaa;font-size:11px;margin-left:8px;'>사주 기반 즉답</span>"
             "</div>",
             unsafe_allow_html=True,
@@ -51,7 +51,7 @@ if "render_quick_consult_response" not in dir():
             f"border:1.5px solid #d4af37;border-radius:16px;padding:20px 24px;"
             f"margin:10px 0;font-size:14px;color:#2d1f00;line-height:2.1;'>"
             f"<div style='font-size:11px;font-weight:800;color:#d4af37;"
-            f"margin-bottom:10px;letter-spacing:1px;'>🔮 만신의 직격 답변</div>"
+            f"margin-bottom:10px;letter-spacing:1px;'>💬 직격 답변</div>"
             f"{response.replace(chr(10), '<br>')}"
             f"</div>",
             unsafe_allow_html=True,
@@ -3179,7 +3179,7 @@ def quick_consult_bar(pils, name, birth_year, gender):
     _final_query = _clicked_q if _auto_submit else quick_query
 
     if (q_submitted and quick_query) or (_auto_submit and _clicked_q):
-        with st.status("🔮 만신의 신안(神眼)이 천기를 살피는 중...", expanded=True) as status:
+        with st.status("🔍 사주 분석 중...", expanded=True) as status:
             # 1. 의도 및 유대감 업데이트
             intent_res = IntentEngine.analyze(_final_query)
 
@@ -6249,7 +6249,7 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
                 c.rect(0, H - 55 * mm, W, 55 * mm, fill=1, stroke=0)
                 c.setFillColorRGB(0.97, 0.90, 0.42)
                 c.setFont(_BF, 22)
-                c.drawCentredString(W / 2, H - 25 * mm, f"만신 사주 — {_label} 리포트")
+                c.drawCentredString(W / 2, H - 25 * mm, f"만세력 사주 — {_label} 리포트")
                 c.setFillColorRGB(0.85, 0.82, 0.70)
                 c.setFont(_BF, 11)
                 c.drawCentredString(W / 2, H - 35 * mm, f"{name} 님  |  {birth_year}년생  |  {gender}성")
@@ -6880,7 +6880,7 @@ def render_ai_deep_analysis(prompt_type, pils, name, birth_year, gender):
     }.get(prompt_type, "정밀 분석 보기")
 
     if st.button(button_label, key=f"btn_deep_{prompt_type}", use_container_width=True):
-        with st.spinner("만신 엔진이 사주 명식을 집대성하고 있습니다..."):
+        with st.spinner("사주 명식을 정리하고 있습니다..."):
             _sec_map = {
                 "lifeline": "lifeline",
                 "past": "past",
@@ -6899,7 +6899,7 @@ def render_ai_deep_analysis(prompt_type, pils, name, birth_year, gender):
                     f"""
 <div style="background:#ffffff;border:2px solid #000000;border-radius:16px; padding:25px;margin-top:20px;box-shadow:0 4px 15px rgba(197,160,89,0.15)">
 <div style="font-size:18px;font-weight:900;color:#000000;margin-bottom:15px;text-align:center">
-                        【 만신 정밀 사주 풀이 결과 】
+                        【 정통 명리 정밀 사주 풀이 결과 】
 </div>
 <div style="font-size:15px;color:#111;line-height:2.2;white-space:pre-wrap;letter-spacing:-0.2px">
                         {apply_lexicon_tooltips(result)}
@@ -10906,7 +10906,7 @@ def b3_render_trigger_card(msg: str):
 
     html += f"<div style='font-size:13px;color:#8b6200;line-height:1.9;margin-bottom:16px'>{msg}</div>"
 
-    html += "<div style='font-size:12px;color:#000000;margin-top:8px'>로컬 만신 엔진으로 풀이합니다.</div>"
+    html += "<div style='font-size:12px;color:#000000;margin-top:8px'>로컬 명리 엔진으로 풀이합니다.</div>"
 
     html += "</div>"
 
@@ -22151,7 +22151,7 @@ def menu7_ai(pils, name, birth_year, gender):
 
 <div style="background:linear-gradient(135deg,#fff8e1,#fffde7);border:2px solid #d4af3755;border-radius:14px; padding:20px;margin-bottom:14px;box-shadow:0 4px 15px rgba(212,175,55,0.1)">
 
-<div style="font-size:18px;font-weight:900;color:#d4af37;margin-bottom:6px">🏛️ 만신 상담소 (萬神 相談所)</div>
+<div style="font-size:18px;font-weight:900;color:#d4af37;margin-bottom:6px">🤖 AI 사주 상담</div>
 
 <div style="font-size:13px;color:#000000;line-height:1.8">
 
@@ -25822,9 +25822,7 @@ def main():
 
 <div class="main-header">
 
-<h1 class="gold-gradient">萬神 사주 천명풀이</h1>
-
-<p>四柱八字 / 天命을 밝히다</p>
+<h1 class="gold-gradient">만세력 사주풀이</h1>
 
 </div>""",
         unsafe_allow_html=True,
@@ -27054,17 +27052,18 @@ def main():
 
             # -- 🗣 기억 기반 개인화 인사말 ------------------
 
-            try:
-                intro_msg = SajuMemory.get_personalized_intro(name, pils)
+            if False:  # X-4-B: 인사말 박스 임시 비활성화 (함수는 보존)
+                try:
+                    intro_msg = SajuMemory.get_personalized_intro(name, pils)
 
-                if intro_msg:
-                    st.markdown(
-                        f"""<div style="background:#f0f7ff;border-left:5px solid #000000;border-radius:8px;padding:10px 16px;margin:8px 0;font-size:13px;color:#000000;font-weight:600">🧠 {intro_msg}</div>""",
-                        unsafe_allow_html=True,
-                    )
+                    if intro_msg:
+                        st.markdown(
+                            f"""<div style="background:#f0f7ff;border-left:5px solid #000000;border-radius:8px;padding:10px 16px;margin:8px 0;font-size:13px;color:#000000;font-weight:600">🧠 {intro_msg}</div>""",
+                            unsafe_allow_html=True,
+                        )
 
-            except Exception as e:
-                st.warning(f"⚠️ {str(e)[:80]}")
+                except Exception as e:
+                    st.warning(f"⚠️ {str(e)[:80]}")
 
             # 이름 + 추가정보 배너
 
