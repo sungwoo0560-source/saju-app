@@ -21173,7 +21173,7 @@ def tab_ai_chat(pils, name, birth_year, gender):
         risk_info = FatePredictionEngine.detect_risk(pils, datetime.now().year)
 
         if risk_info["is_risk"]:
-            st.error(f"⚠️ **만신의 경고 ({risk_info['severity']}):** " + " / ".join(risk_info["messages"]))
+            st.error(f"⚠️ **위험 경고 ({risk_info['severity']}):** " + " / ".join(risk_info["messages"]))
 
         # ── 로컬 사주 엔진 (API 없을 때 폴백) ──────────────────────────────
 
@@ -22155,7 +22155,7 @@ def menu7_ai(pils, name, birth_year, gender):
 
 <div style="font-size:13px;color:#000000;line-height:1.8">
 
-        "인생의 갈림길에서 답답할 때, <b>만신</b>에게 물어보세요."<br>
+        "인생의 갈림길에서 답답할 때, <b>AI 사주 상담</b>으로 문의해보세요."<br>
 
         * <b>궁합, 재물, 커리어, 건강</b> 등 모든 고민을 영속 기억 시스템 기반으로 상담합니다.
 
@@ -23286,7 +23286,7 @@ def menu12_manse(pils=None, birth_year=1990, gender="남"):
 
     if pils and sel_month == today.month and sel_year == today.year:
         st.markdown(
-            '<div class="gold-section" style="margin-top:20px">🔮 오늘 일진으로 보는 만신의 맞춤 조언</div>',
+            '<div class="gold-section" style="margin-top:20px">💡 오늘 일진으로 보는 맞춤 조언</div>',
             unsafe_allow_html=True,
         )
 
@@ -24617,7 +24617,7 @@ def menu_gaewoon(pils, name, birth_year, gender):
                 _card("피해야 할 직종", _bad_job_html)
 
     # ── 섹션10: 총체적 처방 TOP5 ─────────────────────────────────
-    with st.expander("🔮 제10장 — 만신의 총체적 처방전 TOP5", expanded=True):
+    with st.expander("📋 제10장 — 종합 처방전 TOP5", expanded=True):
         for _i10, _t10 in enumerate(_TOP5_GW[:5]):
             st.markdown(
                 f'<div style="border-left:4px solid #d4af37;padding:8px 14px;'
@@ -25158,7 +25158,7 @@ def menu_gaewoon(pils, name, birth_year, gender):
         story.append(PageBreak())
 
         # ── 제10장: 만신의 총체적 처방전 ─────────────────────────
-        story.append(Paragraph(_safe("제10장  만신의 총체적 처방전 - 가장 급한 처방 TOP5"), _sC))
+        story.append(Paragraph(_safe("제10장  종합 처방전 - 가장 급한 처방 TOP5"), _sC))
         story.append(_hr())
         story.append(Paragraph(_safe("[ 급한 처방 TOP5 ]"), _sB))
         for _i, _t in enumerate(_TOP5_GW[:5]):
@@ -25255,7 +25255,7 @@ def menu_gaewoon(pils, name, birth_year, gender):
         story.append(Paragraph(_safe("오늘부터 딱 21일만 실천하십시오."), _sSb))
         story.append(Paragraph(_safe("기운의 변화가 반드시 느껴질 것입니다."), _sSb))
         story.append(_sp(3))
-        story.append(Paragraph(_safe("이것이 만신이 수십 년 경험으로 드리는 마지막 처방이니라."), _sSb))
+        story.append(Paragraph(_safe("이상이 정통 명리학 기반 종합 처방의 핵심입니다."), _sSb))
 
         try:
             _doc.build(story)
@@ -29361,7 +29361,7 @@ border-radius:14px;padding:16px 20px;margin:16px 0 6px">
 <div style="background:linear-gradient(135deg,#1a0000,#3a0000);border:2px solid #e53935;
 border-radius:14px;padding:16px 20px;margin:16px 0 6px">
 <div style="font-size:16px;font-weight:900;color:#ff6b6b;letter-spacing:2px">
-🔴 6. 만신 직격 처방 — 이 팔자가 망하는 이유와 흥하는 법</div>
+🔴 6. 직격 처방 — 이 사주의 약점·강점·활용법</div>
 <div style="font-size:12px;color:#aaa;margin-top:4px">
 듣기 싫어도 들어야 하는 소리다. 이걸 모르면 평생 같은 실수를 반복한다.</div>
 </div>""", unsafe_allow_html=True)
@@ -29813,7 +29813,7 @@ unsafe_allow_html=True)
 
 
 
-        st.caption("⚠️ 본 분석은 전통 명리학·민속 문화 기반 참고 자료입니다. 실제 처방은 전문 만신에게 문의하십시오.")
+        st.caption("⚠️ 본 분석은 전통 명리학·민속 문화 기반 참고 자료입니다. 의료·법률·정신건강 관련 사안은 해당 분야 전문가와 상담하시기 바랍니다.")
 
 
 
