@@ -14420,7 +14420,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                     f'padding:10px 14px;margin:6px 0;border-radius:6px;">'
                     f'<div style="font-weight:900;font-size:14px;color:#fff;margin-bottom:3px;">'
                     f'{_icon28} {_nm28}{f" ({_pos28})" if _pos28 else ""}</div>'
-                    f'<div style="font-size:12px;color:#e8eaf6;line-height:1.7;">{str(_res28)[:120]}</div>'
+                    f'<div style="font-size:12px;color:#e8eaf6;line-height:1.7;">{str(_res28)}</div>'
                     f'</div>'
                 )
             lines.append(
@@ -27150,7 +27150,7 @@ def main():
 
 </div>
 
-<div style="margin-bottom:6px">{date_badge}{hour_badge}</div>
+<div style="margin-bottom:6px">{date_badge}&nbsp;{hour_badge}</div>
 
 <div style="margin-top:4px">{info_tags}</div>
 
