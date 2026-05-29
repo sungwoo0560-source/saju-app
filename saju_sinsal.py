@@ -854,7 +854,7 @@ def get_extra_sinsal(pils):
     if cheon_eul.get(ilgan) in all_jjs:
         stars.append(
             {
-                "name": "천을귀인(天乙(을))",
+                "name": "천을귀인(天乙貴人)",
                 "desc": "인생의 위기에서 돕는 귀인이 상주하는 최고의 길성",
             }
         )

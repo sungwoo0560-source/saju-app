@@ -14410,7 +14410,8 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
             for _s28 in _all28[:20]:
                 _nm28   = _s28.get("이름", _s28.get("name", ""))
                 _icon28 = _s28.get("아이콘", "⭐")
-                _pos28  = _s28.get("위치", "")
+                _pos28_raw = _s28.get("위치", "")
+                _pos28 = ", ".join(str(x) for x in _pos28_raw) if isinstance(_pos28_raw, list) else _pos28_raw
                 _res28  = _s28.get("결과", _s28.get("의미", _s28.get("desc", "")))
                 _gr28   = _s28.get("등급", "")
                 _col28  = "#c62828" if "강력" in _gr28 else "#90caf9"
@@ -26051,8 +26052,8 @@ def main():
             # 관계
             _rel_icon_b    = "❤️ 원만" if "관" in _ss_mon_b or "식" in _ss_mon_b else ("⚡ 마찰" if "흉" in _gil_b else "➖ 평온")
             _briefing_b    = (
-                f"이달은 **{_gil_b}** 운입니다. "
-                f"오늘 일진 **{_day_cg_b}{_day_jj_b}**({_OHKR_B.get(_cg_oh_b,'')})의 기운이 흐르는 날, "
+                f"이달은 <b>{_gil_b}</b> 운입니다. "
+                f"오늘 일진 <b>{_day_cg_b}{_day_jj_b}</b>({_OHKR_B.get(_cg_oh_b,'')})의 기운이 흐르는 날, "
                 f"{_ss_name_b}({_ss_desc_b}) 에너지를 잘 활용하면 흐름이 열립니다."
             )
         else:
