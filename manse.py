@@ -11635,7 +11635,7 @@ def menu_daily(pils, birth_year, gender):
         f"<div style='color:#ff9a9a;font-size:13px;'>⚠️ 주의</div>"
         f"<div style='margin-top:6px;font-size:12px;'>{symptom}</div></div>"
         f"</div></div>"
-        f"<blockquote>🔮 <b>만신의 한마디</b>: {prescription}</blockquote>"
+        f"<blockquote>💡 <b>오늘의 처방</b>: {prescription}</blockquote>"
     )
     st.markdown(_card, unsafe_allow_html=True)
 
@@ -19424,7 +19424,7 @@ def menu10_monthly(pils, name, birth_year, gender):
 
 <div style="background:linear-gradient(135deg,#fff8e1,#ffecb3);border-radius:14px; padding:18px 20px;margin-bottom:16px;border:1px solid #ffcc80">
 
-<div style="font-size:15px;font-weight:900;color:#e65100;margin-bottom:8px">🎙️ 만신의 월간 흉일 브리핑</div>
+<div style="font-size:15px;font-weight:900;color:#e65100;margin-bottom:8px">🎙️ 이번 달 주의일 브리핑</div>
 
 <div style="font-size:14px;color:#4e342e;line-height:1.9">{briefing_text}<br><br>{detailed_insight}</div>
 
@@ -19514,12 +19514,12 @@ def menu10_monthly(pils, name, birth_year, gender):
     # 섹션 6: 만신의 한 마디
 
     FINAL_WORDS = {
-        "겁재": f"이번 달 {display_name}님에게 만신이 드리는 한 마디 - 돈과 사람, 두 가지를 모두 잃지 않으려면 오늘 가장 소중한 것 한 가지를 먼저 선택하십시오. 지킬 것을 정했다면 나머지는 과감히 내려놓는 용기가 이번 달의 진짜 능력입니다.",
-        "편관": f"이번 달 {display_name}님에게 만신이 드리는 한 마디 - 칼끝이 당신을 향하고 있을 때, 가장 안전한 곳은 그 칼을 들고 있는 사람 곁이 아니라, 칼이 닿지 않는 거리를 유지하는 것입니다. 한 발짝 뒤로 물러서는 것이 지혜입니다.",
-        "식신": f"이번 달 {display_name}님에게 만신이 드리는 한 마디 - 당신 안에 오랫동안 잠들어 있던 씨앗이 드디어 싹을 틔울 준비를 마쳤습니다. 두려움 없이 첫 발을 내딛으십시오. 하늘이 응원하고 있습니다.",
-        "정관": f"이번 달 {display_name}님에게 만신이 드리는 한 마디 - 빛이 가장 강할 때 그림자도 가장 짙습니다. 명예와 인정을 받는 이번 달, 자만 대신 감사를 마음에 품으십시오. 그 겸손함이 당신의 빛을 오래도록 유지시켜 줄 것입니다.",
-        "정인": f"이번 달 {display_name}님에게 만신이 드리는 한 마디 - 기다림이 길었을수록 열매는 더 달콤합니다. 이번 달 당신이 기다려온 소식이 찾아올 가능성이 높습니다. 마지막 한 걸음을 포기하지 마십시오.",
-        "-": f"이번 달 {display_name}님에게 만신이 드리는 한 마디 - 파도가 잠잠할 때 배를 정비하는 선원이 폭풍에도 살아남습니다. 이번 달의 평온함을 낭비하지 마시고, 다가올 기회를 위해 조용히 준비하십시오.",
+        "겁재": f"이번 달 {display_name}님께 드리는 메시지 - 돈과 사람, 두 가지를 모두 잃지 않으려면 오늘 가장 소중한 것 한 가지를 먼저 선택하십시오. 지킬 것을 정했다면 나머지는 과감히 내려놓는 용기가 이번 달의 진짜 능력입니다.",
+        "편관": f"이번 달 {display_name}님께 드리는 메시지 - 칼끝이 당신을 향하고 있을 때, 가장 안전한 곳은 그 칼을 들고 있는 사람 곁이 아니라, 칼이 닿지 않는 거리를 유지하는 것입니다. 한 발짝 뒤로 물러서는 것이 지혜입니다.",
+        "식신": f"이번 달 {display_name}님께 드리는 메시지 - 당신 안에 오랫동안 잠들어 있던 씨앗이 드디어 싹을 틔울 준비를 마쳤습니다. 두려움 없이 첫 발을 내딛으십시오. 하늘이 응원하고 있습니다.",
+        "정관": f"이번 달 {display_name}님께 드리는 메시지 - 빛이 가장 강할 때 그림자도 가장 짙습니다. 명예와 인정을 받는 이번 달, 자만 대신 감사를 마음에 품으십시오. 그 겸손함이 당신의 빛을 오래도록 유지시켜 줄 것입니다.",
+        "정인": f"이번 달 {display_name}님께 드리는 메시지 - 기다림이 길었을수록 열매는 더 달콤합니다. 이번 달 당신이 기다려온 소식이 찾아올 가능성이 높습니다. 마지막 한 걸음을 포기하지 마십시오.",
+        "-": f"이번 달 {display_name}님께 드리는 메시지 - 파도가 잠잠할 때 배를 정비하는 선원이 폭풍에도 살아남습니다. 이번 달의 평온함을 낭비하지 마시고, 다가올 기회를 위해 조용히 준비하십시오.",
     }
 
     final_word = FINAL_WORDS.get(month_ss, FINAL_WORDS["-"])
@@ -19529,7 +19529,7 @@ def menu10_monthly(pils, name, birth_year, gender):
 
 <div style="background:linear-gradient(135deg,#2c1a00,#4a2e00);border-radius:16px; padding:22px 24px;margin-top:20px;border:1px solid #d4af37; box-shadow:0 8px 30px rgba(0,0,0,0.15)">
 
-<div style="font-size:15px;font-weight:900;color:#d4af37;margin-bottom:12px">🙏 만신의 {month}월 최후 한 마디</div>
+<div style="font-size:15px;font-weight:900;color:#d4af37;margin-bottom:12px">🙏 {month}월 마음에 새길 한 마디</div>
 
 <div style="font-size:14.5px;color:#ffe0b2;line-height:2.1;font-style:italic">{final_word}</div>
 
@@ -19912,13 +19912,13 @@ def menu8_bihang(pils, name, birth_year, gender):
 
 <div style="color:#f7e695;font-size:19px;font-weight:900;letter-spacing:2px;margin-bottom:10px">
 
-            🔴 특급 비방록(特急 秘方錄)
+            🔴 정통 비방록(秘方錄) — 용신 기반 처방
 
 </div>
 
 <div style="color:#d0a080;font-size:13px;line-height:1.9">
 
-            무당/만신이 대대로 전해온 비방을 사주 용신에 맞춰 처방합니다.<br>
+            정통 명리학과 전통 민속 문화에서 전해온 비방을 사주 용신에 맞춰 분석합니다.<br>
 
             돈이 새는 구멍을 막고, 재물이 들어오는 문을 여는 처방입니다.<br>
 
@@ -20136,7 +20136,7 @@ def menu8_bihang(pils, name, birth_year, gender):
 </div>
 </div>
 <div style="background:#fff0f0;border:1px solid #e53935;border-radius:8px;padding:16px;margin-bottom:14px">
-<div style="font-size:14px;font-weight:900;color:#b71c1c;margin-bottom:10px">🙏 기도법 처방 (만신 전수)</div>
+<div style="font-size:14px;font-weight:900;color:#b71c1c;margin-bottom:10px">🏛️ 전통 기도법 (참고)</div>
 <div style="font-size:13px;color:#222;line-height:2.1">
 ① 새벽 3시~5시 사이, 남동쪽을 향해 앉아라.<br>
 ② 붉은 초 1쌍을 켜고 향을 피워라.<br>
@@ -20195,7 +20195,7 @@ def menu8_bihang(pils, name, birth_year, gender):
 
 <div style="font-size:16px;font-weight:900;color:#4a2080;margin-bottom:14px">
 
-            🕯️ 신강신약별 공통 비방 - 만신 구전(口傳)
+            🕯️ 신강신약별 공통 비방 (전통 구전)
 
 </div>""",
         unsafe_allow_html=True,
@@ -20833,7 +20833,7 @@ padding:12px 14px;margin-bottom:8px">
         pass
 
 
-    st.caption("⚠️ 본 비방록은 전통 민속 문화 정보를 제공하는 참고 자료입니다. 실제 굿/부적 처방은 전문 무당/만신에게 문의하십시오.")
+    st.caption("⚠️ 본 비방록은 정통 명리학과 전통 민속 문화 정보를 제공하는 참고 자료입니다. 의료·법률·정신건강 관련 사안은 해당 분야 전문가와 상담하시기 바랍니다.")
 
 
 class Brain3:
