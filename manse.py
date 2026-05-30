@@ -843,6 +843,19 @@ def _local_saju_engine(pils, name, birth_year, gender, query):
     is_guiin       = bool(_re.search(r"귀인|천을귀인|도움|구원|베풀|후원자|은인|누가도와|누가돕|좋은사람|좋은인연", q))
     is_elderly     = bool(_re.search(r"노후|말년|은퇴|노년|60세|70세|80세|늙어서|나중에|수명|장수|오래살", q))
     is_childcare   = bool(_re.search(r"자녀진로|아이진로|아이공부|자녀교육|아이적성|아들사주|딸사주|자식팔자|자식운|아이운", q))
+    # ── 기능-C 신규 키워드 12개 ──
+    is_color         = bool(_re.search(r"색상|색깔|옷|입을|코디|어울리는|어울릴", q))
+    is_food          = bool(_re.search(r"음식|먹|식단|체질|보양|약식|식이요법", q))
+    is_direction     = bool(_re.search(r"방향|방위|동쪽|서쪽|남쪽|북쪽|동남|서북", q))
+    is_emotion       = bool(_re.search(r"우울|불안|화나|짜증|외로|답답|슬프|허전|허무|괴로|마음이", q))
+    is_decision      = bool(_re.search(r"할까|해야|결정|고민|선택|망설|결심|어떻게|어찌", q))
+    is_relation      = bool(_re.search(r"친구|동료|상사|선배|후배|싸웠|갈등|화해|관계|모임|소외|왕따", q))
+    is_timing        = bool(_re.search(r"언제|시기|타이밍|몇월|몇년|언제쯤|언제부터|언제까지", q))
+    is_method        = bool(_re.search(r"방법|어떻게|해결|풀려면|좋아지려면|개선|치유", q))
+    is_self          = bool(_re.search(r"나는 어떤|나의 성향|내 성격|나만의|나란 사람", q))
+    is_future_worry  = bool(_re.search(r"앞으로|불안하|걱정|두려|혹시|위태로", q))
+    is_regret        = bool(_re.search(r"후회|아쉽|돌이키|되돌|되돌리|만약|그때", q))
+    is_change        = bool(_re.search(r"바꾸|바뀌|변화|전환|새출발|새로 시작|리셋", q))
 
     # ── 개인 사주 컨텍스트 추출 ──────────────────────────────
     try:
@@ -3932,14 +3945,11 @@ class SajuExpertPrompt:
 class SajuJudgmentRules:
     # -- 판단 규칙용 상수 정의 ---------------------------
 
+    # 기능-C: 명리학적 단정은 그대로 출력 (의료·법률 영역만 약화 유지)
     _ASSERTION_MAP = {
-        "반드시": "흐름상",
-        "절대": "거의",
-        "확실히": "분명",
-        "무조건": "매우",
-        "단언컨대": "필시",
-        "명백히": "상당히",
-        "꼭": "가급적",
+        "확실히 낫는다": "회복 가능성 높음",
+        "반드시 죽는다": "건강 위험 매우 높음",
+        "절대 안 낫는다": "회복 어려움",
     }
 
     _ANXIETY_KEYWORDS = [
