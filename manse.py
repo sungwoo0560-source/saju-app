@@ -20908,88 +20908,14 @@ def tab_ai_chat(pils, name, birth_year, gender):
 
     stage_html = " ".join([f'<span style="color: {"#000" if i == stage_idx else "#ccc"}; font-weight: {"800" if i == stage_idx else "400"};">{s}</span>' for i, s in enumerate(stages)])
 
-    st.markdown(
-        f"""
-
-<div style="background: rgba(255, 255, 255, 0.4); backdrop-filter: blur(10px); border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 15px; padding: 18px; margin-bottom: 20px; box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);">
-
-        
-
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-
-<div>
-
-<div style="font-size: 10px; color: #d4af37; font-weight: 800; letter-spacing: 1px;">상담 진행 단계</div>
-
-<div style="font-size: 14px; margin-top:2px; font-weight: 700;">{stage_html}</div>
-
-</div>
-
-<div style="text-align: right;">
-
-<div style="font-size: 10px; color: #888; font-weight: 700;">{bond_data["label"]} 교감 Lv.{bond_data["level"]}</div>
-
-<div style="background: #eee; width: 100px; height: 5px; border-radius: 3px; margin-top: 5px; position: relative;">
-
-<div style="background: linear-gradient(90deg, #6c5ce7, #a06ee1); width: {bond_data.get("score", 0)}%; height: 100%; border-radius: 3px;"></div>
-
-</div>
-
-</div>
-
-</div>
-
-        <!-- 📊 종합 밸런스 매트릭스 -->
-
-<div style="display: flex; justify-content: space-around; background: rgba(0,0,0,0.03); padding: 10px; border-radius: 10px; margin-bottom: 12px;">
-
-            {
-            "".join(
-                [
-                    f'''
-
-<div style="text-align: center;">
-
-<div style="font-size: 9px; color: #999;">{k}</div>
-
-<div style="font-size: 13px; font-weight: 800; color: {"#d4af37" if (v or 0) > 70 else "#555"};">{(v or 0)}</div>
-
-</div>
-
-            '''
-                    for k, v in matrix.items()
-                ]
-            )
-        }
-
-</div>
-
-<div style="display: flex; gap: 8px;">
-
-<div style="background: #f0f4ff; color: #1a237e; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 800; border: 1px solid #c5cae9;">
-
-                🧬 사주 MBTI: {mbti_val}
-
-</div>
-
-<div style="background: #fff8e1; color: #f57f17; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 800; border: 1px solid #fff176;">
-
-                🌌 인생 서사: {narrative}
-
-</div>
-
-</div>
-
-</div>""",
-        unsafe_allow_html=True,
-    )
+    pass  # UI-1: 프리미엄 헤더 비활성화 (bond_data/mbti_val/narrative 변수는 유지)
 
     # === 사주 원국 기반 핵심 예측 (AI 챗 상단 직접 노출) ===
 
     try:
         hl = generate_engine_highlights(pils, birth_year, gender)
 
-        with st.expander("🔮 내 사주 핵심 예측치 모아보기 (성격/재물/인연/사고)", expanded=True):
+        with st.expander("📊 더 자세한 사주 분석 (펼치기)", expanded=False):
             # 1. 타고난 성향
 
             if hl.get("personality"):
@@ -22146,29 +22072,12 @@ def tab_ai_chat(pils, name, birth_year, gender):
 def menu7_ai(pils, name, birth_year, gender):
     """7️⃣ 만신 상담소 - AI 대화형 상담 센터 (E-Version)"""
 
-    st.markdown(
-        """
-
-<div style="background:linear-gradient(135deg,#fff8e1,#fffde7);border:2px solid #d4af3755;border-radius:14px; padding:20px;margin-bottom:14px;box-shadow:0 4px 15px rgba(212,175,55,0.1)">
-
-<div style="font-size:18px;font-weight:900;color:#d4af37;margin-bottom:6px">🤖 AI 사주 상담</div>
-
-<div style="font-size:13px;color:#000000;line-height:1.8">
-
-        "인생의 갈림길에서 답답할 때, <b>AI 사주 상담</b>으로 문의해보세요."<br>
-
-        * <b>궁합, 재물, 커리어, 건강</b> 등 모든 고민을 영속 기억 시스템 기반으로 상담합니다.
-
-</div></div>""",
-        unsafe_allow_html=True,
-    )
+    st.markdown("# 🤖 AI 사주 상담")
+    st.caption("정통 명리학 기반으로 사주를 분석해 드립니다. 무엇이든 편하게 문의해 주세요.")
 
     # -- 엔진 상태 표시 --
 
-    st.markdown(
-        '<div style="background:#e8f5e8;color:#2e7d32;padding:6px 12px;border-radius:8px;font-size:11px;margin-bottom:10px">🔮 자체 사주 분석 엔진 가동 중 — 만세력 / 격국 / 용신 / 대운 완전 분석</div>',
-        unsafe_allow_html=True,
-    )
+    pass  # UI-1: 엔진 상태 뱃지 비활성화
 
     # -- 상담 집중 분야 선택 --
 
@@ -22266,7 +22175,7 @@ def menu7_ai(pils, name, birth_year, gender):
         gb = goosebump_engine(pils, birth_year, gender)
 
         if gb["past"]:
-            with st.expander("🔮 이전에 이런 일을 겪으셨나요?", expanded=True):
+            with st.expander("🔍 과거사건 명리학 분석 (펼치기)", expanded=False):
                 for s in gb["past"][:2]:
                     st.markdown(
                         f'<div style="background:#f9f9f9;border-left:3px solid #d4af37;padding:8px 12px;margin:4px 0;font-size:13px">🔍 {s}</div>',
