@@ -24761,10 +24761,10 @@ def menu_gaewoon(pils, name, birth_year, gender):
             f'text-align:center;box-shadow:0 0 30px {_pray_color}44;margin-top:8px;">'
 
             f'<div style="font-size:11px;letter-spacing:4px;color:{_pray_color};'
-            f'font-weight:900;margin-bottom:6px;">🙏 홍수맥 천명 기도문</div>'
+            f'font-weight:900;margin-bottom:6px;">🏛️ 홍수맥 천명 기도문 (전통 양식 참고)</div>'
 
             f'<div style="font-size:13px;color:#c8b8e8;margin-bottom:16px;">'
-            f'용신 {_yong1_gw}({_oh_kor}) 오행 — {_pray_dir}을 향해 읊으소서</div>'
+            f'용신 {_yong1_gw}({_oh_kor}) 오행 — {_pray_dir}을 향해 낭송하십시오</div>'
 
             f'<div style="background:rgba(255,255,255,0.04);border:1px solid {_pray_color}44;'
             f'border-radius:12px;padding:20px;margin-bottom:16px;">'
