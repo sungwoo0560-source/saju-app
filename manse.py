@@ -830,7 +830,7 @@ def _local_saju_engine(pils, name, birth_year, gender, query):
 
     # ── 추가 키워드 분기 (직격 질문 대응) ──────────────────────
     is_infidelity = bool(_re.search(r"바람|외도|불륜|바람피|이성문제|浮氣|浮气|바람끼|이중생활", q))
-    is_accident   = bool(_re.search(r"사고수|사고|위기|큰일|큰 일|재난|재앙|조심해야|올해위험|위험한해|아픈해", q))
+    is_accident   = bool(_re.search(r"사고수|사고|위기|큰일|큰 일|재난|재앙|조심해야|올해위험|위험한해|아픈해|수술|입원|다쳤|다친|교통사고|골절|낙상|부상|외상", q))
     is_quit       = bool(_re.search(r"퇴사|회사그만|직장그만|사직|그만둬야|그만해야|때려치|때려쳐|관두|관뒤", q))
     is_fail_biz   = bool(_re.search(r"사업망|사업실패|폐업|사업접|망할|망하|접어야|빚|손실|부도|파산", q))
     is_lawsuit    = bool(_re.search(r"소송|법적|관재|고소|피소|분쟁|법원|변호사|처벌|범죄", q))
@@ -2418,6 +2418,36 @@ def _local_saju_engine(pils, name, birth_year, gender, query):
                     f"🔴 **충(沖) 발동!** 올해 세운 지지가 원국 {'/'.join(chung_h)}와 충(沖)이 일어나습니다. "
                     "이사·이직·사고·수술 등 강제 변화가 올 수 있으니 신중히 하게.\n"
                 )
+
+            # === [신규] 양인살 + 충 교차 사고수 직격 진단 ===
+            try:
+                _yangin_data = get_yangin(pils)
+                if _yangin_data and _yangin_data.get("존재"):
+                    _ya_jj = _yangin_data.get("양인_지지", "")
+                    _ya_locs = ", ".join(_yangin_data.get("위치", []))
+                    out.append(f"\n⚔️ **양인살(羊刃殺) 발동 — 사고·수술 핵심 신호**")
+                    out.append(f"원국 양인살({_ya_jj}, {_ya_locs})이 있습니다. 평생 사고·수술 패턴이 잠재합니다.")
+
+                    # 양인 + 세운 충 교차 (가장 위험)
+                    if chung_h:
+                        _chung_str = ", ".join(chung_h)
+                        out.append(f"⚠️ 올해 세운({sw_jj})과 충({_chung_str})이 발동합니다.")
+                        out.append(f"**양인살 + 충 교차 = 사고·수술 위험 ★★★★★. 최대 주의 필요.**")
+
+                    # 과거 3년 충 발동 회고
+                    _GZ_SUNG = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"]
+                    _past_warnings = []
+                    for _py in [current_year-1, current_year-2, current_year-3]:
+                        _py_jj = _GZ_SUNG[(_py - 4) % 12]
+                        for _pos_jj in _pjjs2:
+                            if _CAC.get(_py_jj, "") == _pos_jj:
+                                _past_warnings.append(f"{_py}년({_py_jj})")
+                                break
+                    if _past_warnings:
+                        out.append(f"\n📅 **과거 사고수 발동 시기**: {', '.join(_past_warnings)}")
+                        out.append("이 시기에 실제 사고·수술이 있으셨다면 양인+충 발동 패턴입니다.")
+            except Exception:
+                pass
 
             # 기신 세운 추가 경고
             if is_gisin_a and sw_ss not in ("偏官","劫財","傷官"):
