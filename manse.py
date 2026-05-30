@@ -505,16 +505,16 @@ class SajuMemory:
         conv = mem.get("conversation", [])
 
         if conv:
-            return f"다시 찾아왔구먼. 지난 '{conv[-1]['topic']}' 자리 이후로 {name}의 기운이 어찌 흘렀는지 명리학적 분석에 선히 보이습니다. 오늘은 또 어떤 천명(天命)의 실타래를 풀러 왔는가?"
+            return f"{name}님 다시 오셨네요. 지난번 '{conv[-1]['topic']}' 상담 이후 어떻게 지내셨나요? 명리학 관점에서 분석해 드리겠습니다. 어떤 부분이 궁금하신가요?"
 
         if pils:
             profile = PersonalityProfiler.analyze(pils)
 
             desc = profile.get("trait_desc", "깊은 내면의 힘")
 
-            return f"허어, 어서 오게. {desc}의 기질을 타고난 {name}의 팔자(八字)가 내 신안에 선히 보이는구먼. 이 만신의 문을 두드린 데는 분명한 까닭이 있으리라. 어디, 속 이야기를 털어놓아 보게나."
+            return f"안녕하세요. {desc} 기질을 타고나신 {name}님 사주를 명리학 관점에서 분석합니다. 상담을 요청하신 데는 분명한 이유가 있으실 텐데, 편하게 말씀해 주세요."
 
-        return f"어서 오게. 자네 기운이 느껴지는구먼... 나는 만신(萬神)이라네. 천명(天命)을 읽고 팔자(八字)의 이치를 풀어내는 것이 내 소임이니, 무엇이든 묻고 가게나."
+        return "안녕하세요. 정통 명리학(자평진전·적천수·궁통보감) 기반으로 사주를 분석합니다. 무엇이든 편하게 문의해 주세요."
 
     @staticmethod
     def build_rich_ai_context(name: str) -> str:
@@ -867,7 +867,7 @@ def _local_saju_engine(pils, name, birth_year, gender, query):
         _is_yong=False; _is_gisin=False; _luck_signal="🟡 중립"; _OHN_ai={}; _yong_str="분석중"
 
     out = [
-        f"어서 오게. {name}의 팔자를 명리학적 분석으로 살펴보겠습니다.\n"
+        f"{name}님 사주를 명리학적 분석으로 살펴보겠습니다.\n"
         f"*[{ilgan}일간 / {_sn_val} / 용신:{_yong_str} / 올해:{_luck_signal}]*\n"
     ]
 
@@ -1347,7 +1347,7 @@ def _local_saju_engine(pils, name, birth_year, gender, query):
                     out.append(rel.get("desc", "") + "\n")
 
                     if rel.get("present"):
-                        out.append("배우자 기운이 사주에 뚜렷이 자리 잡고 있구먼. 인연은 반드시 옵니다.\n")
+                        out.append("배우자 기운이 사주에 뚜렷이 자리 잡고 있습니다. 인연은 반드시 옵니다.\n")
 
                     else:
                         out.append("배우자 기운이 약하니 대운·세운에서 재성/관성이 들어올 때 적극적으로 움직이게.\n")
@@ -1393,7 +1393,7 @@ def _local_saju_engine(pils, name, birth_year, gender, query):
                         out.append(f"\n**[대운 인연 시기]** 지금 **{cdw['str']} {cdw_ss}** 대운 진행 중! {cdw['종료연도'] - current_year}년 남았으니 이 기간을 놓치지 말게!\n")
 
                     else:
-                        out.append(f"\n**[대운 인연 시기]** {cdw['시작연도']}년({cdw['시작나이']}세)부터 **{cdw['str']} {cdw_ss}** 대운이 열리습니다. 그때가 인연의 문이 활짝 열리는 시기니라.\n")
+                        out.append(f"\n**[대운 인연 시기]** {cdw['시작연도']}년({cdw['시작나이']}세)부터 **{cdw['str']} {cdw_ss}** 대운이 열립니다. 그때가 인연의 문이 활짝 열리는 시기니라.\n")
 
             except Exception as _e:
                 _saju_log.debug("[silent except] %s", _e)
@@ -1438,7 +1438,7 @@ def _local_saju_engine(pils, name, birth_year, gender, query):
 
                 if dohwa_found or dohwa12:
                     out.append(
-                        "\n**[신살 — 도화살(桃花殺)]** 도화살이 사주에 있구먼!\n이성의 인기를 한몸에 받는 매력의 기운입니다. 이성이 먼저 다가오는 팔자이나, 감정에 휩쓸려 경솔한 선택을 하지 않도록 명심하게.\n"
+                        "\n**[신살 — 도화살(桃花殺)]** 도화살이 사주에 있습니다!\n이성의 인기를 한몸에 받는 매력의 기운입니다. 이성이 먼저 다가오는 팔자이나, 감정에 휩쓸려 경솔한 선택을 하지 않도록 명심하게.\n"
                     )
 
                 else:
@@ -1469,7 +1469,7 @@ def _local_saju_engine(pils, name, birth_year, gender, query):
                         out.append(f"지금 **{bd2['str']} {bd2_ss}** 대운 중! **{current_year}~{bd2['종료연도']}년**이 최적 결혼 시기니라. 망설이지 말게!\n")
 
                     else:
-                        out.append(f"**{bd2['시작연도']}년({bd2['시작나이']}세)**부터 {bd2['str']} **{bd2_ss}** 대운이 열리습니다. 그 무렵 결혼 결실이 맺어질 가능성이 높습니다.\n")
+                        out.append(f"**{bd2['시작연도']}년({bd2['시작나이']}세)**부터 {bd2['str']} **{bd2_ss}** 대운이 열립니다. 그 무렵 결혼 결실이 맺어질 가능성이 높습니다.\n")
 
                 else:
                     for yr in range(current_year, current_year + 10):
@@ -1514,7 +1514,7 @@ def _local_saju_engine(pils, name, birth_year, gender, query):
                     out.append(f"- 💊 **{OHN.get(o,'')}({o}) 부족({v:.0f}%)**: {_OHB.get(o,'')} 계통 보강 필요. 이 오행이 약하면 해당 장기가 취약합니다.")
             for o, v in sorted(oh_s.items(), key=lambda x: -x[1])[:1]:
                 if v >= 35:
-                    out.append(f"- ⚠️ **{OHN.get(o,'')}({o}) 과다({v:.0f}%)**: {_OHB.get(o,'')} 계통 혹사 주의. 과다한 오행이 해당 장기를 과부하시키습니다.")
+                    out.append(f"- ⚠️ **{OHN.get(o,'')}({o}) 과다({v:.0f}%)**: {_OHB.get(o,'')} 계통 혹사 주의. 과다한 오행이 해당 장기를 과부하시킵니다.")
             out.append("")
 
             # 현재 대운 건강 영향
@@ -1581,9 +1581,9 @@ def _local_saju_engine(pils, name, birth_year, gender, query):
             ys_hlt2 = get_yongshin_multilayer(pils, birth_year, gender, bm, bd, bh, bmn, current_year)
             yong_oh1 = ys_hlt2.get("용신_1순위","")
             _OH_RX = {
-                "木": "🌿 초록 채소·산책·스트레칭이 건강을 지키습니다. 동쪽 방향이 기운을 살리습니다.",
+                "木": "🌿 초록 채소·산책·스트레칭이 건강을 지킵니다. 동쪽 방향이 기운을 살립니다.",
                 "火": "🔥 햇빛 쬐기·적당한 유산소 운동이 심혈관을 강화합니다. 남쪽 방향이 길합니다.",
-                "土": "🏔️ 규칙적 식사·명상·걷기 운동이 소화기를 지키습니다. 황색 식품이 도움이 됩니다.",
+                "土": "🏔️ 규칙적 식사·명상·걷기 운동이 소화기를 지킵니다. 황색 식품이 도움이 됩니다.",
                 "金": "⚙️ 폐 호흡 운동·수영·흰색 식품(무·배·도라지)이 호흡기를 강화합니다.",
                 "水": "💧 충분한 수분 섭취·수영·검은콩·해조류가 신장을 보호합니다. 북쪽이 길합니다.",
             }
@@ -1596,10 +1596,10 @@ def _local_saju_engine(pils, name, birth_year, gender, query):
 
             for o, v in oh_s.items():
                 if v >= 35:
-                    out.append(f"\n⚠️ **{OHN.get(o, '')}({o}) 과다({v}%):** {_OHB.get(o, '')} 계통 특히 조심하게. 과다한 오행이 해당 장기를 혹사시키습니다.")
+                    out.append(f"\n⚠️ **{OHN.get(o, '')}({o}) 과다({v}%):** {_OHB.get(o, '')} 계통 특히 조심하게. 과다한 오행이 해당 장기를 혹사시킵니다.")
 
                 elif v <= 5:
-                    out.append(f"\n💊 **{OHN.get(o, '')}({o}) 부족({v}%):** {_OHB.get(o, '')} 계통 보강하게. 부족한 오행이 해당 장기를 약하게 만드습니다.")
+                    out.append(f"\n💊 **{OHN.get(o, '')}({o}) 부족({v}%):** {_OHB.get(o, '')} 계통 보강하게. 부족한 오행이 해당 장기를 약하게 만듭니다.")
 
             # 현재 대운 건강 영향
 
@@ -1722,7 +1722,7 @@ def _local_saju_engine(pils, name, birth_year, gender, query):
 
                 ndw_grade = "🌟 황금기" if ndw_oh in yong_ohs_dw else "⚠️ 주의기" if ndw_oh in gisin_dw else "⬜ 보통"
 
-                out.append(f"\n**[다음 대운 미리보기]** {ndw['시작연도']}년({ndw['시작나이']}세)부터 **{ndw['str']} {ndw_ss}** ({ndw_grade}) 대운이 열리습니다.\n")
+                out.append(f"\n**[다음 대운 미리보기]** {ndw['시작연도']}년({ndw['시작나이']}세)부터 **{ndw['str']} {ndw_ss}** ({ndw_grade}) 대운이 열립니다.\n")
 
                 out.append(DAEWOON_PRESCRIPTION.get(ndw_ss, "새 대운을 준비하게.") + "\n")
 
@@ -2283,7 +2283,7 @@ def _local_saju_engine(pils, name, birth_year, gender, query):
                     "⚠️ **傷官(상관) 세운 — 말·SNS로 인한 관계 균열!**\n"
                     "배우자·연인과의 불화가 극에 달하고 제3자가 끼어들기 쉬운 해니라.\n"
                     "→ 감정적 언쟁에서 돌이킬 수 없는 말을 하지 않도록 주의하게.\n"
-                    "→ SNS에 사적인 감정을 올리는 것은 관계를 더 망가뜨리습니다.\n"
+                    "→ SNS에 사적인 감정을 올리는 것은 관계를 더 망가뜨립니다.\n"
                 ),
             }
 
@@ -2906,11 +2906,11 @@ def _local_saju_engine(pils, name, birth_year, gender, query):
             _SIJ_LATE = {
                 "子":"말년에 지혜와 문서 인연이 강합니다. 학문·종교로 노년을 빛내게.",
                 "丑":"말년에 착실한 노력의 결실이 맺히습니다.",
-                "寅":"말년에 활동력이 강하니 사회 활동을 유지하는 것이 건강을 지키습니다.",
-                "卯":"말년에 인화(人和)가 넘치습니다. 따뜻한 노년이 기다리습니다.",
+                "寅":"말년에 활동력이 강하니 사회 활동을 유지하는 것이 건강을 지킵니다.",
+                "卯":"말년에 인화(人和)가 넘칩니다. 따뜻한 노년이 기다립니다.",
                 "辰":"말년에 여러 분야에서 능력이 빛나습니다. 배움을 멈추지 말게.",
                 "巳":"말년에 지혜와 재물이 함께합니다. 정신적 수행이 노년을 풍요롭게 합니다.",
-                "午":"말년에 열정이 넘치습니다. 사회 봉사·가르치는 일이 가장 맞는 노년입니다.",
+                "午":"말년에 열정이 넘칩니다. 사회 봉사·가르치는 일이 가장 맞는 노년입니다.",
                 "未":"말년에 가족 인연이 강합니다. 가정 중심으로 안정된 노년이 옵니다.",
                 "申":"말년에 영리하고 활동적이니 사회·경제 활동을 유지하면 기운이 살아나습니다.",
                 "酉":"말년에 완성과 결실의 기운입니다. 젊은 시절 전문성이 노년에 꽃피습니다.",
@@ -2918,7 +2918,7 @@ def _local_saju_engine(pils, name, birth_year, gender, query):
                 "亥":"말년에 자유와 영성의 기운입니다. 종교·철학·여행으로 노년을 풍요롭게 하게.",
             }
             _GK_LATE = {
-                "정재격":"연금·부동산 중심 안정 자산. 꾸준히 모아온 재물이 노후를 지키습니다.",
+                "정재격":"연금·부동산 중심 안정 자산. 꾸준히 모아온 재물이 노후를 지킵니다.",
                 "식신격":"재능·취미가 노후의 밥벌이가 됩니다. 강의·창작·봉사로 활기찬 노년.",
                 "편재격":"사업 활동을 노년에도 유지하는 것이 맞는 팔자니라. 완전 은퇴보다 규모를 줄여 계속 활동하게.",
             }
@@ -2926,7 +2926,7 @@ def _local_saju_engine(pils, name, birth_year, gender, query):
             out.append(f"\n**[시주(時柱) 말년 기운]** {sijju_jj}\n{_SIJ_LATE.get(sijju_jj, f'시지 {sijju_jj}의 기운이 말년을 이끌어 갑니다.')}\n")
             out.append(f"\n**[격국별 노후 전략]** {_GK_LATE.get(gkn_el, '용신 기운을 유지하면서 즐겁게 활동하는 것이 최고의 노후니라.')}\n")
             if "신강" in sn_el:
-                out.append("\n신강 팔자 노후: 에너지가 넘치니 사회 활동을 유지하는 것이 건강에 좋으니라. 완전 은퇴는 오히려 건강을 해치습니다.\n")
+                out.append("\n신강 팔자 노후: 에너지가 넘치니 사회 활동을 유지하는 것이 건강에 좋습니다. 완전 은퇴는 오히려 건강을 해칩니다.\n")
             else:
                 out.append("\n신약 팔자 노후: 가족·지인의 도움을 적극적으로 받는 것이 건강에 좋으니라. 혼자 모든 것을 해결하려 하지 말게.\n")
 
@@ -3106,7 +3106,7 @@ def _local_saju_engine(pils, name, birth_year, gender, query):
         except Exception as _e:
             _saju_log.debug("[silent except] %s", _e)
 
-    out.append(f"\n---\n*명리학적 분석이 본 {name}의 팔자가 이러하니라. 더 깊이 알고 싶다면 다시 물어보게.*")
+    out.append(f"\n---\n*명리학 관점의 {name}님 사주 분석은 이상과 같습니다. 더 궁금한 점은 다시 문의해 주세요.*")
 
     return "\n".join(out)
 
@@ -21212,7 +21212,7 @@ def tab_ai_chat(pils, name, birth_year, gender):
 
             is_char = bool(_re_loc.search(r"성격|성향|기질|특성|나는|내가|나의|나 어때", q))
 
-            out = [f"어서 오게. {name}의 팔자를 명리학적 분석으로 살펴보겠습니다.\n"]
+            out = [f"{name}님 사주를 명리학적 분석으로 살펴보겠습니다.\n"]
 
             try:
                 if is_year:
@@ -21402,7 +21402,7 @@ def tab_ai_chat(pils, name, birth_year, gender):
                             out.append(rel.get("desc", "") + "\n")
 
                             if rel.get("present"):
-                                out.append("배우자 기운이 사주에 뚜렷이 자리 잡고 있구먼. 인연은 반드시 옵니다.\n")
+                                out.append("배우자 기운이 사주에 뚜렷이 자리 잡고 있습니다. 인연은 반드시 옵니다.\n")
 
                             else:
                                 out.append("배우자 기운이 약하니 대운·세운에서 재성/관성이 들어올 때 적극적으로 움직이게.\n")
@@ -21449,7 +21449,7 @@ def tab_ai_chat(pils, name, birth_year, gender):
 
                             else:
                                 out.append(
-                                    f"\n**[대운 인연 시기]** {cdw_l['시작연도']}년({cdw_l['시작나이']}세)부터 **{cdw_l['str']} {cdw_ss_l}** 대운이 열리습니다. 그때가 인연의 문이 활짝 열리는 시기니라.\n"
+                                    f"\n**[대운 인연 시기]** {cdw_l['시작연도']}년({cdw_l['시작나이']}세)부터 **{cdw_l['str']} {cdw_ss_l}** 대운이 열립니다. 그때가 인연의 문이 활짝 열리는 시기니라.\n"
                                 )
 
                     except Exception as _e:
@@ -21494,7 +21494,7 @@ def tab_ai_chat(pils, name, birth_year, gender):
                         dohwa12_l = [s for s in ss12_l if "도화" in s.get("이름", "") or "년살" in s.get("이름", "")]
 
                         if dohwa_l or dohwa12_l:
-                            out.append("\n**[신살 — 도화살(桃花殺)]** 도화살이 사주에 있구먼!\n이성의 인기를 한몸에 받는 매력의 기운입니다. 감정에 휩쓸려 경솔한 선택을 하지 않도록 명심하게.\n")
+                            out.append("\n**[신살 — 도화살(桃花殺)]** 도화살이 사주에 있습니다!\n이성의 인기를 한몸에 받는 매력의 기운입니다. 감정에 휩쓸려 경솔한 선택을 하지 않도록 명심하게.\n")
 
                         else:
                             out.append("\n도화살은 없으나, 꾸준한 진심이 최고의 인연을 불러옵니다.\n")
@@ -21524,7 +21524,7 @@ def tab_ai_chat(pils, name, birth_year, gender):
                                 out.append(f"지금 **{bd2_l['str']} {bd2_ss_l}** 대운 중! **{current_year}~{bd2_l['종료연도']}년**이 최적 결혼 시기니라. 망설이지 말게!\n")
 
                             else:
-                                out.append(f"**{bd2_l['시작연도']}년({bd2_l['시작나이']}세)**부터 {bd2_l['str']} **{bd2_ss_l}** 대운이 열리습니다. 그 무렵 결혼 결실이 맺어지습니다.\n")
+                                out.append(f"**{bd2_l['시작연도']}년({bd2_l['시작나이']}세)**부터 {bd2_l['str']} **{bd2_ss_l}** 대운이 열립니다. 그 무렵 결혼 결실이 맺어집니다.\n")
 
                         else:
                             for _yr2_l in range(current_year, current_year + 10):
@@ -21569,10 +21569,10 @@ def tab_ai_chat(pils, name, birth_year, gender):
 
                     for o, v in oh_s.items():
                         if v >= 35:
-                            out.append(f"\n⚠️ **{OHN.get(o, '')}({o}) 과다({v}%):** {_OHB.get(o, '')} 계통 특히 조심하게. 과다한 오행이 해당 장기를 혹사시키습니다.")
+                            out.append(f"\n⚠️ **{OHN.get(o, '')}({o}) 과다({v}%):** {_OHB.get(o, '')} 계통 특히 조심하게. 과다한 오행이 해당 장기를 혹사시킵니다.")
 
                         elif v <= 5:
-                            out.append(f"\n💊 **{OHN.get(o, '')}({o}) 부족({v}%):** {_OHB.get(o, '')} 계통 보강하게. 부족한 오행이 해당 장기를 약하게 만드습니다.")
+                            out.append(f"\n💊 **{OHN.get(o, '')}({o}) 부족({v}%):** {_OHB.get(o, '')} 계통 보강하게. 부족한 오행이 해당 장기를 약하게 만듭니다.")
 
                     # 현재 대운 건강 영향
 
@@ -21695,7 +21695,7 @@ def tab_ai_chat(pils, name, birth_year, gender):
 
                         ndw2_grade = "🌟 황금기" if ndw2_oh in yong_ohs_dw2 else "⚠️ 주의기" if ndw2_oh in gisin_dw2 else "⬜ 보통"
 
-                        out.append(f"\n**[다음 대운 미리보기]** {ndw2['시작연도']}년({ndw2['시작나이']}세)부터 **{ndw2['str']} {ndw2_ss}** ({ndw2_grade}) 대운이 열리습니다.\n")
+                        out.append(f"\n**[다음 대운 미리보기]** {ndw2['시작연도']}년({ndw2['시작나이']}세)부터 **{ndw2['str']} {ndw2_ss}** ({ndw2_grade}) 대운이 열립니다.\n")
 
                         out.append(DAEWOON_PRESCRIPTION.get(ndw2_ss, "새 대운을 준비하게.") + "\n")
 
@@ -22072,7 +22072,7 @@ def tab_ai_chat(pils, name, birth_year, gender):
                     _is_y_def = _oh_def in _yong_def
                     _is_g_def = _oh_def in _gisin_def
 
-                    _sig_def = ("🟢 올해는 용신 운이 흐르는 황금기입니다. 지금 움직이면 반드시 결실이 따르습니다."
+                    _sig_def = ("🟢 올해는 용신 운이 흐르는 황금기입니다. 지금 움직이면 반드시 결실이 따릅니다."
                                 if _is_y_def else
                                 "🔴 올해는 기신 운이 강한 수비기입니다. 무리한 확장보다 지키는 것이 최선입니다."
                                 if _is_g_def else
@@ -22087,7 +22087,7 @@ def tab_ai_chat(pils, name, birth_year, gender):
                     out.append(f"{_sig_def}\n")
                     out.append(
                         f"\n용신은 **{'·'.join(_yong_def[:2]) if _yong_def else '분석중'}** 오행입니다. "
-                        f"이 기운을 강화하는 방향으로 행동하면 운이 열리습니다.\n"
+                        f"이 기운을 강화하는 방향으로 행동하면 운이 열립니다.\n"
                     )
                     if _gisin_def:
                         out.append(
@@ -22106,7 +22106,7 @@ def tab_ai_chat(pils, name, birth_year, gender):
                         f"더 정확하게 풀어드리겠습니다.\n"
                     )
 
-            out.append(f"\n---\n*명리학적 분석이 본 {name}의 팔자가 이러하니라.*")
+            out.append(f"\n---\n*명리학 관점의 {name}님 사주 분석은 이상과 같습니다.*")
 
             return "\n".join(out)
 
@@ -24795,7 +24795,7 @@ def menu_gaewoon(pils, name, birth_year, gender):
             f'padding-top:12px;">'
             f'🌟 <b>21일 법칙</b> — 매일 같은 시간, 같은 방향, 같은 마음으로 읊을 것.<br>'
             f'마음이 흔들릴 때도 입술로 읊으면 하늘이 듣습니다.<br>'
-            f'<span style="color:{_pray_color};font-weight:700;">21일 연속 완성 시 홍수맥이 반드시 열리습니다.</span>'
+            f'<span style="color:{_pray_color};font-weight:700;">21일 연속 완성 시 홍수맥이 반드시 열립니다.</span>'
             f'</div>'
             f'</div>',
             unsafe_allow_html=True,
