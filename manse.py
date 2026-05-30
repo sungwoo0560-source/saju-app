@@ -879,7 +879,7 @@ def _local_saju_engine(pils, name, birth_year, gender, query):
     if _topic_count >= 2:
         try:
             _council_hdr = AICouncil.build_council_prompt(q)
-            out.insert(0, f"*[3인 전문가 통합 상담 모드]*\n{_council_hdr[:120]}\n")
+            pass  # UI-2: 시스템 메시지 사용자 노출 차단 (out.insert 제거)
         except Exception:
             pass
 
@@ -20915,7 +20915,7 @@ def tab_ai_chat(pils, name, birth_year, gender):
     try:
         hl = generate_engine_highlights(pils, birth_year, gender)
 
-        with st.expander("📊 더 자세한 사주 분석 (펼치기)", expanded=False):
+        if False:  # UI-2: 핵심 예측치 expander 비활성화
             # 1. 타고난 성향
 
             if hl.get("personality"):
@@ -22081,9 +22081,11 @@ def menu7_ai(pils, name, birth_year, gender):
 
     # -- 상담 집중 분야 선택 --
 
+    focus_key = "종합"  # UI-2: selectbox 비활성화, 기본값 고정
+
     c1, c2 = st.columns([3, 1])
 
-    with c1:
+    if False:  # UI-2: selectbox 비활성화
         # 자주 묻는 관심사 기반 기본값 설정
         _interest_default = 0
         try:
@@ -22114,7 +22116,7 @@ def menu7_ai(pils, name, birth_year, gender):
             st.rerun()
 
     # ── 🏛️ 전문가 8섹션 완전 분석 (SajuExpertPrompt) ───────────────
-    with st.expander("🏛️ 명리학 전문가 8섹션 완전 분석 펼치기", expanded=False):
+    if False:  # UI-2: 8섹션 expander 비활성화
         if st.button("📊 전문가 8섹션 분석 생성", key="btn_expert_8sec",
                      use_container_width=True):
             with st.spinner("3인 명리 전문가가 사주를 집대성하고 있습니다..."):
@@ -22175,7 +22177,7 @@ def menu7_ai(pils, name, birth_year, gender):
         gb = goosebump_engine(pils, birth_year, gender)
 
         if gb["past"]:
-            with st.expander("🔍 과거사건 명리학 분석 (펼치기)", expanded=False):
+            if False:  # UI-2: 과거사건 expander 비활성화
                 for s in gb["past"][:2]:
                     st.markdown(
                         f'<div style="background:#f9f9f9;border-left:3px solid #d4af37;padding:8px 12px;margin:4px 0;font-size:13px">🔍 {s}</div>',
