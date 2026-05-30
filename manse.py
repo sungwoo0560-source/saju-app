@@ -25299,7 +25299,7 @@ def menu_gaewoon(pils, name, birth_year, gender):
 
     render_pdf_download_btn("gaewoon", pils, name, birth_year, gender)
 
-_Y51_DEPLOY = "Y-51: 2026-05-24 cache clear"
+_Y51_DEPLOY = "X-4F: 2026-05-30 cache clear"
 
 def main():
 
