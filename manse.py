@@ -4154,6 +4154,114 @@ class SajuJudgmentRules:
         return rules.strip()
 
 
+# ─── X-4-I-3: 사주 핵심 종합 진단 박스 ──────────────────────────────────────
+def build_saju_core_diagnosis(pils, name, birth_year, gender, current_year=None):
+    """사주 핵심 진단 박스 — 양인+충 패턴 자동 감지, 모든 메뉴 헤더용"""
+    try:
+        if current_year is None:
+            current_year = datetime.now().year
+
+        pjjs = [p.get("jj", "") for p in pils if p]
+        pcgs = [p.get("cg", "") for p in pils if p]
+
+        # 양인살 감지
+        yangin_active = False
+        yangin_pos = ""
+        try:
+            yangin_data = get_yangin(pils)
+            if yangin_data and yangin_data.get("존재", False):
+                yangin_active = True
+                yangin_pos = yangin_data.get("양인_지지", "")
+        except Exception:
+            pass
+
+        # 충 매핑
+        _GZ_SUNG = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"]
+        _CHUNG_MAP = {"子":"午","午":"子","丑":"未","未":"丑","寅":"申","申":"寅",
+                      "卯":"酉","酉":"卯","辰":"戌","戌":"辰","巳":"亥","亥":"巳"}
+
+        # 원국 내부 충
+        internal_chung = []
+        for i, j1 in enumerate(pjjs):
+            for j2 in pjjs[i+1:]:
+                if j1 and j2 and _CHUNG_MAP.get(j1, "") == j2:
+                    internal_chung.append(f"{j1}-{j2}")
+
+        # 세운 충 + 양인 직격
+        cur_jj = _GZ_SUNG[(current_year - 4) % 12]
+        cur_chung_targets = [j for j in pjjs if j and _CHUNG_MAP.get(cur_jj, "") == j]
+        cur_yangin_hit = (yangin_active and cur_jj == yangin_pos)
+
+        # 위험 점수
+        risk_score = 0
+        if yangin_active:       risk_score += 30
+        if internal_chung:      risk_score += 20
+        if cur_chung_targets:   risk_score += 25
+        if cur_yangin_hit:      risk_score += 30
+        risk_score = min(risk_score, 100)
+
+        # 과거(-3~-1) + 미래(+1~+3) 발동 연도
+        past_active = []
+        future_active = []
+        for delta in range(-3, 4):
+            if delta == 0:
+                continue
+            y = current_year + delta
+            jj = _GZ_SUNG[(y - 4) % 12]
+            is_hit = (yangin_active and jj == yangin_pos) or (_CHUNG_MAP.get(jj, "") in pjjs)
+            if is_hit:
+                label = f"{y}년({jj})"
+                if delta < 0:
+                    past_active.append(label)
+                else:
+                    future_active.append(label)
+
+        # 출력 생성
+        out = [f"### 🎯 {name}님 사주 핵심 진단 (자동 종합)\n"]
+
+        out.append("**▣ 핵심 구조 진단**")
+        if yangin_active or internal_chung or cur_chung_targets:
+            parts = []
+            if yangin_active:       parts.append(f"일지 양인살({yangin_pos})")
+            if internal_chung:      parts.append(f"원국 충({internal_chung[0]})")
+            if cur_chung_targets:   parts.append(f"세운 충({cur_jj}-{cur_chung_targets[0]})")
+            out.append(f"- 발동 패턴: {' × '.join(parts)}\n")
+        else:
+            out.append("- 원국 안정 — 큰 충극 패턴 없음\n")
+
+        out.append(f"**▣ 올해({current_year}) 위험 점수: {risk_score}/100**")
+        if risk_score >= 70:
+            out.append("- 🔴 **매우 위험** — 사고·수술·큰 결정 최대 주의\n")
+        elif risk_score >= 50:
+            out.append("- 🟡 **주의** — 신중한 판단 필요\n")
+        elif risk_score >= 30:
+            out.append("- 🟢 **보통** — 일상 주의 수준\n")
+        else:
+            out.append("- ✅ **안정** — 평이한 흐름\n")
+
+        if past_active:
+            out.append(f"**▣ 최근 발동**: {', '.join(past_active[-2:])}")
+            out.append("- 이 시기 실제 사고·수술·큰 변화 있었다면 명리 패턴 일치\n")
+
+        if future_active:
+            out.append(f"**▣ 다가올 위험**: {', '.join(future_active[:2])}")
+            out.append("- 미리 대비 + 안전 관리 + 정기 검진 필수\n")
+
+        out.append("**▣ 종합 한 줄**")
+        if risk_score >= 70:
+            out.append(f"> **{name}님은 평생 가장 위험한 시기입니다. 안전·신중·정기검진이 핵심입니다.**")
+        elif risk_score >= 50:
+            out.append(f"> **{name}님은 신중한 판단이 필요한 시기입니다.**")
+        else:
+            out.append(f"> **{name}님은 안정적 흐름입니다. 내실 다지기에 적합합니다.**")
+
+        out.append("\n⬇️ 아래에 세부 분석이 이어집니다.\n---")
+
+        return "\n".join(out)
+    except Exception:
+        return ""
+
+
 st.set_page_config(
     page_title="[MANSE] Saju Heaven-Sent Destiny",
     page_icon="*",
@@ -12300,6 +12408,14 @@ def render_worry_inference(pils, birth_year, gender, marital_status=None):
 def menu_current_situation(pils, name, birth_year, gender, marriage_status=None):
     """🎯 나의 현재 상황 — 공감형 서술 (무엇 때문에 힘드신지 짚어드립니다)"""
 
+    # X-4-I-3: 사주 핵심 종합 진단 헤더
+    try:
+        _core_diag = build_saju_core_diagnosis(pils, name, birth_year, gender)
+        if _core_diag:
+            st.markdown(_core_diag)
+    except Exception:
+        pass
+
     if marriage_status is None:
         marriage_status = st.session_state.get("marriage_status", "미혼")
     _is_married = marriage_status in ["기혼", "재혼"]
@@ -15069,6 +15185,14 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
 
 def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
     """[1. Comprehensive Report] - Pillars, Personality, Gyeokguk, Yongshin"""
+
+    # X-4-I-3: 사주 핵심 종합 진단 헤더
+    try:
+        _core_diag = build_saju_core_diagnosis(pils, name, birth_year, gender)
+        if _core_diag:
+            st.markdown(_core_diag)
+    except Exception:
+        pass
 
     # ════════════════════════════════════════════
     # JONGHAP-SSOT : 개발자 진단판 (URL ?dev=1 활성화)
