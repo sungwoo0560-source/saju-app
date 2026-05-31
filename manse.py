@@ -4177,6 +4177,91 @@ class SajuJudgmentRules:
         return rules.strip()
 
 
+# ─── X-6-A: 막장 드라마 시나리오 텍스트 상수 ──────────────────────────────────
+DRAMATIC_SCENARIOS = {
+    "extramarital": (
+        "💔 {name}님의 배우자는 평생 한 번 이상 흔들립니다.\n"
+        "도화살이 박혀있어 그 사람 의지로는 안 됩니다.\n"
+        "이미 지났거나, 지금이거나, 곧 옵니다."
+    ),
+    "two_lives": (
+        "💔 {name}님 사주는 두 가정 부양 구조입니다.\n"
+        "한 사람으로 끝나지 않는 인연이 평생 따라옵니다.\n"
+        "선택 안 하면 둘 다 잃고 빈손이 됩니다."
+    ),
+    "remarriage": (
+        "💑 {name}님은 결혼 두 번 사주입니다.\n"
+        "첫 결혼은 시험 무대, 깨지는 게 정해진 흐름입니다.\n"
+        "두 번째에서 진짜 부부 인연을 만납니다."
+    ),
+    "old_love_return": (
+        "💔 헤어진 그 사람이 반드시 돌아옵니다.\n"
+        "사주에 적힌 운명입니다.\n"
+        "그때 흔들리면 인생 두 번 깨집니다."
+    ),
+    "triangle": (
+        "💔 동시에 두 사람이 따라오는 시기가 옵니다.\n"
+        "선택 못 하고 미루면 둘 다 떠납니다.\n"
+        "이 사주는 평생 한 번 이 시험을 받습니다."
+    ),
+    "double_life": (
+        "🎭 {name}님은 겉과 속이 다른 인생을 살아갑니다.\n"
+        "남이 모르는 두 번째 얼굴이 평생 따라옵니다.\n"
+        "숨긴 비밀은 결국 드러납니다."
+    ),
+    "friend_betrayal": (
+        "💼 가장 믿었던 사람이 가장 큰 칼을 꽂습니다.\n"
+        "친한 친구·동업자·가족 — 사주가 가리키는 배신자입니다.\n"
+        "동업·보증·돈거래는 평생 절대 금지입니다."
+    ),
+    "windfall_fall": (
+        "💰 평생 한 번 큰돈이 들어옵니다.\n"
+        "그런데 들어온 만큼 새어 나가는 구조입니다.\n"
+        "그 돈 못 지키면 평생 후회합니다."
+    ),
+    "big_scam": (
+        "💼 평생 한 번 큰 사기 당합니다.\n"
+        "사주에 적혀 있어 피하기 어렵습니다.\n"
+        "달콤한 제안일수록 그게 함정입니다."
+    ),
+    "inheritance_war": (
+        "💰 형제·자매가 돈 때문에 원수가 됩니다.\n"
+        "유산·재산 다툼이 평생 가족을 갈라놓는 구조.\n"
+        "미리 정리 안 하면 장례식에서 싸웁니다."
+    ),
+    "child_burden": (
+        "👨‍👩‍👧 자식 때문에 평생 마음 졸이는 사주입니다.\n"
+        "자식 덕보다 자식 짐을 지는 운명입니다.\n"
+        "자식 의지 X, 본인 노후 미리 챙기십시오."
+    ),
+    "parent_shadow": (
+        "👨‍👩‍👧 부모 그늘이 평생 인생을 막습니다.\n"
+        "그 그늘 못 벗어나면 본인 운명이 안 풀립니다.\n"
+        "심리적 독립이 평생 숙제입니다."
+    ),
+    "hidden_family": (
+        "🌀 {name}님 가족 안에 평생 풀리지 않는 비밀이 있습니다.\n"
+        "사주가 그 비밀을 가리킵니다.\n"
+        "시간 지나면 반드시 드러납니다."
+    ),
+    "life_flip_accident": (
+        "⚠️ 큰 사고로 인생이 두 번 갈라집니다.\n"
+        "사고 전후 사람이 완전히 달라지는 패턴.\n"
+        "이미 한 번 겪었거나, 곧 옵니다."
+    ),
+    "hospital_regular": (
+        "🏥 수술실에 평생 두세 번 들어가는 사주입니다.\n"
+        "첫 번째는 이미 지났을 가능성이 큽니다.\n"
+        "양인+충 발동 해마다 위험합니다."
+    ),
+    "power_fall": (
+        "⚔️ 정점에서 한순간 모든 걸 잃는 사주입니다.\n"
+        "높이 올라간 사람이 가장 크게 떨어지는 구조.\n"
+        "전성기에 겸손 못 하면 추락이 평생 한 번 옵니다."
+    ),
+}
+
+
 # ─── X-4-I-3: 사주 핵심 종합 진단 박스 ──────────────────────────────────────
 def build_saju_core_diagnosis(pils, name, birth_year, gender, current_year=None):
     """사주 핵심 진단 박스 — 양인+충 패턴 자동 감지, 모든 메뉴 헤더용"""
@@ -4252,7 +4337,6 @@ def build_saju_core_diagnosis(pils, name, birth_year, gender, current_year=None)
         else:
             out.append("- 원국 안정 — 큰 충극 패턴 없음\n")
 
-        out.append(f"**▣ 올해({current_year}) 위험 점수: {risk_score}/100**")
         if risk_score >= 70:
             out.append("- 🔴 **매우 위험** — 사고·수술·큰 결정 최대 주의\n")
         elif risk_score >= 50:
@@ -4277,6 +4361,150 @@ def build_saju_core_diagnosis(pils, name, birth_year, gender, current_year=None)
             out.append(f"> **{name}님은 신중한 판단이 필요한 시기입니다.**")
         else:
             out.append(f"> **{name}님은 안정적 흐름입니다. 내실 다지기에 최적입니다.**")
+
+        # === X-6-A: 막장 드라마 시나리오 16개 ===
+        scenarios = []
+        _sipsung_ok = False
+        _ss_cnt = {}
+        bicap = jae = gwan = in_ss = sik_sang = 0
+        _gup_jae = _peon_jae = _peon_gwan_cnt = 0
+        _gwansal_mix = _jaesung_mix = _in_mix = False
+        try:
+            _ilgan_d = pils[1].get("cg", "") if len(pils) > 1 else ""
+            if _ilgan_d:
+                _sipsung = calc_sipsung(_ilgan_d, pils)
+                for _s in _sipsung:
+                    for _sk in ["cg_ss", "jj_ss"]:
+                        _v = _s.get(_sk, "-")
+                        if _v and _v != "-":
+                            _ss_cnt[_v] = _ss_cnt.get(_v, 0) + 1
+                bicap        = _ss_cnt.get("比肩(비견)", 0) + _ss_cnt.get("劫財(겁재)", 0)
+                jae          = _ss_cnt.get("偏財(편재)", 0) + _ss_cnt.get("正財(정재)", 0)
+                gwan         = _ss_cnt.get("偏官(편관)", 0) + _ss_cnt.get("正官(정관)", 0)
+                in_ss        = _ss_cnt.get("偏印(편인)", 0) + _ss_cnt.get("正印(정인)", 0)
+                sik_sang     = _ss_cnt.get("食神(식신)", 0) + _ss_cnt.get("傷官(상관)", 0)
+                _gup_jae     = _ss_cnt.get("劫財(겁재)", 0)
+                _peon_jae    = _ss_cnt.get("偏財(편재)", 0)
+                _peon_gwan_cnt = _ss_cnt.get("偏官(편관)", 0)
+                _gwansal_mix = (_ss_cnt.get("偏官(편관)", 0) >= 1 and _ss_cnt.get("正官(정관)", 0) >= 1)
+                _jaesung_mix = (_ss_cnt.get("偏財(편재)", 0) >= 1 and _ss_cnt.get("正財(정재)", 0) >= 1)
+                _in_mix      = (_ss_cnt.get("偏印(편인)", 0) >= 1 and _ss_cnt.get("正印(정인)", 0) >= 1)
+                _sipsung_ok  = True
+        except Exception:
+            pass
+
+        # 음양차착살
+        _chachaek = False
+        try:
+            _extra = get_extra_sinsal(pils)
+            _chachaek = any("음양차착살" in s.get("name", "") for s in _extra)
+        except Exception:
+            pass
+
+        # 도화살 (년지/일지 기준 직접 계산)
+        _DOHWA_MAP = {"寅":"卯","午":"卯","戌":"卯","申":"酉","子":"酉","辰":"酉",
+                      "巳":"午","酉":"午","丑":"午","亥":"子","卯":"子","未":"子"}
+        _dohwa_active = False
+        try:
+            _neonji = pjjs[3] if len(pjjs) > 3 else ""
+            _ilji_d  = pjjs[1] if len(pjjs) > 1 else ""
+            for _anchor in [_neonji, _ilji_d]:
+                if _DOHWA_MAP.get(_anchor, "") in pjjs:
+                    _dohwa_active = True
+                    break
+        except Exception:
+            pass
+
+        # 형살 (삼형 + 자형)
+        _HYUNG_SETS = [frozenset({"寅","巳","申"}), frozenset({"丑","戌","未"}), frozenset({"子","卯"})]
+        _AUTO_HYUNG = {"辰","午","酉","亥"}
+        _pjjs_set = set(pjjs)
+        _hyung_active = (
+            any(h <= _pjjs_set for h in _HYUNG_SETS) or
+            any(pjjs.count(j) >= 2 for j in _AUTO_HYUNG if j in _pjjs_set)
+        )
+
+        # 지지 육합 발동
+        _HAP6 = [frozenset({"子","丑"}), frozenset({"寅","亥"}), frozenset({"卯","戌"}),
+                 frozenset({"辰","酉"}), frozenset({"巳","申"}), frozenset({"午","未"})]
+        _hap_active = any(h <= _pjjs_set for h in _HAP6)
+
+        # 일지 충
+        _ilji_self = pjjs[1] if len(pjjs) > 1 else ""
+        _other_pjjs = [pjjs[i] for i in range(len(pjjs)) if i != 1]
+        _ilji_chung = bool(_ilji_self and _CHUNG_MAP.get(_ilji_self, "") in _other_pjjs)
+
+        # [A] 외도·혼외 위험
+        if _dohwa_active and yangin_active and _hap_active:
+            scenarios.append(DRAMATIC_SCENARIOS["extramarital"].format(name=name))
+
+        # [B] 이중 인생 (관살혼잡·재성혼잡)
+        if _gwansal_mix or _jaesung_mix:
+            scenarios.append(DRAMATIC_SCENARIOS["two_lives"].format(name=name))
+
+        # [C] 재혼·이별 구조
+        if _chachaek or _ilji_chung:
+            scenarios.append(DRAMATIC_SCENARIOS["remarriage"].format(name=name))
+
+        # [D] 옛 인연 반복
+        if gwan >= 1 and _hap_active and bool(internal_chung or cur_chung_targets):
+            scenarios.append(DRAMATIC_SCENARIOS["old_love_return"].format(name=name))
+
+        # [E] 삼각관계
+        if _dohwa_active and yangin_active and _hap_active and bool(internal_chung or cur_chung_targets):
+            scenarios.append(DRAMATIC_SCENARIOS["triangle"].format(name=name))
+
+        # [F] 이중 인연 구조
+        if _dohwa_active and yangin_active and _chachaek:
+            scenarios.append(DRAMATIC_SCENARIOS["double_life"].format(name=name))
+
+        # [G] 친구 배신·비겁쟁재
+        if bicap >= 2 and jae >= 1:
+            scenarios.append(DRAMATIC_SCENARIOS["friend_betrayal"].format(name=name))
+
+        # [H] 큰 돈 들어와도 빠져나가는 구조
+        if _peon_jae >= 1 and bicap >= 2:
+            scenarios.append(DRAMATIC_SCENARIOS["windfall_fall"].format(name=name))
+
+        # [I] 대형 사기 주의
+        if _gup_jae >= 1 and _hyung_active and _peon_jae >= 1:
+            scenarios.append(DRAMATIC_SCENARIOS["big_scam"].format(name=name))
+
+        # [J] 재산 분쟁·상속 갈등
+        if _peon_jae >= 1 and bicap >= 1 and _hyung_active:
+            scenarios.append(DRAMATIC_SCENARIOS["inheritance_war"].format(name=name))
+
+        # [K] 자녀 관계 굴곡
+        if _sipsung_ok and (
+            (sik_sang == 0 and bicap >= 2) or
+            (_hyung_active and sik_sang >= 1)
+        ):
+            scenarios.append(DRAMATIC_SCENARIOS["child_burden"].format(name=name))
+
+        # [L] 부모·가족 독립 과제
+        if _sipsung_ok and (in_ss == 0 or in_ss >= 3):
+            scenarios.append(DRAMATIC_SCENARIOS["parent_shadow"].format(name=name))
+
+        # [M] 복잡한 가족 구조
+        if _in_mix:
+            scenarios.append(DRAMATIC_SCENARIOS["hidden_family"].format(name=name))
+
+        # [N] 인생 대역전·극적 반전
+        if yangin_active and bool(internal_chung or cur_chung_targets) and _hyung_active:
+            scenarios.append(DRAMATIC_SCENARIOS["life_flip_accident"].format(name=name))
+
+        # [O] 수술·입원 반복 패턴
+        if yangin_active and (internal_chung or cur_chung_targets):
+            scenarios.append(DRAMATIC_SCENARIOS["hospital_regular"].format(name=name))
+
+        # [P] 권력 추락·강제 퇴장
+        if _peon_gwan_cnt >= 2 and yangin_active and _hyung_active:
+            scenarios.append(DRAMATIC_SCENARIOS["power_fall"].format(name=name))
+
+        if scenarios:
+            out.append(f"\n---\n### ★ {name}님 사주 충격 진단 ★\n")
+            for sc in scenarios:
+                out.append(sc + "\n")
 
         out.append("\n⬇️ 아래에 세부 분석이 이어집니다.\n---")
 
