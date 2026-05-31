@@ -1574,6 +1574,20 @@ def _local_saju_engine(pils, name, birth_year, gender, query):
             _bad_health_ss = {"偏官","劫財","傷官"}
             ys_hlt = get_yongshin_multilayer(pils, birth_year, gender, bm, bd, bh, bmn, current_year)
             gisin_hlt = set(ys_hlt.get("기신", []))
+            # === 기능-B-C: 양인+충 교차 보정 (5년 위험구간 정확도) ===
+            _yangin_active = False
+            _yangin_pos = ""
+            try:
+                _yd = get_yangin(pils)
+                if _yd and _yd.get("존재", False):
+                    _yangin_active = True
+                    _yangin_pos = _yd.get("양인_지지", "")
+            except Exception:
+                pass
+            _CHUNG_MAP = {"子":"午","午":"子","丑":"未","未":"丑","寅":"申","申":"寅",
+                          "卯":"酉","酉":"卯","辰":"戌","戌":"辰","巳":"亥","亥":"巳"}
+            _GZ_SUNG = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"]
+            _pjjs2 = [p.get("jj","") for p in pils]
             for _yr in range(current_year, current_year + 5):
                 try:
                     _sw_hlt = get_yearly_luck(pils, _yr) or {}
@@ -1581,7 +1595,16 @@ def _local_saju_engine(pils, name, birth_year, gender, query):
                     _hg     = _sw_hlt.get("길흉","평")
                     _hoh    = OH.get(_sw_hlt.get("세운","")[:1],"")
                     _hgs    = _hoh in gisin_hlt
-                    if _hs in _bad_health_ss:
+                    _y_jj        = _GZ_SUNG[(_yr - 4) % 12]
+                    _is_chung    = _CHUNG_MAP.get(_y_jj, "") in _pjjs2
+                    _is_yangin_hit = (_yangin_active and _y_jj == _yangin_pos)
+                    if _is_yangin_hit and _is_chung:
+                        out.append(f"- 🔴 **{_yr}년** [{_hs}] — 매우 위험 (양인 직격 + 충 발동)")
+                    elif _is_yangin_hit:
+                        out.append(f"- 🔴 **{_yr}년** [{_hs}] — 매우 위험 (양인 직격)")
+                    elif _is_chung:
+                        out.append(f"- ⚠️ **{_yr}년** [{_hs}] — 주의 (충 발동)")
+                    elif _hs in _bad_health_ss:
                         out.append(f"- 🔴 **{_yr}년** [{_hs}] — 각별 건강 주의 구간")
                     elif _hgs and _hg in ("흉","-"):
                         out.append(f"- ⚠️ **{_yr}년** [{_hs}] — 기신 흉운, 면역 관리 필요")
@@ -22806,25 +22829,53 @@ def menu14_health(pils, name, birth_year, gender):
         # ── 연령대별 건강 위험 구간 ──────────────────────────────────
         st.markdown('<div class="gold-section">📅 앞으로 5년 건강 위험 구간</div>',
                     unsafe_allow_html=True)
+        # === 기능-B-C: 양인+충 교차 보정 ===
+        _yangin_active2 = False
+        _yangin_pos2 = ""
+        try:
+            _yd2 = get_yangin(pils)
+            if _yd2 and _yd2.get("존재", False):
+                _yangin_active2 = True
+                _yangin_pos2 = _yd2.get("양인_지지", "")
+        except Exception:
+            pass
+        _CHUNG_MAP2 = {"子":"午","午":"子","丑":"未","未":"丑","寅":"申","申":"寅",
+                       "卯":"酉","酉":"卯","辰":"戌","戌":"辰","巳":"亥","亥":"巳"}
+        _GZ_SUNG2   = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"]
+        _pjjs3      = [p.get("jj","") for p in pils]
         _danger_found = False
         for _yr in range(current_year, current_year + 6):
             _sw_y  = get_yearly_luck(pils, _yr) or {}
             _ss_y  = _sw_y.get("십성_천간", "")
             _age_y = _yr - birth_year + 1
-            if _ss_y in ("偏官(편관)", "劫財(겁재)", "傷官(상관)"):
+            _y_jj2      = _GZ_SUNG2[(_yr - 4) % 12]
+            _is_chung2  = _CHUNG_MAP2.get(_y_jj2, "") in _pjjs3
+            _is_yangin_hit2 = (_yangin_active2 and _y_jj2 == _yangin_pos2)
+            if _is_yangin_hit2 and _is_chung2:
+                _lvl, _color = "🔴 매우 위험", "#8e1a0e"
+                _msg = "양인 직격 + 충 발동 — 사고·수술·큰 결정 절대 금물. 정기검진 즉시 예약."
+            elif _is_yangin_hit2:
+                _lvl, _color = "🔴 매우 위험", "#c0392b"
+                _msg = "양인 직격 — 신체 부상·수술 위험 최고조. 극도로 조심하십시오."
+            elif _is_chung2:
+                _lvl, _color = "⚠️ 주의", "#e67e22"
+                _msg = f"충 발동({_y_jj2}) — 환경·신체 변동 주의. 안전사고 예방 필수."
+            elif _ss_y in ("偏官(편관)", "劫財(겁재)", "傷官(상관)"):
                 _lvl   = "🔴 고위험" if _ss_y == "偏官(편관)" else "⚠️ 주의"
                 _color = "#c0392b" if _ss_y == "偏官(편관)" else "#e67e22"
                 _msg   = {"偏官(편관)": "사고·수술·급성 질환 위험 구간. 정기검진 필수.",
                           "劫財(겁재)": "외상·혈액 관련 이슈 주의. 안전사고 예방 최우선.",
                           "傷官(상관)": "신경계 과부하·만성 과로 주의. 수면 확보가 핵심."}.get(_ss_y, "")
-                st.markdown(
-                    f"""<div style='border-left:4px solid {_color};padding:8px 14px;
-                    margin:4px 0;background:#fff5f5;border-radius:0 8px 8px 0;font-size:13px;'>
-                    <b style='color:{_color}'>{_yr}년 (만 {_age_y}세) {_lvl} [{_ss_y}]</b>
-                    &nbsp;— {_msg}</div>""",
-                    unsafe_allow_html=True,
-                )
-                _danger_found = True
+            else:
+                continue
+            st.markdown(
+                f"""<div style='border-left:4px solid {_color};padding:8px 14px;
+                margin:4px 0;background:#fff5f5;border-radius:0 8px 8px 0;font-size:13px;'>
+                <b style='color:{_color}'>{_yr}년 (만 {_age_y}세) {_lvl} [{_ss_y}]</b>
+                &nbsp;— {_msg}</div>""",
+                unsafe_allow_html=True,
+            )
+            _danger_found = True
         if not _danger_found:
             st.success("✅ 향후 5년간 특별히 강한 건강 위기 세운은 보이지 않습니다. 꾸준한 관리를 유지하십시오.")
 
