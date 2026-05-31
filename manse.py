@@ -4261,6 +4261,90 @@ DRAMATIC_SCENARIOS = {
     ),
 }
 
+# ─── X-6-B: 추가 시나리오 텍스트 상수 ──────────────────────────────────────
+DRAMATIC_SCENARIOS_B = {
+    "first_love_obsession": (
+        "💔 {name}님은 첫사랑을 평생 가슴에 묻고 사는 사주입니다.\n"
+        "공망에 든 도화살이 그 사람을 추억으로 박아둡니다.\n"
+        "지금 배우자 옆에서도 그 사람이 떠오릅니다."
+    ),
+    "late_marriage": (
+        "💑 {name}님은 늦게 결혼해야 행복한 사주입니다.\n"
+        "일찍 결혼하면 반드시 깨집니다.\n"
+        "40대 이후 인연이 진짜 부부 운명입니다."
+    ),
+    "unable_to_marry": (
+        "💔 {name}님은 결혼 자체가 어려운 구조입니다.\n"
+        "관성이 비어있고 비겁이 자리를 차지합니다.\n"
+        "혼자 사는 것이 사주의 길일 수 있습니다."
+    ),
+    "spouse_dominates": (
+        "💔 {name}님은 배우자에게 평생 휘둘리는 사주입니다.\n"
+        "일지가 일간을 압도하는 구조입니다.\n"
+        "배우자 비위 맞추다가 자신을 잃습니다."
+    ),
+    "younger_spouse": (
+        "💑 {name}님은 연하 배우자와 진짜 행복한 사주입니다.\n"
+        "식상 기운이 어린 인연을 끌어옵니다.\n"
+        "또래보다 어린 쪽이 운명의 짝입니다."
+    ),
+    "older_spouse": (
+        "💑 {name}님은 연상 배우자에게서 안정을 찾는 사주입니다.\n"
+        "인성이 어른 인연을 부릅니다.\n"
+        "또래보다 연상이 운명적입니다."
+    ),
+    "spouse_illness": (
+        "💔 {name}님 배우자가 큰 건강 위기를 겪는 사주입니다.\n"
+        "일지 충극+흉살 발동 시기에 정점입니다.\n"
+        "배우자 건강 미리 챙기지 않으면 후회합니다."
+    ),
+    "childless": (
+        "👨‍👩‍👧 {name}님은 자녀가 없거나 늦게 생기는 사주입니다.\n"
+        "식상이 비어있고 시주에 흉살이 자리합니다.\n"
+        "자녀에 집착하면 더 멀어집니다."
+    ),
+    "love_after_60": (
+        "💑 {name}님은 60세 이후 진짜 인연을 만나는 사주입니다.\n"
+        "시주 도화가 말년 사랑을 부릅니다.\n"
+        "인생 후반에 운명의 짝이 옵니다."
+    ),
+    "lottery_curse": (
+        "💰 {name}님은 큰돈 들어오는 순간 인생이 무너집니다.\n"
+        "양인+충이 재물을 한순간에 빼앗아 갑니다.\n"
+        "돈 들어오는 순간이 가장 위험합니다."
+    ),
+    "business_repeat_fail": (
+        "💼 {name}님은 사업하면 반복해서 실패하는 사주입니다.\n"
+        "비겁이 재물을 분산시키고 식상이 약합니다.\n"
+        "직장·고용·전문직이 살리는 길입니다."
+    ),
+    "investment_burn": (
+        "💰 {name}님은 투자하면 다 날리는 사주입니다.\n"
+        "편재+양인+기신 운이 돈을 태웁니다.\n"
+        "주식·코인·도박 절대 금지입니다."
+    ),
+    "self_made_rich": (
+        "💰 {name}님은 맨손으로 부자 되는 사주입니다.\n"
+        "재성+식상이 결합해 실력으로 재물을 만듭니다.\n"
+        "40대 이후 본격 발휘됩니다."
+    ),
+    "gambling_pattern": (
+        "💼 {name}님은 도박·일확천금 유혹에 약한 사주입니다.\n"
+        "편재+양인+도화가 한탕 욕망을 부릅니다.\n"
+        "한번 빠지면 평생 못 빠져나옵니다."
+    ),
+    "wealth_late": (
+        "💰 {name}님은 50세 이후 재물이 본격 들어오는 사주입니다.\n"
+        "일찍 욕심내면 다 잃습니다.\n"
+        "긴 호흡으로 가야 큰돈 만집니다."
+    ),
+    "tax_lawsuit": (
+        "⚖️ {name}님은 세금·소송·관재 휘말리는 사주입니다.\n"
+        "편관+형살이 법적 문제 부릅니다.\n"
+        "계약서·세무 신고 절대 빈틈 X."
+    ),
+}
+
 
 # ─── X-4-I-3: 사주 핵심 종합 진단 박스 ──────────────────────────────────────
 def build_saju_core_diagnosis(pils, name, birth_year, gender, current_year=None):
@@ -4500,6 +4584,178 @@ def build_saju_core_diagnosis(pils, name, birth_year, gender, current_year=None)
         # [P] 권력 추락·강제 퇴장
         if _peon_gwan_cnt >= 2 and yangin_active and _hyung_active:
             scenarios.append(DRAMATIC_SCENARIOS["power_fall"].format(name=name))
+
+        # === X-6-B: 추가 트리거 계산 ===
+        _jeong_gwan = _ss_cnt.get("正官(정관)", 0)
+
+        # 일간 강약
+        _ilgan_weak = False
+        try:
+            _ilgan_b = pils[1].get("cg", "") if len(pils) > 1 else ""
+            if _ilgan_b:
+                _si_b = get_ilgan_strength(_ilgan_b, pils)
+                _ilgan_weak = bool(_si_b and _si_b.get("신강신약", "") in ("신약", "극신약"))
+        except Exception:
+            pass
+
+        # 공망 계산 (일주 기준)
+        _gongmang_jjs = set()
+        try:
+            _GONGMANG_B = {
+                ("甲","子"):("戌","亥"),("乙","丑"):("戌","亥"),("丙","寅"):("戌","亥"),
+                ("丁","卯"):("戌","亥"),("戊","辰"):("戌","亥"),("己","巳"):("戌","亥"),
+                ("庚","午"):("戌","亥"),("辛","未"):("戌","亥"),("壬","申"):("戌","亥"),("癸","酉"):("戌","亥"),
+                ("甲","戌"):("申","酉"),("乙","亥"):("申","酉"),("丙","子"):("申","酉"),
+                ("丁","丑"):("申","酉"),("戊","寅"):("申","酉"),("己","卯"):("申","酉"),
+                ("庚","辰"):("申","酉"),("辛","巳"):("申","酉"),("壬","午"):("申","酉"),("癸","未"):("申","酉"),
+                ("甲","申"):("午","未"),("乙","酉"):("午","未"),("丙","戌"):("午","未"),
+                ("丁","亥"):("午","未"),("戊","子"):("午","未"),("己","丑"):("午","未"),
+                ("庚","寅"):("午","未"),("辛","卯"):("午","未"),("壬","辰"):("午","未"),("癸","巳"):("午","未"),
+                ("甲","午"):("辰","巳"),("乙","未"):("辰","巳"),("丙","申"):("辰","巳"),
+                ("丁","酉"):("辰","巳"),("戊","戌"):("辰","巳"),("己","亥"):("辰","巳"),
+                ("庚","子"):("辰","巳"),("辛","丑"):("辰","巳"),("壬","寅"):("辰","巳"),("癸","卯"):("辰","巳"),
+                ("甲","辰"):("寅","卯"),("乙","巳"):("寅","卯"),("丙","午"):("寅","卯"),
+                ("丁","未"):("寅","卯"),("戊","申"):("寅","卯"),("己","酉"):("寅","卯"),
+                ("庚","戌"):("寅","卯"),("辛","亥"):("寅","卯"),("壬","子"):("寅","卯"),("癸","丑"):("寅","卯"),
+                ("甲","寅"):("子","丑"),("乙","卯"):("子","丑"),("丙","辰"):("子","丑"),
+                ("丁","巳"):("子","丑"),("戊","午"):("子","丑"),("己","未"):("子","丑"),
+                ("庚","申"):("子","丑"),("辛","酉"):("子","丑"),("壬","戌"):("子","丑"),("癸","亥"):("子","丑"),
+            }
+            _ilju_cg_b = pils[1].get("cg", "") if len(pils) > 1 else ""
+            _ilju_jj_b = pils[1].get("jj", "") if len(pils) > 1 else ""
+            _gm_b = _GONGMANG_B.get((_ilju_cg_b, _ilju_jj_b), ())
+            if _gm_b:
+                _gongmang_jjs = set(_gm_b)
+        except Exception:
+            pass
+
+        # 시주(pils[0]) 지지 도화
+        _siju_jj = pils[0].get("jj", "") if pils else ""
+        _sj_dohwa = _siju_jj in {"子", "午", "卯", "酉"}
+
+        # 시지 육합 (시지가 년/월/일지와 합)
+        _YUKHAP_B = {"子":"丑","丑":"子","寅":"亥","亥":"寅","卯":"戌","戌":"卯",
+                     "辰":"酉","酉":"辰","巳":"申","申":"巳","午":"未","未":"午"}
+        _si_hap_b = False
+        try:
+            _si_partner = _YUKHAP_B.get(_siju_jj, "")
+            _si_hap_b = bool(_si_partner and _si_partner in [
+                pils[i].get("jj", "") for i in range(1, 4) if i < len(pils)
+            ])
+        except Exception:
+            pass
+
+        # 화개살 (년지 기준)
+        _HWAGAE_B = {"寅":"戌","午":"戌","戌":"戌","申":"辰","子":"辰","辰":"辰",
+                     "巳":"丑","酉":"丑","丑":"丑","亥":"未","卯":"未","未":"未"}
+        _hwagae_active = False
+        try:
+            _nyeon_jj_b = pils[3].get("jj", "") if len(pils) > 3 else ""
+            _hwagae_jj  = _HWAGAE_B.get(_nyeon_jj_b, "")
+            _hwagae_active = bool(_hwagae_jj and _hwagae_jj in _pjjs_set)
+        except Exception:
+            pass
+
+        # 기신 운 (세운 지지 오행 vs 기신)
+        _gishin_year = False
+        try:
+            _ys_b = get_yongshin(pils)
+            if _ys_b:
+                _gishin_ohs = _ys_b.get("기신", [])
+                if isinstance(_gishin_ohs, list) and _gishin_ohs:
+                    _cur_jj_oh = _OH_JJ.get(cur_jj, "")
+                    _gishin_year = bool(_cur_jj_oh and _cur_jj_oh in _gishin_ohs)
+        except Exception:
+            pass
+
+        # 일지 강 (일지 십성이 인성·비겁 → 일간 보호)
+        _ilji_strong_b = False
+        try:
+            if _sipsung_ok and len(_sipsung) > 1:
+                _ilji_ss_b = _sipsung[1].get("jj_ss", "-")
+                _ilji_strong_b = _ilji_ss_b in (
+                    "比肩(비견)", "劫財(겁재)", "偏印(편인)", "正印(정인)"
+                )
+        except Exception:
+            pass
+
+        # 시주 흉살 (시지 공망 OR 시지에 형 발동)
+        _siju_hyung = False
+        try:
+            _HYUNG_B2 = [{"寅","巳","申"}, {"丑","戌","未"}, {"子","卯"}]
+            _AUTO_H_B  = {"辰","午","酉","亥"}
+            _siju_hyung = (
+                (_siju_jj in _gongmang_jjs) or
+                any(_siju_jj in h for h in _HYUNG_B2) or
+                (pjjs.count(_siju_jj) >= 2 and _siju_jj in _AUTO_H_B)
+            )
+        except Exception:
+            pass
+
+        # === X-6-B 시나리오 출력 ===
+        # [7] 첫사랑 못 잊음
+        if _dohwa_active and _gongmang_jjs and any(j in _gongmang_jjs for j in pjjs):
+            scenarios.append(DRAMATIC_SCENARIOS_B["first_love_obsession"].format(name=name))
+
+        # [8] 만혼
+        if (gwan <= 1) and _ilgan_weak and (in_ss >= 2):
+            scenarios.append(DRAMATIC_SCENARIOS_B["late_marriage"].format(name=name))
+
+        # [9] 결혼 못 함
+        if (gwan == 0) and (bicap >= 2):
+            scenarios.append(DRAMATIC_SCENARIOS_B["unable_to_marry"].format(name=name))
+
+        # [10] 배우자에 휘둘림
+        if _ilji_strong_b and _ilgan_weak:
+            scenarios.append(DRAMATIC_SCENARIOS_B["spouse_dominates"].format(name=name))
+
+        # [11] 연하 인연
+        if _si_hap_b and (sik_sang >= 2):
+            scenarios.append(DRAMATIC_SCENARIOS_B["younger_spouse"].format(name=name))
+
+        # [12] 연상 인연
+        if (in_ss >= 2) and (_jeong_gwan >= 1):
+            scenarios.append(DRAMATIC_SCENARIOS_B["older_spouse"].format(name=name))
+
+        # [13] 배우자 큰병
+        if _ilji_chung and _hyung_active:
+            scenarios.append(DRAMATIC_SCENARIOS_B["spouse_illness"].format(name=name))
+
+        # [14] 자녀 없음
+        if _sipsung_ok and (sik_sang == 0) and _siju_hyung:
+            scenarios.append(DRAMATIC_SCENARIOS_B["childless"].format(name=name))
+
+        # [15] 말년 인연
+        if _sj_dohwa and (in_ss >= 1):
+            scenarios.append(DRAMATIC_SCENARIOS_B["love_after_60"].format(name=name))
+
+        # [J] 큰돈 무너짐
+        if (_peon_jae >= 1) and yangin_active and bool(internal_chung or cur_chung_targets):
+            scenarios.append(DRAMATIC_SCENARIOS_B["lottery_curse"].format(name=name))
+
+        # [K] 사업 반복 실패
+        if (bicap >= 2) and (jae >= 1) and (sik_sang <= 1):
+            scenarios.append(DRAMATIC_SCENARIOS_B["business_repeat_fail"].format(name=name))
+
+        # [L] 투자 손실
+        if (_peon_jae >= 1) and yangin_active and _gishin_year:
+            scenarios.append(DRAMATIC_SCENARIOS_B["investment_burn"].format(name=name))
+
+        # [M] 자수성가 부자
+        if (jae >= 1) and (sik_sang >= 2):
+            scenarios.append(DRAMATIC_SCENARIOS_B["self_made_rich"].format(name=name))
+
+        # [N] 도박 패턴
+        if (_peon_jae >= 1) and yangin_active and _sj_dohwa:
+            scenarios.append(DRAMATIC_SCENARIOS_B["gambling_pattern"].format(name=name))
+
+        # [O] 말년 재물
+        if (jae >= 1) and (in_ss >= 1) and _hwagae_active:
+            scenarios.append(DRAMATIC_SCENARIOS_B["wealth_late"].format(name=name))
+
+        # [P2] 세금·소송
+        if (_peon_gwan_cnt >= 1) and _hyung_active and (_peon_jae >= 1):
+            scenarios.append(DRAMATIC_SCENARIOS_B["tax_lawsuit"].format(name=name))
 
         if scenarios:
             out.append(f"\n---\n### ★ {name}님 사주 충격 진단 ★\n")
