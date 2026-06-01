@@ -4501,6 +4501,117 @@ def _x6i_cheonul_years(pils, ilgan, current_year):
     return good[:2]
 
 
+# ─── X-6-J: 올해 인연 시나리오 상수 ──────────────────────────────────────────
+INCOMING_PERSON_MAP = {
+    "甲": "큰 나무 같은 강직한 사람. 리더형. 청록 자주 입음.",
+    "乙": "꽃·풀 같은 부드러운 사람. 예술 감각. 연두색.",
+    "丙": "태양 같은 밝은 사람. 표현력 폭발. 빨강·주황.",
+    "丁": "촛불 같은 섬세한 사람. 깊은 정. 자주·빨강.",
+    "戊": "큰 산 같은 묵직한 사람. 신뢰형. 황색·갈색.",
+    "己": "들판 같은 포용형. 부드러운 토. 노랑·황토.",
+    "庚": "강철 같은 단단한 사람. 의리형·고집. 흰색·금색.",
+    "辛": "보석 같은 세련된 사람. 깔끔·완벽주의. 흰색·은색.",
+    "壬": "바다 같은 큰 그릇. 지혜·깊이. 검정·남색.",
+    "癸": "비·이슬 같은 섬세함. 감수성. 검정·파랑.",
+}
+ZODIAC_BY_JIJI = {
+    "子":"쥐띠","丑":"소띠","寅":"호랑이띠","卯":"토끼띠",
+    "辰":"용띠","巳":"뱀띠","午":"말띠","未":"양띠",
+    "申":"원숭이띠","酉":"닭띠","戌":"개띠","亥":"돼지띠",
+}
+SIPSUNG_INTENT = {
+    "비견": "동급·친구·경쟁자. 동업·투자 제안. 비겁쟁재 시 돈 노림.",
+    "겁재": "친한 친구·형제 같은 사람. 돈 거래·보증 요청.",
+    "식신": "베푸는 입장. 시간·돈·정성 나감. 부드러운 인연.",
+    "상관": "표현형. 자유분방. 자극·도전. 결혼 X.",
+    "편재": "활동적·돈 끌고 다니는 사람. 사업·투자 같이.",
+    "정재": "꼼꼼·알뜰형. 안정 결혼 후보.",
+    "편관": "강한 남자/여자. 압박형·상사·권위자.",
+    "정관": "안정·책임감. 결혼 후보. 미혼이면 적극.",
+    "편인": "특별 분야·멘토·외국인·스승. 깊은 가르침.",
+    "정인": "어머니 같은 보호자·후원자. 따뜻한 지원.",
+}
+
+
+def build_yearly_relationship_story(pils, name, gender, current_year):
+    """올해 나타날 인연 시나리오 자동 생성"""
+    try:
+        import re as _re6j
+        ilgan = pils[1].get("cg","") if len(pils)>1 else ""
+        ilji  = pils[1].get("jj","") if len(pils)>1 else ""
+        if not ilgan or not ilji:
+            return ""
+
+        _CG10 = ["甲","乙","丙","丁","戊","己","庚","辛","壬","癸"]
+        _JJ12 = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"]
+        sw_cg = _CG10[(current_year - 4) % 10]
+        sw_jj = _JJ12[(current_year - 4) % 12]
+
+        # 십성 (천간 기준)
+        _ss_raw = TEN_GODS_MATRIX.get(ilgan, {}).get(sw_cg, "")
+        _ss_m   = _re6j.search(r'\(([^)]+)\)', _ss_raw)
+        ss      = _ss_m.group(1) if _ss_m else (_ss_raw or "미상")
+
+        person = INCOMING_PERSON_MAP.get(sw_cg, "알 수 없는 기운의 사람")
+        zodiac = ZODIAC_BY_JIJI.get(sw_jj, "")
+        intent = SIPSUNG_INTENT.get(ss, "")
+
+        # 합/충/반합/홍염/도화
+        _HAP6 = [frozenset({"子","丑"}),frozenset({"寅","亥"}),frozenset({"卯","戌"}),
+                 frozenset({"辰","酉"}),frozenset({"巳","申"}),frozenset({"午","未"})]
+        _CM6  = {"子":"午","午":"子","丑":"未","未":"丑","寅":"申","申":"寅",
+                 "卯":"酉","酉":"卯","辰":"戌","戌":"辰","巳":"亥","亥":"巳"}
+        _BH   = [frozenset({"申","子"}),frozenset({"子","辰"}),frozenset({"申","辰"}),
+                 frozenset({"亥","卯"}),frozenset({"卯","未"}),frozenset({"亥","未"}),
+                 frozenset({"寅","午"}),frozenset({"午","戌"}),frozenset({"寅","戌"}),
+                 frozenset({"巳","酉"}),frozenset({"酉","丑"}),frozenset({"巳","丑"})]
+        _HY   = {"甲":"午","乙":"申","丙":"寅","丁":"未",
+                 "戊":"辰","己":"辰","庚":"戌","辛":"酉","壬":"子","癸":"申"}
+        _DM   = {"寅":"卯","午":"卯","戌":"卯","申":"酉","子":"酉","辰":"酉",
+                 "巳":"午","酉":"午","丑":"午","亥":"子","卯":"子","未":"子"}
+
+        hap      = any(frozenset({ilji, sw_jj}) == h for h in _HAP6)
+        chung    = _CM6.get(ilji,"") == sw_jj
+        banhap   = (not hap) and any(frozenset({ilji, sw_jj}) == b for b in _BH)
+        hongyeom = _HY.get(ilgan,"") == sw_jj
+        dohwa    = _DM.get(ilji,"") == sw_jj
+
+        if hap and hongyeom:
+            ending = "깊은 인연 발전. 한 번 빠지면 헤어 나오기 어려움."
+        elif chung:
+            ending = "이별·갈등·충돌 가능성. 빠른 이별 위험."
+        elif banhap and hongyeom:
+            ending = "강한 끌림. 단 1년짜리 인연. 깊이 빠지면 위험."
+        elif hap:
+            ending = "깊은 융합. 진지한 관계 발전 가능."
+        else:
+            ending = "스쳐 지나가는 인연. 깊이 안 들어감."
+
+        out = [f"\n---\n## 📅 {current_year}년 {name}님 앞에 나타날 사람\n"]
+        out.append(f"🧑 **인물**: {zodiac} / {person}")
+        if intent:
+            out.append(f"💭 **십성**: {ss} — {intent}\n")
+        else:
+            out.append(f"💭 **십성**: {ss}\n")
+
+        for sig, cond, label in [
+            ("💋", hongyeom, "홍염살 직격 — 상대가 강하게 끌림"),
+            ("🌸", dohwa,    "도화살 발동 — 본인 매력 폭발"),
+            ("🔥", hap,      "합 발동 — 깊은 인연 발전"),
+            ("⚔️", chung,   "충 발동 — 갈등·이별 위험"),
+            ("🌙", banhap,   "반합 발동 — 강한 끌림, 단기 인연"),
+        ]:
+            if cond:
+                out.append(f"{sig} **{label}**")
+
+        if intent:
+            out.append(f"\n⚠️ **상대 속마음**: {intent}")
+        out.append(f"📌 **결말 예측**: {ending}")
+        return "\n".join(out)
+    except Exception:
+        return ""
+
+
 def build_unified_conclusion(name, saju_data, active_scenarios):
     """대박 vs 망함 단일 결론 박스"""
     try:
@@ -5091,6 +5202,14 @@ def build_saju_core_diagnosis(pils, name, birth_year, gender, current_year=None)
                 _uc = build_unified_conclusion(name, _saju_data_6i, active_scenarios)
                 if _uc:
                     out.append(_uc)
+            except Exception:
+                pass
+
+            # X-6-J: 올해 인연 시나리오
+            try:
+                _yrs = build_yearly_relationship_story(pils, name, gender, current_year)
+                if _yrs:
+                    out.append(_yrs)
             except Exception:
                 pass
 
