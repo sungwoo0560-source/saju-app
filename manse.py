@@ -4346,6 +4346,43 @@ DRAMATIC_SCENARIOS_B = {
 }
 
 
+# ─── X-6-E1: 시나리오 가중치·카테고리 상수 ────────────────────────────────────
+SCENARIO_WEIGHTS = {
+    "life_flip_accident": 10, "hospital_regular": 10,
+    "lottery_curse": 9,       "power_fall": 9,
+    "remarriage": 8,          "two_lives": 8,     "extramarital": 8,
+    "friend_betrayal": 7,     "windfall_fall": 7, "business_repeat_fail": 7,
+    "big_scam": 7,            "tax_lawsuit": 7,   "parent_shadow": 7,
+    "triangle": 7,            "double_life": 7,   "spouse_illness": 7,
+    "investment_burn": 7,     "gambling_pattern": 7,
+    "inheritance_war": 6,     "child_burden": 6,  "hidden_family": 6,
+    "unable_to_marry": 6,     "childless": 6,     "old_love_return": 6,
+    "spouse_dominates": 6,
+    "first_love_obsession": 5,"late_marriage": 5, "self_made_rich": 5,
+    "younger_spouse": 4,      "older_spouse": 4,  "love_after_60": 4,
+    "wealth_late": 4,
+}
+
+SCENARIO_CATEGORY = {
+    "life_flip_accident": "accident", "hospital_regular": "accident",
+    "lottery_curse": "accident",      "power_fall": "accident",
+    "extramarital": "love",  "two_lives": "love",    "remarriage": "love",
+    "old_love_return": "love","triangle": "love",    "double_life": "love",
+    "first_love_obsession": "love", "late_marriage": "love",
+    "unable_to_marry": "love","spouse_dominates": "love",
+    "younger_spouse": "love", "older_spouse": "love",
+    "spouse_illness": "love", "childless": "love",  "love_after_60": "love",
+    "friend_betrayal": "wealth","windfall_fall": "wealth",
+    "business_repeat_fail": "wealth","investment_burn": "wealth",
+    "self_made_rich": "wealth","gambling_pattern": "wealth",
+    "wealth_late": "wealth",  "big_scam": "wealth", "inheritance_war": "wealth",
+    "child_burden": "family", "parent_shadow": "family","hidden_family": "family",
+    "tax_lawsuit": "power",
+}
+
+CATEGORY_MAX = {"accident": 2, "love": 2, "wealth": 2, "family": 1, "power": 1}
+
+
 # ─── X-4-I-3: 사주 핵심 종합 진단 박스 ──────────────────────────────────────
 def build_saju_core_diagnosis(pils, name, birth_year, gender, current_year=None):
     """사주 핵심 진단 박스 — 양인+충 패턴 자동 감지, 모든 메뉴 헤더용"""
@@ -4446,8 +4483,10 @@ def build_saju_core_diagnosis(pils, name, birth_year, gender, current_year=None)
         else:
             out.append(f"> **{name}님은 안정적 흐름입니다. 내실 다지기에 최적입니다.**")
 
-        # === X-6-A: 막장 드라마 시나리오 16개 ===
-        scenarios = []
+        # === X-6-A + X-6-B: 막장 드라마 시나리오 수집 ===
+        active_scenarios = []
+        def _sadd(_key, _txt):
+            active_scenarios.append((SCENARIO_WEIGHTS.get(_key, 5), _key, _txt))
         _sipsung_ok = False
         _ss_cnt = {}
         bicap = jae = gwan = in_ss = sik_sang = 0
@@ -4520,70 +4559,70 @@ def build_saju_core_diagnosis(pils, name, birth_year, gender, current_year=None)
 
         # [A] 외도·혼외 위험
         if _dohwa_active and yangin_active and _hap_active:
-            scenarios.append(DRAMATIC_SCENARIOS["extramarital"].format(name=name))
+            _sadd("extramarital", DRAMATIC_SCENARIOS["extramarital"].format(name=name))
 
         # [B] 이중 인생 (관살혼잡·재성혼잡)
         if _gwansal_mix or _jaesung_mix:
-            scenarios.append(DRAMATIC_SCENARIOS["two_lives"].format(name=name))
+            _sadd("two_lives", DRAMATIC_SCENARIOS["two_lives"].format(name=name))
 
         # [C] 재혼·이별 구조
         if _chachaek or _ilji_chung:
-            scenarios.append(DRAMATIC_SCENARIOS["remarriage"].format(name=name))
+            _sadd("remarriage", DRAMATIC_SCENARIOS["remarriage"].format(name=name))
 
         # [D] 옛 인연 반복
         if gwan >= 1 and _hap_active and bool(internal_chung or cur_chung_targets):
-            scenarios.append(DRAMATIC_SCENARIOS["old_love_return"].format(name=name))
+            _sadd("old_love_return", DRAMATIC_SCENARIOS["old_love_return"].format(name=name))
 
         # [E] 삼각관계
         if _dohwa_active and yangin_active and _hap_active and bool(internal_chung or cur_chung_targets):
-            scenarios.append(DRAMATIC_SCENARIOS["triangle"].format(name=name))
+            _sadd("triangle", DRAMATIC_SCENARIOS["triangle"].format(name=name))
 
         # [F] 이중 인연 구조
         if _dohwa_active and yangin_active and _chachaek:
-            scenarios.append(DRAMATIC_SCENARIOS["double_life"].format(name=name))
+            _sadd("double_life", DRAMATIC_SCENARIOS["double_life"].format(name=name))
 
         # [G] 친구 배신·비겁쟁재
         if bicap >= 2 and jae >= 1:
-            scenarios.append(DRAMATIC_SCENARIOS["friend_betrayal"].format(name=name))
+            _sadd("friend_betrayal", DRAMATIC_SCENARIOS["friend_betrayal"].format(name=name))
 
         # [H] 큰 돈 들어와도 빠져나가는 구조
         if _peon_jae >= 1 and bicap >= 2:
-            scenarios.append(DRAMATIC_SCENARIOS["windfall_fall"].format(name=name))
+            _sadd("windfall_fall", DRAMATIC_SCENARIOS["windfall_fall"].format(name=name))
 
         # [I] 대형 사기 주의
         if _gup_jae >= 1 and _hyung_active and _peon_jae >= 1:
-            scenarios.append(DRAMATIC_SCENARIOS["big_scam"].format(name=name))
+            _sadd("big_scam", DRAMATIC_SCENARIOS["big_scam"].format(name=name))
 
         # [J] 재산 분쟁·상속 갈등
         if _peon_jae >= 1 and bicap >= 1 and _hyung_active:
-            scenarios.append(DRAMATIC_SCENARIOS["inheritance_war"].format(name=name))
+            _sadd("inheritance_war", DRAMATIC_SCENARIOS["inheritance_war"].format(name=name))
 
         # [K] 자녀 관계 굴곡
         if _sipsung_ok and (
             (sik_sang == 0 and bicap >= 2) or
             (_hyung_active and sik_sang >= 1)
         ):
-            scenarios.append(DRAMATIC_SCENARIOS["child_burden"].format(name=name))
+            _sadd("child_burden", DRAMATIC_SCENARIOS["child_burden"].format(name=name))
 
         # [L] 부모·가족 독립 과제
         if _sipsung_ok and (in_ss == 0 or in_ss >= 3):
-            scenarios.append(DRAMATIC_SCENARIOS["parent_shadow"].format(name=name))
+            _sadd("parent_shadow", DRAMATIC_SCENARIOS["parent_shadow"].format(name=name))
 
         # [M] 복잡한 가족 구조
         if _in_mix:
-            scenarios.append(DRAMATIC_SCENARIOS["hidden_family"].format(name=name))
+            _sadd("hidden_family", DRAMATIC_SCENARIOS["hidden_family"].format(name=name))
 
         # [N] 인생 대역전·극적 반전
         if yangin_active and bool(internal_chung or cur_chung_targets) and _hyung_active:
-            scenarios.append(DRAMATIC_SCENARIOS["life_flip_accident"].format(name=name))
+            _sadd("life_flip_accident", DRAMATIC_SCENARIOS["life_flip_accident"].format(name=name))
 
         # [O] 수술·입원 반복 패턴
         if yangin_active and (internal_chung or cur_chung_targets):
-            scenarios.append(DRAMATIC_SCENARIOS["hospital_regular"].format(name=name))
+            _sadd("hospital_regular", DRAMATIC_SCENARIOS["hospital_regular"].format(name=name))
 
         # [P] 권력 추락·강제 퇴장
         if _peon_gwan_cnt >= 2 and yangin_active and _hyung_active:
-            scenarios.append(DRAMATIC_SCENARIOS["power_fall"].format(name=name))
+            _sadd("power_fall", DRAMATIC_SCENARIOS["power_fall"].format(name=name))
 
         # === X-6-B: 추가 트리거 계산 ===
         _jeong_gwan = _ss_cnt.get("正官(정관)", 0)
@@ -4695,72 +4734,107 @@ def build_saju_core_diagnosis(pils, name, birth_year, gender, current_year=None)
         # === X-6-B 시나리오 출력 ===
         # [7] 첫사랑 못 잊음
         if _dohwa_active and _gongmang_jjs and any(j in _gongmang_jjs for j in pjjs):
-            scenarios.append(DRAMATIC_SCENARIOS_B["first_love_obsession"].format(name=name))
+            _sadd("first_love_obsession", DRAMATIC_SCENARIOS_B["first_love_obsession"].format(name=name))
 
         # [8] 만혼
         if (gwan <= 1) and _ilgan_weak and (in_ss >= 2):
-            scenarios.append(DRAMATIC_SCENARIOS_B["late_marriage"].format(name=name))
+            _sadd("late_marriage", DRAMATIC_SCENARIOS_B["late_marriage"].format(name=name))
 
         # [9] 결혼 못 함
         if (gwan == 0) and (bicap >= 2):
-            scenarios.append(DRAMATIC_SCENARIOS_B["unable_to_marry"].format(name=name))
+            _sadd("unable_to_marry", DRAMATIC_SCENARIOS_B["unable_to_marry"].format(name=name))
 
         # [10] 배우자에 휘둘림
         if _ilji_strong_b and _ilgan_weak:
-            scenarios.append(DRAMATIC_SCENARIOS_B["spouse_dominates"].format(name=name))
+            _sadd("spouse_dominates", DRAMATIC_SCENARIOS_B["spouse_dominates"].format(name=name))
 
         # [11] 연하 인연
         if _si_hap_b and (sik_sang >= 2):
-            scenarios.append(DRAMATIC_SCENARIOS_B["younger_spouse"].format(name=name))
+            _sadd("younger_spouse", DRAMATIC_SCENARIOS_B["younger_spouse"].format(name=name))
 
         # [12] 연상 인연
         if (in_ss >= 2) and (_jeong_gwan >= 1):
-            scenarios.append(DRAMATIC_SCENARIOS_B["older_spouse"].format(name=name))
+            _sadd("older_spouse", DRAMATIC_SCENARIOS_B["older_spouse"].format(name=name))
 
         # [13] 배우자 큰병
         if _ilji_chung and _hyung_active:
-            scenarios.append(DRAMATIC_SCENARIOS_B["spouse_illness"].format(name=name))
+            _sadd("spouse_illness", DRAMATIC_SCENARIOS_B["spouse_illness"].format(name=name))
 
         # [14] 자녀 없음
         if _sipsung_ok and (sik_sang == 0) and _siju_hyung:
-            scenarios.append(DRAMATIC_SCENARIOS_B["childless"].format(name=name))
+            _sadd("childless", DRAMATIC_SCENARIOS_B["childless"].format(name=name))
 
         # [15] 말년 인연
         if _sj_dohwa and (in_ss >= 1):
-            scenarios.append(DRAMATIC_SCENARIOS_B["love_after_60"].format(name=name))
+            _sadd("love_after_60", DRAMATIC_SCENARIOS_B["love_after_60"].format(name=name))
 
         # [J] 큰돈 무너짐
         if (_peon_jae >= 1) and yangin_active and bool(internal_chung or cur_chung_targets):
-            scenarios.append(DRAMATIC_SCENARIOS_B["lottery_curse"].format(name=name))
+            _sadd("lottery_curse", DRAMATIC_SCENARIOS_B["lottery_curse"].format(name=name))
 
         # [K] 사업 반복 실패
         if (bicap >= 2) and (jae >= 1) and (sik_sang <= 1):
-            scenarios.append(DRAMATIC_SCENARIOS_B["business_repeat_fail"].format(name=name))
+            _sadd("business_repeat_fail", DRAMATIC_SCENARIOS_B["business_repeat_fail"].format(name=name))
 
         # [L] 투자 손실
         if (_peon_jae >= 1) and yangin_active and _gishin_year:
-            scenarios.append(DRAMATIC_SCENARIOS_B["investment_burn"].format(name=name))
+            _sadd("investment_burn", DRAMATIC_SCENARIOS_B["investment_burn"].format(name=name))
 
         # [M] 자수성가 부자
         if (jae >= 1) and (sik_sang >= 2):
-            scenarios.append(DRAMATIC_SCENARIOS_B["self_made_rich"].format(name=name))
+            _sadd("self_made_rich", DRAMATIC_SCENARIOS_B["self_made_rich"].format(name=name))
 
         # [N] 도박 패턴
         if (_peon_jae >= 1) and yangin_active and _sj_dohwa:
-            scenarios.append(DRAMATIC_SCENARIOS_B["gambling_pattern"].format(name=name))
+            _sadd("gambling_pattern", DRAMATIC_SCENARIOS_B["gambling_pattern"].format(name=name))
 
         # [O] 말년 재물
         if (jae >= 1) and (in_ss >= 1) and _hwagae_active:
-            scenarios.append(DRAMATIC_SCENARIOS_B["wealth_late"].format(name=name))
+            _sadd("wealth_late", DRAMATIC_SCENARIOS_B["wealth_late"].format(name=name))
 
         # [P2] 세금·소송
         if (_peon_gwan_cnt >= 1) and _hyung_active and (_peon_jae >= 1):
-            scenarios.append(DRAMATIC_SCENARIOS_B["tax_lawsuit"].format(name=name))
+            _sadd("tax_lawsuit", DRAMATIC_SCENARIOS_B["tax_lawsuit"].format(name=name))
 
-        if scenarios:
+        if active_scenarios:
+            # 보너스 점수 적용
+            _bm = {}
+            for _, _bk, _ in active_scenarios:
+                _bcat = SCENARIO_CATEGORY.get(_bk, "other")
+                _bb = 0
+                if yangin_active and _bcat == "accident":           _bb += 2
+                if bool(internal_chung) and _bcat == "accident":    _bb += 2
+                if _hyung_active and _bcat in ("accident","power"): _bb += 2
+                _bm[_bk] = _bb
+            active_scenarios[:] = [(s+_bm.get(k,0),k,t) for s,k,t in active_scenarios]
+            active_scenarios.sort(key=lambda x: -x[0])
+
+            # TOP 7 카테고리 제한 선택
+            _sel = []
+            _ccat = {"accident":0,"love":0,"wealth":0,"family":0,"power":0}
+            for _ss, _sk, _st in active_scenarios:
+                _scat = SCENARIO_CATEGORY.get(_sk, "other")
+                if _ccat.get(_scat, 0) < CATEGORY_MAX.get(_scat, 1):
+                    _sel.append((_ss, _sk, _st))
+                    _ccat[_scat] = _ccat.get(_scat, 0) + 1
+                if len(_sel) >= 7:
+                    break
+            _remain = len(active_scenarios) - len(_sel)
+
             out.append(f"\n---\n### ★ {name}님 사주 충격 진단 ★\n")
-            for sc in scenarios:
-                out.append(sc + "\n")
+            for _, _, _st in _sel:
+                out.append(_st + "\n")
+            if _remain > 0:
+                _rem_items = [s for s in active_scenarios if s not in _sel]
+                _rem_html = "".join(
+                    f"<p style='margin:6px 0;font-size:13px;'>{_rt}</p>"
+                    for _, _, _rt in _rem_items
+                )
+                out.append(
+                    f"\n<details><summary>📌 <b>이 외 {_remain}개 패턴 추가 발동</b> "
+                    f"(클릭하여 펼치기)</summary>"
+                    f"\n{_rem_html}</details>\n"
+                )
 
         out.append("\n⬇️ 아래에 세부 분석이 이어집니다.\n---")
 
@@ -12919,7 +12993,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
     try:
         _core_diag = build_saju_core_diagnosis(pils, name, birth_year, gender)
         if _core_diag:
-            st.markdown(_core_diag)
+            st.markdown(_core_diag, unsafe_allow_html=True)
     except Exception:
         pass
 
@@ -15697,7 +15771,7 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
     try:
         _core_diag = build_saju_core_diagnosis(pils, name, birth_year, gender)
         if _core_diag:
-            st.markdown(_core_diag)
+            st.markdown(_core_diag, unsafe_allow_html=True)
     except Exception:
         pass
 
