@@ -4383,6 +4383,196 @@ SCENARIO_CATEGORY = {
 CATEGORY_MAX = {"accident": 2, "love": 2, "wealth": 2, "family": 1, "power": 1}
 
 
+# ─── X-6-I: 시기별 명확화 + 단일 결론 박스 ─────────────────────────────────────
+def _x6i_danger_label(key):
+    _M = {"hospital_regular":"수술·입원","life_flip_accident":"큰 사고",
+          "lottery_curse":"재물 붕괴","windfall_fall":"큰돈 유출",
+          "friend_betrayal":"배신·재물손실","power_fall":"권력 추락",
+          "big_scam":"대형 사기","tax_lawsuit":"관재·소송"}
+    return _M.get(key, "위험 패턴")
+
+
+def get_scenario_timing(key, saju_data):
+    """시나리오별 시기 판별 — past/now/soon/future"""
+    current_year   = saju_data.get("current_year", datetime.now().year)
+    yangin_active  = saju_data.get("yangin_active", False)
+    chung_active   = saju_data.get("chung_active", False)
+    cur_yangin_hit = saju_data.get("cur_yangin_hit", False)
+    past_active    = saju_data.get("past_active", [])
+    future_active  = saju_data.get("future_active", [])
+    pils           = saju_data.get("pils", [])
+
+    def _yr(label):
+        try:
+            return int(str(label).split("년")[0].strip())
+        except Exception:
+            return None
+
+    # 사고·수술 (양인+충)
+    if key in ("hospital_regular", "life_flip_accident"):
+        if yangin_active and (chung_active or cur_yangin_hit):
+            return "now", current_year
+        if past_active:
+            y = _yr(past_active[-1])
+            if y: return "past", y
+        if future_active:
+            y = _yr(future_active[0])
+            if y: return "soon", y
+        return "future", None
+
+    # 큰돈 패턴 (재성 세운 탐색)
+    if key in ("lottery_curse", "windfall_fall"):
+        if saju_data.get("sewoon_sipsung","") in ("偏財(편재)","正財(정재)","偏財","正財"):
+            return "now", current_year
+        try:
+            for dy in range(1, 10):
+                fy = current_year + dy
+                _sw = get_yearly_luck(pils, fy) or {}
+                if _sw.get("십성_천간","") in ("偏財","正財"):
+                    return "soon", fy
+        except Exception:
+            pass
+        return "future", None
+
+    # 결혼·배우자 패턴
+    if key in ("remarriage", "two_lives", "spouse_illness", "double_life"):
+        if chung_active and saju_data.get("bigyeop_jaengjae", False):
+            return "now", current_year
+        if past_active:
+            y = _yr(past_active[-1])
+            if y: return "past", y
+        return "future", None
+
+    # 비겁쟁재 (비견/겁재 세운 탐색)
+    if key in ("friend_betrayal", "business_repeat_fail", "big_scam"):
+        if saju_data.get("sewoon_sipsung","") in ("比肩(비견)","劫財(겁재)","比肩","劫財"):
+            return "now", current_year
+        if past_active:
+            y = _yr(past_active[0])
+            if y: return "past", y
+        try:
+            for dy in range(1, 8):
+                fy = current_year + dy
+                _sw = get_yearly_luck(pils, fy) or {}
+                if _sw.get("십성_천간","") in ("比肩","劫財"):
+                    return "soon", fy
+        except Exception:
+            pass
+        return "future", None
+
+    # 양인 직격
+    if key in ("power_fall",):
+        if cur_yangin_hit: return "now", current_year
+        if future_active:
+            y = _yr(future_active[0])
+            if y: return "soon", y
+        return "future", None
+
+    return "future", None
+
+
+def format_scenario_with_timing(key, text, timing, year):
+    """시기 라벨을 시나리오 텍스트 앞에 추가"""
+    if year is None and timing in ("soon", "past"):
+        timing = "future"
+    _L = {
+        "past":   f"📍 **[이미 발동 — {year}년경]**  \n",
+        "now":    f"🔴 **[지금 발동 중 — {year}년 정점]**  \n",
+        "soon":   f"⏰ **[곧 발동 — {year}년경 예정]**  \n",
+        "future": "🔮 **[미래 패턴]**  \n",
+    }
+    return _L.get(timing, "") + text
+
+
+def _x6i_cheonul_years(pils, ilgan, current_year):
+    """천을귀인 활성 연도 추출 (±1~+7년 탐색)"""
+    _CUG = {"甲":["丑","未"],"戊":["丑","未"],"庚":["丑","未"],
+            "乙":["子","申"],"己":["子","申"],
+            "丙":["亥","酉"],"丁":["亥","酉"],
+            "壬":["卯","巳"],"癸":["卯","巳"],"辛":["寅","午"]}
+    _jjs = set(_CUG.get(ilgan, []))
+    _GZ  = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"]
+    good = []
+    for dy in range(0, 8):
+        y = current_year + dy
+        jj = _GZ[(y - 4) % 12]
+        if jj in _jjs:
+            good.append((y, "천을귀인 활성 — 귀인 도움·위기 회복"))
+    return good[:2]
+
+
+def build_unified_conclusion(name, saju_data, active_scenarios):
+    """대박 vs 망함 단일 결론 박스"""
+    try:
+        current_year = saju_data.get("current_year", datetime.now().year)
+        ilgan        = saju_data.get("ilgan", "")
+        pils         = saju_data.get("pils", [])
+
+        # 위험 시기
+        _danger_keys = {"hospital_regular","life_flip_accident","lottery_curse",
+                        "windfall_fall","power_fall","big_scam","tax_lawsuit"}
+        danger_years = {}
+        for sc, key, txt in active_scenarios:
+            if key in _danger_keys:
+                try:
+                    tm, yr = get_scenario_timing(key, saju_data)
+                    if yr and tm in ("now","soon","past"):
+                        danger_years.setdefault(yr, []).append(_x6i_danger_label(key))
+                except Exception:
+                    pass
+
+        # 좋은 시기
+        good_years = _x6i_cheonul_years(pils, ilgan, current_year)
+        try:
+            for dy in range(0, 10):
+                fy = current_year + dy
+                _sw = get_yearly_luck(pils, fy) or {}
+                if _sw.get("십성_천간","") in ("偏財","正財","正官"):
+                    if not any(y == fy for y, _ in good_years):
+                        good_years.append((fy, "재성·정관 세운 — 수입·성취 기회"))
+                        break
+        except Exception:
+            pass
+
+        out = [f"\n---\n## 🎯 {name}님 사주 단일 결론\n",
+               "**시기별 명확화 — 대박과 위기 시기는 다릅니다.**\n"]
+
+        if good_years:
+            out.append("\n**✨ 좋은 시기 (기회·회복·귀인)**")
+            for yr, reason in sorted(set(good_years), key=lambda x: x[0]):
+                out.append(f"- **{yr}년경**: {reason}")
+
+        if danger_years:
+            out.append("\n**⚠️ 위험 시기 (사고·재물손실·위기)**")
+            for yr in sorted(danger_years.keys()):
+                out.append(f"- **{yr}년경**: {', '.join(set(danger_years[yr]))}")
+
+        out.append("\n**💡 종합 방향**")
+        if danger_years and good_years:
+            mn_d = min(danger_years.keys())
+            mn_g = min(y for y, _ in good_years)
+            if mn_d <= current_year:
+                out.append("- 지금 위험 한가운데 — **방어 최우선**")
+                if mn_g > current_year:
+                    out.append(f"- {mn_g}년부터 **적극 행동** — 기회 잡기")
+            elif mn_d < mn_g:
+                out.append(f"- {mn_d}년까지 **안전 모드** — 사고·손실 방어")
+                out.append(f"- {mn_g}년부터 **적극 행동** — 기회 잡기")
+            else:
+                out.append(f"- {mn_g}년에 **기회 잡기** — 귀인 활성")
+                out.append(f"- {mn_d}년경 **방어 모드** — 위험 회피")
+        elif good_years:
+            out.append(f"- {min(y for y,_ in good_years)}년 적극 행동 권장")
+        elif danger_years:
+            out.append("- 현재 위험 집중 — 방어와 내실 다지기 우선")
+        else:
+            out.append("- 평이한 흐름 — 꾸준히 실력 쌓기")
+
+        return "\n".join(out)
+    except Exception:
+        return ""
+
+
 # ─── X-6-G: 혼인 상태 기반 시나리오 필터 ─────────────────────────────────────
 def filter_scenarios_by_marital(active_scenarios, marital_status, name):
     """혼인 상태에 따라 시나리오 제거 + 톤 변경"""
@@ -4850,6 +5040,27 @@ def build_saju_core_diagnosis(pils, name, birth_year, gender, current_year=None)
         except Exception:
             pass
 
+        # === X-6-I: saju_data 패키징 ===
+        _saju_data_6i = {
+            "pils": pils, "name": name, "birth_year": birth_year,
+            "current_year": current_year,
+            "ilgan": pcgs[1] if len(pcgs) > 1 else "",
+            "ilji":  pjjs[1] if len(pjjs) > 1 else "",
+            "yangin_active": yangin_active, "yangin_pos": yangin_pos,
+            "chung_active": bool(internal_chung or cur_chung_targets),
+            "cur_yangin_hit": cur_yangin_hit,
+            "past_active": past_active, "future_active": future_active,
+            "internal_chung": internal_chung, "cur_chung_targets": cur_chung_targets,
+            "_GZ_SUNG": _GZ_SUNG, "_CHUNG_MAP": _CHUNG_MAP,
+            "bigyeop_jaengjae": (bicap >= 2 and jae >= 1),
+            "sewoon_sipsung": "",
+        }
+        try:
+            _sw_6i = get_yearly_luck(pils, current_year) or {}
+            _saju_data_6i["sewoon_sipsung"] = _sw_6i.get("십성_천간", "")
+        except Exception:
+            pass
+
         if active_scenarios:
             # 보너스 점수 적용
             _bm = {}
@@ -4875,9 +5086,22 @@ def build_saju_core_diagnosis(pils, name, birth_year, gender, current_year=None)
                     break
             _remain = len(active_scenarios) - len(_sel)
 
+            # 단일 결론 박스 (충격 진단 상단)
+            try:
+                _uc = build_unified_conclusion(name, _saju_data_6i, active_scenarios)
+                if _uc:
+                    out.append(_uc)
+            except Exception:
+                pass
+
             out.append(f"\n---\n### ★ {name}님 사주 충격 진단 ★\n")
-            for _, _, _st in _sel:
-                out.append(_st + "\n")
+            for _ss_t, _sk_t, _st_t in _sel:
+                try:
+                    _tm_t, _yr_t = get_scenario_timing(_sk_t, _saju_data_6i)
+                    _st_t = format_scenario_with_timing(_sk_t, _st_t, _tm_t, _yr_t)
+                except Exception:
+                    pass
+                out.append(_st_t + "\n")
             if _remain > 0:
                 _rem_items = [s for s in active_scenarios if s not in _sel]
                 _rem_html = "".join(
