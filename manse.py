@@ -4383,6 +4383,156 @@ SCENARIO_CATEGORY = {
 CATEGORY_MAX = {"accident": 2, "love": 2, "wealth": 2, "family": 1, "power": 1}
 
 
+# ─── X-6-P: 막장 드라마 소설 스토리텔링 ─────────────────────────────────────────
+PATTERN_NARRATIVE_TYPE = {
+    "식상태왕_홍염활성":    "외부 새 인연 등장형",
+    "무관_상관세운_기혼여": "기존 남편 충돌형",
+    "비겁쟁재_비견세운":    "친구 배신·동업 함정형",
+    "관살혼잡_정관세운":    "양다리·선택 시기형",
+    "재다신약_편재세운_남": "감당 못 할 여자 등장형",
+    "양인+충+기혼":         "사고·이별 정점형",
+    "기본형":               "일반 흐름",
+}
+
+NARRATIVE_TEMPLATES = {
+    "무관_상관세운_기혼여": (
+        "{year}년 봄, {name}님 안에서 무언가가 움직입니다.\n"
+        "상관 세운이 시작되어 자유 욕구가 폭발합니다.\n\n"
+        "남편과의 대화가 점점 줄어듭니다.\n"
+        "'이렇게 평생 살 수 있을까' 고민이 깊어집니다.\n\n"
+        "여름이 되면 친구 같은 새 사람이 다가옵니다.\n"
+        "그 사람과의 대화가 너무 통합니다.\n"
+        "{name}님 마음이 흔들립니다.\n\n"
+        "가을이 되면 결정의 시기입니다.\n"
+        "남편과의 충돌이 정점에 달합니다.\n"
+        "이혼·퇴사 충동이 강하게 올라옵니다.\n\n"
+        "이건 여명 상관 세운의 정해진 흐름입니다.\n"
+        "충동으로 내린 결정은 6개월 후 반드시 후회합니다."
+    ),
+    "식상태왕_홍염활성": (
+        "{year}년 봄, {name}님 앞에 한 사람이 나타납니다.\n"
+        "{zodiac}, 빨간 셔츠를 자주 입는 밝고 표현력 강한 사람입니다.\n\n"
+        "그는 첫 만남부터 강한 매혹으로 {name}님을 흔듭니다.\n"
+        "{name}님은 끌립니다.\n\n"
+        "여름이 되면 {name}님이 데이트비·선물·시간을 다 부담합니다.\n"
+        "그는 받기만 합니다. 책임은 회피합니다.\n\n"
+        "가을이 되면 그는 더 잘해주는 다른 사람에게로 갑니다.\n"
+        "{name}님 통장은 비고, 마음에는 큰 상처만 남습니다.\n\n"
+        "이건 식상태왕 + 홍염살 직격의 정해진 흐름입니다.\n"
+        "끌릴수록 손실 — 자제가 답입니다."
+    ),
+    "비겁쟁재_비견세운": (
+        "{year}년 봄, {name}님 앞에 친구 한 명이 다가옵니다.\n"
+        "{zodiac}, 강한 카리스마를 가진 {name}님과 비슷한 사람입니다.\n\n"
+        "그는 '같이 사업하자, 동업하자' 제안합니다.\n"
+        "의리로 시작하는 권유입니다.\n\n"
+        "여름이 되면 {name}님이 자본금을 냅니다.\n"
+        "상대는 명의·지분만 챙깁니다.\n\n"
+        "가을이 되면 사업이 흔들립니다.\n"
+        "상대는 손 떼고 떠납니다.\n"
+        "{name}님 돈만 사라집니다.\n\n"
+        "이건 비겁쟁재 + 양인 + 일지충의 정해진 흐름입니다.\n"
+        "동업·보증 — 사주가 가리킨 평생 금지입니다."
+    ),
+    "관살혼잡_정관세운": (
+        "{year}년, {name}님 앞에 동시에 두 사람이 나타납니다.\n"
+        "한 명은 안정적이고, 한 명은 강렬합니다.\n\n"
+        "봄부터 여름까지 {name}님은 양쪽 모두에게 시간을 씁니다.\n"
+        "결정을 미룹니다.\n\n"
+        "가을이 되면 안정형이 떠납니다.\n"
+        "더 확신 있는 사람을 찾아서입니다.\n\n"
+        "이건 관살혼잡의 정해진 흐름입니다.\n"
+        "선택 안 하면 둘 다 잃습니다."
+    ),
+    "재다신약_편재세운_남": (
+        "{year}년 봄, {name}님 앞에 강렬한 여성이 나타납니다.\n"
+        "화려하고 활동적이며 {name}님의 모든 것을 끌어당깁니다.\n\n"
+        "여름이 되면 {name}님이 모든 것을 부담하기 시작합니다.\n"
+        "데이트·선물·여행 — 전부 {name}님 카드입니다.\n\n"
+        "가을이 되면 통장이 비어갑니다.\n"
+        "그녀는 여전히 요구합니다.\n\n"
+        "이건 재다신약 + 편재 세운의 정해진 흐름입니다.\n"
+        "지금 손 놓으면 더 큰 손실을 막을 수 있습니다."
+    ),
+    "양인+충+기혼": (
+        "{year}년은 {name}님에게 가장 조심해야 할 해입니다.\n"
+        "양인과 충이 동시에 발동하는 정점입니다.\n\n"
+        "봄부터 몸과 관계 모두 조심해야 합니다.\n"
+        "작은 충돌이 큰 사건으로 번지는 시기입니다.\n\n"
+        "여름이 정점 — 사고·수술·갑작스러운 이별 위험이 최고조입니다.\n\n"
+        "가을 이후 서서히 안정됩니다.\n"
+        "이 시기를 버티면 다음 사이클이 열립니다.\n\n"
+        "이건 양인+충의 정해진 흐름입니다.\n"
+        "방어가 최우선입니다."
+    ),
+    "기본형": (
+        "{year}년, {name}님 앞에 {zodiac}이 나타납니다.\n\n"
+        "{intent_text}\n\n"
+        "사주가 가리키는 흐름입니다. 의식적으로 선택하십시오."
+    ),
+}
+
+
+def classify_narrative_pattern(saju_data, gender, marital_status):
+    """본인 사주 패턴 자동 분류 (우선순위 순)"""
+    try:
+        sw_ss       = saju_data.get("sewoon_sipsung", "")
+        yangin_act  = saju_data.get("yangin_active", False)
+        chung_act   = saju_data.get("chung_active", False)
+        bigyeop_jae = saju_data.get("bigyeop_jaengjae", False)
+        ilgan       = saju_data.get("ilgan", "")
+        siksang     = saju_data.get("siksang", 0)
+        gwan        = saju_data.get("gwan", 0)
+        jae         = saju_data.get("jae", 0)
+        gwansal_mix = saju_data.get("gwansal_mix", False)
+        ilgan_weak  = saju_data.get("ilgan_weak", False)
+        cur_year    = saju_data.get("current_year", datetime.now().year)
+        _HY   = {"甲":"午","乙":"申","丙":"寅","丁":"未","戊":"辰","己":"辰",
+                 "庚":"戌","辛":"酉","壬":"子","癸":"申"}
+        _JJ12 = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"]
+        sw_jj    = _JJ12[(cur_year - 4) % 12]
+        hongyeom = _HY.get(ilgan, "") == sw_jj
+        is_married = marital_status in ("기혼","재혼")
+        is_female  = gender in ("여","女")
+
+        if siksang >= 2 and hongyeom:                                       return "식상태왕_홍염활성"
+        if gwan == 0 and sw_ss == "상관" and is_female and is_married:      return "무관_상관세운_기혼여"
+        if bigyeop_jae and sw_ss == "비견":                                 return "비겁쟁재_비견세운"
+        if gwansal_mix and sw_ss == "정관":                                  return "관살혼잡_정관세운"
+        if jae >= 2 and ilgan_weak and not is_female and sw_ss == "편재":   return "재다신약_편재세운_남"
+        if yangin_act and chung_act and is_married:                          return "양인+충+기혼"
+        return "기본형"
+    except Exception:
+        return "기본형"
+
+
+def build_dramatic_narrative(pils, name, gender, marital_status, saju_data):
+    """사주 패턴 자동 분류 후 소설 스토리텔링 박스 생성"""
+    try:
+        cur_year = saju_data.get("current_year", datetime.now().year)
+        pattern  = classify_narrative_pattern(saju_data, gender, marital_status)
+        p_type   = PATTERN_NARRATIVE_TYPE.get(pattern, "")
+        _CG10 = ["甲","乙","丙","丁","戊","己","庚","辛","壬","癸"]
+        _JJ12 = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"]
+        sw_cg   = _CG10[(cur_year - 4) % 10]
+        sw_jj   = _JJ12[(cur_year - 4) % 12]
+        zodiac  = ZODIAC_BY_JIJI.get(sw_jj, "")
+        intent  = SIPSUNG_INTENT.get(saju_data.get("sewoon_sipsung",""), "")
+        tmpl    = NARRATIVE_TEMPLATES.get(pattern, NARRATIVE_TEMPLATES["기본형"])
+        narrative = tmpl.format(
+            name=name, year=cur_year, zodiac=zodiac,
+            person=INCOMING_PERSON_MAP.get(sw_cg,""),
+            intent_text=f"십성: {saju_data.get('sewoon_sipsung','')} — {intent}" if intent else "",
+        )
+        out = [f"\n---\n## 📖 {cur_year}년 {name}님 사주 드라마\n"]
+        if p_type:
+            out.append(f"**패턴: {p_type}**\n")
+        out.append(narrative)
+        return "\n".join(out)
+    except Exception:
+        return ""
+
+
 # ─── X-6-I: 시기별 명확화 + 단일 결론 박스 ─────────────────────────────────────
 def _x6i_danger_label(key):
     _M = {"hospital_regular":"수술·입원","life_flip_accident":"큰 사고",
@@ -5335,6 +5485,9 @@ def build_saju_core_diagnosis(pils, name, birth_year, gender, current_year=None)
             "_GZ_SUNG": _GZ_SUNG, "_CHUNG_MAP": _CHUNG_MAP,
             "bigyeop_jaengjae": (bicap >= 2 and jae >= 1),
             "sewoon_sipsung": "",
+            "siksang": sik_sang, "gwan": gwan, "jae": jae,
+            "gwansal_mix": _gwansal_mix,
+            "ilgan_weak": _ilgan_weak if "_ilgan_weak" in dir() else False,
         }
         try:
             _sw_6i = get_yearly_luck(pils, current_year) or {}
@@ -5380,6 +5533,14 @@ def build_saju_core_diagnosis(pils, name, birth_year, gender, current_year=None)
                 _yrs = build_yearly_relationship_story(pils, name, gender, current_year)
                 if _yrs:
                     out.append(_yrs)
+            except Exception:
+                pass
+
+            # X-6-P: 막장 드라마 소설 스토리텔링
+            try:
+                _nar = build_dramatic_narrative(pils, name, gender, _marital_g, _saju_data_6i)
+                if _nar:
+                    out.append(_nar)
             except Exception:
                 pass
 
