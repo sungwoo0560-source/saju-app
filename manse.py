@@ -4532,9 +4532,109 @@ SIPSUNG_INTENT = {
     "정인": "어머니 같은 보호자·후원자. 따뜻한 지원.",
 }
 
+# ─── X-6-J-4: 관계 의도 매트릭스 (구체 행동 + 돈 흐름) ─────────────────────
+RELATIONSHIP_INTENT_MATRIX = {
+    ("비겁쟁재","비견"): {
+        "의도": "이 사람은 동업·사업 같이 하자고 옵니다. 본인이 자본금 내라고 합니다.",
+        "돈흐름": "본인이 돈 내고, 상대는 명의·지분만 챙깁니다. 사업이 망하면 본인 돈만 사라집니다.",
+        "결말": "받으면 본인이 다 떠안습니다. 거절하면 적이 됩니다.",
+        "경고": "🔴 사주에 박힌 함정 — 동업·보증 평생 금지.",
+    },
+    ("비겁쟁재","겁재"): {
+        "의도": "친한 친구·형제 행세하며 옵니다. '이번만 도와줘' — 본인이 빌려줍니다.",
+        "돈흐름": "본인이 돈 빌려주면 안 갚습니다. 의리 깨지니까 돌려달라 못 합니다.",
+        "결말": "돈 잃고 친구도 잃습니다.",
+        "경고": "🔴 감정 호소 + 의리 자극 = 함정.",
+    },
+    ("재다신약","편재"): {
+        "의도": "이 사람은 본인이 감당 못 합니다. 사치·놀이·여행 끝없이 요구.",
+        "돈흐름": "데이트비 100% 본인. 선물·여행·기념일 다 본인. 결혼하면 시댁·살림비까지 본인.",
+        "결말": "1년 후 통장 비고 카드 빚만 남습니다.",
+        "경고": "🔴 만나면 통장 비고 건강 무너집니다.",
+    },
+    ("재다신약","정재"): {
+        "의도": "안정 추구하나 본인 한계 모릅니다. 결혼 후 끝없는 안정 요구.",
+        "돈흐름": "결혼하면 본인이 평생 가계 책임. 상대는 검소하나 본인 능력 이상 요구.",
+        "결말": "결혼 후 본인이 평생 끌려갑니다.",
+        "경고": "⚠️ 본인 그릇 확인 후 결정.",
+    },
+    ("관살혼잡","정관"): {
+        "의도": "한 명은 안정형 결혼 후보, 또 한 명은 자극형. 동시에 옵니다.",
+        "돈흐름": "양쪽 다 본인이 챙겨야 함. 시간·돈·정성 분산. 한 명에 집중 못 함.",
+        "결말": "들통나면 둘 다 떠나고 본인만 빈손.",
+        "경고": "💡 선택 안 하면 평생 후회.",
+    },
+    ("관살혼잡","편관"): {
+        "의도": "강한 자극형 옵니다. 동시에 안정형도 함께.",
+        "돈흐름": "자극형에 끌려 시간·돈 쓰면서 안정형도 챙겨야 함. 이중 부담.",
+        "결말": "선택 늦으면 안정형 떠납니다.",
+        "경고": "⚠️ 둘 사이 흔들리는 시기 — 평생 한 번.",
+    },
+    ("형살활성","편관"): {
+        "의도": "이 사람은 본인 통제하러 옵니다. 처음엔 강한 매력.",
+        "돈흐름": "결혼 후 본인 통장·카드·재산 — 명의·관리권 모두 상대에게로. 본인은 용돈 받는 구조.",
+        "결말": "한 번 잡히면 빠져나오기 매우 어렵습니다.",
+        "경고": "🔴 형살 + 편관 = 가장 위험한 조합.",
+    },
+    ("식상태왕","식신"): {
+        "의도": "이 사람은 본인이 챙겨주는 입장으로 옵니다.",
+        "돈흐름": "본인이 데이트비·식사비·선물비 다 부담. 상대는 받기만. 시간·돈·정성 빨려갑니다.",
+        "결말": "6개월~1년 후 상대는 더 잘해주는 다른 사람에게 갑니다.",
+        "경고": "⚠️ 깊이 빠지면 본인만 상처.",
+    },
+    ("식상태왕","편관"): {
+        "의도": "권위형 상대가 본인 자유를 도전합니다.",
+        "돈흐름": "본인이 자유 추구하면서 상대 요구도 맞춰야 함. 이중 소진.",
+        "결말": "본인이 폭발해서 떠납니다.",
+        "경고": "💡 자유 본성 인정 후 결정.",
+    },
+    ("양인활성","비견"): {
+        "의도": "이 사람은 본인과 같은 칼날. 동급 강자끼리 충돌.",
+        "돈흐름": "사업·연애에서 한 자리 두고 다툼. 처음엔 동맹 — 나중엔 누가 차지하느냐.",
+        "결말": "한쪽이 무너져야 끝. 무너진 쪽은 평생 자존심 손상.",
+        "경고": "⚔️ 거리 두는 게 살길.",
+    },
+    ("양인활성","겁재"): {
+        "의도": "비슷한 강자가 친구 행세. 본인 자리·지분 노립니다.",
+        "돈흐름": "동업·동료 자리에서 한쪽이 다른 쪽 자리 차지하려 함.",
+        "결말": "한 자리 두고 다툼. 떨어진 쪽은 손해.",
+        "경고": "⚔️ 사고·소송 위험 동반.",
+    },
+    ("상관견관","정관"): {
+        "의도": "이 사람은 안정형으로 옵니다 — 본인이 답답합니다.",
+        "돈흐름": "본인의 자유 욕구를 상대는 이해 못 함. 사고 치고 헤어지면 위자료·재산 분할.",
+        "결말": "본인이 떠나거나 상대가 못 버티고 떠납니다.",
+        "경고": "💡 평행선 — 절대 안 만나는 두 사람.",
+    },
+    ("인성과다","편재"): {
+        "의도": "이 사람은 본인 안정을 부숩니다. 활동적·외향적.",
+        "돈흐름": "결혼 후 본인 집·차·통장 — 공동명의·이전 요구. 어머니 같은 본인은 거절 못 함.",
+        "결말": "5년 안에 본인 자산 절반이 상대 명의로 넘어갑니다.",
+        "경고": "🔴 재극인 — 본인 자산 무너짐.",
+    },
+    ("인성과다","정재"): {
+        "의도": "안정형이나 본인 의지하게 만드는 사람.",
+        "돈흐름": "본인이 결혼 후 상대에게 의지. 독립성 약화.",
+        "결말": "어머니 같은 연인 — 깊은 사랑 발전 어려움.",
+        "경고": "⚠️ 보호자 관계, 연애 아님.",
+    },
+    ("홍염살_직격","편재"): {
+        "의도": "이 사람은 매력으로 다가와서 본인 마음을 흔듭니다.",
+        "돈흐름": "본인이 푹 빠지면 — 명품·여행·집세·차까지 본인이 다 사줍니다. 상대는 받기만.",
+        "결말": "사주에 박힌 함정 — 끌릴수록 통장이 빕니다.",
+        "경고": "🔴 다른 사람에게도 똑같이 합니다.",
+    },
+    ("홍염살_직격","비견"): {
+        "의도": "친구 같은 매력으로 옴 + 본인 자원 끌어갑니다.",
+        "돈흐름": "친밀 관계 만든 후 동업·투자·돈 거래 요청.",
+        "결말": "표면 친밀 → 깊은 손실.",
+        "경고": "🔴 매혹에 속지 마세요.",
+    },
+}
+
 
 def build_yearly_relationship_story(pils, name, gender, current_year):
-    """올해 나타날 인연 시나리오 자동 생성"""
+    """올해 나타날 인연 시나리오 자동 생성 (X-6-J-4: 4단 분리 출력)"""
     try:
         import re as _re6j
         ilgan = pils[1].get("cg","") if len(pils)>1 else ""
@@ -4547,14 +4647,13 @@ def build_yearly_relationship_story(pils, name, gender, current_year):
         sw_cg = _CG10[(current_year - 4) % 10]
         sw_jj = _JJ12[(current_year - 4) % 12]
 
-        # 십성 (천간 기준)
+        # 세운 십성
         _ss_raw = TEN_GODS_MATRIX.get(ilgan, {}).get(sw_cg, "")
         _ss_m   = _re6j.search(r'\(([^)]+)\)', _ss_raw)
         ss      = _ss_m.group(1) if _ss_m else (_ss_raw or "미상")
 
         person = INCOMING_PERSON_MAP.get(sw_cg, "알 수 없는 기운의 사람")
         zodiac = ZODIAC_BY_JIJI.get(sw_jj, "")
-        intent = SIPSUNG_INTENT.get(ss, "")
 
         # 합/충/반합/홍염/도화
         _HAP6 = [frozenset({"子","丑"}),frozenset({"寅","亥"}),frozenset({"卯","戌"}),
@@ -4565,10 +4664,12 @@ def build_yearly_relationship_story(pils, name, gender, current_year):
                  frozenset({"亥","卯"}),frozenset({"卯","未"}),frozenset({"亥","未"}),
                  frozenset({"寅","午"}),frozenset({"午","戌"}),frozenset({"寅","戌"}),
                  frozenset({"巳","酉"}),frozenset({"酉","丑"}),frozenset({"巳","丑"})]
-        _HY   = {"甲":"午","乙":"申","丙":"寅","丁":"未",
-                 "戊":"辰","己":"辰","庚":"戌","辛":"酉","壬":"子","癸":"申"}
-        _DM   = {"寅":"卯","午":"卯","戌":"卯","申":"酉","子":"酉","辰":"酉",
-                 "巳":"午","酉":"午","丑":"午","亥":"子","卯":"子","未":"子"}
+        _HY  = {"甲":"午","乙":"申","丙":"寅","丁":"未",
+                "戊":"辰","己":"辰","庚":"戌","辛":"酉","壬":"子","癸":"申"}
+        _DM  = {"寅":"卯","午":"卯","戌":"卯","申":"酉","子":"酉","辰":"酉",
+                "巳":"午","酉":"午","丑":"午","亥":"子","卯":"子","未":"子"}
+        _HYUNG = [{"寅","巳","申"},{"丑","戌","未"},{"子","卯"}]
+        _AUTO_H = {"辰","午","酉","亥"}
 
         hap      = any(frozenset({ilji, sw_jj}) == h for h in _HAP6)
         chung    = _CM6.get(ilji,"") == sw_jj
@@ -4576,24 +4677,83 @@ def build_yearly_relationship_story(pils, name, gender, current_year):
         hongyeom = _HY.get(ilgan,"") == sw_jj
         dohwa    = _DM.get(ilji,"") == sw_jj
 
-        if hap and hongyeom:
-            ending = "깊은 인연 발전. 한 번 빠지면 헤어 나오기 어려움."
-        elif chung:
-            ending = "이별·갈등·충돌 가능성. 빠른 이별 위험."
-        elif banhap and hongyeom:
-            ending = "강한 끌림. 단 1년짜리 인연. 깊이 빠지면 위험."
-        elif hap:
-            ending = "깊은 융합. 진지한 관계 발전 가능."
-        else:
-            ending = "스쳐 지나가는 인연. 깊이 안 들어감."
+        # 패턴 탐지 (우선순위 순)
+        _active_pattern = None
+        try:
+            _sp = calc_sipsung(ilgan, pils)
+            _sc = {}
+            for _sv in _sp:
+                for _k in ["cg_ss","jj_ss"]:
+                    _v = _sv.get(_k,"-")
+                    if _v and _v!="-": _sc[_v]=_sc.get(_v,0)+1
+            _bicap  = _sc.get("比肩(비견)",0)+_sc.get("劫財(겁재)",0)
+            _jae    = _sc.get("偏財(편재)",0)+_sc.get("正財(정재)",0)
+            _siksang= _sc.get("食神(식신)",0)+_sc.get("傷官(상관)",0)
+            _insung = _sc.get("偏印(편인)",0)+_sc.get("正印(정인)",0)
+            _sanggan= _sc.get("傷官(상관)",0)
+            _peon_gwan = _sc.get("偏官(편관)",0)
+            _jeong_gwan= _sc.get("正官(정관)",0)
+            _peon_jae  = _sc.get("偏財(편재)",0)
+            _all_jj = [p.get("jj","") for p in pils]
+            _pjj_set = set(_all_jj)
+            _hyung = (any(set(h) <= _pjj_set for h in _HYUNG) or
+                      any(_all_jj.count(j)>=2 for j in _AUTO_H if j in _pjj_set))
+            _yd = get_yangin(pils)
+            _yangin = _yd and _yd.get("존재",False)
+            _si = get_ilgan_strength(ilgan, pils)
+            _weak = _si and _si.get("신강신약","") in ("신약","극신약")
 
+            if hongyeom:
+                _active_pattern = "홍염살_직격"
+            elif _yangin:
+                _active_pattern = "양인활성"
+            elif _bicap>=2 and _jae>=1:
+                _active_pattern = "비겁쟁재"
+            elif _hyung:
+                _active_pattern = "형살활성"
+            elif _siksang>=2:
+                _active_pattern = "식상태왕"
+            elif _peon_gwan>=1 and _jeong_gwan>=1:
+                _active_pattern = "관살혼잡"
+            elif _sanggan>=1 and _jeong_gwan>=1:
+                _active_pattern = "상관견관"
+            elif _jae>=2 and _weak:
+                _active_pattern = "재다신약"
+            elif _insung>=3:
+                _active_pattern = "인성과다"
+        except Exception:
+            pass
+
+        # RELATIONSHIP_INTENT_MATRIX 조회
+        _matrix_entry = None
+        if _active_pattern:
+            _matrix_entry = RELATIONSHIP_INTENT_MATRIX.get((_active_pattern, ss))
+            if not _matrix_entry:
+                # ss가 없으면 인접 ss로 폴백
+                for _k in RELATIONSHIP_INTENT_MATRIX:
+                    if _k[0] == _active_pattern:
+                        _matrix_entry = RELATIONSHIP_INTENT_MATRIX[_k]
+                        break
+
+        # 결말 (합/충 기반)
+        if hap and hongyeom:
+            _ending_base = "깊은 인연 발전. 한 번 빠지면 헤어 나오기 어려움."
+        elif chung:
+            _ending_base = "이별·갈등·충돌 가능성. 빠른 이별 위험."
+        elif banhap and hongyeom:
+            _ending_base = "강한 끌림. 단 1년짜리 인연. 깊이 빠지면 위험."
+        elif hap:
+            _ending_base = "깊은 융합. 진지한 관계 발전 가능."
+        else:
+            _ending_base = "스쳐 지나가는 인연. 깊이 안 들어감."
+
+        # 출력 구성
         out = [f"\n---\n## 📅 {current_year}년 {name}님 앞에 나타날 사람\n"]
         out.append(f"🧑 **인물**: {zodiac} / {person}")
-        if intent:
-            out.append(f"💭 **십성**: {ss} — {intent}\n")
-        else:
-            out.append(f"💭 **십성**: {ss}\n")
+        _simple = SIPSUNG_INTENT.get(ss,"")
+        out.append(f"💭 **십성**: {ss}" + (f" — {_simple}" if _simple else "") + "\n")
 
+        # 신호 라벨
         for sig, cond, label in [
             ("💋", hongyeom, "홍염살 직격 — 상대가 강하게 끌림"),
             ("🌸", dohwa,    "도화살 발동 — 본인 매력 폭발"),
@@ -4604,9 +4764,19 @@ def build_yearly_relationship_story(pils, name, gender, current_year):
             if cond:
                 out.append(f"{sig} **{label}**")
 
-        if intent:
-            out.append(f"\n⚠️ **상대 속마음**: {intent}")
-        out.append(f"📌 **결말 예측**: {ending}")
+        if out[-1] != "\n":
+            out.append("")
+
+        if _matrix_entry:
+            out.append(f"📍 **상대 의도**: {_matrix_entry['의도']}")
+            out.append(f"💸 **돈 흐름**: {_matrix_entry['돈흐름']}")
+            out.append(f"📌 **결말 예측**: {_matrix_entry['결말']}")
+            out.append(f"🚨 **경고**: {_matrix_entry['경고']}")
+        else:
+            if _simple:
+                out.append(f"📍 **상대 의도**: {_simple}")
+            out.append(f"📌 **결말 예측**: {_ending_base}")
+
         return "\n".join(out)
     except Exception:
         return ""
