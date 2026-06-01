@@ -7486,16 +7486,42 @@ def calc_children_count_precise(pils, gender):
             "壬":{"巳","午","辰"},
             "癸":{"辰","午","巳"},
         }
-        sijoo_weak = tj_jj in _WEAK.get(ilgan, set())
+        sijoo_weak   = tj_jj in _WEAK.get(ilgan, set())
 
-        if sijoo_weak:     result = max(0, result - 1)
-        if sijoo_kongmang: result = max(0, result - 1)
-        if sijoo_chung:    result = max(0, result - 1)
+        # X-6-K-2: 범위 출력 (단정 X)
+        if base == 0:
+            range_str = "0~1명 (자녀 인연 약함)"
+        elif base == 1:
+            range_str = "1~2명 (정성껏 키우는 구조)"
+        elif base == 2:
+            range_str = "2~3명 (다자녀 구조)"
+        else:
+            range_str = "3명 이상"
 
-        if result == 0:   return "0명 (자녀 인연 약함 — 정성껏 키우면 1명 가능)"
-        elif result == 1: return "1명 (자녀 1명에 집중하는 구조)"
-        elif result == 2: return "2명 (두 자녀 양육 구조)"
-        else:             return "3명 이상 (다자녀 구조)"
+        # 시주 강약 → 숫자 차감 없이 라벨만
+        notes = []
+        if sijoo_weak:     notes.append("시주 약 — 자녀와 거리 조심")
+        if sijoo_kongmang: notes.append("시주 공망 — 자녀 인연 늦거나 약함")
+        if sijoo_chung:    notes.append("시주 충 — 자녀와 갈등 가능")
+        # 강한 12운성 (제왕·건록·장생)
+        _STRONG = {
+            "甲":{"寅","卯","亥"},
+            "乙":{"卯","寅"},
+            "丙":{"午","巳","寅"},
+            "丁":{"午","巳"},
+            "戊":{"午","巳","寅"},
+            "己":{"午","巳"},
+            "庚":{"申","酉","巳"},
+            "辛":{"酉","申"},
+            "壬":{"子","亥","申"},
+            "癸":{"子","亥"},
+        }
+        if tj_jj in _STRONG.get(ilgan, set()):
+            notes.append("시주 강 — 자녀 효도형")
+
+        if notes:
+            return range_str + " · " + " / ".join(notes)
+        return range_str
     except Exception:
         return "산출 불가"
 
