@@ -15655,13 +15655,24 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
             _일주_str_s = pils[1].get("str","") or (pils[1].get("cg","") + pils[1].get("jj",""))
             if _일주_str_s in _GORAN:
                 if gender == "여":
+                    # X-6-K [4]: 혼인 상태 분기
+                    try:
+                        _ms_k4 = st.session_state.get("marriage_status","미혼")
+                    except Exception:
+                        _ms_k4 = "미혼"
+                    if _ms_k4 in ("기혼","재혼"):
+                        _고란_advice = "현재 배우자가 책임감 있는 사람인지 점검하세요. 외부 자극 차단 + 경제적 독립 필수."
+                    elif _ms_k4 in ("이혼","이혼/사별","사별"):
+                        _고란_advice = "다음 인연은 책임감 있는 사람으로. 같은 실수 반복 X."
+                    else:
+                        _고란_advice = "결혼 상대를 신중하게 고르고 경제적 독립 능력을 반드시 갖추십시오."
                     _danger_signals.append((
                         "🦢 고란살(孤鸞殺) — 독수공방 주의",
                         f"일주({_일주_str_s})에 고란살이 있습니다. "
                         f"여명에서 고란살은 배우자와 이별하거나 "
                         f"결혼 후에도 혼자 지내는 시간이 많은 살입니다. "
                         f"남편이 출장·해외 근무가 잦거나 이혼·사별로 혼자 되는 경우가 많습니다. "
-                        f"결혼 상대를 신중하게 고르고 경제적 독립 능력을 반드시 갖추십시오.",
+                        f"{_고란_advice}",
                         "주의"
                     ))
                 else:
