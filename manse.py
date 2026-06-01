@@ -4383,6 +4383,53 @@ SCENARIO_CATEGORY = {
 CATEGORY_MAX = {"accident": 2, "love": 2, "wealth": 2, "family": 1, "power": 1}
 
 
+# ─── X-6-G: 혼인 상태 기반 시나리오 필터 ─────────────────────────────────────
+def filter_scenarios_by_marital(active_scenarios, marital_status, name):
+    """혼인 상태에 따라 시나리오 제거 + 톤 변경"""
+    SKIP_FOR_MARRIED = [
+        "unable_to_marry", "late_marriage",
+        "first_love_obsession", "love_after_60",
+    ]
+    SKIP_FOR_DIVORCED = ["extramarital", "spouse_illness"]
+
+    MARRIED_RETONE = {
+        "remarriage": (
+            "💑 {name}님 사주는 결혼 두 번 구조입니다.\n"
+            "지금 결혼이 첫 번째라면 흔들림 시기가 옵니다.\n"
+            "의식적 대화·신뢰 회복이 핵심입니다."
+        ),
+        "two_lives": (
+            "💔 {name}님 원국에 두 가정 부양 구조입니다.\n"
+            "현재 가정 외 인연이 자극되는 시기 옵니다.\n"
+            "미리 차단 필수입니다."
+        ),
+    }
+    DIVORCED_RETONE = {
+        "remarriage": (
+            "💑 이미 첫 결혼이 끝난 상태입니다.\n"
+            "사주가 가리킨 첫 시험 무대였습니다.\n"
+            "다음 인연에서 진짜 부부 인연을 만납니다."
+        ),
+        "two_lives": (
+            "💔 두 가정 구조 — 재혼·새 인연 시기에 다시 흔들림 옵니다.\n"
+            "신중한 선택 필수."
+        ),
+    }
+
+    filtered = []
+    for score, key, text in active_scenarios:
+        if marital_status in ("기혼", "이혼", "사별") and key in SKIP_FOR_MARRIED:
+            continue
+        if marital_status in ("이혼", "사별") and key in SKIP_FOR_DIVORCED:
+            continue
+        if marital_status == "기혼" and key in MARRIED_RETONE:
+            text = MARRIED_RETONE[key].format(name=name)
+        elif marital_status in ("이혼", "사별") and key in DIVORCED_RETONE:
+            text = DIVORCED_RETONE[key].format(name=name)
+        filtered.append((score, key, text))
+    return filtered
+
+
 # ─── X-4-I-3: 사주 핵심 종합 진단 박스 ──────────────────────────────────────
 def build_saju_core_diagnosis(pils, name, birth_year, gender, current_year=None):
     """사주 핵심 진단 박스 — 양인+충 패턴 자동 감지, 모든 메뉴 헤더용"""
@@ -4795,6 +4842,13 @@ def build_saju_core_diagnosis(pils, name, birth_year, gender, current_year=None)
         # [P2] 세금·소송
         if (_peon_gwan_cnt >= 1) and _hyung_active and (_peon_jae >= 1):
             _sadd("tax_lawsuit", DRAMATIC_SCENARIOS_B["tax_lawsuit"].format(name=name))
+
+        # === X-6-G: 혼인 상태 필터 적용 ===
+        try:
+            _marital_g = st.session_state.get("marriage_status", "미혼")
+            active_scenarios = filter_scenarios_by_marital(active_scenarios, _marital_g, name)
+        except Exception:
+            pass
 
         if active_scenarios:
             # 보너스 점수 적용
