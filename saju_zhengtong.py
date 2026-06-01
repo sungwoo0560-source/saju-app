@@ -7110,11 +7110,66 @@ def detect_life_risk_signals(pils, saewoon_data=None):
     if pyeonjae >= 2 and ilgan in ["甲","丙","戊","庚","壬"]:
         baram_score += 20
         baram_reasons.append("양일간 + 편재 다발 — 외도 신호")
-    if baram_score >= 60:
+
+    # === X-6-F: 세운 연동 5개 추가 조건 ===
+    try:
+        from datetime import datetime as _dt6f
+        _cur_yr6f = _dt6f.now().year
+        _JJ6F = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"]
+        _sw_jj = _JJ6F[(_cur_yr6f - 4) % 12]
+
+        # 조건 1: 홍염살 발동 (일간×세운지지)
+        _HONGYEOM = {"甲":"午","乙":"申","丙":"寅","丁":"未",
+                     "戊":"辰","己":"辰","庚":"戌","辛":"酉","壬":"子","癸":"申"}
+        if _sw_jj == _HONGYEOM.get(ilgan, ""):
+            baram_score += 30
+            baram_reasons.append("홍염살 발동 — 이성 매력 폭발")
+
+        # 조건 2: 일지 도화살 + 세운 도화 (삼합 도화법)
+        _DOHWA_GRP = {
+            ("寅","午","戌"): "卯",
+            ("申","子","辰"): "酉",
+            ("巳","酉","丑"): "午",
+            ("亥","卯","未"): "子",
+        }
+        for _grp, _dh in _DOHWA_GRP.items():
+            if iljj in _grp and _sw_jj == _dh:
+                baram_score += 25
+                baram_reasons.append("일지 도화살 + 세운 도화 — 인연 폭발")
+                break
+
+        # 조건 3: 일지-세운 충 + 양인 동시
+        _iljj_sw_chung = any(
+            iljj in (ca, cb) and _sw_jj in (ca, cb) and iljj != _sw_jj
+            for ca, cb in chung_pairs
+        )
+        if _iljj_sw_chung and has_yangin:
+            baram_score += 20
+            baram_reasons.append("일지 충 + 양인 — 배우자궁 흔들림 + 외도 충동")
+
+        # 조건 4: 식상태왕 + 편재
+        if (sikshin + sanggan) >= 2 and pyeonjae >= 1:
+            baram_score += 15
+            baram_reasons.append("식상태왕 + 편재 — 자유 연애 충동")
+
+        # 조건 5: 일지-세운 육합 발동
+        _iljj_sw_hap = any(
+            iljj in (ha, hb) and _sw_jj in (ha, hb) and iljj != _sw_jj
+            for ha, hb in hap_pairs
+        )
+        if _iljj_sw_hap:
+            baram_score += 10
+            baram_reasons.append("일지 육합 — 도화 자극")
+    except Exception:
+        pass
+
+    if baram_score >= 81:
         baram_level, baram_msg = "🔴 매우 높음", "外桃花 강력 발동. 평생 이성 관계 주의.\n→ 합·충 운에 외도 위험 최대. 의식적 자기 통제 필수."
-    elif baram_score >= 40:
-        baram_level, baram_msg = "🟡 보통", "도화·합 강함. 합 운에 외도 위험. 자기 통제 필수.\n→ 한 사람에 집중하지 않으면 반드시 갈등이 생깁니다."
-    elif baram_score >= 20:
+    elif baram_score >= 61:
+        baram_level, baram_msg = "⚠️ 높음", "이성 인연이 강하게 자극되는 구조입니다.\n→ 이 시기 외도·충동 인연에 각별히 조심하십시오."
+    elif baram_score >= 41:
+        baram_level, baram_msg = "💡 보통", "도화·합 강함. 합 운에 외도 위험. 자기 통제 필수.\n→ 한 사람에 집중하지 않으면 반드시 갈등이 생깁니다."
+    elif baram_score >= 21:
         baram_level, baram_msg = "🟢 낮음", "🟢 평소 안전 — 단, 도화 운 만나면 흔들립니다. 충동 인연 주의."
     else:
         baram_level, baram_msg = "✅ 매우 낮음", "✅ 천성이 외도 안 합니다 — 의리형.\n→ 단, 도화 운(합 발동 해) 들어오면 이성 인연 자주.\n→ 기혼자는 의식적으로 자기 통제."
