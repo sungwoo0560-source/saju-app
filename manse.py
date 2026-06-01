@@ -12837,36 +12837,123 @@ def infer_current_worry(pils, birth_year, gender, marital_status=None):
                 _ms_norm = None  # 선택안함
 
             if _ms_norm == "싱글":
-                if _mar_r >= 70:
+                # X-6-F-2: 관성 부재·비겁쟁재 보정
+                _mar_adj = _mar_r
+                try:
+                    _ilgan_sg = pils[1].get("cg","") if len(pils)>1 else ""
+                    _sp_sg = calc_sipsung(_ilgan_sg, pils)
+                    _sc_sg = {}
+                    for _sg in _sp_sg:
+                        for _k in ["cg_ss","jj_ss"]:
+                            _v = _sg.get(_k,"-")
+                            if _v and _v!="-": _sc_sg[_v]=_sc_sg.get(_v,0)+1
+                    if _sc_sg.get("偏官(편관)",0)+_sc_sg.get("正官(정관)",0)==0:
+                        _mar_adj = max(0, _mar_adj - 15)  # 관성 부재
+                    if (_sc_sg.get("比肩(비견)",0)+_sc_sg.get("劫財(겁재)",0)>=2 and
+                            _sc_sg.get("偏財(편재)",0)+_sc_sg.get("正財(정재)",0)>=1):
+                        _mar_adj = max(0, _mar_adj - 10)  # 비겁쟁재
+                except Exception:
+                    _mar_adj = _mar_r
+                if _mar_adj >= 70:
                     title = "💕 좋은 인연이 들어올 시기입니다"
-                    message = (f"결혼 인연이 매우 좋은 사주입니다 ({_mar_r}/100). "
+                    message = (f"결혼 인연이 매우 좋은 사주입니다 ({_mar_adj}/100). "
                                f"합 운/천을귀인이 활성화되는 시기에 적극적으로 움직이세요. "
-                               f"새로운 인연을 만날 가능성이 높습니다.")
-                elif _mar_r >= 40:
+                               f"새로운 인연을 만납니다.")
+                elif _mar_adj >= 40:
                     title = "🔍 인연을 만들어가는 시기"
-                    message = (f"인연 기운은 보통입니다 ({_mar_r}/100). "
+                    message = (f"인연 기운은 보통입니다 ({_mar_adj}/100). "
                                f"적극적인 만남보다는 자기 성장과 매력을 다지는 시기입니다.")
                 else:
                     title = "🌱 자기 성장에 집중할 시기"
                     message = (f"지금은 연애보다 자기 자신을 가꾸는 시기입니다. "
                                f"진짜 맞는 인연은 자기 성숙 후에 나타납니다.")
             elif _ms_norm == "기혼":
-                if _div_r >= 60:
-                    title = "⚠️ 배우자 관계 주의 시기"
-                    message = (f"이혼·이별 기운이 들어옵니다 ({_div_r}/100). "
-                               f"배우자와 대화를 늘리세요.")
-                elif _aff_r >= 50:
-                    title = "🌹 이성 인연 활발 — 신중 관리"
-                    message = (f"도화·합 기운이 강합니다 ({_aff_r}/100). "
-                               f"기혼자는 관계 관리 필수입니다.")
-                else:
-                    title = "💑 부부 관계 안정적"
-                    message = (f"결혼 운 양호 ({_mar_r}/100), 이혼 위험 낮음 ({_div_r}/100). "
-                               f"현재 관계를 잘 가꾸어 가시면 됩니다.")
+                # X-6-F-2: 부부관계 안정도 재계산
+                _cp = 50
+                _cp_r = []
+                try:
+                    _ilgan_c = pils[1].get("cg","") if len(pils)>1 else ""
+                    _iljj_c  = pils[1].get("jj","") if len(pils)>1 else ""
+                    _all_jj_c = [p.get("jj","") for p in pils]
+                    _chp = [("子","午"),("丑","未"),("寅","申"),("卯","酉"),("辰","戌"),("巳","亥")]
+                    _hap_c = [("子","丑"),("寅","亥"),("卯","戌"),("辰","酉"),("巳","申"),("午","未")]
+                    # 일지 충 (원국 내)
+                    if any(_iljj_c in (a,b) and any(
+                            p.get("jj","") in (a,b) and p.get("jj","")!=_iljj_c
+                            for p in pils) for a,b in _chp):
+                        _cp -= 30; _cp_r.append("배우자궁 흔들림 — 의식적 대화 필요")
+                    # 양인 활성
+                    _yg_c = get_yangin(pils)
+                    if _yg_c and _yg_c.get("존재",False):
+                        _cp -= 20; _cp_r.append("양인 발동 — 충돌·갈등 위험")
+                    # 십성 분석
+                    _sp_c = calc_sipsung(_ilgan_c, pils)
+                    _sc_c = {}
+                    for _sc_v in _sp_c:
+                        for _k in ["cg_ss","jj_ss"]:
+                            _v = _sc_v.get(_k,"-")
+                            if _v and _v!="-": _sc_c[_v]=_sc_c.get(_v,0)+1
+                    _bicap_c = _sc_c.get("比肩(비견)",0)+_sc_c.get("劫財(겁재)",0)
+                    _jae_c   = _sc_c.get("偏財(편재)",0)+_sc_c.get("正財(정재)",0)
+                    _jg_c    = _sc_c.get("正官(정관)",0)
+                    _sg_c    = _sc_c.get("傷官(상관)",0)
+                    if _bicap_c>=2 and _jae_c>=1:
+                        _cp -= 15; _cp_r.append("비겁쟁재 — 외부 인연 자극")
+                    if _sc_c.get("偏官(편관)",0)>=1 and _jg_c>=1:
+                        _cp -= 15; _cp_r.append("관살혼잡 — 역할 혼란")
+                    if _jg_c>=1:
+                        _cp += 10; _cp_r.append("정관 강 — 안정 구조")
+                    if _sg_c>=2:
+                        _cp -= 10; _cp_r.append("식상태왕 — 표현 갈등")
+                    # 천을귀인
+                    _CUG = {"甲":["丑","未"],"戊":["丑","未"],"庚":["丑","未"],
+                            "乙":["子","申"],"己":["子","申"],
+                            "丙":["亥","酉"],"丁":["亥","酉"],
+                            "壬":["卯","巳"],"癸":["卯","巳"],"辛":["寅","午"]}
+                    if any(jj in _CUG.get(_ilgan_c,[]) for jj in _all_jj_c):
+                        _cp += 20; _cp_r.append("천을귀인 — 위기 시 회복력")
+                    # 일지 육합 (원국 내)
+                    if any(_iljj_c in (a,b) and any(
+                            p.get("jj","") in (a,b) and p.get("jj","")!=_iljj_c
+                            for p in pils) for a,b in _hap_c):
+                        _cp += 15; _cp_r.append("일지 육합 — 배우자와의 결속")
+                except Exception:
+                    _cp = max(0, 50 - (30 if has_chung else 0))
+                _cp = max(0, min(_cp, 100))
+                _cp_lv = ("🌟 매우 안정" if _cp>=81 else
+                          "✨ 양호"     if _cp>=61 else
+                          "💡 보통"     if _cp>=41 else
+                          "⚠️ 위험"    if _cp>=21 else
+                          "🔴 매우 위험")
+                _cp_txt = " · ".join(_cp_r[:3]) if _cp_r else "원국 분석 기반"
+                title = f"💑 부부관계 안정도: {_cp_lv}"
+                message = (f"부부관계 안정도 {_cp}/100 — {_cp_txt}.\n"
+                           f"{'배우자와 지금 바로 대화를 시작하십시오.' if _cp<41 else '현재 관계를 꾸준히 가꾸어 가십시오.'}")
             elif _ms_norm == "이혼":
+                # X-6-F-2: 재혼 인연 보정
+                _mar_dv = _mar_r
+                try:
+                    _ilgan_dv = pils[1].get("cg","") if len(pils)>1 else ""
+                    _all_jj_dv = [p.get("jj","") for p in pils]
+                    _sp_dv = calc_sipsung(_ilgan_dv, pils)
+                    _sc_dv = {}
+                    for _sd in _sp_dv:
+                        for _k in ["cg_ss","jj_ss"]:
+                            _v = _sd.get(_k,"-")
+                            if _v and _v!="-": _sc_dv[_v]=_sc_dv.get(_v,0)+1
+                    _CUG_DV = {"甲":["丑","未"],"戊":["丑","未"],"庚":["丑","未"],
+                               "乙":["子","申"],"己":["子","申"],
+                               "丙":["亥","酉"],"丁":["亥","酉"],
+                               "壬":["卯","巳"],"癸":["卯","巳"],"辛":["寅","午"]}
+                    if any(jj in _CUG_DV.get(_ilgan_dv,[]) for jj in _all_jj_dv):
+                        _mar_dv = min(100, _mar_dv + 20)
+                    if _sc_dv.get("正財(정재)",0)>=1 and _sc_dv.get("正官(정관)",0)>=1:
+                        _mar_dv = min(100, _mar_dv + 15)
+                except Exception:
+                    pass
                 title = "🌅 새로운 시작의 시기"
                 message = (f"지난 인연은 흘려 보내고 새 출발 준비하세요. "
-                           f"인연 기운은 {_mar_r}/100입니다.")
+                           f"재혼 인연 기운은 {_mar_dv}/100입니다.")
             else:
                 # 선택안함 — 점수 기반 기본 로직
                 if _div_r >= 60:
