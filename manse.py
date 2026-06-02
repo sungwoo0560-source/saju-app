@@ -4343,6 +4343,13 @@ DRAMATIC_SCENARIOS_B = {
         "편관+형살이 법적 문제 부릅니다.\n"
         "계약서·세무 신고 절대 빈틈 X."
     ),
+    "extra_marital_child": (
+        "💔 {name}님 사주 식상이 명리 기대치보다 자녀가 적습니다.\n"
+        "식상태왕 + 시주 강 + 자유 자리 중복인데 자녀 적음 = "
+        "남은 식상 에너지는 외부 인연·창작·양육 정성으로 분산되었거나 "
+        "잠재 패턴으로 박혀 있습니다. 홍염살 직격 시기에 "
+        "혼외 가능성 패턴이 강하게 발동합니다."
+    ),
 }
 
 
@@ -4361,6 +4368,7 @@ SCENARIO_WEIGHTS = {
     "first_love_obsession": 5,"late_marriage": 5, "self_made_rich": 5,
     "younger_spouse": 4,      "older_spouse": 4,  "love_after_60": 4,
     "wealth_late": 4,
+    "extra_marital_child": 7,
 }
 
 SCENARIO_CATEGORY = {
@@ -4377,6 +4385,7 @@ SCENARIO_CATEGORY = {
     "self_made_rich": "wealth","gambling_pattern": "wealth",
     "wealth_late": "wealth",  "big_scam": "wealth", "inheritance_war": "wealth",
     "child_burden": "family", "parent_shadow": "family","hidden_family": "family",
+    "extra_marital_child": "love",
     "tax_lawsuit": "power",
 }
 
@@ -4473,6 +4482,61 @@ NARRATIVE_TEMPLATES = {
 }
 
 
+def is_yang_yang_repeat(cg, jj):
+    """양양(陽陽) 또는 음음(陰陰) 동일 극성 여부"""
+    _YANG_CG = {"甲","丙","戊","庚","壬"}
+    _YANG_JJ = {"子","寅","辰","午","申","戌"}
+    _YIN_CG  = {"乙","丁","己","辛","癸"}
+    _YIN_JJ  = {"丑","卯","巳","未","酉","亥"}
+    return (cg in _YANG_CG and jj in _YANG_JJ) or (cg in _YIN_CG and jj in _YIN_JJ)
+
+
+def infer_partner_pattern(my_ilgan, sewoon_cg, sewoon_jj):
+    """세운 천간·지지로 상대방 사주 패턴 추론"""
+    import re as _re6r
+    traits = []
+
+    # 세운 天干 火(丙·丁) + 地支 火(午·巳) → 강한 도화 사주
+    if sewoon_cg in ("丙","丁") and sewoon_jj in ("午","巳"):
+        traits.append("표현력 폭발·매혹형")
+        traits.append("도화살 강 — 인기 많음")
+        traits.append("동시에 다른 사람도 만나는 多人 패턴")
+
+    # 양양·음음 중복
+    if is_yang_yang_repeat(sewoon_cg, sewoon_jj):
+        traits.append("양양 중복 — 강하고 자유로운 성향")
+
+    # 십성 추론 (TEN_GODS_MATRIX 활용)
+    sipsung = ""
+    try:
+        _ss_raw = TEN_GODS_MATRIX.get(my_ilgan, {}).get(sewoon_cg, "")
+        _m = _re6r.search(r'\(([^)]+)\)', _ss_raw)
+        sipsung = _m.group(1) if _m else _ss_raw
+    except Exception:
+        pass
+    if sipsung in ("식신","상관"):
+        traits.append("자유 표현·책임 회피")
+
+    # 일간 인상 추론
+    _CG_CHAR = {
+        "丙":"일간 丙 또는 火 강 — 태양형 카리스마",
+        "丁":"일간 丁 — 섬세하고 깊은 감정형",
+        "庚":"일간 庚 — 강한 의지·단단·차가운 면",
+        "辛":"일간 辛 — 완벽주의·세련·속 깊음",
+        "壬":"일간 壬 — 감각적·지적·넓은 그릇",
+        "癸":"일간 癸 — 섬세한 감수성·비밀형",
+    }
+    if sewoon_cg in _CG_CHAR:
+        traits.append(_CG_CHAR[sewoon_cg])
+
+    # 결정타 판단
+    has_dohwa = any("도화살 강" in t for t in traits)
+    if has_dohwa and sipsung in ("식신","편재","상관"):
+        traits.append("⚠️ 바람기 박힌 사주 — 한 사람으로 끝나지 않음")
+
+    return traits, sipsung
+
+
 def classify_narrative_pattern(saju_data, gender, marital_status):
     """본인 사주 패턴 자동 분류 (우선순위 순)"""
     try:
@@ -4524,10 +4588,23 @@ def build_dramatic_narrative(pils, name, gender, marital_status, saju_data):
             person=INCOMING_PERSON_MAP.get(sw_cg,""),
             intent_text=f"십성: {saju_data.get('sewoon_sipsung','')} — {intent}" if intent else "",
         )
+        # 상대방 사주 추론 (세운 기반)
+        traits, _sw_sipsung = infer_partner_pattern(
+            saju_data.get("ilgan",""), sw_cg, sw_jj
+        )
+
         out = [f"\n---\n## 📖 {cur_year}년 {name}님 사주 드라마\n"]
         if p_type:
             out.append(f"**패턴: {p_type}**\n")
         out.append(narrative)
+
+        if traits:
+            out.append(f"\n**🔍 그 사람 사주 추론 ({zodiac} / {sw_cg}일간형):**")
+            for t in traits:
+                out.append(f"- {t}")
+            if any("바람기" in t or "多人" in t for t in traits):
+                out.append("\n> → **본인만 만나는 게 아닙니다. 끝까지 갈 사람 아닙니다.**")
+
         return "\n".join(out)
     except Exception:
         return ""
@@ -5463,6 +5540,22 @@ def build_saju_core_diagnosis(pils, name, birth_year, gender, current_year=None)
         # [P2] 세금·소송
         if (_peon_gwan_cnt >= 1) and _hyung_active and (_peon_jae >= 1):
             _sadd("tax_lawsuit", DRAMATIC_SCENARIOS_B["tax_lawsuit"].format(name=name))
+
+        # [X-6-R] 혼외 가능성 패턴 (식상태왕+홍염+시주도화)
+        try:
+            _HY_R = {"甲":"午","乙":"申","丙":"寅","丁":"未","戊":"辰","己":"辰",
+                     "庚":"戌","辛":"酉","壬":"子","癸":"申"}
+            _ilgan_r = pcgs[1] if len(pcgs) > 1 else ""
+            _hongyeom_r = _HY_R.get(_ilgan_r,"") == cur_jj
+            _STRONG_R = {"甲":{"寅","卯","亥"},"乙":{"卯","寅"},"丙":{"午","巳","寅"},
+                         "丁":{"午","巳"},"戊":{"午","巳","寅"},"己":{"午","巳"},
+                         "庚":{"申","酉","巳"},"辛":{"酉","申"},"壬":{"子","亥","申"},"癸":{"子","亥"}}
+            _siju_strong_r = pjjs[0] in _STRONG_R.get(_ilgan_r, set()) if pjjs else False
+            if sik_sang >= 2 and _hongyeom_r and _siju_strong_r:
+                _sadd("extra_marital_child",
+                      DRAMATIC_SCENARIOS_B["extra_marital_child"].format(name=name))
+        except Exception:
+            pass
 
         # === X-6-G: 혼인 상태 필터 적용 ===
         try:
