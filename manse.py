@@ -1328,10 +1328,20 @@ def _local_saju_engine(pils, name, birth_year, gender, query):
             _gender_love = "남성분" if gender == "남" else "여성분"
             out.append(f"\n{name}님은 {_gender_love}으로, {_love_style}\n")
             out.append(f"\n💑 **{name}님의 이상형**: {_love_match}\n")
-            if _is_yong:
-                out.append(f"\n✅ 올해는 인연 황금기! 적극적으로 나서십시오.\n")
-            elif _is_gisin:
-                out.append(f"\n⚠️ 올해는 인연 신중 기간. 충동적인 만남보다 깊이 알아가는 것이 중요합니다.\n")
+            # X-6-Q [3]: 혼인 상태 분기
+            try:
+                _ms_q3 = st.session_state.get("marriage_status","미혼")
+                _married_q3 = _ms_q3 in ("기혼","재혼")
+            except Exception:
+                _ms_q3 = "미혼"; _married_q3 = False
+            if _is_yong and not _married_q3:
+                out.append(f"\n✅ 올해는 인연 황금기 — 적극적으로 나서십시오. 천을귀인 활성월 절대 거절 X.\n")
+            elif _is_yong and _married_q3:
+                out.append(f"\n✅ 올해는 부부 관계 강화 황금기 — 배우자와 대화·여행·신뢰 회복 적극.\n")
+            elif not _is_yong and not _married_q3:
+                out.append(f"\n⚠️ 인연 약함 — 자기 성장 우선. 인연은 따라옵니다.\n")
+            else:
+                out.append(f"\n⚠️ 부부 관계 점검 — 의식적 대화·신뢰 회복 필요.\n")
             out.append(f"**{name}의 인연·결혼운 완전 분석**\n허어, 인연의 실타래를 신안으로 살펴보겠습니다.\n")
             _love_now_e = get_yearly_luck(pils, current_year) or {}
             _love_ss_e = _love_now_e.get("십성_천간","").split("(")[0]
@@ -4977,7 +4987,17 @@ def build_yearly_relationship_story(pils, name, gender, current_year):
         # 출력 구성
         out = [f"\n---\n## 📅 {current_year}년 {name}님 앞에 나타날 사람\n"]
         out.append(f"🧑 **인물**: {zodiac} / {person}")
-        _simple = SIPSUNG_INTENT.get(ss,"")
+        # X-6-Q [4]: 혼인 상태별 폴백 분기
+        try:
+            _ms_q4 = st.session_state.get("marriage_status","미혼")
+        except Exception:
+            _ms_q4 = "미혼"
+        if _ms_q4 in ("기혼","재혼"):
+            _simple = "현재 관계 점검 + 의식적 관리 우선"
+        elif _ms_q4 in ("이혼","이혼/사별","사별"):
+            _simple = "재혼 신중 — 같은 패턴 반복 X"
+        else:
+            _simple = SIPSUNG_INTENT.get(ss,"")
         out.append(f"💭 **십성**: {ss}" + (f" — {_simple}" if _simple else "") + "\n")
 
         # 신호 라벨
@@ -5220,13 +5240,7 @@ def build_saju_core_diagnosis(pils, name, birth_year, gender, current_year=None)
             out.append(f"**▣ 다가올 위험**: {', '.join(future_active[:2])}")
             out.append("- 미리 대비 + 안전 관리 + 정기 검진 필수\n")
 
-        out.append("**▣ 종합 한 줄**")
-        if risk_score >= 70:
-            out.append(f"> **{name}님은 평생 가장 위험한 시기입니다. 안전·신중·정기검진이 핵심입니다.**")
-        elif risk_score >= 50:
-            out.append(f"> **{name}님은 신중한 판단이 필요한 시기입니다.**")
-        else:
-            out.append(f"> **{name}님은 안정적 흐름입니다. 내실 다지기에 최적입니다.**")
+        # 종합 한 줄은 X-6-G 필터 후 시나리오 수 확정 이후 출력 (X-6-Q 이동)
 
         # === X-6-A + X-6-B: 막장 드라마 시나리오 수집 ===
         active_scenarios = []
@@ -5561,6 +5575,30 @@ def build_saju_core_diagnosis(pils, name, birth_year, gender, current_year=None)
         try:
             _marital_g = st.session_state.get("marriage_status", "미혼")
             active_scenarios = filter_scenarios_by_marital(active_scenarios, _marital_g, name)
+        except Exception:
+            pass
+
+        # === X-6-Q [1]: 종합 한 줄 — 시나리오 수 반영 보정 ===
+        try:
+            _scen_penalty = min(len(active_scenarios) * 4, 30)
+            _adj_score    = risk_score + _scen_penalty
+            out.append("**▣ 종합 한 줄**")
+            if _adj_score >= 70:
+                out.append(f"> **{name}님은 평생 가장 위험한 시기입니다. 안전·신중·정기검진이 핵심입니다.**")
+            elif _adj_score >= 40:
+                out.append(f"> **{name}님은 흔들림 시기입니다. 막장 시나리오 {len(active_scenarios)}개 발동 — 신중한 판단이 핵심입니다.**")
+            else:
+                out.append(f"> **{name}님은 안정적 흐름입니다. 내실 다지기에 최적입니다.**")
+        except Exception:
+            out.append("**▣ 종합 한 줄**")
+            out.append(f"> **{name}님 사주 흐름 분석 중입니다.**")
+
+        # 자녀 인연 (X-6-Q [2])
+        try:
+            from saju_zhengtong import calc_children_count_precise as _ccp_q
+            _children_q = _ccp_q(pils, gender)
+            if _children_q:
+                out.append(f"\n**▣ 자녀 인연**: 👶 {_children_q}")
         except Exception:
             pass
 
