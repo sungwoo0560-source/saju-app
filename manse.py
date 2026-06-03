@@ -20321,7 +20321,13 @@ def menu6_relations(pils, name, birth_year, gender, marriage_status="미혼"):
         _pahae_list = _ph.get("파살",[]) + _ph.get("해살",[])
         if _pahae_list:
             for _p in _pahae_list[:3]:
-                st.markdown(f"- {_p}", unsafe_allow_html=True)
+                if isinstance(_p, (frozenset, set, tuple, list)):
+                    _p_str = "·".join(sorted(str(x) for x in _p))
+                elif isinstance(_p, dict):
+                    _p_str = " · ".join(f"{k}:{v}" for k, v in _p.items())
+                else:
+                    _p_str = str(_p)
+                st.markdown(f"- {_p_str}", unsafe_allow_html=True)
         else:
             st.markdown("파살·해살이 감지되지 않습니다. ✅")
 
