@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 
 import streamlit as st
 
@@ -20452,74 +20452,6 @@ def menu6_relations(pils, name, birth_year, gender, marriage_status="미혼"):
         unsafe_allow_html=True,
     )
 
-    st.markdown(
-        '<div class="gold-section">👫 육친론 - 주변 인물 분석</div>',
-        unsafe_allow_html=True,
-    )
-
-    tab_yukjin(pils, gender)
-
-    # ── 미사용 신살 분석 연결 ────────────────────────────────────
-    try:
-        from saju_sinsal import get_pahae, get_geunmyo_hwasil, get_waryeong, get_oigyeok
-        st.markdown('<div class="gold-section">🔍 파살·해살 분석</div>', unsafe_allow_html=True)
-        _ph = get_pahae(pils)
-        _pahae_list = _ph.get("파살",[]) + _ph.get("해살",[])
-        if _pahae_list:
-            for _p in _pahae_list[:3]:
-                if isinstance(_p, (frozenset, set, tuple, list)):
-                    _p_str = "·".join(sorted(str(x) for x in _p))
-                elif isinstance(_p, dict):
-                    _p_str = " · ".join(f"{k}:{v}" for k, v in _p.items())
-                else:
-                    _p_str = str(_p)
-                st.markdown(f"- {_p_str}", unsafe_allow_html=True)
-        else:
-            st.markdown("파살·해살이 감지되지 않습니다. ✅")
-
-        st.markdown('<div class="gold-section">🌱 근묘화실 — 4기둥 궁 분석</div>', unsafe_allow_html=True)
-        _gm = get_geunmyo_hwasil(pils)
-        if isinstance(_gm, list):
-            for _g in _gm[:4]:
-                if isinstance(_g, dict):
-                    st.markdown(f"**{_g.get('궁','')}**: {_g.get('desc','')}")
-    except Exception as _se:
-        pass
-
-    st.markdown(
-        '<hr style="border:none;border-top:1px solid #e0d8c0;margin:20px 0">',
-        unsafe_allow_html=True,
-    )
-
-    st.markdown('<div class="gold-section">💑 궁합 분석</div>', unsafe_allow_html=True)
-
-    tab_gunghap(pils, name)
-
-    # 인간관계 완전 해설
-
-    st.markdown(
-        '<hr style="border:none;border-top:1px solid #e0d8c0;margin:20px 0">',
-        unsafe_allow_html=True,
-    )
-
-    st.markdown(
-        '<div class="gold-section">📜 육친/인간관계 완전 해설</div>',
-        unsafe_allow_html=True,
-    )
-
-    try:
-        narrative = build_rich_narrative(pils, birth_year, gender, name if name else "내담자", section="relations")
-
-        if narrative and len(narrative) > 50:
-            st.markdown(
-                f'<div style="background:#fdf4ff;border-left:4px solid #9b59b6;border-radius:10px;'
-                f'padding:18px 22px;margin:10px 0;font-size:13px;color:#3a0a4a;'
-                f'line-height:2.0;white-space:pre-wrap">{narrative}</div>',
-                unsafe_allow_html=True,
-            )
-
-    except Exception as e:
-        st.warning(f"인간관계 해설 오류: {e}")
 
     # AI 정밀 분석 버튼
 
