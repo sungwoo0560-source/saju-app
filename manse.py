@@ -20151,6 +20151,152 @@ def menu6_relations(pils, name, birth_year, gender, marriage_status="미혼"):
             unsafe_allow_html=True,
         )
 
+        # ═══════════════════════════════════════════════════════════
+        # 🎬 Y-3: 두 사람의 운명 드라마 — 통합 스토리
+        # ═══════════════════════════════════════════════════════════
+        _OHN_K = {"木":"목","火":"화","土":"토","金":"금","水":"수"}
+        _my_ohn = _OHN_K.get(_my_oh, _my_oh)
+        _p_ohn = _OHN_K.get(_p_oh, _p_oh)
+
+        # 관계 본질 한 줄
+        if _is_geuk_pm:
+            _nutshell = f"<b>상극 구조</b> — {_p_ohn}이(가) {_my_ohn}을(를) 누르는 관계. 끌림과 갈등이 공존합니다."
+        elif _is_geuk_mp:
+            _nutshell = f"<b>주도 구조</b> — {name}님이 상대를 누르는 관계. 양보가 핵심입니다."
+        elif _is_saeng_pm:
+            _nutshell = f"<b>상생 구조 (得)</b> — 상대가 {name}님을 살려주는 최고 궁합."
+        elif _is_saeng_mp:
+            _nutshell = f"<b>상생 구조 (給)</b> — {name}님이 상대를 키워주는 헌신형 관계."
+        else:
+            _nutshell = f"<b>비화 구조</b> — 같은 오행끼리. 편하지만 경쟁·의존 발생."
+
+        # [1막] 첫 만남 — 끌림의 정체
+        _act1_lines = []
+        if _sam_hap_name:
+            _act1_lines.append(f"💥 일지 삼합({_sam_hap_name}) — 자석처럼 끌립니다. 운명 같은 느낌이 강하게 드는 만남입니다.")
+        if _has_yook_hap:
+            _act1_lines.append(f"✨ 일지 육합 — 첫 만남부터 이상하게 편안합니다. 오래 알던 사이 같은 느낌.")
+        if _is_geuk_pm:
+            _act1_lines.append(f"⚠️ 상대 오행({_p_ohn})이 {name}님 오행({_my_ohn})을 극(剋)합니다. 무의식적으로 '강한 사람'이라 느끼며 끌리지만, 그 끌림 자체가 '눌리고 싶다'는 본능입니다.")
+        if _has_iljj_chung:
+            _act1_lines.append(f"💢 일지 충({_my_iljj}↔{_p_iljj}) — 처음부터 묘하게 부딪힙니다. 끌리면서도 거슬리는 양가 감정.")
+        if not _act1_lines:
+            _act1_lines.append(f"평이한 끌림. 극적이지도 거부감도 없는 만남입니다.")
+        _act1 = "<br>".join(f"• {x}" for x in _act1_lines)
+
+        # [2막] 데이트 — 케미의 진실 (점수별)
+        if _score >= 85:
+            _act2 = "시간 가는 줄 모릅니다. 침묵도 어색하지 않고, 같이 있는 것 자체로 충전됩니다. 사주가 직접 묶어준 인연."
+        elif _score >= 70:
+            _act2 = "즐겁고 새로움이 가득. 함께 있으면 에너지가 충전됩니다. 단, 상대 약점은 절대 건드리지 마세요."
+        elif _score >= 55:
+            _act2 = "평범하고 안정적. 큰 감동도 큰 실망도 없습니다. 같은 패턴이 반복되며 권태기 주의."
+        elif _score >= 40:
+            _act2 = "짜릿하고 극적입니다. 다른 사람과는 못 느낀 강도. 그러나 그 강렬함이 바로 위험 신호."
+        else:
+            _act2 = "어색하거나 충돌. 가치관·취향 부딪힘이 잦고, 데이트 자체가 피곤해집니다."
+
+        # [3막] 갈등 — 어디서 부딪히나
+        _act3_lines = []
+        _sang_count_my = sum(1 for p in pils if "傷官" in p.get("ss",""))
+        if _sang_count_my >= 2:
+            _act3_lines.append(f"🔪 {name}님 상관 과다 — 말 한마디가 칼이 됩니다. 화날 때 표현 조심.")
+        if _is_geuk_pm:
+            _act3_lines.append(f"🔨 {_p_ohn}극{_my_ohn} — 상대가 {name}님 자존심을 무심코 건드립니다.")
+        if _is_geuk_mp:
+            _act3_lines.append(f"🔨 {_my_ohn}극{_p_ohn} — {name}님이 상대를 무시하는 발언을 합니다. 의도 없어도 상처가 됩니다.")
+        if _has_iljj_chung:
+            _act3_lines.append(f"💥 일지 충 — 가까울수록 마찰이 커집니다. 단둘이 오래 있으면 폭발.")
+        _my_iljj_hyung = _my_iljj in ["丑","戌","未"] and _p_iljj in ["丑","戌","未"] and _my_iljj != _p_iljj
+        if _my_iljj_hyung:
+            _act3_lines.append(f"⚠️ 일지 형살({_my_iljj}·{_p_iljj}) — 은혜를 원수로 갚는 패턴 주의.")
+        if not _act3_lines:
+            _act3_lines.append("심각한 갈등 패턴은 없습니다. 일상의 사소한 마찰 정도.")
+        _act3 = "<br>".join(f"• {x}" for x in _act3_lines)
+
+        # [4막] 돈·재물 흐름
+        _jae_count = sum(1 for p in pils if "財" in p.get("ss",""))
+        _act4_lines = []
+        if _jae_count >= 3:
+            _act4_lines.append(f"💰 {name}님 재성 {_jae_count}개 — 재물 흐름이 강한 사주. 본인이 벌어옵니다.")
+        if _p_oh in ["土"] and _my_oh == "木":
+            _act4_lines.append("💸 상대가 토(土) — {name}님 입장에서 재성. 끌릴수록 통장이 비는 구조 주의.")
+        if _is_geuk_pm:
+            _act4_lines.append(f"⚠️ 상극 구조 — 명품·여행·차 등 상대한테 지출 가능성 증가.")
+        if not _act4_lines:
+            _act4_lines.append("재물 흐름은 무난. 함께 모으기에 적합한 관계.")
+        _act4 = "<br>".join(f"• {x}" for x in _act4_lines)
+
+        # [5막] 결말 예측
+        if _score >= 85:
+            _act5 = f"🏆 평생 의지하는 파트너. {_score}점 — 사주가 직접 묶어준 인연입니다."
+        elif _score >= 70:
+            _act5 = f"💚 노력한 만큼 단단해지는 관계. {_score}점 — 좋은 부부·동반자."
+        elif _score >= 55:
+            _act5 = f"💛 노력 안 하면 점점 멀어집니다. {_score}점 — 의식적 관리가 필수."
+        elif _score >= 40:
+            _act5 = f"🧡 끌림 vs 갈등 줄다리기. {_score}점 — 단기는 강렬, 장기는 위험."
+        else:
+            _act5 = f"❤️ 극복 시 가장 깊은 관계, 실패 시 가장 큰 상처. {_score}점."
+
+        if _sam_hap_name and _score < 70:
+            _act5 += f"<br>🌀 단, 삼합({_sam_hap_name})이 있어 헤어져도 다시 만나는 운입니다."
+
+        # [에필로그] 사주의 충고
+        _epi_lines = []
+        try:
+            _my_yong = get_yongshin(pils).get("종합_용신", [])
+            if _my_yong:
+                _yong_str = "·".join(_my_yong) if isinstance(_my_yong, list) else str(_my_yong)
+                _epi_lines.append(f"✅ <b>잘 되려면:</b> {_yong_str} 관련 분야·활동을 함께 하세요.")
+        except Exception:
+            pass
+        if _is_geuk_pm or _is_geuk_mp:
+            _epi_lines.append("❌ <b>망하려면:</b> 돈 거래·동업·보증.")
+        _epi_lines.append("💎 <b>핵심:</b> 말투 한 번, 양보 한 번. 그게 평생을 가릅니다.")
+        _epi = "<br>".join(_epi_lines)
+
+        # 통합 출력
+        st.markdown(
+            f"<div style='background:linear-gradient(135deg,#1a0a1f 0%,#2d0a2d 50%,#1a0a1f 100%);"
+            f"border:2px solid #d4af37;border-radius:18px;padding:28px;margin:20px 0;color:#f5e6d3'>"
+            f"<div style='text-align:center;font-size:24px;font-weight:900;color:#ffd700;margin-bottom:8px;letter-spacing:2px'>"
+            f"🎬 두 사람의 운명 드라마</div>"
+            f"<div style='text-align:center;font-size:13px;color:#c9a84c;margin-bottom:20px'>"
+            f"{name}님 × 상대방 — 사주가 말하는 진짜 이야기</div>"
+
+            f"<div style='background:rgba(212,175,55,0.1);border-left:4px solid #d4af37;padding:14px 16px;margin:12px 0;border-radius:6px'>"
+            f"<div style='font-size:14px;color:#ffd700;font-weight:700;margin-bottom:6px'>📜 프롤로그 — 관계의 본질</div>"
+            f"<div style='font-size:13px;line-height:1.8;color:#f5e6d3'>{_nutshell}</div></div>"
+
+            f"<div style='background:rgba(255,100,100,0.08);border-left:4px solid #ff6b6b;padding:14px 16px;margin:12px 0;border-radius:6px'>"
+            f"<div style='font-size:14px;color:#ff8a8a;font-weight:700;margin-bottom:6px'>🎭 1막 — 첫 만남, 끌림의 정체</div>"
+            f"<div style='font-size:13px;line-height:1.8;color:#f5e6d3'>{_act1}</div></div>"
+
+            f"<div style='background:rgba(255,180,100,0.08);border-left:4px solid #ffa94d;padding:14px 16px;margin:12px 0;border-radius:6px'>"
+            f"<div style='font-size:14px;color:#ffc078;font-weight:700;margin-bottom:6px'>💞 2막 — 데이트, 케미의 진실</div>"
+            f"<div style='font-size:13px;line-height:1.8;color:#f5e6d3'>{_act2}</div></div>"
+
+            f"<div style='background:rgba(180,100,255,0.08);border-left:4px solid #b197fc;padding:14px 16px;margin:12px 0;border-radius:6px'>"
+            f"<div style='font-size:14px;color:#d0bfff;font-weight:700;margin-bottom:6px'>⚔️ 3막 — 갈등, 어디서 부딪히나</div>"
+            f"<div style='font-size:13px;line-height:1.8;color:#f5e6d3'>{_act3}</div></div>"
+
+            f"<div style='background:rgba(100,200,100,0.08);border-left:4px solid #51cf66;padding:14px 16px;margin:12px 0;border-radius:6px'>"
+            f"<div style='font-size:14px;color:#8ce99a;font-weight:700;margin-bottom:6px'>💰 4막 — 돈과 재물의 흐름</div>"
+            f"<div style='font-size:13px;line-height:1.8;color:#f5e6d3'>{_act4}</div></div>"
+
+            f"<div style='background:rgba(100,180,255,0.08);border-left:4px solid #4dabf7;padding:14px 16px;margin:12px 0;border-radius:6px'>"
+            f"<div style='font-size:14px;color:#74c0fc;font-weight:700;margin-bottom:6px'>🎬 5막 — 이 인연의 결말</div>"
+            f"<div style='font-size:13px;line-height:1.8;color:#f5e6d3'>{_act5}</div></div>"
+
+            f"<div style='background:rgba(212,175,55,0.15);border:1px solid #d4af37;padding:16px;margin:16px 0 0;border-radius:8px'>"
+            f"<div style='font-size:14px;color:#ffd700;font-weight:700;margin-bottom:8px;text-align:center'>📿 에필로그 — 사주의 충고</div>"
+            f"<div style='font-size:13px;line-height:1.9;color:#f5e6d3'>{_epi}</div></div>"
+
+            f"</div>",
+            unsafe_allow_html=True,
+        )
+
     st.markdown("---")
 
     # ── 로컬 엔진 항상 먼저 출력 ─────────────
