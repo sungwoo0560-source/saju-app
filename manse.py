@@ -20179,6 +20179,54 @@ def menu6_relations(pils, name, birth_year, gender, marriage_status="미혼"):
         unsafe_allow_html=True,
     )
 
+    # ③ 관계 유형 진단 — 애정/애증/열애/집착
+    st.markdown('<div class="gold-section">💘 ③ 나의 연애 유형 진단</div>', unsafe_allow_html=True)
+    _sang_count = sum(1 for p in pils if "傷官" in p.get("ss",""))
+    _yang_in = any("양인" in str(p) for p in pils)
+    _dohwa = _has_dohwa
+    _hongran = any(p.get("jj") in ["寅","午","戌"] for p in pils)
+    _ilji_chung = _iljj in ["子","午","卯","酉","寅","申","巳","亥"]
+
+    # 유형 결정
+    if _sang_count >= 2 and _ilji_chung:
+        _love_type = "😈 애증형"
+        _love_desc = "끌리는데 싸운다. 헤어져도 다시 찾는다. 상관 과다+일지 충 구조 — 말 한마디로 깊은 상처를 주고받으면서도 그 강렬함에 중독된다. 평범한 연애는 시시하다고 느낀다."
+        _love_warn = "⚠️ 감정이 폭발하는 순간 한 발 물러서는 훈련이 필요하다. 강렬함이 사랑이라고 착각하지 말 것."
+    elif _dohwa and _hongran:
+        _love_type = "🔥 열애형"
+        _love_desc = "도화+홍란 동시 발동 — 이성이 먼저 다가온다. 연애할 때 전부를 쏟아붓는 스타일. 불꽃처럼 타오르지만 식는 것도 빠를 수 있다."
+        _love_warn = "⚠️ 초반 감정에 휩쓸려 중요한 판단을 놓치지 말 것. 뜨거울수록 천천히."
+    elif _sang_count >= 2:
+        _love_type = "💬 밀당형"
+        _love_desc = "상관 과다 — 매력적이고 재치 있어서 이성이 끌리지만, 연인에게 날카로운 말이 나오는 순간 관계가 흔들린다. 사랑할수록 더 많은 것을 요구한다."
+        _love_warn = "⚠️ 말투가 관계의 생명줄. 비판보다 인정 표현을 먼저 하는 연습이 필요하다."
+    elif _yang_in:
+        _love_type = "🌀 집착형"
+        _love_desc = "양인살 — 한번 마음을 주면 끝까지 놓지 않는다. 연인에 대한 기준이 높고 소유욕이 강하다. 상대가 자유를 원할 때 갈등이 폭발한다."
+        _love_warn = "⚠️ 집착과 사랑의 경계를 의식적으로 구분할 것. 믿음이 최고의 관계 유지법."
+    elif _ilji_chung:
+        _love_type = "💔 인연박복형"
+        _love_desc = "일지 충 구조 — 인연이 와도 끝까지 가기 어려운 구조. 만남과 헤어짐이 반복되기 쉽다. 그러나 이는 '나쁜 사람'이 아니라 타이밍과 구조의 문제다."
+        _love_warn = "⚠️ 용신 기운이 강한 세운에 만난 인연을 특히 소중히 할 것."
+    elif not _dohwa:
+        _love_type = "🥶 냉온탕형"
+        _love_desc = "도화살 없음 — 겉으로는 차갑게 보이지만 속으로는 깊이 감정을 쌓는 스타일. 표현이 서툴러서 오해를 받기 쉽다. 한번 정하면 오래간다."
+        _love_warn = "⚠️ 감정 표현을 조금만 더 하면 관계가 훨씬 부드러워진다."
+    else:
+        _love_type = "💕 순애형"
+        _love_desc = "헌신적이고 진지한 연애 스타일. 조건보다 감정을 중시한다. 한번 맺은 인연을 끝까지 지키려는 의리가 있다."
+        _love_warn = "⚠️ 자신을 너무 희생하지 않도록 주의. 내 감정도 중요하다."
+
+    st.markdown(
+        f"<div style='background:linear-gradient(145deg,#fff0f3,#ffe4e8);border:2px solid #e8638c;"
+        f"border-radius:14px;padding:22px;margin:10px 0'>"
+        f"<div style='font-size:22px;font-weight:900;color:#c0003c;margin-bottom:8px'>{_love_type}</div>"
+        f"<div style='font-size:14px;color:#3d0020;line-height:1.9;margin-bottom:10px'>{_love_desc}</div>"
+        f"<div style='font-size:13px;color:#8b0000;background:#fff5f7;border-radius:8px;padding:10px'>{_love_warn}</div>"
+        f"</div>",
+        unsafe_allow_html=True,
+    )
+
     # ② 결혼 타이밍 예측
     st.markdown('<div class="gold-section">💒 ② 결혼·인연 타이밍 예측</div>', unsafe_allow_html=True)
     _current_year = datetime.now().year
