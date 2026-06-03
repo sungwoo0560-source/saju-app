@@ -5630,12 +5630,20 @@ def build_saju_core_diagnosis(pils, name, birth_year, gender, current_year=None)
             out.append("**▣ 종합 한 줄**")
             out.append(f"> **{name}님 사주 흐름 분석 중입니다.**")
 
-        # 자녀 인연 (X-6-Q [2])
+        # 자녀 인연 (Y-7-B [4]: marriage_status 분기 + 혼외 경고)
         try:
             from saju_zhengtong import calc_children_count_precise as _ccp_q
             _children_q = _ccp_q(pils, gender)
+            _marital_q = st.session_state.get("marriage_status", "미혼")
             if _children_q:
-                out.append(f"\n**▣ 자녀 인연**: 👶 {_children_q}")
+                if _marital_q in ("기혼", "재혼", "이혼", "사별"):
+                    out.append(f"\n**▣ 자녀 인연**: 👶 {_children_q}")
+                else:
+                    out.append(f"\n**▣ 자녀 인연 (잠재 운)**: 👶 {_children_q}")
+                    _extra_keys = {"extramarital", "double_life", "hidden_family", "extra_marital_child"}
+                    _has_extra = any(item[1] in _extra_keys for item in active_scenarios)
+                    if _has_extra:
+                        out.append("> ⚠️ 혼외 자녀 인연이 발동될 수 있는 구조입니다. 관계 신중히.")
         except Exception:
             pass
 
