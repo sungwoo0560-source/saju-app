@@ -20214,18 +20214,79 @@ def menu6_relations(pils, name, birth_year, gender, marriage_status="미혼"):
             _act3_lines.append("심각한 갈등 패턴은 없습니다. 일상의 사소한 마찰 정도.")
         _act3 = "<br>".join(f"• {x}" for x in _act3_lines)
 
-        # [4막] 돈·재물 흐름
+        # [4막] 돈·재물 흐름 + 그 사람 정체 (Y-4+5 통합 강화)
         _jae_count = sum(1 for p in pils if "財" in p.get("ss",""))
+        _OH2JJ_JAE = {"木":["土"], "火":["金"], "土":["水"], "金":["木"], "水":["火"]}
+        _p_is_my_jae = _p_oh in _OH2JJ_JAE.get(_my_oh, [])
+
         _act4_lines = []
+
+        # ── 그 사람 일주 본질 (상대 사주 폭로) ──
+        _P_ILGAN_TRAIT = {
+            "甲":"리더형·직진형, 자기 방식 강요",
+            "乙":"부드러우나 끈질김, 우회 압박형",
+            "丙":"태양형 카리스마, 표현 폭발·바람기 박힘",
+            "丁":"섬세한 매혹형, 은근한 조종",
+            "戊":"산처럼 묵직, 자기 중심·고집",
+            "己":"부드러운 포용형, 의외의 계산",
+            "庚":"칼날형 카리스마, 자기 돈 안 쓰는 구조",
+            "辛":"보석형 세련, 외모·사치 중시",
+            "壬":"바다형 자유, 책임 회피·바람기",
+            "癸":"비처럼 스며듦, 감정 조종형",
+        }
+        _p_trait = _P_ILGAN_TRAIT.get(_p_ilgan, "본질 파악 필요")
+        _act4_lines.append(f"🎭 <b>상대({_p_ilgan}{_p_iljj}) 본질:</b> {_p_trait}")
+
+        # ── 일지 십성 (편재면 돈·이성 본능) ──
+        _P_ILJI_DESIRE = {
+            "寅":"편재 깔림 — 돈·이성에 본능적 끌림",
+            "卯":"정재 깔림 — 안정 추구하나 인색 가능",
+            "巳":"편재 깔림 — 활동적·돈 욕망 강",
+            "午":"정재·정관 깔림 — 명예·재물 균형",
+            "申":"편재 깔림 — 실리주의·계산형",
+            "酉":"정재 깔림 — 세련·실속형",
+        }
+        _ilji_desire = _P_ILJI_DESIRE.get(_p_iljj, "")
+        if _ilji_desire:
+            _act4_lines.append(f"💎 <b>일지({_p_iljj}) 욕망:</b> {_ilji_desire}")
+
+        # ── 본인 재성 강도 ──
         if _jae_count >= 3:
-            _act4_lines.append(f"💰 {name}님 재성 {_jae_count}개 — 재물 흐름이 강한 사주. 본인이 벌어옵니다.")
-        if _p_oh in ["土"] and _my_oh == "木":
-            _act4_lines.append("💸 상대가 토(土) — {name}님 입장에서 재성. 끌릴수록 통장이 비는 구조 주의.")
-        if _is_geuk_pm:
-            _act4_lines.append(f"⚠️ 상극 구조 — 명품·여행·차 등 상대한테 지출 가능성 증가.")
-        if not _act4_lines:
+            _act4_lines.append(f"💰 <b>{name}님 재성 {_jae_count}개</b> — 돈 다루는 힘 강한 사주. 본인이 벌어옴 = 상대가 그걸 노릴 수 있음.")
+
+        # ── 핵심: 상대가 내 재성에 해당하는 경우 ──
+        if _p_is_my_jae:
+            _act4_lines.append(f"🚨 <b>상대 오행({_p_ohn})이 {name}님 재성</b> — 가장 위험한 구조. 끌릴수록 통장이 비는 사주 함정.")
+
+        # ── 3단계 시나리오 (상극 + 재성 강 = 형 같은 패턴) ──
+        if _is_geuk_pm and _jae_count >= 3:
+            _act4_lines.append(
+                f"<br><b>📖 돈 흐름 3단계 시나리오:</b><br>"
+                f"&nbsp;&nbsp;<b>【초반 1~3개월】</b> 상대가 적극 부담. '누나/형이 살게' 패턴 — 호감 어필 단계.<br>"
+                f"&nbsp;&nbsp;<b>【중반 3~6개월】</b> 변곡점. '이번엔 네가' '다음엔 내가' 슬쩍 부담 전가 시작.<br>"
+                f"&nbsp;&nbsp;<b>【후반 6개월~】</b> 명품·여행·차 → {name}님이 다 결제. 상대 명분: '공유 자산이잖아'."
+            )
+        elif _is_geuk_pm:
+            _act4_lines.append(f"⚠️ <b>상극 구조</b> — 명품·여행·차 등 상대한테 지출 가능성 증가.")
+        elif _is_geuk_mp:
+            _act4_lines.append(f"⚠️ <b>{name}님이 상대를 극</b> — 본인이 자꾸 베푸는 구조. 헌신이 당연시될 위험.")
+
+        # ── 행동 가이드 ──
+        _guides = []
+        if _is_geuk_pm or _p_is_my_jae:
+            _guides.append("✅ 3개월 이상 데이트 시 N분의 1 명확히 할 것")
+            _guides.append("✅ 명품·고가 선물은 받기만, 주지 말 것")
+            _guides.append("❌ 공동 명의 계좌·자산 절대 금지")
+            _guides.append("❌ '잠깐 빌리는 거야' 절대 믿지 말 것")
+        if _jae_count >= 3 and _p_iljj in ["寅","巳","申"]:
+            _guides.append("❌ 동업·보증 평생 금지 (상대 일지 편재 = 돈 노림)")
+        if _guides:
+            _act4_lines.append(f"<br><b>🛡️ 행동 가이드:</b><br>" + "<br>".join(f"&nbsp;&nbsp;{g}" for g in _guides))
+
+        if len(_act4_lines) <= 2:
             _act4_lines.append("재물 흐름은 무난. 함께 모으기에 적합한 관계.")
-        _act4 = "<br>".join(f"• {x}" for x in _act4_lines)
+
+        _act4 = "<br>".join(f"• {x}" if not x.startswith("<br>") else x for x in _act4_lines)
 
         # [5막] 결말 예측
         if _score >= 85:
@@ -20314,72 +20375,10 @@ def menu6_relations(pils, name, birth_year, gender, marriage_status="미혼"):
 
     st.markdown("---")
 
-    st.markdown("### 🤖 AI 심층 분석")
-
-    st.markdown(
-        """
-
-<div style="background:#fdf0ff;border:2px solid #9b59b655;border-radius:12px; padding:14px 18px;margin-bottom:14px">
-
-<div style="font-size:13px;font-weight:700;color:#4a148c;margin-bottom:4px">💑 궁합 / 인간관계 분석</div>
-
-<div style="font-size:12px;color:#000000;line-height:1.8">
-
-    * 연인 / 동업자 / 상사와의 인간관계를 사주로 분석합니다.
-
-</div>
-
-</div>""",
-        unsafe_allow_html=True,
-    )
-
-    # ① 배우자/인연 프로필
-    st.markdown('<div class="gold-section">💍 ① 배우자·인연 프로필</div>', unsafe_allow_html=True)
-    _ilgan = pils[1]["cg"]
-    _iljj = pils[1]["jj"]
-    _ilgan_oh = OH.get(_ilgan, "")
-    _ilp = ILGAN_PROFILE.get(_ilgan, {})
-    # 성별에 따라 배우자 십성 결정
-    if gender == "남":
-        _spouse_ss = ["正財(정재)", "偏財(편재)"]
-        _spouse_label = "배우자·여성 인연"
-    else:
-        _spouse_ss = ["正官(정관)", "偏官(편관)"]
-        _spouse_label = "배우자·남성 인연"
-    # 일지 분석
-    _JJ_SPOUSE = {
-        "子": "지적이고 총명한 배우자. 감정 표현이 적고 독립심이 강함.",
-        "丑": "듬직하고 성실한 배우자. 변화를 싫어하나 신뢰도가 높음.",
-        "寅": "활동적이고 리더십 강한 배우자. 자존심이 세고 독립적.",
-        "卯": "섬세하고 감수성 풍부한 배우자. 예술적 기질, 사교적.",
-        "辰": "포용력 있고 현실적인 배우자. 안정 지향, 재물 운 강함.",
-        "巳": "지혜롭고 카리스마 있는 배우자. 비밀이 많고 깊은 내면.",
-        "午": "열정적이고 화끈한 배우자. 매력이 강하나 감정 기복 있음.",
-        "未": "온화하고 배려 깊은 배우자. 예술·미적 감각이 뛰어남.",
-        "申": "총명하고 실행력 강한 배우자. 직설적이고 솔직한 성격.",
-        "酉": "세련되고 완벽주의적 배우자. 높은 기준, 우아한 품격.",
-        "戌": "의리 있고 충성스러운 배우자. 고집 있으나 믿음직스러움.",
-        "亥": "자유롭고 지적인 배우자. 창의적이나 정착이 어려운 면.",
-    }
-    _iljj_spouse = _JJ_SPOUSE.get(_iljj, "배우자 자리에 특별한 인연의 기운이 있습니다.")
-    _yeonae_style = _ilp.get("연애", "")
-    # 도화살 확인 (子·午·卯·酉 지지 중 해당)
-    _dohwa_jj = ["子", "午", "卯", "酉"]
-    _has_dohwa = any(p.get("jj") in _dohwa_jj for p in pils)
-    _dohwa_txt = "✨ 도화살이 있습니다 — 이성 매력이 강하고 인기가 많습니다." if _has_dohwa else "도화살 없음 — 이성보다 실력으로 인정받는 타입."
-    st.markdown(
-        f"<div style='background:linear-gradient(145deg,#faf7f0,#f2ebe0);border:1px solid #c9a84c;"
-        f"border-radius:14px;padding:20px;margin:10px 0'>"
-        f"<div style='font-size:14px;color:#3d2800;line-height:2'>"
-        f"<b>💑 {_spouse_label} 기운:</b> {', '.join(_spouse_ss)} 십성이 {_spouse_label}을 나타냅니다.<br>"
-        f"<b>🪑 일지(日支 {_iljj}) — 배우자 자리:</b> {_iljj_spouse}<br>"
-        f"<b>❤️ 연애 스타일:</b> {_yeonae_style}<br>"
-        f"<b>🌸 도화살:</b> {_dohwa_txt}</div></div>",
-        unsafe_allow_html=True,
-    )
-
     # ③ 관계 유형 진단 — 애정/애증/열애/집착
     st.markdown('<div class="gold-section">💘 ③ 나의 연애 유형 진단</div>', unsafe_allow_html=True)
+    _iljj = pils[1]["jj"]
+    _has_dohwa = any(p.get("jj") in ["子","午","卯","酉"] for p in pils)
     _sang_count = sum(1 for p in pils if "傷官" in p.get("ss",""))
     _yang_in = any("양인" in str(p) for p in pils)
     _dohwa = _has_dohwa
@@ -20425,33 +20424,6 @@ def menu6_relations(pils, name, birth_year, gender, marriage_status="미혼"):
         f"</div>",
         unsafe_allow_html=True,
     )
-
-    # ② 결혼 타이밍 예측
-    st.markdown('<div class="gold-section">💒 ② 결혼·인연 타이밍 예측</div>', unsafe_allow_html=True)
-    _current_year = datetime.now().year
-    _marriage_years = []
-    for _y in range(_current_year, _current_year + 10):
-        try:
-            _yl = get_yearly_luck(pils, _y)
-            _y_ss = _yl.get("십성_천간", "")
-            if _y_ss in _spouse_ss or _yl.get("십성_지지", "") in _spouse_ss:
-                _marriage_years.append(f"{_y}년 [{_yl.get('세운', str(_y))}] — {_y_ss} 기운 (인연운 강함)")
-        except Exception as e:
-            _saju_log.warning("[menu6_relations] 오류: %s", str(e)[:60])
-    if _marriage_years:
-        _marriage_info = "\n".join(f"    🌸 {m}" for m in _marriage_years[:4])
-    else:
-        _marriage_info = "    향후 10년 내 특별한 인연운이 흐릅니다."
-    st.markdown(
-        f"<div style='background:linear-gradient(145deg,#faf7f0,#f2ebe0);border:1px solid #c9a84c;"
-        f"border-radius:14px;padding:20px;margin:10px 0;font-size:13px;color:#3d2800;line-height:2'>"
-        f"<b>향후 10년 인연·결혼 운 강한 해:</b><br>"
-        + "<br>".join(f"🌸 {m}" for m in _marriage_years[:4])
-        + (f"<br><span style='color:#888;font-size:12px'>특별한 인연운이 점차 다가옵니다</span>" if not _marriage_years else "")
-        + "</div>",
-        unsafe_allow_html=True,
-    )
-
 
     # AI 정밀 분석 버튼
 
