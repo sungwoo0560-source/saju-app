@@ -4381,6 +4381,43 @@ SCENARIO_WEIGHTS = {
     "extra_marital_child": 7,
 }
 
+# 시나리오 키 → 사용자 화면용 한국어 라벨 (Y-7-A)
+SCENARIO_LABELS = {
+    "life_flip_accident":   "인생 뒤집는 사고",
+    "hospital_regular":     "병원 단골",
+    "lottery_curse":        "큰돈 들어왔다 새어나감",
+    "power_fall":           "권력 추락",
+    "remarriage":           "재혼",
+    "two_lives":            "두 가정 부양",
+    "extramarital":         "혼외 인연",
+    "friend_betrayal":      "측근 배신",
+    "windfall_fall":        "한 방 후 추락",
+    "business_repeat_fail": "사업 반복 실패",
+    "big_scam":             "큰 사기",
+    "tax_lawsuit":          "세무·법적 분쟁",
+    "parent_shadow":        "부모 그림자",
+    "triangle":             "삼각관계",
+    "double_life":          "이중생활",
+    "spouse_illness":       "배우자 질병",
+    "investment_burn":      "투자 소실",
+    "gambling_pattern":     "도박 패턴",
+    "extra_marital_child":  "혼외 자녀",
+    "inheritance_war":      "상속 분쟁",
+    "child_burden":         "자녀 짐",
+    "hidden_family":        "숨겨진 가족",
+    "unable_to_marry":      "결혼 어려움",
+    "childless":            "무자녀",
+    "old_love_return":      "옛 인연 회귀",
+    "spouse_dominates":     "배우자 주도권",
+    "first_love_obsession": "첫사랑 집착",
+    "late_marriage":        "만혼",
+    "self_made_rich":       "자수성가",
+    "younger_spouse":       "연하 인연",
+    "older_spouse":         "연상 인연",
+    "love_after_60":        "60 이후 인연",
+    "wealth_late":          "말년 재물",
+}
+
 SCENARIO_CATEGORY = {
     "life_flip_accident": "accident", "hospital_regular": "accident",
     "lottery_curse": "accident",      "power_fall": "accident",
@@ -5586,7 +5623,7 @@ def build_saju_core_diagnosis(pils, name, birth_year, gender, current_year=None)
             if _adj_score >= 70:
                 out.append(f"> **{name}님은 평생 가장 위험한 시기입니다. 안전·신중·정기검진이 핵심입니다.**")
             elif _adj_score >= 40:
-                out.append(f"> **{name}님은 흔들림 시기입니다. 막장 시나리오 {len(active_scenarios)}개 발동 — 신중한 판단이 핵심입니다.**")
+                out.append(f"> **{name}님은 흔들림 시기입니다. 주요 발동 패턴: {' · '.join(SCENARIO_LABELS.get(s[1], s[1]) for s in sorted(active_scenarios, key=lambda x: -x[0])[:3])} — 신중한 판단이 핵심입니다.**")
             else:
                 out.append(f"> **{name}님은 안정적 흐름입니다. 내실 다지기에 최적입니다.**")
         except Exception:
