@@ -5234,28 +5234,52 @@ def build_saju_core_diagnosis(pils, name, birth_year, gender, current_year=None)
         # 과거(-3~-1) + 미래(+1~+3) 발동 연도
         past_active = []
         future_active = []
+        future_danger = {}  # Y-7-B Step 2: {label: "위험 설명"}
+        past_danger = {}  # Y-7-B Step 2-3
+        _pos_drama = {
+            0: "조상·뿌리 흔들림 (부모 건강·고향·유산)",
+            1: "직업·사회 충돌 (이직·해고·사업 마찰)",
+            2: "배우자·건강 직격 (부부 갈등·수술·큰 병)",
+            3: "자녀·말년 충격 (자녀 문제·재물 손실)",
+        }
         for delta in range(-3, 4):
             if delta == 0:
                 continue
             y = current_year + delta
             jj = _GZ_SUNG[(y - 4) % 12]
-            is_hit = (yangin_active and jj == yangin_pos) or (_CHUNG_MAP.get(jj, "") in pjjs)
+            _yangin_hit = yangin_active and jj == yangin_pos
+            _chung_hit_idx = [i for i, p in enumerate(pjjs) if _CHUNG_MAP.get(jj, "") == p]
+            is_hit = _yangin_hit or bool(_chung_hit_idx)
             if is_hit:
                 label = f"{y}년({jj})"
+                # 위험 분류
+                _parts = []
+                if _yangin_hit:
+                    _parts.append("양인 직격 — 교통사고·낙상·수술수·이성 갈등")
+                if _chung_hit_idx:
+                    _chung_desc = " / ".join(_pos_drama.get(i, "") for i in _chung_hit_idx)
+                    _parts.append(f"{_chung_desc}")
+                _danger_str = " + ".join(_parts) if _parts else "주의"
                 if delta < 0:
                     past_active.append(label)
+                    past_danger[label] = _danger_str
                 else:
                     future_active.append(label)
+                    future_danger[label] = _danger_str
 
         # 출력 생성
         out = [f"### 🎯 {name}님 사주 핵심 진단 (자동 종합)\n"]
 
         out.append("**▣ 핵심 구조 진단**")
         if yangin_active or internal_chung or cur_chung_targets:
+            # Y-7-B Step 3: 발동 패턴에 "조심할 것" 한 줄 설명 추가
             parts = []
-            if yangin_active:       parts.append(f"일지 양인살({yangin_pos})")
-            if internal_chung:      parts.append(f"원국 충({internal_chung[0]})")
-            if cur_chung_targets:   parts.append(f"세운 충({cur_jj}-{cur_chung_targets[0]})")
+            if yangin_active:
+                parts.append(f"일지 양인살({yangin_pos}) — 칼날 같은 추진력. 사고·수술·이성 충돌 평생 따라옴")
+            if internal_chung:
+                parts.append(f"원국 충({internal_chung[0]}) — 원국 자체 충돌 구조. 가족·배우자 관계 마찰 평생")
+            if cur_chung_targets:
+                parts.append(f"세운 충({cur_jj}-{cur_chung_targets[0]}) — 올해 충 발동. 이동·수술·이별 주의")
             out.append(f"- 발동 패턴: {' × '.join(parts)}\n")
         else:
             out.append("- 원국 안정 — 큰 충극 패턴 없음\n")
@@ -5270,11 +5294,15 @@ def build_saju_core_diagnosis(pils, name, birth_year, gender, current_year=None)
             out.append("- ✅ **안정** — 평이한 흐름\n")
 
         if past_active:
-            out.append(f"**▣ 최근 발동**: {', '.join(past_active[-2:])}")
-            out.append("- 이 시기 실제 사고·수술·큰 변화 있었다면 명리 패턴 일치\n")
+            out.append(f"**▣ 최근 발동**")
+            for _lbl in past_active[-2:]:
+                out.append(f"- {_lbl}: {past_danger.get(_lbl, '주의')}")
+            out.append("- 이 시기에 실제 사고·수술·이별·재물 손실 등이 있었을 가능성 높음. 사주 패턴이 가리킨 시기.\n")
 
         if future_active:
-            out.append(f"**▣ 다가올 위험**: {', '.join(future_active[:2])}")
+            out.append(f"**▣ 다가올 위험**")
+            for _lbl in future_active[:2]:
+                out.append(f"- {_lbl}: {future_danger.get(_lbl, '주의')}")
             out.append("- 미리 대비 + 안전 관리 + 정기 검진 필수\n")
 
         # 종합 한 줄은 X-6-G 필터 후 시나리오 수 확정 이후 출력 (X-6-Q 이동)
