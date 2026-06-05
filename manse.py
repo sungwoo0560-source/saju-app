@@ -5313,10 +5313,10 @@ def build_saju_core_diagnosis(pils, name, birth_year, gender, current_year=None)
         future_danger = {}  # Y-7-B Step 2: {label: "위험 설명"}
         past_danger = {}  # Y-7-B Step 2-3
         _pos_drama = {
-            0: "조상·뿌리 흔들림 (부모 건강·고향·유산)",
-            1: "직업·사회 충돌 (이직·해고·사업 마찰)",
-            2: "배우자·건강 직격 (부부 갈등·수술·큰 병)",
-            3: "자녀·말년 충격 (자녀 문제·재물 손실)",
+            0: "기반·뿌리 영역 (가족·터전·자산 기초 흔들림)",
+            1: "직업·사회 영역 (이직·해고·사업 마찰)",
+            2: "배우자·건강 영역 (관계 갈등·수술·큰 병)",
+            3: "말년·결실 영역 (자산·건강·마무리 충격)",
         }
         for delta in range(-3, 4):
             if delta == 0:
@@ -5494,23 +5494,9 @@ def build_saju_core_diagnosis(pils, name, birth_year, gender, current_year=None)
                 _fb_text = DRAMATIC_SCENARIOS["friend_betrayal"].format(name=name)
             _sadd("friend_betrayal", _fb_text)
 
-        # [H] 큰 돈 들어와도 빠져나가는 구조 (Y-8: 비겁 띠 구체화)
+        # [H] 큰 돈 들어와도 빠져나가는 구조
         if _peon_jae >= 1 and bicap >= 2:
-            _bt = get_betrayer_profile(pils)
-            if _bt:
-                _wf_text = DRAMATIC_SCENARIOS["windfall_fall"].format(name=name).replace(
-                    "그런데 들어온 만큼 새어 나가는 구조입니다.",
-                    f"그런데 들어온 돈을 {_bt}(비겁)가 나눠 갖는 구조입니다."
-                )
-            else:
-                _wf_text = DRAMATIC_SCENARIOS["windfall_fall"].format(name=name)
-            _bt2 = _bt if _bt else "비겁(형제·동료)"
-            _wf_text += (
-                f"\n🛡️ 예방: {_bt2}와 동업·보증·돈거래 금지. "
-                "큰돈 들어오면 즉시 부동산·예금에 고정(유동성으로 두면 샘). "
-                "화려한 제안은 의심. 계약·서류는 한 글자도 놓치지 마십시오."
-            )
-            _sadd("windfall_fall", _wf_text)
+            _sadd("windfall_fall", DRAMATIC_SCENARIOS["windfall_fall"].format(name=name))
 
         # [I] 대형 사기 주의
         if _gup_jae >= 1 and _hyung_active and _peon_jae >= 1:
