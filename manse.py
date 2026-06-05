@@ -4418,6 +4418,80 @@ SCENARIO_LABELS = {
     "wealth_late":          "말년 재물",
 }
 
+# 시나리오 키 → 드라마틱 한 줄 설명 (Y-7-B Step 4)
+SCENARIO_DRAMA = {
+    "life_flip_accident":   ("⚡", "한 번의 사고로 인생 통째로 뒤집힘"),
+    "hospital_regular":     ("🏥", "병원 출입 잦음 — 건강 관리 평생 핵심"),
+    "lottery_curse":        ("💸", "큰돈 들어와도 새어나감 — 못 지키면 평생 후회"),
+    "power_fall":           ("👑", "정점 찍은 후 추락 — 권력은 빌린 것"),
+    "remarriage":           ("💍", "한 번 끝낸 인연 또 시작 — 재혼 구조"),
+    "two_lives":            ("💔", "두 가정 부양 구조 — 현재 가정 외 인연 자극"),
+    "extramarital":         ("🌶️", "혼외 인연 발동 — 선 넘으면 평생 후회"),
+    "friend_betrayal":      ("🔪", "가장 믿은 사람이 가장 큰 칼"),
+    "windfall_fall":        ("📉", "들어온 돈 못 지킴 — 한 방 후 새어나감"),
+    "business_repeat_fail": ("🔁", "같은 패턴 3번 반복 — 격국 거스르면 백전백패"),
+    "big_scam":             ("🎭", "큰 사기 직격 — 화려한 제안 무조건 의심"),
+    "tax_lawsuit":          ("⚖️", "세무·법적 분쟁 — 서류·계약 한 글자도 놓치지 마"),
+    "parent_shadow":        ("👤", "부모 그림자 평생 따라옴 — 인정 못 받는 갈증"),
+    "triangle":             ("📐", "삼각관계 발동 — 세 사람 중 한 명은 무너짐"),
+    "double_life":          ("🎭", "이중생활 — 두 얼굴 들킬 때 모든 게 무너짐"),
+    "spouse_illness":       ("💊", "배우자 질병 — 간병·돌봄 책임 무거움"),
+    "investment_burn":      ("🔥", "투자 소실 — 욕심내면 본전도 못 건짐"),
+    "gambling_pattern":     ("🎰", "도박 패턴 — 한 번 빠지면 끝없는 늪"),
+    "extra_marital_child":  ("👶", "혼외 자녀 가능성 — 선택의 무게가 평생"),
+    "inheritance_war":      ("⚔️", "상속 분쟁 — 가족이 적이 됨"),
+    "child_burden":         ("🎒", "자녀가 짐이 되는 구조 — 헌신 끝없음"),
+    "hidden_family":        ("🤫", "숨겨진 가족·인연 — 진실 드러나는 날 옴"),
+    "unable_to_marry":      ("🚫", "결혼 어려운 구조 — 인연이 자꾸 어긋남"),
+    "childless":            ("🌱", "무자녀 패턴 — 자녀 인연 박함"),
+    "old_love_return":      ("📞", "옛 인연 회귀 — 한 번 끝낸 관계 다시"),
+    "spouse_dominates":     ("👫", "배우자 주도권 — 본인 목소리 자꾸 작아짐"),
+    "first_love_obsession": ("💔", "첫사랑 집착 — 못 잊는 한 사람 평생"),
+    "late_marriage":        ("⏳", "만혼 패턴 — 30대 후반~40대 결혼 운"),
+    "self_made_rich":       ("💪", "자수성가 — 맨손으로 일군 사주"),
+    "younger_spouse":       ("🧒", "연하 인연 — 어린 사람한테 끌리는 운"),
+    "older_spouse":         ("👴", "연상 인연 — 어른한테 안정 찾는 운"),
+    "love_after_60":        ("🌹", "60 이후 인연 — 늦게 피는 사랑"),
+    "wealth_late":          ("🌅", "말년 재물 — 끝에 가서 풀리는 사주"),
+}
+
+# Y-8: 십성 → 현실 인물 번역
+YUKCHIN_PERSON = {
+    "비견": "형제·동료·동업자", "겁재": "형제·경쟁자·동업자",
+    "식신": "후배·아랫사람·자녀", "상관": "후배·제자",
+    "편재": "돈·사업·아버지", "정재": "돈·아내",
+    "편관": "직장·상사·관청", "정관": "직장·법·남자",
+    "편인": "윗사람·계모·문서", "정인": "어머니·스승·윗사람",
+}
+
+# Y-8: 지지 → 띠
+JIJI_TI = {
+    "子": "쥐", "丑": "소", "寅": "호랑이", "卯": "토끼",
+    "辰": "용", "巳": "뱀", "午": "말", "未": "양",
+    "申": "원숭이", "酉": "닭", "戌": "개", "亥": "돼지",
+}
+
+
+def get_betrayer_profile(pils):
+    """비겁쟁재 발동 시 배신자 정체를 띠로 반환. 없으면 "" """
+    try:
+        ilgan = pils[1]["cg"]
+        ss_list = calc_sipsung(ilgan, pils)
+        ti_set = []
+        for ss in ss_list:
+            jj_ss = ss.get("jj_ss", "")
+            if "비견" in jj_ss or "겁재" in jj_ss:
+                jj = ss.get("jj", "")
+                ti = JIJI_TI.get(jj)
+                if ti and ti not in ti_set:
+                    ti_set.append(ti)
+        if not ti_set:
+            return ""
+        return f"{'·'.join(ti_set)}띠"
+    except Exception:
+        return ""
+
+
 SCENARIO_CATEGORY = {
     "life_flip_accident": "accident", "hospital_regular": "accident",
     "lottery_curse": "accident",      "power_fall": "accident",
@@ -5405,9 +5479,17 @@ def build_saju_core_diagnosis(pils, name, birth_year, gender, current_year=None)
         if _dohwa_active and yangin_active and _chachaek:
             _sadd("double_life", DRAMATIC_SCENARIOS["double_life"].format(name=name))
 
-        # [G] 친구 배신·비겁쟁재
+        # [G] 친구 배신·비겁쟁재 (Y-8: 배신자 띠 구체화)
         if bicap >= 2 and jae >= 1:
-            _sadd("friend_betrayal", DRAMATIC_SCENARIOS["friend_betrayal"].format(name=name))
+            _bt = get_betrayer_profile(pils)
+            if _bt:
+                _fb_text = DRAMATIC_SCENARIOS["friend_betrayal"].format(name=name).replace(
+                    "친한 친구·동업자·가족",
+                    f"{_bt} 동료·동업자(친한 친구·가족 포함)"
+                )
+            else:
+                _fb_text = DRAMATIC_SCENARIOS["friend_betrayal"].format(name=name)
+            _sadd("friend_betrayal", _fb_text)
 
         # [H] 큰 돈 들어와도 빠져나가는 구조
         if _peon_jae >= 1 and bicap >= 2:
@@ -5651,7 +5733,16 @@ def build_saju_core_diagnosis(pils, name, birth_year, gender, current_year=None)
             if _adj_score >= 70:
                 out.append(f"> **{name}님은 평생 가장 위험한 시기입니다. 안전·신중·정기검진이 핵심입니다.**")
             elif _adj_score >= 40:
-                out.append(f"> **{name}님은 흔들림 시기입니다. 주요 발동 패턴: {' · '.join(SCENARIO_LABELS.get(s[1], s[1]) for s in sorted(active_scenarios, key=lambda x: -x[0])[:3])} — 신중한 판단이 핵심입니다.**")
+                # Y-7-B Step 4: 패턴별 이모지+설명 라인 추가 (blockquote 제거, 줄바꿈 명확)
+                out.append(f"**{name}님은 흔들림 시기입니다.**\n")
+                _top3 = sorted(active_scenarios, key=lambda x: -x[0])[:3]
+                for _s in _top3:
+                    _k = _s[1]
+                    _label = SCENARIO_LABELS.get(_k, _k)
+                    _emoji, _desc = SCENARIO_DRAMA.get(_k, ("⚠️", "주의 패턴 발동"))
+                    out.append(f"- {_emoji} **{_label}** — {_desc}")
+                out.append("")
+                out.append(f"**신중한 판단이 핵심입니다.**")
             else:
                 out.append(f"> **{name}님은 안정적 흐름입니다. 내실 다지기에 최적입니다.**")
         except Exception:
@@ -9749,10 +9840,16 @@ def tab_daewoon(pils, birth_year, gender):
                     f"💰 <b>재물 전략:</b> {_dd.get('money','')}</div>",
                     unsafe_allow_html=True,
                 )
+                # Y-8: 겁재 대운이면 배신자 띠 동적 교체
+                _caution_raw = _dd.get("caution", "")
+                if "劫財" in d_ss_cg:
+                    _bt = get_betrayer_profile(pils)
+                    if _bt:
+                        _caution_raw = f"가장 믿은 {_bt} 동료·동업자가 가장 큰 칼을 꽂습니다. 돈 거래는 형제·친구도 계약서를 쓰십시오."
                 st.markdown(
                     f"<div style='background:#f3e5f5;border-left:4px solid #8e24aa;border-radius:8px;"
                     f"padding:10px 14px;margin-top:6px;font-size:13px;color:#4a148c;'>"
-                    f"⚠️ <b>핵심 경계:</b> {_dd.get('caution','')}</div>",
+                    f"⚠️ <b>핵심 경계:</b> {_caution_raw}</div>",
                     unsafe_allow_html=True,
                 )
 
