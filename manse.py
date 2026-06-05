@@ -5272,11 +5272,13 @@ def build_saju_core_diagnosis(pils, name, birth_year, gender, current_year=None)
         # 양인살 감지
         yangin_active = False
         yangin_pos = ""
+        yangin_loc = []
         try:
             yangin_data = get_yangin(pils)
             if yangin_data and yangin_data.get("존재", False):
                 yangin_active = True
                 yangin_pos = yangin_data.get("양인_지지", "")
+                yangin_loc = yangin_data.get("위치", [])
         except Exception:
             pass
 
@@ -5349,7 +5351,8 @@ def build_saju_core_diagnosis(pils, name, birth_year, gender, current_year=None)
             # Y-7-B Step 3: 발동 패턴에 "조심할 것" 한 줄 설명 추가
             parts = []
             if yangin_active:
-                parts.append(f"일지 양인살({yangin_pos}) — 칼날 같은 추진력. 사고·수술·이성 충돌 평생 따라옴")
+                _loc_txt = yangin_loc[0].replace("주", "지") if yangin_loc else "원국"
+                parts.append(f"{_loc_txt} 양인살({yangin_pos}) — 칼날 같은 추진력. 사고·수술·이성 충돌 평생 따라옴")
             if internal_chung:
                 parts.append(f"원국 충({internal_chung[0]}) — 원국 자체 충돌 구조. 가족·배우자 관계 마찰 평생")
             if cur_chung_targets:
