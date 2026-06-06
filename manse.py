@@ -5269,6 +5269,56 @@ def filter_scenarios_by_marital(active_scenarios, marital_status, name):
 
 
 # ─── X-4-I-3: 사주 핵심 종합 진단 박스 ──────────────────────────────────────
+# ─── Y-10: 일주 핵심 한 줄 판정 (8글자 통합 리딩 1단계) ───
+_CG_BONJIL = {
+    "甲": "곧게 뻗는 큰 나무, 우직한 추진형",
+    "乙": "유연한 풀·넝쿨, 적응·생존형",
+    "丙": "태양 같은 큰 불, 표현·확산형",
+    "丁": "촛불 같은 섬세한 불, 집중·헌신형",
+    "戊": "큰 산·대지, 묵직한 신뢰형",
+    "己": "논밭의 흙, 세심한 실속형",
+    "庚": "제련 전 강철, 강철 결단형",
+    "辛": "다듬어진 보석, 예리한 완벽형",
+    "壬": "큰 바다·강물, 큰 그림 지혜형",
+    "癸": "이슬·빗물, 침투·통찰형",
+}
+_SS_DEPICT = {
+    "비견": "동료·경쟁자를 깔고 독립·자수성가하는",
+    "겁재": "경쟁·분배 위에서 승부하는",
+    "식신": "재능·여유를 깔고 표현으로 먹고사는",
+    "상관": "끼와 반항으로 튀는 재능의",
+    "편재": "큰 돈·기회를 직접 쥐고 개척하는",
+    "정재": "안정된 재물을 성실히 쌓는",
+    "편관": "압박·도전을 정면으로 받는 강한 승부의",
+    "정관": "명예·자리를 지키는 책임·관록의",
+    "편인": "독특한 사유로 파고드는 직관·전문의",
+    "정인": "배움·자격으로 서는 학자·전문직의",
+}
+
+def build_ilju_core_line(pils):
+    """일간+일지+십성+운성을 한 문장으로 — 8글자 통합 리딩 1단계"""
+    try:
+        ilgan = pils[1].get("cg", "")
+        ilji  = pils[1].get("jj", "")
+        _ss_list = calc_sipsung(ilgan, pils)
+        ilji_ss = _ss_list[1].get("jj_ss", "") if len(_ss_list) > 1 else ""
+        _ss_key = ""
+        for k in _SS_DEPICT:
+            if k in ilji_ss:
+                _ss_key = k
+                break
+        bonjil = _CG_BONJIL.get(ilgan, "")
+        depict = _SS_DEPICT.get(_ss_key, "")
+        if not bonjil:
+            return ""
+        line = f"🎯 한 줄 본질: {ilgan}{ilji} 일주 — {bonjil}."
+        if depict:
+            line += f" {depict} 기질입니다."
+        return line
+    except Exception:
+        return ""
+
+
 def build_saju_core_diagnosis(pils, name, birth_year, gender, current_year=None):
     """사주 핵심 진단 박스 — 양인+충 패턴 자동 감지, 모든 메뉴 헤더용"""
     try:
@@ -5354,7 +5404,9 @@ def build_saju_core_diagnosis(pils, name, birth_year, gender, current_year=None)
 
         # 출력 생성
         out = [f"### 🎯 {name}님 사주 핵심 진단 (자동 종합)\n"]
-
+        _ilju_line = build_ilju_core_line(pils)
+        if _ilju_line:
+            out.append(_ilju_line + "\n")
         out.append("**▣ 핵심 구조 진단**")
         if yangin_active or internal_chung or cur_chung_targets:
             # Y-7-B Step 3: 발동 패턴에 "조심할 것" 한 줄 설명 추가
