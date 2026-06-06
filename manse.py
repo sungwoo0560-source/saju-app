@@ -16583,8 +16583,9 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
             if not isinstance(_s28, dict):
                 continue
             _nm28 = _s28.get("이름") or _s28.get("name") or ""
-            if _nm28 and _nm28 not in _seen28:
-                _seen28.add(_nm28)
+            _nm28_key = _nm28.split("(")[0]  # "귀문관살(鬼門)" → "귀문관살" 통일 비교
+            if _nm28 and _nm28_key not in _seen28:
+                _seen28.add(_nm28_key)
                 _all28.append(_s28)
         if _all28:
             _sin_items28 = ""
