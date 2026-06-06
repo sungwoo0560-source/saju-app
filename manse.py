@@ -5419,7 +5419,17 @@ def build_ilju_core_line(pils):
                 _top_grp = sorted(_top_sc, key=_top_sc.get, reverse=True)[0]
                 _way = _LIFE_WAY.get(_top_grp, "")
                 if _way:
-                    line += f"\n\n🧭 삶의 방식: {_way}."
+                    _skip = False
+                    if _top_grp == "인성":
+                        _gk_n = ""
+                        try: _gk_n = gyeok_name
+                        except NameError: pass
+                        _wj_chk = _ss_list[2].get("jj_ss","") if len(_ss_list)>2 else ""
+                        if any(k in _gk_n for k in ("正印","偏印")) or \
+                           any(k in _wj_chk for k in ("편인","정인")):
+                            _skip = True
+                    if not _skip:
+                        line += f"\n\n🧭 삶의 방식: {_way}."
         except Exception:
             pass
         # Y-10 4단계: 일지 → 연애·배우자
