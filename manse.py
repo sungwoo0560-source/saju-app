@@ -16592,7 +16592,8 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
             _gil28, _hyung28 = [], []
             for _s28 in _all28[:20]:
                 _nm28_g = _s28.get("이름", _s28.get("name", ""))
-                if _s28.get("type") == "길" or "귀인" in _nm28_g:
+                _GILSIN = ("귀인","암록","천덕","월덕","천을","문창","학당","금여","천의")
+                if _s28.get("type") == "길" or any(_g in _nm28_g for _g in _GILSIN):
                     _gil28.append(_s28)
                 else:
                     _hyung28.append(_s28)
