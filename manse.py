@@ -4702,7 +4702,7 @@ def build_dramatic_narrative(pils, name, gender, marital_status, saju_data):
         sw_cg   = _CG10[(cur_year - 4) % 10]
         sw_jj   = _JJ12[(cur_year - 4) % 12]
         zodiac  = ZODIAC_BY_JIJI.get(sw_jj, "")
-        intent  = SIPSUNG_INTENT.get(saju_data.get("sewoon_sipsung",""), "")
+        intent  = resolve_sipsung_intent(SIPSUNG_INTENT.get(saju_data.get("sewoon_sipsung",""), ""), gender)
         tmpl    = NARRATIVE_TEMPLATES.get(pattern, NARRATIVE_TEMPLATES["기본형"])
         narrative = tmpl.format(
             name=name, year=cur_year, zodiac=zodiac,
@@ -4879,6 +4879,15 @@ SIPSUNG_INTENT = {
     "편인": "특별 분야·멘토·외국인·스승. 깊은 가르침.",
     "정인": "어머니 같은 보호자·후원자. 따뜻한 지원.",
 }
+
+def resolve_sipsung_intent(intent_text, gender):
+    """편관 등 gender 의존 십성 멘트를 성별에 맞게 풀어줌 (Y-9)"""
+    if intent_text and "강한 남자/여자" in intent_text:
+        if gender in ("남", "남자", "male", "M"):
+            return "나와 기싸움 붙는 강한 경쟁자·상사·권위자. 안 굽히는 동급 강자."
+        else:
+            return "강하게 끌리는 강한 남자(인연 후보) 또는 나를 압박하는 상사·권위자."
+    return intent_text
 
 # ─── X-6-J-4: 관계 의도 매트릭스 (구체 행동 + 돈 흐름) ─────────────────────
 RELATIONSHIP_INTENT_MATRIX = {
@@ -5108,7 +5117,7 @@ def build_yearly_relationship_story(pils, name, gender, current_year):
         elif _ms_q4 in ("이혼","이혼/사별","사별"):
             _simple = "재혼 신중 — 같은 패턴 반복 X"
         else:
-            _simple = SIPSUNG_INTENT.get(ss,"")
+            _simple = resolve_sipsung_intent(SIPSUNG_INTENT.get(ss,""), gender)
         out.append(f"💭 **십성**: {ss}" + (f" — {_simple}" if _simple else "") + "\n")
 
         # 신호 라벨
