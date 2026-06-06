@@ -5294,6 +5294,20 @@ _SS_DEPICT = {
     "편인": "독특한 사유로 파고드는 직관·전문의",
     "정인": "배움·자격으로 서는 학자·전문직의",
 }
+_GK_DEPICT = {
+    "正印格": "전문성·자격으로 서는 그릇 (학자·교육·전문직·역술)",
+    "偏印格": "독창적 사유·기술로 서는 그릇 (연구·예술·전문기술)",
+    "正官格": "조직·명예로 서는 그릇 (공직·대기업·관리직)",
+    "偏官格": "강한 추진력·통솔로 서는 그릇 (군경·법조·승부직)",
+    "正財格": "성실한 축적으로 서는 그릇 (안정 직장·실속 경영)",
+    "偏財格": "큰 돈·기회를 굴리는 그릇 (사업·투자·유통)",
+    "食神格": "재능·표현을 돈으로 푸는 그릇 (콘텐츠·요식·서비스)",
+    "傷官格": "튀는 재능·기술로 푸는 그릇 (예술·기술·1인 전문)",
+    "比肩格": "독립·자수성가 그릇 (자기 사업·전문직 독립)",
+    "劫財格": "경쟁·승부로 서는 그릇 (영업·승부직, 동업 주의)",
+    "從强格": "강한 기운을 그대로 쓰는 특수 그릇 (전문·독립 강하게)",
+    "從殺格": "압도적 환경에 올라타는 특수 그릇 (조직·권위 활용)",
+}
 
 def build_ilju_core_line(pils):
     """일간+일지+십성+운성을 한 문장으로 — 8글자 통합 리딩 1단계"""
@@ -5314,6 +5328,19 @@ def build_ilju_core_line(pils):
         line = f"🎯 한 줄 본질: {ilgan}{ilji} 일주 — {bonjil}."
         if depict:
             line += f" {depict} 기질입니다."
+        # Y-10 2단계: 격국(그릇) 한 줄
+        try:
+            gk = get_gyeokguk(pils)
+            gyeok_name = gk.get("격국명", "") if gk else ""
+            gk_depict = ""
+            for k in _GK_DEPICT:
+                if k in gyeok_name:
+                    gk_depict = _GK_DEPICT[k]
+                    break
+            if gyeok_name and gk_depict:
+                line += f"\n📐 타고난 그릇: {gyeok_name} — {gk_depict}."
+        except Exception:
+            pass
         return line
     except Exception:
         return ""
