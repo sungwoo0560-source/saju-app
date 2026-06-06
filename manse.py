@@ -5485,7 +5485,8 @@ def build_ilju_core_line(pils):
             try:
                 for _k in _GK_DEPICT:
                     if _k in gyeok_name:
-                        _gk_short = gyeok_name.split("(")[0] if "(" in gyeok_name else gyeok_name
+                        import re as _re
+                        _gk_short = _re.sub(r"\([^)]*\)", "", gyeok_name)
                         break
             except NameError:
                 pass
