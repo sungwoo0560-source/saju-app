@@ -5308,6 +5308,20 @@ _GK_DEPICT = {
     "從强格": "강한 기운을 그대로 쓰는 특수 그릇 (전문·독립 강하게)",
     "從殺格": "압도적 환경에 올라타는 특수 그릇 (조직·권위 활용)",
 }
+_LIFE_WAY = {
+    "비겁": "혼자·독립으로 가야 하는 사람입니다. 동업·보증·돈거래는 분쟁 위험 (비겁쟁재)",
+    "식상": "재능·표현으로 풀어야 하는 사람입니다. 만들고 보여주는 일에서 빛납니다 (식상)",
+    "재성": "현실 감각·돈 흐름으로 움직이는 사람입니다. 실리·결과 중심이 맞습니다 (재성)",
+    "관성": "조직·명예 안에서 빛나는 사람입니다. 책임·자리가 동력입니다 (관성)",
+    "인성": "배움·자격으로 서는 사람입니다. 전문성·지식이 평생 무기입니다 (인성)",
+}
+_SS_TO_GROUP = {
+    "比肩":"비겁","劫財":"비겁",
+    "食神":"식상","傷官":"식상",
+    "偏財":"재성","正財":"재성",
+    "偏官":"관성","正官":"관성",
+    "偏印":"인성","正印":"인성",
+}
 
 def build_ilju_core_line(pils):
     """일간+일지+십성+운성을 한 문장으로 — 8글자 통합 리딩 1단계"""
@@ -5339,6 +5353,25 @@ def build_ilju_core_line(pils):
                     break
             if gyeok_name and gk_depict:
                 line += f"\n📐 타고난 그릇: {gyeok_name} — {gk_depict}."
+        except Exception:
+            pass
+        # Y-10 3단계: 가장 강한 십성 → 삶의 방식
+        try:
+            _top_sc = {}
+            for _sv in _ss_list:
+                for _k in ["cg_ss", "jj_ss"]:
+                    _v = _sv.get(_k, "-")
+                    if _v and _v != "-":
+                        for _han in _SS_TO_GROUP:
+                            if _han in _v:
+                                _grp = _SS_TO_GROUP[_han]
+                                _top_sc[_grp] = _top_sc.get(_grp, 0) + 1
+                                break
+            if _top_sc:
+                _top_grp = sorted(_top_sc, key=_top_sc.get, reverse=True)[0]
+                _way = _LIFE_WAY.get(_top_grp, "")
+                if _way:
+                    line += f"\n🧭 삶의 방식: {_way}."
         except Exception:
             pass
         return line
