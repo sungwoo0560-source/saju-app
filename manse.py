@@ -4221,8 +4221,8 @@ DRAMATIC_SCENARIOS = {
     ),
     "friend_betrayal": (
         "💼 가장 믿었던 사람이 가장 큰 칼을 꽂습니다.\n"
-        "친한 친구·동업자·가족 — 사주가 가리키는 배신자입니다.\n"
-        "동업·보증·돈거래는 평생 절대 금지입니다."
+        "친한 친구·동업자·가족과 돈이 얽히면 가장 위험합니다.\n"
+        "특정인보다 동업·보증·돈거래 관계 자체를 평생 피하십시오."
     ),
     "windfall_fall": (
         "💰 평생 한 번 큰돈이 들어옵니다.\n"
@@ -5497,7 +5497,7 @@ def build_saju_core_diagnosis(pils, name, birth_year, gender, current_year=None)
             if _bt:
                 _fb_text = DRAMATIC_SCENARIOS["friend_betrayal"].format(name=name).replace(
                     "친한 친구·동업자·가족",
-                    f"{_bt} 동료·동업자(친한 친구·가족 포함)"
+                    f"{_bt} 동료·동업자(친구·가족 포함)"
                 )
             else:
                 _fb_text = DRAMATIC_SCENARIOS["friend_betrayal"].format(name=name)
