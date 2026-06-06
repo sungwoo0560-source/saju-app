@@ -6133,6 +6133,35 @@ def build_saju_core_diagnosis(pils, name, birth_year, gender, current_year=None)
 
         out.append("\n⬇️ 아래에 세부 분석이 이어집니다.\n---")
 
+        # Y-13: 내 사주 십성 풀이 (4면, 접기)
+        try:
+            _seen = set()
+            _sipsung_lines = []
+            for _full_key in _ss_cnt.keys():
+                _han = _full_key.split("(")[0]  # "偏財(편재)" → "偏財"
+                if _han in _seen:
+                    continue
+                _seen.add(_han)
+                _d = SIPSONG_DETAIL.get(_han, {})
+                if not _d:
+                    continue
+                _sipsung_lines.append(f"<b>【{_full_key}】</b><br>")
+                if _d.get("핵심"):
+                    _sipsung_lines.append(f"⊙ {_d['핵심']}<br>")
+                if _d.get("직업"):
+                    _sipsung_lines.append(f"💼 직업: {_d['직업']}<br>")
+                if _d.get("연애"):
+                    _sipsung_lines.append(f"💑 연애: {_d['연애']}<br>")
+                if _d.get("재물"):
+                    _sipsung_lines.append(f"💰 재물: {_d['재물']}<br>")
+                _sipsung_lines.append("<br>")
+            if _sipsung_lines:
+                out.append("\n<details><summary>📖 내 사주 십성 풀이 (펼치기)</summary>\n")
+                out.append("".join(_sipsung_lines))
+                out.append("</details>\n")
+        except Exception:
+            pass
+
         return "\n".join(out)
     except Exception:
         return ""
