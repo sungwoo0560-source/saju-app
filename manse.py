@@ -16588,23 +16588,41 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                 _seen28.add(_nm28_key)
                 _all28.append(_s28)
         if _all28:
-            _sin_items28 = ""
+            # Y-16: 길신/흉살 그룹 분리
+            _gil28, _hyung28 = [], []
             for _s28 in _all28[:20]:
-                _nm28   = _s28.get("이름", _s28.get("name", ""))
-                _icon28 = _s28.get("아이콘", "⭐")
-                _pos28_raw = _s28.get("위치", "")
-                _pos28 = ", ".join(str(x) for x in _pos28_raw) if isinstance(_pos28_raw, list) else _pos28_raw
-                _res28  = _s28.get("결과", _s28.get("의미", _s28.get("desc", "")))
-                _gr28   = _s28.get("등급", "")
-                _col28  = "#c62828" if "강력" in _gr28 else "#90caf9"
-                _sin_items28 += (
-                    f'<div style="background:rgba(255,255,255,0.08);border-left:3px solid {_col28};'
+                _nm28_g = _s28.get("이름", _s28.get("name", ""))
+                if _s28.get("type") == "길" or "귀인" in _nm28_g:
+                    _gil28.append(_s28)
+                else:
+                    _hyung28.append(_s28)
+
+            def _card28(_s):
+                _nm   = _s.get("이름", _s.get("name", ""))
+                _icon = _s.get("아이콘", "⭐")
+                _pr   = _s.get("위치", "")
+                _pos  = ", ".join(str(x) for x in _pr) if isinstance(_pr, list) else _pr
+                _res  = _s.get("결과", _s.get("의미", _s.get("desc", "")))
+                _gr   = _s.get("등급", "")
+                _col  = "#c62828" if "강력" in _gr else "#90caf9"
+                return (
+                    f'<div style="background:rgba(255,255,255,0.08);border-left:3px solid {_col};'
                     f'padding:10px 14px;margin:6px 0;border-radius:6px;">'
                     f'<div style="font-weight:900;font-size:14px;color:#fff;margin-bottom:3px;">'
-                    f'{_icon28} {_nm28}{f" ({_pos28})" if _pos28 else ""}</div>'
-                    f'<div style="font-size:12px;color:#e8eaf6;line-height:1.7;">{str(_res28)}</div>'
+                    f'{_icon} {_nm}{f" ({_pos})" if _pos else ""}</div>'
+                    f'<div style="font-size:12px;color:#e8eaf6;line-height:1.7;">{str(_res)}</div>'
                     f'</div>'
                 )
+
+            _sin_items28 = ""
+            if _gil28:
+                _sin_items28 += '<div style="font-size:12px;color:#a5d6a7;font-weight:700;margin:10px 0 4px;">👼 타고난 복 (귀인)</div>'
+                for _s28 in _gil28:
+                    _sin_items28 += _card28(_s28)
+            if _hyung28:
+                _sin_items28 += '<div style="font-size:12px;color:#ef9a9a;font-weight:700;margin:10px 0 4px;">⚠️ 주의할 기운</div>'
+                for _s28 in _hyung28:
+                    _sin_items28 += _card28(_s28)
             lines.append(
                 f'<div style="background:linear-gradient(135deg,#3e2723 0%,#5d4037 100%);'
                 f'border-radius:14px;padding:clamp(16px,4vw,24px);margin:20px 0;color:#fff;">'
