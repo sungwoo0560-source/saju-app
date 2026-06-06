@@ -4195,9 +4195,9 @@ DRAMATIC_SCENARIOS = {
         "이미 지났거나, 지금이거나, 곧 옵니다."
     ),
     "two_lives": (
-        "💔 {name}님 사주는 두 가정 부양 구조입니다.\n"
-        "한 사람으로 끝나지 않는 인연이 평생 따라옵니다.\n"
-        "선택 안 하면 둘 다 잃고 빈손이 됩니다."
+        "💔 {name}님 사주는 바람기가 박힌 구조입니다.\n"
+        "한 사람으로 만족 못 하는 인연이 평생 따라옵니다.\n"
+        "단속 안 하면 가정도 명예도 둘 다 잃습니다."
     ),
     "remarriage": (
         "💑 {name}님은 결혼 두 번 사주입니다.\n"
@@ -4388,7 +4388,7 @@ SCENARIO_LABELS = {
     "lottery_curse":        "큰돈 들어왔다 새어나감",
     "power_fall":           "권력 추락",
     "remarriage":           "재혼",
-    "two_lives":            "두 가정 부양",
+    "two_lives":            "바람기 구조",
     "extramarital":         "혼외 인연",
     "friend_betrayal":      "측근 배신",
     "windfall_fall":        "한 방 후 추락",
@@ -4425,7 +4425,7 @@ SCENARIO_DRAMA = {
     "lottery_curse":        ("💸", "큰돈 들어와도 새어나감 — 못 지키면 평생 후회"),
     "power_fall":           ("👑", "정점 찍은 후 추락 — 권력은 빌린 것"),
     "remarriage":           ("💍", "한 번 끝낸 인연 또 시작 — 재혼 구조"),
-    "two_lives":            ("💔", "두 가정 부양 구조 — 현재 가정 외 인연 자극"),
+    "two_lives":            ("💔", "바람기 구조 — 현재 가정 외 인연에 자꾸 눈감"),
     "extramarital":         ("🌶️", "혼외 인연 발동 — 선 넘으면 평생 후회"),
     "friend_betrayal":      ("🔪", "가장 믿은 사람이 가장 큰 칼"),
     "windfall_fall":        ("📉", "들어온 돈을 비겁(닭띠·동료)이 나눠 가짐"),
@@ -5237,9 +5237,9 @@ def filter_scenarios_by_marital(active_scenarios, marital_status, name):
             "의식적 대화·신뢰 회복이 핵심입니다."
         ),
         "two_lives": (
-            "💔 {name}님 원국에 두 가정 부양 구조입니다.\n"
-            "현재 가정 외 인연이 자극되는 시기 옵니다.\n"
-            "미리 차단 필수입니다."
+            "💔 {name}님 원국에 바람기가 박힌 구조입니다.\n"
+            "현재 가정 밖 인연에 흔들리는 시기가 옵니다.\n"
+            "선 넘기 전에 미리 차단 필수입니다."
         ),
     }
     DIVORCED_RETONE = {
