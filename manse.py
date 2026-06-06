@@ -5479,6 +5479,34 @@ def build_ilju_core_line(pils):
                 line += f"\n\n🌙 말년·자녀(시지 {_sj}): {_late}."
         except Exception:
             pass
+        # Y-12 5단계: 🔮 한마디 헤드라인 (맨 앞에 prepend)
+        try:
+            _gk_short = ""
+            try:
+                for _k in _GK_DEPICT:
+                    if _k in gyeok_name:
+                        _gk_short = gyeok_name.split("(")[0] if "(" in gyeok_name else gyeok_name
+                        break
+            except NameError:
+                pass
+            _grp_short = ""
+            try:
+                _grp_map = {"비겁":"혼자 서야", "식상":"재능으로 풀어야",
+                            "재성":"현실 감각으로", "관성":"조직에서 빛나야",
+                            "인성":"전문성으로 서야"}
+                _grp_short = _grp_map.get(_top_grp, "")
+            except NameError:
+                pass
+            _bon_head = bonjil.split(",")[0] if bonjil else ""
+            _head = f"🔮 한마디: {_bon_head} {ilgan}{ilji}"
+            if _gk_short:
+                _head += f" — {_gk_short}"
+            if _grp_short:
+                _head += f", {_grp_short} 할 사람"
+            _head += "."
+            line = _head + "\n\n" + line
+        except Exception:
+            pass
         return line
     except Exception:
         return ""
