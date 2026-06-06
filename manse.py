@@ -5488,6 +5488,22 @@ def build_ilju_core_line(pils):
                 line += f"\n\n🌙 말년·자녀(시지 {_sj}): {_late}."
         except Exception:
             pass
+        # Y-23: 형제 자리 (비겁) — 단정 X, 자리 경향만
+        try:
+            _bicap_c = sum(
+                1 for _s in _ss_list
+                for _k in ["cg_ss","jj_ss"]
+                if "비견" in _s.get(_k,"") or "겁재" in _s.get(_k,"")
+            )
+            if _bicap_c >= 2:
+                _hj = "형제·동료가 많고 경쟁 속에서도 의리가 깊은 자리. 함께 가는 힘이 강합니다"
+            elif _bicap_c == 1:
+                _hj = "형제·동료와 적당한 거리의 자리. 협력은 되나 깊은 의존보다 독립이 편합니다"
+            else:
+                _hj = "혼자 서서 개척하는 자리. 형제·동료보다 스스로의 힘으로 길을 엽니다"
+            line += f"\n\n👫 형제·동료: {_hj}."
+        except Exception:
+            pass
         # Y-12 5단계: 🔮 한마디 헤드라인 (맨 앞에 prepend)
         try:
             _gk_short = ""
