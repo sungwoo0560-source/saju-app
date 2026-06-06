@@ -4545,11 +4545,11 @@ NARRATIVE_TEMPLATES = {
     "식상태왕_홍염활성": (
         "{year}년 봄, {name}님 앞에 한 사람이 나타납니다.\n"
         "{zodiac}, 빨간 셔츠를 자주 입는 밝고 표현력 강한 사람입니다.\n\n"
-        "그는 첫 만남부터 강한 매혹으로 {name}님을 흔듭니다.\n"
+        "{partner}는 첫 만남부터 강한 매혹으로 {name}님을 흔듭니다.\n"
         "{name}님은 끌립니다.\n\n"
         "여름이 되면 {name}님이 데이트비·선물·시간을 다 부담합니다.\n"
-        "그는 받기만 합니다. 챙길 것만 챙기고 미련 없이 갑니다.\n\n"
-        "가을이 되면 그는 더 잘해주는 다른 사람에게로 갑니다.\n"
+        "{partner}는 받기만 합니다. 줄 생각은 처음부터 없습니다.\n\n"
+        "가을이 되면 {partner}는 {dest} 미련 없이 갑니다.\n"
         "{name}님 통장은 비고, 마음에는 큰 상처만 남습니다.\n\n"
         "이건 식상태왕 + 홍염살 직격의 정해진 흐름입니다.\n"
         "끌릴수록 손실 — 신약 사주는 자제가 안 됩니다. 애초에 엮이지 않는 게 유일한 답입니다."
@@ -4707,10 +4707,14 @@ def build_dramatic_narrative(pils, name, gender, marital_status, saju_data):
         zodiac  = ZODIAC_BY_JIJI.get(sw_jj, "")
         intent  = resolve_sipsung_intent(SIPSUNG_INTENT.get(saju_data.get("sewoon_sipsung",""), ""), gender)
         tmpl    = NARRATIVE_TEMPLATES.get(pattern, NARRATIVE_TEMPLATES["기본형"])
+        _is_m   = (gender == "남")
+        _partner = "그녀" if _is_m else "그"
+        _dest    = "더 능력 있고 잘난 남자에게" if _is_m else "더 예쁘고 돈 많은 여자에게"
         narrative = tmpl.format(
             name=name, year=cur_year, zodiac=zodiac,
             person=INCOMING_PERSON_MAP.get(sw_cg,""),
             intent_text=f"십성: {saju_data.get('sewoon_sipsung','')} — {intent}" if intent else "",
+            partner=_partner, dest=_dest,
         )
         # 상대방 사주 추론 (세운 기반)
         traits, _sw_sipsung = infer_partner_pattern(
