@@ -6135,9 +6135,12 @@ def build_saju_core_diagnosis(pils, name, birth_year, gender, current_year=None)
 
         # Y-13: 내 사주 십성 풀이 (4면, 접기)
         try:
+            _SS_ORDER = ["比肩(비견)","劫財(겁재)","食神(식신)","傷官(상관)","偏財(편재)","正財(정재)","偏官(편관)","正官(정관)","偏印(편인)","正印(정인)"]
+            def _ss_sort_key(_k):
+                return _SS_ORDER.index(_k) if _k in _SS_ORDER else 99
             _seen = set()
             _sipsung_lines = []
-            for _full_key in _ss_cnt.keys():
+            for _full_key in sorted(_ss_cnt.keys(), key=_ss_sort_key):
                 _han = _full_key.split("(")[0]  # "偏財(편재)" → "偏財"
                 if _han in _seen:
                     continue
