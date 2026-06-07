@@ -18950,7 +18950,7 @@ def menu3_past(pils, birth_year, gender, name=""):
             f"그리고 곧 다가올 <b style='color:#c9a84c'>{_future_str} 대운</b>에서 새로운 장이 펼쳐질 것입니다.<br><br>"
             f"<span style='font-size:13px;color:#5a3d1a'>"
             f"{_gname_s} 격국을 타고난 {name if name else '당신'}님의 인생은 "
-            f"{_ilp_s.get('본질', '강인한 의지와 독특한 기질')[:30]}의 여정입니다. "
+            f"{_ilp_s.get('본질', '강인한 의지와 독특한 기질').split('.')[0]}의 여정입니다. "
             f"과거의 모든 경험은 현재의 내공이 되었고, 지금의 선택이 미래를 결정합니다."
             f"</span></div></div>"
         )
