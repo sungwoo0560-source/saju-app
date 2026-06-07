@@ -8297,7 +8297,7 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
                                     c.setFont(_BF, size)        # Y-33: 페이지 break 후 폰트 재적용
                                     c.setFillColorRGB(*color)
                                 c.drawString(MARGIN, y, raw)
-                                y -= (size * 0.45) * mm
+                                y -= (size * 0.55) * mm
                                 break
                             lo, hi = 1, len(raw)
                             while lo < hi - 1:
@@ -8311,7 +8311,7 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
                                 c.setFont(_BF, size)            # Y-33: 페이지 break 후 폰트 재적용
                                 c.setFillColorRGB(*color)
                             c.drawString(MARGIN, y, raw[:lo])
-                            y -= (size * 0.45) * mm
+                            y -= (size * 0.55) * mm
                             raw = raw[lo:].lstrip()
                     return y
 
@@ -8319,10 +8319,10 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
                     if y < 45 * mm:
                         y = _new_page()
                     c.setFillColorRGB(0.15, 0.12, 0.05)
-                    c.rect(MARGIN - 3 * mm, y - 2 * mm, W - 2 * MARGIN + 6 * mm, 9 * mm, fill=1, stroke=0)
+                    c.rect(MARGIN - 3 * mm, y - 4 * mm, W - 2 * MARGIN + 6 * mm, 9 * mm, fill=1, stroke=0)
                     c.setFillColorRGB(0.97, 0.88, 0.38)
                     c.setFont(_BF, 13)
-                    c.drawString(MARGIN + 1 * mm, y + 1.5 * mm, text)
+                    c.drawString(MARGIN + 1 * mm, y - 0.5 * mm, text)
                     return y - 12 * mm
 
                 # 표지
@@ -8868,12 +8868,6 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
                     y = _write(f"⑤ 위 분석을 출력해 매일 1번 읽으세요. 사주는 아는 것이 아닌 실천이 전부입니다.", y, size=10, color=(0.65,0.1,0.1))
                     y -= 3*mm
 
-                    # ── 14. 법적 면책 ────────────────────────────────────
-                    y = _sec("⚖️ 14. 법적 면책 고지", y)
-                    y = _write("본 사주 분석은 정통 명리학(자평진전·적천수·궁통보감) 원리에 기반한 참고 자료입니다.", y, size=8, color=(0.5,0.5,0.5))
-                    y = _write("의료·법률·재무 전문가의 진단을 대체하지 않으며, 모든 의사결정의 최종 책임은 본인에게 있습니다.", y, size=8, color=(0.5,0.5,0.5))
-                    y = _write("사주 해석은 통계적 패턴에 기반하며 개인의 노력과 환경에 따라 결과가 달라질 수 있습니다.", y, size=8, color=(0.5,0.5,0.5))
-
                 elif tab_name == "yearly":
                     y = _sec(f"📅 {_cur_yr}년 연간 운세 분석", y)
                     # 세운 정보
@@ -8919,6 +8913,11 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
                 c.setFillColorRGB(0.5, 0.45, 0.35)
                 c.drawString(MARGIN, 12 * mm, "만세력 사주 천명풀이")
                 c.drawRightString(W - MARGIN, 12 * mm, f"{_dt2.now().strftime('%Y.%m.%d')} 출력")
+                c.setFont(_BF, 7)
+                c.setFillColorRGB(0.75, 0.1, 0.1)
+                c.drawCentredString(W / 2, 32 * mm, "본 분석은 정통 명리학 원리에 기반한 참고 자료이며, 의료·법률·재무 전문가의 진단을 대체하지 않습니다.")
+                c.drawCentredString(W / 2, 28 * mm, "모든 의사결정의 최종 책임은 본인에게 있습니다.")
+                c.setFillColorRGB(0, 0, 0)
                 c.save()
                 _buf.seek(0)
 

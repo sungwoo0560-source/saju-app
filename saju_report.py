@@ -2616,8 +2616,6 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str=""):
                 except Exception as _te:
                     y = write(c, f"  (토정비결 오류: {str(_te)[:50]})", y, size=9)
 
-            c.setFont(BASE_FONT, 8)
-
             c.drawCentredString(
                 W / 2,
                 12 * mm,
@@ -2625,6 +2623,13 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str=""):
             )
 
             _draw_footer(c)
+            if y < 40 * mm:
+                new_page(c)
+            c.setFont(BASE_FONT, 8)
+            c.setFillColorRGB(0.75, 0.1, 0.1)
+            c.drawCentredString(W / 2, 30 * mm, "본 분석은 정통 명리학 원리에 기반한 참고 자료입니다.")
+            c.drawCentredString(W / 2, 26 * mm, "실제 의사결정은 본인의 판단과 전문가 상담이 우선되어야 합니다.")
+            c.setFillColorRGB(0, 0, 0)
             c.save()
 
             buf.seek(0)
