@@ -8614,6 +8614,14 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
                             y = _sec("🌟 8. 개운 처방", y)
                             for _oh in _cs_yong[:3]:
                                 y = _write(f"용신({_oh}): {_OH_RX2.get(_oh,'')}", y, size=9)
+                        # 올해 인연 흐름 (홍염살·상대의도·돈흐름)
+                        try:
+                            _rel_story = build_yearly_relationship_story(pils, name, gender, _cur_yr)
+                            if _rel_story:
+                                y = _sec(f"💋 {_cur_yr}년 인연 흐름", y)
+                                y = _write(_rel_story, y, size=9)
+                        except Exception:
+                            pass
 
                     except Exception as _cs_e:
                         y = _write(f"현재 상황 진단 오류: {_cs_e}", y, size=9)
@@ -8860,6 +8868,14 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
                     _jf_rel = LocalSajuNarrator.relations(pils, name, birth_year, gender)
                     y = _write(_jf_rel, y, size=9)
                     y -= 3*mm
+                    # 올해 인연 흐름 (홍염살·상대의도·돈흐름)
+                    try:
+                        _rel_story = build_yearly_relationship_story(pils, name, gender, _cur_yr)
+                        if _rel_story:
+                            y = _sec(f"💋 {_cur_yr}년 인연 흐름", y)
+                            y = _write(_rel_story, y, size=9)
+                    except Exception:
+                        pass
 
                     # ── Y-50: full_report 종합 사주 풀이 ────────────────
                     y = _sec("📜 종합 사주 풀이 — 인과 분석", y)
