@@ -3989,7 +3989,7 @@ class LocalSajuNarrator:
             "火": {"위험도": 75, "질환": "심장질환·고혈압·열질환", "예방": "과로 피하기·명상·따뜻한 음료 절제·수면 관리"},
             "金": {"위험도": 68, "질환": "폐질환·호흡곤란·피부질환", "예방": "습도 유지·호흡운동·매운음식 적절·금속 소품 활용"},
             "水": {"위험도": 62, "질환": "신장·비뇨계·청력 저하", "예방": "짠음식 절제·검진·겨울 보온·명상·독서"},
-            "土": {"위험도": 65, "질환": "소화계·관절염·비만", "예전": "규칙적 식사·요가·황토 효능·소화제 준비"}
+            "土": {"위험도": 65, "질환": "소화계·관절염·비만", "예방": "규칙적 식사·요가·황토 효능·소화제 준비"}
         }
         
         # ── 일간별 사고·건강 금기 행동 ──────────────────────────
@@ -4297,11 +4297,11 @@ class LocalSajuNarrator:
                 
                 yr_health_map[yr] = {
                     "accident": {"grade": risk_grade, "risk": accident_risk["위험도"], "reason": accident_risk["원인"], "months": risk_months},
-                    "health": {"grade": health_grade, "risk": health_rs["위험도"], "disease": health_rs["질환"], "prevention": health_rs["예방"]}
+                    "health": {"grade": health_grade, "risk": health_rs.get("위험도", 45), "disease": health_rs.get("질환", "일반관리"), "prevention": health_rs.get("예방", "정기검진")}
                 }
             except Exception:
                 yr_health_map[yr] = None
-        
+
         # 연도별 카드 출력
         yr_names = {cur_year: f"🔮 {cur_year}년 (올해)", cur_year+1: f"🔮 {cur_year+1}년 (내년)", cur_year+2: f"🔮 {cur_year+2}년 (내후년)"}
         
