@@ -8369,6 +8369,14 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
                     y = _sec("💑 궁합/관계 분석", y)
                     _txt = LocalSajuNarrator.relations(pils, name, birth_year, gender)
                     y = _write(_txt, y, size=9)
+                    # 올해 인연 흐름 (홍염살·상대의도·돈흐름)
+                    try:
+                        _rel_story = build_yearly_relationship_story(pils, name, gender, _cur_yr)
+                        if _rel_story:
+                            y = _sec(f"💋 {_cur_yr}년 인연 흐름", y)
+                            y = _write(_rel_story, y, size=9)
+                    except Exception:
+                        pass
 
                 elif tab_name == "health":
                     y = _sec("🏥 건강 분석", y)
