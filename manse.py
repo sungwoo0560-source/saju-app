@@ -8367,7 +8367,7 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
 
                 elif tab_name == "relations":
                     y = _sec("💑 궁합/관계 분석", y)
-                    _txt = LocalSajuNarrator.relations(pils, name, birth_year, gender)
+                    _txt = LocalSajuNarrator.relations(pils, name, birth_year, gender, st.session_state.get("in_marriage", "미혼"))
                     y = _write(_txt, y, size=9)
                     # 올해 인연 흐름 (홍염살·상대의도·돈흐름)
                     try:
@@ -8865,7 +8865,7 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
 
                     # ── 12. 관계·인연 ────────────────────────────────────
                     y = _sec("💑 12. 관계·인연 분석", y)
-                    _jf_rel = LocalSajuNarrator.relations(pils, name, birth_year, gender)
+                    _jf_rel = LocalSajuNarrator.relations(pils, name, birth_year, gender, st.session_state.get("in_marriage", "미혼"))
                     y = _write(_jf_rel, y, size=9)
                     y -= 3*mm
                     # 올해 인연 흐름 (홍염살·상대의도·돈흐름)
@@ -8929,7 +8929,7 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
                     y -= 3*mm
                     # 관계·인연
                     y = _sec("💑 관계·인연 분석", y)
-                    _yr_rel = LocalSajuNarrator.relations(pils, name, birth_year, gender)
+                    _yr_rel = LocalSajuNarrator.relations(pils, name, birth_year, gender, st.session_state.get("in_marriage", "미혼"))
                     y = _write(_yr_rel, y, size=9)
 
                 # 푸터
