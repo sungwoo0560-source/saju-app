@@ -17723,12 +17723,26 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
         if "劫財" in _sw_ss_cg: _sm = max(1, _sm - 3)
         if _is_sw_hung8: _sm = max(1, _sm - 2)
 
-        _ss = 0  # 사고수 (높을수록 위험)
-        if _has_chung8: _ss += 3
-        if "偏官" in _sw_ss_cg: _ss += 2
-        if _has_geobsal8: _ss += 2
-        if _has_baekho8: _ss += 2
-        _ss = min(10, max(1, _ss)) if _ss > 0 else 2
+        # 사고수 — B섹션(menu16_ohaeng_deep)과 동일 알고리즘 → /10 환산
+        _ss_raw = 0
+        if "偏官" in _sw_ss_cg:   _ss_raw += 30
+        elif "劫財" in _sw_ss_cg: _ss_raw += 25
+        _sw_jj8v = _sw_now.get("jj", "")
+        _ilji8v  = pils[1]["jj"] if len(pils) > 1 else ""
+        _wolji8v = pils[2]["jj"] if len(pils) > 2 else ""
+        if _JJCHUNG.get(_sw_jj8v, "") == _ilji8v:  _ss_raw += 25
+        if _JJCHUNG.get(_sw_jj8v, "") == _wolji8v: _ss_raw += 20
+        _BAEKHO8s = {"甲辰","乙未","丙戌","丁丑","戊辰","壬辰","癸丑"}
+        if any(p["cg"]+p["jj"] in _BAEKHO8s for p in pils) and _ss_raw >= 20:
+            _ss_raw += 15
+        _YANGIN8s = {"甲":"卯","丙":"午","戊":"午","庚":"酉","壬":"子"}
+        _yj8s = _YANGIN8s.get(_ilgan, "")
+        if _yj8s and any(p["jj"] == _yj8s for p in pils) and "偏官" in _sw_ss_cg:
+            _ss_raw += 15
+        if _has_geobsal8 and "偏官" in _sw_ss_cg: _ss_raw += 10
+        if _has_geobsal8 and "劫財" in _sw_ss_cg: _ss_raw += 10
+        _ss_raw = min(100, _ss_raw)
+        _ss = max(1, round(_ss_raw / 10)) if _ss_raw > 0 else 2
 
         _sl = 3  # 이성
         if _has_dowhwa8: _sl = min(10, _sl + 3)
