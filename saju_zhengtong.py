@@ -7021,10 +7021,13 @@ def render_final_verdict_card(pils, name="내담자"):
     return html
 
 
-def detect_life_risk_signals(pils, saewoon_data=None):
+def detect_life_risk_signals(pils, saewoon_data=None, gender=None, marriage_status=None):
     """7대 운명 코드 자동 감지: 바람/사고/횡재/이혼/병/결혼/사업"""
     if not pils or len(pils) < 4:
         return {}
+
+    _is_male    = gender in ("남", "男") if gender is not None else True
+    _is_married = marriage_status in ("기혼", "재혼") if marriage_status else False
 
     ilgan = pils[1].get("cg", "")
     iljj  = pils[1].get("jj", "")
@@ -7246,7 +7249,7 @@ def detect_life_risk_signals(pils, saewoon_data=None):
     if dohwa_count >= 3:
         ihon_score += 15
         ihon_reasons.append("도화 과다 — 이성 관계 복잡")
-    if gwanseong == 0 and ilgan in ["甲","丙","戊","庚","壬"]:
+    if gwanseong == 0 and _is_male:
         ihon_score += 10
         ihon_reasons.append("관성 부재(남자) — 자녀·책임 약함")
     if ihon_score >= 60:
@@ -7300,23 +7303,34 @@ def detect_life_risk_signals(pils, saewoon_data=None):
     if has_cheonueul:
         gyeolhon_score += 25
         gyeolhon_reasons.append("천을귀인 — 좋은 배우자 인연")
-    if jeongjae >= 1 and ilgan in ["甲","丙","戊","庚","壬"]:
+    if jeongjae >= 1 and _is_male:
         gyeolhon_score += 20
         gyeolhon_reasons.append("남자 + 정재 — 안정적 배우자")
-    if jeonggwan >= 1 and ilgan in ["乙","丁","己","辛","癸"]:
+    if jeonggwan >= 1 and not _is_male:
         gyeolhon_score += 20
         gyeolhon_reasons.append("여자 + 정관 — 듬직한 배우자")
     if "관인상생" in activated_combos:
         gyeolhon_score += 15
         gyeolhon_reasons.append("관인상생 — 격있는 배우자 인연")
-    if gyeolhon_score >= 60:
-        gyeolhon_level, gyeolhon_msg = "🌟 최상급 인연", "💎 60갑자 중 상위 5% — 평생 단 한 번 그 인연이 옵니다.\n→ 천을귀인 활성월(6월·12월) — 사람 만나는 자리 의무로 가세요.\n→ 이 시기 못 잡으면 평생 후회입니다."
-    elif gyeolhon_score >= 40:
-        gyeolhon_level, gyeolhon_msg = "✨ 좋음", "✨ 좋은 결혼 인연 옵니다 — 정재/정관 운에서."
-    elif gyeolhon_score >= 20:
-        gyeolhon_level, gyeolhon_msg = "💡 보통", "평범한 인연. 자연스러운 흐름.\n→ 노력해야 옵니다. 가만히 있으면 안 옵니다."
+    if _is_married:
+        if gyeolhon_score >= 60:
+            gyeolhon_level, gyeolhon_msg = "🌟 최상급", "💎 현재 배우자와의 인연이 최상급입니다 — 천을귀인 활성월(6·12월) 관계 더욱 깊어집니다."
+        elif gyeolhon_score >= 40:
+            gyeolhon_level, gyeolhon_msg = "✨ 좋음", "✨ 현재 배우자와 인연이 좋습니다 — 정재/정관 운에서 관계 더욱 안정됩니다."
+        elif gyeolhon_score >= 20:
+            gyeolhon_level, gyeolhon_msg = "💡 보통", "현재 관계 평이 — 꾸준한 소통으로 유지하십시오."
+        else:
+            gyeolhon_level, gyeolhon_msg = "🔍 점검 필요", "배우자 인연 점검 필요 — 대화를 먼저 늘리세요."
     else:
-        gyeolhon_level, gyeolhon_msg = "🔍 신중", "인연 약함. 자기 성장 우선.\n→ 자기 성장이 최고의 인연 전략입니다."
+        _spouse = "부인" if _is_male else "남편"
+        if gyeolhon_score >= 60:
+            gyeolhon_level, gyeolhon_msg = "🌟 최상급 인연", f"💎 60갑자 중 상위 5% — 평생 단 한 번 그 {_spouse} 인연이 옵니다.\n→ 천을귀인 활성월(6월·12월) — 사람 만나는 자리 의무로 가세요.\n→ 이 시기 못 잡으면 평생 후회입니다."
+        elif gyeolhon_score >= 40:
+            gyeolhon_level, gyeolhon_msg = "✨ 좋음", f"✨ 좋은 {_spouse} 인연 옵니다 — 정재/정관 운에서."
+        elif gyeolhon_score >= 20:
+            gyeolhon_level, gyeolhon_msg = "💡 보통", "평범한 인연. 자연스러운 흐름.\n→ 노력해야 옵니다. 가만히 있으면 안 옵니다."
+        else:
+            gyeolhon_level, gyeolhon_msg = "🔍 신중", "인연 약함. 자기 성장 우선.\n→ 자기 성장이 최고의 인연 전략입니다."
     results["결혼인연"] = {"점수": min(gyeolhon_score,100), "등급": gyeolhon_level, "이유": gyeolhon_reasons, "메시지": gyeolhon_msg, "아이콘": "💕"}
 
     # 7. 사업운
@@ -7353,9 +7367,9 @@ def detect_life_risk_signals(pils, saewoon_data=None):
     return results
 
 
-def render_life_risk_card(pils, name="내담자"):
+def render_life_risk_card(pils, name="내담자", gender=None, marriage_status=None):
     """7대 운명 코드 박스 — 광고 임팩트 최대화"""
-    results = detect_life_risk_signals(pils)
+    results = detect_life_risk_signals(pils, gender=gender, marriage_status=marriage_status)
     if not results:
         return ""
 

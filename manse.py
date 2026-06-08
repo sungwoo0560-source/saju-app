@@ -8584,7 +8584,7 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
                         # ── 7. 위험 신호 진단 ─────────────────────────────
                         try:
                             from saju_zhengtong import detect_life_risk_signals as _cs_drs
-                            _cs_risks = _cs_drs(pils)
+                            _cs_risks = _cs_drs(pils, gender=gender, marriage_status=st.session_state.get("in_marriage","미혼"))
                             if _cs_risks:
                                 y = _sec("🚨 7. 위험 신호 진단", y)
                                 _RISK_LBL = {"바람기":"바람기·외도","사고수":"사고수","횡재수":"횡재수",
@@ -8835,7 +8835,7 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
                     y = _sec("🔴 9. 7대 운명 코드 직격 진단", y)
                     try:
                         from saju_zhengtong import detect_life_risk_signals as _jf_drs
-                        _jf_risks = _jf_drs(pils)
+                        _jf_risks = _jf_drs(pils, gender=gender, marriage_status=st.session_state.get("in_marriage","미혼"))
                         _RISK_PDF = {
                             "바람기":"바람기·외도","사고수":"사고수·수술","횡재수":"횡재수·재물",
                             "이혼·이별":"이혼·이별","큰병":"큰병·중병","결혼인연":"결혼·인연","사업운":"사업운",
@@ -14112,7 +14112,7 @@ def infer_current_worry(pils, birth_year, gender, marital_status=None):
         # 연애_결혼 위험도: 실제 점수 기반 (도화/합만 보던 로직 정확화)
         try:
             from saju_zhengtong import detect_life_risk_signals as _dlrs
-            _risks_r = _dlrs(pils)
+            _risks_r = _dlrs(pils, gender=gender, marriage_status=marital_status)
             _div_r = _risks_r.get("이혼·이별", {}).get("점수", 30)
             _aff_r = _risks_r.get("바람기", {}).get("점수", 20)
             _mar_r = _risks_r.get("결혼인연", {}).get("점수", 50)
@@ -14328,7 +14328,7 @@ def render_worry_inference(pils, birth_year, gender, marital_status=None):
     """고민 자동 추론 — 결혼/이혼/바람기 점수 기반 임팩트 메시지"""
     try:
         from saju_zhengtong import detect_life_risk_signals
-        _risks_in = detect_life_risk_signals(pils)
+        _risks_in = detect_life_risk_signals(pils, gender=gender, marriage_status=marital_status)
         _mar = _risks_in.get("결혼인연", {}).get("점수", 50)
         _div = _risks_in.get("이혼·이별", {}).get("점수", 30)
         _aff = _risks_in.get("바람기", {}).get("점수", 20)
@@ -17548,7 +17548,7 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
     # Patch Y-9-A: 7대 운명 코드 박스 (충격 임팩트)
     try:
         from saju_zhengtong import render_life_risk_card
-        st.markdown(render_life_risk_card(pils, _name_y6), unsafe_allow_html=True)
+        st.markdown(render_life_risk_card(pils, _name_y6, gender=gender, marriage_status=st.session_state.get("in_marriage","미혼")), unsafe_allow_html=True)
     except Exception as _e_y9a:
         st.warning(f"Y-9-A 운명 코드 박스 로드 실패: {_e_y9a}")
 
@@ -19729,7 +19729,7 @@ def menu5_money(pils, birth_year, gender, name="내담자"):
     # ── 재물 직격 요약 카드 (결론 먼저) ──────────────────────────
     try:
         from saju_zhengtong import detect_life_risk_signals
-        _m5_risks = detect_life_risk_signals(pils)
+        _m5_risks = detect_life_risk_signals(pils, gender=gender, marriage_status=st.session_state.get("in_marriage","미혼"))
         _m5_hoeng = _m5_risks.get("횡재수", {})
         _m5_biz   = _m5_risks.get("사업운", {})
         _m5_hs    = _m5_hoeng.get("점수", 0)
