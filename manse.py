@@ -4994,6 +4994,18 @@ RELATIONSHIP_INTENT_MATRIX = {
         "결말": "표면 친밀 → 깊은 손실.",
         "경고": "🔴 매혹에 속지 마세요.",
     },
+    ("재다신약_여_미혼","편재"): {
+        "의도": "당신 헌신을 당연히 여깁니다. 받는 데 익숙하고 줄 생각이 없습니다.",
+        "돈흐름": "데이트비·선물·여행 다 본인. 빠질수록 더 씁니다. 상대는 받기만.",
+        "결말": "1년 후 통장 비고, 상대는 더 조건 좋은 사람에게 갑니다.",
+        "경고": "🔴 끌릴수록 통장이 빕니다. 선 넘기 전에 끊으세요.",
+    },
+    ("재다신약_여_기혼","편재"): {
+        "의도": "가정 밖 인연. 매력으로 다가와 당신 마음을 흔듭니다.",
+        "돈흐름": "가정 돈까지 끌어다 씁니다. 상대는 받기만 합니다.",
+        "결말": "가정도 돈도 다 잃고 빈손. 들키면 더 큰 대가.",
+        "경고": "🔴 가정 밖 인연에 빠지면 다 잃습니다. 애초에 엮이지 마세요.",
+    },
 }
 
 
@@ -5082,7 +5094,11 @@ def build_yearly_relationship_story(pils, name, gender, current_year):
             elif _sanggan>=1 and _jeong_gwan>=1:
                 _active_pattern = "상관견관"
             elif _jae>=2 and _weak:
-                _active_pattern = "재다신약"
+                if gender in ("여","女"):
+                    _ms_pat = st.session_state.get("in_marriage","미혼")
+                    _active_pattern = "재다신약_여_기혼" if _ms_pat in ("기혼","재혼") else "재다신약_여_미혼"
+                else:
+                    _active_pattern = "재다신약"
             elif _insung>=3:
                 _active_pattern = "인성과다"
         except Exception:
@@ -5116,7 +5132,7 @@ def build_yearly_relationship_story(pils, name, gender, current_year):
         out.append(f"🧑 **인물**: {zodiac} / {person}")
         # X-6-Q [4]: 혼인 상태별 폴백 분기
         try:
-            _ms_q4 = st.session_state.get("marriage_status","미혼")
+            _ms_q4 = st.session_state.get("in_marriage","미혼")
         except Exception:
             _ms_q4 = "미혼"
         if _ms_q4 in ("기혼","재혼"):
