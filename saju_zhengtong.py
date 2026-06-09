@@ -7379,6 +7379,7 @@ def render_life_risk_card(pils, name="내담자", gender=None, marriage_status=N
         "🤔": "#5e35b1", "⚠": "#e65100",
     }
 
+    _CARD_LABELS = {"사고수": "평생 사고수"}
     cards = ""
     for key, data in results.items():
         icon    = data["아이콘"]
@@ -7386,6 +7387,7 @@ def render_life_risk_card(pils, name="내담자", gender=None, marriage_status=N
         score   = data["점수"]
         reasons = data["이유"]
         msg     = data["메시지"]
+        display_key = _CARD_LABELS.get(key, key)
 
         emoji = level[0] if level else "🟢"
         color = color_map.get(emoji, "#666")
@@ -7404,7 +7406,7 @@ def render_life_risk_card(pils, name="내담자", gender=None, marriage_status=N
   <div style="display:flex;justify-content:space-between;align-items:center;
               border-bottom:1px solid #f0f0f0;padding-bottom:10px;margin-bottom:10px;">
     <div style="font-size:18px;font-weight:900;color:{color};">
-      {icon} {key} — {level}
+      {icon} {display_key} — {level}
     </div>
     <div style="font-size:14px;font-weight:700;color:{color};
                 background:{color}15;padding:4px 12px;border-radius:20px;">

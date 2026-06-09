@@ -17896,7 +17896,7 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
     <div style="color:#bbb;font-size:11px;margin-top:4px;line-height:1.5">{_money_1l}</div>
   </div>
   <div style="background:#111827;border-radius:10px;padding:12px">
-    <div style="color:#999;font-size:11px;margin-bottom:3px">⚡ 사고수</div>
+    <div style="color:#999;font-size:11px;margin-bottom:3px">⚡ 올해 사고수</div>
     <div style="font-family:monospace;color:{_sc8(_ss,True)};font-size:12px">{_bar8(_ss)} {_ss}/10</div>
     <div style="color:#bbb;font-size:11px;margin-top:4px;line-height:1.5">{_sago_1l}</div>
   </div>
