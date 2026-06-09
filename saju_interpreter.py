@@ -12553,7 +12553,7 @@ def get_jeokjung_guiin(ilgan, pils, yukjin_list):
     return {"title": title, "line1": line1, "line2": line2, "line3": line3}
 
 
-def get_jeokjung_affair(gender, ilgan, yukjin_list, sinsal_list, pils):
+def get_jeokjung_affair(gender, ilgan, yukjin_list, sinsal_list, pils, marriage_status="미혼"):
     """성별 기반 이성 인연 적중 박스 반환. pils는 [시주,일주,월주,년주] 리스트.
     반환: dict {title, line1, line2, line3}
     """
@@ -12706,10 +12706,16 @@ def get_jeokjung_affair(gender, ilgan, yukjin_list, sinsal_list, pils):
             extra = " 특히 시지 도화 — 말년 마음 단속 필수." if sigi_dohwa else ""
             line3 = "본인이 자제하면 그저 인기 많은 사람으로 끝납니다." + extra
         elif gwan_total == 0:
-            title = "💔 당신은 — 남자 인연이 약한 사주입니다"
-            line1 = "무관(無官) 구조. 남자에 큰 미련 없고 결혼도 늦습니다."
-            line2 = "독립적이고 본인 일에 몰두 — 그게 당신의 길."
-            line3 = "외도 가능성 낮습니다. 결혼 자체를 신중히."
+            if marriage_status in ("기혼", "재혼"):
+                title = "💔 당신은 — 남편엔 시들, 밖엔 약한 무관 사주입니다"
+                line1 = "무관(無官) 구조 — 남편한텐 점점 시들, 밖에서 끌리는 사람엔 약합니다."
+                line2 = "독립적·일 몰두형 — 외로움 느낄 때가 진짜 함정."
+                line3 = "🚨 가정 밖 인연에 빠지면 돈·마음 다 퍼주고 빈손. 끌릴수록 차단이 답."
+            else:
+                title = "💔 당신은 — 남자 인연이 약한 사주입니다"
+                line1 = "무관(無官) 구조. 남자에 큰 미련 없고 결혼도 늦습니다."
+                line2 = "독립적이고 본인 일에 몰두 — 그게 당신의 길."
+                line3 = "외도 가능성 낮습니다. 결혼 자체를 신중히."
         else:
             title = "💔 당신은 — 한 사람에게 충실한 사주입니다"
             line1 = "관성이 안정적 — 한 번 선택한 사람 끝까지 갑니다."

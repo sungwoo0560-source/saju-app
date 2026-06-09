@@ -17678,7 +17678,8 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
         jk_hea = get_jeokjung_health(_jk_oh, pils, _jk_sinsal)
         jk_win = get_jeokjung_windfall(_jk_yukjin, _jk_daeun, birth_year)
         jk_gui = get_jeokjung_guiin(_jk_ilgan, pils, _jk_yukjin)
-        jk_aff = get_jeokjung_affair(gender, _jk_ilgan, _jk_yukjin, _jk_sinsal, pils)
+        jk_aff = get_jeokjung_affair(gender, _jk_ilgan, _jk_yukjin, _jk_sinsal, pils,
+                                     marriage_status=st.session_state.get("marriage_status", "미혼"))
         import inspect as _insp_fix7
         _sig_marr = _insp_fix7.signature(get_jeokjung_marriage)
         _kw_marr = {}
