@@ -109,7 +109,7 @@ def _pdf_current_status(pils, name, birth_year, gender, story, styles):
         pass
     return elements
 
-def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str=""):
+def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str="", dramatic_text=None):
     """📄 PDF 출력 - 사주 천명 리포트 다운로드"""
 
     from datetime import datetime as _dt
@@ -2445,6 +2445,21 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str=""):
                     y -= 3*mm
                 except Exception as _re2:
                     y = write(c, f"  (궁합분석 오류: {str(_re2)[:50]})", y, size=9)
+
+            # ══ 막장 드라마 서사 ══
+            if dramatic_text:
+                try:
+                    import re as _re_dr
+                    y = section_title(c, "📖 사주 드라마 — 올해 핵심 서사", y)
+                    for _dl in dramatic_text.split("\n"):
+                        _dc = _re_dr.sub(r"[*#\[\]`>★]", "", _dl).strip()
+                        if not _dc:
+                            y -= 1 * mm
+                            continue
+                        y = write(c, f"  {_dc}", y, size=9)
+                    y -= 3 * mm
+                except Exception as _dre:
+                    y = write(c, f"  (드라마서사 오류: {str(_dre)[:50]})", y, size=9)
 
             # ══ 미래 3년 집중 분석 ══
             if include_future3:

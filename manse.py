@@ -29849,7 +29849,49 @@ def main():
             elif _cur_tab == 14:
                 menu_yearly(pils, name, birth_year, gender)
             elif _cur_tab == 15:
-                menu_pdf(pils, birth_year, gender, name, str(_ss.get("in_birth_hour", "")))
+                _pdf_ms = _ss.get("in_marriage", "미혼")
+                _dramatic_text = ""
+                try:
+                    _pdf_ilgan = pils[1].get("cg", "") if len(pils) > 1 else ""
+                    _pdf_sw    = get_yearly_luck(pils, datetime.now().year) or {}
+                    _pdf_ss_t  = _pdf_sw.get("십성_천간", "")
+                    _pdf_cnt   = {}
+                    if _pdf_ilgan:
+                        for _s in calc_sipsung(_pdf_ilgan, pils):
+                            for _k in ("cg_ss", "jj_ss"):
+                                _v = _s.get(_k, "-")
+                                if _v and _v != "-":
+                                    _pdf_cnt[_v] = _pdf_cnt.get(_v, 0) + 1
+                    _pdf_bic  = _pdf_cnt.get("比肩(비견)",0) + _pdf_cnt.get("劫財(겁재)",0)
+                    _pdf_jae  = _pdf_cnt.get("偏財(편재)",0) + _pdf_cnt.get("正財(정재)",0)
+                    _pdf_gwan = _pdf_cnt.get("偏官(편관)",0) + _pdf_cnt.get("正官(정관)",0)
+                    _pdf_sik  = _pdf_cnt.get("食神(식신)",0) + _pdf_cnt.get("傷官(상관)",0)
+                    _pdf_gmix = (_pdf_cnt.get("偏官(편관)",0)>=1 and _pdf_cnt.get("正官(정관)",0)>=1)
+                    _pdf_weak = False
+                    try:
+                        _si = get_ilgan_strength(_pdf_ilgan, pils)
+                        _pdf_weak = bool(_si and _si.get("신강신약","") in ("신약","극신약"))
+                    except Exception:
+                        pass
+                    _pdf_yd   = get_yangin(pils) or {}
+                    _pdf_ya   = bool(_pdf_yd.get("존재", False))
+                    _pdf_ypos = _pdf_yd.get("양인_지지", "")
+                    _pdf_ctx  = {
+                        "pils": pils, "name": name, "birth_year": birth_year,
+                        "current_year": datetime.now().year,
+                        "ilgan": _pdf_ilgan,
+                        "sewoon_sipsung": _pdf_ss_t,
+                        "yangin_active": _pdf_ya, "yangin_pos": _pdf_ypos,
+                        "chung_active": False, "cur_yangin_hit": False,
+                        "past_active": [], "future_active": [],
+                        "bigyeop_jaengjae": (_pdf_bic >= 2 and _pdf_jae >= 1),
+                        "siksang": _pdf_sik, "gwan": _pdf_gwan, "jae": _pdf_jae,
+                        "gwansal_mix": _pdf_gmix, "ilgan_weak": _pdf_weak,
+                    }
+                    _dramatic_text = build_dramatic_narrative(pils, name, gender, _pdf_ms, _pdf_ctx)
+                except Exception:
+                    _dramatic_text = ""
+                menu_pdf(pils, birth_year, gender, name, str(_ss.get("in_birth_hour", "")), dramatic_text=_dramatic_text)
             elif _cur_tab == 16:
                 menu_gaewoon(pils, name, birth_year, gender)
 
