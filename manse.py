@@ -4717,9 +4717,12 @@ def build_dramatic_narrative(pils, name, gender, marital_status, saju_data):
             partner=_partner, dest=_dest,
         )
         # 상대방 사주 추론 (세운 기반)
-        traits, _sw_sipsung = infer_partner_pattern(
-            saju_data.get("ilgan",""), sw_cg, sw_jj
-        )
+        try:
+            traits, _sw_sipsung = infer_partner_pattern(
+                saju_data.get("ilgan",""), sw_cg, sw_jj
+            )
+        except Exception:
+            traits, _sw_sipsung = [], ""
 
         out = [f"\n---\n## 📖 {cur_year}년 {name}님 사주 드라마\n"]
         if p_type:
