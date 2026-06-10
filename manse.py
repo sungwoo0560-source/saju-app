@@ -4789,8 +4789,28 @@ def get_scenario_timing(key, saju_data):
             pass
         return "future", None
 
+    # 바람기·혼외 인연 — 홍염살 발동 연도 기준 (충/양인 기반 past_active 대신)
+    if key in ("two_lives", "extramarital"):
+        _ilgan_tl = saju_data.get("ilgan", "")
+        _HONGYEOM_TL = {"甲":"午","乙":"申","丙":"寅","丁":"未",
+                        "戊":"辰","己":"辰","庚":"戌","辛":"酉","壬":"子","癸":"申"}
+        _hy_jj = _HONGYEOM_TL.get(_ilgan_tl, "")
+        _JJ12_TL = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"]
+        if _hy_jj:
+            if _JJ12_TL[(current_year - 4) % 12] == _hy_jj:
+                return "now", current_year
+            for _d in range(-1, -4, -1):
+                _fy = current_year + _d
+                if _JJ12_TL[(_fy - 4) % 12] == _hy_jj:
+                    return "past", _fy
+            for _d in range(1, 7):
+                _fy = current_year + _d
+                if _JJ12_TL[(_fy - 4) % 12] == _hy_jj:
+                    return "soon", _fy
+        return "future", None
+
     # 결혼·배우자 패턴
-    if key in ("remarriage", "two_lives", "spouse_illness", "double_life"):
+    if key in ("remarriage", "spouse_illness", "double_life"):
         if chung_active and saju_data.get("bigyeop_jaengjae", False):
             return "now", current_year
         if past_active:
