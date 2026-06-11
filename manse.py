@@ -18050,19 +18050,13 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
         _gisin_cal= _ys_cal.get("기신",[]) if _ys_cal and isinstance(_ys_cal.get("기신"),list) else []
         _OH_CAL = _OH_CG
         _OH_CAL2= _OH_CG
-        _MON_CG_BASE = {"甲":"丙","乙":"戊","丙":"庚","丁":"壬","戊":"甲",
-                        "己":"丙","庚":"戊","辛":"庚","壬":"壬","癸":"甲"}
-        _CG_LIST = ["甲","乙","丙","丁","戊","己","庚","辛","壬","癸"]
-        _JJ_LIST_M = ["丑","寅","卯","辰","巳","午","未","申","酉","戌","亥","子"]
-        _start = _MON_CG_BASE.get(_ilgan_cal,"甲")
-        _sidx  = _CG_LIST.index(_start) if _start in _CG_LIST else 0
-
         _cal_rows = []
         for _mi in range(12):
-            _mcg = _CG_LIST[(_sidx + _mi) % 10]
-            _mjj = _JJ_LIST_M[_mi]
-            _mss = TEN_GODS_MATRIX.get(_ilgan_cal,{}).get(_mcg,"-")
-            _moh = _OH_CAL2.get(_mcg,"")
+            _ml_cal = get_monthly_luck(pils, _cy_cal, _mi + 1) or {}
+            _mcg = _ml_cal.get("간", "")
+            _mjj = _ml_cal.get("지", "")
+            _mss = _ml_cal.get("십성", "-")
+            _moh = _OH_CAL2.get(_mcg, "")
             _is_y = _moh in _yong_cal
             _is_g = _moh in _gisin_cal
             _col  = "#1a3d1a" if _is_y else "#3d1a1a" if _is_g else "#1a1a2e"
@@ -18151,15 +18145,11 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
         _JJ_LIST_G = ["丑","寅","卯","辰","巳","午","未","申","酉","戌","亥","子"]
         _danger_months = []
         _good_months = []
-        _CG_LIST_G = ["甲","乙","丙","丁","戊","己","庚","辛","壬","癸"]
-        _start_g = {"甲":"丙","乙":"戊","丙":"庚","丁":"壬","戊":"甲",
-                    "己":"丙","庚":"戊","辛":"庚","壬":"壬","癸":"甲"}.get(_ilgan_g,"甲")
-        _sidx_g = _CG_LIST_G.index(_start_g) if _start_g in _CG_LIST_G else 0
-
         for _mi_g in range(12):
-            _mcg_g = _CG_LIST_G[(_sidx_g + _mi_g) % 10]
-            _mjj_g = _JJ_LIST_G[_mi_g]
-            _moh_g = _OH_CG.get(_mcg_g,"")
+            _ml_g = get_monthly_luck(pils, _cy_g, _mi_g + 1) or {}
+            _mcg_g = _ml_g.get("간", "")
+            _mjj_g = _ml_g.get("지", "")
+            _moh_g = _OH_CG.get(_mcg_g, "")
             _chung_g = _CHUNG_G.get(_mjj_g,"")
             _has_chung_g = bool(_chung_g and _chung_g in _orig_jjs_g)
             _is_g_g = _moh_g in (_ys_g.get("기신",[]) if _ys_g and isinstance(_ys_g.get("기신"),list) else [])
