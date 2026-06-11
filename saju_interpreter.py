@@ -10678,6 +10678,30 @@ def _nar_report(ctx):
         {ilju_block}{oh_block}{sinsal_block}{gongmang_block}{pahae_block}{geunmyo_block}
 """
 
+    # 세운 메시지 — 4️⃣ 블록 ({sw_msg1}/{sw_msg2}) 에서 사용
+    _sw_ss_rp = this_year_flow.get("십성_천간", "") if this_year_flow else ""
+    _sw_gh_rp = this_year_flow.get("길흉", "보통") if this_year_flow else "보통"
+    _SW_MSG_RP = {
+        "正官": f"{cur_year}년 정관(正官) 세운 — 명예와 직위가 오르는 해. 조직 내 신뢰가 높아집니다.",
+        "偏官": f"{cur_year}년 편관(偏官) 세운 — 도전과 극복의 해. 강인하게 버티면 크게 성장합니다.",
+        "正財": f"{cur_year}년 정재(正財) 세운 — 안정적 수입이 늘어나는 해. 성실한 노력이 결실을 맺습니다.",
+        "偏財": f"{cur_year}년 편재(偏財) 세운 — 예상치 못한 수입과 기회의 해. 적극적으로 움직이십시오.",
+        "食神": f"{cur_year}년 식신(食神) 세운 — 표현력과 창의성이 빛나는 해. 부업·새 분야 도전에 좋습니다.",
+        "傷官": f"{cur_year}년 상관(傷官) 세운 — 변화와 혁신의 에너지. 기존 틀을 깨는 도전이 성과를 냅니다.",
+        "比肩": f"{cur_year}년 비견(比肩) 세운 — 독립과 자립의 해. 경쟁이 심해지나 자신감으로 돌파 가능합니다.",
+        "劫財": f"{cur_year}년 겁재(劫財) 세운 — 재물 기복 주의. 충동적 지출과 투자를 자제하십시오.",
+        "偏印": f"{cur_year}년 편인(偏印) 세운 — 이동과 변화의 해. 학습·이직·이사 기운이 강합니다.",
+        "正印": f"{cur_year}년 정인(正印) 세운 — 학문과 귀인의 해. 배움과 자격증이 운명을 바꿉니다.",
+    }
+    sw_msg1 = _SW_MSG_RP.get(_sw_ss_rp, f"{cur_year}년은 {_sw_gh_rp}의 기운이 흐르는 한 해입니다.")
+    sw_msg2 = (
+        "길(吉) 기운이 강합니다. 상반기 안에 중요한 결정을 내리십시오. 망설이면 기회가 지나갑니다."
+        if "길" in _sw_gh_rp else
+        "흉(凶) 기운이 있습니다. 무리한 변화·투자·확장 자제. 내실을 다지는 한 해로 써야 합니다."
+        if "흉" in _sw_gh_rp else
+        "평온한 한 해입니다. 꾸준히 실력을 쌓으십시오 — 조용한 해에 준비한 사람이 다음 기회에 터집니다."
+    )
+
     # 2. 만신 화법 f-string 조립 (5단계 + 강화된 6단계)
     report = f"""
 <div style="background:#ffffff; border:2px solid #d4af37; border-radius:16px; padding:25px; margin-top:20px; box-shadow:0 8px 20px rgba(212,175,55,0.15)">
