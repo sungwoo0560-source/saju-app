@@ -1765,6 +1765,16 @@ class LocalSajuNarrator:
 
             gisin_raw = ys_data.get("기신", [])
             gisin = list(gisin_raw) if isinstance(gisin_raw, list) else [o for o in ["木","火","土","金","水"] if o in str(gisin_raw)]
+            # 기신 보정 — kihwa 문자열에 오행한자 없어 gisin=[]인 경우 신강신약 기준으로 보완
+            if not gisin and sn:
+                _ob = {"木":"水","火":"木","土":"火","金":"土","水":"金"}
+                _oc = {"木":"土","火":"金","土":"水","金":"木","水":"火"}
+                _ih = OH.get(ilgan, "")
+                if "신강" in sn:
+                    gisin = list(dict.fromkeys(x for x in [_ob.get(_ih,""), _ih] if x))
+                elif "신약" in sn:
+                    _gw = next((k for k, v in _oc.items() if v == _ih), "")
+                    gisin = list(dict.fromkeys(x for x in [_gw, _oc.get(_ih,"")] if x))
 
             ss_list = calc_sipsung(ilgan, pils) or []
 
@@ -1829,6 +1839,15 @@ class LocalSajuNarrator:
             )
 
             sw = get_yearly_luck(pils, cur_year) or {}
+            # 세운 길흉 용신·기신 기준 보정 (캐시된 dict 새 dict로 복사 후 교체)
+            _sw_oh_b = sw.get("오행_천간", "")
+            if _sw_oh_b and yongshin:
+                if _sw_oh_b in yongshin:
+                    sw = dict(sw, 길흉="길(吉)")
+                elif _sw_oh_b in gisin:
+                    sw = dict(sw, 길흉="흉(凶)")
+                else:
+                    sw = dict(sw, 길흉="평(平)")
 
             return dict(
                 ilgan=ilgan,
@@ -1890,7 +1909,7 @@ class LocalSajuNarrator:
         _gkn = b.get("gyeok_name","")
         _sn2 = b.get("sn","")
         _ys2 = b.get("yongshin",[])
-        _ys_str = "·".join(_ys2[:2]) if _ys2 else ""
+        _ys_str = "·".join(_ys2[:3]) if _ys2 else ""
 
         lines.append(f"# 🌟 {name}님의 사주 종합 리포트")
         lines.append(

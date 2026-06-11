@@ -1905,7 +1905,8 @@ def get_yearly_luck(pils, current_year):
 
     oh_jj = OH.get(jj, "")
 
-    narr = YEARLY_LUCK_NARRATIVE.get(se_ss_cg, YEARLY_LUCK_NARRATIVE["-"])
+    _ss_key = se_ss_cg.split("(")[0] if "(" in se_ss_cg else se_ss_cg
+    narr = YEARLY_LUCK_NARRATIVE.get(_ss_key, YEARLY_LUCK_NARRATIVE["-"])
 
     return {
         "연도": current_year,
