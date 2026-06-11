@@ -4196,17 +4196,15 @@ class LocalSajuNarrator:
             # ── 사고수·건강수 위험도 분석 ──────────────────────────
             lines.append("#### 🚨 안전 & 건강 예측")
             
-            # 사고수 위험도
-            gisin_oh_list = [_OH.get(gs[:1], "") for gs in (gisin or [])]
-            gisin_oh = gisin_oh_list[0] if gisin_oh_list else ""
-            accident_risk = _OH_ACCIDENT_RISK.get(gisin_oh, {"위험도": 45, "원인": "일반적 주의"})
+            # 사고수 위험도 — yr_oh(세운 천간 오행) 기반, 하단 건강카드와 동일 기준
+            accident_risk = _OH_ACCIDENT_RISK.get(yr_oh, {"위험도": 45, "원인": "일반적 주의"})
             risk_grade = "🔴 고위험" if accident_risk["위험도"] >= 70 else ("🟡 주의" if accident_risk["위험도"] >= 55 else "🟢 안전")
             lines.append(
                 f"• **사고수 예측**: {risk_grade} (위험도 {accident_risk['위험도']}%) — {accident_risk['원인']}\n"
             )
-            
-            # 건강수 위험도
-            health_rs = _OH_HEALTH_RISK.get(gisin_oh, {"위험도": 45, "질환": "일반관리", "예방": "정기검진"})
+
+            # 건강수 위험도 — yr_oh(세운 천간 오행) 기반
+            health_rs = _OH_HEALTH_RISK.get(yr_oh, {"위험도": 45, "질환": "일반관리", "예방": "정기검진"})
             health_grade = "🔴 주의" if health_rs["위험도"] >= 70 else ("🟡 관찰" if health_rs["위험도"] >= 60 else "🟢 양호")
             lines.append(
                 f"• **건강수 예측**: {health_grade} (위험도 {health_rs['위험도']}%) — {health_rs['질환']}\n"
