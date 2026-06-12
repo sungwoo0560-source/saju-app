@@ -14654,6 +14654,16 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
     except Exception:
         ilgan = "甲"; iljj = "子"; sn = "중화"; yong_str = ""; gi_str = ""
 
+    # 용신보정: 세운 오행이 용신이면 sw_gil='길', 기신이면 '흉'
+    try:
+        _sw_oh_c = (get_yearly_luck(pils, cur_year) or {}).get("오행_천간", "")
+        if _sw_oh_c and _sw_oh_c in yong_ohs:
+            sw_gil = "길"
+        elif _sw_oh_c and _sw_oh_c in gi_ohs:
+            sw_gil = "흉"
+    except Exception:
+        pass
+
     _SS_KR = {
         "偏財(편재)":"편재","正財(정재)":"정재","食神(식신)":"식신","傷官(상관)":"상관",
         "偏官(편관)":"편관","正官(정관)":"정관","偏印(편인)":"편인","正印(정인)":"정인",
@@ -19293,7 +19303,7 @@ def menu4_future3(
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
 <div>
 <span style="font-size:26px;font-weight:900;color:{card_color}">{yd["year"]}년</span>
-<span style="font-size:14px;color:#000000;margin-left:10px">만 {yd["age"]}세</span>
+<span style="font-size:14px;color:#000000;margin-left:10px">{yd["age"]}세</span>
 </div>
 <div style="background:{card_color};color:#fff;padding:5px 16px;border-radius:20px;font-size:13px;font-weight:700">{label}</div>
 </div>

@@ -2170,6 +2170,8 @@ class LocalSajuNarrator:
             _GH2 = {"길":"✅ 좋음","+":"✅ 좋음","평":"⚖️ 보통","흉":"⚠️ 주의","-":"⚠️ 주의"}
             _is_yong2  = _sw_oh2 in _ys_diag
             _is_gisin2 = _sw_oh2 in _gs_diag
+            if _is_yong2:   _sw_gh2 = "길"
+            elif _is_gisin2: _sw_gh2 = "흉"
 
             if _sw_gan2:
                 _sw_signal = ""
@@ -3764,6 +3766,8 @@ class LocalSajuNarrator:
 
                 is_ys = any(yr_oh == y or yr_oh in y for y in (yongshin or []))
                 is_gs = any(yr_oh == g or yr_oh in g for g in (gisin or []))
+                if is_ys:  gh = "길"
+                elif is_gs: gh = "흉"
 
                 ys_badge = " ✨ **[용신년 — 적극 활용하십시오]**" if is_ys else (
                     " 🔴 **[기신년 — 신중하게 행동하십시오]**" if is_gs else ""
@@ -4091,6 +4095,8 @@ class LocalSajuNarrator:
             yr_oh  = _OH.get(sw_gan[:1], "") if sw_gan else ""
             is_ys  = bool(yr_oh) and yr_oh in ys_list
             is_gs  = bool(yr_oh) and yr_oh in gisin
+            if is_ys:  sw_gh = "길"
+            elif is_gs: sw_gh = "흉"
             grade  = "🌟 황금기" if is_ys else "🔴 수비" if is_gs else "⚖️ 중립"
             yr_summaries.append((yr, sw_gan, _SS_KR.get(sw_ss, sw_ss), sw_gh, grade, sw_ss))
 
@@ -4153,6 +4159,8 @@ class LocalSajuNarrator:
             yr_oh   = _OH.get(sw_gan[:1], "") if sw_gan else ""
             is_ys   = bool(yr_oh) and yr_oh in ys_list
             is_gs   = bool(yr_oh) and yr_oh in gisin
+            if is_ys:  sw_gh = "길"
+            elif is_gs: sw_gh = "흉"
 
             label = "📌 **올해**" if yr==cur_year else ("📅 **내년**" if yr==cur_year+1 else "🔭 **내후년**")
             gh_icon = "🌟" if sw_gh in ["길","+"] else ("⚠️" if sw_gh in ["흉","-"] else "⚖️")
@@ -11033,6 +11041,10 @@ def _nar_future(ctx):
             is_yong_sw = _get_yongshin_match(sw_ss, yongshin_ohs, ilgan_oh) == "yong"
 
             gilhyung = sw.get("길흉", "")
+            # 용신보정: 세운오행이 용신이면 "길"
+            _yr_oh_f = sw.get("오행_천간", "")
+            if _yr_oh_f and isinstance(yongshin_ohs, list) and _yr_oh_f in yongshin_ohs:
+                gilhyung = "길"
 
             # 길흉 마커
 
