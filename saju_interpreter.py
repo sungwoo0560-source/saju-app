@@ -1839,15 +1839,13 @@ class LocalSajuNarrator:
             )
 
             sw = get_yearly_luck(pils, cur_year) or {}
-            # 세운 길흉 용신·기신 기준 보정 (캐시된 dict 새 dict로 복사 후 교체)
+            # 세운 길흉 용신·기신 기준 보정 — 중립 오행은 narr 기반값 유지
             _sw_oh_b = sw.get("오행_천간", "")
             if _sw_oh_b and yongshin:
                 if _sw_oh_b in yongshin:
                     sw = dict(sw, 길흉="길(吉)")
                 elif _sw_oh_b in gisin:
                     sw = dict(sw, 길흉="흉(凶)")
-                else:
-                    sw = dict(sw, 길흉="평(平)")
 
             return dict(
                 ilgan=ilgan,
@@ -2540,6 +2538,15 @@ class LocalSajuNarrator:
         sw_gan = sw.get("세운", "")
 
         sw_gh = sw.get("길흉", "평")
+        # 황금기 로직과 동일 — 용신/기신 기준 보정
+        _sw_oh_fr = sw.get("오행_천간", "")
+        _ys_fr    = b.get("yongshin", [])
+        _gs_fr    = b.get("gisin", [])
+        if _sw_oh_fr and _ys_fr:
+            if _sw_oh_fr in _ys_fr:
+                sw_gh = "길(吉)"
+            elif _sw_oh_fr in _gs_fr:
+                sw_gh = "흉(凶)"
 
         if sw_gan:
             dw_meaning = LocalSajuNarrator.DW_SS_MEANING.get(sw_ss, "")

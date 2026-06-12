@@ -18222,7 +18222,7 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
 
     yong_list = ys.get("종합_용신", [])
 
-    yong_str = "/".join(yong_list[:2]) if isinstance(yong_list, list) else str(yong_list)
+    yong_str = "/".join(yong_list[:3]) if isinstance(yong_list, list) else str(yong_list)
 
     gk_name = gyeokguk.get("격국명", "-") if gyeokguk else "-"
 
@@ -18236,7 +18236,7 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
 
     # 용신 오행 한자 배지
     _yong_icon_html = ""
-    for _yc in (yong_list[:2] if isinstance(yong_list, list) else []):
+    for _yc in (yong_list[:3] if isinstance(yong_list, list) else []):
         _bg, _fg = get_ohang_color(_yc)
         _yong_icon_html += (
             f"<span style='background:{_bg};color:{_fg};"
@@ -26403,7 +26403,7 @@ def menu_gaewoon(pils, name, birth_year, gender):
         _TOP5_GW.append(f"{_sinsal_gw[0].get('이름','신살')} 발동 중 -- 해당 비방을 즉시 실행하십시오")
     if _gis_gw:
         _TOP5_GW.append(f"기신 {'/'.join(_gis_gw)} 오행 강화 차단 -- 기신 색상·음식·방위 즉각 제거")
-    _TOP5_GW.append(f"용신 {'/'.join(_yong_gw[:2]) if _yong_gw else '미산출'} 오행 보강 -- 색상·음식·소품 생활 침투")
+    _TOP5_GW.append(f"용신 {'/'.join(_yong_gw[:3]) if _yong_gw else '미산출'} 오행 보강 -- 색상·음식·소품 생활 침투")
     _TOP5_GW.append("재물 기운 누수 차단 -- 지갑 정리·불필요한 지출 즉각 중단")
     _TOP5_GW.append("귀인 기운 활성화 -- 사람을 만나고 새로운 모임에 참여하라")
     _TODAY3_GW  = [

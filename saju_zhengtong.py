@@ -6803,11 +6803,11 @@ def render_quick_summary_card(pils, name="내담자", saewoon_data=None, yongshi
                 []
             )
             if isinstance(yong_list, list) and yong_list:
-                yong_str = "·".join([str(y) for y in yong_list[:2]])
+                yong_str = "·".join([str(y) for y in yong_list[:3]])
             elif isinstance(yong_list, str):
                 yong_str = yong_list
         elif isinstance(yongshin, list):
-            yong_str = "·".join([str(y) for y in yongshin[:2]])
+            yong_str = "·".join([str(y) for y in yongshin[:3]])
         else:
             yong_str = str(yongshin)
 
