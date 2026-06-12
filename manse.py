@@ -8608,6 +8608,26 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
                         _cs_gh = _cs_sw.get("길흉", "")
                         _cs_cg2 = _cs_sw.get("cg", "")
                         _cs_jj2 = _cs_sw.get("jj", "")
+                        try:
+                            _cs_yn2 = (get_yongshin(pils) or {}).get("종합_용신", [])
+                            if not isinstance(_cs_yn2, list): _cs_yn2 = []
+                            _cs_ig2 = pils[1]["cg"] if len(pils) > 1 else ""
+                            _cs_io2 = OH.get(_cs_ig2, "")
+                            _cs_ss2 = (get_ilgan_strength(_cs_ig2, pils) or {}).get("신강신약","")
+                            _cs_ob2 = {"木":"水","火":"木","土":"火","金":"土","水":"金"}
+                            _cs_oc2 = {"木":"土","火":"金","土":"水","金":"木","水":"火"}
+                            if "신강" in _cs_ss2:
+                                _cs_gs2 = [_cs_ob2.get(_cs_io2,""), _cs_io2]
+                            elif "신약" in _cs_ss2:
+                                _cs_gs2 = [next((k for k,v in _cs_oc2.items() if v==_cs_io2),""), _cs_oc2.get(_cs_io2,"")]
+                            else:
+                                _cs_gs2 = []
+                            _cs_gs2 = [g for g in _cs_gs2 if g]
+                            _cs_oh2 = _cs_sw.get("오행_천간","")
+                            if _cs_oh2 and _cs_yn2:
+                                if _cs_oh2 in _cs_yn2: _cs_gh = "길(吉)"
+                                elif _cs_oh2 in _cs_gs2: _cs_gh = "흉(凶)"
+                        except Exception: pass
                         y = _write(f"올해 세운간지: {_cs_cg2}{_cs_jj2}  |  십성: {_cs_ss}  |  길흉: {_cs_gh}", y, size=10)
                         _CS_SW_MSG = {
                             "正官": "명예·승진·조직 신뢰가 높아지는 해. 공식적 행동으로 결과를 만드세요.",
@@ -19141,6 +19161,19 @@ def menu4_future3(
     if not isinstance(yongshin_ohs, list):
         yongshin_ohs = []
 
+    # 기신 오행 리스트 (신강신약 기반, 용신보정에 사용)
+    _m4_sn = (get_ilgan_strength(ilgan, pils) or {}).get("신강신약", "")
+    _m4_oh = OH.get(ilgan, "")
+    _m4_ob = {"木":"水","火":"木","土":"火","金":"土","水":"金"}
+    _m4_oc = {"木":"土","火":"金","土":"水","金":"木","水":"火"}
+    if "신강" in _m4_sn:
+        gisin_ohs = [_m4_ob.get(_m4_oh,""), _m4_oh]
+    elif "신약" in _m4_sn:
+        gisin_ohs = [next((k for k,v in _m4_oc.items() if v==_m4_oh),""), _m4_oc.get(_m4_oh,"")]
+    else:
+        gisin_ohs = []
+    gisin_ohs = [g for g in gisin_ohs if g]
+
     ilgan_oh = OH.get(ilgan, "")
 
     DOMAIN_SS = {
@@ -19220,6 +19253,13 @@ def menu4_future3(
 
         hap_warn = _get_hap_break_warning(pils, dw["jj"] if dw else "", sw.get("jj",""))
 
+        _m4_sw_oh = sw.get("오행_천간","")
+        _m4_gh = (
+            "길(吉)" if _m4_sw_oh and _m4_sw_oh in yongshin_ohs
+            else "흉(凶)" if _m4_sw_oh and _m4_sw_oh in gisin_ohs
+            else sw.get("길흉","평")
+        )
+
         years_data.append(
             {
                 "year": y,
@@ -19232,7 +19272,7 @@ def menu4_future3(
                 "is_yong_sw": is_yong_sw,
                 "domains": domains,
                 "hap_warn": hap_warn,
-                "gilhyung": sw.get("길흉","평"),
+                "gilhyung": _m4_gh,
             }
         )
 
