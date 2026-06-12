@@ -8020,7 +8020,7 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
   <div style="text-align:center;border-bottom:2px solid #6b4423;padding-bottom:20px;margin-bottom:30px;">
     <div style="font-size:14px;color:#8b6914;letter-spacing:4px;font-weight:700;">📜 종합 사주 평론 📜</div>
     <div style="font-size:clamp(20px, 5vw, 28px);font-weight:900;color:#3e2723;margin-top:10px;">{name}님 사주 풀이</div>
-    <div style="font-size:13px;color:#6b4423;margin-top:8px;">{birth_year}년생 만 {cur_age}세 {gender}</div>
+    <div style="font-size:13px;color:#6b4423;margin-top:8px;">{birth_year}년생 {cur_year - birth_year + 1}세 {gender}</div>
   </div>
 
   <!-- 1. 사주 명식 -->
@@ -8323,7 +8323,7 @@ def render_manse_board(pils, name="내담자", birth_year=1969, gender="男",
         "亥":{"亥":"지살","子":"도화","丑":"월살","寅":"망신","卯":"장성","辰":"반안","巳":"역마","午":"육해","未":"화개","申":"겁살","酉":"재살","戌":"천살"},
     }
 
-    cur_age = current_year - birth_year
+    cur_age = current_year - birth_year + 1
 
     # ── 셀 헬퍼 ──────────────────────────────────
     def _hdr(text, bg="#3e2723", fg="#fff", sz=12, extra=""):

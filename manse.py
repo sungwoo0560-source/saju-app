@@ -16710,7 +16710,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
     _sw_label = f"{sw_kr} 세운" if sw_kr else f"{cur_year}년 세운"
     _age_range = f" ({dw_age_s}~{dw_age_e}세)" if dw_age_s and dw_age_e else ""
     lines.append(f"## 🎯 {name}님, 지금 무엇 때문에 힘드신가요?")
-    lines.append(f"*{cur_year}년 · 한국나이 {cur_age}세(만 {cur_age-1}세) · {_dw_label}{_age_range} · {_sw_label}*")
+    lines.append(f"*{cur_year}년 · {cur_age}세 · {_dw_label}{_age_range} · {_sw_label}*")
     lines.append("")
 
     # ── 지금 상황 진단 — 세운 십성 기반 공감 서술 ──────────────────
