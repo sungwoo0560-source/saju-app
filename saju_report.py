@@ -109,6 +109,159 @@ def _pdf_current_status(pils, name, birth_year, gender, story, styles):
         pass
     return elements
 
+
+def _pdf_cheongan_hap(pils, cur_year, yong_ohs, gi_ohs, c, y, _write, _sec_title):
+    """PDF 천간합(天干合) 분석 — manse.py ⑱ 블록 A~E 판정 로직 이식"""
+    from reportlab.lib.units import mm
+    _OH_CG = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
+               "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
+    _TG_HAP_OH = {
+        frozenset({"甲","己"}): "土", frozenset({"乙","庚"}): "金",
+        frozenset({"丙","辛"}): "水", frozenset({"丁","壬"}): "木",
+        frozenset({"戊","癸"}): "火",
+    }
+    _TG_HAP_NAME = {
+        frozenset({"甲","己"}): "甲己합(토화)", frozenset({"乙","庚"}): "乙庚합(금화)",
+        frozenset({"丙","辛"}): "丙辛합(수화)", frozenset({"丁","壬"}): "丁壬합(목화)",
+        frozenset({"戊","癸"}): "戊癸합(화화)",
+    }
+    _PIL_LBL = {0:"시간", 1:"일간", 2:"월간", 3:"년간"}
+    try:
+        from saju_engine import get_yearly_luck as _gyl_hap
+        ilgan    = pils[1].get("cg", "") if len(pils) > 1 else ""
+        _일간_oh  = _OH_CG.get(ilgan, "")
+        _yl      = _gyl_hap(pils, cur_year) or {}
+        _세운_cg  = _yl.get("cg", "")
+        _yong    = yong_ohs if isinstance(yong_ohs, list) else []
+        _gi      = gi_ohs   if isinstance(gi_ohs,   list) else []
+
+        # 세운 천간 × 원국 천간 합 감지
+        _합_발동 = []
+        for _pi, _p in enumerate(pils):
+            _pcg = _p.get("cg", "")
+            if not _pcg or _pcg == _세운_cg:
+                continue
+            _pair = frozenset({_세운_cg, _pcg})
+            if _pair in _TG_HAP_OH:
+                _합_발동.append((_pi, _pcg, _PIL_LBL.get(_pi, ""),
+                                  _TG_HAP_OH[_pair], _TG_HAP_NAME[_pair]))
+
+        # 원국 내 인접 천간합 (년↔월, 월↔일, 일↔시)
+        _원국_합 = []
+        for _a, _b in [(3, 2), (2, 1), (1, 0)]:
+            _cg_a = pils[_a].get("cg", "") if _a < len(pils) else ""
+            _cg_b = pils[_b].get("cg", "") if _b < len(pils) else ""
+            if not _cg_a or not _cg_b:
+                continue
+            _p2 = frozenset({_cg_a, _cg_b})
+            if _p2 in _TG_HAP_OH:
+                _원국_합.append((_PIL_LBL.get(_a, ""), _cg_a,
+                                  _PIL_LBL.get(_b, ""), _cg_b,
+                                  _TG_HAP_OH[_p2], _TG_HAP_NAME[_p2]))
+
+        if not _합_발동 and not _원국_합:
+            return y  # 합 없으면 섹션 생략
+
+        y = _sec_title(c, f"천간합(天干合) 분석 — {cur_year}년 세운", y)
+
+        # A~E 판정 (manse.py ⑱ 블록과 동일 로직)
+        for _pi, _pcg, _기둥명, _합화오행, _합이름 in _합_발동:
+            _pcg_oh       = _OH_CG.get(_pcg, "")
+            _hh_is_yong   = bool(_yong) and _합화오행 in _yong
+            _hh_is_gisin  = bool(_gi)   and _합화오행 in _gi
+            _pcg_is_yong  = bool(_yong) and _pcg_oh  in _yong
+            _pcg_is_gisin = bool(_gi)   and _pcg_oh  in _gi
+
+            if _pi == 1:  # 일간과 합
+                if _hh_is_yong and _pcg_is_gisin:      # A
+                    _tag = "[참고]"; _col = (0.1, 0.35, 0.6)
+                    _msg = (f"세운이 일간을 합으로 잡아끕니다 — 합화 길조\n"
+                            f"  세운({_세운_cg})이 일간({_pcg})과 {_합이름}을 이룹니다. "
+                            f"일간 오행({_pcg_oh})은 기신에 해당하는데 합화 오행이 {_합화오행}(용신)으로 전환됩니다. "
+                            f"기신이 용신으로 화하는 긍정적 변화이나 주체적 결단력이 약해질 수 있으니 신중히 결정하십시오.")
+                elif _hh_is_gisin and _pcg_is_yong:    # C
+                    _tag = "[경고]"; _col = (0.7, 0.1, 0.1)
+                    _msg = (f"세운이 일간을 합으로 잡아끕니다 — 용신 훼손·최고 경계\n"
+                            f"  세운({_세운_cg})이 일간({_pcg})과 {_합이름}을 이룹니다. "
+                            f"일간 오행({_pcg_oh})은 용신에 해당하는데 합화 결과 기신 오행({_합화오행})으로 변질됩니다. "
+                            f"중요한 결정·투자·이직은 올해 삼가십시오.")
+                elif _hh_is_yong:                       # B
+                    _tag = "[주의]"; _col = (0.6, 0.35, 0.05)
+                    _msg = (f"세운이 일간을 합으로 잡아끕니다 — 반길반흉\n"
+                            f"  세운({_세운_cg})이 일간({_pcg})과 {_합이름}을 이룹니다. "
+                            f"합화 오행은 {_합화오행}(용신)으로 방향은 유리하나 일간이 묶이면 주체적 판단이 흐려집니다.")
+                else:                                   # D/E
+                    _tag = "[경고]"; _col = (0.7, 0.1, 0.1)
+                    _msg = (f"세운이 일간을 합으로 잡아끕니다 — 최고 경계\n"
+                            f"  세운({_세운_cg})이 일간({_pcg})과 {_합이름}을 이룹니다. "
+                            f"일간이 세운에 합으로 묶이면 의지·결단력이 종속됩니다. "
+                            f"합화 오행은 {_합화오행}으로 변질되어 용신·기신 계산이 달라집니다.")
+            elif _pcg_oh == _일간_oh:  # 비겁과 합
+                if _hh_is_yong and _pcg_is_gisin:      # A
+                    _tag = "[참고]"; _col = (0.1, 0.35, 0.6)
+                    _msg = (f"{_기둥명}({_pcg}) 세운합 — 기신 제어·용신 강화 (호재)\n"
+                            f"  {_기둥명}({_pcg}, {_pcg_oh})이 세운({_세운_cg})과 {_합이름}을 이룹니다. "
+                            f"{_pcg_oh}는 기신 오행이며 합화 오행 {_합화오행}(용신)으로 전환됩니다. "
+                            f"기신이 제어되고 용신이 강화되는 길조입니다. 뜻밖의 호재·조력자·기회가 생길 가능성이 높습니다.")
+                elif _hh_is_gisin and _pcg_is_yong:    # C
+                    _tag = "[경고]"; _col = (0.7, 0.1, 0.1)
+                    _msg = (f"{_기둥명}({_pcg}) 세운합 — 용신 비겁 상실·기신 강화 (흉)\n"
+                            f"  {_기둥명}({_pcg}, {_pcg_oh})은 용신 영역인데 세운({_세운_cg})과 {_합이름}을 이뤄 기신 오행 {_합화오행}으로 변질됩니다. "
+                            f"지원군이 기신으로 전환됩니다. 체력 저하·인간관계 손실에 주의하십시오.")
+                elif _hh_is_yong:                       # B
+                    _tag = "[참고]"; _col = (0.1, 0.35, 0.6)
+                    _msg = (f"{_기둥명}({_pcg}) 세운합 — 합화 용신·부분 길조\n"
+                            f"  {_기둥명}({_pcg})이 세운({_세운_cg})과 {_합이름}을 이룹니다. "
+                            f"합화 오행이 {_합화오행}(용신)으로 유리한 방향이나 {_pcg}가 일간 지원 역할에서 벗어납니다.")
+                elif _hh_is_gisin:                      # D
+                    _tag = "[주의]"; _col = (0.6, 0.35, 0.05)
+                    _msg = (f"{_기둥명}({_pcg}) 세운합 — 기신 강화\n"
+                            f"  {_기둥명}({_pcg})이 세운({_세운_cg})과 {_합이름}을 이룹니다. "
+                            f"합화 오행이 {_합화오행}(기신)으로 변질되어 균형이 흔들립니다. 혼자 무리하지 마십시오.")
+                else:                                   # E
+                    _tag = "[주의]"; _col = (0.6, 0.35, 0.05)
+                    _msg = (f"{_기둥명}({_pcg}) 세운합 — 지원 상실\n"
+                            f"  {_기둥명}({_pcg})은 일간의 비겁(지원군)인데 세운({_세운_cg})과 {_합이름}을 이뤄 일간을 돕지 못합니다. "
+                            f"평소보다 혼자 처리해야 할 일이 많아집니다.")
+            else:  # 기타 천간과 합
+                if _hh_is_yong and _pcg_is_gisin:      # A
+                    _tag = "[참고]"; _col = (0.1, 0.35, 0.6)
+                    _msg = (f"{_기둥명}({_pcg}) 세운합 — 기신 제어·용신 강화 (호재)\n"
+                            f"  {_기둥명}({_pcg}, {_pcg_oh})이 세운({_세운_cg})과 {_합이름}을 이룹니다. "
+                            f"{_pcg_oh}는 기신이며 합화 오행 {_합화오행}(용신)으로 전환됩니다. 올해 예상치 못한 호재가 찾아올 수 있습니다.")
+                elif _hh_is_gisin and _pcg_is_yong:    # C
+                    _tag = "[경고]"; _col = (0.7, 0.1, 0.1)
+                    _msg = (f"{_기둥명}({_pcg}) 세운합 — 용신 기신 전환 (흉)\n"
+                            f"  {_기둥명}({_pcg}, {_pcg_oh})이 세운({_세운_cg})과 {_합이름}을 이뤄 기신 오행 {_합화오행}으로 변질됩니다. "
+                            f"용신이 훼손되고 기신이 강화되어 해당 영역에서 차질이 예상됩니다.")
+                elif _hh_is_yong:                       # B
+                    _tag = "[참고]"; _col = (0.1, 0.35, 0.6)
+                    _msg = (f"{_기둥명}({_pcg}) 세운합 — 합화 용신·부분 길조\n"
+                            f"  {_기둥명}({_pcg})이 세운({_세운_cg})과 {_합이름}을 이룹니다. "
+                            f"합화 오행은 {_합화오행}(용신)으로 전반적으로 유리합니다.")
+                else:                                   # D/E
+                    _tag = "[주의]"; _col = (0.6, 0.35, 0.05)
+                    _msg = (f"{_기둥명}({_pcg}) 세운합 — 변질 주의\n"
+                            f"  {_기둥명}({_pcg})이 세운({_세운_cg})과 {_합이름}을 이룹니다. "
+                            f"{_pcg}의 원래 기운이 {_합화오행}으로 변질되어 원국의 균형이 흔들립니다.")
+
+            y = _write(c, f"{_tag} {_msg}", y, size=9, color=_col)
+            y -= 2 * mm
+
+        # 원국 내 평생 천간합
+        if _원국_합:
+            y = _write(c, "[ 원국 내 평생 천간합 ]", y, size=9, color=(0.35, 0.35, 0.35))
+            for _lb_a, _cg_a, _lb_b, _cg_b, _oh, _nm in _원국_합:
+                y = _write(c,
+                           f"  [참고] {_lb_a}({_cg_a})x{_lb_b}({_cg_b}) {_nm} — 합화 {_oh}. "
+                           f"이 두 천간은 평생 합으로 묶여 해당 육친 관계가 복잡하게 얽히는 경향이 있습니다.",
+                           y, size=9, color=(0.35, 0.35, 0.35))
+                y -= 1 * mm
+    except Exception:
+        pass
+    return y
+
+
 def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str="", dramatic_text=None):
     """📄 PDF 출력 - 사주 천명 리포트 다운로드"""
 
@@ -2560,6 +2713,40 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str="", dram
                     y -= 3*mm
                 except Exception as _c2e:
                     y = write(c, f"  (현재상황 오류: {str(_c2e)[:50]})", y, size=9)
+
+            # ══ 천간합 분석 ══
+            if include_current:
+                try:
+                    from saju_interpreter import get_yongshin as _gys_hap
+                    from saju_interpreter import get_ilgan_strength as _gis_hap
+                    _ys_hap   = _gys_hap(pils)
+                    _yong_hap = _ys_hap.get("종합_용신", []) if _ys_hap else []
+                    _gi_hap_raw = _ys_hap.get("기신", [])    if _ys_hap else []
+                    if isinstance(_gi_hap_raw, list):
+                        _gi_hap = _gi_hap_raw
+                    elif isinstance(_gi_hap_raw, str) and _gi_hap_raw:
+                        _gi_hap = [x.strip() for x in _gi_hap_raw.replace("·", ",").split(",")
+                                   if x.strip() in ["木","火","土","金","水"]]
+                    else:
+                        _gi_hap = []
+                    # 기신 빈 경우 manse.py L14640~14650과 동일한 신강/신약 역산
+                    if not _gi_hap and _ys_hap:
+                        _sn_hap  = (_gis_hap(pils[1]["cg"], pils) or {}).get("신강신약", "중화")
+                        _iloh_hap = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
+                                     "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}.get(
+                                     pils[1].get("cg",""), "")
+                        _BMRV = {"木":"水","火":"木","土":"火","金":"土","水":"金"}
+                        _CTLV = {"木":"土","火":"金","土":"水","金":"木","水":"火"}
+                        if "신강" in _sn_hap and _iloh_hap:
+                            _gi_hap = [o for o in [_BMRV.get(_iloh_hap,""), _iloh_hap] if o]
+                        elif "신약" in _sn_hap and _iloh_hap:
+                            _gi_hap = [o for o in [
+                                next((k for k,v in _CTLV.items() if v==_iloh_hap),""),
+                                _CTLV.get(_iloh_hap,"")] if o]
+                    y = _pdf_cheongan_hap(pils, _dt.now().year, _yong_hap, _gi_hap,
+                                          c, y, write, section_title)
+                except Exception:
+                    pass
 
             # ══ 성격/기질 분석 ══
             if include_nature:
