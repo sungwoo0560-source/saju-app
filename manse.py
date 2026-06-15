@@ -8869,8 +8869,10 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
                     _jf_ys = get_yongshin(pils) or {}
                     _jf_yn  = _jf_ys.get("종합_용신") or _jf_ys.get("용신") or []
                     _jf_gi  = _jf_ys.get("종합_기신") or _jf_ys.get("기신") or []
-                    _jf_gyeok = _jf_ys.get("격국","") or ""
-                    _jf_shin  = _jf_ys.get("신강약","") or ""
+                    from saju_interpreter import get_gyeokguk as _gk_jf
+                    from saju_engine import get_ilgan_strength as _si_jf
+                    _jf_gyeok = (_gk_jf(pils) or {}).get("격국명","")
+                    _jf_shin  = (_si_jf(_jf_ilgan, pils) or {}).get("신강신약","")
                     _jf_yns = "·".join(_jf_yn[:3]) if isinstance(_jf_yn, list) else str(_jf_yn)
                     _jf_gis = "·".join(_jf_gi[:2]) if isinstance(_jf_gi, list) else str(_jf_gi)
                     if not _jf_yns: _jf_yns = "水·木"
