@@ -8937,6 +8937,10 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
                             _yd3 = get_yearly_luck(pils, _yr3) or {}
                             _ss3 = _yd3.get("십성_천간","")
                             _gh3 = _yd3.get("길흉","평")
+                            _oh3 = _yd3.get("오행_천간","")
+                            if _oh3 and isinstance(_jf_yn, list):
+                                if _oh3 in _jf_yn: _gh3 = "길(吉)"
+                                elif isinstance(_jf_gi, list) and _oh3 in _jf_gi: _gh3 = "흉(凶)"
                             _age3 = _yr3 - birth_year + 1
                             y = _write(f"[{_yr3}년 {_age3}세] {_ss3} [{_gh3}]", y, size=10)
                             _mons3 = get_monthly_luck(pils, _yr3) or []
