@@ -4298,7 +4298,8 @@ class LocalSajuNarrator:
         
         # 기신 오행별 피할행동
         if gisin:
-            gisin_oh_main = _OH.get(gisin[0][:1], "") if gisin else "목"
+            gisin_oh_main = (gisin[0] if (gisin and gisin[0] in {"木","火","土","金","水"})
+                             else _OH.get(gisin[0][:1], "")) if gisin else "목"
             gisin_warning = _GISIN_CAUTION_MAP.get(gisin_oh_main, "개별상담 권고")
             lines.append(f"#### ⚠️ 기신(忌神) 오행별 피할 행동 — {name}님의 약한 지점")
             lines.append(f"• **기신 오행**: {OHN.get(gisin_oh_main, gisin_oh_main)}")
@@ -4380,7 +4381,8 @@ class LocalSajuNarrator:
         
         # 기신 기반 주의사항
         if gisin:
-            gisin_oh_main = _OH.get(gisin[0][:1], "") if gisin else "목"
+            gisin_oh_main = (gisin[0] if (gisin and gisin[0] in {"木","火","土","金","水"})
+                             else _OH.get(gisin[0][:1], "")) if gisin else "목"
             gisin_warning = _GISIN_CAUTION_MAP.get(gisin_oh_main, "개별상담 권고")
             lines.append(f"#### ⚠️ 기신 오행별 3년 피할 행동 — {name}님의 약한 지점 보호")
             lines.append(f"**하늘이 피하는 기운 {OHN.get(gisin_oh_main, gisin_oh_main)}을(를) 조심하세요:**")
