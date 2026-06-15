@@ -2506,7 +2506,7 @@ class LocalSajuNarrator:
                 elif isinstance(d, str) and d != "-":
                     ss_names.append(d)
 
-            ss_str = " / ".join(list(set(ss_names))) if ss_names else "알 수 없음"
+            ss_str = " / ".join(dict.fromkeys(ss_names)) if ss_names else "알 수 없음"
 
             lines.append(f"내 사주에 주로 포진된 사회적 무기는 **[{ss_str}]** 입니다.")
 
