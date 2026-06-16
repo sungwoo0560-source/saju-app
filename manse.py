@@ -19338,13 +19338,15 @@ def menu4_future3(
 
         domains = {}
 
+        _dw_ss_bare = dw_ss.split("(")[0] if dw_ss else "-"
+        _sw_ss_bare = sw_ss.split("(")[0] if sw_ss else "-"
         for dname, ss_set in DOMAIN_SS.items():
             score = 0
 
-            if dw_ss in ss_set:
+            if _dw_ss_bare in ss_set:
                 score += 50
 
-            if sw_ss in ss_set:
+            if _sw_ss_bare in ss_set:
                 score += 50
 
             domains[dname] = score
