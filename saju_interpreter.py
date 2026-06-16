@@ -3351,16 +3351,17 @@ class LocalSajuNarrator:
                     has_hap      = bool(hap_partners) and any(j in _orig_jjs for j in hap_partners)
 
                     age_yr = yr - birth_year + 1
+                    _chung_oh2 = OH.get(chung_target, "")
 
-                    if has_chung and is_gs2:
-                        peak_years.append(
-                            f"**{yr}년**({age_yr}세) 💥 충(沖)×기신 — "
-                            f"이사·이직·관계 변동 조심 [{hint}]"
-                        )
-                    elif has_chung and is_ys2:
+                    if has_chung and _chung_oh2 in yongshin:
                         peak_years.append(
                             f"**{yr}년**({age_yr}세) 💥 충(沖)×용신 — "
-                            f"환경 변화 속 기회 [{hint}]"
+                            f"용신 기반 손상·변동 주의. 사고·이동 조심 [{hint}]"
+                        )
+                    elif has_chung and _chung_oh2 in gisin:
+                        peak_years.append(
+                            f"**{yr}년**({age_yr}세) 💥 충(沖)×기신 — "
+                            f"묵은 기신 충거·전환 기회. 사고·이동 주의 [{hint}]"
                         )
                     elif has_hap and is_ys2:
                         peak_years.append(
@@ -3502,12 +3503,24 @@ class LocalSajuNarrator:
                     _hit_jj = next((oj for oj in _orig_jjs if _CHUNG.get(_dw_jj,"") == oj), "")
                     _chung_label = _CHUNG_DESC_P.get(frozenset({_dw_jj, _hit_jj}),
                                                      f"{_dw_jj}{_hit_jj}충 — 큰 변동") if _hit_jj else "충 발동 — 큰 변동"
+                    _hit_oh = OH.get(_hit_jj, "")
                     _chung_key = (dw_start, f"chung_{_dw_jj}")
                     if _chung_key not in seen_events:
-                        lines.append(
-                            f"- ⚡ **{_chung_label}**이 발동한 시기입니다. "
-                            f"{age_s}~{age_s+9}세 사이에 직장 변동·이사·이별·사고 중 하나가 있었을 겁니다."
-                        )
+                        if _hit_oh in yongshin:
+                            lines.append(
+                                f"- ⚡ **{_chung_label}**이 발동한 시기입니다. "
+                                f"용신 기반이 충을 받아 직장·거주지·관계 변동이 있었을 겁니다. 사고·수술·이동 주의."
+                            )
+                        elif _hit_oh in gisin:
+                            lines.append(
+                                f"- ⚡ **{_chung_label}**이 발동한 시기입니다. "
+                                f"기신 기운이 충거되어 묵은 것이 정리되는 전환기였습니다. 사고·이동 주의."
+                            )
+                        else:
+                            lines.append(
+                                f"- ⚡ **{_chung_label}**이 발동한 시기입니다. "
+                                f"{age_s}~{age_s+9}세 사이에 직장 변동·이사·이별·사고 중 하나가 있었을 겁니다."
+                            )
                         seen_events.add(_chung_key)
                 if peak_years:
                     lines.append(f"- 특히 주목할 해: {' / '.join(peak_years[:2])}")
