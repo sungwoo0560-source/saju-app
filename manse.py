@@ -8530,9 +8530,9 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
                     y = _sec("🌟 1. 용신(用神) 개운 처방", y)
                     if _gw_yong:
                         y = _write(f"격국: {_gw_gyeok}  |  강약: {_gw_shin}", y, size=10)
-                        y = _write(f"용신: {' · '.join([_OHN_G.get(o,o) for o in _gw_yong[:3]])}", y, size=10, color=(0.7,0.1,0.1))
+                        y = _write(f"용신: {' · '.join([_OHN_G.get(o,o) for o in _gw_yong])}", y, size=10, color=(0.7,0.1,0.1))
                         y -= 2*mm
-                        for _oh in _gw_yong[:3]:
+                        for _oh in _gw_yong:
                             _rx = _GW_RX.get(_oh, {})
                             y = _write(f"[{_OHN_G.get(_oh,_oh)} 용신 — 매일 실천 처방]", y, size=10, color=(0.1,0.4,0.1))
                             y = _write(f"  방향: {_rx.get('방향','')}  |  색상: {_rx.get('색상','')}  |  계절(길월): {_rx.get('계절','')}", y, size=9)
@@ -8550,7 +8550,7 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
                             y = _write(f"  → 기신 대운·세운에서 보증·투기·큰 계약 절대 금지", y, size=9, color=(0.6,0.1,0.1))
                             y -= 2*mm
                     y = _sec("📋 3. 실천 지침 5가지", y)
-                    _gw_yns = "·".join([_OHN_G.get(o,o) for o in _gw_yong[:2]]) if _gw_yong else "용신"
+                    _gw_yns = "·".join([_OHN_G.get(o,o) for o in _gw_yong]) if _gw_yong else "용신"
                     _gw_gis = "·".join([_OHN_G.get(o,o) for o in _gw_gi[:2]]) if _gw_gi else "기신"
                     y = _write(f"① {_gw_yns} 색상을 매일 착용 — 속옷·소품 하나라도 용신색으로 바꾸세요.", y, size=9)
                     y = _write(f"② 아침에 {_gw_yns} 방향으로 앉아 하루를 시작하세요.", y, size=9)
@@ -20829,7 +20829,8 @@ def menu6_relations(pils, name, birth_year, gender, marriage_status="미혼"):
         try:
             _my_yong = get_yongshin(pils).get("종합_용신", [])
             if _my_yong:
-                _yong_str = "·".join(_my_yong) if isinstance(_my_yong, list) else str(_my_yong)
+                _OHN_EP = {"木":"목(木)","火":"화(火)","土":"토(土)","金":"금(金)","水":"수(水)"}
+                _yong_str = "·".join([_OHN_EP.get(o,o) for o in _my_yong]) if isinstance(_my_yong, list) else str(_my_yong)
                 _epi_lines.append(f"✅ <b>잘 되려면:</b> {_yong_str} 관련 분야·활동을 함께 하세요.")
         except Exception:
             pass
@@ -26278,6 +26279,7 @@ def menu_gaewoon(pils, name, birth_year, gender):
     }
 
     # ── 총체적 처방 ───────────────────────────────────────────────
+    _OHN_K = {"木":"목(木)","火":"화(火)","土":"토(土)","金":"금(金)","水":"수(水)"}
     _yong1_gw      = _yong_gw[0] if _yong_gw else "木"
     _yong_rx_gw    = _OH_RX_GW.get(_yong1_gw, {})
     _yong_color_gw = _yong_rx_gw.get("색상","초록").split("·")[0]
@@ -26653,7 +26655,7 @@ def menu_gaewoon(pils, name, birth_year, gender):
     # 미리보기 expander
     with st.expander("📋 처방전 주요 내용 미리보기 (전체는 PDF에서 확인)"):
         st.markdown(
-            f"**[제1장 용신 강화]** {_yong1_gw} 오행 — "
+            f"**[제1장 용신 강화]** 주 용신: {_OHN_K.get(_yong1_gw,_yong1_gw)} — "
             f"{_yong_rx_gw.get('색상','')} | {_yong_rx_gw.get('방위','')} | {_yong_rx_gw.get('음식','')}"
         )
         _top3_str = " / ".join(f"{mkr}({gh})" for _,mkr,gh,_,_ in _top3_gw)
@@ -27256,7 +27258,8 @@ def menu_gaewoon(pils, name, birth_year, gender):
         story.append(Paragraph(_safe(f"{name}님 전용 맞춤 처방"), _sSb))
         story.append(Paragraph(_safe(f"생성일: {_today_str_p}"), _sSb))
         story.append(_sp(2))
-        story.append(Paragraph(_safe(f"용신(用神): {'  '.join(_yong_gw) if _yong_gw else '미산출'}"), _sSb))
+        _OHN_PD = {"木":"목(木)","火":"화(火)","土":"토(土)","金":"금(金)","水":"수(水)"}
+        story.append(Paragraph(_safe(f"용신(用神): {'·'.join([_OHN_PD.get(o,o) for o in _yong_gw]) if _yong_gw else '미산출'}"), _sSb))
         story.append(Paragraph(_safe(f"기신(忌神): {'  '.join(_gis_gw) if _gis_gw else '없음'}"), _sSb))
         story.append(Paragraph(_safe(f"격국(格局): {_gkn_gw}"), _sSb))
         story.append(Paragraph(_safe(f"홍수맥 등급: {_hsm_grade} - {_hsm_text}"), _sSb))
