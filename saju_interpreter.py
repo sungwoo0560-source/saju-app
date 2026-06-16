@@ -4233,7 +4233,9 @@ class LocalSajuNarrator:
                 _field_lines.append("💼 **직업운**: 승진·인정·새로운 기회가 열리는 해입니다.")
             else:
                 _field_lines.append("💼 **직업운**: 현재 위치를 안정적으로 유지하는 데 집중하십시오.")
-            if love_ok:
+            if marriage == "기혼":
+                _field_lines.append("❤️ **인연운**: 기혼 — 새 인연보다 부부 관계 흐름이 중요한 해. 배우자궁(육친론) 참고.")
+            elif love_ok:
                 _field_lines.append("❤️ **인연운**: 새로운 인연이 들어오거나 관계가 발전하는 해입니다.")
             else:
                 _field_lines.append("❤️ **인연운**: 기존 관계를 더욱 깊이 다지는 시기입니다.")

@@ -19449,49 +19449,6 @@ def menu4_future3(
 
         st.markdown("</div>", unsafe_allow_html=True)
 
-    # 결혼 여부별 인연 조언
-
-    st.markdown(
-        '<hr style="border:none;border-top:1px solid #e0d8c0;margin:20px 0">',
-        unsafe_allow_html=True,
-    )
-
-    st.markdown('<div class="gold-section">💑 인연/배우자운 (3년)</div>', unsafe_allow_html=True)
-
-    if marriage_status != "기혼":
-        MARRY_SS = {"正財", "偏財"} if gender == "남" else {"正官", "偏官"}
-
-        for yd in years_data:
-            if yd["sw_ss"] in MARRY_SS or yd["dw_ss"] in MARRY_SS:
-                st.markdown(
-                    f"""
-
-<div style="background:#fff0f8;border-left:4px solid #e91e8c; border-radius:8px;padding:12px;margin:5px 0">
-
-<b style="color:#e91e8c">{yd["year"]}년({yd["age"]}세)</b> -
-
-                    인연성이 강합니다. 적극적으로 움직이십시오.
-
-</div>
-
-""",
-                    unsafe_allow_html=True,
-                )
-
-    else:
-        st.markdown(
-            f"""
-
-<div style="background:#f0fff8;border-left:4px solid #27ae60; border-radius:8px;padding:12px">
-
-            {marriage_status} 상태. 부부 관계 흐름 분석은 육친론을 참고하세요.
-
-</div>
-
-""",
-            unsafe_allow_html=True,
-        )
-
     # ── 사고수·사업실패수·이별수 직격 경고 ────────────────────
     st.markdown(
         '<hr style="border:none;border-top:1px solid #e0d8c0;margin:20px 0">',
