@@ -3165,20 +3165,21 @@ class LocalSajuNarrator:
                     _has_cg_chung = bool(_cct and _cct in _orig_cgs_pa)
                     _age_pa = _yr_pa - birth_year + 1
                     _event_hint = _SS_EVENT_PA.get(_ss_pa,"")
+                    _ct_oh = OH.get(_ct, "")
                     if _has_chung and _has_cg_chung:
                         _decisive_moments.append(
                             f"**{_yr_pa}년({_age_pa}세)** 💥 천간+지지 동시 충(沖) — "
                             f"인생 최대 변곡점. {_event_hint}"
                         )
-                    elif _has_chung and _is_g:
+                    elif _has_chung and _ct_oh in yongshin:
                         _decisive_moments.append(
-                            f"**{_yr_pa}년({_age_pa}세)** 💥 충(沖)+기신 — "
-                            f"힘든 변화. {_event_hint}"
+                            f"**{_yr_pa}년({_age_pa}세)** 💥 충(沖)×용신 — "
+                            f"용신 기반 손상·변동 주의. 사고·이동 조심 [{_event_hint}]"
                         )
-                    elif _has_chung and _is_y:
+                    elif _has_chung and _ct_oh in gisin:
                         _decisive_moments.append(
-                            f"**{_yr_pa}년({_age_pa}세)** 💥 충(沖)+용신 — "
-                            f"변화 속 기회. {_event_hint}"
+                            f"**{_yr_pa}년({_age_pa}세)** 💥 충(沖)×기신 — "
+                            f"묵은 기신 충거·전환 기회. 사고·이동 주의 [{_event_hint}]"
                         )
                     elif _is_y and _gh_pa in ("길","+"):
                         _decisive_moments.append(
