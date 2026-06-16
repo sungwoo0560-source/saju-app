@@ -131,7 +131,7 @@ def _pdf_cheongan_hap(pils, cur_year, yong_ohs, gi_ohs, c, y, _write, _sec_title
         ilgan    = pils[1].get("cg", "") if len(pils) > 1 else ""
         _일간_oh  = _OH_CG.get(ilgan, "")
         _yl      = _gyl_hap(pils, cur_year) or {}
-        _세운_cg  = _yl.get("cg", "")
+        _세운_cg  = (_yl.get("세운", "") or "")[:1]
         _yong    = yong_ohs if isinstance(yong_ohs, list) else []
         _gi      = gi_ohs   if isinstance(gi_ohs,   list) else []
 
@@ -2550,7 +2550,6 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str="", dram
                         "金":"폐·대장·피부·코 — 호흡기·피부·알레르기 주의",
                         "水":"신장·방광·생식기·귀 — 신장·부종·생식기 주의",
                     }
-                    from saju_engine import calc_ohaeng_strength
                     _oh_str_h = calc_ohaeng_strength(pils[1]["cg"], pils) if pils else {}
                     _oh_sorted_h = sorted(_oh_str_h.items(), key=lambda x:-x[1])
                     _oh_max_h = _oh_sorted_h[0][0] if _oh_sorted_h else ""
