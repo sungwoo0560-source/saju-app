@@ -8891,8 +8891,8 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
                         _OH_KR2 = {"木":"목(木)","火":"화(火)","土":"토(土)","金":"금(金)","水":"수(水)"}
                         _OH_BODY = {"木":"간·담·눈","火":"심장·혈관","土":"위장·비장","金":"폐·대장","水":"신장·방광"}
                         for _oh2, _sc2 in _jf_oh_sorted:
-                            _tag2 = "과다(취약)" if _sc2 >= 3 else ("강" if _sc2 == 2 else ("중" if _sc2 == 1 else "결핍(보강필수)"))
-                            y = _write(f"{_OH_KR2.get(_oh2,_oh2)} {_sc2}개 [{_tag2}] — 취약장기: {_OH_BODY.get(_oh2,'')}", y, size=9)
+                            _tag2 = "과다(취약)" if _sc2 >= 25 else ("보통" if _sc2 >= 15 else "부족(보강)")
+                            y = _write(f"{_OH_KR2.get(_oh2,_oh2)} {_sc2:.0f}% [{_tag2}] — 취약장기: {_OH_BODY.get(_oh2,'')}", y, size=9)
                     except Exception:
                         y = _write("오행 분포: 사주 8글자 기준 산출 (calc_ohaeng_strength)", y, size=9)
                     y -= 3*mm

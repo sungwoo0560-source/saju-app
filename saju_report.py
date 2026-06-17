@@ -876,7 +876,7 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str="", dram
                 _sn_cv = get_ilgan_strength(_ilgan_cv, pils)
                 _sn_str = _sn_cv.get("신강신약","") if _sn_cv else ""
                 _ys_cv = get_yongshin(pils)
-                _yong_str = "·".join(_ys_cv.get("종합_용신",[])[:2]) if _ys_cv else ""
+                _yong_str = "·".join(_ys_cv.get("종합_용신",[])) if _ys_cv else ""
                 _gk_cv = get_gyeokguk(pils)
                 _gk_str = _gk_cv.get("격국명","") if _gk_cv else ""
                 _info_items = [
@@ -2708,7 +2708,7 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str="", dram
                     _age_c2 = _cy_c2 - birth_year + 1
                     _sig_c2 = "🟢 황금기 — 적극 공세" if _is_y_c2 else ("🔴 주의기 — 수비 전략" if _is_g_c2 else "🟡 중립 — 내실 다지기")
                     y = write(c, f"  {_cy_c2}년 현재 ({_age_c2}세) — {_sig_c2}", y, size=9)
-                    y = write(c, f"  용신: {' '.join(_yong_c2[:2])} | 기신: {' '.join(_gisin_c2[:2])}", y, size=9)
+                    y = write(c, f"  용신: {' '.join(_yong_c2)} | 기신: {' '.join(_gisin_c2[:2])}", y, size=9)
                     y -= 3*mm
                 except Exception as _c2e:
                     y = write(c, f"  (현재상황 오류: {str(_c2e)[:50]})", y, size=9)
