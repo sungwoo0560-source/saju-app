@@ -2442,6 +2442,7 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str="", dram
                     _ys_pdf = get_yongshin(pils)
                     _ys_ohs = _ys_pdf.get("종합_용신", []) if isinstance(_ys_pdf.get("종합_용신",[]), list) else []
                     _gi_ohs = _ys_pdf.get("기신", "")
+                    if not isinstance(_gi_ohs, list): _gi_ohs = []
                     _OH_REMEDY_FULL = {
                         "木": {
                             "색상": "초록·청색 소품·의류",
