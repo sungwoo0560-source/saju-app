@@ -5888,6 +5888,10 @@ class LocalSajuNarrator:
             "辛":["寅","午"],
         }
         _gwiin_ji = _CHEONUEUL_MAP_R.get(ilgan, [])
+        _YUKHAP_R = {
+            "子":"丑","丑":"子","寅":"亥","亥":"寅","卯":"戌","戌":"卯",
+            "辰":"酉","酉":"辰","巳":"申","申":"巳","午":"未","未":"午",
+        }
 
         _love_peaks = []
         _orig_jjs_r = {p.get("jj","") for p in pils}
@@ -5905,6 +5909,7 @@ class LocalSajuNarrator:
                 is_ys  = bool(yr_oh) and yr_oh in yongshin
                 is_love= yr_ss in _love_ss_target
                 is_gwiin = yr_jj in _gwiin_ji
+                is_ilji_hap = (_YUKHAP_R.get(_iljj_r) == yr_jj) or (frozenset([_iljj_r, yr_jj]) in BAN_HAP_MAP)
                 chung_t = _JJ_CHUNG_R.get(yr_jj,"")
                 has_chung_r = bool(chung_t) and chung_t in _orig_jjs_r
                 if is_ys and is_love and has_chung_r:
@@ -5928,7 +5933,15 @@ class LocalSajuNarrator:
                     )
                 elif is_gwiin:
                     _love_peaks.append(
-                        f"{yr}년 ({yr-birth_year+1}세) 🌟 천을귀인 인연(귀인) — 좋은 사람과의 만남이 들어오는 해입니다."
+                        f"{yr}년 ({yr-birth_year+1}세) 🌟 강한 인연 해 — 천을귀인. 좋은 사람과의 만남이 들어오는 해입니다."
+                    )
+                elif is_ilji_hap and is_ys:
+                    _love_peaks.append(
+                        f"{yr}년 ({yr-birth_year+1}세) 🌟 강한 인연 해 — 배우자궁 합 + 용신 동시 작용. 적극적으로 나서십시오."
+                    )
+                elif is_ilji_hap:
+                    _love_peaks.append(
+                        f"{yr}년 ({yr-birth_year+1}세) ✅ 인연 해(보통) — 배우자궁 합 동(動)."
                     )
             except Exception:
                 _saju_log.warning("[relations] 오류: %s", sys.exc_info()[1])
