@@ -7359,7 +7359,7 @@ def detect_life_risk_signals(pils, saewoon_data=None, gender=None, marriage_stat
     elif saup_score >= 25:
         saup_level, saup_msg = "✨ 사업 가능", "직장 + 부업 병행 적합.\n→ 자금 관리 못하면 무너집니다. 시기 잘 보세요."
     elif saup_score >= 0:
-        saup_level, saup_msg = "💼 직장형", "💼 사업하면 100% 망하는 구조.\n→ 비겁쟁재 — 동업·투자자 받으면 즉시 분쟁.\n→ 직장 + 작은 부업만. 사업 유혹에 흔들리면 반드시 후회합니다."
+        saup_level, saup_msg = "💼 직장형", "💼 혼자 가야 사는 구조 — 사업 자체가 금지가 아니라 '같이 하는 사업'이 독입니다.\n→ 동업·투자자·보증은 즉시 분쟁(비겁쟁재). 이것만 평생 금지.\n→ 직장·전문직 기반 + 혼자 굴리는 부업·영업·콘텐츠로 재능을 수익화하는 길은 열려 있습니다."
     else:
         saup_level, saup_msg = "⚠️ 사업 위험", "⚠️ 사업 손대지 마세요. 직장·전문직이 당신을 살립니다."
     results["사업운"] = {"점수": max(min(saup_score, 100), 10), "등급": saup_level, "이유": saup_reasons, "메시지": saup_msg, "아이콘": "💼"}
