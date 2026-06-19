@@ -4631,17 +4631,22 @@ class LocalSajuNarrator:
         _biz_reasons = []
         _job_reasons = []
 
-        if any(s.get("cg_ss") == "偏財(편재)" for s in ss_list):
+        if any(s.get("cg_ss") == "偏財(편재)" or s.get("jj_ss") == "偏財(편재)" for s in ss_list):
             _biz_score += 2; _biz_reasons.append("편재(사업재물) 있음")
-        if any(s.get("cg_ss") in ["傷官(상관)","食神(식신)"] for s in ss_list):
+        if any(s.get("cg_ss") in ["傷官(상관)","食神(식신)"] or s.get("jj_ss") in ["傷官(상관)","食神(식신)"] for s in ss_list):
             _biz_score += 1; _biz_reasons.append("식상(재능 표현) 있음")
         if "신강" in sn:
             _biz_score += 1; _biz_reasons.append("신강(자기주도 강함)")
-        if any(s.get("cg_ss") == "正財(정재)" for s in ss_list):
+        elif "신약" in sn:
+            _biz_score -= 2; _biz_reasons.append("신약(감당력 부족)")
+        _geopjae = sum(1 for s in ss_list if s.get("cg_ss")=="劫財(겁재)" or s.get("jj_ss")=="劫財(겁재)")
+        if _geopjae >= 2:
+            _biz_score -= 2; _biz_reasons.append("비겁쟁재(겁재 과다)")
+        if any(s.get("cg_ss") == "正財(정재)" or s.get("jj_ss") == "正財(정재)" for s in ss_list):
             _job_score += 2; _job_reasons.append("정재(안정 수입) 있음")
-        if any(s.get("cg_ss") in ["正官(정관)","偏官(편관)"] for s in ss_list):
+        if any(s.get("cg_ss") in ["正官(정관)","偏官(편관)"] or s.get("jj_ss") in ["正官(정관)","偏官(편관)"] for s in ss_list):
             _job_score += 2; _job_reasons.append("관성(조직 친화) 있음")
-        if any(s.get("cg_ss") in ["正印(정인)","偏印(편인)"] for s in ss_list):
+        if any(s.get("cg_ss") in ["正印(정인)","偏印(편인)"] or s.get("jj_ss") in ["正印(정인)","偏印(편인)"] for s in ss_list):
             _job_score += 1; _job_reasons.append("인성(학습·자격) 강함")
 
         if _biz_score > _job_score:
