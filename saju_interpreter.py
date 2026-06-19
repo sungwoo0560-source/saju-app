@@ -5060,9 +5060,9 @@ class LocalSajuNarrator:
         _biz_pts_j, _job_pts_j = 50, 50  # 기준 50점에서 시작
 
         # 격국 기반 보정
-        if _gyeok_j in {"편재격","식신격","상관격","비견격"}:
+        if any(_g in _gyeok_j for _g in ("偏財","食神","傷官","比肩")):
             _biz_pts_j += 20
-        elif _gyeok_j in {"정관격","정재격","정인격","편관격"}:
+        elif any(_g in _gyeok_j for _g in ("正官","正財","正印","偏官")):
             _job_pts_j += 20
 
         # 십성 분포 보정 (각 +5점)
