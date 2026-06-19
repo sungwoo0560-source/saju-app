@@ -12821,7 +12821,7 @@ def get_jeokjung_affair(gender, ilgan, yukjin_list, sinsal_list, pils, marriage_
         elif bg >= 3:
             title = "💔 당신은 — 남편 단속이 더 중요한 사주입니다"
             line1 = "비겁 강 — 남편이 다른 여자에게 흔들릴 수 있는 구조."
-            line2 = "본인이 외도하기보다 — 배우자 단속이 핵심."
+            line2 = "본인보다 배우자 쪽 이성 관계에 변동수가 있으니, 관계 관리가 핵심입니다."
             line3 = "결혼 상대는 — 책임감 있는 사람으로 골라야 합니다."
         elif has_dohwa or has_hongyeom or sigi_dohwa:
             title = "💔 당신은 — 남자에게 인기 많은 사주입니다"
