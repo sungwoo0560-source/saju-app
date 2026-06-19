@@ -6144,7 +6144,8 @@ class LocalSajuNarrator:
         # ─ 4. 재물 궁합 ─────────────────────────────────────────────
         lines.append("**💰 재물 궁합 분석:**")
         _jae_cnt_g = sum(1 for s in ss_list
-                         if "財" in s.get("cg_ss","") or "財" in s.get("jj_ss",""))
+                         if s.get("cg_ss") in ["偏財(편재)","正財(정재)"]
+                         or s.get("jj_ss") in ["偏財(편재)","正財(정재)"])
         _sik_cnt_g = sum(1 for s in ss_list
                          if any(k in s.get("cg_ss","") for k in ("食神","傷官")))
         if _jae_cnt_g >= 2:
