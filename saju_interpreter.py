@@ -2470,8 +2470,11 @@ class LocalSajuNarrator:
 
             oh_sorted = sorted(b.get("o_s", {}).items(), key=lambda x: -x[1])
 
+            _omax_sc = oh_sorted[0][1] if oh_sorted else 0  # 막대 정규화 기준(최대 오행%)
+
             for oh, sc in oh_sorted:
-                bar = "█" * min(int(sc * 2), 10)
+                # 최대 오행=10칸 정규화 → 분포 기울기가 막대 길이에 비례, 약한 오행은 짧게(취약 가시화)
+                bar = "█" * round(sc / _omax_sc * 10) if _omax_sc else ""
 
                 lines.append(f"- **{OHN.get(oh, oh)}**: {bar} ({sc:.1f})")
 
