@@ -2018,6 +2018,12 @@ class LocalSajuNarrator:
             f"시원한 물(水)의 기운 — 냉정한 판단, 충분한 휴식, 감정 조절 — 이 지금 {name}님에게 가장 필요한 보완입니다. "
             f"열정의 방향을 집중시키고 페이스 조절에 신경 쓴다면 {name}님의 에너지는 장거리 경주에서도 빛을 발할 것입니다."
         )
+        _DIAG_SUMMER_WEAKFIRE = (
+            f"{name}님은 여름(巳午未) 끝물에 태어났지만, 정작 火(열정·표현·확산) 기운이 "
+            f"가장 약한 조후(調候) 구조입니다. 겉은 뜨거운 계절의 사람이나 속은 차분·내성적이며, "
+            f"부족한 火를 보강해야 타고난 에너지가 비로소 살아납니다. 밝은 사람·활동·표현의 장으로 "
+            f"의식적으로 나가는 것이 이 사주의 개운 포인트입니다."
+        )
         _DIAG_SPRING = (
             f"{name}님은 봄(寅卯辰) 태생으로, 새싹이 돋아나듯 성장과 시작의 기운이 사주 전반에 흐르고 있습니다. "
             f"활기차고 진취적인 기질이 있으며 새로운 시작과 변화에 두려움 없이 뛰어드는 용기가 있습니다. "
@@ -2128,7 +2134,10 @@ class LocalSajuNarrator:
         if _wol_jj2 in _cold_months:
             lines.append(_DIAG_COLD)
         elif _wol_jj2 in _hot_months:
-            lines.append(_DIAG_SUMMER)
+            if _oh_min2 == "火":
+                lines.append(_DIAG_SUMMER_WEAKFIRE)
+            else:
+                lines.append(_DIAG_SUMMER)
         elif _wol_jj2 in _spring_months:
             lines.append(_DIAG_SPRING)
         elif _wol_jj2 in _autumn_months:
