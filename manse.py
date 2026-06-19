@@ -2472,7 +2472,7 @@ def _local_saju_engine(pils, name, birth_year, gender, query):
                     _ya_jj = _yangin_data.get("양인_지지", "")
                     _ya_locs = ", ".join(_yangin_data.get("위치", []))
                     out.append(f"\n⚔️ **양인살(羊刃殺) 발동 — 사고·수술 핵심 신호**")
-                    out.append(f"원국 양인살({_ya_jj}, {_ya_locs})이 있습니다. 평생 사고·수술 패턴이 잠재합니다.")
+                    out.append(f"원국 양인살({_ya_jj}, {_ya_locs})이 있습니다. 충 운 해에 사고·수술수가 발동하기 쉬운 구조입니다.")
 
                     # 양인 + 세운 충 교차 (가장 위험)
                     if chung_h:
@@ -4435,7 +4435,7 @@ SCENARIO_DRAMA = {
     "business_repeat_fail": ("🔁", "같은 실패 반복 — 타고난 길(전문직) 거스르면 백전백패"),
     "big_scam":             ("🎭", "큰 사기 직격 — 화려한 제안 무조건 의심"),
     "tax_lawsuit":          ("⚖️", "세무·법적 분쟁 — 서류·계약 한 글자도 놓치지 마"),
-    "parent_shadow":        ("👤", "부모 그림자 평생 따라옴 — 인정 못 받는 갈증"),
+    "parent_shadow":        ("👤", "부모 그림자 — 독립 과제"),
     "triangle":             ("📐", "삼각관계 발동 — 세 사람 중 한 명은 무너짐"),
     "double_life":          ("🎭", "이중생활 — 두 얼굴 들킬 때 모든 게 무너짐"),
     "spouse_illness":       ("💊", "배우자 질병 — 간병·돌봄 책임 무거움"),
@@ -5727,7 +5727,7 @@ def build_saju_core_diagnosis(pils, name, birth_year, gender, current_year=None)
             parts = []
             if yangin_active:
                 _loc_txt = yangin_loc[0].replace("주", "지") if yangin_loc else "원국"
-                parts.append(f"{_loc_txt} 양인살({yangin_pos}) — 칼날 같은 추진력. 사고·수술·이성 충돌 평생 따라옴")
+                parts.append(f"{_loc_txt} 양인살({yangin_pos}) — 칼날 같은 추진력. 충 운 해에 사고·수술·이성 충돌수가 발동합니다")
             if internal_chung:
                 parts.append(f"원국 충({internal_chung[0]}) — 원국 자체 충돌 구조. 가족·배우자 관계 마찰 평생")
             if cur_chung_targets:
@@ -29582,8 +29582,9 @@ def main():
                         "title": f"원진살(怨嗔殺) — {', '.join(_wonjin_found)}",
                         "desc": (
                             "원국에 원진살이 있습니다. "
-                            "가까운 사람(배우자·직장 동료)과 이유 없이 미워지고 반목하는 기운이 "
-                            "평생 따라옵니다. 인간관계에서 감정 충돌이 잦고, "
+                            "가까운 사람(배우자·직장 동료)과 이유 없이 미워지고 "
+                            "반목하는 기운이 강하니, 그 관계에선 거리 조절이 필요합니다. "
+                            "인간관계에서 감정 충돌이 잦고, "
                             "배우자와 원진이면 부부 갈등의 근본 원인이 될 수 있습니다."
                         ),
                         "action": "💬 처방: 상대방을 먼저 이해하려는 노력·소통 훈련이 관계를 살립니다",
