@@ -31251,15 +31251,22 @@ border-radius:14px;padding:16px 20px;margin:16px 0 6px">
 </div>""", unsafe_allow_html=True)
 
     try:
+        def _strip_kr(s):
+            while '(' in s and ')' in s:
+                a=s.index('('); b=s.index(')')
+                if b>a: s=s[:a]+s[b+1:]
+                else: break
+            return s
+
         _gk_j = get_gyeokguk(pils)
         _gkn_j_raw = _gk_j["격국명"] if _gk_j else "미정격"
-        # "正官格" → "정관격" 변환
+        # "正官格" → "정관격" 변환 (get_gyeokguk은 "正官(정관)格" 형식 반환 → 한글 제거 후 매칭)
         _GKN_KR_MAP = {
             "正官格":"정관격","偏官格":"편관격","正財格":"정재격","偏財格":"편재격",
             "食神格":"식신격","傷官格":"상관격","正印格":"정인격","偏印格":"편인격",
             "比肩格":"비견격","劫財格":"겁재격",
         }
-        _gkn_j = _GKN_KR_MAP.get(_gkn_j_raw, _gkn_j_raw)
+        _gkn_j = _GKN_KR_MAP.get(_strip_kr(_gkn_j_raw), _gkn_j_raw)
         _si_j  = get_ilgan_strength(ilgan, pils)
         _sn_j  = _si_j.get("신강신약","중화")
         _ys_j  = get_yongshin(pils)
@@ -31280,6 +31287,8 @@ border-radius:14px;padding:16px 20px;margin:16px 0 6px">
                 _jj_ss = TEN_GODS_MATRIX.get(ilgan,{}).get(_jj_main,"")
                 if _jj_ss:
                     _ss_counts[_jj_ss] = _ss_counts.get(_jj_ss,0) + 0.5
+        # 십성 키 정규화 — TEN_GODS_MATRIX는 "正官(정관)" 형식, _JOB_SCORE는 평문 한자라 매칭 안 되던 것 보정
+        _ss_counts_norm = {_strip_kr(_k): _v for _k, _v in _ss_counts.items()}
 
         # 직업군별 점수 (십성 가중치)
         _JOB_SCORE = {
@@ -31294,9 +31303,109 @@ border-radius:14px;padding:16px 20px;margin:16px 0 6px">
         }
         _job_scores = {}
         for _job, _weights in _JOB_SCORE.items():
-            _score = sum(_ss_counts.get(_ss,0)*_w for _ss,_w in _weights.items())
+            _score = sum(_ss_counts_norm.get(_ss,0)*_w for _ss,_w in _weights.items())
             _job_scores[_job] = round(_score,1)
         _sorted_jobs = sorted(_job_scores.items(), key=lambda x: x[1], reverse=True)
+
+        # ── [신규] 1순위 종합 직군 — 격국×주도십성×용신오행×신살 교차 reconcile ──
+        _SS_GROUP_MAP_J = {
+            "比肩":"비겁","劫財":"비겁",
+            "食神":"식상","傷官":"식상",
+            "偏財":"재성","正財":"재성",
+            "偏官":"관성","正官":"관성",
+            "偏印":"인성","正印":"인성",
+        }
+        _group_sums_j = {"비겁":0.0,"식상":0.0,"재성":0.0,"관성":0.0,"인성":0.0}
+        for _ssk_j, _ssv_j in _ss_counts_norm.items():
+            _grp_j = _SS_GROUP_MAP_J.get(_ssk_j)
+            if _grp_j:
+                _group_sums_j[_grp_j] += _ssv_j
+        _lead_group_j = max(_group_sums_j, key=_group_sums_j.get) if any(_group_sums_j.values()) else "비겁"
+
+        _GYEOK_GROUP_MAP_J = {
+            "정관격":"관성","편관격":"관성","정재격":"재성","편재격":"재성",
+            "식신격":"식상","상관격":"식상","정인격":"인성","편인격":"인성",
+            "비견격":"비겁","겁재격":"비겁",
+        }
+        _gyeok_group_j = _GYEOK_GROUP_MAP_J.get(_gkn_j, _lead_group_j)
+
+        _GROUP_STYLE_J = {
+            "비겁":"독립·자영·전문직·경쟁",
+            "식상":"표현·기술·창작·교육·서비스",
+            "재성":"사업·금융·유통·무역·재무",
+            "관성":"조직·공직·관리·군경·법",
+            "인성":"학문·연구·자격·교육·의료",
+        }
+        _OH_FIELD_J = {
+            "水":"금융·유통·무역·IT·물류",
+            "火":"교육·예술·방송·전기·요식",
+            "木":"교육·의료·출판·기획·섬유",
+            "金":"법조·금융·기계·군경·감정",
+            "土":"부동산·건설·중개·농업·토목",
+        }
+        _SINSAL_FLAVOR_J = {
+            "문창귀인":"학문·시험·작가·교육",
+            "역마살":"무역·영업·해외·운송",
+            "화개살":"예술·종교·연구·철학",
+            "양인살":"군경·외과·검·정밀기술·스포츠",
+        }
+        try:
+            from saju_sinsal import get_extra_sinsal as _gex_j, get_yangin as _gya_j, get_12sinsal as _g12_j
+            _ext_names_j = [s.get("name","") for s in (_gex_j(pils) or [])]
+            _has_munchang_j = any("문창귀인" in n for n in _ext_names_j)
+            _yangin_data_j = _gya_j(pils) or {}
+            _has_yangin_j = bool(_yangin_data_j.get("존재"))
+            _twelve_j = [s.get("이름","") for s in (_g12_j(pils) or [])]
+            _has_yeokma_j = any("역마" in n for n in _twelve_j)
+            _has_hwagae_j = any("화개" in n for n in _twelve_j)
+        except Exception:
+            _has_munchang_j = _has_yangin_j = _has_yeokma_j = _has_hwagae_j = False
+
+        _active_sinsal_j = []
+        if _has_munchang_j: _active_sinsal_j.append("문창귀인")
+        if _has_yeokma_j:   _active_sinsal_j.append("역마살")
+        if _has_hwagae_j:   _active_sinsal_j.append("화개살")
+        if _has_yangin_j:   _active_sinsal_j.append("양인살")
+
+        _cand_words_j = []
+        _cand_words_j += _GROUP_STYLE_J.get(_lead_group_j, "").split("·")
+        if _gyeok_group_j != _lead_group_j:
+            _cand_words_j += _GROUP_STYLE_J.get(_gyeok_group_j, "").split("·")
+        if _y1_j:
+            _cand_words_j += _OH_FIELD_J.get(_y1_j, "").split("·")
+        for _snm_j in _active_sinsal_j:
+            _cand_words_j += _SINSAL_FLAVOR_J.get(_snm_j, "").split("·")
+
+        _word_freq_j = {}
+        for _w_j in _cand_words_j:
+            if _w_j:
+                _word_freq_j[_w_j] = _word_freq_j.get(_w_j, 0) + 1
+        _top_words_j = sorted(_word_freq_j, key=lambda w: -_word_freq_j[w])[:4]
+
+        if _gyeok_group_j == _lead_group_j:
+            _reconcile_j = f"✅ 격국·십성 방향 일치({_GROUP_STYLE_J.get(_lead_group_j,'')}) — 강력 추천"
+        else:
+            _reconcile_j = (
+                f"격국(장기 본령): {_GROUP_STYLE_J.get(_gyeok_group_j,'')} / "
+                f"현재 발현(십성): {_GROUP_STYLE_J.get(_lead_group_j,'')} — 본령 우선, 십성 쪽은 부업·전환 적성"
+            )
+
+        _sinsal_txt_j = " · ".join(_SINSAL_FLAVOR_J.get(s,"") for s in _active_sinsal_j if _SINSAL_FLAVOR_J.get(s))
+        _summary_line_j = f"{_gkn_j} 틀 + {_GROUP_STYLE_J.get(_lead_group_j,'')} 방식"
+        if _y1_j:
+            _summary_line_j += f" + 용신 {_y1_j} 분야"
+        if _sinsal_txt_j:
+            _summary_line_j += f" · {_sinsal_txt_j}"
+
+        st.markdown(
+            f"<div style='background:linear-gradient(135deg,#1a0d2e,#2e1a4e);border:2px solid #f7e695;"
+            f"border-radius:12px;padding:16px 18px;margin-bottom:14px'>"
+            f"<div style='font-size:14px;font-weight:900;color:#f7e695;margin-bottom:8px'>🎯 1순위 종합 직군</div>"
+            f"<div style='font-size:12.5px;color:#ddd;line-height:1.8'>{_summary_line_j}</div>"
+            f"<div style='font-size:14px;font-weight:800;color:#a8e6cf;margin-top:8px'>→ 추천: {' · '.join(_top_words_j)}</div>"
+            f"<div style='font-size:11.5px;color:#aaa;margin-top:6px'>{_reconcile_j}</div>"
+            f"</div>",
+            unsafe_allow_html=True)
 
         # 상위 3개 직업군 표시
         col_ja, col_jb = st.columns([3,2])
