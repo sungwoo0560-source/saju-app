@@ -1867,6 +1867,12 @@ class LocalSajuNarrator:
                 cur_year=cur_year,
                 bm=bm,
                 bd=bd,
+                조후_need=ys_data.get("조후_need", []),
+                조후_avoid=ys_data.get("조후_avoid", []),
+                조후_우선=ys_data.get("조후_우선", False),
+                조후_desc=ys_data.get("조후_desc", ""),
+                억부_용신=ys_data.get("억부_용신", []),
+                월지=ys_data.get("월지", ""),
             )
 
         except Exception as e:
@@ -2461,6 +2467,33 @@ class LocalSajuNarrator:
                 f"이 오행이 강한 해에 중요한 결정을 내리면 좋은 결과를 얻을 수 있습니다. "
                 f"용신 오행의 색상을 가까이하고, 용신이 강한 계절에 적극적으로 나서는 것이 개운의 핵심입니다."
             )
+        # ── 조후(調候) 용신 단독 노출 (get_yongshin 기계산값, 엔진 무수정) ──
+        _johu_need = b.get("조후_need", [])
+        _johu_pri = b.get("조후_우선", False)
+        _johu_desc = b.get("조후_desc", "")
+        _eokbu = b.get("억부_용신", [])
+        if _johu_desc or _johu_need:
+            _eokbu_str = "·".join(_eokbu[:3]) if _eokbu else "—"
+            _CG2OH = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
+                      "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
+            _need_oh = []
+            for _c in _johu_need:
+                _o = _CG2OH.get(_c, _c)
+                if _o not in _need_oh:
+                    _need_oh.append(_o)
+            _need_str = "·".join(_need_oh) if _need_oh else "—"
+            if _johu_pri:
+                lines.append(
+                    f"\n🌡️ **조후(調候) — 계절 보정이 우선되는 사주**\n"
+                    f"태어난 달({b.get('월지','')})의 기운이 치우쳐, "
+                    f"억부용신({_eokbu_str})보다 **계절 균형을 잡는 조후용신 {_need_str}**을(를) 우선합니다. "
+                    f"{_johu_desc}"
+                )
+            else:
+                lines.append(
+                    f"\n🌡️ **조후(調候) 보조** — 억부용신({_eokbu_str})이 중심, "
+                    f"조후용신 {_need_str}이(가) 계절 균형을 보조합니다. {_johu_desc}"
+                )
         if _gs3_str:
             lines.append(
                 f"\n반대로 **기신(忌神)**은 **{_gs3_str}** 오행으로, "
