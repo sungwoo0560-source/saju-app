@@ -20324,52 +20324,6 @@ def menu5_money(pils, birth_year, gender, name="내담자"):
         unsafe_allow_html=True,
     )
 
-    # ② 돈 터지는 시기
-
-    st.markdown('<div class="gold-section">📈 돈이 터지는 시기</div>', unsafe_allow_html=True)
-
-    try:
-        with st.spinner("재물 운기 계산 중..."):
-            hl = generate_engine_highlights(pils, birth_year, gender)
-
-        if hl["money_peak"]:
-            for mp in hl["money_peak"]:
-                is_double = mp.get("ss") == "더블"
-
-                bg = "#ffffff" if is_double else "#f0fff0"
-
-                bc = "#000000" if is_double else "#27ae60"
-
-                icon = "🌟" if is_double else "💰"
-
-                st.markdown(
-                    f"""
-
-<div style="background:{bg};border:2px solid {bc};border-radius:12px; padding:16px;margin:8px 0">
-
-<span style="font-size:18px;font-weight:900;color:{bc}">{icon} {mp["age"]}</span>
-
-<span style="font-size:12px;color:#000000;margin-left:8px">({mp["year"]})</span>
-
-<div style="font-size:13px;color:#000000;margin-top:6px;line-height:1.8">{mp["desc"]}</div>
-
-</div>
-
-""",
-                    unsafe_allow_html=True,
-                )
-
-        else:
-            st.info("현재 기준 향후 5년 내 뚜렷한 재물 피크가 계산되지 않았습니다.")
-
-    except Exception as e:
-        st.warning(f"재물 운기 계산 오류: {e}")
-
-    st.markdown(
-        '<hr style="border:none;border-top:1px solid #e0d8c0;margin:20px 0">',
-        unsafe_allow_html=True,
-    )
-
     st.markdown(
         '<div class="gold-section">💰 재물론 상세 (장생/12운성)</div>',
         unsafe_allow_html=True,
@@ -20380,64 +20334,6 @@ def menu5_money(pils, birth_year, gender, name="내담자"):
 
     except Exception as e:
         st.warning(f"재물론 오류: {e}")
-
-    # 재물 완전 해설
-
-    st.markdown(
-        '<hr style="border:none;border-top:1px solid #e0d8c0;margin:20px 0">',
-        unsafe_allow_html=True,
-    )
-
-    st.markdown(
-        '<div class="gold-section">📜 재물/사업 완전 해설</div>',
-        unsafe_allow_html=True,
-    )
-
-    try:
-        narrative = build_rich_narrative(pils, birth_year, gender, name if name else "내담자", section="money")
-
-        if narrative and len(narrative) > 50:
-            st.markdown(
-                f'<div style="background:#f8fdf0;border-left:4px solid #4caf50;border-radius:10px;'
-                f'padding:18px 22px;margin:10px 0;font-size:13px;color:#2a4a00;'
-                f'line-height:2.0;white-space:pre-wrap">{narrative}</div>',
-                unsafe_allow_html=True,
-            )
-
-    except Exception as e:
-        st.warning(f"재물 해설 오류: {e}")
-
-    # ── 재물 극대화 타이밍 ──────────────────────────────────────
-    try:
-        st.markdown("---")
-        st.markdown("### 💰 재물 극대화 타이밍")
-        _JAE_YEARS = []
-        _cur_y_m = datetime.now().year
-        for _y_m in range(_cur_y_m, _cur_y_m + 10):
-            try:
-                _yl_m = get_yearly_luck(pils, _y_m)
-                _ss_m = _yl_m.get("십성_천간","")
-                if "재" in _ss_m:
-                    _gil_m = _yl_m.get("길흉","")
-                    _JAE_YEARS.append((_y_m, _ss_m, _gil_m))
-            except Exception:
-                pass
-        if _JAE_YEARS:
-            st.success("**향후 10년 재물 기회 연도:**")
-            for _y_m, _ss_m, _gil_m in _JAE_YEARS:
-                _icon_m = "🟢" if "길" in _gil_m else "🟡" if "평" in _gil_m else "🔴"
-                st.write(f"{_icon_m} **{_y_m}년** — {_ss_m} ({_gil_m})")
-            st.info(
-                "💡 재물 극대화 전략:\n"
-                "- 🟢 길한 재성 운 → 투자·사업 확장 최적 타이밍\n"
-                "- 🟡 평한 재성 운 → 현상 유지, 소규모 투자\n"
-                "- 🔴 흉한 재성 운 → 방어적 재무 관리"
-            )
-        else:
-            st.info("향후 10년간 재성 운이 들어오는 세운이 없습니다. "
-                    "비겁·인성 운에 실력을 쌓는 것이 재물 준비입니다.")
-    except Exception:
-        pass
 
     # AI 정밀 분석 버튼
 
