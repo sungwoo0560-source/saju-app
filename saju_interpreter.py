@@ -5537,16 +5537,6 @@ class LocalSajuNarrator:
             "신의 기운을 알고 따르는 자가 재물을 얻습니다."
         )
 
-        # 3. 오행 추천
-        lines.append("\n### 💡 유리한 직종과 투자처 (오행)")
-
-        lines.append(LocalSajuNarrator.OH_JOB.get(b.get("oh_max", "木"), ""))
-
-        if b.get("yongshin", []):
-            lines.append(f"특히 용신 오행인 **{' · '.join(b.get('yongshin',[])[:3])}** 관련 사업(색상, 방향, 취급 품목 등)을 취급할 때 재물 운이 상승합니다.")
-
-        # 3. 타이밍! 언제 좋고 언제 조심?
-
         lines.append("\n### ⏰ 시기별 투자/사업 행동 지침")
 
         # 최근 10년의 재성/겁재 해
@@ -5585,24 +5575,6 @@ class LocalSajuNarrator:
         }
 
         lines.append(cur_money_guide.get(sw_ss, "무난한 시기입니다. 하던 대로 꾸준함을 유지하십시오."))
-
-        # ── 월 단위 재물 시기 특정 ────────────────────────────────
-        try:
-            _mt = get_monthly_timing(pils, birth_year, gender,
-                                     target_year=b.get("cur_year", datetime.now().year), focus="재물")
-            if _mt and _mt.get("summary"):
-                lines.append(f"\n### 📅 {b.get('cur_year', 2026)}년 월별 재물 타이밍")
-                lines.append(f"\n{_mt['summary']}\n")
-                if _mt.get("peak"):
-                    lines.append("**✅ 돈 움직이기 좋은 달:**")
-                    for _m, _desc in _mt["peak"][:4]:
-                        lines.append(f"- {_desc}")
-                if _mt.get("caution"):
-                    lines.append("\n**⛔ 절대 큰 결정 내리면 안 되는 달:**")
-                    for _m, _desc in _mt["caution"][:3]:
-                        lines.append(f"- {_desc}")
-        except Exception:
-            _saju_log.warning("[money 오류] %s", sys.exc_info()[1])
 
         return "\n".join(lines)
 
