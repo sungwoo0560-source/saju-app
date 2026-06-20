@@ -2157,7 +2157,7 @@ class LocalSajuNarrator:
             lines.append(_SN_MAP[_sn_key])
 
         # 5) 용신 처방
-        _yong_rxs = [_YONG_RX[y] for y in _ys_diag[:2] if y in _YONG_RX]
+        _yong_rxs = [_YONG_RX[y] for y in _ys_diag[:3] if y in _YONG_RX]
         if _yong_rxs:
             lines.append("**💊 용신 처방:** " + "  \n".join(_yong_rxs))
 
@@ -2772,14 +2772,14 @@ class LocalSajuNarrator:
         )
         lines.append(
             f"\n**[시기]** {name}님 평생 중 결정적 타이밍:\n"
-            f"- **황금기**: 용신({'/'.join(b.get('yongshin',[])[:2])}) 대운 — 확장·투자·도전\n"
+            f"- **황금기**: 용신({'/'.join(b.get('yongshin',[])[:3])}) 대운 — 확장·투자·도전\n"
             f"- **수비기**: 기신({'/'.join(b.get('gisin',[])[:2]) if b.get('gisin') else '해당 없음'}) 대운 — 내실 다지기·보수적 운영\n"
             f"- **위기**: 충(沖) 발동 해 — 큰 결정 회피·건강 점검 필수"
         )
         lines.append(
             f"\n**[행동]** 지금 당장 실천할 3가지:\n"
             f"1. 일간 {ilgan} 본질({_ip_fr.get('본질','').split('.')[0]}) — 매일 의식하고 강화\n"
-            f"2. 용신 오행 ({'/'.join(b.get('yongshin',[])[:2])}) 색상·음식·방향 일상 활용\n"
+            f"2. 용신 오행 ({'/'.join(b.get('yongshin',[])[:3])}) 색상·음식·방향 일상 활용\n"
             f"3. 기신 오행 자극(술·담배·야간 과로) 의식적 절제"
         )
         lines.append(
@@ -4791,7 +4791,7 @@ class LocalSajuNarrator:
         lines.append(LocalSajuNarrator.OH_JOB.get(b.get("oh_max","木"), ""))
         if yongshin:
             lines.append(
-                f"특히 용신 오행 **{' · '.join(OHN.get(y,y) for y in yongshin[:2])}** "
+                f"특히 용신 오행 **{' · '.join(OHN.get(y,y) for y in yongshin[:3])}** "
                 "관련 사업을 취급할 때 재물 운이 상승합니다."
             )
 
@@ -5632,7 +5632,7 @@ class LocalSajuNarrator:
         lines.append(LocalSajuNarrator.OH_JOB.get(b.get("oh_max", "木"), ""))
 
         if b.get("yongshin", []):
-            lines.append(f"특히 용신 오행인 **{' · '.join(b.get('yongshin',[])[:2])}** 관련 사업(색상, 방향, 취급 품목 등)을 취급할 때 재물 운이 상승합니다.")
+            lines.append(f"특히 용신 오행인 **{' · '.join(b.get('yongshin',[])[:3])}** 관련 사업(색상, 방향, 취급 품목 등)을 취급할 때 재물 운이 상승합니다.")
 
         # 3. 타이밍! 언제 좋고 언제 조심?
 

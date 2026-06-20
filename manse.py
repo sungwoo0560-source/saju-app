@@ -17165,7 +17165,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                 "번호": "둘째",
                 "제목": "🟡 좋은 운이 와도 준비가 안 되어 있습니다",
                 "내용": (
-                    f"현재 {dw_kr} 대운은 용신({' '.join(_yong_ohs_s[:2])}) 기운과 "
+                    f"현재 {dw_kr} 대운은 용신({' '.join(_yong_ohs_s[:3])}) 기운과 "
                     f"완전히 일치하지 않습니다. "
                     f"비가 와서 밭이 갈아엎어졌는데 씨를 뿌리지 못하는 상황입니다. "
                     f"다음 용신 대운이 오기 전에 지금부터 준비해야 합니다. "
@@ -18139,7 +18139,7 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
         }
 
         _strategy_txt = _ILGAN_STRATEGY.get(_ilgan_s, f"{_ilgan_s}일간의 기운으로 살아가고 있습니다.")
-        _yong_str_s = " · ".join([_OHN_S.get(y,"") for y in _yong_s[:2]]) if _yong_s else "분석 중"
+        _yong_str_s = " · ".join([_OHN_S.get(y,"") for y in _yong_s[:3]]) if _yong_s else "분석 중"
         # JONGHAP-FIX-6: 빈 문자열 fallback (saju_zhengtong L7428 패턴 통일)
         _gisin_str_s = (" · ".join([_OHN_S.get(g, g) for g in _gisin_s[:2] if isinstance(g, str)])) or "土·金"
 
@@ -21053,7 +21053,7 @@ def menu9_daily(pils, name, birth_year, gender):
             f"<div style='font-size:16px;font-weight:900;color:{_sig_tc};'>{_signal}</div>"
             f"<div style='font-size:13px;color:#ccc;margin-top:6px;'>{_sig_sub}</div>"
             f"<div style='font-size:11px;color:#888;margin-top:8px;'>"
-            f"용신: {' '.join(_yong_d[:2]) if _yong_d else '-'} | "
+            f"용신: {' '.join(_yong_d[:3]) if _yong_d else '-'} | "
             f"기신: {' '.join(_gisin_d[:2]) if _gisin_d else '-'} | "
             f"오늘 천간오행: {_cg_oh_d} / 지지오행: {_jj_oh_d}"
             f"</div></div>",
@@ -21344,7 +21344,7 @@ def menu10_monthly(pils, name, birth_year, gender):
             f"<div style='font-size:14px;color:#fff;margin-top:8px;font-weight:700;'>"
             f"{datetime.now().month}월 [{_ml_ss}] — {_mdesc}</div>"
             f"<div style='font-size:11px;color:#888;margin-top:8px;'>"
-            f"용신: {' '.join(_yong_m[:2]) if _yong_m else '-'} | "
+            f"용신: {' '.join(_yong_m[:3]) if _yong_m else '-'} | "
             f"이달 십성: {_ml_ss} | 오행: {_ml_oh}"
             f"</div></div>",
             unsafe_allow_html=True,
@@ -24393,7 +24393,7 @@ def tab_ai_chat(pils, name, birth_year, gender):
                     )
                     out.append(f"{_sig_def}\n")
                     out.append(
-                        f"\n용신은 **{'·'.join(_yong_def[:2]) if _yong_def else '분석중'}** 오행입니다. "
+                        f"\n용신은 **{'·'.join(_yong_def[:3]) if _yong_def else '분석중'}** 오행입니다. "
                         f"이 기운을 강화하는 방향으로 행동하면 운이 열립니다.\n"
                     )
                     if _gisin_def:
