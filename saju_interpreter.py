@@ -4719,42 +4719,6 @@ class LocalSajuNarrator:
                     "콘텐츠·강의·컨설팅·창작 분야에서 수익화가 가능합니다."
                 )
 
-        # ── 4. 격국 기반 직업 직격 판단 ────────────────────────────
-        lines.append("\n### 🎯 격국이 가리키는 천직")
-        _gyeok = b.get("gyeok_name", "")
-        _gyeok_key_map = {
-            "정관격":"正官(정관)格(정관격)", "편관격":"偏官(편관)格(편관격)",
-            "식신격":"食神(식신)格(식신격)", "상관격":"傷官(상관)格(상관격)",
-            "정재격":"正財(정재)格(정재격)", "편재격":"偏財(편재)格(편재격)",
-            "정인격":"正印(정인)格(정인격)", "편인격":"偏印(편인)格(편인격)",
-            "비견격":"比肩(비견)格(비견격)", "겁재격":"劫財(겁재)格(겁재격)",
-        }
-        _cm_key = _gyeok_key_map.get(_gyeok, _gyeok)
-        _cm = CAREER_MATRIX.get(_cm_key, {})
-        if _cm:
-            lines.append(f"**{_gyeok}** 기준 천직:")
-            lines.append(f"- 🥇 **최적 직군**: {'·'.join(_cm.get('best', []))}")
-            lines.append(f"- ✅ **잘 맞는 직군**: {'·'.join(_cm.get('good', []))}")
-            lines.append(f"- ❌ **피해야 할 직군**: {'·'.join(_cm.get('avoid', []))}")
-        else:
-            _fallback = {
-                "偏財":"사업가/CEO, 투자자, 무역상, 영업전문가",
-                "正財":"회계사/세무사, 은행원, 공무원",
-                "偏官":"군인/경찰, 외과의사, 스포츠인",
-                "正官":"공무원/관리직, 교사, 대기업 직원",
-                "食神":"요리사, 예술가, 교육자, 크리에이터",
-                "傷官":"연예인, 변호사, 창업가, 작가",
-                "正印":"교수/학자, 의사, 작가",
-                "偏印":"IT개발자, 철학가, 특수기술자",
-            }
-            _top_ss = ss_list[0].get("cg_ss", "").replace("(","").split(")")[0] if ss_list else ""
-            if _top_ss in _fallback:
-                lines.append(f"십성 분석 기준 → {_fallback[_top_ss]}")
-
-        _ilg_career = ILGAN_DESC.get(ilgan, {}).get("career", "")
-        if _ilg_career:
-            lines.append(f"\n**일간({ilgan}) 천성 직업**: {_ilg_career}")
-
         # ── 5. 평생 재물 황금기 대운 ───────────────────────────────
         lines.append("\n### 🌟 평생 재물 황금기 — 인생 피크 타이밍")
         _money_golden = []
@@ -4972,9 +4936,7 @@ class LocalSajuNarrator:
             lines.append(f"- {_ss_job_j}")
         lines.append("")
 
-        # ─ 11-2. 사업 vs 직장 적합도 점수화 (0~100) ────────────────────
-        lines.append("**📊 사업 vs 직장 적합도 점수:**")
-
+        # ─ 11-2. 사업 vs 직장 적합도 점수화 (0~100, 내부 판정용) ────────
         _biz_pts_j, _job_pts_j = 50, 50  # 기준 50점에서 시작
 
         # 격국 기반 보정
@@ -5000,11 +4962,6 @@ class LocalSajuNarrator:
 
         _biz_pts_j = min(100, max(0, _biz_pts_j))
         _job_pts_j = min(100, max(0, _job_pts_j))
-
-        _biz_bar_j = "█" * (_biz_pts_j // 10) + "░" * (10 - _biz_pts_j // 10)
-        _job_bar_j = "█" * (_job_pts_j // 10) + "░" * (10 - _job_pts_j // 10)
-        lines.append(f"- 🏢 사업·프리랜서형: `{_biz_bar_j}` {_biz_pts_j}점")
-        lines.append(f"- 💼 직장·조직형:     `{_job_bar_j}` {_job_pts_j}점")
 
         if _biz_pts_j >= _job_pts_j + 15:
             lines.append(
