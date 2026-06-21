@@ -2027,7 +2027,7 @@ class LocalSajuNarrator:
         _DIAG_SUMMER_WEAKFIRE = (
             f"{name}님은 여름(巳午未) 끝물에 태어났지만, 정작 火(열정·표현·확산) 기운이 "
             f"가장 약한 조후(調候) 구조입니다. 겉은 뜨거운 계절의 사람이나 속은 차분·내성적이며, "
-            f"부족한 火를 보강해야 타고난 에너지가 비로소 살아납니다. 밝은 사람·활동·표현의 장으로 "
+            f"부족한 火(표현·사교)를 끌어올리면 타고난 에너지가 살아납니다. 밝은 사람·활동·표현의 장으로 "
             f"의식적으로 나가는 것이 이 사주의 개운 포인트입니다."
         )
         _DIAG_SPRING = (
@@ -2142,6 +2142,20 @@ class LocalSajuNarrator:
         elif _wol_jj2 in _hot_months:
             if _oh_min2 == "火":
                 lines.append(_DIAG_SUMMER_WEAKFIRE)
+                _jh_need = b.get("조후_need", [])
+                _CG2OH = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土","己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
+                _jh_oh = []
+                for _c in _jh_need:
+                    _o = _CG2OH.get(_c, _c)
+                    if _o not in _jh_oh:
+                        _jh_oh.append(_o)
+                _jh_str = "·".join(_jh_oh) if _jh_oh else "水"
+                lines.append(
+                    f"\n단, 여기서 '火 보강'은 온도가 아니라 표현·활동·사교를 뜻합니다. "
+                    f"여름의 조열(燥熱)을 식히는 계절 균형(조후) 처방은 **{_jh_str}**이 우선이며, "
+                    f"검정·파랑 계열과 습윤한 환경(水)이 핵심입니다. "
+                    f"火는 밝은 자리·표현으로 끌어올리되, 과열·과로 방식은 피하십시오."
+                )
             else:
                 lines.append(_DIAG_SUMMER)
         elif _wol_jj2 in _spring_months:
