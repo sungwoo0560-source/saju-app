@@ -18216,21 +18216,19 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
         _ilgan_cal = pils[1]["cg"] if len(pils) > 1 else ""
         _ys_cal = get_yongshin(pils)
         _yong_cal = _ys_cal.get("종합_용신",[]) if _ys_cal else []
-        _gisin_cal= _ys_cal.get("기신",[]) if _ys_cal and isinstance(_ys_cal.get("기신"),list) else []
         _OH_CAL = _OH_CG
         _OH_CAL2= _OH_CG
+        _orig_jjs_cal = {p.get("jj","") for p in pils}
         _cal_rows = []
         for _mi in range(12):
             _ml_cal = get_monthly_luck(pils, _cy_cal, _mi + 1) or {}
             _mcg = _ml_cal.get("간", "")
             _mjj = _ml_cal.get("지", "")
             _mss = _ml_cal.get("십성", "-")
-            _moh = _OH_CAL2.get(_mcg, "")
-            _is_y = _moh in _yong_cal
-            _is_g = _moh in _gisin_cal
-            _col  = "#1a3d1a" if _is_y else "#3d1a1a" if _is_g else "#1a1a2e"
-            _tc   = "#7fff7f" if _is_y else "#ffaaaa" if _is_g else "#aaaaaa"
-            _sig  = "🟢" if _is_y else "🔴" if _is_g else "🟡"
+            _gr_cal, _ge_cal, _gs_cal = _month_grade(_ml_cal, _yong_cal, _orig_jjs_cal)
+            _sig  = "🟢" if _gr_cal in ("대길","길") else "🔴" if _gr_cal in ("흉","흉흉") else "🟡"
+            _col  = "#1a3d1a" if _sig == "🟢" else "#3d1a1a" if _sig == "🔴" else "#1a1a2e"
+            _tc   = "#7fff7f" if _sig == "🟢" else "#ffaaaa" if _sig == "🔴" else "#aaaaaa"
             _cal_rows.append(
                 f"<div style='background:{_col};border-radius:8px;padding:8px 6px;"
                 f"text-align:center;min-width:60px;'>"
@@ -18316,16 +18314,10 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
         _good_months = []
         for _mi_g in range(12):
             _ml_g = get_monthly_luck(pils, _cy_g, _mi_g + 1) or {}
-            _mcg_g = _ml_g.get("간", "")
-            _mjj_g = _ml_g.get("지", "")
-            _moh_g = _OH_CG.get(_mcg_g, "")
-            _chung_g = _CHUNG_G.get(_mjj_g,"")
-            _has_chung_g = bool(_chung_g and _chung_g in _orig_jjs_g)
-            _is_g_g = _moh_g in (_ys_g.get("기신",[]) if _ys_g and isinstance(_ys_g.get("기신"),list) else [])
-            _is_y_g = _moh_g in _yong_g
-            if _has_chung_g and _is_g_g:
-                _danger_months.append(f"**{_mi_g+1}월** (충+기신)")
-            elif _is_y_g:
+            _gr_g, _, _ = _month_grade(_ml_g, _yong_g, _orig_jjs_g)
+            if _gr_g in ("흉","흉흉"):
+                _danger_months.append(f"**{_mi_g+1}월**")
+            elif _gr_g in ("대길","길"):
                 _good_months.append(f"**{_mi_g+1}월**")
 
         st.markdown(
