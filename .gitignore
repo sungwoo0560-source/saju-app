@@ -37,3 +37,12 @@ pre_patch_check.txt
 
 # 임시 진단 스크립트
 diag*.py
+
+# 길월통일 정리 - 백업·진단·런타임 잡파일
+*.bak
+*_backup*.py
+backup_*.py
+_diag*.py
+test_*.py
+.claude/
+_*.txt
