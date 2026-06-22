@@ -6848,7 +6848,7 @@ def render_quick_summary_card(pils, name="내담자", saewoon_data=None, yongshi
 
     actions = [
         f"용신 {yong_str} 보강 — {yong_color_action}을 지금 당장 시작하세요" if yong_str else "용신 오행 보강 — 해당 색상·방향·음식 즉시 활용하세요",
-        "4·9·11월이 길월(吉月) — 중요한 결정은 반드시 이 시기에 집중하세요",
+        "용신 활성월에 중요한 결정을 집중하세요 (정확한 길월은 종합운세 탭의 월별 길흉 캘린더 참고)",
         "보증·동업 금물 — 겁살(劫殺) 발동 시기에 외부 충격이 반드시 옵니다",
     ]
 
