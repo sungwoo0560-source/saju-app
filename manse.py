@@ -17500,6 +17500,40 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
     render_pdf_download_btn("current_situation", pils, name, birth_year, gender)
 
 
+_LEVEL_EMOJI = {
+    "대길": "🌟",
+    "길": "✅",
+    "평길": "🟡",
+    "평": "⬜",
+    "흉": "⚠️",
+    "흉흉": "🔴",
+}
+
+
+def _month_grade(ml, yong_list, orig_jjs):
+    base = ml["길흉"]; 간오행 = _OH_CG.get(ml["간"], "")
+    is_yong = 간오행 in yong_list
+    is_chung = _JJCHUNG.get(ml["지"], "") in orig_jjs
+    RANK = {"대길": 5, "길": 4, "평길": 3, "평": 2, "흉": 1, "흉흉": 0}
+
+    if is_yong:
+        if is_chung:
+            등급 = "평길"; 시그널 = "용신月이나 충(冲) — 변동 주의"
+        elif base in ("대길", "길"):
+            등급 = "대길"; 시그널 = "용신+길십성 — 적극"
+        else:
+            등급 = "길"; 시그널 = "용신月 — 양호"
+    else:
+        if is_chung and base in ("흉", "흉흉"):
+            등급 = "흉"; 시그널 = "충+흉 — 큰 결정 보류"
+        elif is_chung:
+            등급 = "평"; 시그널 = "충(冲) — 변동 주의"
+        else:
+            등급 = ("길" if base == "대길" else base); 시그널 = ""
+    이모지 = _LEVEL_EMOJI.get(등급, "")
+    return (등급, 이모지, 시그널)
+
+
 def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
     """[1. Comprehensive Report] - Pillars, Personality, Gyeokguk, Yongshin"""
 
@@ -18573,6 +18607,12 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
 
         _months_data = [get_monthly_luck(pils, _cur_year, m) for m in range(1, 13)]
 
+        _ys_mg = get_yongshin(pils) or {}
+        _yong_mg = _ys_mg.get("종합_용신", [])
+        _orig_jjs_mg = {p.get("jj", "") for p in pils}
+        for _ml_mg in _months_data:
+            _ml_mg["길흉"], _ml_mg["_grade_emoji"], _ml_mg["_grade_signal"] = _month_grade(_ml_mg, _yong_mg, _orig_jjs_mg)
+
         _LEVEL_RANK = {"대길": 5, "길": 4, "평길": 3, "평": 2, "흉": 1, "흉흉": 0}
 
         _best_m = max(_months_data, key=lambda x: _LEVEL_RANK.get(x["길흉"], 2))
@@ -18615,6 +18655,8 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
 
 <div style="font-size:12px;color:#555;margin-top:6px;line-height:1.6">{_best_m.get("short", "")}</div>
 
+{f'<div style="font-size:11px;color:#888;margin-top:4px">💡 {_best_m.get("_grade_signal", "")}</div>' if _best_m.get("_grade_signal") else ""}
+
 </div>""",
                 unsafe_allow_html=True,
             )
@@ -18632,6 +18674,8 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
 <div style="font-size:13px;color:#d32f2f;margin-top:4px">{_LEVEL_EMOJI.get(_worst_m["길흉"], "")} {_worst_m["길흉"]} · {_worst_m["십성"]}</div>
 
 <div style="font-size:12px;color:#555;margin-top:6px;line-height:1.6">{_worst_m.get("short", "")}</div>
+
+{f'<div style="font-size:11px;color:#888;margin-top:4px">💡 {_worst_m.get("_grade_signal", "")}</div>' if _worst_m.get("_grade_signal") else ""}
 
 </div>""",
                 unsafe_allow_html=True,
