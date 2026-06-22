@@ -14443,6 +14443,14 @@ def infer_current_worry(pils, birth_year, gender, marital_status=None):
 def render_worry_inference(pils, birth_year, gender, marital_status=None):
     """고민 자동 추론 — 결혼/이혼/바람기 점수 기반 임팩트 메시지"""
     try:
+        _GUIIN_MAP={"甲":["丑","未"],"乙":["子","申"],"丙":["亥","酉"],"丁":["亥","酉"],"戊":["丑","未"],"己":["子","申"],"庚":["丑","未"],"辛":["寅","午"],"壬":["卯","巳"],"癸":["卯","巳"]}
+        _JJ_MON={"子":11,"丑":12,"寅":1,"卯":2,"辰":3,"巳":4,"午":5,"未":6,"申":7,"酉":8,"戌":9,"亥":10}
+        _gi_jj=_GUIIN_MAP.get(pils[1]["cg"],[]) if len(pils)>1 else []
+        _gi_mon="·".join(f"{_JJ_MON[j]}월" for j in _gi_jj if j in _JJ_MON) or "확인중"
+        _ys=get_yongshin(pils) or {}
+        _yo=_ys.get("종합_용신",[]) if isinstance(_ys.get("종합_용신",[]),list) else []
+        _gw=[m for m in range(1,13) if (_OH_CG.get(get_monthly_luck(pils,datetime.now().year,m).get("간",""),"") in _yo)]
+        _gw_str="·".join(f"{m}월" for m in _gw[:5]) or "확인중"
         from saju_zhengtong import detect_life_risk_signals
         _risks_in = detect_life_risk_signals(pils, gender=gender, marriage_status=marital_status)
         _mar = _risks_in.get("결혼인연", {}).get("점수", 50)
@@ -14477,10 +14485,10 @@ def render_worry_inference(pils, birth_year, gender, marital_status=None):
                     f"• 합(合) 기운 — 배우자궁 완전 활성<br>"
                     f"• 평생 단 한 번 그 인연 — 이 구조가 불러옵니다<br><br>"
                     f"<b>🎯 평생 단 한 번의 그 인연 — 결정적 시기:</b><br>"
-                    f"• 천을귀인 활성: 6월·12월<br>"
-                    f"• 길월: 4·9·11월<br><br>"
+                    f"• 천을귀인 활성: {_gi_mon}<br>"
+                    f"• 길월: {_gw_str}<br><br>"
                     f"<b>💎 행동 지침:</b><br>"
-                    f"6월·12월 — <b>사람 만나는 자리 무조건 가세요. 의무입니다.</b><br>"
+                    f"{_gi_mon} — <b>사람 만나는 자리 무조건 가세요. 의무입니다.</b><br>"
                     f"이 시기 못 잡으면 5년 후회. <b>평생 가는 후회입니다.</b>"
                 )
             _color = "#1a237e"
@@ -14494,7 +14502,7 @@ def render_worry_inference(pils, birth_year, gender, marital_status=None):
                 f"• 큰 결정 보류 (이혼·이사·이직)<br>"
                 f"• 충동적 언행 — 한 번 깨지면 복구 어려움<br><br>"
                 f"<b>💎 해법:</b><br>"
-                f"용신 보강 + 천을귀인 활성월(6·12월) 활용."
+                f"용신 보강 + 천을귀인 활성월({_gi_mon}) 활용."
             )
             _color = "#b71c1c"
         elif _aff >= 50:

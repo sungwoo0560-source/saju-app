@@ -7032,6 +7032,11 @@ def detect_life_risk_signals(pils, saewoon_data=None, gender=None, marriage_stat
     ilgan = pils[1].get("cg", "")
     iljj  = pils[1].get("jj", "")
 
+    _GUIIN_MAP={"甲":["丑","未"],"乙":["子","申"],"丙":["亥","酉"],"丁":["亥","酉"],"戊":["丑","未"],"己":["子","申"],"庚":["丑","未"],"辛":["寅","午"],"壬":["卯","巳"],"癸":["卯","巳"]}
+    _JJ_MON={"子":11,"丑":12,"寅":1,"卯":2,"辰":3,"巳":4,"午":5,"未":6,"申":7,"酉":8,"戌":9,"亥":10}
+    _gi_jj=_GUIIN_MAP.get(ilgan,[])
+    _gi_mon="·".join(f"{_JJ_MON[j]}월" for j in _gi_jj if j in _JJ_MON) or "확인중"
+
     all_cg = [p.get("cg", "") for p in pils]
     all_jj = [p.get("jj", "") for p in pils]
 
@@ -7314,7 +7319,7 @@ def detect_life_risk_signals(pils, saewoon_data=None, gender=None, marriage_stat
         gyeolhon_reasons.append("관인상생 — 격있는 배우자 인연")
     if _is_married:
         if gyeolhon_score >= 60:
-            gyeolhon_level, gyeolhon_msg = "🌟 최상급", "💎 현재 배우자와의 인연이 최상급입니다 — 천을귀인 활성월(6·12월) 관계 더욱 깊어집니다."
+            gyeolhon_level, gyeolhon_msg = "🌟 최상급", f"💎 현재 배우자와의 인연이 최상급입니다 — 천을귀인 활성월({_gi_mon}) 관계 더욱 깊어집니다."
         elif gyeolhon_score >= 40:
             gyeolhon_level, gyeolhon_msg = "✨ 좋음", "✨ 현재 배우자와 인연이 좋습니다 — 정재/정관 운에서 관계 더욱 안정됩니다."
         elif gyeolhon_score >= 20:
@@ -7324,7 +7329,7 @@ def detect_life_risk_signals(pils, saewoon_data=None, gender=None, marriage_stat
     else:
         _spouse = "부인" if _is_male else "남편"
         if gyeolhon_score >= 60:
-            gyeolhon_level, gyeolhon_msg = "🌟 최상급 인연", f"💎 60갑자 중 상위 5% — 평생 단 한 번 그 {_spouse} 인연이 옵니다.\n→ 천을귀인 활성월(6월·12월) — 사람 만나는 자리 의무로 가세요.\n→ 이 시기 못 잡으면 평생 후회입니다."
+            gyeolhon_level, gyeolhon_msg = "🌟 최상급 인연", f"💎 60갑자 중 상위 5% — 평생 단 한 번 그 {_spouse} 인연이 옵니다.\n→ 천을귀인 활성월({_gi_mon}) — 사람 만나는 자리 의무로 가세요.\n→ 이 시기 못 잡으면 평생 후회입니다."
         elif gyeolhon_score >= 40:
             gyeolhon_level, gyeolhon_msg = "✨ 좋음", f"✨ 좋은 {_spouse} 인연 옵니다 — 정재/정관 운에서."
         elif gyeolhon_score >= 20:
@@ -7734,6 +7739,11 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
     gyeok_explain = next((v for k, v in GYEOK_EXPLAIN.items() if k in gyeok_label),
                          "전문 분야에서 두각을 나타낼 수 있는 구조입니다.")
 
+    _GUIIN_MAP={"甲":["丑","未"],"乙":["子","申"],"丙":["亥","酉"],"丁":["亥","酉"],"戊":["丑","未"],"己":["子","申"],"庚":["丑","未"],"辛":["寅","午"],"壬":["卯","巳"],"癸":["卯","巳"]}
+    _JJ_MON={"子":11,"丑":12,"寅":1,"卯":2,"辰":3,"巳":4,"午":5,"未":6,"申":7,"酉":8,"戌":9,"亥":10}
+    _gi_jj=_GUIIN_MAP.get(ilgan,[])
+    _gi_mon="·".join(f"{_JJ_MON[j]}월" for j in _gi_jj if j in _JJ_MON) or "확인중"
+
     SINSAL_EXPLAIN = {
         "역마살": ("이동·변화·해외의 기운", "무역·영업·해외 진출에 유리합니다.<br>→ 충동적 이직·이사는 반드시 신중히. 목적 있는 이동만 허용하세요."),
         "도화살": ("타고난 매력과 예술적 기운", "연예·방송·서비스 분야에서 빛납니다.<br>→ 이성 구설수 조심. 합 운에 인연 넘침 — 기혼자 각별히 주의."),
@@ -7744,7 +7754,7 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
         "장성살": ("타고난 리더십과 통솔력 기운", "군·경·경영·스포츠 등 조직을 이끄는 역할에 적합합니다.<br>→ 혼자보다 팀을 이끌 때 진가 발휘. 리더 역할 적극 수용하세요."),
         "양인살": ("양날의 검 — 추진력 + 사고수", f"<b>⚔️ {name}님 핵심 신살 — 양날의 검.</b><br>→ <b>잘 쓰면</b>: 군·경·외과·검사 — 자기 분야 최강 추진력.<br>→ <b>못 쓰면</b>: 충 운 해에 사고·수술수가 발동합니다. 충 운에 위험 폭발.<br>→ <b>해법</b>: 정기 검진·안전·보험 미리 챙기세요. 이건 선택이 아닙니다."),
         "귀문관살": ("직감·영감이 발달한 기운", "예술·상담·역술 천직 — 직감이 남보다 정확합니다.<br>→ 신경 예민. 불면·우울 주의. 명상·규칙 수면 필수."),
-        "천을귀인": ("위기에 반드시 귀인이 나타나는 기운", f"<b>🌟 {name}님 사주의 최강 보물 — 위기마다 귀인 등장.</b><br>→ <b>활성월: 6월·12월</b> — 매년 두 번 귀인·인연·재물 반드시 나타납니다.<br>→ <b>이 시기 절대 거절 X</b>: 사람·미팅·기회 모두 잡으세요.<br>→ <b>운명이 바뀌는 시기</b>가 이 달입니다."),
+        "천을귀인": ("위기에 반드시 귀인이 나타나는 기운", f"<b>🌟 {name}님 사주의 최강 보물 — 위기마다 귀인 등장.</b><br>→ <b>활성월: {_gi_mon}</b> — 매년 두 번 귀인·인연·재물 반드시 나타납니다.<br>→ <b>이 시기 절대 거절 X</b>: 사람·미팅·기회 모두 잡으세요.<br>→ <b>운명이 바뀌는 시기</b>가 이 달입니다."),
         "문창귀인": ("학문·글·말 능력 최강 신살", f"<b>📚 {name}님 — 글·말 능력 60갑자 중 상위.</b><br>→ <b>직업</b>: 강의·작가·교육·법조·역술 — 무조건 강점입니다.<br>→ <b>표현하는 일 절대 피하지 마세요.</b> 이것이 {name}님 밥줄입니다.<br>→ 콘텐츠·강의·책 — 부수입 가능. 지금 시작하세요."),
         "월덕귀인": ("덕망과 인복 기운", "주변 사람들이 자연스럽게 돕는 귀인 구조입니다.<br>→ 인맥·관계에 투자하세요. 귀인이 결정적 순간에 나타납니다."),
         # Y-21 추가
@@ -8514,6 +8524,11 @@ def calc_all_sinsal_extended(pils):
     iz_key = ilgan + iljj
     wj_jj  = jjs[2] if len(jjs) > 2 else ""
 
+    _GUIIN_MAP={"甲":["丑","未"],"乙":["子","申"],"丙":["亥","酉"],"丁":["亥","酉"],"戊":["丑","未"],"己":["子","申"],"庚":["丑","未"],"辛":["寅","午"],"壬":["卯","巳"],"癸":["卯","巳"]}
+    _JJ_MON={"子":11,"丑":12,"寅":1,"卯":2,"辰":3,"巳":4,"午":5,"未":6,"申":7,"酉":8,"戌":9,"亥":10}
+    _gi_jj=_GUIIN_MAP.get(ilgan,[])
+    _gi_mon="·".join(f"{_JJ_MON[j]}월" for j in _gi_jj if j in _JJ_MON) or "확인중"
+
     results = []
 
     # 1. 홍염살(紅艶煞) — 매력·이성 인연
@@ -8678,7 +8693,7 @@ def calc_all_sinsal_extended(pils):
             "발동": f"{ilgan} 일간 + {'·'.join(_cu_list)}지",
             "결과": "막다른 순간 반드시 누군가 손 내밀어 줍니다. 60갑자 중 상위 10%만 가진 보물.",
             "주의": "복을 당연시 X. 인간관계 절대 소홀히 X.",
-            "활용": "활성월 6월·12월 — 사람·미팅·기회 절대 거절 X. 귀인은 이미 가까이.",
+            "활용": f"활성월 {_gi_mon} — 사람·미팅·기회 절대 거절 X. 귀인은 이미 가까이.",
             "아이콘": "👼",
             "등급": "강력발동",
         })
