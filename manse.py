@@ -4694,6 +4694,61 @@ def classify_narrative_pattern(saju_data, gender, marital_status):
         return "기본형"
 
 
+def _detect_taewang(ilgan, pils):
+    """십성 8글자(천간4+지지본기4) 카운트 기반 태왕 판정.
+    월지(idx 2) 포함 그룹은 3개+, 미포함 그룹은 4개+면 태왕으로 본다."""
+    try:
+        _sp = calc_sipsung(ilgan, pils)
+        _sc = {}
+        for _sv in _sp:
+            for _k in ["cg_ss", "jj_ss"]:
+                _v = _sv.get(_k, "-")
+                if _v and _v != "-":
+                    _sc[_v] = _sc.get(_v, 0) + 1
+
+        _groups = {
+            "비겁": ["比肩(비견)", "劫財(겁재)"],
+            "식상": ["食神(식신)", "傷官(상관)"],
+            "재성": ["偏財(편재)", "正財(정재)"],
+            "관성": ["偏官(편관)", "正官(정관)"],
+            "인성": ["偏印(편인)", "正印(정인)"],
+        }
+
+        _wolji_groups = set()
+        if len(_sp) > 2:
+            for _k in ["cg_ss", "jj_ss"]:
+                _v = _sp[2].get(_k, "-")
+                for _gname, _members in _groups.items():
+                    if _v in _members:
+                        _wolji_groups.add(_gname)
+
+        _MESSAGES = {
+            "비겁": "자아·고집 강함, 군겁쟁재(돈·동료 다툼), 고독·자수성가 경향",
+            "식상": "표현·재능 넘치나 구설·오지랖, 일 벌이고 결정 못함, 관(조직) 거부 경향",
+            "재성": "재물에 끌려다님(재다신약), 욕심이 화 부르는 경향",
+            "인성": "생각·계획 과다로 실행 더딤, 의존·게으름화 경향",
+            "관성": "압박·통제 과다, 건강·관재 주의 경향",
+        }
+
+        _si = get_ilgan_strength(ilgan, pils)
+        _ilgan_weak = bool(_si) and "신약" in _si.get("신강신약", "")
+
+        results = []
+        for _gname, _members in _groups.items():
+            _cnt = sum(_sc.get(m, 0) for m in _members)
+            _in_wolji = _gname in _wolji_groups
+            _is_taewang = (_in_wolji and _cnt >= 3) or (not _in_wolji and _cnt >= 4)
+            if not _is_taewang:
+                continue
+            if _gname == "재성" and not _ilgan_weak:
+                continue
+            results.append((f"{_gname}태왕", _MESSAGES[_gname]))
+
+        return results
+    except Exception:
+        return []
+
+
 def build_dramatic_narrative(pils, name, gender, marital_status, saju_data):
     """사주 패턴 자동 분류 후 소설 스토리텔링 박스 생성"""
     try:
@@ -18571,6 +18626,20 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
 <div style="border-left:4px solid {tag_color};background:#ffffff; padding:11px 16px;border-radius:8px;margin:5px 0; font-size:13px;line-height:1.9;color:#000000;border:1px solid #000000">{trait}</div>""",
                 unsafe_allow_html=True,
             )
+
+        # 십성 太旺(태왕) — 십성 차원 과다 진단 (오행% 과다와 보완 관계)
+        try:
+            _tw = _detect_taewang(ilgan, pils)
+            for _twname, _twdesc in _tw:
+                st.markdown(
+                    f'<div style="border-left:4px solid #c0392b;background:#fdf0ed;'
+                    f'border-radius:8px;padding:10px 14px;margin:6px 0;">'
+                    f'<b style="color:#c0392b;">💢 {_twname}</b><br>'
+                    f'<span style="color:#444;font-size:14px;">{_twdesc}</span></div>',
+                    unsafe_allow_html=True,
+                )
+        except Exception:
+            pass
 
     except Exception as e:
         st.warning(f"성향 계산 오류: {e}")
