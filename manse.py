@@ -15372,11 +15372,11 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
             if _is_married and _ilji_hap and _sw_pyunjae:
                 _danger_signals.append(("💔 남명 외도 실행 위험 — 편재+일지합",
                     "남명 사주에서 편재 세운과 일지합이 동시에 발동했습니다. "
-                    "편재는 본처(정재) 외의 여성, 즉 애인·외도 상대를 의미합니다. "
+                    "편재가 합·세운으로 강하게 동(動)하면 가정 밖 인연에 마음이 흔들릴 수 있는 시기입니다. "
                     "일지합으로 외부 이성이 강하게 당겨지는 구조가 완성됩니다. "
                     "올해 특정 여성과 급격히 가까워지는 상황이 생긴다면 "
                     "그것이 가정을 무너뜨리는 시작점이 될 수 있습니다. "
-                    "편재는 달콤하게 들어와서 정재(본처)와 가정을 흔듭니다. "
+                    "이 시기엔 새 인연이 달콤하게 다가와 기존 관계가 흔들릴 수 있으니 경계가 필요합니다. "
                     "각별히 경계하십시오.", "위험"))
             elif _sw_pyunjae and not _ilji_hap:
                 if _is_married:
