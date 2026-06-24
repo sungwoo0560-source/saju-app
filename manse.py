@@ -13998,6 +13998,20 @@ def tab_jaemul(pils, birth_year, gender="남"):
 
             st.markdown(html, unsafe_allow_html=True)
 
+    try:
+        for _twname, _twdesc in _detect_taewang(pils[1]["cg"], pils):
+            if _twname not in ("비겁태왕", "재성태왕"):
+                continue
+            st.markdown(
+                f'<div style="border-left:4px solid #c0392b;background:#fdf0ed;'
+                f'border-radius:8px;padding:10px 14px;margin:6px 0;">'
+                f'<b style="color:#c0392b;">💢 {_twname}</b><br>'
+                f'<span style="color:#444;font-size:14px;">{_twdesc}</span></div>',
+                unsafe_allow_html=True,
+            )
+    except Exception:
+        pass
+
 
 def tab_career(pils, gender="남"):
 
@@ -24730,6 +24744,20 @@ def menu13_career(pils, name, birth_year, gender):
         """,
             unsafe_allow_html=True,
         )
+
+        try:
+            for _twname, _twdesc in _detect_taewang(ilgan, pils):
+                if _twname not in ("식상태왕", "관성태왕", "인성태왕"):
+                    continue
+                st.markdown(
+                    f'<div style="border-left:4px solid #c0392b;background:#fdf0ed;'
+                    f'border-radius:8px;padding:10px 14px;margin:6px 0;">'
+                    f'<b style="color:#c0392b;">💢 {_twname}</b><br>'
+                    f'<span style="color:#444;font-size:14px;">{_twdesc}</span></div>',
+                    unsafe_allow_html=True,
+                )
+        except Exception:
+            pass
 
     except Exception as e:
         st.error(f"직장운 분석 중 오류 발생: {e}")
