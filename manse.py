@@ -15589,12 +15589,11 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                 _sw_gongmang = _jj_cur in _gongmang
 
                 if _sw_gongmang:
-                    _danger_signals.append(("🌑 올해 공망(空亡) 발동 — 노력이 헛됩니다",
+                    _danger_signals.append(("🌑 올해 공망(空亡) 발동 — 결실보다 비움·정리의 기운",
                         f"올해 세운 지지({_jj_cur})가 일주 공망({_gongmang[0]}·{_gongmang[1]})에 해당합니다. "
-                        f"공망이 발동하면 아무리 열심히 해도 결과가 나오지 않는 해가 됩니다. "
-                        f"투자해도 수익이 안 나고, 노력해도 인정받지 못하고, 계획이 흐지부지됩니다. "
-                        f"올해는 새로운 시작보다 기존 것을 정리하고 내실을 다지는 해입니다. "
-                        f"공망 중에 억지로 밀어붙이면 반드시 손해를 봅니다. 내년을 기약하십시오.", "주의"))
+                        f"공망 발동 해는 눈에 보이는 성과는 더디지만, 내면을 다지고 방향을 재정비하기 좋은 시기입니다. "
+                        f"새로운 시작보다 기존 것을 정리하고 내실을 다지는 해입니다. "
+                        f"큰 결과를 무리하게 밀어붙이기보다, 공부·정리·관계 회복 같은 비물질적 영역에 힘을 쓰면 다음 시기에 빛을 봅니다.", "주의"))
 
                 if _gm_positions and not _sw_gongmang:
                     _gm_pos_str = "·".join(_gm_positions)
@@ -15606,7 +15605,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                     if "시지" in _gm_positions:
                         _gm_detail.append("자녀 인연이 약하거나 말년이 고독한 구조입니다")
                     if _gm_detail:
-                        _danger_signals.append(("🌑 원국 공망 — 평생 조심해야 할 영역",
+                        _danger_signals.append(("🌑 원국 공망 — 기운이 비어 있는 영역(공망궁)",
                             f"{_gm_pos_str}에 공망({_gongmang[0]}·{_gongmang[1]})이 걸려 있습니다. "
                             + " ".join(_gm_detail) + ". "
                             f"공망 자리의 육친에서 기대 이상을 바라면 실망합니다. "
