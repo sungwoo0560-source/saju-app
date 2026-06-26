@@ -7640,6 +7640,9 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
         # 조건 1: 상관 세운 + 기혼 여명
         if _is_married and gender in ("여","女") and _sw_ss_k == "상관":
             _ihon_adj += 25; _ihon_extra.append("상관 세운 — 남편 극하는 기운")
+        # 조건 1-b: 편관 세운 + 기혼 남명 (대칭)
+        if _is_married and gender in ("남","男") and _sw_ss_k == "편관":
+            _ihon_adj += 25; _ihon_extra.append("편관 세운 — 처 극하는 기운")
         # 조건 2: 비겁 세운 + 비겁쟁재 + 기혼
         if _is_married and _sw_ss_k in ("비견","겁재") and "비겁쟁재" in activated:
             _ihon_adj += 20; _ihon_extra.append("비겁쟁재 세운 — 배우자 빼앗김 신호")
