@@ -2900,7 +2900,7 @@ def _local_saju_engine(pils, name, birth_year, gender, query):
                        "正財":"✅ 안정적 부부 기운. 지금은 이혼보다 개선을 시도하는 것이 현명하니라."}
             out.append(f"**{name}의 부부불화·이혼 직격 판단**\n부부 인연의 실타래를 신안으로 살펴보겠습니다.\n")
             if is_iljj_chung:
-                out.append(f"\n🔴 **일지 충(沖) 발동!** 올해 배우자 자리({iljj_d})에 충이 들어옵니다. 이혼·별거 등 강제 변화 기운이 가장 강한 해니라.\n")
+                out.append(f"\n⚡ **일지 충(沖) 발동** — 올해 배우자 자리({iljj_d})에 충이 들어옵니다. 배우자 관계에 변동 기운이 집중되는 해입니다. 충동적 결정은 삼가고 신중히 보세요.\n")
             out.append(f"\n올해 [{sw_ss_d}] — {_DIV_SS.get(sw_ss_d, '중립적 기운이니 성급한 결정은 삼가게.')}\n")
             out.append("\n**[이혼 결정 원칙]**\n- 충 발동 해에 충동적으로 결정하면 후회가 크느니라\n- 자녀가 있다면 정관 세운에서 합의 이혼이 유리하니라\n- 6개월 이상 별거 후 진짜 원하는 것인지 확인하게\n")
 
@@ -5784,9 +5784,9 @@ def build_saju_core_diagnosis(pils, name, birth_year, gender, current_year=None)
                 _loc_txt = yangin_loc[0].replace("주", "지") if yangin_loc else "원국"
                 parts.append(f"{_loc_txt} 양인살({yangin_pos}) — 칼날 같은 추진력. 충 운 해에 사고·수술·이성 충돌수가 발동합니다")
             if internal_chung:
-                parts.append(f"원국 충({internal_chung[0]}) — 원국 자체 충돌 구조. 가족·배우자 관계 마찰 평생")
+                parts.append(f"원국 충({internal_chung[0]}) — 부딪히는 두 기운이 상존하는 구조. 관계에 긴장이 들기 쉬운 만큼, 변화·추진력으로 쓰면 강한 동력이 됩니다")
             if cur_chung_targets:
-                parts.append(f"세운 충({cur_jj}-{cur_chung_targets[0]}) — 올해 충 발동. 이동·수술·이별 주의")
+                parts.append(f"세운 충({cur_jj}-{cur_chung_targets[0]}) — 올해 충 발동. 이동·변화·전환이 잦은 해, 큰 결정은 신중히")
             out.append(f"- 발동 패턴: {' × '.join(parts)}\n")
         else:
             out.append("- 원국 안정 — 큰 충극 패턴 없음\n")
