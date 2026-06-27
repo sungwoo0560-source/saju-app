@@ -8494,8 +8494,36 @@ def _nar_ch3_gyeokguk(ctx):
     return ""
 
 def _nar_ch5_sipsong(ctx):
-    """5장: 십성(十星) 조합 — 당신만의 인생 코드 (SIPSONG_DETAIL 강화)"""
-    return ""
+    """5장: 십성(十星) 조합 — 당신만의 인생 코드 (SIPSUNG_COMBO_LIFE 재사용)"""
+    combos       = ctx.get("combos", [])
+    top_ss       = ctx.get("top_ss", [])
+    display_name = ctx.get("display_name", "내담자")
+
+    if not combos:
+        return ""
+
+    lines = [
+        "",
+        f"    ┌ 제5장 | 십성(十星) 조합 — {display_name}님 인생 코드 ┐",
+        "",
+    ]
+    added = 0
+    for key, combo in combos[:2]:
+        sorted_names = sorted(key, key=lambda x: top_ss.index(x) if x in top_ss else 99)
+        combo_label  = "·".join(sorted_names)
+        summary      = combo.get("요약", "")
+        songhyang    = combo.get("성향", "")
+        if not songhyang:
+            continue
+        lines += [
+            f"  【 {combo_label} 】 {summary}",
+            "",
+            f"  {songhyang}",
+            "",
+        ]
+        added += 1
+
+    return "\n".join(lines) if added else ""
 
 def _nar_ch6_daewoon(ctx):
     """6장: 대운 흐름 + 세운 예측 — 인생의 타임라인 (DAEWOON_INTERP 강화)"""
@@ -10474,8 +10502,9 @@ def _nar_report(ctx):
     # 상세 챕터 분석 (1·8장만 유지 — Y-5 2차 중복 제거)
     try:
         ch1 = _nar_ch1_ilgan(ctx)
+        ch5 = _nar_ch5_sipsong(ctx)
         ch8 = _nar_ch8_flow(ctx)
-        chapter_text = "\n\n".join([ch1, ch8])
+        chapter_text = "\n\n".join(c for c in [ch1, ch5, ch8] if c)
         report += f"""<div style="background:#f9f5e8; border:1px solid #d4af37; border-radius:12px; padding:20px; margin-top:16px; font-size:13px; line-height:1.9; white-space:pre-wrap; color:#333; font-family:'Nanum Gothic',sans-serif;">
 {chapter_text}
 </div>
