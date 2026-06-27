@@ -1673,8 +1673,8 @@ def calc_ohaeng_strength(ilgan, pils):
         matched = len(combo & jjs)
         if matched == 3:
             power[oh] += 15.0   # 삼합 완성
-        elif matched == 2:
-            power[oh] += 7.0    # 반합
+        elif matched == 2 and (combo & jjs & {"子", "午", "卯", "酉"}):
+            power[oh] += 7.0    # 반합(왕지 포함)
 
     for combo, oh in _BANG_HAP.items():
         if combo.issubset(jjs):
