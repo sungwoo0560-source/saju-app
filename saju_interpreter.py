@@ -3407,8 +3407,12 @@ class LocalSajuNarrator:
 
                     chung_target = _JJ_CHUNG_P.get(sw_jj2, "")
                     has_chung    = bool(chung_target) and chung_target in _orig_jjs
+                    _WANGJI_P    = {"子", "午", "卯", "酉"}
                     hap_partners = _SAM_HAP_P.get(sw_jj2, ())
-                    has_hap      = bool(hap_partners) and any(j in _orig_jjs for j in hap_partners)
+                    if sw_jj2 in _WANGJI_P:
+                        has_hap  = bool(hap_partners) and any(j in _orig_jjs for j in hap_partners)
+                    else:
+                        has_hap  = bool(hap_partners) and any(j in _WANGJI_P and j in _orig_jjs for j in hap_partners)
 
                     age_yr = yr - birth_year + 1
                     _chung_oh2 = OH.get(chung_target, "")

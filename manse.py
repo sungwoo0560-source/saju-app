@@ -5162,10 +5162,10 @@ def build_yearly_relationship_story(pils, name, gender, current_year):
                  frozenset({"辰","酉"}),frozenset({"巳","申"}),frozenset({"午","未"})]
         _CM6  = {"子":"午","午":"子","丑":"未","未":"丑","寅":"申","申":"寅",
                  "卯":"酉","酉":"卯","辰":"戌","戌":"辰","巳":"亥","亥":"巳"}
-        _BH   = [frozenset({"申","子"}),frozenset({"子","辰"}),frozenset({"申","辰"}),
-                 frozenset({"亥","卯"}),frozenset({"卯","未"}),frozenset({"亥","未"}),
-                 frozenset({"寅","午"}),frozenset({"午","戌"}),frozenset({"寅","戌"}),
-                 frozenset({"巳","酉"}),frozenset({"酉","丑"}),frozenset({"巳","丑"})]
+        _BH   = [frozenset({"申","子"}),frozenset({"子","辰"}),
+                 frozenset({"亥","卯"}),frozenset({"卯","未"}),
+                 frozenset({"寅","午"}),frozenset({"午","戌"}),
+                 frozenset({"巳","酉"}),frozenset({"酉","丑"})]
         _HY  = {"甲":"午","乙":"申","丙":"寅","丁":"未",
                 "戊":"辰","己":"辰","庚":"戌","辛":"酉","壬":"子","癸":"申"}
         _DM  = {"寅":"卯","午":"卯","戌":"卯","申":"酉","子":"酉","辰":"酉",
@@ -9621,15 +9621,14 @@ def _get_dw_alert(ilgan, dw_cg, dw_jj, pils):
                     }
                 )
 
+    _WANGJI_A = {"子", "午", "卯", "酉"}
     for combo, (hname, hoh, hdesc) in SAM_HAP_MAP.items():
         if dw_jj in combo:
-            orig_in = []
+            orig_in = [f"{labels[i]}({p['jj']})" for i, p in enumerate(pils) if p["jj"] in combo]
+            _orig_uniq = combo & {p["jj"] for p in pils}
+            _all_present = _orig_uniq | {dw_jj}
 
-            for i, p in enumerate(pils):
-                if p["jj"] in combo:
-                    orig_in.append(f"{labels[i]}({p['jj']})")
-
-            if len(orig_in) >= 2:
+            if _all_present == combo:  # 3글자 모두 있음 → 진짜 삼합
                 alerts.append(
                     {
                         "type": "🌟 삼합 성립",
@@ -9638,14 +9637,16 @@ def _get_dw_alert(ilgan, dw_cg, dw_jj, pils):
                     }
                 )
 
-            elif len(orig_in) == 1:
-                alerts.append(
-                    {
-                        "type": "💫 반합",
-                        "color": "#2980b9",
-                        "desc": f"대운 {dw_jj} + 원국 {orig_in[0]} 반합 - 부분적 기운 변화",
-                    }
-                )
+            elif len(_orig_uniq) == 1:  # 나머지 1글자만 원국에 있음 → 반합 후보
+                _partner = next(iter(_orig_uniq))
+                if frozenset({dw_jj, _partner}) & _WANGJI_A:  # 왕지 포함 = 진짜 반합
+                    alerts.append(
+                        {
+                            "type": "💫 반합",
+                            "color": "#2980b9",
+                            "desc": f"대운 {dw_jj} + 원국 {orig_in[0]} 반합 - 부분적 기운 변화",
+                        }
+                    )
 
     return alerts
 
@@ -16456,24 +16457,27 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
             for _sh_group, _sh_oh in _SAM_HAP:
                 if _세운_jj2 not in _sh_group:
                     continue
-                _원국_교집합 = _sh_group & _원국_jj_set
                 _나머지 = _sh_group - {_세운_jj2}
-                if len(_원국_교집합) >= 2:  # 삼합 완성
-                    _완성멤버 = sorted(_원국_교집합 | {_세운_jj2})
+                _나머지_교집합 = _나머지 & _원국_jj_set
+                _WANGJI_SW = {"子", "午", "卯", "酉"}
+                if _나머지_교집합 == _나머지:  # 나머지 2글자 모두 원국에 있음 → 삼합 완성
+                    _완성멤버 = sorted(_sh_group)
                     _danger_signals.append((
                         f"🌀 세운 포함 삼합 완성({'/'.join(_완성멤버)}) → {_sh_oh}기운 폭발",
                         f"{'·'.join(_완성멤버)} 삼합이 세운에서 완성됩니다. "
                         f"{_sh_oh} 오행 기운이 급격히 강화되어 관련 육친·사건이 폭발적으로 부각됩니다. "
                         f"{'재성 폭증 → 재물 or 이성 집착' if _sh_oh in ('金','木') else '관성 폭증 → 권력·직장 급변' if _sh_oh == '水' else '비겁 과다 → 지출·경쟁 급증' if _sh_oh == '火' else '인성 폭증 → 학업·이사·부동산 변동'}",
                         "위험"))
-                elif _세운_jj2 in _sh_group and len(_원국_교집합) == 1:  # 반합
-                    _반합멤버 = sorted(_원국_교집합 | {_세운_jj2})
-                    _danger_signals.append((
-                        f"⚡ 세운 포함 반합({'/'.join(_반합멤버)}) — {_sh_oh} 기운 부분 활성화",
-                        f"{'·'.join(_반합멤버)} 반합이 형성됩니다. "
-                        f"삼합의 절반이 이루어져 {_sh_oh} 기운이 어느 정도 강화됩니다. "
-                        f"완전한 삼합보다는 약하지만 해당 오행 관련 사건이 올해 드러날 수 있습니다.",
-                        "주의"))
+                elif len(_나머지_교집합) == 1:  # 나머지 1글자만 원국에 있음 → 반합 후보
+                    _반합_partner = next(iter(_나머지_교집합))
+                    if frozenset({_세운_jj2, _반합_partner}) & _WANGJI_SW:  # 왕지 포함 = 진짜 반합
+                        _반합멤버 = sorted({_세운_jj2, _반합_partner})
+                        _danger_signals.append((
+                            f"⚡ 세운 포함 반합({'/'.join(_반합멤버)}) — {_sh_oh} 기운 부분 활성화",
+                            f"{'·'.join(_반합멤버)} 반합이 형성됩니다. "
+                            f"삼합의 절반이 이루어져 {_sh_oh} 기운이 어느 정도 강화됩니다. "
+                            f"완전한 삼합보다는 약하지만 해당 오행 관련 사건이 올해 드러날 수 있습니다.",
+                            "주의"))
 
             # ── 파(破) 체크 ──
             if _세운_jj2 in _PA_MAP:
@@ -20550,10 +20554,12 @@ def menu6_relations(pils, name, birth_year, gender, marriage_status="미혼"):
         _has_iljj_chung = _ILJJ_CHUNG.get(_my_iljj,"") == _p_iljj
         _iljj_pair = frozenset([_my_iljj, _p_iljj])
         _has_yook_hap = _iljj_pair in _YOOK_HAP_G
+        _WANGJI_G = {"子", "午", "卯", "酉"}
         _sam_hap_name = ""
         for _sh_set, _sh_name in _SAM_HAP_G.items():
             if _my_iljj in _sh_set and _p_iljj in _sh_set:
-                _sam_hap_name = _sh_name
+                if frozenset({_my_iljj, _p_iljj}) & _WANGJI_G:  # 왕지 포함 쌍만 반합/삼합 인정
+                    _sam_hap_name = _sh_name
                 break
 
         # 궁합 점수 계산
