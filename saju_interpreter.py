@@ -8530,8 +8530,216 @@ def _nar_ch5_sipsong(ctx):
     return "\n".join(lines) if added else ""
 
 def _nar_ch6_daewoon(ctx):
-    """6장: 대운 흐름 + 세운 예측 — 인생의 타임라인 (DAEWOON_INTERP 강화)"""
-    return ""
+    """6장: 대운 흐름 — 인생의 시간 이야기 (강사식 3구간 스토리)"""
+    try:
+        daewoon  = ctx.get("daewoon", [])
+        cur_dw   = ctx.get("cur_dw", None)
+        yong     = ctx.get("yongshin_ohs", [])
+        gisin    = ctx.get("gisin_ohs", [])
+        ilgan    = ctx.get("ilgan", "")
+        cur_year = ctx.get("current_year", 2026)
+        name     = ctx.get("display_name", "내담자")
+
+        if not daewoon or not ilgan:
+            return ""
+
+        cur_idx = next(
+            (i for i, d in enumerate(daewoon)
+             if d.get("시작연도", 0) <= cur_year <= d.get("종료연도", 9999)),
+            None,
+        )
+        if cur_idx is None:
+            return ""
+
+        # ── 상수 ──
+        OH_KR = {"木":"목(木)","火":"화(火)","土":"토(土)","金":"금(金)","水":"수(水)"}
+        UNSUNG_META = {
+            "장생":"어린나무처럼 싹트는 시기",  "목욕":"치장하며 세상에 나서는 시기",
+            "관대":"출근 첫날처럼 각오를 다지는 시기",  "건록":"한창 일하고 벌이는 시기",
+            "제왕":"절정, 책임이 가장 무거운 시기",  "쇠":"지혜로 이끄는 원로의 시기",
+            "병":"몸이 쉬어가며 내면을 돌아보는 시기",  "사":"조용히 정리하는 사색의 시기",
+            "묘":"씨앗을 저장하며 다음을 준비하는 시기",  "절":"절망 속에서 희망을 잉태하는 시기",
+            "태":"새 생명을 잉태하는 시기",  "양":"태중에서 보호받으며 자라는 시기",
+        }
+        CHUNEUL = {
+            "甲":["丑","未"], "乙":["子","申"], "丙":["亥","酉"], "丁":["亥","酉"],
+            "戊":["丑","未"], "己":["子","申"], "庚":["丑","未"], "辛":["寅","午"],
+            "壬":["卯","巳"], "癸":["卯","巳"],
+        }
+        _SS_KR = {
+            "食神":"식신","傷官":"상관","偏財":"편재","正財":"정재",
+            "偏官":"편관","正官":"정관","偏印":"편인","正印":"정인",
+            "比肩":"비견","劫財":"겁재",
+        }
+
+        # ── 헬퍼 ──
+        def dw_oh(d):
+            return OH.get(d.get("cg",""), ""), OH.get(d.get("jj",""), "")
+
+        def dw_kind(d):
+            c, j = dw_oh(d)
+            if c in yong or j in yong:
+                return "용신"
+            if c in gisin or j in gisin:
+                return "기신"
+            return "중립"
+
+        def dw_unsung(d):
+            try:
+                jj = d.get("jj","")
+                ik = f"{ilgan}({CG_KR[CG.index(ilgan)]})" if ilgan in CG else ilgan
+                jk = f"{jj}({JJ_KR[JJ.index(jj)]})" if jj in JJ else jj
+                t  = UNSUNG_TABLE.get(ik, UNSUNG_TABLE.get(ilgan, {}))
+                return t.get(jk, t.get(jj, ""))
+            except Exception:
+                return ""
+
+        def dw_ss(d):
+            raw = TEN_GODS_MATRIX.get(ilgan, {}).get(d.get("cg",""), "")
+            hanja = raw.split("(")[0] if "(" in raw else raw
+            return _SS_KR.get(hanja, raw)
+
+        def age_range(d):
+            s = d.get("시작나이", "?")
+            e = (s + 9) if isinstance(s, int) else "?"
+            return s, e
+
+        def dw_label(d):
+            return d.get("str", d.get("cg","") + d.get("jj",""))
+
+        # ── 단락 1: 전체 흐름 도입 ──
+        first_dw  = daewoon[0]
+        first_oh  = OH_KR.get(OH.get(first_dw.get("cg",""), ""), "")
+        yong_kr   = " · ".join(OH_KR.get(o, o) for o in yong) if yong else "—"
+        gisin_kr  = " · ".join(OH_KR.get(o, o) for o in gisin) if gisin else "—"
+        total_dws = len(daewoon)
+        last_dw   = daewoon[-1]
+        last_oh   = OH_KR.get(OH.get(last_dw.get("cg",""), ""), "")
+
+        para1 = (
+            f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+            f"⏳ 3장. 대운(大運) — 인생의 타임라인\n"
+            f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"{name}의 대운은 {first_oh}({dw_label(first_dw)})에서 출발해 "
+            f"{last_oh}({dw_label(last_dw)})까지 {total_dws}개 대운이 펼쳐집니다.\n"
+            f"용신 오행 {yong_kr}이 흐르는 대운은 '벌이고 드러내는 시기', "
+            + (f"기신 오행 {gisin_kr}이 흐르는 대운은 '다지고 버티는 시기'로 읽습니다." if gisin else "나머지 대운은 내실을 다지며 균형을 잡는 시기로 읽습니다.")
+        )
+
+        # ── 단락 2: 과거 대운 ──
+        past_dws = daewoon[:cur_idx]
+        if past_dws:
+            lines = []
+            yong_cnt = gisin_cnt = 0
+            for d in past_dws:
+                kind  = dw_kind(d)
+                lbl   = dw_label(d)
+                s, e  = age_range(d)
+                uns   = dw_unsung(d)
+                um    = UNSUNG_META.get(uns, "")
+                if kind == "용신":
+                    mark  = "▶ 용신운"
+                    tone  = "벌이고 드러낼 수 있던 시기"
+                    yong_cnt += 1
+                elif kind == "기신":
+                    mark  = "◀ 기신운"
+                    tone  = "묻혀 다지던 시기"
+                    gisin_cnt += 1
+                else:
+                    mark  = "○ 중립"
+                    tone  = "차근차근 쌓아가던 시기"
+                ln = f"  {mark} {lbl}대운({s}~{e}세)"
+                if uns and um:
+                    ln += f" — {uns}({um})"
+                ln += f" → {tone}"
+                lines.append(ln)
+
+            if yong_cnt > gisin_cnt:
+                summary = "초·중년에 기회가 일찍 찾아온 사주입니다. 그 흐름을 얼마나 붙잡았느냐가 갈림길이었습니다."
+            elif gisin_cnt > yong_cnt:
+                summary = "초·중년이 다지는 시기 위주였습니다. 묻혀 기다린 만큼 이후의 대운이 더 중요합니다."
+            else:
+                summary = "용신과 기신이 고루 교차한 과거입니다. 오르내림 속에서 단단해진 사람입니다."
+
+            para2 = "[과거 대운 흐름]\n" + "\n".join(lines) + f"\n→ {summary}"
+        else:
+            para2 = "[과거 대운]\n  아직 첫 대운 전 시기입니다. 앞으로의 대운이 전부입니다."
+
+        # ── 단락 3: 현재 대운 ──
+        cd      = cur_dw or daewoon[cur_idx]
+        lbl     = dw_label(cd)
+        s, e    = age_range(cd)
+        kind    = dw_kind(cd)
+        uns     = dw_unsung(cd)
+        um      = UNSUNG_META.get(uns, "")
+        ss      = dw_ss(cd)
+        cg_oh, jj_oh = dw_oh(cd)
+
+        if kind == "용신":
+            tone = "숨통이 트이는 자리입니다. 막혔던 기운이 흐르기 시작합니다 — 지금은 벌이고 드러내야 할 때입니다."
+        elif kind == "기신":
+            tone = "다지며 버티는 자리입니다. 성급하게 벌이기보다 실속을 챙기고 내실을 쌓는 시기입니다."
+        else:
+            tone = "중립 대운입니다. 크게 치우치지 않고 꾸준히 흐르는 시기입니다."
+
+        para3 = f"[지금 이 대운 — {lbl}대운({s}~{e}세)]\n"
+        detail = []
+        if ss:   detail.append(f"천간 십성: {ss}")
+        if uns and um: detail.append(f"지지 12운성: {uns}({um})")
+        if detail: para3 += "  " + " | ".join(detail) + "\n"
+        para3 += f"  → {tone}"
+
+        # 천을귀인 체크
+        if cd.get("jj","") in CHUNEUL.get(ilgan, []):
+            para3 += f"\n  ★ 이 대운 지지({cd['jj']})가 {ilgan}일간의 천을귀인 자리 — 뜻밖의 귀인과 기회가 따르는 운입니다."
+
+        # DAEWOON_INTERP 해석
+        for key in [cd.get("cg",""), cd.get("jj","")]:
+            interp = DAEWOON_INTERP.get(key, "")
+            if interp:
+                para3 += f"\n  ✦ {interp}"
+
+        # ── 단락 4: 미래 대운 ──
+        future_dws = daewoon[cur_idx+1:]
+        if future_dws:
+            lines = []
+            golden = []
+            for d in future_dws[:5]:
+                kind  = dw_kind(d)
+                lbl   = dw_label(d)
+                s, e  = age_range(d)
+                uns   = dw_unsung(d)
+                um    = UNSUNG_META.get(uns, "")
+                if kind == "용신":
+                    mark  = "▶ 용신운"
+                    tone  = "기다려온 방향 — 벌이고 드러낼 시기"
+                    golden.append(f"{lbl}({s}세~)")
+                elif kind == "기신":
+                    mark  = "◀ 기신운"
+                    tone  = "내실을 다질 시기 — 조급하지 말고 쌓아야"
+                else:
+                    mark  = "○ 중립"
+                    tone  = "안정적으로 흐르는 시기"
+                ln = f"  {mark} {lbl}대운({s}~{e}세)"
+                if uns and um:
+                    ln += f" — {uns}({um})"
+                ln += f" → {tone}"
+                lines.append(ln)
+
+            if golden:
+                future_summary = f"앞으로 {'·'.join(golden)} 등 용신 대운이 예정되어 있습니다. 지금 준비한 것이 그때 꽃핍니다."
+            else:
+                future_summary = "당분간 기신·중립 대운이 이어집니다. 조급하지 않고 내실을 다지는 것이 최선입니다."
+
+            para4 = "[앞으로의 대운]\n" + "\n".join(lines) + f"\n→ {future_summary}"
+        else:
+            para4 = "[앞으로의 대운]\n  이후 대운 정보가 없습니다."
+
+        return "\n\n".join([para1, para2, para3, para4])
+
+    except Exception as _e:
+        _saju_log.warning("[_nar_ch6_daewoon 오류] %s", _e)
+        return ""
 
 def _nar_ch7_health(ctx):
     """7장: 건강운 — 오행 불균형 진단 (get_health_reading 강화)"""
@@ -10715,8 +10923,9 @@ def _nar_report(ctx):
         intro = _nar_intro_scene(ctx)
         ch1 = _nar_ch1_ilgan(ctx)
         ch5 = _nar_ch5_sipsong(ctx)
+        ch6 = _nar_ch6_daewoon(ctx)
         ch8 = _nar_ch8_flow(ctx)
-        chapter_text = "\n\n".join(c for c in [intro, ch1, ch5, ch8] if c)
+        chapter_text = "\n\n".join(c for c in [intro, ch1, ch5, ch6, ch8] if c)
         report += f"""<div style="background:#f9f5e8; border:1px solid #d4af37; border-radius:12px; padding:20px; margin-top:16px; font-size:13px; line-height:1.9; white-space:pre-wrap; color:#333; font-family:'Nanum Gothic',sans-serif;">
 {chapter_text}
 </div>
