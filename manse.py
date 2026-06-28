@@ -9577,7 +9577,7 @@ def get_daewoon_narrative(d_ss_cg, d_ss_jj, dw_str, age_start):
     return icon, title, full_text
 
 
-def _get_dw_alert(ilgan, dw_cg, dw_jj, pils):
+def _get_dw_alert(ilgan, dw_cg, dw_jj, pils, sw_jj=""):
     """대운이 원국과 충/합을 일으키는지 감지"""
 
     alerts = []
@@ -9629,11 +9629,17 @@ def _get_dw_alert(ilgan, dw_cg, dw_jj, pils):
             _all_present = _orig_uniq | {dw_jj}
 
             if _all_present == combo:  # 3글자 모두 있음 → 진짜 삼합
+                _wj_p2 = next(iter(combo & _WANGJI_A), "")
+                _w_note = (
+                    f" 단, 왕지 {_wj_p2}가 세운 {sw_jj}의 충을 맞아 기운이 다소 약화될 수 있음."
+                    if _wj_p2 and sw_jj and frozenset({_wj_p2, sw_jj}) in CHUNG_MAP
+                    else ""
+                )
                 alerts.append(
                     {
                         "type": "🌟 삼합 성립",
                         "color": "#8e44ad",
-                        "desc": f"대운 {dw_jj} + 원국 {','.join(orig_in)} = {hname} - 강력한 발복",
+                        "desc": f"대운 {dw_jj} + 원국 {','.join(orig_in)} = {hname} - 강력한 발복{_w_note}",
                     }
                 )
 
@@ -10188,6 +10194,7 @@ def tab_daewoon(pils, birth_year, gender):
     )
 
     current_year = datetime.now().year
+    _cur_sw_jj = (get_yearly_luck(pils, current_year) or {}).get("jj", "")
 
     ilgan = pils[1]["cg"]
 
@@ -10279,7 +10286,7 @@ def tab_daewoon(pils, birth_year, gender):
         else:
             _dw_grade = "중립"; is_yong = False
 
-        alerts = _get_dw_alert(ilgan, dw["cg"], dw["jj"], pils)
+        alerts = _get_dw_alert(ilgan, dw["cg"], dw["jj"], pils, sw_jj=_cur_sw_jj if is_current else "")
 
         icon, title, narrative_raw = get_daewoon_narrative(d_ss_cg, d_ss_jj, dw["str"], dw["시작나이"])
 
@@ -16416,6 +16423,13 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
             _JJ_LBL2 = ["시지","일지","월지","년지"]
             _jj_vals2 = [p.get("jj","") for p in pils]  # [시지,일지,월지,년지]
             _세운_jj2 = _yl.get("jj","")
+            try:
+                _dl2_p2 = SajuCoreEngine.get_daewoon(pils, birth_year,
+                    st.session_state.get("birth_month",1), st.session_state.get("birth_day",1),
+                    12, 0, gender=gender)
+                _dw_jj_p2 = next((d["jj"] for d in _dl2_p2 if d["시작연도"] <= cur_year <= d["종료연도"]), "")
+            except Exception:
+                _dw_jj_p2 = ""
 
             # ── 육합 체크 ──
             for _idx2, (_jj2, _lb2) in enumerate(zip(_jj_vals2, _JJ_LBL2)):
@@ -16465,11 +16479,18 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                 _WANGJI_SW = {"子", "午", "卯", "酉"}
                 if _나머지_교집합 == _나머지:  # 나머지 2글자 모두 원국에 있음 → 삼합 완성
                     _완성멤버 = sorted(_sh_group)
+                    _wj_sw = next(iter(_sh_group & _WANGJI_SW), "")
+                    _sw_w_note = (
+                        f" 단, 왕지 {_wj_sw}가 대운 {_dw_jj_p2}의 충을 맞아 기운이 다소 약화될 수 있음."
+                        if _wj_sw and _dw_jj_p2 and frozenset({_wj_sw, _dw_jj_p2}) in CHUNG_MAP
+                        else ""
+                    )
                     _danger_signals.append((
                         f"🌀 세운 포함 삼합 완성({'/'.join(_완성멤버)}) → {_sh_oh}기운 폭발",
                         f"{'·'.join(_완성멤버)} 삼합이 세운에서 완성됩니다. "
                         f"{_sh_oh} 오행 기운이 급격히 강화되어 관련 육친·사건이 폭발적으로 부각됩니다. "
-                        f"{'재성 폭증 → 재물 or 이성 집착' if _sh_oh in ('金','木') else '관성 폭증 → 권력·직장 급변' if _sh_oh == '水' else '비겁 과다 → 지출·경쟁 급증' if _sh_oh == '火' else '인성 폭증 → 학업·이사·부동산 변동'}",
+                        f"{'재성 폭증 → 재물 or 이성 집착' if _sh_oh in ('金','木') else '관성 폭증 → 권력·직장 급변' if _sh_oh == '水' else '비겁 과다 → 지출·경쟁 급증' if _sh_oh == '火' else '인성 폭증 → 학업·이사·부동산 변동'}"
+                        f"{_sw_w_note}",
                         "위험"))
                 elif len(_나머지_교집합) == 1:  # 나머지 1글자만 원국에 있음 → 반합 후보
                     _반합_partner = next(iter(_나머지_교집합))
