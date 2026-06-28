@@ -9688,8 +9688,11 @@ def _get_hap_break_warning(pils, dw_jj, sw_jj):
 
     for combo, (hname, hoh, hdesc) in SAM_HAP_MAP.items():
         orig_indices = [i for i, p in enumerate(pils) if p["jj"] in combo]
+        _orig_uniq_hb = combo & {p["jj"] for p in pils}
+        _WANGJI_HB = {"子", "午", "卯", "酉"}
+        _is_real_hap = (len(_orig_uniq_hb) == 3) or (len(_orig_uniq_hb) == 2 and bool(_orig_uniq_hb & _WANGJI_HB))
 
-        if len(orig_indices) >= 2:
+        if _is_real_hap:
             orig_desc = ",".join([f"{labels[i]}({pils[i]['jj']})" for i in orig_indices])
 
             for breaker in [dw_jj, sw_jj]:
