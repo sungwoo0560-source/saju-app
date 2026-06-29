@@ -19939,6 +19939,54 @@ def menu5_money(pils, birth_year, gender, name="내담자"):
         unsafe_allow_html=True,
     )
 
+    # ☀️ 조후(調候) — 재물을 여는 계절 균형
+    try:
+        _조후_need_m  = ys.get("조후_need", [])
+        _조후_avoid_m = ys.get("조후_avoid", [])
+        _조후_우선_m  = ys.get("조후_우선", False)
+        _TEMP_SC_M = {
+            "寅":1,"卯":2,"辰":1,"巳":3,"午":5,"未":4,
+            "申":-1,"酉":-2,"戌":-1,"亥":-3,"子":-5,"丑":-4,
+        }
+        _OH_TEMP_M = {"木":1,"火":3,"土":0,"金":-1,"水":-3}
+        _월지_m = pils[2].get("jj","") if len(pils)>2 else ""
+        _tt_m = _TEMP_SC_M.get(_월지_m, 0)
+        for _pm in pils:
+            _tt_m += _OH_TEMP_M.get(_OH_CG.get(_pm.get("cg",""),""), 0)
+            _tt_m += _OH_TEMP_M.get(_OH_JJ.get(_pm.get("jj",""),""), 0)
+        _조후_str_m = "·".join(_조후_need_m) if _조후_need_m else ""
+        _우선_prefix_m = "조후(계절 균형)가 억부 용신보다 우선한다. " if _조후_우선_m else ""
+        if _tt_m >= 10:
+            _조후_msg_m = (f"{_우선_prefix_m}원국이 불덩이처럼 뜨겁다. "
+                          f"재물 불씨는 크나 水·金 없으면 번쩍이다 꺼진다. "
+                          f"壬·癸·庚·辛 대운·세운이 진짜 돈 들어오는 시기 — 이때 집중 행동.")
+        elif _tt_m >= 6:
+            _조후_msg_m = (f"{_우선_prefix_m}열기 있는 사주. "
+                          f"水 기운 대운에 재물이 안정적으로 쌓인다.")
+        elif _tt_m <= -10:
+            _조후_msg_m = (f"{_우선_prefix_m}원국이 얼어붙어 있다. "
+                          f"丙·丁·甲·乙 대운·세운이 재물 해동기. "
+                          f"추운 땅에 씨 뿌리면 썩는다 — 시기를 골라야.")
+        elif _tt_m <= -6:
+            _조후_msg_m = (f"{_우선_prefix_m}서늘한 사주. "
+                          f"火·木 기운 대운에 활기와 재물이 살아난다.")
+        else:
+            _조후_msg_m = (f"{_우선_prefix_m}온도 균형 잡힌 사주. "
+                          f"조후보다 용신 흐름이 재물을 결정한다.")
+        _조후_suffix_m = f" [조후 필요 기운: {_조후_str_m}]" if _조후_str_m else ""
+        st.markdown(
+            f"<div style='background:linear-gradient(145deg,#f0f4ff,#e8eeff);"
+            f"border:1px solid #7a9fd4;border-radius:14px;padding:16px 20px;margin:10px 0'>"
+            f"<div style='font-size:13px;font-weight:700;color:#2c4a7a;margin-bottom:6px'>"
+            f"☀️ 조후(調候) — 재물을 여는 계절 균형 "
+            f"<span style='font-size:11px;font-weight:400;color:#5a7a9a'>(온도지수 {_tt_m:+d})</span></div>"
+            f"<div style='font-size:14px;color:#2d3d5a;line-height:1.9'>{_조후_msg_m}{_조후_suffix_m}</div>"
+            f"</div>",
+            unsafe_allow_html=True,
+        )
+    except Exception:
+        pass
+
     # ② 직업 적성 정밀 분석
     st.markdown('<div class="gold-section">💼 ② 직업 적성 정밀 분석</div>', unsafe_allow_html=True)
     _jikup = ilp.get("직업", "")
