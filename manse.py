@@ -4759,7 +4759,15 @@ def build_dramatic_narrative(pils, name, gender, marital_status, saju_data):
         _JJ12 = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"]
         sw_cg   = _CG10[(cur_year - 4) % 10]
         sw_jj   = _JJ12[(cur_year - 4) % 12]
-        zodiac  = ZODIAC_BY_JIJI.get(sw_jj, "")
+        _ilgan_d = pils[1].get("cg","") if len(pils)>1 else saju_data.get("ilgan","")
+        _HY_ZOD_D = {"甲":"午","乙":"申","丙":"寅","丁":"未",
+                     "戊":"辰","己":"辰","庚":"戌","辛":"酉","壬":"子","癸":"申"}
+        _PCG_F_D  = {"甲":"辛","乙":"庚","丙":"癸","丁":"壬",
+                     "戊":"乙","己":"甲","庚":"丁","辛":"丙","壬":"己","癸":"戊"}
+        _PCG_M_D  = {"甲":"己","乙":"戊","丙":"辛","丁":"庚",
+                     "戊":"癸","己":"壬","庚":"乙","辛":"甲","壬":"丁","癸":"丙"}
+        zodiac  = ZODIAC_BY_JIJI.get(_HY_ZOD_D.get(_ilgan_d, sw_jj), "")
+        _pcg_d  = (_PCG_F_D if gender in ("여","女") else _PCG_M_D).get(_ilgan_d, sw_cg)
         intent  = resolve_sipsung_intent(SIPSUNG_INTENT.get(saju_data.get("sewoon_sipsung",""), ""), gender)
         tmpl    = NARRATIVE_TEMPLATES.get(pattern, NARRATIVE_TEMPLATES["기본형"])
         _is_m   = (gender == "남")
@@ -4767,7 +4775,7 @@ def build_dramatic_narrative(pils, name, gender, marital_status, saju_data):
         _dest    = "더 능력 있고 잘난 남자에게" if _is_m else "더 예쁘고 돈 많은 여자에게"
         narrative = tmpl.format(
             name=name, year=cur_year, zodiac=zodiac,
-            person=INCOMING_PERSON_MAP.get(sw_cg,""),
+            person=INCOMING_PERSON_MAP.get(_pcg_d,""),
             intent_text=f"십성: {saju_data.get('sewoon_sipsung','')} — {intent}" if intent else "",
             partner=_partner, dest=_dest,
         )
@@ -5154,8 +5162,16 @@ def build_yearly_relationship_story(pils, name, gender, current_year):
         _ss_m   = _re6j.search(r'\(([^)]+)\)', _ss_raw)
         ss      = _ss_m.group(1) if _ss_m else (_ss_raw or "미상")
 
-        person = INCOMING_PERSON_MAP.get(sw_cg, "알 수 없는 기운의 사람")
-        zodiac = ZODIAC_BY_JIJI.get(sw_jj, "")
+        _HY_ZOD = {"甲":"午","乙":"申","丙":"寅","丁":"未",
+                   "戊":"辰","己":"辰","庚":"戌","辛":"酉","壬":"子","癸":"申"}
+        _PCG_F  = {"甲":"辛","乙":"庚","丙":"癸","丁":"壬",
+                   "戊":"乙","己":"甲","庚":"丁","辛":"丙","壬":"己","癸":"戊"}
+        _PCG_M  = {"甲":"己","乙":"戊","丙":"辛","丁":"庚",
+                   "戊":"癸","己":"壬","庚":"乙","辛":"甲","壬":"丁","癸":"丙"}
+        _hy_jj  = _HY_ZOD.get(ilgan, sw_jj)
+        _pcg    = (_PCG_F if gender in ("여","女") else _PCG_M).get(ilgan, sw_cg)
+        zodiac  = ZODIAC_BY_JIJI.get(_hy_jj, "")
+        person  = INCOMING_PERSON_MAP.get(_pcg, "알 수 없는 기운의 사람")
 
         # 합/충/반합/홍염/도화
         _HAP6 = [frozenset({"子","丑"}),frozenset({"寅","亥"}),frozenset({"卯","戌"}),
@@ -9645,7 +9661,7 @@ def _get_dw_alert(ilgan, dw_cg, dw_jj, pils, sw_jj=""):
 
             elif len(_orig_uniq) == 1:  # 나머지 1글자만 원국에 있음 → 반합 후보
                 _partner = next(iter(_orig_uniq))
-                if frozenset({dw_jj, _partner}) & _WANGJI_A:  # 왕지 포함 = 진짜 반합
+                if _partner != dw_jj and frozenset({dw_jj, _partner}) & _WANGJI_A:  # 다른글자+왕지 포함 = 진짜 반합
                     alerts.append(
                         {
                             "type": "💫 반합",
@@ -19513,10 +19529,6 @@ def menu4_future3(
 
         is_yong_sw = _get_yongshin_match(sw_ss, yongshin_ohs, ilgan_oh) == "yong"
 
-        # 합깨짐 경고
-
-        hap_warn = _get_hap_break_warning(pils, dw["jj"] if dw else "", sw.get("jj",""))
-
         _m4_sw_oh = sw.get("오행_천간","")
         _m4_gh = (
             "길(吉)" if _m4_sw_oh and _m4_sw_oh in yongshin_ohs
@@ -19535,7 +19547,6 @@ def menu4_future3(
                 "is_yong_dw": is_yong_dw,
                 "is_yong_sw": is_yong_sw,
                 "domains": domains,
-                "hap_warn": hap_warn,
                 "gilhyung": _m4_gh,
             }
         )
@@ -20581,7 +20592,7 @@ def menu6_relations(pils, name, birth_year, gender, marriage_status="미혼"):
         _WANGJI_G = {"子", "午", "卯", "酉"}
         _sam_hap_name = ""
         for _sh_set, _sh_name in _SAM_HAP_G.items():
-            if _my_iljj in _sh_set and _p_iljj in _sh_set:
+            if _my_iljj != _p_iljj and _my_iljj in _sh_set and _p_iljj in _sh_set:
                 if frozenset({_my_iljj, _p_iljj}) & _WANGJI_G:  # 왕지 포함 쌍만 반합/삼합 인정
                     _sam_hap_name = _sh_name
                 break
