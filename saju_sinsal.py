@@ -115,7 +115,7 @@ def get_chung_hyung(pils):
         if combo.issubset(jj_set):
             result["형"].append({"name": n, "type": htype, "desc": desc})
 
-    for jj in jjs:
+    for jj in set(jjs):
         if jjs.count(jj) >= 2 and jj in SELF_HYUNG:
             result["자형"].append({"name": f"{jj} 자형", "desc": "자책/자학 경향 주의"})
 

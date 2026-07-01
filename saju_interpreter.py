@@ -7707,10 +7707,10 @@ def get_yukjin(ilgan, pils, gender="남", marriage="미혼"):
             fam = ss_to_family.get(ss)
 
             if fam:
-                if fam not in found:
-                    found[fam] = []
+                if ss not in found:
+                    found[ss] = []
 
-                found[fam].append(f"{label}({p.get('cg','')}{p.get('jj','')})")
+                found[ss].append(f"{label}({p.get('cg','')}{p.get('jj','')})")
 
     result = []
 
@@ -7773,8 +7773,8 @@ def get_yukjin(ilgan, pils, gender="남", marriage="미혼"):
     sipsung_all = [ss for si in sipsung_data for ss in [si.get("cg_ss", "-"), si.get("jj_ss", "-")]]
 
     for fam_label, ss_key, yes_msg, no_msg in checks:
-        has = ss_key in sipsung_all
-        where = ", ".join(found.get(fam_label, []))
+        has = any(ss_key in s for s in sipsung_all)
+        where = ", ".join(loc for _ss, locs in found.items() if ss_key in _ss for loc in locs)
 
         # 기혼인데 배우자성 없음 → 별도 처리
         _is_married = marriage in ("기혼","유부남","유부녀","이혼","이혼/별거","이혼/사별","사별","재혼")
