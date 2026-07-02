@@ -46,3 +46,30 @@ _diag*.py
 test_*.py
 .claude/
 _*.txt
+
+# QA/감사/백업 잡파일 추가 정리 (2026-07-02)
+_qa*.py
+_audit_*.py
+_test_*.py
+_y*_smoke.py
+*.backup_*
+manse.py.backup*
+
+# 실험 스크립트·진단 출력 잔여 정리 (2026-07-02)
+sig_test*.py
+x4*.py
+x_*.py
+y6*.py
+y14_patch.py
+y15_patch.py
+*_targets.txt
+*_check.txt
+*_err.txt
+*_log.txt
+*_spec.txt
+diag*.txt
+current_headers.txt
+verify_*.txt
+x_audit*.txt
+면책_고지_위치_진단.txt
+test_results.txt
