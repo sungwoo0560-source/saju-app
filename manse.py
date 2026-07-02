@@ -4637,8 +4637,12 @@ def infer_partner_pattern(my_ilgan, sewoon_cg, sewoon_jj):
 
     # 일간 인상 추론
     _CG_CHAR = {
+        "甲":"일간 甲 — 곧고 강직한 리더형·큰 나무 같은 추진력",
+        "乙":"일간 乙 — 유연하고 섬세한 화초형·사교적",
         "丙":"일간 丙 또는 火 강 — 태양형 카리스마",
         "丁":"일간 丁 — 섬세하고 깊은 감정형",
+        "戊":"일간 戊 — 듬직한 산악형·포용력 큰 믿음직함",
+        "己":"일간 己 — 온화한 옥토형·세심한 배려심",
         "庚":"일간 庚 — 강한 의지·단단·차가운 면",
         "辛":"일간 辛 — 완벽주의·세련·속 깊음",
         "壬":"일간 壬 — 감각적·지적·넓은 그릇",
@@ -4773,10 +4777,10 @@ def build_dramatic_narrative(pils, name, gender, marital_status, saju_data):
             intent_text=f"십성: {saju_data.get('sewoon_sipsung','')} — {intent}" if intent else "",
             partner=_partner, dest=_dest,
         )
-        # 상대방 사주 추론 (세운 기반)
+        # 상대방 사주 추론 (인연 십성 천간 기반)
         try:
             traits, _sw_sipsung = infer_partner_pattern(
-                saju_data.get("ilgan",""), sw_cg, sw_jj
+                saju_data.get("ilgan",""), _pcg_d, sw_jj
             )
         except Exception:
             traits, _sw_sipsung = [], ""
@@ -4787,7 +4791,7 @@ def build_dramatic_narrative(pils, name, gender, marital_status, saju_data):
         out.append(narrative)
 
         if traits:
-            out.append(f"\n**🔍 그 사람 사주 추론 ({zodiac} / {sw_cg}일간형):**")
+            out.append(f"\n**🔍 그 사람 사주 추론 ({zodiac} / {_pcg_d}일간형):**")
             for t in traits:
                 out.append(f"- {t}")
             if any("끌림이 강한" in t or "多人" in t for t in traits):
