@@ -8063,6 +8063,30 @@ def get_crossing_interpretation(pils, cur_year, birth_year=None, birth_month=Non
         dw_ss = TEN_GODS_MATRIX.get(ilgan, {}).get(cur_dw.get("cg", ""), "")
         sw_ss = sw.get("십성_천간", "")
         sw_gil = sw.get("길흉", "평")
+        # "길(吉)" 등 괄호 표기 → 괄호 없는 형태로 정규화 (_GIL_MAP 키와 매치시키기 위함)
+        sw_gil = re.sub(r'\([^)]+\)', '', str(sw_gil)).strip()
+
+        # 세운 길흉 용신·기신 기준 중화 (menu_current_situation/_nar_future/_get_base와 동일 패턴)
+        try:
+            _sn_ci = (get_ilgan_strength(ilgan, pils) or {}).get("신강신약", "")
+            _yong_ci = (get_yongshin(pils) or {}).get("종합_용신", [])
+            if not isinstance(_yong_ci, list):
+                _yong_ci = []
+            _sw_oh_ci = sw.get("오행_천간", "")
+            if _sw_oh_ci and _yong_ci and _sw_oh_ci in _yong_ci:
+                sw_gil = "길"
+            elif _sw_oh_ci and ("신강" in _sn_ci or "신약" in _sn_ci):
+                _ilgan_oh_ci = OH.get(ilgan, "")
+                _BMRV_ci = {"木":"水","火":"木","土":"火","金":"土","水":"金"}
+                _CTLV_ci = {"木":"土","火":"金","土":"水","金":"木","水":"火"}
+                if "신강" in _sn_ci:
+                    _gi_ci = [o for o in [_BMRV_ci.get(_ilgan_oh_ci, ""), _ilgan_oh_ci] if o]
+                else:
+                    _gw_ci = next((k for k, v in _CTLV_ci.items() if v == _ilgan_oh_ci), "")
+                    _gi_ci = [o for o in [_gw_ci, _CTLV_ci.get(_ilgan_oh_ci, "")] if o]
+                sw_gil = "흉" if _sw_oh_ci in _gi_ci else "평"
+        except Exception:
+            pass
 
         # 대운·세운 십성 조합 매핑
         _CROSS_MAP = {
