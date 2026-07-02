@@ -28363,7 +28363,7 @@ def main():
                 st.warning(f"⚠️ 오류: {str(_e)[:80]}")
 
     if "in_birth_hour" not in _ss:
-        _ss["birth_hour"] = _ss.get("in_birth_hour", 12)
+        _ss["in_birth_hour"] = 12
 
     if "in_birth_minute" not in _ss:
         _ss["birth_minute"] = _ss.get("in_birth_minute", 0)
@@ -29193,7 +29193,7 @@ def main():
                         b_year,
                         b_month,
                         b_day,
-                        _ss.get("birth_hour", _ss.get("in_birth_hour", 12)),
+                        _ss.get("in_birth_hour", _ss.get("birth_hour", 12)),
                         _ss.get("birth_minute", _ss.get("in_birth_minute", 0)),
                         _ss.get("in_gender", "남"),
                         use_yaja_time=_ss.get("in_use_yaja", True),
@@ -29205,7 +29205,7 @@ def main():
                         b_year,
                         b_month,
                         b_day,
-                        _ss.get("birth_hour", _ss.get("in_birth_hour", 12)),
+                        _ss.get("in_birth_hour", _ss.get("birth_hour", 12)),
                         _ss.get("birth_minute", _ss.get("in_birth_minute", 0)),
                         _ss.get("in_gender", "남"),
                         use_yaja_time=_ss.get("in_use_yaja", True),
@@ -29234,7 +29234,7 @@ def main():
 
             st.session_state["occupation"] = _ss["in_occupation"]
 
-            st.session_state["birth_hour"] = _ss.get("birth_hour", _ss.get("in_birth_hour", 12))
+            st.session_state["birth_hour"] = _ss.get("in_birth_hour", _ss.get("birth_hour", 12))
 
             st.session_state["birth_minute"] = _ss.get("birth_minute", _ss.get("in_birth_minute", 0))
 
