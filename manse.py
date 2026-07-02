@@ -13283,7 +13283,8 @@ def tab_past_events(pils, birth_year, gender, name=""):
         return s[:maxlen] + ("..." if len(s) > maxlen else "")
 
     past_events_raw = hl.get("past_events", [])
-    past_events = [e for e in past_events_raw if _parse_age_int(e.get("age","")) < _kr_age]
+    _cur_age_saeng = _today.year - birth_year + 1  # 세는나이 (이벤트 age와 동일 체계)
+    past_events = [e for e in past_events_raw if _parse_age_int(e.get("age","")) < _cur_age_saeng]
 
     _DC = {
         "사고·관재":"#c62828","건강이상":"#7b1fa2","질병·건강":"#7b1fa2",
@@ -14714,6 +14715,8 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
             birth_month=st.session_state.get("birth_month", 1),
             birth_day=st.session_state.get("birth_day", 1),
             gender=gender,
+            birth_hour=st.session_state.get("birth_hour", 12),
+            birth_minute=st.session_state.get("birth_minute", 0),
         )
     except Exception:
         cross = {}
@@ -14763,12 +14766,16 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
         ilgan = "甲"; iljj = "子"; sn = "중화"; yong_str = ""; gi_str = ""
 
     # 용신보정: 세운 오행이 용신이면 sw_gil='길', 기신이면 '흉'
+    # 신강/신약인데 용신·기신 어디에도 안 속하는 오행(주로 식상)은
+    # YEARLY_LUCK_NARRATIVE 고정표(예: 食神=大吉)를 그대로 두지 않고 '평'으로 중화
     try:
         _sw_oh_c = (get_yearly_luck(pils, cur_year) or {}).get("오행_천간", "")
         if _sw_oh_c and _sw_oh_c in yong_ohs:
             sw_gil = "길"
         elif _sw_oh_c and _sw_oh_c in gi_ohs:
             sw_gil = "흉"
+        elif _sw_oh_c and ("신강" in sn or "신약" in sn):
+            sw_gil = "평"
     except Exception:
         pass
 

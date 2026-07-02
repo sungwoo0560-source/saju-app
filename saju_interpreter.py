@@ -8033,7 +8033,7 @@ def get_yongshin_multilayer(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0, 
     }
 
 
-def get_crossing_interpretation(pils, cur_year, birth_year=None, birth_month=None, birth_day=None, gender=None):
+def get_crossing_interpretation(pils, cur_year, birth_year=None, birth_month=None, birth_day=None, gender=None, birth_hour=None, birth_minute=None):
     """세운×대운 교차 해석 — 대운 십성과 세운 십성의 조합으로 핵심 키워드 반환"""
     try:
         ilgan = pils[1]["cg"]
@@ -8044,8 +8044,8 @@ def get_crossing_interpretation(pils, cur_year, birth_year=None, birth_month=Non
         _bm = birth_month if birth_month is not None else 1
         _bd = birth_day if birth_day is not None else 1
         _gd = gender if gender is not None else "남"
-        birth_hour = 12
-        birth_minute = 0
+        birth_hour = birth_hour if birth_hour is not None else 12
+        birth_minute = birth_minute if birth_minute is not None else 0
         daewoon = SajuCoreEngine.get_daewoon(
             pils, _by, _bm, _bd,
             birth_hour, birth_minute, gender=_gd
@@ -11223,7 +11223,7 @@ def _nar_future(ctx):
 
             # 세운×대운 교차 분석 (연도별)
             try:
-                cross_y = get_crossing_interpretation(pils, y, birth_year=birth_year, gender=gender) if pils else {}
+                cross_y = get_crossing_interpretation(pils, y, birth_year=birth_year, gender=gender, birth_hour=ctx.get("birth_hour"), birth_minute=ctx.get("birth_minute")) if pils else {}
                 if cross_y.get("summary"):
                     result.append(f"  [교차분석] {cross_y['summary']}\n")
             except Exception:
@@ -11456,7 +11456,7 @@ def _nar_wealth(ctx):
     # 세운×대운 교차 해석 (재물 섹션용)
     cross_money = {}
     try:
-        cross_money = get_crossing_interpretation(pils, current_year, birth_year=birth_year, gender=gender) if pils else {}
+        cross_money = get_crossing_interpretation(pils, current_year, birth_year=birth_year, gender=gender, birth_hour=ctx.get("birth_hour"), birth_minute=ctx.get("birth_minute")) if pils else {}
     except Exception:
         _saju_log.warning("[_nar_wealth] 오류: %s", sys.exc_info()[1])
 
@@ -12344,6 +12344,7 @@ def build_rich_narrative(pils, birth_year, gender, name, section="report"):
             "ilgan_profile": ILGAN_PROFILE.get(ilgan, {}),
             "marriage": _marriage_val,
             "gisin_ohs": _gisin_safe,
+            "birth_hour": birth_hour, "birth_minute": birth_minute,
         }
 
         if section == "report":
