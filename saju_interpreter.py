@@ -1839,13 +1839,15 @@ class LocalSajuNarrator:
             )
 
             sw = get_yearly_luck(pils, cur_year) or {}
-            # 세운 길흉 용신·기신 기준 보정 — 중립 오행은 narr 기반값 유지
+            # 세운 길흉 용신·기신 기준 보정
             _sw_oh_b = sw.get("오행_천간", "")
             if _sw_oh_b and yongshin:
                 if _sw_oh_b in yongshin:
                     sw = dict(sw, 길흉="길(吉)")
-                elif _sw_oh_b in gisin:
+                elif _sw_oh_b and gisin and _sw_oh_b in gisin:
                     sw = dict(sw, 길흉="흉(凶)")
+                elif _sw_oh_b and ("신강" in sn or "신약" in sn):
+                    sw = dict(sw, 길흉="평(平)")
 
             return dict(
                 ilgan=ilgan,
@@ -10968,6 +10970,8 @@ def _nar_future(ctx):
 
     yongshin_ohs = ctx.get("yongshin_ohs", [])
 
+    gi_ohs = ctx.get("gisin_ohs", [])
+
     yong_kr = ctx.get("yong_kr", "")
 
     char = ctx.get("char", {})
@@ -11211,6 +11215,10 @@ def _nar_future(ctx):
             _yr_oh_f = sw.get("오행_천간", "")
             if _yr_oh_f and isinstance(yongshin_ohs, list) and _yr_oh_f in yongshin_ohs:
                 gilhyung = "길"
+            elif _yr_oh_f and gi_ohs and _yr_oh_f in gi_ohs:
+                gilhyung = "흉"
+            elif _yr_oh_f and ("신강" in sn or "신약" in sn):
+                gilhyung = "평"
 
             # 길흉 마커
 
@@ -12323,6 +12331,17 @@ def build_rich_narrative(pils, birth_year, gender, name, section="report"):
                 _gisin_safe = [o for o in ["木","火","土","金","水"] if o in _gisin_raw]
             else:
                 _gisin_safe = []
+            # 기신이 서술형 문자열(오행 없음)인 경우 → sn으로 역산 (manse.py menu_current_situation 폴백과 동일 로직)
+            if not _gisin_safe and sn:
+                _BMRV3 = {"木":"水","火":"木","土":"火","金":"土","水":"金"}
+                _CTLV3 = {"木":"土","火":"金","土":"水","金":"木","水":"火"}
+                if "신강" in sn and ilgan_oh:
+                    _ok_인3 = _BMRV3.get(ilgan_oh, "")
+                    _gisin_safe = [o for o in [_ok_인3, ilgan_oh] if o]
+                elif "신약" in sn and ilgan_oh:
+                    _ok_관3 = next((k for k, v in _CTLV3.items() if v == ilgan_oh), "")
+                    _ok_재3 = _CTLV3.get(ilgan_oh, "")
+                    _gisin_safe = [o for o in [_ok_관3, _ok_재3] if o]
         except Exception:
             _gisin_safe = []
 
