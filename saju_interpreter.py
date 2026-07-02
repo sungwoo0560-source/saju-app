@@ -11231,7 +11231,7 @@ def _nar_future(ctx):
 
             # 세운×대운 교차 분석 (연도별)
             try:
-                cross_y = get_crossing_interpretation(pils, y, birth_year=birth_year, gender=gender, birth_hour=ctx.get("birth_hour"), birth_minute=ctx.get("birth_minute")) if pils else {}
+                cross_y = get_crossing_interpretation(pils, y, birth_year=birth_year, gender=gender, birth_month=ctx.get("birth_month"), birth_day=ctx.get("birth_day"), birth_hour=ctx.get("birth_hour"), birth_minute=ctx.get("birth_minute")) if pils else {}
                 if cross_y.get("summary"):
                     result.append(f"  [교차분석] {cross_y['summary']}\n")
             except Exception:
@@ -11464,7 +11464,7 @@ def _nar_wealth(ctx):
     # 세운×대운 교차 해석 (재물 섹션용)
     cross_money = {}
     try:
-        cross_money = get_crossing_interpretation(pils, current_year, birth_year=birth_year, gender=gender, birth_hour=ctx.get("birth_hour"), birth_minute=ctx.get("birth_minute")) if pils else {}
+        cross_money = get_crossing_interpretation(pils, current_year, birth_year=birth_year, gender=gender, birth_month=ctx.get("birth_month"), birth_day=ctx.get("birth_day"), birth_hour=ctx.get("birth_hour"), birth_minute=ctx.get("birth_minute")) if pils else {}
     except Exception:
         _saju_log.warning("[_nar_wealth] 오류: %s", sys.exc_info()[1])
 
@@ -12364,6 +12364,7 @@ def build_rich_narrative(pils, birth_year, gender, name, section="report"):
             "marriage": _marriage_val,
             "gisin_ohs": _gisin_safe,
             "birth_hour": birth_hour, "birth_minute": birth_minute,
+            "birth_month": birth_month, "birth_day": birth_day,
         }
 
         if section == "report":
