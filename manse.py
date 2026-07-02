@@ -19537,6 +19537,7 @@ def menu4_future3(
         _m4_gh = (
             "길(吉)" if _m4_sw_oh and _m4_sw_oh in yongshin_ohs
             else "흉(凶)" if _m4_sw_oh and _m4_sw_oh in gisin_ohs
+            else "평(平)" if _m4_sw_oh and ("신강" in _m4_sn or "신약" in _m4_sn)
             else sw.get("길흉","평")
         )
 
