@@ -8122,10 +8122,14 @@ def get_crossing_interpretation(pils, cur_year, birth_year=None, birth_month=Non
         health = f"건강: {'활동적 시기이므로 과로와 스트레스 주의.' if sw_gil in ['길','대길'] else '기운이 약한 시기. 무리한 계획보다 건강 우선.'}"
         relation = f"인간관계: {'귀인 만남 가능성 높음. 새로운 인연을 적극적으로 받아들일 것.' if sw_gil in ['길','대길'] else '갈등 조심. 감정적 충돌보다 이성적 대화를 선택.'}"
 
+        _dw_age_s = cur_dw.get("시작나이", "")
+        _dw_age_e = (_dw_age_s + 9) if isinstance(_dw_age_s, (int, float)) else ""
+
         return {
             "dw_ss": dw_ss, "sw_ss": sw_ss, "sw_gil": sw_gil,
             "summary": summary, "finance": finance,
             "career": career, "health": health, "relation": relation,
+            "dw_start_age": _dw_age_s, "dw_end_age": _dw_age_e,
         }
     except Exception as _e:
         _saju_log.debug("[crossing_interp] %s", _e)
