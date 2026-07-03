@@ -13340,7 +13340,7 @@ def tab_past_events(pils, birth_year, gender, name=""):
     st.markdown(
         f"""<div style="background:linear-gradient(135deg,#1a1a1a,#2c2c2c);border-radius:14px;padding:14px 18px;margin-bottom:12px">
 <div style="color:#f7e695;font-size:15px;font-weight:900">📅 {name if name else "내담자"}님 과거 사건 타임라인 ({birth_year}-{current_year}년 · 만 {_kr_age}세)</div>
-<div style="color:#aaa;font-size:12px;margin-top:3px">대운×세운 충·합 교차 계산 — 현재 나이(만 나이) 이전 사건만 표시</div>
+<div style="color:#aaa;font-size:12px;margin-top:3px">대운×세운 충·합 교차 계산 — 현재 나이(세는나이) 이전 사건만 표시</div>
 </div>""",
         unsafe_allow_html=True,
     )
@@ -13360,7 +13360,7 @@ def tab_past_events(pils, birth_year, gender, name=""):
             f"box-shadow:0 1px 4px rgba(0,0,0,0.08)'>"
             f"<div style='min-width:60px;text-align:center;padding-top:2px'>"
             f"<div style='font-size:20px;font-weight:900;color:{dc};line-height:1'>{age_num}</div>"
-            f"<div style='font-size:10px;color:{dc};font-weight:700'>세 (만)</div>"
+            f"<div style='font-size:10px;color:{dc};font-weight:700'>세 (세는나이)</div>"
             f"<div style='font-size:10px;color:#888;margin-top:2px'>{yr}년</div></div>"
             f"<div style='flex:1'>"
             f"<div style='font-size:12px;font-weight:800;color:{dc};margin-bottom:4px'>{dom_lbl}</div>"
@@ -13403,7 +13403,7 @@ def tab_past_events(pils, birth_year, gender, name=""):
                 f"<div style='flex:1'>"
                 f"<div style='font-size:11px;color:{_rc};font-weight:800'>{_lbl5}</div>"
                 f"<div style='font-size:13px;color:#222;font-weight:700;margin:2px 0'>"
-                f"{_yr5}년 · {_age5}세 (만)</div>"
+                f"{_yr5}년 · {_age5}세 (세는나이)</div>"
                 f"<div style='font-size:12px;color:#555;line-height:1.6'>{_desc5}</div>"
                 f"</div></div>"
             )
