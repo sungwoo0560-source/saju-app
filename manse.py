@@ -16951,6 +16951,58 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
     lines.append(f"*{cur_year}년 · {cur_age}세 · {_dw_label}{_age_range} · {_sw_label}*")
     lines.append("")
 
+    # ── 강사식 4박자 도입부 (①전체구조 ②근거 ③그래서지금 ④대비책) ──
+    try:
+        _gk4 = get_gyeokguk(pils) or {}
+        _gyeok_raw4 = TEN_GODS_MATRIX.get(ilgan, {}).get(_gk4.get("정기", ""), "")
+        _gyeok_kr4 = (_SS_KR.get(_gyeok_raw4, "") + "격") if _gyeok_raw4 else "격국미상"
+        _gyeok_hj4 = (clean_hanja(_gyeok_raw4) + "格") if _gyeok_raw4 else ""
+        _ip4 = ILGAN_PROFILE.get(ilgan, {})
+        _bonjil4 = _ip4.get("본질", "")
+        _cheobang4 = _ip4.get("처방", "")
+        _yong_ohs4 = locals().get("yong_ohs") or []
+        _gi_ohs4 = locals().get("gi_ohs") or []
+        _yong4 = "·".join(_yong_ohs4[:2])
+        _gi4 = "·".join(_gi_ohs4[:2])
+
+        _l1_4 = (
+            f"**【전체 구조】** {ilgan}일간 — {_bonjil4 or '독특한 기운을 지닌 존재입니다.'} "
+            f"{sn} 사주에 **{_gyeok_kr4}({_gyeok_hj4})** 구조를 갖추었으니, "
+            f"이 틀 안에서 기운을 어떻게 쓰느냐가 평생의 관건입니다."
+        )
+        _l2_4 = (
+            f"**【근거】** " +
+            (f"{_yong4}(용신)" if _yong4 else "") +
+            (" · " if _yong4 and _gi4 else "") +
+            (f"{_gi4}(기신)" if _gi4 else "") +
+            f" 오행의 힘겨루기 위에 이 사주의 십성 구조가 짜여 있으니, "
+            f"용신이 힘을 받으면 순탄하고 기신이 힘을 받으면 굴곡이 생기기 쉬운 흐름입니다."
+        )
+        if sw_gil in ("길", "대길"):
+            _now_txt4 = f"{_sw_label}이 용신과 통하니 흐름을 타기 좋은 시기일 가능성이 높습니다."
+        elif sw_gil in ("흉", "대흉"):
+            _now_txt4 = f"{_sw_label}이 기신 쪽에 가까우니 무리한 결정보다 신중함이 필요한 시기일 수 있습니다."
+        else:
+            _now_txt4 = f"{_sw_label}은 크게 기울지 않는 평이한 흐름이니, 큰 변수보다 꾸준함이 중요한 시기입니다."
+        _l3_4 = f"**【그래서 지금】** {cur_year}년 {cur_age}세, {_dw_label}{_age_range}에 {_now_txt4}"
+        _cheobang4_txt = (_cheobang4 or "용신 오행을 가까이하고 기신 오행의 기운을 줄이는 것이 실질적인 개운법입니다.").rstrip()
+        if _cheobang4_txt and _cheobang4_txt[-1] not in ".!?":
+            _cheobang4_txt += "."
+        _l4_4 = (
+            f"**【대비책】** {_cheobang4_txt}"
+            + (f" 특히 {_yong4} 기운을 생활 속에서 늘리는 것이 지금 실행할 수 있는 가장 확실한 방법입니다." if _yong4 else "")
+        )
+
+        lines.append(
+            '<div style="background:#faf7f0;border-left:4px solid #d4af37;border-radius:10px;'
+            'padding:16px 18px;margin:8px 0 16px;font-size:13px;color:#333;line-height:2;">'
+            + "<br><br>".join([_l1_4, _l2_4, _l3_4, _l4_4]) +
+            '</div>'
+        )
+        lines.append("")
+    except Exception:
+        pass
+
     # ── 지금 상황 진단 — 세운 십성 기반 공감 서술 ──────────────────
     if hard_q or hard_body:
         lines.append(
