@@ -15913,16 +15913,22 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
             for _hset14, _hname14, _hdesc14 in _HYUNG_3:
                 _matched14 = _hset14 & _all_jj14_set
                 if len(_matched14) >= 2:
-                    _hyung_found.append((_hname14, _hdesc14, _matched14))
+                    # 3자 전부 겹치면 풀네임, 부분(2자)이면 실제 글자만
+                    if _matched14 == _hset14:
+                        _label14 = _hname14                          # "丑戌未 삼형살"
+                    else:
+                        _label14 = "".join(sorted(_matched14)) + "刑"  # "戌未刑" (실제 겹친 글자만)
+                    _hyung_found.append((_label14, _hdesc14, _matched14))
             for _jj_sf in _HYUNG_SELF:
                 if _all_jj14.count(_jj_sf) >= 2:
                     _hyung_found.append((f"{_jj_sf} 자형살", "스스로 자신을 해치는 구조", {_jj_sf}))
 
-            # 세운 지지가 형살 완성 트리거
+            # 세운 지지가 형살 완성 트리거 (3자형은 이미 2자 있어야, 상형은 1자 있어야 완성)
             _hyung_sw_trigger = []
             for _hset14, _hname14, _hdesc14 in _HYUNG_3:
                 _in_chart14 = _hset14 & _all_jj14_set
-                if _jj_cur in _hset14 and len(_in_chart14) >= 1 and _jj_cur not in _all_jj14_set:
+                _need14 = len(_hset14) - 1
+                if _jj_cur in _hset14 and len(_in_chart14) >= _need14 and _jj_cur not in _all_jj14_set:
                     _hyung_sw_trigger.append((_hname14, _hdesc14))
             for _hname14, _hdesc14 in _hyung_sw_trigger:
                 _danger_signals.append((f"⚠️ 올해 {_hname14} 완성 — 형살 발동",
