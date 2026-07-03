@@ -6084,7 +6084,10 @@ class LocalSajuNarrator:
         _indep_dws_k     = []
         _child_oh_ctrl_k = _OH_CTRL_K.get(_child_oh_k, "")   # 자녀 오행을 극하는 오행
 
-        for _dw_k in dw_list[:6]:
+        # 자녀를 가질 수 있는 성인기 대운만 대상 (미성년기 대운 제외, manse.py _adjust_for_youth와 동일 기준)
+        _adult_dws_k = [d for d in dw_list if isinstance(d.get("시작나이"), (int, float)) and d.get("시작나이", 0) >= 20]
+
+        for _dw_k in _adult_dws_k[:6]:
             _dw_cg_k   = _dw_k.get("cg", "")
             _dw_jj_k   = _dw_k.get("jj", "")
             _dw_age_k  = _dw_k.get("시작나이", "?")
@@ -6099,13 +6102,12 @@ class LocalSajuNarrator:
                 _indep_dws_k.append((_dw_age_k, _dw_cg_k, _dw_jj_k))
 
         if _conflict_dws_k:
-            lines.append("**⚡ 갈등이 생기기 쉬운 대운:**")
-            for _age_k, _cg_k, _jj_k in _conflict_dws_k:
-                lines.append(
-                    f"- **{_age_k}세 대운({_cg_k}{_jj_k})**: 이 시기에는 자녀와의 가치관·생활방식 충돌이 "
-                    f"심해집니다. '내 기준'을 강요하지 말고 자녀의 선택을 존중하는 연습이 필요합니다. "
-                    f"특히 진로·결혼·독립 문제로 마찰이 생기기 쉬운 때입니다."
-                )
+            _conflict_ages_k = "· ".join(f"{a}세({c}{j})" for a, c, j in _conflict_dws_k)
+            lines.append(
+                f"**⚡ 갈등이 생기기 쉬운 대운: {_conflict_ages_k}**\n"
+                f"이 시기들에는 자녀와의 가치관·생활방식 충돌이 심해집니다. '내 기준'을 강요하지 말고 "
+                f"자녀의 선택을 존중하는 연습이 필요합니다. 특히 진로·결혼·독립 문제로 마찰이 생기기 쉬운 때입니다."
+            )
         else:
             lines.append(
                 "대운 흐름상 자녀와 극(剋) 관계가 두드러지는 시기는 없습니다. "
@@ -6113,13 +6115,12 @@ class LocalSajuNarrator:
             )
 
         if _indep_dws_k:
-            lines.append("\n**🦋 자녀 독립이 자연스럽게 이루어지는 대운:**")
-            for _age_k, _cg_k, _jj_k in _indep_dws_k:
-                lines.append(
-                    f"- **{_age_k}세 대운({_cg_k}{_jj_k})**: 자녀의 에너지가 독자적으로 강해지는 시기입니다. "
-                    f"이때 자녀가 독립·유학·취직·결혼 등 새로운 단계로 나아갑니다. "
-                    f"잡으려 하지 말고 축복하며 보내주십시오."
-                )
+            _indep_ages_k = "· ".join(f"{a}세({c}{j})" for a, c, j in _indep_dws_k)
+            lines.append(
+                f"\n**🦋 자녀 독립이 자연스럽게 이루어지는 대운: {_indep_ages_k}**\n"
+                f"이 시기들에는 자녀의 에너지가 독자적으로 강해집니다. 자녀가 독립·유학·취직·결혼 등 "
+                f"새로운 단계로 나아갈 수 있으니, 잡으려 하지 말고 축복하며 보내주십시오."
+            )
 
         # 세운 기반 올해 자녀 운
         lines.append("\n### 📅 올해 자녀와의 관계운")
