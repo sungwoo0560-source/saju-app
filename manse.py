@@ -19313,7 +19313,7 @@ def menu3_past(pils, birth_year, gender, name=""):
     try:
         _local_out = LocalSajuNarrator.past_analysis(pils, name, birth_year, gender)
         if _local_out:
-            st.markdown(_local_out, unsafe_allow_html=True)
+            st.markdown(_local_out.replace("~", "～"), unsafe_allow_html=True)  # L7878/L8156 검증된 전각 치환과 통일
     except Exception as _e:
         st.warning(f"⚠️ 과거 분석 오류: {_e}")
 
