@@ -3274,7 +3274,7 @@ def quick_consult_bar(pils, name, birth_year, gender):
 
             # 3. 응답 출력
 
-            render_quick_consult_response(response)
+            render_quick_consult_response(response.replace("~", "～"))  # L7878/L8156 검증된 전각 치환과 통일
 
             # 4. 데이터 영속화
 
@@ -24552,7 +24552,7 @@ def tab_ai_chat(pils, name, birth_year, gender):
             else:
                 final_resp = _resp
 
-            st.markdown(final_resp)
+            st.markdown(final_resp.replace("~", "～"))  # L7878/L8156 검증된 전각 치환과 통일
 
             st.session_state.chat_history.append({"role": "assistant", "content": final_resp})
 
