@@ -2906,7 +2906,7 @@ class LocalSajuNarrator:
             lines.append("---")
             lines.append(f"### ⭐ 지금 {name}님이 걷고 있는 대운")
             lines.append(
-                f"현재 {name}님은 **{_cdw_gan}대운**({_cdw_s}~{_cdw_e}년) 안에 있습니다. "
+                f"현재 {name}님은 **{_cdw_gan}대운**({_cdw_s}～{_cdw_e}년) 안에 있습니다. "
                 f"이 대운은 {_grade}에 해당하며, "
                 f"앞으로 **{_remain}년**이 더 남아 있습니다. "
                 f"십성으로 보면 천간은 {_cdw_ss}, 지지는 {_cdw_ss_j}의 기운입니다.\n"
@@ -3000,7 +3000,7 @@ class LocalSajuNarrator:
 
         if golden:
             g_info = ", ".join(
-                f"{d.get('str','')}대운({d.get('시작연도','')}~{d.get('종료연도','')}년)"
+                f"{d.get('str','')}대운({d.get('시작연도','')}～{d.get('종료연도','')}년)"
                 for d in golden[:4]
             )
             lines.append(
@@ -3012,7 +3012,7 @@ class LocalSajuNarrator:
             )
         if danger:
             d_info = ", ".join(
-                f"{d.get('str','')}대운({d.get('시작연도','')}~{d.get('종료연도','')}년)"
+                f"{d.get('str','')}대운({d.get('시작연도','')}～{d.get('종료연도','')}년)"
                 for d in danger[:4]
             )
             lines.append(
@@ -3979,7 +3979,7 @@ class LocalSajuNarrator:
         }
         for (lo, hi), focus_msg in _AGE_FOCUS.items():
             if lo <= age_s <= hi:
-                lines.append(f"**{age_s}~{age_e}세 집중 항목**: {focus_msg}")
+                lines.append(f"**{age_s}～{age_e}세 집중 항목**: {focus_msg}")
                 break
 
         # ── 처방: 용신 오행 활용법 ────────────────────────────
