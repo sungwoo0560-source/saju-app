@@ -12467,14 +12467,8 @@ def get_monthly_timing(pils, birth_year, gender, target_year=None, focus="재물
         # 오호둔월법 — 연천간 기준 월천간 계산
         _CG = ["甲","乙","丙","丁","戊","己","庚","辛","壬","癸"]
         _JJ_MONTHS = ["寅","卯","辰","巳","午","未","申","酉","戌","亥","子","丑"]
-        # 연간(年干) 인덱스
-        year_cg = None
-        for p in pils:
-            if p.get("pillar") == "년주" or pils.index(p) == 3:
-                year_cg = p.get("cg","甲")
-                break
-        if not year_cg:
-            year_cg = pils[3]["cg"] if len(pils) > 3 else "甲"
+        # 연간(年干) 인덱스 — 세운(대상 연도) 기준, 원국 출생년간 아님 (엔진 get_monthly_luck과 동일 공식)
+        year_cg = _CG[(cur_year - 4) % 10]
 
         year_gan_idx = _CG.index(year_cg) % 5 if year_cg in _CG else 0
 
@@ -12522,7 +12516,7 @@ def get_monthly_timing(pils, birth_year, gender, target_year=None, focus="재물
         caution_months = []
 
         for i, jj in enumerate(_JJ_MONTHS):
-            month_num = i + 1  # 1월=寅...12월=丑
+            month_num = ((i + 1) % 12) + 1  # 캘린더 월 라벨 보정 (寅=2월...子=12월...丑=1월, get_monthly_luck 대응)
             month_gan_idx = (year_gan_idx * 2 + 2 + i) % 10
             month_cg = _CG[month_gan_idx]
             month_oh = _OH.get(month_cg, "")
