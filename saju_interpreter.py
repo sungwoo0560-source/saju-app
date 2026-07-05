@@ -1445,7 +1445,7 @@ except NameError:
                 ),
                 "career": "의료·치과·성형·연구직·예술·디자인·감정사·금융분석가·패션·뷰티. 정밀함과 심미안이 요구되는 분야에서 독보적입니다.",
                 "health": "폐·피부·호흡기 건강 관리가 핵심입니다. 건조한 환경에 취약하므로 가습기와 수분 관리가 필수입니다.",
-                "relation": "까다로운 기준으로 이성을 선택합니다. 자신의 높은 기준을 충족하는 상대가 드물어 싱글 기간이 길어질 수 있습니다.",
+                "relation": "까다로운 기준으로 이성을 선택합니다. 자신의 높은 기준 때문에 관계 진입까지 시간이 걸리는 편이며, 일단 확신이 서면 깊게 몰입합니다.",
                 "money": "전문성과 기술에서 재물이 옵니다. 남다른 감식안으로 투자에서 뛰어난 성과를 냅니다.",
                 "caution": "완벽주의로 인한 소진과 외로움이 가장 큰 약점입니다. 때로는 80점짜리 완성도도 충분히 훌륭합니다.",
                 "lucky": "서쪽·서남 방향, 흰색·금색, 가을(10월)에 운이 강해집니다.",
@@ -5426,8 +5426,24 @@ class LocalSajuNarrator:
         _OH_CTRL  = {"木":"土","火":"金","土":"水","金":"木","水":"火"}  # 내가 극하는
 
         ilgan_oh = _OH.get(ilgan, "木")
-        good_oh1 = _OH_BIRTH.get(ilgan_oh, "")  # 나를 생해주는 = 편인/정인 오행
-        good_oh2 = _OH_GEN.get(ilgan_oh, "")    # 내가 생해주는 = 식신/상관 오행
+
+        # 용신/기신을 반영한 오행별 궁합 점수 (아래 "궁합 점수화" 섹션과 동일 공식)
+        # — 순수 생/극 구조만 보면 극신약·극신강 사주에서 실제 용신(비겁·인성)이
+        #   빠지는 불일치가 생기므로, 여기서도 동일 기준으로 상위 2개를 뽑는다.
+        _OH_CTRL_R_early = {"木": "金", "火": "水", "土": "木", "金": "火", "水": "土"}
+        _cand_scores = {}
+        for _poh in ["木", "火", "土", "金", "水"]:
+            _sc = 50
+            if _OH_BIRTH.get(ilgan_oh) == _poh:        _sc += 25
+            elif _OH_GEN.get(ilgan_oh) == _poh:        _sc += 15
+            elif _OH_CTRL.get(ilgan_oh) == _poh:       _sc += 10
+            if _OH_CTRL_R_early.get(ilgan_oh) == _poh: _sc -= 10
+            if _poh == ilgan_oh:                       _sc -= 5
+            if _poh in yongshin:                       _sc += 20
+            if _poh in gisin:                          _sc -= 15
+            _cand_scores[_poh] = max(0, min(100, _sc))
+        _cand_sorted = sorted(_cand_scores.items(), key=lambda x: -x[1])
+        good_oh1, good_oh2 = _cand_sorted[0][0], _cand_sorted[1][0]
 
         _OH_ANIMALS = {
             "木": "인(寅)·묘(卯)띠 — 호랑이·토끼",
@@ -5437,7 +5453,7 @@ class LocalSajuNarrator:
             "水": "해(亥)·자(子)띠 — 돼지·쥐",
         }
 
-        bad_oh = _OH_CTRL.get(ilgan_oh, "")
+        bad_oh = _cand_sorted[-1][0]
         lines.append(
             f"\n{name}님과 궁합이 잘 맞는 오행은 "
             f"**{OHN.get(good_oh1, good_oh1)}**과 **{OHN.get(good_oh2, good_oh2)}** 오행입니다. "
@@ -5880,9 +5896,13 @@ class LocalSajuNarrator:
                           "💚 좋음" if _final_sc_g >= 65 else
                           "💛 보통" if _final_sc_g >= 50 else
                           "🟠 주의" if _final_sc_g >= 35 else "🔴 흉")
-        lines.append(f"- 최적 파트너 오행: **{_OH_KR_G.get(_top_oh_g,_top_oh_g)}** ({_top_sc_g}점)")
-        lines.append(f"- 일지 안정도 보정: {'+' if _iljj_sc >= 0 else ''}{_iljj_sc}점")
-        lines.append(f"- 종합 궁합 지수: `{_final_bar_g}` **{_final_sc_g}점 {_FINAL_GRADE_G}**")
+        lines.append(f"- 최적 파트너 오행: **{_OH_KR_G.get(_top_oh_g,_top_oh_g)}** ({_top_sc_g}점 × 50%)")
+        lines.append(f"- 일지 안정도: {'+' if _iljj_sc >= 0 else ''}{_iljj_sc}점 → 보정 {_iljj_total_g}점 (× 30%)")
+        lines.append(f"- 기준 점수: 50점 (× 20%)")
+        lines.append(
+            f"- 종합 궁합 지수: `{_final_bar_g}` **{_final_sc_g}점 {_FINAL_GRADE_G}** "
+            f"(={_top_sc_g}×0.5 + {_iljj_total_g}×0.3 + 50×0.2)"
+        )
         lines.append("")
 
         # ─ 6. 부족한 부분 보완법 ────────────────────────────────────

@@ -21924,11 +21924,11 @@ def menu10_monthly(pils, name, birth_year, gender):
 
         d_end = week_data[i][-1]["date"].day
 
-        ss_list = [w["ss"] for w in week_data[i]]
+        bad_cnt  = sum(1 for w in week_data[i]
+                       if w["ss"] in ("겁재", "편관", "상관") or w.get("chung"))
 
-        bad_cnt = sum(1 for s in ss_list if s in ("겁재", "편관", "상관"))
-
-        good_cnt = sum(1 for s in ss_list if s in ("식신", "정관", "정인", "정재"))
+        good_cnt = sum(1 for w in week_data[i]
+                       if w["ss"] in ("식신", "정관", "정인", "정재") and not w.get("chung"))
 
         week_color = "#ffe0e0" if bad_cnt > good_cnt else "#e8f5e9" if good_cnt > 0 else "#f5f5f5"
 
@@ -21997,7 +21997,7 @@ def menu10_monthly(pils, name, birth_year, gender):
                 "겁재": "재물 손실/인간관계 갈등 주의",
                 "편관": "건강 악화/관재구설 주의",
                 "상관": "말실수/직장 내 트러블 주의",
-            }.get(b["ss"], "매사 조심")
+            }.get(b["ss"], "원국과 충 — 해당 자리 흔들림, 큰 결정 보류" if b.get("chung") else "매사 조심")
 
             d_str = b["date"].strftime("%m/%d")
 
