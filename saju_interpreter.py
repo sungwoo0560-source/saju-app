@@ -7102,6 +7102,7 @@ class LocalSajuNarrator:
         sw        = b.get("sw", {})
         sw_ss     = sw.get("십성_천간", "")
         OHN       = b.get("OHN", {})
+        sn        = b.get("sn", "")
 
         _OH = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
                "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
@@ -7306,10 +7307,18 @@ class LocalSajuNarrator:
             if i < 2:
                 lines.append(f"### {yr}년 {m}월 [{m_jj_kr}] {m_ss_kr} {gilhyung} — {_JJ_SEASON.get(m_jj, '흐름의 달')}{cur_tag}")
                 lines.append("")
+                _money_txt = _SS_MONEY.get(m_ss_key, '수입·지출 균형 유지. 무리한 투자 자제.')
+                _job_txt   = _SS_JOB.get(m_ss_key, '꾸준히 맡은 일에 집중하십시오.')
+                _rel_txt   = _SS_RELATION.get(m_ss_key, '기존 인간관계를 소중히 유지하십시오.')
+                if m_ss_key == "比肩" and "신약" in sn:
+                    # 신약자에게 비견(比肩)은 경쟁이 아니라 방신(幇身) — 일간을 돕는 조력으로 뜻이 뒤집힘
+                    _money_txt = "동료·협력자와 힘을 합치기 좋은 달. 함께하면 수입 기반이 넓어집니다."
+                    _job_txt   = "혼자보다 팀·동료와 함께할 때 성과가 커지는 달. 협업이 곧 경쟁력."
+                    _rel_txt   = "동료·형제와의 유대가 힘이 되는 달. 함께 어울리며 기운을 나누십시오."
                 lines.append(
-                    f"💰 {_SS_MONEY.get(m_ss_key, '수입·지출 균형 유지. 무리한 투자 자제.')} / "
-                    f"💼 {_SS_JOB.get(m_ss_key, '꾸준히 맡은 일에 집중하십시오.')} / "
-                    f"💑 {_SS_RELATION.get(m_ss_key, '기존 인간관계를 소중히 유지하십시오.')} / "
+                    f"💰 {_money_txt} / "
+                    f"💼 {_job_txt} / "
+                    f"💑 {_rel_txt} / "
                     f"🏥 {_SS_HEALTH.get(m_ss_key, _JJ_HEALTH.get(m_jj, '무리하지 말고 규칙적인 생활을 유지하십시오.'))}"
                 )
                 lines.append(
