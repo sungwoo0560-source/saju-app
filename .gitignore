@@ -73,3 +73,6 @@ verify_*.txt
 x_audit*.txt
 면책_고지_위치_진단.txt
 test_results.txt
+
+# 테스트/샘플 PDF 산출물 (2026-07-06)
+test_*.pdf
