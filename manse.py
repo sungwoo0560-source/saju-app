@@ -20277,27 +20277,23 @@ def menu5_money(pils, birth_year, gender, name="내담자"):
         _MONEY_SS = {"偏財","正財","食神","比肩"}  # 재물 유리 십성
         _DANGER_SS = {"劫財","偏官"}               # 재물 위험 십성
 
-        # 월간 기반 계산 (오호둔월법)
-        _MON_CG_BASE = {"甲":"丙","乙":"戊","丙":"庚","丁":"壬","戊":"甲",
-                        "己":"丙","庚":"戊","辛":"庚","壬":"壬","癸":"甲"}
-        _CG_LIST_MC = ["甲","乙","丙","丁","戊","己","庚","辛","壬","癸"]
-        _JJ_LIST_MC = ["丑","寅","卯","辰","巳","午","未","申","酉","戌","亥","子"]
-        _start_mc = _MON_CG_BASE.get(_ilgan_mc,"甲")
-        _sidx_mc  = _CG_LIST_MC.index(_start_mc) if _start_mc in _CG_LIST_MC else 0
-
-        # 향후 12개월 금전운 계산
+        # 향후 12개월 금전운 계산 (get_monthly_luck 정답 소스 재사용 — 오호둔 평행재계산 제거)
         _mon_data = []
         for _mi in range(12):
             _abs_mi = (_cm_mc - 1 + _mi) % 12
             _yr_mi  = _cy_mc + (_cm_mc - 1 + _mi) // 12
-            _mcg_mi = _CG_LIST_MC[(_sidx_mc + _abs_mi) % 10]
-            _mjj_mi = _JJ_LIST_MC[_abs_mi]
-            _mss_mi = TEN_GODS_MATRIX.get(_ilgan_mc,{}).get(_mcg_mi,"-")
+            _luck_mi = get_monthly_luck(pils, _yr_mi, _abs_mi + 1)
+            if not _luck_mi:
+                continue
+            _mcg_mi = _luck_mi.get("간", "")
+            _mjj_mi = _luck_mi.get("지", "")
+            _mss_mi = _luck_mi.get("십성", "-")
+            _mss_bare_mi = _mss_mi.split("(")[0] if "(" in _mss_mi else _mss_mi
             _moh_mi = _OH_MC.get(_mcg_mi,"")
             _is_y_mi = _moh_mi in _yong_mc
             _is_g_mi = _moh_mi in _gisin_mc
-            _is_money_mi = _mss_mi in _MONEY_SS
-            _is_danger_mi= _mss_mi in _DANGER_SS
+            _is_money_mi = _mss_bare_mi in _MONEY_SS
+            _is_danger_mi= _mss_bare_mi in _DANGER_SS
 
             # 금전 점수 (0~100)
             _score_mi = 50
@@ -20337,7 +20333,7 @@ def menu5_money(pils, birth_year, gender, name="내담자"):
                 "偏印": "투자보다 학습에 집중. 큰 결정 보류",
                 "正印": "귀인 활용·자격증으로 수입 향상",
             }
-            _action_mi = _MON_ACTION_MC.get(_mss_mi, "흐름 읽고 꾸준히")
+            _action_mi = _MON_ACTION_MC.get(_mss_bare_mi, "흐름 읽고 꾸준히")
 
             _mon_data.append({
                 "월": f"{_yr_mi}년 {_abs_mi+1}월" if _yr_mi != _cy_mc else f"{_abs_mi+1}월",
