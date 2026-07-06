@@ -4849,7 +4849,7 @@ class LocalSajuNarrator:
             _saju_log.warning("[money 오류] %s", sys.exc_info()[1])
 
         # ── 9. 횡재수·재수부 개운법 ────────────────────────────────
-        lines.append("\n### 🎰 횡재수(橫財數) 발동 조건 & 재수부(財數符) 개운법")
+        lines.append("\n### 🎰 횡재수(橫財數) 발동 조건 & 재수부(財數符) 개운법 (민속 참고)")
 
         # 용신 오행 기준 재수부 처방
         _jaesubu = {
