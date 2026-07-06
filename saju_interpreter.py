@@ -4045,7 +4045,7 @@ class LocalSajuNarrator:
                     _sw_short = _sw_desc_map.get(sw_ss.split("(")[0], "흐름 유지의 해")
                     _cur_txt  = " ← **지금 이 해**" if yr == cur_year else ""
                     lines.append(
-                        f"  - **{yr}년** ({yr - birth_year + 1}세): "
+                        f"  - **{yr}년** ({yr - birth_year}세): "
                         f"{sw_gan} — {_sw_short} {gh_icon}{ys2}{_cur_txt}"
                     )
 
