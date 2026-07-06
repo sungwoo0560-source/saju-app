@@ -21154,13 +21154,23 @@ def menu6_relations(pils, name, birth_year, gender, marriage_status="미혼"):
         _love_desc = "헌신적이고 진지한 연애 스타일. 조건보다 감정을 중시한다. 한번 맺은 인연을 끝까지 지키려는 의리가 있다."
         _love_warn = "⚠️ 자신을 너무 희생하지 않도록 주의. 내 감정도 중요하다."
 
+    # ── 강사식 4박자 (①전체구조 ②근거 ③그래서지금 ④대비책) — 궁합 맥락, 신규계산 0 ──
+    _is_married6 = marriage_status in ("기혼", "재혼")
+    _now_txt6 = (
+        "결혼생활 속에서 이 성향이 실제로 어떻게 드러나는지 재확인하고 조율할 시기입니다."
+        if _is_married6 else
+        "다가오는 인연 앞에서 이 성향이 어떻게 작용할지 미리 알고 대비할 시기입니다."
+    )
+    _p1_6 = f"**【전체 구조】** {name}님의 배우자 자리(일지 {_iljj})가 만드는 연애 구조는 **{_love_type}**입니다."
+    _p2_6 = f"**【근거】** {_love_desc} 배우자궁(일지 {_iljj})의 기운이 이 성향의 뿌리입니다."
+    _p3_6 = f"**【그래서 지금】** {_now_txt6}"
+    _p4_6 = f"**【대비책】** {_love_warn}"
+
     st.markdown(
-        f"<div style='background:linear-gradient(145deg,#fff0f3,#ffe4e8);border:2px solid #e8638c;"
-        f"border-radius:14px;padding:22px;margin:10px 0'>"
-        f"<div style='font-size:22px;font-weight:900;color:#c0003c;margin-bottom:8px'>{_love_type}</div>"
-        f"<div style='font-size:14px;color:#3d0020;line-height:1.9;margin-bottom:10px'>{_love_desc}</div>"
-        f"<div style='font-size:13px;color:#8b0000;background:#fff5f7;border-radius:8px;padding:10px'>{_love_warn}</div>"
-        f"</div>",
+        "<div style='background:linear-gradient(145deg,#fff0f3,#ffe4e8);border:2px solid #e8638c;"
+        "border-radius:14px;padding:22px;margin:10px 0;font-size:14px;color:#3d0020;line-height:2'>"
+        + "<br><br>".join([_p1_6, _p2_6, _p3_6, _p4_6]) +
+        "</div>",
         unsafe_allow_html=True,
     )
 
