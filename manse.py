@@ -15870,7 +15870,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
 
             if _cur_dw2 and _next_dw2:
                 _next_start_age = _next_dw2.get("시작나이", 999)
-                _years_left2    = int(_next_start_age) - cur_age if _next_start_age else 99
+                _years_left2    = int(_next_start_age) - (cur_year - birth_year) if _next_start_age else 99
                 _next_cg2 = _next_dw2.get("cg","")
                 _next_jj2 = _next_dw2.get("jj","")
                 _cur_start_age2 = _cur_dw2.get("시작나이", 0) or 0
@@ -15891,7 +15891,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                         f"대운이 바뀌었을 때 준비된 사람과 그렇지 않은 사람의 "
                         f"10년 후 차이는 하늘과 땅입니다.", "참고"))
 
-                if cur_age - int(_cur_start_age2) <= 2:
+                if (cur_year - birth_year) - int(_cur_start_age2) <= 2:
                     _danger_signals.append(("🔄 대운 교체 직후 — 적응 기간입니다",
                         f"최근 {_cur_dw2.get('cg','')}{_cur_dw2.get('jj','')} 대운으로 바뀐 지 얼마 되지 않았습니다. "
                         f"새 대운의 기운에 아직 몸과 마음이 적응 중입니다. "
@@ -19020,7 +19020,7 @@ def menu2_lifeline(pils, birth_year, gender, name="내담자"):
         _dd      = DAEWOON_DIRECT.get(_cdw_ss, {})
         _verdict = _dd.get("verdict", f"{_cdw_ss} 대운이 진행 중입니다.")
         _remain  = cur_dw["종료연도"] - current_year
-        _age     = current_year - birth_year + 1
+        _age     = current_year - birth_year
 
         st.markdown(
             f"""<div style='background:{_gbg};border-radius:16px;padding:20px 24px;
@@ -19211,8 +19211,8 @@ def menu2_lifeline(pils, birth_year, gender, name="내담자"):
                 "戌":"戌土 — 가을의 수확 기운. 마무리·결실·저장에 유리.",
                 "亥":"亥水 — 깊고 조용한 기운. 준비·내면 성장·연구에 유리.",
             }
-            _age_s2 = cur_dw["시작연도"] - birth_year + 1
-            _age_e2 = cur_dw["종료연도"] - birth_year + 1
+            _age_s2 = cur_dw.get("시작나이", cur_dw["시작연도"] - birth_year)
+            _age_e2 = _age_s2 + 9
             _dw2_oh_cg = OH.get(_dw_cg2, "")
             _dw2_oh_jj = OH.get(_dw_jj2, "")
             _dw2_is_yong = _dw2_oh_cg in yongshin_ohs and _dw2_oh_jj in yongshin_ohs

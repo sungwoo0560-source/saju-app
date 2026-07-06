@@ -2849,7 +2849,7 @@ class LocalSajuNarrator:
             return "## ⚠️ 대운 분석을 불러오지 못했습니다."
 
         cur_year  = b.get("cur_year", datetime.now().year)
-        age_now   = cur_year - birth_year + 1
+        age_now   = cur_year - birth_year
         ilgan     = b.get("ilgan", "甲")
         gyeok     = b.get("gyeok_name", "")
         sn        = b.get("sn", "")
@@ -3902,9 +3902,9 @@ class LocalSajuNarrator:
         dw_ss_key = dw_ss[:dw_ss.find('(')] if '(' in dw_ss else dw_ss
         dw_ss_j_key = dw_ss_j[:dw_ss_j.find('(')] if '(' in dw_ss_j else dw_ss_j
 
-        age_s = dw_start - birth_year + 1
+        age_s = dw.get("시작나이", dw_start - birth_year)
 
-        age_e = dw_end - birth_year + 1
+        age_e = age_s + 9
 
         is_cur = dw_start <= cur_year <= dw_end
 
