@@ -15379,7 +15379,9 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
             ("土","土"): ("🏥 위·췌장 건강 점검이 권장되는 시기", "土 과다로 위장 질환, 당뇨 전단계 증상이 나타날 수 있습니다. 정기 건강검진을 챙기시는 것이 필요합니다."),
         }
         _h_key = (_oh_cg, _oh_jj)
-        if _h_key in _OH_HEALTH:
+        _gi_ohs_now = locals().get('gi_ohs') or []   # gi_ohs 미정의 방어 (앞 try 실패 대비)
+        # 오행 과다 건강경고는 그 오행이 기신일 때만 — 용신이면 보강이라 경고 부적절
+        if _h_key in _OH_HEALTH and _oh_cg in _gi_ohs_now:
             _ht, _hb = _OH_HEALTH[_h_key]
             _danger_signals.append((_ht, _hb, "주의"))
 
