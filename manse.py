@@ -19995,33 +19995,58 @@ def menu5_money(pils, birth_year, gender, name="내담자"):
     except Exception:
         pass
 
-    # ① 타고난 재물 그릇
-    st.markdown(f'<div class="gold-section">💎 {name}님 — ① 타고난 재물 그릇 분석</div>', unsafe_allow_html=True)
-    _GYEOK_MONEY = {
-        "식신격": ("중·대형", "꾸준히 먹고사는 복록. 부업·창작으로 자산을 늘림. 안정적 수입원이 다양함."),
-        "정관격": ("중형", "조직에서 안정적 수입. 재테크보다 직업적 성취로 자산 형성."),
-        "편관격": ("대형 또는 소형", "극단적 기복. 크게 성공하거나 손실도 큼. 도전적 투자 성향."),
-        "정재격": ("중·대형", "착실하게 쌓는 재물. 저축·부동산·안전 투자에 탁월."),
-        "편재격": ("대형", "큰 사업·투자로 자산 폭발. 기복이 크나 기회 포착 능력 최강."),
-        "상관격": ("중형", "기술·창의로 버는 재물. 자유업·전문직에서 수입 극대화."),
-        "건록격": ("중형", "노력으로 쌓는 재물. 사업보다 직업적 성취가 안정적."),
-    }
-    _bowl_size, _bowl_desc = "중형", "사주의 기운에 따라 꾸준히 쌓이는 재물 운."
-    for _gk, (_sz, _dc) in _GYEOK_MONEY.items():
-        if _gk in gname:
-            _bowl_size, _bowl_desc = _sz, _dc
-            break
-    _jaemul_profile = ilp.get("재물", "")
-    st.markdown(
-        f"<div style='background:linear-gradient(145deg,#faf7f0,#f2ebe0);border:1px solid #c9a84c;"
-        f"border-radius:14px;padding:20px;margin:10px 0'>"
-        f"<div style='font-size:15px;font-weight:800;color:#2d1f00;margin-bottom:10px'>"
-        f"재물 그릇 크기: <span style='color:#c9a84c;font-size:18px'>{_bowl_size}</span> ({gname or '격국 분석 중'})</div>"
-        f"<div style='font-size:14px;color:#3d2800;line-height:1.9'>{_bowl_desc}</div>"
-        f"<div style='margin-top:10px;font-size:13px;color:#5a3d1a;border-top:1px solid rgba(201,168,76,0.3);padding-top:8px'>"
-        f"일간({ilgan}) 재물 기질: {_jaemul_profile}</div></div>",
-        unsafe_allow_html=True,
-    )
+    # ── 강사식 4박자 (①전체구조 ②근거 ③그래서지금 ④대비책) — 재물 맥락 ──
+    st.markdown(f'<div class="gold-section">💎 {name}님 — 타고난 재물 그릇, 강사식 총평</div>', unsafe_allow_html=True)
+    try:
+        _GYEOK_MONEY = {
+            "식신격": ("중·대형", "꾸준히 먹고사는 복록. 부업·창작으로 자산을 늘림. 안정적 수입원이 다양함."),
+            "정관격": ("중형", "조직에서 안정적 수입. 재테크보다 직업적 성취로 자산 형성."),
+            "편관격": ("대형 또는 소형", "극단적 기복. 크게 성공하거나 손실도 큼. 도전적 투자 성향."),
+            "정재격": ("중·대형", "착실하게 쌓는 재물. 저축·부동산·안전 투자에 탁월."),
+            "편재격": ("대형", "큰 사업·투자로 자산 폭발. 기복이 크나 기회 포착 능력 최강."),
+            "상관격": ("중형", "기술·창의로 버는 재물. 자유업·전문직에서 수입 극대화."),
+            "건록격": ("중형", "노력으로 쌓는 재물. 사업보다 직업적 성취가 안정적."),
+        }
+        _bowl_size, _bowl_desc = "중형", "사주의 기운에 따라 꾸준히 쌓이는 재물 운."
+        for _gk, (_sz, _dc) in _GYEOK_MONEY.items():
+            if _gk in gname:
+                _bowl_size, _bowl_desc = _sz, _dc
+                break
+        _jaemul_profile = ilp.get("재물", "")
+        _yong_m5 = "·".join(yongshin_ohs[:2]) if yongshin_ohs else ""
+
+        _m5_verdict_now = locals().get("_m5_verdict", "")
+        _m5_now_txt = locals().get("_m5_hm", "") or locals().get("_m5_bm", "")
+        _dw_msg5_now = locals().get("_dw_msg5", "")
+
+        _p1 = (
+            f"**【전체 구조】** {name}님의 재물 그릇은 **{_bowl_size}**"
+            f"({gname or '격국 분석 중'}) 구조입니다 — {_bowl_desc}"
+        )
+        _p2 = (
+            f"**【근거】** " +
+            (f"{_yong_m5}(용신) 오행의 흐름 위에 " if _yong_m5 else "") +
+            f"이 재물 그릇이 서 있으니, 일간({ilgan})의 재물 기질은 "
+            f"{_jaemul_profile or '꾸준한 노력으로 자산을 쌓아가는 방식입니다.'}"
+        )
+        _p3 = "**【그래서 지금】** " + (
+            _m5_verdict_now or _m5_now_txt or f"{current_year}년 재물운을 살피는 시기입니다."
+        )
+        _p4 = "**【대비책】** " + (
+            _dw_msg5_now or
+            (f"{_yong_m5} 기운을 생활 속에서 강화하는 것이 재물 개운의 핵심입니다." if _yong_m5
+             else "용신 오행을 가까이하는 것이 재물 개운의 핵심입니다.")
+        )
+
+        st.markdown(
+            "<div style='background:linear-gradient(145deg,#faf7f0,#f2ebe0);border:1px solid #c9a84c;"
+            "border-radius:14px;padding:20px;margin:10px 0;font-size:14px;color:#3d2800;line-height:2'>"
+            + "<br><br>".join([_p1, _p2, _p3, _p4]) +
+            "</div>",
+            unsafe_allow_html=True,
+        )
+    except Exception:
+        pass
 
     # ☀️ 조후(調候) — 재물을 여는 계절 균형
     try:
