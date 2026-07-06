@@ -16973,14 +16973,17 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
             _gujo4 = "기운이 넘쳐 스스로 앞장서고 뻗어나가려는 구조입니다."
             _gugeo4_pre = "비겁·식상의 기운이 두드러지게 강해 스스로 힘을 발산하려는 흐름이 근거가 되며, "
             _cheobang4_pre = "넘치는 기운을 덜어내는 쪽으로 접근해야 하니, "
+            _yong_action4 = "용신 기운으로 넘치는 힘을 자연스럽게 흘려보내는 것이"
         elif _is_sinyak4:
             _gujo4 = "기운을 끌어모아 의지할 곳을 필요로 하는 구조입니다."
             _gugeo4_pre = "재성·관성의 부담이 크고 인성의 도움이 필요한 흐름이 근거가 되며, "
             _cheobang4_pre = "부족한 기운을 보강하는 쪽으로 접근해야 하니, "
+            _yong_action4 = "용신 기운을 채워 부족한 힘을 보강하는 것이"
         else:
             _gujo4 = "기운이 어느 한쪽으로 치우치지 않은 균형 잡힌 구조입니다."
             _gugeo4_pre = ""
             _cheobang4_pre = ""
+            _yong_action4 = f"특히 {_yong4} 기운을 생활 속에서 늘리는 것이"
 
         _l1_4 = (
             f"**【전체 구조】** {ilgan}일간 — {_bonjil4 or '독특한 기운을 지닌 존재입니다.'} "
@@ -17007,7 +17010,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
             _cheobang4_txt += "."
         _l4_4 = (
             f"**【대비책】** {_cheobang4_pre}{_cheobang4_txt}"
-            + (f" 특히 {_yong4} 기운을 생활 속에서 늘리는 것이 지금 실행할 수 있는 가장 확실한 방법입니다." if _yong4 else "")
+            + (f" {_yong_action4} 지금 실행할 수 있는 가장 확실한 방법입니다." if _yong4 else "")
         )
 
         lines.append(
