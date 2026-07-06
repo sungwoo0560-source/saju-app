@@ -19041,8 +19041,8 @@ def menu2_lifeline(pils, birth_year, gender, name="내담자"):
             <div style='font-size:14px;color:#fff;font-weight:800;
             margin-bottom:8px'>{_verdict}</div>
             <div style='font-size:12px;color:#aaa;'>
-            {cur_dw["시작연도"]}~{cur_dw["종료연도"]}년 (만 {_age}세) · 
-            <b style='color:{_gc}'>{_remain}년 남음</b></div>
+            {cur_dw["시작연도"]}~{cur_dw["종료연도"]}년 (만 {_age}세) ·
+            <b style='color:{_gc}'>{"올해가 마지막 해" if _remain == 0 else f"{_remain}년 남음"}</b></div>
             </div>""",
             unsafe_allow_html=True,
         )
@@ -19254,7 +19254,8 @@ def menu2_lifeline(pils, birth_year, gender, name="내담자"):
                 f"font-size:13px;color:{_dw2_col};font-weight:700;'>"
                 f"💎 행동 지침: {_dw2_action}<br>"
                 f"<span style='color:#aaa;font-weight:400;font-size:12px'>"
-                f"📅 {cur_dw['시작연도']}~{cur_dw['종료연도']}년 (만 {_age_s2}~{_age_e2}세) · <b>{_remain2}년 남음</b></span>"
+                f"📅 {cur_dw['시작연도']}~{cur_dw['종료연도']}년 (만 {_age_s2}~{_age_e2}세) · "
+                f"<b>{'올해가 마지막 해' if _remain2 == 0 else f'{_remain2}년 남음'}</b></span>"
                 f"</div></div>",
                 unsafe_allow_html=True,
             )
