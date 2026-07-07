@@ -7360,6 +7360,16 @@ _GK_KEY_MAP_GLOBAL = {
     "편인格":"偏印(편인)格(편인격)", "정인格":"正印(정인)格(정인격)",
 }
 
+def _gyeok_kr_name(gname):
+    """'偏官(편관)格' → '편관격', '從强格(종강격)' → '종강격' (특수격 중복접미사 방지). 매칭 실패 시 원본 반환."""
+    if not gname:
+        return gname or ""
+    m = re.search(r"\(([가-힣]+)\)", gname)
+    if not m:
+        return gname
+    inner = m.group(1)
+    return inner if inner.endswith("격") else inner + "격"
+
 def _gk_career(gname):
     """격국명을 CAREER_MATRIX 키 형식으로 변환 후 조회"""
     _key = _GK_KEY_MAP_GLOBAL.get(gname, gname)
@@ -20008,8 +20018,9 @@ def menu5_money(pils, birth_year, gender, name="내담자"):
             "건록격": ("중형", "노력으로 쌓는 재물. 사업보다 직업적 성취가 안정적."),
         }
         _bowl_size, _bowl_desc = "중형", "사주의 기운에 따라 꾸준히 쌓이는 재물 운."
+        _gname_kr5 = _gyeok_kr_name(gname)
         for _gk, (_sz, _dc) in _GYEOK_MONEY.items():
-            if _gk in gname:
+            if _gk == _gname_kr5:
                 _bowl_size, _bowl_desc = _sz, _dc
                 break
         _jaemul_profile = ilp.get("재물", "")
@@ -20169,8 +20180,9 @@ def menu5_money(pils, birth_year, gender, name="내담자"):
 
     _sn_key5 = "신강" if "신강" in _sn5 else ("신약" if "신약" in _sn5 else "중화")
     _job_detail5 = ""
+    _gname_kr_job5 = _gyeok_kr_name(gname)
     for _gk5, _jmap5 in _GYEOK_JOB_DETAIL.items():
-        if _gk5 in gname:
+        if _gk5 == _gname_kr_job5:
             _job_detail5 = _jmap5.get(_sn_key5, _jmap5.get("중화",""))
             break
 

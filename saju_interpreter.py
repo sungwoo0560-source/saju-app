@@ -8344,6 +8344,7 @@ HEALTH_OH = make_hanja_safe(HEALTH_OH)
 GYEOKGUK_DESC = make_hanja_safe(GYEOKGUK_DESC)
 STRENGTH_NARRATIVE = make_hanja_safe(STRENGTH_NARRATIVE)
 CAREER_MATRIX = make_hanja_safe(CAREER_MATRIX)
+GYEOKGUK_DETAIL = make_hanja_safe(GYEOKGUK_DETAIL)
 
 
 # ----------------- HANJA SAFE INJECT END -----------------
