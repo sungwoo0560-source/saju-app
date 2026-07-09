@@ -25172,9 +25172,34 @@ def menu14_health(pils, name, birth_year, gender):
                      "비견 운에서는 무리한 경쟁과 과도한 활동으로 체력이 바닥납니다. 충분한 휴식이 곧 최고의 건강법입니다."),
         }
 
-        # ── 오행 과다·부족 TOP3 질병 직격 출력 ─────────────────────
-        st.markdown('<div class="gold-section">🚨 지금 당신에게 올 수 있는 질병 TOP3</div>',
+        # ── 【전체구조】 타고난 건강 구조 — 오행 밸런스 ─────────────
+        st.markdown('<div class="gold-section">🩺 【전체구조】 타고난 건강 구조 — 오행 밸런스</div>',
                     unsafe_allow_html=True)
+        col1, col2 = st.columns([1.5, 1])
+        with col1:
+            st.markdown('<div class="section-label">🩺 오행 건강 밸런스</div>',
+                        unsafe_allow_html=True)
+            render_ohaeng_chart(oh_strength)
+
+        with col2:
+            st.markdown('<div class="section-label">⚠️ 과다·부족 진단</div>',
+                        unsafe_allow_html=True)
+            _oh_nm = {"木":"목(木)","火":"화(火)","土":"토(土)","金":"금(金)","水":"수(水)"}
+            for _oh, _val in sorted(oh_strength.items(), key=lambda x: -x[1]):
+                if _val >= 30:
+                    _tag = f"🔴 {_oh_nm.get(_oh,_oh)} 과다({_val}%)"
+                    _col = "#c0392b"
+                elif _val <= 10:
+                    _tag = f"💧 {_oh_nm.get(_oh,_oh)} 부족({_val}%)"
+                    _col = "#2980b9"
+                else:
+                    _tag = f"✅ {_oh_nm.get(_oh,_oh)} 정상({_val}%)"
+                    _col = "#27ae60"
+                st.markdown(
+                    f"<div style='font-size:12px;color:{_col};font-weight:700;"
+                    f"padding:4px 0;'>{_tag}</div>",
+                    unsafe_allow_html=True,
+                )
 
         # 판단 기준: 과다 오행 + 부족 오행 + 세운 오행 교차
         _target_oh = excess_oh if oh_strength[excess_oh] >= 30 else weak_oh
@@ -25182,6 +25207,10 @@ def menu14_health(pils, name, birth_year, gender):
         _excess_mode = oh_strength.get(_target_oh, 0) >= 30
         _oh_dict = _OH_DISEASE_EXCESS if _excess_mode else _OH_DISEASE
         _oh_data = _oh_dict.get(_target_oh, _OH_DISEASE["土"])
+
+        # ── 【근거】 지금 당신에게 올 수 있는 질병 TOP3 ─────────────
+        st.markdown('<div class="gold-section">🚨 【근거】 지금 당신에게 올 수 있는 질병 TOP3</div>',
+                    unsafe_allow_html=True)
 
         for rank, (disease_name, disease_desc) in enumerate(_oh_data["diseases"], 1):
             _rank_color = ["#c0392b", "#e67e22", "#f39c12"][rank - 1]
@@ -25195,8 +25224,8 @@ def menu14_health(pils, name, birth_year, gender):
                 unsafe_allow_html=True,
             )
 
-        # ── 세운·대운 교차 건강 경보 ────────────────────────────────
-        st.markdown('<div class="gold-section">⚡ 올해·현재 대운 건강 경보</div>',
+        # ── 【그래서 지금】 올해·현재 대운 건강 경보 ────────────────
+        st.markdown('<div class="gold-section">⚡ 【그래서 지금】 올해·현재 대운 건강 경보</div>',
                     unsafe_allow_html=True)
 
         _sw_warn_title, _sw_warn_desc = _SS_HEALTH.get(
@@ -25227,35 +25256,8 @@ def menu14_health(pils, name, birth_year, gender):
                 unsafe_allow_html=True,
             )
 
-        # ── 오행 밸런스 차트 + 과다·부족 진단 ──────────────────────
-        col1, col2 = st.columns([1.5, 1])
-        with col1:
-            st.markdown('<div class="section-label">🩺 오행 건강 밸런스</div>',
-                        unsafe_allow_html=True)
-            render_ohaeng_chart(oh_strength)
-
-        with col2:
-            st.markdown('<div class="section-label">⚠️ 과다·부족 진단</div>',
-                        unsafe_allow_html=True)
-            _oh_nm = {"木":"목(木)","火":"화(火)","土":"토(土)","金":"금(金)","水":"수(水)"}
-            for _oh, _val in sorted(oh_strength.items(), key=lambda x: -x[1]):
-                if _val >= 30:
-                    _tag = f"🔴 {_oh_nm.get(_oh,_oh)} 과다({_val}%)"
-                    _col = "#c0392b"
-                elif _val <= 10:
-                    _tag = f"💧 {_oh_nm.get(_oh,_oh)} 부족({_val}%)"
-                    _col = "#2980b9"
-                else:
-                    _tag = f"✅ {_oh_nm.get(_oh,_oh)} 정상({_val}%)"
-                    _col = "#27ae60"
-                st.markdown(
-                    f"<div style='font-size:12px;color:{_col};font-weight:700;"
-                    f"padding:4px 0;'>{_tag}</div>",
-                    unsafe_allow_html=True,
-                )
-
-        # ── 직격 처방 ────────────────────────────────────────────────
-        st.markdown('<div class="gold-section">💊 직격 건강 처방 (지금 당장 해야 할 것)</div>',
+        # ── 【대비책】 직격 건강 처방 ────────────────────────────────
+        st.markdown('<div class="gold-section">💊 【대비책】 직격 건강 처방 (지금 당장 해야 할 것)</div>',
                     unsafe_allow_html=True)
 
         _oh_rx = _oh_data
