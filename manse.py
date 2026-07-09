@@ -14865,7 +14865,20 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
         else:
             _now_txt4 = (f"{_sw_label4}은 크게 기울지 않는 평이한 흐름이니, 큰 변수보다 꾸준함이 중요한 시기입니다. "
                          f"화려한 전환점을 기대하기보다 하루하루 쌓아가는 노력이 다음 흐름을 준비하는 밑거름이 됩니다.")
-        _l3_4 = f"**【그래서 지금】** {cur_year}년 {cur_age}세, {_dw_label4}{_age_range4}에 {_now_txt4}"
+        _cross_sum4 = cross.get("summary", "")
+        _cross_fin4 = cross.get("finance", "").replace("재물:", "").strip()
+        _cross_car4 = cross.get("career", "").replace("직업:", "").strip()
+        _cross_detail4 = ""
+        if _cross_sum4:
+            _cross_detail4 += f" 올해의 큰 흐름은 이렇습니다 — {_cross_sum4}."
+        if _cross_fin4:
+            _cross_detail4 += f" 재물 면에서는 {_cross_fin4}"
+        if _cross_car4:
+            _cross_detail4 += f" 일·사회 면에서는 {_cross_car4}"
+        _l3_4 = (
+            f"**【그래서 지금】** {cur_year}년 {cur_age}세, {_dw_label4}{_age_range4}에 {_now_txt4}"
+            f"{_cross_detail4}"
+        )
         _cheobang4_txt = (_cheobang4 or "용신 오행을 가까이하고 기신 오행의 기운을 줄이는 것이 실질적인 개운법입니다.").rstrip()
         if _cheobang4_txt and _cheobang4_txt[-1] not in ".!?":
             _cheobang4_txt += "."
