@@ -14839,6 +14839,15 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
             _cheobang4_pre = ""
             _yong_action4 = f"특히 {_yong4} 기운을 생활 속에서 늘리는 것이"
 
+        _char4 = ILGAN_CHAR_DESC.get(ilgan, {})
+        _char_core4 = _char4.get("성격_핵심", "").strip()
+        _char_weak4 = _char4.get("단점", "").strip()
+        _l0_4 = ""
+        if _char_core4:
+            _l0_4 = f"**【당신이라는 사람】** {_char_core4}"
+            if _char_weak4:
+                _l0_4 += f" 다만 {_char_weak4} 그 점만 의식하면 타고난 강점이 더 빛납니다."
+
         _l1_4 = (
             f"**【전체 구조】** {ilgan}일간 — {_bonjil4 or '독특한 기운을 지닌 존재입니다.'} "
             f"여기에 {sn} 사주가 겹쳐지고 **{_gyeok_kr4}({_gyeok_hj4})** 구조까지 갖추었으니, {_gujo4} "
@@ -14895,7 +14904,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
         st.markdown(
             '<div style="background:#faf7f0;border-left:4px solid #d4af37;border-radius:10px;'
             'padding:16px 18px;margin:8px 0 16px;font-size:13px;color:#333;line-height:2;">'
-            + "<br><br>".join([_l1_4, _l2_4, _l3_4, _l4_4]) +
+            + "<br><br>".join([x for x in [_l0_4, _l1_4, _l2_4, _l3_4, _l4_4] if x]) +
             '</div>',
             unsafe_allow_html=True,
         )
