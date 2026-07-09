@@ -14869,12 +14869,15 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
         _cross_fin4 = cross.get("finance", "").replace("재물:", "").strip()
         _cross_car4 = cross.get("career", "").replace("직업:", "").strip()
         _cross_detail4 = ""
+        def _pd(s):  # 마침표 없으면 붙이기
+            s = s.rstrip()
+            return s if (not s or s[-1] in ".!?") else s + "."
         if _cross_sum4:
-            _cross_detail4 += f" 올해의 큰 흐름은 이렇습니다 — {_cross_sum4}."
+            _cross_detail4 += f" 올해의 큰 흐름은 이렇습니다 — {_pd(_cross_sum4)}"
         if _cross_fin4:
-            _cross_detail4 += f" 재물 면에서는 {_cross_fin4}"
+            _cross_detail4 += f" 재물 면에서는 {_pd(_cross_fin4)}"
         if _cross_car4:
-            _cross_detail4 += f" 일·사회 면에서는 {_cross_car4}"
+            _cross_detail4 += f" 일·사회 면에서는 {_pd(_cross_car4)}"
         _l3_4 = (
             f"**【그래서 지금】** {cur_year}년 {cur_age}세, {_dw_label4}{_age_range4}에 {_now_txt4}"
             f"{_cross_detail4}"
