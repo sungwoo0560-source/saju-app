@@ -14797,6 +14797,95 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
     dw_kr = _SS_KR.get(dw_ss, dw_ss)
     sw_kr = _SS_KR.get(sw_ss, sw_ss)
 
+    # ── 강사식 4박자 도입부 (①전체구조 ②근거 ③그래서지금 ④대비책) ──
+    # 핵심 진단 요약(build_saju_core_diagnosis) 바로 아래 배치 — 짧은 팩트 요약과
+    # 구별되는 "풀어서 설명하는 강사 해설" 역할. ilgan/sn/yong_ohs/gi_ohs/sw_gil/
+    # dw_kr/sw_kr이 모두 계산된 이 지점이 이동 가능한 최상단.
+    try:
+        _dw_label4  = f"{dw_kr} 대운" if dw_kr else "대운 미산출"
+        _sw_label4  = f"{sw_kr} 세운" if sw_kr else f"{cur_year}년 세운"
+        _age_range4 = f" ({dw_age_s}~{dw_age_e}세)" if dw_age_s and dw_age_e else ""
+
+        _gk4 = get_gyeokguk(pils) or {}
+        _gyeok_raw4 = TEN_GODS_MATRIX.get(ilgan, {}).get(_gk4.get("정기", ""), "")
+        _gyeok_kr4 = (_SS_KR.get(_gyeok_raw4, "") + "격") if _gyeok_raw4 else "격국미상"
+        _gyeok_hj4 = (clean_hanja(_gyeok_raw4) + "格") if _gyeok_raw4 else ""
+        _ip4 = ILGAN_PROFILE.get(ilgan, {})
+        _bonjil4 = _ip4.get("본질", "")
+        _cheobang4 = _ip4.get("처방", "")
+        _yong_ohs4 = locals().get("yong_ohs") or []
+        _gi_ohs4 = locals().get("gi_ohs") or []
+        _yong4 = "·".join(_yong_ohs4[:2])
+        _gi4 = "·".join(_gi_ohs4[:2])
+
+        _is_singang4 = "신강" in sn
+        _is_sinyak4  = "신약" in sn
+        if _is_singang4:
+            _gujo4 = ("기운이 넘쳐 스스로 앞장서고 뻗어나가려는 구조입니다. 가만히 있지 못하고 "
+                      "늘 무언가를 벌이거나 주도해야 마음이 편안해지는 성향이 여기서 나옵니다.")
+            _gugeo4_pre = "비겁·식상의 기운이 두드러지게 강해 스스로 힘을 발산하려는 흐름이 근거가 되며, "
+            _cheobang4_pre = "넘치는 기운을 덜어내는 쪽으로 접근해야 하니, "
+            _yong_action4 = "용신 기운으로 넘치는 힘을 자연스럽게 흘려보내는 것이"
+        elif _is_sinyak4:
+            _gujo4 = ("기운을 끌어모아 의지할 곳을 필요로 하는 구조입니다. 혼자 감당하기보다 "
+                      "주변의 도움과 지지를 받을 때 비로소 힘이 붙는 성향이 여기서 나옵니다.")
+            _gugeo4_pre = "재성·관성의 부담이 크고 인성의 도움이 필요한 흐름이 근거가 되며, "
+            _cheobang4_pre = "부족한 기운을 보강하는 쪽으로 접근해야 하니, "
+            _yong_action4 = "용신 기운을 채워 부족한 힘을 보강하는 것이"
+        else:
+            _gujo4 = ("기운이 어느 한쪽으로 치우치지 않은 균형 잡힌 구조입니다. 극단으로 치닫기보다 "
+                      "상황에 맞춰 유연하게 대응하는 힘이 이 구조의 강점입니다.")
+            _gugeo4_pre = ""
+            _cheobang4_pre = ""
+            _yong_action4 = f"특히 {_yong4} 기운을 생활 속에서 늘리는 것이"
+
+        _l1_4 = (
+            f"**【전체 구조】** {ilgan}일간 — {_bonjil4 or '독특한 기운을 지닌 존재입니다.'} "
+            f"여기에 {sn} 사주가 겹쳐지고 **{_gyeok_kr4}({_gyeok_hj4})** 구조까지 갖추었으니, {_gujo4} "
+            f"이 구조는 타고난 성격 묘사에서 그치지 않고, 살면서 반복적으로 마주치는 선택의 순간마다 "
+            f"본인도 모르게 끌려가는 방향을 결정짓습니다."
+        )
+        _l2_4 = (
+            f"**【근거】** " + _gugeo4_pre +
+            (f"{_yong4}(용신)" if _yong4 else "") +
+            (" · " if _yong4 and _gi4 else "") +
+            (f"{_gi4}(기신)" if _gi4 else "") +
+            f" 오행의 힘겨루기 위에 이 사주의 십성 구조가 짜여 있으니, 이건 막연한 느낌이 아니라 "
+            f"사주 여덟 글자 안에서 어느 오행이 힘을 받고 어느 오행이 억눌리는지를 그대로 읽어낸 결과입니다. "
+            f"용신이 힘을 받으면 순탄하고 기신이 힘을 받으면 굴곡이 생기기 쉬운 흐름이니, "
+            f"이 두 기운의 움직임을 눈여겨봐야 합니다."
+        )
+        if sw_gil in ("길", "대길"):
+            _now_txt4 = (f"{_sw_label4}이 용신과 통하니 흐름을 타기 좋은 시기일 가능성이 높습니다. "
+                         f"다만 좋은 시기일수록 자만하지 말고, 지금의 흐름을 실질적인 성과로 "
+                         f"바꾸는 데 집중해야 합니다.")
+        elif sw_gil in ("흉", "대흉"):
+            _now_txt4 = (f"{_sw_label4}이 기신 쪽에 가까우니 무리한 결정보다 신중함이 필요한 시기일 수 있습니다. "
+                         f"큰 결정은 잠시 미루고, 지금은 버티고 정비하는 데 힘을 쏟는 편이 낫습니다.")
+        else:
+            _now_txt4 = (f"{_sw_label4}은 크게 기울지 않는 평이한 흐름이니, 큰 변수보다 꾸준함이 중요한 시기입니다. "
+                         f"화려한 전환점을 기대하기보다 하루하루 쌓아가는 노력이 다음 흐름을 준비하는 밑거름이 됩니다.")
+        _l3_4 = f"**【그래서 지금】** {cur_year}년 {cur_age}세, {_dw_label4}{_age_range4}에 {_now_txt4}"
+        _cheobang4_txt = (_cheobang4 or "용신 오행을 가까이하고 기신 오행의 기운을 줄이는 것이 실질적인 개운법입니다.").rstrip()
+        if _cheobang4_txt and _cheobang4_txt[-1] not in ".!?":
+            _cheobang4_txt += "."
+        _l4_4 = (
+            f"**【대비책】** {_cheobang4_pre}{_cheobang4_txt}"
+            + (f" {_yong_action4} 지금 실행할 수 있는 가장 확실한 방법입니다." if _yong4 else "")
+            + " 거창하게 접근할 필요 없이, 오늘 하나씩 실천할 수 있는 작은 습관부터 바꿔나가는 것이 "
+              "결국 큰 흐름을 바꾸는 시작이 됩니다."
+        )
+
+        st.markdown(
+            '<div style="background:#faf7f0;border-left:4px solid #d4af37;border-radius:10px;'
+            'padding:16px 18px;margin:8px 0 16px;font-size:13px;color:#333;line-height:2;">'
+            + "<br><br>".join([_l1_4, _l2_4, _l3_4, _l4_4]) +
+            '</div>',
+            unsafe_allow_html=True,
+        )
+    except Exception:
+        pass
+
     # ── 십성별 힘든 이유 & 공감 문장 ──────────────────────
     _HARD_REASON = {
         "편재": (
@@ -16963,75 +17052,9 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
     lines.append(f"*{cur_year}년 · {cur_age}세 · {_dw_label}{_age_range} · {_sw_label}*")
     lines.append("")
 
-    # ── 강사식 4박자 도입부 (①전체구조 ②근거 ③그래서지금 ④대비책) ──
-    try:
-        _gk4 = get_gyeokguk(pils) or {}
-        _gyeok_raw4 = TEN_GODS_MATRIX.get(ilgan, {}).get(_gk4.get("정기", ""), "")
-        _gyeok_kr4 = (_SS_KR.get(_gyeok_raw4, "") + "격") if _gyeok_raw4 else "격국미상"
-        _gyeok_hj4 = (clean_hanja(_gyeok_raw4) + "格") if _gyeok_raw4 else ""
-        _ip4 = ILGAN_PROFILE.get(ilgan, {})
-        _bonjil4 = _ip4.get("본질", "")
-        _cheobang4 = _ip4.get("처방", "")
-        _yong_ohs4 = locals().get("yong_ohs") or []
-        _gi_ohs4 = locals().get("gi_ohs") or []
-        _yong4 = "·".join(_yong_ohs4[:2])
-        _gi4 = "·".join(_gi_ohs4[:2])
-
-        _is_singang4 = "신강" in sn
-        _is_sinyak4  = "신약" in sn
-        if _is_singang4:
-            _gujo4 = "기운이 넘쳐 스스로 앞장서고 뻗어나가려는 구조입니다."
-            _gugeo4_pre = "비겁·식상의 기운이 두드러지게 강해 스스로 힘을 발산하려는 흐름이 근거가 되며, "
-            _cheobang4_pre = "넘치는 기운을 덜어내는 쪽으로 접근해야 하니, "
-            _yong_action4 = "용신 기운으로 넘치는 힘을 자연스럽게 흘려보내는 것이"
-        elif _is_sinyak4:
-            _gujo4 = "기운을 끌어모아 의지할 곳을 필요로 하는 구조입니다."
-            _gugeo4_pre = "재성·관성의 부담이 크고 인성의 도움이 필요한 흐름이 근거가 되며, "
-            _cheobang4_pre = "부족한 기운을 보강하는 쪽으로 접근해야 하니, "
-            _yong_action4 = "용신 기운을 채워 부족한 힘을 보강하는 것이"
-        else:
-            _gujo4 = "기운이 어느 한쪽으로 치우치지 않은 균형 잡힌 구조입니다."
-            _gugeo4_pre = ""
-            _cheobang4_pre = ""
-            _yong_action4 = f"특히 {_yong4} 기운을 생활 속에서 늘리는 것이"
-
-        _l1_4 = (
-            f"**【전체 구조】** {ilgan}일간 — {_bonjil4 or '독특한 기운을 지닌 존재입니다.'} "
-            f"{sn} 사주에 **{_gyeok_kr4}({_gyeok_hj4})** 구조를 갖추었으니, "
-            f"{_gujo4}"
-        )
-        _l2_4 = (
-            f"**【근거】** " + _gugeo4_pre +
-            (f"{_yong4}(용신)" if _yong4 else "") +
-            (" · " if _yong4 and _gi4 else "") +
-            (f"{_gi4}(기신)" if _gi4 else "") +
-            f" 오행의 힘겨루기 위에 이 사주의 십성 구조가 짜여 있으니, "
-            f"용신이 힘을 받으면 순탄하고 기신이 힘을 받으면 굴곡이 생기기 쉬운 흐름입니다."
-        )
-        if sw_gil in ("길", "대길"):
-            _now_txt4 = f"{_sw_label}이 용신과 통하니 흐름을 타기 좋은 시기일 가능성이 높습니다."
-        elif sw_gil in ("흉", "대흉"):
-            _now_txt4 = f"{_sw_label}이 기신 쪽에 가까우니 무리한 결정보다 신중함이 필요한 시기일 수 있습니다."
-        else:
-            _now_txt4 = f"{_sw_label}은 크게 기울지 않는 평이한 흐름이니, 큰 변수보다 꾸준함이 중요한 시기입니다."
-        _l3_4 = f"**【그래서 지금】** {cur_year}년 {cur_age}세, {_dw_label}{_age_range}에 {_now_txt4}"
-        _cheobang4_txt = (_cheobang4 or "용신 오행을 가까이하고 기신 오행의 기운을 줄이는 것이 실질적인 개운법입니다.").rstrip()
-        if _cheobang4_txt and _cheobang4_txt[-1] not in ".!?":
-            _cheobang4_txt += "."
-        _l4_4 = (
-            f"**【대비책】** {_cheobang4_pre}{_cheobang4_txt}"
-            + (f" {_yong_action4} 지금 실행할 수 있는 가장 확실한 방법입니다." if _yong4 else "")
-        )
-
-        lines.append(
-            '<div style="background:#faf7f0;border-left:4px solid #d4af37;border-radius:10px;'
-            'padding:16px 18px;margin:8px 0 16px;font-size:13px;color:#333;line-height:2;">'
-            + "<br><br>".join([_l1_4, _l2_4, _l3_4, _l4_4]) +
-            '</div>'
-        )
-        lines.append("")
-    except Exception:
-        pass
+    # 강사식 4박자(【전체구조】【근거】【그래서지금】【대비책】)는 함수 상단
+    # build_saju_core_diagnosis 직후로 이동·별도 렌더됨 (ilgan/sn/yong_ohs/gi_ohs/
+    # sw_gil/dw_kr/sw_kr 계산 직후가 이동 가능한 최상단이라 lines 리스트 밖에서 처리)
 
     # ── 지금 상황 진단 — 세운 십성 기반 공감 서술 ──────────────────
     if hard_q or hard_body:
