@@ -14848,6 +14848,57 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
             if _char_weak4:
                 _l0_4 += f" 다만 {_char_weak4} 그 점만 의식하면 타고난 강점이 더 빛납니다."
 
+        import re as _re_story
+        _CORE_FALLBACK4 = {"子": "지혜와 내실"}
+        def _core_interp4(t, key=""):
+            m = _re_story.search(r"([가-힣·\s]+?)의 10년", t or "")
+            if m:
+                return m.group(1).strip()
+            return _CORE_FALLBACK4.get(key, "")
+
+        # 과거 대운 (기존 세션값 재사용, get_daewoon 읽기전용)
+        _life_l = ""
+        try:
+            _dw_all4 = SajuCoreEngine.get_daewoon(
+                pils, birth_year,
+                st.session_state.get("birth_month", 1),
+                st.session_state.get("birth_day", 1),
+                st.session_state.get("birth_hour", 12),
+                st.session_state.get("birth_minute", 0),
+                gender=gender,
+            )
+            _past4 = [d for d in _dw_all4 if d.get("종료연도", 0) < cur_year][-3:]
+            _seg4 = []
+            _conn4 = ["의 흐름 속에 있었고", "의 시기를 지났으며", "의 기운이 함께했습니다"]
+            for _i, d in enumerate(_past4):
+                _cg_d = d.get("cg", "")
+                _jj_d = d.get("jj", "")
+                _str_d = d.get("str", "")
+                _a_s = d.get("시작나이", 0)
+                _ck = _core_interp4(DAEWOON_INTERP.get(_cg_d, ""), _cg_d)
+                _jk = _core_interp4(DAEWOON_INTERP.get(_jj_d, ""), _jj_d)
+                # 천간·지지 핵심 합치기 (빈값 가드)
+                _mean = " · ".join([x for x in [_ck, _jk] if x])
+                if _mean and _str_d:
+                    # 접속어 순환 (같은 말 반복 방지) — 마지막 조각은 완결형 어미로
+                    _is_last4 = (_i == len(_past4) - 1)
+                    if _is_last4:
+                        _tail = "의 기운이 함께했습니다"
+                    else:
+                        _tail = _conn4[_i] if _i < len(_conn4) - 1 else "의 흐름이 이어졌고"
+                    _seg4.append(f"{_a_s}세 무렵 {_str_d} 대운엔 {_mean}{_tail}")
+            if _seg4:
+                _life_body = ", ".join(_seg4)
+                # 마지막 조각이 마침표로 끝나지 않으면 붙여 문장 마무리 (대운 1~2개 케이스)
+                if _life_body and _life_body[-1] not in ".!?":
+                    _life_body += "."
+                _life_l = (
+                    f"**【당신이 걸어온 길】** 지나온 길을 돌아보면, {_life_body} "
+                    f"그 시간들이 차곡차곡 쌓여 지금의 당신을 만들었습니다."
+                )
+        except Exception:
+            _life_l = ""
+
         _l1_4 = (
             f"**【전체 구조】** {ilgan}일간 — {_bonjil4 or '독특한 기운을 지닌 존재입니다.'} "
             f"여기에 {sn} 사주가 겹쳐지고 **{_gyeok_kr4}({_gyeok_hj4})** 구조까지 갖추었으니, {_gujo4} "
@@ -14904,7 +14955,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
         st.markdown(
             '<div style="background:#faf7f0;border-left:4px solid #d4af37;border-radius:10px;'
             'padding:16px 18px;margin:8px 0 16px;font-size:13px;color:#333;line-height:2;">'
-            + "<br><br>".join([x for x in [_l0_4, _l1_4, _l2_4, _l3_4, _l4_4] if x]) +
+            + "<br><br>".join([x for x in [_l0_4, _life_l, _l1_4, _l2_4, _l3_4, _l4_4] if x]) +
             '</div>',
             unsafe_allow_html=True,
         )
