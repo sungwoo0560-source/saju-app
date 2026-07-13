@@ -14899,6 +14899,54 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
         except Exception:
             _life_l = ""
 
+        # ── 타고난 구조의 특징 (natal 패턴, 최대 2개, 양면화) ──
+        _trait_l = ""
+        try:
+            _sp4 = calc_sipsung(ilgan, pils)
+            _sc4 = {}
+            for _p4 in _sp4:
+                for _k4 in (_p4.get("cg_ss",""), _p4.get("jj_ss","")):
+                    if _k4 and _k4 != "-":
+                        _sc4[_k4] = _sc4.get(_k4, 0) + 1
+            # calc_sipsung은 "比肩(비견)" 형식 전체 라벨을 반환 (TEN_GODS_MATRIX 값과 동일)
+            _bi4  = _sc4.get("比肩(비견)",0)+_sc4.get("劫財(겁재)",0)
+            _jae4 = _sc4.get("偏財(편재)",0)+_sc4.get("正財(정재)",0)
+            _sik4 = _sc4.get("食神(식신)",0)+_sc4.get("傷官(상관)",0)
+            _in4  = _sc4.get("偏印(편인)",0)+_sc4.get("正印(정인)",0)
+            _pg4  = _sc4.get("偏官(편관)",0); _jg4 = _sc4.get("正官(정관)",0)
+            _sg4  = _sc4.get("傷官(상관)",0)
+            _es4 = get_extra_sinsal(pils)
+            _hy_natal4 = any("홍염" in (s.get("name","") if isinstance(s,dict) else str(s)) for s in (_es4 or []))
+            _yd4 = get_yangin(pils)
+            _yang4 = bool(_yd4 and _yd4.get("존재", False))
+            _wk4 = "신약" in sn   # 부분일치 (발견2 반영, 원본 exact-match 버그 미적용)
+
+            _TRAITS4 = {
+                "홍염": "타고난 이성 흡인력이 강한 구조입니다 — 매력과 인기가 따르는 만큼, 관계의 선을 분명히 하는 것이 복을 지키는 길입니다.",
+                "양인": "칼날 같은 추진력을 품은 구조입니다 — 큰일을 해내는 힘이지만, 속도를 조절할 때 그 힘이 온전히 내 것이 됩니다.",
+                "비겁쟁재": "곁에 사람이 많고 경쟁도 많은 구조입니다 — 함께 가는 힘이 크지만, 동업·보증·금전 거래에서는 선을 긋는 것이 서로를 지킵니다.",
+                "재다신약": "재물과 인연이 많이 들어오지만 몸이 따라가기 벅찬 구조 — 욕심보다 선택과 집중이 복을 지킵니다.",
+                "관살혼잡": "책임과 압박이 겹으로 들어오는 구조 — 일을 가려 받는 것이 실력입니다.",
+                "상관견관": "틀을 깨는 재주가 관을 건드리는 구조 — 창의력이 무기지만, 윗사람·조직과의 말은 한 번 더 다듬는 게 좋습니다.",
+                "식상태왕": "표현하고 만들어내는 기운이 넘치는 구조 — 재능이 많은 만큼, 하나에 힘을 모으면 크게 됩니다.",
+                "인성과다": "생각이 깊고 배움이 많은 구조 — 다만 생각이 길어지면 때를 놓치니, 어느 순간엔 몸이 먼저 움직여야 합니다.",
+            }
+            _hit4 = []
+            if _hy_natal4: _hit4.append("홍염")
+            if _yang4: _hit4.append("양인")
+            if _bi4 >= 2 and _jae4 >= 1: _hit4.append("비겁쟁재")
+            if _jae4 >= 2 and _wk4: _hit4.append("재다신약")
+            if _pg4 >= 1 and _jg4 >= 1: _hit4.append("관살혼잡")
+            if _sg4 >= 1 and _jg4 >= 1: _hit4.append("상관견관")
+            if _sik4 >= 2: _hit4.append("식상태왕")
+            if _in4 >= 3: _hit4.append("인성과다")
+            _hit4 = _hit4[:2]   # 최대 2개
+            if _hit4:
+                _trait_body4 = " ".join(_TRAITS4[h] for h in _hit4)
+                _trait_l = f"**【타고난 구조의 특징】** {_trait_body4}"
+        except Exception:
+            _trait_l = ""
+
         _l1_4 = (
             f"**【전체 구조】** {ilgan}일간 — {_bonjil4 or '독특한 기운을 지닌 존재입니다.'} "
             f"여기에 {sn} 사주가 겹쳐지고 **{_gyeok_kr4}({_gyeok_hj4})** 구조까지 갖추었으니, {_gujo4} "
@@ -14955,7 +15003,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
         st.markdown(
             '<div style="background:#faf7f0;border-left:4px solid #d4af37;border-radius:10px;'
             'padding:16px 18px;margin:8px 0 16px;font-size:13px;color:#333;line-height:2;">'
-            + "<br><br>".join([x for x in [_l0_4, _life_l, _l1_4, _l2_4, _l3_4, _l4_4] if x]) +
+            + "<br><br>".join([x for x in [_l0_4, _trait_l, _life_l, _l1_4, _l2_4, _l3_4, _l4_4] if x]) +
             '</div>',
             unsafe_allow_html=True,
         )
