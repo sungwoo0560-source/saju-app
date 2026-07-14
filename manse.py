@@ -14947,6 +14947,69 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
         except Exception:
             _trait_l = ""
 
+        # ── 타고난 인연과 충돌 (합충형파, 양면화) ──
+        _relation_l = ""
+        try:
+            _jjs4 = [p.get("jj","") for p in pils]  # 4지지
+            _cgs4 = [p.get("cg","") for p in pils]  # 4천간
+            _rel_hits4 = []
+
+            # 로컬 dict — 지지충 6쌍
+            _CHUNG6 = [frozenset(["子","午"]),frozenset(["丑","未"]),frozenset(["寅","申"]),
+                       frozenset(["卯","酉"]),frozenset(["辰","戌"]),frozenset(["巳","亥"])]
+            # 로컬 dict — 육합 6쌍
+            _YUKHAP6 = [frozenset(["子","丑"]),frozenset(["寅","亥"]),frozenset(["卯","戌"]),
+                        frozenset(["辰","酉"]),frozenset(["巳","申"]),frozenset(["午","未"])]
+
+            _jjset4 = set(_jjs4)
+
+            # 육합 (우선 — 파 해소) — 양면
+            for _pair in _YUKHAP6:
+                if _pair.issubset(_jjset4):
+                    _rel_hits4.append(("합", "가까이 묶이는 인연의 구조가 있습니다 — 사람과 잘 어울리고 협력이 순조로운 만큼, 때로는 그 관계에 발이 묶이지 않도록 거리 조절이 필요합니다"))
+                    break
+
+            # 충 (변동) — 양면
+            for _pair in _CHUNG6:
+                if _pair.issubset(_jjset4):
+                    _rel_hits4.append(("충", "부딪히고 움직이는 충의 구조가 있습니다 — 변화·이동이 잦아 한자리에 머물기 어렵지만, 그만큼 변화에 강하고 새 국면을 여는 추진력이 됩니다"))
+                    break
+
+            # 형 (자형 포함) — 양면
+            _hyung_hit4 = False
+            # 자형: 같은 지지 2개 이상
+            for _z in set(_jjs4):
+                if _jjs4.count(_z) >= 2 and _z in ("辰","午","酉","亥"):  # 전통 자형 지지
+                    _hyung_hit4 = True
+                    break
+            # 삼형: HYUNG_MAP 전역 참조 (구조는 1단계 확인 후 맞춤)
+            if not _hyung_hit4:
+                try:
+                    for _combo in HYUNG_MAP:
+                        _cset = _combo if isinstance(_combo,(set,frozenset)) else set(_combo)
+                        if _cset.issubset(_jjset4):
+                            _hyung_hit4 = True
+                            break
+                except Exception:
+                    pass
+            if _hyung_hit4:
+                _rel_hits4.append(("형", "갈등과 마찰의 형(刑) 구조가 있습니다 — 부딪힘이 있는 만큼, 그 기운을 법·검경·의료처럼 남의 문제를 다루는 전문 영역으로 쓰면 오히려 큰 강점이 됩니다"))
+
+            # 파 (짧게, 약한 작용) — 육합 있으면 생략 가능하나 일단 표시
+            _PA6 = [frozenset(["子","酉"]),frozenset(["午","卯"]),frozenset(["申","巳"]),
+                    frozenset(["寅","亥"]),frozenset(["辰","丑"]),frozenset(["戌","未"])]
+            _pa_hit4 = any(_p.issubset(_jjset4) for _p in _PA6)
+            # 육합(寅亥 등)이 이미 잡혔으면 파는 언급 안 함 (합 우선)
+            _has_hap4 = any(h[0]=="합" for h in _rel_hits4)
+            if _pa_hit4 and not _has_hap4:
+                _rel_hits4.append(("파", "작게 어긋나는 파(破)의 기운이 있습니다 — 계획이 살짝 틀어질 수 있으니, 중요한 일은 한 번 더 점검하면 됩니다"))
+
+            if _rel_hits4:
+                _rel_body4 = " ".join(h[1] + "." for h in _rel_hits4[:3])  # 최대 3개
+                _relation_l = f"<b>【타고난 인연과 충돌】</b> {_rel_body4}"
+        except Exception:
+            _relation_l = ""
+
         _l1_4 = (
             f"<b>【전체 구조】</b> {ilgan}일간 — {_bonjil4 or '독특한 기운을 지닌 존재입니다.'} "
             f"여기에 {sn} 사주가 겹쳐지고 <b>{_gyeok_kr4}({_gyeok_hj4})</b> 구조까지 갖추었으니, {_gujo4} "
@@ -15081,7 +15144,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
         st.markdown(
             '<div style="background:#faf7f0;border-left:4px solid #d4af37;border-radius:10px;'
             'padding:16px 18px;margin:8px 0 16px;font-size:13px;color:#333;line-height:2;">'
-            + "<br><br>".join([x for x in [_l0_4, _trait_l, _life_l, _l1_4, _temp_l, _l2_4, _l3_4, _l4_4, _key_l] if x]) +
+            + "<br><br>".join([x for x in [_l0_4, _trait_l, _relation_l, _life_l, _l1_4, _temp_l, _l2_4, _l3_4, _l4_4, _key_l] if x]) +
             '</div>',
             unsafe_allow_html=True,
         )
