@@ -14844,7 +14844,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
         _char_weak4 = _char4.get("단점", "").strip()
         _l0_4 = ""
         if _char_core4:
-            _l0_4 = f"**【당신이라는 사람】** {_char_core4}"
+            _l0_4 = f"<b>【당신이라는 사람】</b> {_char_core4}"
             if _char_weak4:
                 _l0_4 += f" 다만 {_char_weak4} 그 점만 의식하면 타고난 강점이 더 빛납니다."
 
@@ -14893,7 +14893,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                 if _life_body and _life_body[-1] not in ".!?":
                     _life_body += "."
                 _life_l = (
-                    f"**【당신이 걸어온 길】** 지나온 길을 돌아보면, {_life_body} "
+                    f"<b>【당신이 걸어온 길】</b> 지나온 길을 돌아보면, {_life_body} "
                     f"그 시간들이 차곡차곡 쌓여 지금의 당신을 만들었습니다."
                 )
         except Exception:
@@ -14943,18 +14943,18 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
             _hit4 = _hit4[:2]   # 최대 2개
             if _hit4:
                 _trait_body4 = " ".join(_TRAITS4[h] for h in _hit4)
-                _trait_l = f"**【타고난 구조의 특징】** {_trait_body4}"
+                _trait_l = f"<b>【타고난 구조의 특징】</b> {_trait_body4}"
         except Exception:
             _trait_l = ""
 
         _l1_4 = (
-            f"**【전체 구조】** {ilgan}일간 — {_bonjil4 or '독특한 기운을 지닌 존재입니다.'} "
-            f"여기에 {sn} 사주가 겹쳐지고 **{_gyeok_kr4}({_gyeok_hj4})** 구조까지 갖추었으니, {_gujo4} "
+            f"<b>【전체 구조】</b> {ilgan}일간 — {_bonjil4 or '독특한 기운을 지닌 존재입니다.'} "
+            f"여기에 {sn} 사주가 겹쳐지고 <b>{_gyeok_kr4}({_gyeok_hj4})</b> 구조까지 갖추었으니, {_gujo4} "
             f"이 구조는 타고난 성격 묘사에서 그치지 않고, 살면서 반복적으로 마주치는 선택의 순간마다 "
             f"본인도 모르게 끌려가는 방향을 결정짓습니다."
         )
         _l2_4 = (
-            f"**【근거】** " + _gugeo4_pre +
+            f"<b>【근거】</b> " + _gugeo4_pre +
             (f"{_yong4}(용신)" if _yong4 else "") +
             (" · " if _yong4 and _gi4 else "") +
             (f"{_gi4}(기신)" if _gi4 else "") +
@@ -14987,14 +14987,14 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
         if _cross_car4:
             _cross_detail4 += f" 일·사회 면에서는 {_pd(_cross_car4)}"
         _l3_4 = (
-            f"**【그래서 지금】** {cur_year}년 {cur_age}세, {_dw_label4}{_age_range4}에 {_now_txt4}"
+            f"<b>【그래서 지금】</b> {cur_year}년 {cur_age}세, {_dw_label4}{_age_range4}에 {_now_txt4}"
             f"{_cross_detail4}"
         )
         _cheobang4_txt = (_cheobang4 or "용신 오행을 가까이하고 기신 오행의 기운을 줄이는 것이 실질적인 개운법입니다.").rstrip()
         if _cheobang4_txt and _cheobang4_txt[-1] not in ".!?":
             _cheobang4_txt += "."
         _l4_4 = (
-            f"**【대비책】** {_cheobang4_pre}{_cheobang4_txt}"
+            f"<b>【대비책】</b> {_cheobang4_pre}{_cheobang4_txt}"
             + (f" {_yong_action4} 지금 실행할 수 있는 가장 확실한 방법입니다." if _yong4 else "")
             + " 거창하게 접근할 필요 없이, 오늘 하나씩 실천할 수 있는 작은 습관부터 바꿔나가는 것이 "
               "결국 큰 흐름을 바꾸는 시작이 됩니다."
@@ -15035,11 +15035,11 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
             if _hit4:
                 _warn4 = _KEY_WARN4.get(_hit4[0], "")
 
-            _key_body4 = f"당신은 **‘{_core_id4}’**입니다. 평생의 과제는 {_bal4}이고"
+            _key_body4 = f"당신은 <b>‘{_core_id4}’</b>입니다. 평생의 과제는 {_bal4}이고"
             if _warn4:
-                _key_body4 += f", 평생 조심할 것은 **‘{_warn4}’**입니다"
+                _key_body4 += f", 평생 조심할 것은 <b>‘{_warn4}’</b>입니다"
             _key_body4 += "."
-            _key_l = f"**【한마디로 말하면】** {_key_body4}"
+            _key_l = f"<b>【한마디로 말하면】</b> {_key_body4}"
         except Exception:
             _key_l = ""
 
