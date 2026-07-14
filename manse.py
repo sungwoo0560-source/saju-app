@@ -15000,10 +15000,53 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
               "결국 큰 흐름을 바꾸는 시작이 됩니다."
         )
 
+        # ── 핵심 한 방 (구조 요약 + 평생 주의) ──
+        _key_l = ""
+        try:
+            # 구조 요약 — 격국+신강약 기반 한 줄
+            _CORE_ID4 = {
+                "정인격": "배우고 쌓아서 그것으로 서는 사람",
+                "편인격": "남다른 시선으로 자기 길을 내는 사람",
+                "정재격": "성실하게 쌓아 지키는 사람",
+                "편재격": "크게 벌이고 크게 움직이는 사람",
+                "정관격": "질서와 명예 안에서 빛나는 사람",
+                "편관격": "책임과 압박을 뚫고 나아가는 사람",
+                "식신격": "만들어내고 표현하며 사는 사람",
+                "상관격": "틀을 깨고 새로 짜는 사람",
+                "비견격": "혼자 힘으로 서는 사람",
+                "겁재격": "경쟁 속에서 자기를 세우는 사람",
+            }
+            _core_id4 = _CORE_ID4.get(_gyeok_kr4, "자기만의 방식으로 살아가는 사람")
+            _strong4 = "신강" in sn
+            _bal4 = "넘치는 힘을 어디에 쓸지" if _strong4 else "부족한 힘을 어디서 채울지"
+
+            # 평생 주의 — natal 패턴 기반 (_hit4 첫번째)
+            _KEY_WARN4 = {
+                "홍염": "이성과의 인연이 들어오고 나가는 자리",
+                "양인": "속도와 결단이 지나쳐 부딪히는 자리",
+                "비겁쟁재": "가까운 사람과 돈이 겹치는 자리",
+                "재다신약": "욕심이 몸을 앞지르는 자리",
+                "관살혼잡": "책임을 가리지 않고 다 떠안는 자리",
+                "상관견관": "말과 재주가 윗사람을 건드리는 자리",
+                "식상태왕": "재능이 흩어져 하나도 못 맺는 자리",
+                "인성과다": "생각이 길어져 때를 놓치는 자리",
+            }
+            _warn4 = ""
+            if _hit4:
+                _warn4 = _KEY_WARN4.get(_hit4[0], "")
+
+            _key_body4 = f"당신은 **‘{_core_id4}’**입니다. 평생의 과제는 {_bal4}이고"
+            if _warn4:
+                _key_body4 += f", 평생 조심할 것은 **‘{_warn4}’**입니다"
+            _key_body4 += "."
+            _key_l = f"**【한마디로 말하면】** {_key_body4}"
+        except Exception:
+            _key_l = ""
+
         st.markdown(
             '<div style="background:#faf7f0;border-left:4px solid #d4af37;border-radius:10px;'
             'padding:16px 18px;margin:8px 0 16px;font-size:13px;color:#333;line-height:2;">'
-            + "<br><br>".join([x for x in [_l0_4, _trait_l, _life_l, _l1_4, _l2_4, _l3_4, _l4_4] if x]) +
+            + "<br><br>".join([x for x in [_l0_4, _trait_l, _life_l, _l1_4, _l2_4, _l3_4, _l4_4, _key_l] if x]) +
             '</div>',
             unsafe_allow_html=True,
         )
