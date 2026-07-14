@@ -1688,17 +1688,6 @@ def calc_ohaeng_strength(ilgan, pils):
         if combo.issubset(cgs):
             power[oh] += 8.0    # 천간합화
 
-    # ── ④ 충 감산 ────────────────────────────────────────────────
-    for combo, oh1, oh2 in _JJ_CHUNG:
-        if combo.issubset(jjs):
-            power[oh1] = max(0.0, power[oh1] - 5.0)
-            power[oh2] = max(0.0, power[oh2] - 5.0)
-
-    for combo, oh1, oh2 in _TG_CHUNG:
-        if combo.issubset(cgs):
-            power[oh1] = max(0.0, power[oh1] - 4.0)
-            power[oh2] = max(0.0, power[oh2] - 4.0)
-
     # ── ⑤ 월령 득령 (최대 25pt) ──────────────────────────────────
     wol_jj = pils[2]["jj"]
     wol_oh = OH.get(wol_jj, "")
@@ -1778,6 +1767,17 @@ def calc_ohaeng_strength(ilgan, pils):
     for oh, jj_set in _TONGGUEN.items():
         if all_jjs & jj_set:
             power[oh] += 5.0
+
+    # ── ④ 충 감산 ────────────────────────────────────────────────
+    for combo, oh1, oh2 in _JJ_CHUNG:
+        if combo.issubset(jjs):
+            power[oh1] = max(0.0, power[oh1] - 5.0)
+            power[oh2] = max(0.0, power[oh2] - 5.0)
+
+    for combo, oh1, oh2 in _TG_CHUNG:
+        if combo.issubset(cgs):
+            power[oh1] = max(0.0, power[oh1] - 4.0)
+            power[oh2] = max(0.0, power[oh2] - 4.0)
 
     # ── 정규화 (합=100) ───────────────────────────────────────────
     total = sum(power.values())
