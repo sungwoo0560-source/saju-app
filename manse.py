@@ -14953,6 +14953,41 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
             f"이 구조는 타고난 성격 묘사에서 그치지 않고, 살면서 반복적으로 마주치는 선택의 순간마다 "
             f"본인도 모르게 끌려가는 방향을 결정짓습니다."
         )
+
+        # ── 타고난 온도 (조후) ──
+        _temp_l = ""
+        try:
+            _jo_need4 = ys_info.get("조후_need", "")
+            _jo_prior4 = ys_info.get("조후_우선", False)
+            _wol_jj4 = pils[2].get("jj", "")
+
+            # 월지 → 계절 매핑
+            _SEASON4 = {
+                "寅": ("봄", "기운이 처음 움트는"), "卯": ("봄", "만물이 자라나는"), "辰": ("봄", "봄이 무르익어 흙이 촉촉한"),
+                "巳": ("여름", "열기가 오르기 시작하는"), "午": ("여름", "불기운이 가장 뜨거운"), "未": ("여름", "마른 흙이 뜨겁게 달아오른"),
+                "申": ("가을", "서늘한 금기운이 도는"), "酉": ("가을", "금기운이 가장 날카로운"), "戌": ("가을", "가을이 저물어 흙이 메마른"),
+                "亥": ("겨울", "물이 왕성해지는"), "子": ("겨울", "한기가 가장 깊은"), "丑": ("겨울", "얼어붙은 흙의"),
+            }
+            _season4, _season_desc4 = _SEASON4.get(_wol_jj4, ("", ""))
+
+            if _season4 and _jo_need4:
+                # 조후_need를 문자열로 정규화 (리스트면 · 로 결합)
+                _need_txt4 = "·".join(_jo_need4) if isinstance(_jo_need4, (list, tuple)) else str(_jo_need4)
+                _temp_body4 = (
+                    f"{_wol_jj4}월({_season4}) 태생 — {_season_desc4} 계절에 태어난 {ilgan}일간입니다. "
+                    f"이 사주의 온도를 맞추는 데 급한 기운은 <b>{_need_txt4}</b>입니다."
+                )
+                if _jo_prior4:
+                    _temp_body4 += (
+                        " 이건 강약(억부)보다 먼저 보아야 하는 요소로, "
+                        "아무리 힘을 보태거나 덜어내도 온도가 맞지 않으면 그 힘이 제대로 쓰이지 않습니다."
+                    )
+                else:
+                    _temp_body4 += " 온도는 비교적 균형이 잡혀 있어, 강약(억부)의 흐름을 우선해 보면 됩니다."
+                _temp_l = f"<b>【타고난 온도】</b> {_temp_body4}"
+        except Exception:
+            _temp_l = ""
+
         _l2_4 = (
             f"<b>【근거】</b> " + _gugeo4_pre +
             (f"{_yong4}(용신)" if _yong4 else "") +
@@ -15046,7 +15081,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
         st.markdown(
             '<div style="background:#faf7f0;border-left:4px solid #d4af37;border-radius:10px;'
             'padding:16px 18px;margin:8px 0 16px;font-size:13px;color:#333;line-height:2;">'
-            + "<br><br>".join([x for x in [_l0_4, _trait_l, _life_l, _l1_4, _l2_4, _l3_4, _l4_4, _key_l] if x]) +
+            + "<br><br>".join([x for x in [_l0_4, _trait_l, _life_l, _l1_4, _temp_l, _l2_4, _l3_4, _l4_4, _key_l] if x]) +
             '</div>',
             unsafe_allow_html=True,
         )
