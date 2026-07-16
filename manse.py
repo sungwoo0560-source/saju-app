@@ -15051,6 +15051,35 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
         except Exception:
             _pillar_l = ""
 
+        # ── 타고난 인연의 자리 (육친, get_yukjin 재사용, 양면화 내장) ──
+        _yuk_l = ""
+        try:
+            _yuk_list4 = get_yukjin(ilgan, pils, gender, marriage_status)
+            _yuk_seg4 = []
+            # present=True 우선, 없으면 재해석 문구 있는 것 일부
+            _yuk_present4 = [y for y in (_yuk_list4 or []) if y.get("present")]
+            _yuk_absent4 = [y for y in (_yuk_list4 or []) if not y.get("present")]
+            # present 관계 전부 + absent 중 desc 있는 것 최대 1개 (없는 인연도 한마디)
+            _yuk_pick4 = _yuk_present4 + _yuk_absent4[:1]
+            for _y4 in _yuk_pick4:
+                _y_rel4 = _y4.get("관계", "")
+                _y_desc4 = _y4.get("desc", "")
+                _y_present4 = _y4.get("present", False)
+                if _y_rel4 and _y_desc4:
+                    if _y_present4:
+                        # 있는 육친(긍정 톤): 첫 문장 압축 OK
+                        _y_txt4 = _y_desc4.split(".")[0].strip()
+                    else:
+                        # 없는 육친: 양면·재해석 문구 보존 위해 전체 desc 유지 (낙인 방지)
+                        _y_txt4 = _y_desc4.strip().rstrip(".")
+                    if _y_txt4:
+                        _yuk_seg4.append(_y_txt4)
+            if _yuk_seg4:
+                _yuk_body4 = ". ".join(_yuk_seg4[:5]) + "."   # 최대 5관계
+                _yuk_l = f"<b>【타고난 인연의 자리】</b> {_yuk_body4}"
+        except Exception:
+            _yuk_l = ""
+
         _l1_4 = (
             f"<b>【전체 구조】</b> {ilgan}일간 — {_bonjil4 or '독특한 기운을 지닌 존재입니다.'} "
             f"여기에 {sn} 사주가 겹쳐지고 <b>{_gyeok_kr4}({_gyeok_hj4})</b> 구조까지 갖추었으니, {_gujo4} "
@@ -15185,7 +15214,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
         st.markdown(
             '<div style="background:#faf7f0;border-left:4px solid #d4af37;border-radius:10px;'
             'padding:16px 18px;margin:8px 0 16px;font-size:13px;color:#333;line-height:2;">'
-            + "<br><br>".join([x for x in [_l0_4, _trait_l, _relation_l, _pillar_l, _life_l, _l1_4, _temp_l, _l2_4, _l3_4, _l4_4, _key_l] if x]) +
+            + "<br><br>".join([x for x in [_l0_4, _trait_l, _relation_l, _pillar_l, _yuk_l, _life_l, _l1_4, _temp_l, _l2_4, _l3_4, _l4_4, _key_l] if x]) +
             '</div>',
             unsafe_allow_html=True,
         )
