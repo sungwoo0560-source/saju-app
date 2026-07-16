@@ -15010,6 +15010,47 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
         except Exception:
             _relation_l = ""
 
+        # ── 자리마다 새겨진 운 (기둥별 십성, 포지션 새 정의) ──
+        _pillar_l = ""
+        try:
+            _sp_p4 = calc_sipsung(ilgan, pils)  # [시주, 일주, 월주, 년주] 순서
+            # ★ 전통 포지션: 기존 _pos_drama(뒤집힘) 미사용, 새로 정의
+            _POS4 = {
+                3: ("년주", "초년과 뿌리"),        # index3 = 년주
+                2: ("월주", "청년기와 사회 활동"),  # index2 = 월주
+                1: ("일주", "중년과 나 자신·배우자"), # index1 = 일주
+                0: ("시주", "말년과 자식 인연"),    # index0 = 시주
+            }
+            _seg_p4 = []
+            # 전통 순서(년→월→일→시)로 서술: index 3→2→1→0
+            for _idx4 in (3, 2, 1, 0):
+                if _idx4 >= len(_sp_p4):
+                    continue
+                _pd4 = _sp_p4[_idx4]
+                _ss_cg4 = _pd4.get("cg_ss", "")
+                _pos_name4, _pos_mean4 = _POS4[_idx4]
+                if not _ss_cg4 or _ss_cg4 == "-":
+                    continue
+                # SIPSONG_DETAIL 키는 순수 한자 (DW_SS_DESC 선례와 동일하게 정규화)
+                _ss_hj4 = _ss_cg4.split("(")[0]
+                _sd4 = SIPSONG_DETAIL.get(_ss_hj4, {})
+                _core_p4 = _sd4.get("핵심", "") if isinstance(_sd4, dict) else ""
+                if _core_p4:
+                    _parts_p4 = [s.strip() for s in _core_p4.split(".") if s.strip()]
+                    _core_short4 = _parts_p4[1] if len(_parts_p4) >= 2 else (_parts_p4[0] if _parts_p4 else "")
+                    # 키워드 끝의 "의 기운"/"기운" 중복 제거 (앞의 "~의 기운 —"과 겹침 방지)
+                    _kw_p4 = _core_short4
+                    for _suf in ("의 기운", "기운"):
+                        if _kw_p4.endswith(_suf):
+                            _kw_p4 = _kw_p4[:-len(_suf)].rstrip("· ").rstrip()
+                            break
+                    _seg_p4.append(f"{_pos_name4}({_pos_mean4})에는 {_ss_cg4}의 기운 — {_kw_p4}")
+            if _seg_p4:
+                _pillar_body4 = ". ".join(_seg_p4) + "."
+                _pillar_l = f"<b>【자리마다 새겨진 운】</b> {_pillar_body4}"
+        except Exception:
+            _pillar_l = ""
+
         _l1_4 = (
             f"<b>【전체 구조】</b> {ilgan}일간 — {_bonjil4 or '독특한 기운을 지닌 존재입니다.'} "
             f"여기에 {sn} 사주가 겹쳐지고 <b>{_gyeok_kr4}({_gyeok_hj4})</b> 구조까지 갖추었으니, {_gujo4} "
@@ -15144,7 +15185,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
         st.markdown(
             '<div style="background:#faf7f0;border-left:4px solid #d4af37;border-radius:10px;'
             'padding:16px 18px;margin:8px 0 16px;font-size:13px;color:#333;line-height:2;">'
-            + "<br><br>".join([x for x in [_l0_4, _trait_l, _relation_l, _life_l, _l1_4, _temp_l, _l2_4, _l3_4, _l4_4, _key_l] if x]) +
+            + "<br><br>".join([x for x in [_l0_4, _trait_l, _relation_l, _pillar_l, _life_l, _l1_4, _temp_l, _l2_4, _l3_4, _l4_4, _key_l] if x]) +
             '</div>',
             unsafe_allow_html=True,
         )
