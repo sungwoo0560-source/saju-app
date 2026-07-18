@@ -7786,12 +7786,21 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
     _merged_seen = set()
     sinsal_names = []
     for _n in _ext_names_ordered + _base_names:
-        if _n and _n not in _merged_seen:
-            _merged_seen.add(_n)
+        _n_key = (_n or "").split("(")[0].strip()
+        if _n and _n_key not in _merged_seen:
+            _merged_seen.add(_n_key)
             sinsal_names.append(_n)
 
     # 확장 신살 상세 dict → 이름 키로 빠른 참조
     _ext_detail = {_es.get("이름", ""): _es for _es in _ext_sinsal}
+    # 원본 sinsal_data dict → 이름 키로 빠른 참조 (get_12sinsal/get_extra_sinsal의 desc/remedy 활용)
+    _sd_detail = {}
+    if sinsal_data and isinstance(sinsal_data, list):
+        for _sd in sinsal_data:
+            if isinstance(_sd, dict):
+                _sd_key = _sd.get("이름") or _sd.get("name") or ""
+                if _sd_key and _sd_key not in _sd_detail:
+                    _sd_detail[_sd_key] = _sd
 
     sinsal_rows = ""
     for _sn in sinsal_names[:20]:
@@ -7817,6 +7826,19 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
                 f'<b>{_icon} {_sn}</b> — {_ed.get("의미","")}<br>'
                 f'<span style="color:#555;font-size:13px;">→ {_res}</span>'
                 + (f'<br><span style="color:#c62828;font-size:12px;">⚠️ {_warn}</span>' if _warn else "")
+                + '</div>'
+            )
+        elif _sn in _sd_detail and (
+            _sd_detail[_sn].get("결과") or _sd_detail[_sn].get("의미") or _sd_detail[_sn].get("desc")
+        ):
+            _fd = _sd_detail[_sn]
+            _res2 = _fd.get("결과") or _fd.get("의미") or _fd.get("desc") or ""
+            _advice2 = _fd.get("remedy") or _fd.get("caution") or ""
+            sinsal_rows += (
+                '<div style="margin-bottom:10px;padding:10px 14px;background:#fff8e1;'
+                'border-left:3px solid #f9a825;border-radius:6px;">'
+                f'<b>{_sn}</b> — {_res2}'
+                + (f'<br><span style="color:#555;font-size:13px;">→ {_advice2}</span>' if _advice2 else '')
                 + '</div>'
             )
         else:
