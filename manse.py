@@ -18002,8 +18002,9 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
         lines.append("")
 
     lines.append("---")
-    _gi_display = gi_str if gi_str else ("없음(중화)" if "중화" in sn else "미산출")
-    _data_note = f"일간 {ilgan}({iljj}) · 신강신약 {sn} · 용신 {yong_str or '미산출'} · 기신 {_gi_display} · 오행 {_oh_bar}"
+    _gi_display = gi_str2 if gi_str2 else ("없음(중화)" if "중화" in sn else "미산출")
+    _yong_str3 = "·".join(yong_ohs[:3]) if yong_ohs else ""
+    _data_note = f"일간 {ilgan}({iljj}) · 신강신약 {sn} · 용신 {(_yong_str3 or yong_str) or '미산출'} · 기신 {_gi_display} · 오행 {_oh_bar}"
     lines.append(f"*위 분석은 {_dw_label} × {_sw_label} 교차 + 원국 오행구성 + 일간·일지·나이 개인화 기반으로 생성됩니다.*")
     lines.append(f"*[ {_data_note} ]*")
 
@@ -26696,7 +26697,7 @@ def render_manse_grid(pils, birth_year, birth_month, birth_day, birth_hour, birt
                 unsafe_allow_html=True,
             )
         # 용신/기신
-        yong_str = "·".join(yong_ohs[:2]) if yong_ohs else "-"
+        yong_str = "·".join(yong_ohs[:3]) if yong_ohs else "-"
         gi_str   = "·".join(gi_ohs[:2])   if gi_ohs   else "-"
         st.markdown(
             f"""<div style="background:#f0fff4;border-radius:6px;padding:6px 10px;margin-top:6px;font-size:12px">
