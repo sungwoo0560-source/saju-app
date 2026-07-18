@@ -18904,9 +18904,9 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
             _ml_g = get_monthly_luck(pils, _cy_g, _mi_g + 1) or {}
             _gr_g, _, _ = _month_grade(_ml_g, _yong_g, _orig_jjs_g)
             if _gr_g in ("흉","흉흉"):
-                _danger_months.append(f"**{_mi_g+1}월**")
+                _danger_months.append(f"<b>{_mi_g+1}월</b>")
             elif _gr_g in ("대길","길"):
-                _good_months.append(f"**{_mi_g+1}월**")
+                _good_months.append(f"<b>{_mi_g+1}월</b>")
 
         st.markdown(
             f"<div style='background:#0d1117;border:1.5px solid #d4af3744;"
