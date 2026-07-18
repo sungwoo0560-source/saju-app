@@ -18117,14 +18117,6 @@ def _month_grade(ml, yong_list, orig_jjs):
 def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
     """[1. Comprehensive Report] - Pillars, Personality, Gyeokguk, Yongshin"""
 
-    # X-4-I-3: 사주 핵심 종합 진단 헤더
-    try:
-        _core_diag = build_saju_core_diagnosis(pils, name, birth_year, gender)
-        if _core_diag:
-            st.markdown(_core_diag, unsafe_allow_html=True)
-    except Exception:
-        pass
-
     # 강사식 13항목 골드박스 (현재상황탭에서 이설, build_gangsa_block() 재사용)
     try:
         _gangsa_html = build_gangsa_block(pils, name, birth_year, gender)
