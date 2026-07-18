@@ -14569,6 +14569,573 @@ def render_worry_inference(pils, birth_year, gender, marital_status=None):
         pass
 
 
+def build_gangsa_block(pils, name, birth_year, gender, marriage_status=None):
+    """강사식 13항목 HTML 문자열을 반환. 실패 시 빈 문자열."""
+    try:
+        if marriage_status is None:
+            marriage_status = st.session_state.get("marriage_status", "미혼")
+
+        cur_year = datetime.now().year
+        cur_age  = cur_year - birth_year + 1
+
+        # ── 데이터 수집 ────────────────────────────────────────
+        try:
+            from saju_interpreter import get_crossing_interpretation
+            cross = get_crossing_interpretation(
+                pils,
+                cur_year,
+                birth_year=birth_year,
+                birth_month=st.session_state.get("birth_month", 1),
+                birth_day=st.session_state.get("birth_day", 1),
+                gender=gender,
+                birth_hour=st.session_state.get("birth_hour", 12),
+                birth_minute=st.session_state.get("birth_minute", 0),
+            )
+        except Exception:
+            cross = {}
+
+        dw_ss  = (cross.get("dw_ss")  or cross.get("대운_천간십성") or cross.get("대운십성") or "")
+        sw_ss  = (cross.get("sw_ss")  or cross.get("세운_천간십성") or cross.get("세운십성") or "")
+        sw_gil = (cross.get("sw_gil") or cross.get("길흉") or "평")
+        # "평(平)" → "평" 정규화
+        import re as _re
+        sw_gil = _re.sub(r'\([^)]+\)', '', str(sw_gil)).strip()
+        dw_age_s = cross.get("dw_start_age", cross.get("시작나이", ""))
+        dw_age_e = cross.get("dw_end_age",   cross.get("종료나이", ""))
+
+        try:
+            ilgan   = pils[1]["cg"]
+            from saju_interpreter import get_ilgan_strength, get_yongshin
+            sn_info  = get_ilgan_strength(ilgan, pils)
+            sn       = sn_info.get("신강신약", "중화")
+            ys_info  = get_yongshin(pils)
+            yong_ohs = ys_info.get("종합_용신", [])
+            _gi_raw  = ys_info.get("기신", [])
+            # 기신이 문자열로 반환되는 경우 리스트로 변환
+            if isinstance(_gi_raw, list):
+                gi_ohs = _gi_raw
+            elif isinstance(_gi_raw, str) and _gi_raw:
+                # "木·火" 형태면 분리, 아니면 빈 리스트
+                gi_ohs = [x.strip() for x in _gi_raw.replace("·", ",").split(",") if x.strip() in ["木","火","土","金","水"]]
+            else:
+                gi_ohs = []
+            # 기신이 서술형 문자열(오행 없음)인 경우 → sn으로 역산
+            if not gi_ohs and isinstance(_gi_raw, str) and _gi_raw:
+                _ilgan_oh2 = _OH_CG.get(ilgan, "")
+                _BMRV2 = {"木":"水","火":"木","土":"火","金":"土","水":"金"}
+                _CTLV2 = {"木":"土","火":"金","土":"水","金":"木","水":"火"}
+                if "신강" in sn and _ilgan_oh2:
+                    _ok_인2 = _BMRV2.get(_ilgan_oh2, "")
+                    gi_ohs = [o for o in [_ok_인2, _ilgan_oh2] if o]
+                elif "신약" in sn and _ilgan_oh2:
+                    _ok_관2 = next((k for k, v in _CTLV2.items() if v == _ilgan_oh2), "")
+                    _ok_재2 = _CTLV2.get(_ilgan_oh2, "")
+                    gi_ohs = [o for o in [_ok_관2, _ok_재2] if o]
+                # 중화(中和): 특정 기신 없음 → gi_ohs 빈 리스트 유지
+        except Exception:
+            ilgan = "甲"; sn = "중화"
+
+        # 용신보정: 세운 오행이 용신이면 sw_gil='길', 기신이면 '흉'
+        # 신강/신약인데 용신·기신 어디에도 안 속하는 오행(주로 식상)은
+        # YEARLY_LUCK_NARRATIVE 고정표(예: 食神=大吉)를 그대로 두지 않고 '평'으로 중화
+        try:
+            _sw_oh_c = (get_yearly_luck(pils, cur_year) or {}).get("오행_천간", "")
+            if _sw_oh_c and _sw_oh_c in yong_ohs:
+                sw_gil = "길"
+            elif _sw_oh_c and _sw_oh_c in gi_ohs:
+                sw_gil = "흉"
+            elif _sw_oh_c and ("신강" in sn or "신약" in sn):
+                sw_gil = "평"
+        except Exception:
+            pass
+
+        _SS_KR = {
+            "偏財(편재)":"편재","正財(정재)":"정재","食神(식신)":"식신","傷官(상관)":"상관",
+            "偏官(편관)":"편관","正官(정관)":"정관","偏印(편인)":"편인","正印(정인)":"정인",
+            "比肩(비견)":"비견","劫財(겁재)":"겁재",
+        }
+        dw_kr = _SS_KR.get(dw_ss, dw_ss)
+        sw_kr = _SS_KR.get(sw_ss, sw_ss)
+
+        # ── 강사식 4박자 도입부 (①전체구조 ②근거 ③그래서지금 ④대비책) ──
+        # 핵심 진단 요약(build_saju_core_diagnosis) 바로 아래 배치 — 짧은 팩트 요약과
+        # 구별되는 "풀어서 설명하는 강사 해설" 역할. ilgan/sn/yong_ohs/gi_ohs/sw_gil/
+        # dw_kr/sw_kr이 모두 계산된 이 지점이 이동 가능한 최상단.
+        _gangsa_html = ""
+        try:
+            _dw_label4  = f"{dw_kr} 대운" if dw_kr else "대운 미산출"
+            _sw_label4  = f"{sw_kr} 세운" if sw_kr else f"{cur_year}년 세운"
+            _age_range4 = f" ({dw_age_s}~{dw_age_e}세)" if dw_age_s and dw_age_e else ""
+
+            _gk4 = get_gyeokguk(pils) or {}
+            _gyeok_raw4 = TEN_GODS_MATRIX.get(ilgan, {}).get(_gk4.get("정기", ""), "")
+            _gyeok_kr4 = (_SS_KR.get(_gyeok_raw4, "") + "격") if _gyeok_raw4 else "격국미상"
+            _gyeok_hj4 = (clean_hanja(_gyeok_raw4) + "格") if _gyeok_raw4 else ""
+            _ip4 = ILGAN_PROFILE.get(ilgan, {})
+            _bonjil4 = _ip4.get("본질", "")
+            _cheobang4 = _ip4.get("처방", "")
+            _yong_ohs4 = locals().get("yong_ohs") or []
+            _gi_ohs4 = locals().get("gi_ohs") or []
+            _yong4 = "·".join(_yong_ohs4[:2])
+            _gi4 = "·".join(_gi_ohs4[:2])
+
+            _is_singang4 = "신강" in sn
+            _is_sinyak4  = "신약" in sn
+            if _is_singang4:
+                _gujo4 = ("기운이 넘쳐 스스로 앞장서고 뻗어나가려는 구조입니다. 가만히 있지 못하고 "
+                          "늘 무언가를 벌이거나 주도해야 마음이 편안해지는 성향이 여기서 나옵니다.")
+                _gugeo4_pre = "비겁·식상의 기운이 두드러지게 강해 스스로 힘을 발산하려는 흐름이 근거가 되며, "
+                _cheobang4_pre = "넘치는 기운을 덜어내는 쪽으로 접근해야 하니, "
+                _yong_action4 = "용신 기운으로 넘치는 힘을 자연스럽게 흘려보내는 것이"
+            elif _is_sinyak4:
+                _gujo4 = ("기운을 끌어모아 의지할 곳을 필요로 하는 구조입니다. 혼자 감당하기보다 "
+                          "주변의 도움과 지지를 받을 때 비로소 힘이 붙는 성향이 여기서 나옵니다.")
+                _gugeo4_pre = "재성·관성의 부담이 크고 인성의 도움이 필요한 흐름이 근거가 되며, "
+                _cheobang4_pre = "부족한 기운을 보강하는 쪽으로 접근해야 하니, "
+                _yong_action4 = "용신 기운을 채워 부족한 힘을 보강하는 것이"
+            else:
+                _gujo4 = ("기운이 어느 한쪽으로 치우치지 않은 균형 잡힌 구조입니다. 극단으로 치닫기보다 "
+                          "상황에 맞춰 유연하게 대응하는 힘이 이 구조의 강점입니다.")
+                _gugeo4_pre = ""
+                _cheobang4_pre = ""
+                _yong_action4 = f"특히 {_yong4} 기운을 생활 속에서 늘리는 것이"
+
+            _char4 = ILGAN_CHAR_DESC.get(ilgan, {})
+            _char_core4 = _char4.get("성격_핵심", "").strip()
+            _char_weak4 = _char4.get("단점", "").strip()
+            _l0_4 = ""
+            if _char_core4:
+                _l0_4 = f"<b>【당신이라는 사람】</b> {_char_core4}"
+                if _char_weak4:
+                    _l0_4 += f" 다만 {_char_weak4} 그 점만 의식하면 타고난 강점이 더 빛납니다."
+
+            import re as _re_story
+            _CORE_FALLBACK4 = {"子": "지혜와 내실"}
+            def _core_interp4(t, key=""):
+                m = _re_story.search(r"([가-힣·\s]+?)의 10년", t or "")
+                if m:
+                    return m.group(1).strip()
+                return _CORE_FALLBACK4.get(key, "")
+
+            # 과거 대운 (기존 세션값 재사용, get_daewoon 읽기전용)
+            _life_l = ""
+            try:
+                _dw_all4 = SajuCoreEngine.get_daewoon(
+                    pils, birth_year,
+                    st.session_state.get("birth_month", 1),
+                    st.session_state.get("birth_day", 1),
+                    st.session_state.get("birth_hour", 12),
+                    st.session_state.get("birth_minute", 0),
+                    gender=gender,
+                )
+                _past4 = [d for d in _dw_all4 if d.get("종료연도", 0) < cur_year][-3:]
+                _seg4 = []
+                _conn4 = ["의 흐름 속에 있었고", "의 시기를 지났으며", "의 기운이 함께했습니다"]
+                for _i, d in enumerate(_past4):
+                    _cg_d = d.get("cg", "")
+                    _jj_d = d.get("jj", "")
+                    _str_d = d.get("str", "")
+                    _a_s = d.get("시작나이", 0)
+                    _ck = _core_interp4(DAEWOON_INTERP.get(_cg_d, ""), _cg_d)
+                    _jk = _core_interp4(DAEWOON_INTERP.get(_jj_d, ""), _jj_d)
+                    # 천간·지지 핵심 합치기 (빈값 가드)
+                    _mean = " · ".join([x for x in [_ck, _jk] if x])
+                    if _mean and _str_d:
+                        # 접속어 순환 (같은 말 반복 방지) — 마지막 조각은 완결형 어미로
+                        _is_last4 = (_i == len(_past4) - 1)
+                        if _is_last4:
+                            _tail = "의 기운이 함께했습니다"
+                        else:
+                            _tail = _conn4[_i] if _i < len(_conn4) - 1 else "의 흐름이 이어졌고"
+                        _seg4.append(f"{_a_s}세 무렵 {_str_d} 대운엔 {_mean}{_tail}")
+                if _seg4:
+                    _life_body = ", ".join(_seg4)
+                    # 마지막 조각이 마침표로 끝나지 않으면 붙여 문장 마무리 (대운 1~2개 케이스)
+                    if _life_body and _life_body[-1] not in ".!?":
+                        _life_body += "."
+                    _life_l = (
+                        f"<b>【당신이 걸어온 길】</b> 지나온 길을 돌아보면, {_life_body} "
+                        f"그 시간들이 차곡차곡 쌓여 지금의 당신을 만들었습니다."
+                    )
+            except Exception:
+                _life_l = ""
+
+            # ── 타고난 구조의 특징 (natal 패턴, 최대 2개, 양면화) ──
+            _trait_l = ""
+            try:
+                _sp4 = calc_sipsung(ilgan, pils)
+                _sc4 = {}
+                for _p4 in _sp4:
+                    for _k4 in (_p4.get("cg_ss",""), _p4.get("jj_ss","")):
+                        if _k4 and _k4 != "-":
+                            _sc4[_k4] = _sc4.get(_k4, 0) + 1
+                # calc_sipsung은 "比肩(비견)" 형식 전체 라벨을 반환 (TEN_GODS_MATRIX 값과 동일)
+                _bi4  = _sc4.get("比肩(비견)",0)+_sc4.get("劫財(겁재)",0)
+                _jae4 = _sc4.get("偏財(편재)",0)+_sc4.get("正財(정재)",0)
+                _sik4 = _sc4.get("食神(식신)",0)+_sc4.get("傷官(상관)",0)
+                _in4  = _sc4.get("偏印(편인)",0)+_sc4.get("正印(정인)",0)
+                _pg4  = _sc4.get("偏官(편관)",0); _jg4 = _sc4.get("正官(정관)",0)
+                _sg4  = _sc4.get("傷官(상관)",0)
+                _es4 = get_extra_sinsal(pils)
+                _hy_natal4 = any("홍염" in (s.get("name","") if isinstance(s,dict) else str(s)) for s in (_es4 or []))
+                _yd4 = get_yangin(pils)
+                _yang4 = bool(_yd4 and _yd4.get("존재", False))
+                _wk4 = "신약" in sn   # 부분일치 (발견2 반영, 원본 exact-match 버그 미적용)
+
+                _TRAITS4 = {
+                    "홍염": "당신은 가만있어도 이성의 눈길이 따라붙는 사람입니다. 원치 않아도 인연이 얽히고, 그 때문에 구설에 오른 적 이미 있으시죠? 타고난 매력이라 없앨 순 없지만, 선을 분명히 하면 그 매력이 독이 아니라 복이 됩니다.",
+                    "양인": "당신 안에는 칼날 같은 추진력이 있습니다. 한번 결정하면 밀어붙이다 크게 부딪히거나 다친 적, 사고·수술·큰 충돌을 겪은 적 있으시죠? 이 힘은 없앨 게 아니라 방향을 잡아줄 것입니다 — 속도만 조절하면 남들이 못 하는 일을 해냅니다.",
+                    "비겁쟁재": "당신은 가까운 사람과 돈이 얽히면 한 번은 데이는 구조입니다. 믿었던 사람, 형제 같던 동료에게 마음이든 돈이든 크게 잃어본 적 이미 있으시죠? 피하기 어려운 흐름이지만, 알고 선을 그으면 잃는 대신 사람이 남습니다.",
+                    "재다신약": "당신은 재물과 인연이 끊임없이 들어오지만, 정작 몸과 마음이 벅찬 사람입니다. 욕심내다 건강이나 관계를 놓친 적 있으시죠? 다 잡으려다 다 놓치는 자리라, 하나에 집중하는 순간 오히려 크게 됩니다.",
+                    "관살혼잡": "당신은 책임과 압박이 사방에서 몰려드는 사람입니다. 거절 못 하고 다 떠안다가 스스로 지친 적 이미 있으시죠? 일을 가려 받는 것이 나약함이 아니라 실력입니다 — 하나를 깊게 하면 그게 무기가 됩니다.",
+                    "상관견관": "당신은 틀을 못 견디고 자기 방식대로 가는 사람입니다. 그 재주 때문에 윗사람이나 조직과 부딪혀 손해 본 적 있으시죠? 그 창의력을 죽이지 말고, 말 한마디만 다듬으면 오히려 판을 바꾸는 힘이 됩니다.",
+                    "식상태왕": "당신은 표현하고 만들어내는 재능이 넘치는 사람입니다. 재주가 많아 여기저기 손대다 하나도 못 맺고 흩어진 적 있으시죠? 재능이 문제가 아니라 분산이 문제라, 하나에 힘을 모으면 크게 터집니다.",
+                    "인성과다": "당신은 생각이 깊고 배움이 끝없는 사람입니다. 너무 재고 따지다 정작 기회를 놓치거나 시작을 못 한 적 이미 있으시죠? 생각은 이미 충분하니, 어느 순간엔 몸이 먼저 움직여야 그 깊이가 결실이 됩니다.",
+                }
+                _hit4 = []
+                if _hy_natal4: _hit4.append("홍염")
+                if _yang4: _hit4.append("양인")
+                if _bi4 >= 2 and _jae4 >= 1: _hit4.append("비겁쟁재")
+                if _jae4 >= 2 and _wk4: _hit4.append("재다신약")
+                if _pg4 >= 1 and _jg4 >= 1: _hit4.append("관살혼잡")
+                if _sg4 >= 1 and _jg4 >= 1: _hit4.append("상관견관")
+                if _sik4 >= 2: _hit4.append("식상태왕")
+                if _in4 >= 3: _hit4.append("인성과다")
+                _hit4 = _hit4[:2]   # 최대 2개
+                if _hit4:
+                    _trait_body4 = " ".join(_TRAITS4[h] for h in _hit4)
+                    _trait_l = f"<b>【타고난 구조의 특징】</b> {_trait_body4}"
+            except Exception:
+                _trait_l = ""
+
+            # ── 겪어왔을 일들 (natal 패턴 사건 + 과거 대운 시기, 강한 톤) ──
+            _event_l = ""
+            try:
+                # 패턴별 실제 사건 (흉사) - 구체적으로
+                _EVENT_BAD4 = {
+                    "비겁쟁재": "믿었던 사람과 돈이 부딪히는 일이 한 번은 있었습니다. 동업이 깨졌거나, 빌려준 돈이 끝내 돌아오지 않았거나, 보증·투자로 물려 손해를 봤거나 — 그것도 남이 아니라 형제·친구·오래된 동료처럼 가장 가까운 자리에서 터진 일입니다.",
+                    "양인": "한번 밀어붙이다 크게 다치거나 부러진 일이 있었습니다. 사고나 수술을 겪었거나, 사람과 세게 부딪혀 관계가 끊어졌거나 — 그 순간 자기 성질을 못 이겼던 기억이 남아 있을 자리입니다.",
+                    "홍염": "원치 않아도 이성 문제로 말이 돌았던 시기가 있었습니다. 얽히지 말았어야 할 인연에 걸렸거나, 오해로 구설에 올랐거나, 정리가 깔끔하지 못해 뒤끝이 남았거나 — 매력이 강한 만큼 치른 대가입니다.",
+                    "재다신약": "돈은 계속 들어오는데 몸이 먼저 무너진 시기가 있었습니다. 무리하게 벌리다 건강을 잃었거나, 여러 개 잡으려다 정작 큰 것을 놓쳤거나 — 욕심이 체력을 앞질러 탈이 난 자리입니다.",
+                    "관살혼잡": "책임이 사방에서 몰려와 혼자 다 떠안다 무너진 시기가 있었습니다. 거절하지 못해 짐을 다 지고, 결국 몸이나 마음이 먼저 나가떨어졌던 때 — 아무도 대신 져주지 않는다는 걸 배운 자리입니다.",
+                    "상관견관": "윗사람이나 조직과 정면으로 부딪혀 손해 본 일이 있었습니다. 옳은 말 했다가 찍혔거나, 못 참고 자리를 박차고 나왔거나, 억울하게 뒤집어썼거나 — 실력은 있는데 판이 받아주지 않던 시기입니다.",
+                    "식상태왕": "재주가 많아 여기저기 벌였다가 하나도 못 맺고 흩어진 시기가 있었습니다. 시작은 화려했는데 마무리가 되지 않았고, 남 좋은 일만 시킨 것 같아 허탈했던 때입니다.",
+                    "인성과다": "너무 재고 따지다 눈앞의 기회를 놓친 일이 있었습니다. 준비만 하다 때를 흘려보냈거나, 남이 먼저 채간 것을 보며 뒤늦게 후회했던 시기입니다.",
+                }
+                # 대운 천간 십성별 길사
+                _EVENT_GOOD4 = {
+                    "正印": "배움·자격·시험으로 자기 자리를 만든", "偏印": "남다른 기술이나 안목으로 길을 튼",
+                    "正官": "이름과 자리를 얻고 인정받은", "偏官": "큰 책임을 떠맡아 실력을 증명한",
+                    "正財": "성실하게 쌓아 재물이 붙은", "偏財": "크게 벌이고 기회를 잡은",
+                    "食神": "재능이 빛을 보고 사람이 따른", "傷官": "자기 방식으로 판을 새로 짠",
+                    "比肩": "자기 힘으로 홀로 서기 시작한", "劫財": "경쟁 속에서 자기 몫을 지켜낸",
+                }
+                _ev_bad4 = []
+                for _h4 in (_hit4 or [])[:2]:
+                    _b4 = _EVENT_BAD4.get(_h4, "")
+                    if _b4:
+                        _ev_bad4.append(_b4)
+                # 길사 — 과거 대운 중 천간 오행이 용신에 드는 대운만 (기신 대운을 길사로 쓰지 않도록)
+                _ev_good4 = ""
+                _yong_set4 = set(_yong_ohs4 or [])
+                for _d4 in reversed(_past4 or []):   # 최근 대운부터
+                    _dcg4 = _d4.get("cg", "")
+                    _doh4 = _OH_CG.get(_dcg4, "")     # 천간 → 오행
+                    if _yong_set4 and _doh4 and _doh4 not in _yong_set4:
+                        continue                       # 기신·한신 대운은 길사로 안 씀
+                    _dss4 = TEN_GODS_MATRIX.get(ilgan, {}).get(_dcg4, "")
+                    _dhj4 = _dss4.split("(")[0] if _dss4 else ""
+                    _g4 = _EVENT_GOOD4.get(_dhj4, "")
+                    if _g4:
+                        _ev_good4 = f"다만 {_d4.get('시작나이',0)}세 무렵 {_d4.get('str','')} 대운은 용신이 힘을 받아 {_g4} 시기였습니다. 그때 쌓은 것이 지금 당신을 버티게 하는 밑천입니다."
+                        break
+                if _ev_bad4:
+                    # 문구가 이미 마침표로 끝나므로 공백만으로 연결
+                    _ev_body4 = " ".join(_ev_bad4)
+                    if _ev_good4:
+                        _ev_body4 += " " + _ev_good4
+                    _event_l = f"<b>【겪어왔을 일들】</b> {_ev_body4}"
+            except Exception:
+                _event_l = ""
+
+            # ── 타고난 인연과 충돌 (합충형파, 양면화) ──
+            _relation_l = ""
+            try:
+                _jjs4 = [p.get("jj","") for p in pils]  # 4지지
+                _cgs4 = [p.get("cg","") for p in pils]  # 4천간
+                _rel_hits4 = []
+
+                # 로컬 dict — 지지충 6쌍
+                _CHUNG6 = [frozenset(["子","午"]),frozenset(["丑","未"]),frozenset(["寅","申"]),
+                           frozenset(["卯","酉"]),frozenset(["辰","戌"]),frozenset(["巳","亥"])]
+                # 로컬 dict — 육합 6쌍
+                _YUKHAP6 = [frozenset(["子","丑"]),frozenset(["寅","亥"]),frozenset(["卯","戌"]),
+                            frozenset(["辰","酉"]),frozenset(["巳","申"]),frozenset(["午","未"])]
+
+                _jjset4 = set(_jjs4)
+
+                # 육합 (우선 — 파 해소) — 양면
+                for _pair in _YUKHAP6:
+                    if _pair.issubset(_jjset4):
+                        _rel_hits4.append(("합", "가까이 묶이는 인연의 구조가 있습니다 — 사람과 잘 어울리고 협력이 순조로운 만큼, 때로는 그 관계에 발이 묶이지 않도록 거리 조절이 필요합니다"))
+                        break
+
+                # 충 (변동) — 양면
+                for _pair in _CHUNG6:
+                    if _pair.issubset(_jjset4):
+                        _rel_hits4.append(("충", "부딪히고 움직이는 충의 구조가 있습니다 — 변화·이동이 잦아 한자리에 머물기 어렵지만, 그만큼 변화에 강하고 새 국면을 여는 추진력이 됩니다"))
+                        break
+
+                # 형 (자형 포함) — 양면
+                _hyung_hit4 = False
+                # 자형: 같은 지지 2개 이상
+                for _z in set(_jjs4):
+                    if _jjs4.count(_z) >= 2 and _z in ("辰","午","酉","亥"):  # 전통 자형 지지
+                        _hyung_hit4 = True
+                        break
+                # 삼형: HYUNG_MAP 전역 참조 (구조는 1단계 확인 후 맞춤)
+                if not _hyung_hit4:
+                    try:
+                        for _combo in HYUNG_MAP:
+                            _cset = _combo if isinstance(_combo,(set,frozenset)) else set(_combo)
+                            if _cset.issubset(_jjset4):
+                                _hyung_hit4 = True
+                                break
+                    except Exception:
+                        pass
+                if _hyung_hit4:
+                    _rel_hits4.append(("형", "갈등과 마찰의 형(刑) 구조가 있습니다 — 부딪힘이 있는 만큼, 그 기운을 법·검경·의료처럼 남의 문제를 다루는 전문 영역으로 쓰면 오히려 큰 강점이 됩니다"))
+
+                # 파 (짧게, 약한 작용) — 육합 있으면 생략 가능하나 일단 표시
+                _PA6 = [frozenset(["子","酉"]),frozenset(["午","卯"]),frozenset(["申","巳"]),
+                        frozenset(["寅","亥"]),frozenset(["辰","丑"]),frozenset(["戌","未"])]
+                _pa_hit4 = any(_p.issubset(_jjset4) for _p in _PA6)
+                # 육합(寅亥 등)이 이미 잡혔으면 파는 언급 안 함 (합 우선)
+                _has_hap4 = any(h[0]=="합" for h in _rel_hits4)
+                if _pa_hit4 and not _has_hap4:
+                    _rel_hits4.append(("파", "작게 어긋나는 파(破)의 기운이 있습니다 — 계획이 살짝 틀어질 수 있으니, 중요한 일은 한 번 더 점검하면 됩니다"))
+
+                if _rel_hits4:
+                    _rel_body4 = " ".join(h[1] + "." for h in _rel_hits4[:3])  # 최대 3개
+                    _relation_l = f"<b>【타고난 인연과 충돌】</b> {_rel_body4}"
+            except Exception:
+                _relation_l = ""
+
+            # ── 자리마다 새겨진 운 (기둥별 십성, 포지션 새 정의) ──
+            _pillar_l = ""
+            try:
+                _sp_p4 = calc_sipsung(ilgan, pils)  # [시주, 일주, 월주, 년주] 순서
+                # ★ 전통 포지션: 기존 _pos_drama(뒤집힘) 미사용, 새로 정의
+                _POS4 = {
+                    3: ("년주", "초년과 뿌리"),        # index3 = 년주
+                    2: ("월주", "청년기와 사회 활동"),  # index2 = 월주
+                    1: ("일주", "중년과 나 자신·배우자"), # index1 = 일주
+                    0: ("시주", "말년과 자식 인연"),    # index0 = 시주
+                }
+                _seg_p4 = []
+                # 전통 순서(년→월→일→시)로 서술: index 3→2→1→0
+                for _idx4 in (3, 2, 1, 0):
+                    if _idx4 >= len(_sp_p4):
+                        continue
+                    _pd4 = _sp_p4[_idx4]
+                    _ss_cg4 = _pd4.get("cg_ss", "")
+                    _pos_name4, _pos_mean4 = _POS4[_idx4]
+                    if not _ss_cg4 or _ss_cg4 == "-":
+                        continue
+                    # SIPSONG_DETAIL 키는 순수 한자 (DW_SS_DESC 선례와 동일하게 정규화)
+                    _ss_hj4 = _ss_cg4.split("(")[0]
+                    _sd4 = SIPSONG_DETAIL.get(_ss_hj4, {})
+                    _core_p4 = _sd4.get("핵심", "") if isinstance(_sd4, dict) else ""
+                    if _core_p4:
+                        _parts_p4 = [s.strip() for s in _core_p4.split(".") if s.strip()]
+                        _core_short4 = _parts_p4[1] if len(_parts_p4) >= 2 else (_parts_p4[0] if _parts_p4 else "")
+                        # 키워드 끝의 "의 기운"/"기운" 중복 제거 (앞의 "~의 기운 —"과 겹침 방지)
+                        _kw_p4 = _core_short4
+                        for _suf in ("의 기운", "기운"):
+                            if _kw_p4.endswith(_suf):
+                                _kw_p4 = _kw_p4[:-len(_suf)].rstrip("· ").rstrip()
+                                break
+                        _seg_p4.append(f"{_pos_name4}({_pos_mean4})에는 {_ss_cg4}의 기운 — {_kw_p4}")
+                if _seg_p4:
+                    _pillar_body4 = ". ".join(_seg_p4) + "."
+                    _pillar_l = f"<b>【자리마다 새겨진 운】</b> {_pillar_body4}"
+            except Exception:
+                _pillar_l = ""
+
+            # ── 타고난 인연의 자리 (육친, get_yukjin 재사용, 양면화 내장) ──
+            _yuk_l = ""
+            try:
+                _yuk_list4 = get_yukjin(ilgan, pils, gender, marriage_status)
+                _yuk_seg4 = []
+                # present=True 우선, 없으면 재해석 문구 있는 것 일부
+                _yuk_present4 = [y for y in (_yuk_list4 or []) if y.get("present")]
+                _yuk_absent4 = [y for y in (_yuk_list4 or []) if not y.get("present")]
+                # present 관계 전부 + absent 중 desc 있는 것 최대 1개 (없는 인연도 한마디)
+                _yuk_pick4 = _yuk_present4 + _yuk_absent4[:1]
+                for _y4 in _yuk_pick4:
+                    _y_rel4 = _y4.get("관계", "")
+                    _y_desc4 = _y4.get("desc", "")
+                    _y_present4 = _y4.get("present", False)
+                    if _y_rel4 and _y_desc4:
+                        if _y_present4:
+                            # 있는 육친(긍정 톤): 첫 문장 압축 OK
+                            _y_txt4 = _y_desc4.split(".")[0].strip()
+                        else:
+                            # 없는 육친: 양면·재해석 문구 보존 위해 전체 desc 유지 (낙인 방지)
+                            _y_txt4 = _y_desc4.strip().rstrip(".")
+                        if _y_txt4:
+                            _yuk_seg4.append(_y_txt4)
+                if _yuk_seg4:
+                    _yuk_body4 = ". ".join(_yuk_seg4[:5]) + "."   # 최대 5관계
+                    _yuk_l = f"<b>【타고난 인연의 자리】</b> {_yuk_body4}"
+            except Exception:
+                _yuk_l = ""
+
+            _l1_4 = (
+                f"<b>【전체 구조】</b> {ilgan}일간 — {_bonjil4 or '독특한 기운을 지닌 존재입니다.'} "
+                f"여기에 {sn} 사주가 겹쳐지고 <b>{_gyeok_kr4}({_gyeok_hj4})</b> 구조까지 갖추었으니, {_gujo4} "
+                f"이 구조는 타고난 성격 묘사에서 그치지 않고, 살면서 반복적으로 마주치는 선택의 순간마다 "
+                f"본인도 모르게 끌려가는 방향을 결정짓습니다."
+            )
+
+            # ── 타고난 온도 (조후) ──
+            _temp_l = ""
+            try:
+                _jo_need4 = ys_info.get("조후_need", "")
+                _jo_prior4 = ys_info.get("조후_우선", False)
+                _wol_jj4 = pils[2].get("jj", "")
+
+                # 월지 → 계절 매핑
+                _SEASON4 = {
+                    "寅": ("봄", "기운이 처음 움트는"), "卯": ("봄", "만물이 자라나는"), "辰": ("봄", "봄이 무르익어 흙이 촉촉한"),
+                    "巳": ("여름", "열기가 오르기 시작하는"), "午": ("여름", "불기운이 가장 뜨거운"), "未": ("여름", "마른 흙이 뜨겁게 달아오른"),
+                    "申": ("가을", "서늘한 금기운이 도는"), "酉": ("가을", "금기운이 가장 날카로운"), "戌": ("가을", "가을이 저물어 흙이 메마른"),
+                    "亥": ("겨울", "물이 왕성해지는"), "子": ("겨울", "한기가 가장 깊은"), "丑": ("겨울", "얼어붙은 흙의"),
+                }
+                _season4, _season_desc4 = _SEASON4.get(_wol_jj4, ("", ""))
+
+                if _season4 and _jo_need4:
+                    # 조후_need를 문자열로 정규화 (리스트면 · 로 결합)
+                    _need_txt4 = "·".join(_jo_need4) if isinstance(_jo_need4, (list, tuple)) else str(_jo_need4)
+                    _temp_body4 = (
+                        f"{_wol_jj4}월({_season4}) 태생 — {_season_desc4} 계절에 태어난 {ilgan}일간입니다. "
+                        f"이 사주의 온도를 맞추는 데 급한 기운은 <b>{_need_txt4}</b>입니다."
+                    )
+                    if _jo_prior4:
+                        _temp_body4 += (
+                            " 이건 강약(억부)보다 먼저 보아야 하는 요소로, "
+                            "아무리 힘을 보태거나 덜어내도 온도가 맞지 않으면 그 힘이 제대로 쓰이지 않습니다."
+                        )
+                    else:
+                        _temp_body4 += " 온도는 비교적 균형이 잡혀 있어, 강약(억부)의 흐름을 우선해 보면 됩니다."
+                    _temp_l = f"<b>【타고난 온도】</b> {_temp_body4}"
+            except Exception:
+                _temp_l = ""
+
+            _l2_4 = (
+                f"<b>【근거】</b> " + _gugeo4_pre +
+                (f"{_yong4}(용신)" if _yong4 else "") +
+                (" · " if _yong4 and _gi4 else "") +
+                (f"{_gi4}(기신)" if _gi4 else "") +
+                f" 오행의 힘겨루기 위에 이 사주의 십성 구조가 짜여 있으니, 이건 막연한 느낌이 아니라 "
+                f"사주 여덟 글자 안에서 어느 오행이 힘을 받고 어느 오행이 억눌리는지를 그대로 읽어낸 결과입니다. "
+                f"용신이 힘을 받으면 순탄하고 기신이 힘을 받으면 굴곡이 생기기 쉬운 흐름이니, "
+                f"이 두 기운의 움직임을 눈여겨봐야 합니다."
+            )
+            if sw_gil in ("길", "대길"):
+                _now_txt4 = (f"{_sw_label4}이 용신과 통하니 흐름을 타기 좋은 시기일 가능성이 높습니다. "
+                             f"다만 좋은 시기일수록 자만하지 말고, 지금의 흐름을 실질적인 성과로 "
+                             f"바꾸는 데 집중해야 합니다.")
+            elif sw_gil in ("흉", "대흉"):
+                _now_txt4 = (f"{_sw_label4}이 기신 쪽에 가까우니 무리한 결정보다 신중함이 필요한 시기일 수 있습니다. "
+                             f"큰 결정은 잠시 미루고, 지금은 버티고 정비하는 데 힘을 쏟는 편이 낫습니다.")
+            else:
+                _now_txt4 = (f"{_sw_label4}은 크게 기울지 않는 평이한 흐름이니, 큰 변수보다 꾸준함이 중요한 시기입니다. "
+                             f"화려한 전환점을 기대하기보다 하루하루 쌓아가는 노력이 다음 흐름을 준비하는 밑거름이 됩니다.")
+            _cross_sum4 = cross.get("summary", "")
+            _cross_fin4 = cross.get("finance", "").replace("재물:", "").strip()
+            _cross_car4 = cross.get("career", "").replace("직업:", "").strip()
+            _cross_detail4 = ""
+            def _pd(s):  # 마침표 없으면 붙이기
+                s = s.rstrip()
+                return s if (not s or s[-1] in ".!?") else s + "."
+            if _cross_sum4:
+                _cross_detail4 += f" 올해의 큰 흐름은 이렇습니다 — {_pd(_cross_sum4)}"
+            if _cross_fin4:
+                _cross_detail4 += f" 재물 면에서는 {_pd(_cross_fin4)}"
+            if _cross_car4:
+                _cross_detail4 += f" 일·사회 면에서는 {_pd(_cross_car4)}"
+            _l3_4 = (
+                f"<b>【그래서 지금】</b> {cur_year}년 {cur_age}세, {_dw_label4}{_age_range4}에 {_now_txt4}"
+                f"{_cross_detail4}"
+            )
+            _cheobang4_txt = (_cheobang4 or "용신 오행을 가까이하고 기신 오행의 기운을 줄이는 것이 실질적인 개운법입니다.").rstrip()
+            if _cheobang4_txt and _cheobang4_txt[-1] not in ".!?":
+                _cheobang4_txt += "."
+            _l4_4 = (
+                f"<b>【대비책】</b> {_cheobang4_pre}{_cheobang4_txt}"
+                + (f" {_yong_action4} 지금 실행할 수 있는 가장 확실한 방법입니다." if _yong4 else "")
+                + " 거창하게 접근할 필요 없이, 오늘 하나씩 실천할 수 있는 작은 습관부터 바꿔나가는 것이 "
+                  "결국 큰 흐름을 바꾸는 시작이 됩니다."
+            )
+
+            # ── 핵심 한 방 (구조 요약 + 평생 주의) ──
+            _key_l = ""
+            try:
+                # 구조 요약 — 격국+신강약 기반 한 줄
+                _CORE_ID4 = {
+                    "정인격": "배우고 쌓아서 그것으로 서는 사람",
+                    "편인격": "남다른 시선으로 자기 길을 내는 사람",
+                    "정재격": "성실하게 쌓아 지키는 사람",
+                    "편재격": "크게 벌이고 크게 움직이는 사람",
+                    "정관격": "질서와 명예 안에서 빛나는 사람",
+                    "편관격": "책임과 압박을 뚫고 나아가는 사람",
+                    "식신격": "만들어내고 표현하며 사는 사람",
+                    "상관격": "틀을 깨고 새로 짜는 사람",
+                    "비견격": "혼자 힘으로 서는 사람",
+                    "겁재격": "경쟁 속에서 자기를 세우는 사람",
+                }
+                _core_id4 = _CORE_ID4.get(_gyeok_kr4, "자기만의 방식으로 살아가는 사람")
+                _strong4 = "신강" in sn
+                _bal4 = "넘치는 힘을 어디에 쓸지" if _strong4 else "부족한 힘을 어디서 채울지"
+
+                # 평생 주의 — natal 패턴 기반 (_hit4 첫번째)
+                _KEY_WARN4 = {
+                    "홍염": "이성과의 인연이 들어오고 나가는 자리",
+                    "양인": "속도와 결단이 지나쳐 부딪히는 자리",
+                    "비겁쟁재": "가까운 사람과 돈이 겹치는 자리",
+                    "재다신약": "욕심이 몸을 앞지르는 자리",
+                    "관살혼잡": "책임을 가리지 않고 다 떠안는 자리",
+                    "상관견관": "말과 재주가 윗사람을 건드리는 자리",
+                    "식상태왕": "재능이 흩어져 하나도 못 맺는 자리",
+                    "인성과다": "생각이 길어져 때를 놓치는 자리",
+                }
+                _warn4 = ""
+                if _hit4:
+                    _warn4 = _KEY_WARN4.get(_hit4[0], "")
+
+                _key_body4 = f"당신은 <b>‘{_core_id4}’</b>입니다. 평생의 과제는 {_bal4}이고"
+                if _warn4:
+                    _key_body4 += f", 평생 조심할 것은 <b>‘{_warn4}’</b>입니다"
+                _key_body4 += "."
+                _key_l = f"<b>【한마디로 말하면】</b> {_key_body4}"
+            except Exception:
+                _key_l = ""
+
+            _gangsa_html = (
+                '<div style="background:#faf7f0;border-left:4px solid #d4af37;border-radius:10px;'
+                'padding:16px 18px;margin:8px 0 16px;font-size:13px;color:#333;line-height:2;">'
+                + "<br><br>".join([x for x in [_l0_4, _trait_l, _relation_l, _pillar_l, _yuk_l, _life_l, _event_l, _l1_4, _temp_l, _l2_4, _l3_4, _l4_4, _key_l] if x]) +
+                '</div>'
+            )
+        except Exception:
+            pass
+
+        return _gangsa_html
+    except Exception:
+        return ""
+
+
 def menu_current_situation(pils, name, birth_year, gender, marriage_status=None):
     """🎯 나의 현재 상황 — 공감형 서술 (무엇 때문에 힘드신지 짚어드립니다)"""
 
@@ -14676,479 +15243,13 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
     dw_kr = _SS_KR.get(dw_ss, dw_ss)
     sw_kr = _SS_KR.get(sw_ss, sw_ss)
 
-    # ── 강사식 4박자 도입부 (①전체구조 ②근거 ③그래서지금 ④대비책) ──
-    # 핵심 진단 요약(build_saju_core_diagnosis) 바로 아래 배치 — 짧은 팩트 요약과
-    # 구별되는 "풀어서 설명하는 강사 해설" 역할. ilgan/sn/yong_ohs/gi_ohs/sw_gil/
-    # dw_kr/sw_kr이 모두 계산된 이 지점이 이동 가능한 최상단.
+    # ── 강사식 13항목 골드박스 (build_gangsa_block() 로 추출됨, 렌더 위치는 유지) ──
     try:
-        _dw_label4  = f"{dw_kr} 대운" if dw_kr else "대운 미산출"
-        _sw_label4  = f"{sw_kr} 세운" if sw_kr else f"{cur_year}년 세운"
-        _age_range4 = f" ({dw_age_s}~{dw_age_e}세)" if dw_age_s and dw_age_e else ""
-
-        _gk4 = get_gyeokguk(pils) or {}
-        _gyeok_raw4 = TEN_GODS_MATRIX.get(ilgan, {}).get(_gk4.get("정기", ""), "")
-        _gyeok_kr4 = (_SS_KR.get(_gyeok_raw4, "") + "격") if _gyeok_raw4 else "격국미상"
-        _gyeok_hj4 = (clean_hanja(_gyeok_raw4) + "格") if _gyeok_raw4 else ""
-        _ip4 = ILGAN_PROFILE.get(ilgan, {})
-        _bonjil4 = _ip4.get("본질", "")
-        _cheobang4 = _ip4.get("처방", "")
-        _yong_ohs4 = locals().get("yong_ohs") or []
-        _gi_ohs4 = locals().get("gi_ohs") or []
-        _yong4 = "·".join(_yong_ohs4[:2])
-        _gi4 = "·".join(_gi_ohs4[:2])
-
-        _is_singang4 = "신강" in sn
-        _is_sinyak4  = "신약" in sn
-        if _is_singang4:
-            _gujo4 = ("기운이 넘쳐 스스로 앞장서고 뻗어나가려는 구조입니다. 가만히 있지 못하고 "
-                      "늘 무언가를 벌이거나 주도해야 마음이 편안해지는 성향이 여기서 나옵니다.")
-            _gugeo4_pre = "비겁·식상의 기운이 두드러지게 강해 스스로 힘을 발산하려는 흐름이 근거가 되며, "
-            _cheobang4_pre = "넘치는 기운을 덜어내는 쪽으로 접근해야 하니, "
-            _yong_action4 = "용신 기운으로 넘치는 힘을 자연스럽게 흘려보내는 것이"
-        elif _is_sinyak4:
-            _gujo4 = ("기운을 끌어모아 의지할 곳을 필요로 하는 구조입니다. 혼자 감당하기보다 "
-                      "주변의 도움과 지지를 받을 때 비로소 힘이 붙는 성향이 여기서 나옵니다.")
-            _gugeo4_pre = "재성·관성의 부담이 크고 인성의 도움이 필요한 흐름이 근거가 되며, "
-            _cheobang4_pre = "부족한 기운을 보강하는 쪽으로 접근해야 하니, "
-            _yong_action4 = "용신 기운을 채워 부족한 힘을 보강하는 것이"
-        else:
-            _gujo4 = ("기운이 어느 한쪽으로 치우치지 않은 균형 잡힌 구조입니다. 극단으로 치닫기보다 "
-                      "상황에 맞춰 유연하게 대응하는 힘이 이 구조의 강점입니다.")
-            _gugeo4_pre = ""
-            _cheobang4_pre = ""
-            _yong_action4 = f"특히 {_yong4} 기운을 생활 속에서 늘리는 것이"
-
-        _char4 = ILGAN_CHAR_DESC.get(ilgan, {})
-        _char_core4 = _char4.get("성격_핵심", "").strip()
-        _char_weak4 = _char4.get("단점", "").strip()
-        _l0_4 = ""
-        if _char_core4:
-            _l0_4 = f"<b>【당신이라는 사람】</b> {_char_core4}"
-            if _char_weak4:
-                _l0_4 += f" 다만 {_char_weak4} 그 점만 의식하면 타고난 강점이 더 빛납니다."
-
-        import re as _re_story
-        _CORE_FALLBACK4 = {"子": "지혜와 내실"}
-        def _core_interp4(t, key=""):
-            m = _re_story.search(r"([가-힣·\s]+?)의 10년", t or "")
-            if m:
-                return m.group(1).strip()
-            return _CORE_FALLBACK4.get(key, "")
-
-        # 과거 대운 (기존 세션값 재사용, get_daewoon 읽기전용)
-        _life_l = ""
-        try:
-            _dw_all4 = SajuCoreEngine.get_daewoon(
-                pils, birth_year,
-                st.session_state.get("birth_month", 1),
-                st.session_state.get("birth_day", 1),
-                st.session_state.get("birth_hour", 12),
-                st.session_state.get("birth_minute", 0),
-                gender=gender,
-            )
-            _past4 = [d for d in _dw_all4 if d.get("종료연도", 0) < cur_year][-3:]
-            _seg4 = []
-            _conn4 = ["의 흐름 속에 있었고", "의 시기를 지났으며", "의 기운이 함께했습니다"]
-            for _i, d in enumerate(_past4):
-                _cg_d = d.get("cg", "")
-                _jj_d = d.get("jj", "")
-                _str_d = d.get("str", "")
-                _a_s = d.get("시작나이", 0)
-                _ck = _core_interp4(DAEWOON_INTERP.get(_cg_d, ""), _cg_d)
-                _jk = _core_interp4(DAEWOON_INTERP.get(_jj_d, ""), _jj_d)
-                # 천간·지지 핵심 합치기 (빈값 가드)
-                _mean = " · ".join([x for x in [_ck, _jk] if x])
-                if _mean and _str_d:
-                    # 접속어 순환 (같은 말 반복 방지) — 마지막 조각은 완결형 어미로
-                    _is_last4 = (_i == len(_past4) - 1)
-                    if _is_last4:
-                        _tail = "의 기운이 함께했습니다"
-                    else:
-                        _tail = _conn4[_i] if _i < len(_conn4) - 1 else "의 흐름이 이어졌고"
-                    _seg4.append(f"{_a_s}세 무렵 {_str_d} 대운엔 {_mean}{_tail}")
-            if _seg4:
-                _life_body = ", ".join(_seg4)
-                # 마지막 조각이 마침표로 끝나지 않으면 붙여 문장 마무리 (대운 1~2개 케이스)
-                if _life_body and _life_body[-1] not in ".!?":
-                    _life_body += "."
-                _life_l = (
-                    f"<b>【당신이 걸어온 길】</b> 지나온 길을 돌아보면, {_life_body} "
-                    f"그 시간들이 차곡차곡 쌓여 지금의 당신을 만들었습니다."
-                )
-        except Exception:
-            _life_l = ""
-
-        # ── 타고난 구조의 특징 (natal 패턴, 최대 2개, 양면화) ──
-        _trait_l = ""
-        try:
-            _sp4 = calc_sipsung(ilgan, pils)
-            _sc4 = {}
-            for _p4 in _sp4:
-                for _k4 in (_p4.get("cg_ss",""), _p4.get("jj_ss","")):
-                    if _k4 and _k4 != "-":
-                        _sc4[_k4] = _sc4.get(_k4, 0) + 1
-            # calc_sipsung은 "比肩(비견)" 형식 전체 라벨을 반환 (TEN_GODS_MATRIX 값과 동일)
-            _bi4  = _sc4.get("比肩(비견)",0)+_sc4.get("劫財(겁재)",0)
-            _jae4 = _sc4.get("偏財(편재)",0)+_sc4.get("正財(정재)",0)
-            _sik4 = _sc4.get("食神(식신)",0)+_sc4.get("傷官(상관)",0)
-            _in4  = _sc4.get("偏印(편인)",0)+_sc4.get("正印(정인)",0)
-            _pg4  = _sc4.get("偏官(편관)",0); _jg4 = _sc4.get("正官(정관)",0)
-            _sg4  = _sc4.get("傷官(상관)",0)
-            _es4 = get_extra_sinsal(pils)
-            _hy_natal4 = any("홍염" in (s.get("name","") if isinstance(s,dict) else str(s)) for s in (_es4 or []))
-            _yd4 = get_yangin(pils)
-            _yang4 = bool(_yd4 and _yd4.get("존재", False))
-            _wk4 = "신약" in sn   # 부분일치 (발견2 반영, 원본 exact-match 버그 미적용)
-
-            _TRAITS4 = {
-                "홍염": "당신은 가만있어도 이성의 눈길이 따라붙는 사람입니다. 원치 않아도 인연이 얽히고, 그 때문에 구설에 오른 적 이미 있으시죠? 타고난 매력이라 없앨 순 없지만, 선을 분명히 하면 그 매력이 독이 아니라 복이 됩니다.",
-                "양인": "당신 안에는 칼날 같은 추진력이 있습니다. 한번 결정하면 밀어붙이다 크게 부딪히거나 다친 적, 사고·수술·큰 충돌을 겪은 적 있으시죠? 이 힘은 없앨 게 아니라 방향을 잡아줄 것입니다 — 속도만 조절하면 남들이 못 하는 일을 해냅니다.",
-                "비겁쟁재": "당신은 가까운 사람과 돈이 얽히면 한 번은 데이는 구조입니다. 믿었던 사람, 형제 같던 동료에게 마음이든 돈이든 크게 잃어본 적 이미 있으시죠? 피하기 어려운 흐름이지만, 알고 선을 그으면 잃는 대신 사람이 남습니다.",
-                "재다신약": "당신은 재물과 인연이 끊임없이 들어오지만, 정작 몸과 마음이 벅찬 사람입니다. 욕심내다 건강이나 관계를 놓친 적 있으시죠? 다 잡으려다 다 놓치는 자리라, 하나에 집중하는 순간 오히려 크게 됩니다.",
-                "관살혼잡": "당신은 책임과 압박이 사방에서 몰려드는 사람입니다. 거절 못 하고 다 떠안다가 스스로 지친 적 이미 있으시죠? 일을 가려 받는 것이 나약함이 아니라 실력입니다 — 하나를 깊게 하면 그게 무기가 됩니다.",
-                "상관견관": "당신은 틀을 못 견디고 자기 방식대로 가는 사람입니다. 그 재주 때문에 윗사람이나 조직과 부딪혀 손해 본 적 있으시죠? 그 창의력을 죽이지 말고, 말 한마디만 다듬으면 오히려 판을 바꾸는 힘이 됩니다.",
-                "식상태왕": "당신은 표현하고 만들어내는 재능이 넘치는 사람입니다. 재주가 많아 여기저기 손대다 하나도 못 맺고 흩어진 적 있으시죠? 재능이 문제가 아니라 분산이 문제라, 하나에 힘을 모으면 크게 터집니다.",
-                "인성과다": "당신은 생각이 깊고 배움이 끝없는 사람입니다. 너무 재고 따지다 정작 기회를 놓치거나 시작을 못 한 적 이미 있으시죠? 생각은 이미 충분하니, 어느 순간엔 몸이 먼저 움직여야 그 깊이가 결실이 됩니다.",
-            }
-            _hit4 = []
-            if _hy_natal4: _hit4.append("홍염")
-            if _yang4: _hit4.append("양인")
-            if _bi4 >= 2 and _jae4 >= 1: _hit4.append("비겁쟁재")
-            if _jae4 >= 2 and _wk4: _hit4.append("재다신약")
-            if _pg4 >= 1 and _jg4 >= 1: _hit4.append("관살혼잡")
-            if _sg4 >= 1 and _jg4 >= 1: _hit4.append("상관견관")
-            if _sik4 >= 2: _hit4.append("식상태왕")
-            if _in4 >= 3: _hit4.append("인성과다")
-            _hit4 = _hit4[:2]   # 최대 2개
-            if _hit4:
-                _trait_body4 = " ".join(_TRAITS4[h] for h in _hit4)
-                _trait_l = f"<b>【타고난 구조의 특징】</b> {_trait_body4}"
-        except Exception:
-            _trait_l = ""
-
-        # ── 겪어왔을 일들 (natal 패턴 사건 + 과거 대운 시기, 강한 톤) ──
-        _event_l = ""
-        try:
-            # 패턴별 실제 사건 (흉사) - 구체적으로
-            _EVENT_BAD4 = {
-                "비겁쟁재": "믿었던 사람과 돈이 부딪히는 일이 한 번은 있었습니다. 동업이 깨졌거나, 빌려준 돈이 끝내 돌아오지 않았거나, 보증·투자로 물려 손해를 봤거나 — 그것도 남이 아니라 형제·친구·오래된 동료처럼 가장 가까운 자리에서 터진 일입니다.",
-                "양인": "한번 밀어붙이다 크게 다치거나 부러진 일이 있었습니다. 사고나 수술을 겪었거나, 사람과 세게 부딪혀 관계가 끊어졌거나 — 그 순간 자기 성질을 못 이겼던 기억이 남아 있을 자리입니다.",
-                "홍염": "원치 않아도 이성 문제로 말이 돌았던 시기가 있었습니다. 얽히지 말았어야 할 인연에 걸렸거나, 오해로 구설에 올랐거나, 정리가 깔끔하지 못해 뒤끝이 남았거나 — 매력이 강한 만큼 치른 대가입니다.",
-                "재다신약": "돈은 계속 들어오는데 몸이 먼저 무너진 시기가 있었습니다. 무리하게 벌리다 건강을 잃었거나, 여러 개 잡으려다 정작 큰 것을 놓쳤거나 — 욕심이 체력을 앞질러 탈이 난 자리입니다.",
-                "관살혼잡": "책임이 사방에서 몰려와 혼자 다 떠안다 무너진 시기가 있었습니다. 거절하지 못해 짐을 다 지고, 결국 몸이나 마음이 먼저 나가떨어졌던 때 — 아무도 대신 져주지 않는다는 걸 배운 자리입니다.",
-                "상관견관": "윗사람이나 조직과 정면으로 부딪혀 손해 본 일이 있었습니다. 옳은 말 했다가 찍혔거나, 못 참고 자리를 박차고 나왔거나, 억울하게 뒤집어썼거나 — 실력은 있는데 판이 받아주지 않던 시기입니다.",
-                "식상태왕": "재주가 많아 여기저기 벌였다가 하나도 못 맺고 흩어진 시기가 있었습니다. 시작은 화려했는데 마무리가 되지 않았고, 남 좋은 일만 시킨 것 같아 허탈했던 때입니다.",
-                "인성과다": "너무 재고 따지다 눈앞의 기회를 놓친 일이 있었습니다. 준비만 하다 때를 흘려보냈거나, 남이 먼저 채간 것을 보며 뒤늦게 후회했던 시기입니다.",
-            }
-            # 대운 천간 십성별 길사
-            _EVENT_GOOD4 = {
-                "正印": "배움·자격·시험으로 자기 자리를 만든", "偏印": "남다른 기술이나 안목으로 길을 튼",
-                "正官": "이름과 자리를 얻고 인정받은", "偏官": "큰 책임을 떠맡아 실력을 증명한",
-                "正財": "성실하게 쌓아 재물이 붙은", "偏財": "크게 벌이고 기회를 잡은",
-                "食神": "재능이 빛을 보고 사람이 따른", "傷官": "자기 방식으로 판을 새로 짠",
-                "比肩": "자기 힘으로 홀로 서기 시작한", "劫財": "경쟁 속에서 자기 몫을 지켜낸",
-            }
-            _ev_bad4 = []
-            for _h4 in (_hit4 or [])[:2]:
-                _b4 = _EVENT_BAD4.get(_h4, "")
-                if _b4:
-                    _ev_bad4.append(_b4)
-            # 길사 — 과거 대운 중 천간 오행이 용신에 드는 대운만 (기신 대운을 길사로 쓰지 않도록)
-            _ev_good4 = ""
-            _yong_set4 = set(_yong_ohs4 or [])
-            for _d4 in reversed(_past4 or []):   # 최근 대운부터
-                _dcg4 = _d4.get("cg", "")
-                _doh4 = _OH_CG.get(_dcg4, "")     # 천간 → 오행
-                if _yong_set4 and _doh4 and _doh4 not in _yong_set4:
-                    continue                       # 기신·한신 대운은 길사로 안 씀
-                _dss4 = TEN_GODS_MATRIX.get(ilgan, {}).get(_dcg4, "")
-                _dhj4 = _dss4.split("(")[0] if _dss4 else ""
-                _g4 = _EVENT_GOOD4.get(_dhj4, "")
-                if _g4:
-                    _ev_good4 = f"다만 {_d4.get('시작나이',0)}세 무렵 {_d4.get('str','')} 대운은 용신이 힘을 받아 {_g4} 시기였습니다. 그때 쌓은 것이 지금 당신을 버티게 하는 밑천입니다."
-                    break
-            if _ev_bad4:
-                # 문구가 이미 마침표로 끝나므로 공백만으로 연결
-                _ev_body4 = " ".join(_ev_bad4)
-                if _ev_good4:
-                    _ev_body4 += " " + _ev_good4
-                _event_l = f"<b>【겪어왔을 일들】</b> {_ev_body4}"
-        except Exception:
-            _event_l = ""
-
-        # ── 타고난 인연과 충돌 (합충형파, 양면화) ──
-        _relation_l = ""
-        try:
-            _jjs4 = [p.get("jj","") for p in pils]  # 4지지
-            _cgs4 = [p.get("cg","") for p in pils]  # 4천간
-            _rel_hits4 = []
-
-            # 로컬 dict — 지지충 6쌍
-            _CHUNG6 = [frozenset(["子","午"]),frozenset(["丑","未"]),frozenset(["寅","申"]),
-                       frozenset(["卯","酉"]),frozenset(["辰","戌"]),frozenset(["巳","亥"])]
-            # 로컬 dict — 육합 6쌍
-            _YUKHAP6 = [frozenset(["子","丑"]),frozenset(["寅","亥"]),frozenset(["卯","戌"]),
-                        frozenset(["辰","酉"]),frozenset(["巳","申"]),frozenset(["午","未"])]
-
-            _jjset4 = set(_jjs4)
-
-            # 육합 (우선 — 파 해소) — 양면
-            for _pair in _YUKHAP6:
-                if _pair.issubset(_jjset4):
-                    _rel_hits4.append(("합", "가까이 묶이는 인연의 구조가 있습니다 — 사람과 잘 어울리고 협력이 순조로운 만큼, 때로는 그 관계에 발이 묶이지 않도록 거리 조절이 필요합니다"))
-                    break
-
-            # 충 (변동) — 양면
-            for _pair in _CHUNG6:
-                if _pair.issubset(_jjset4):
-                    _rel_hits4.append(("충", "부딪히고 움직이는 충의 구조가 있습니다 — 변화·이동이 잦아 한자리에 머물기 어렵지만, 그만큼 변화에 강하고 새 국면을 여는 추진력이 됩니다"))
-                    break
-
-            # 형 (자형 포함) — 양면
-            _hyung_hit4 = False
-            # 자형: 같은 지지 2개 이상
-            for _z in set(_jjs4):
-                if _jjs4.count(_z) >= 2 and _z in ("辰","午","酉","亥"):  # 전통 자형 지지
-                    _hyung_hit4 = True
-                    break
-            # 삼형: HYUNG_MAP 전역 참조 (구조는 1단계 확인 후 맞춤)
-            if not _hyung_hit4:
-                try:
-                    for _combo in HYUNG_MAP:
-                        _cset = _combo if isinstance(_combo,(set,frozenset)) else set(_combo)
-                        if _cset.issubset(_jjset4):
-                            _hyung_hit4 = True
-                            break
-                except Exception:
-                    pass
-            if _hyung_hit4:
-                _rel_hits4.append(("형", "갈등과 마찰의 형(刑) 구조가 있습니다 — 부딪힘이 있는 만큼, 그 기운을 법·검경·의료처럼 남의 문제를 다루는 전문 영역으로 쓰면 오히려 큰 강점이 됩니다"))
-
-            # 파 (짧게, 약한 작용) — 육합 있으면 생략 가능하나 일단 표시
-            _PA6 = [frozenset(["子","酉"]),frozenset(["午","卯"]),frozenset(["申","巳"]),
-                    frozenset(["寅","亥"]),frozenset(["辰","丑"]),frozenset(["戌","未"])]
-            _pa_hit4 = any(_p.issubset(_jjset4) for _p in _PA6)
-            # 육합(寅亥 등)이 이미 잡혔으면 파는 언급 안 함 (합 우선)
-            _has_hap4 = any(h[0]=="합" for h in _rel_hits4)
-            if _pa_hit4 and not _has_hap4:
-                _rel_hits4.append(("파", "작게 어긋나는 파(破)의 기운이 있습니다 — 계획이 살짝 틀어질 수 있으니, 중요한 일은 한 번 더 점검하면 됩니다"))
-
-            if _rel_hits4:
-                _rel_body4 = " ".join(h[1] + "." for h in _rel_hits4[:3])  # 최대 3개
-                _relation_l = f"<b>【타고난 인연과 충돌】</b> {_rel_body4}"
-        except Exception:
-            _relation_l = ""
-
-        # ── 자리마다 새겨진 운 (기둥별 십성, 포지션 새 정의) ──
-        _pillar_l = ""
-        try:
-            _sp_p4 = calc_sipsung(ilgan, pils)  # [시주, 일주, 월주, 년주] 순서
-            # ★ 전통 포지션: 기존 _pos_drama(뒤집힘) 미사용, 새로 정의
-            _POS4 = {
-                3: ("년주", "초년과 뿌리"),        # index3 = 년주
-                2: ("월주", "청년기와 사회 활동"),  # index2 = 월주
-                1: ("일주", "중년과 나 자신·배우자"), # index1 = 일주
-                0: ("시주", "말년과 자식 인연"),    # index0 = 시주
-            }
-            _seg_p4 = []
-            # 전통 순서(년→월→일→시)로 서술: index 3→2→1→0
-            for _idx4 in (3, 2, 1, 0):
-                if _idx4 >= len(_sp_p4):
-                    continue
-                _pd4 = _sp_p4[_idx4]
-                _ss_cg4 = _pd4.get("cg_ss", "")
-                _pos_name4, _pos_mean4 = _POS4[_idx4]
-                if not _ss_cg4 or _ss_cg4 == "-":
-                    continue
-                # SIPSONG_DETAIL 키는 순수 한자 (DW_SS_DESC 선례와 동일하게 정규화)
-                _ss_hj4 = _ss_cg4.split("(")[0]
-                _sd4 = SIPSONG_DETAIL.get(_ss_hj4, {})
-                _core_p4 = _sd4.get("핵심", "") if isinstance(_sd4, dict) else ""
-                if _core_p4:
-                    _parts_p4 = [s.strip() for s in _core_p4.split(".") if s.strip()]
-                    _core_short4 = _parts_p4[1] if len(_parts_p4) >= 2 else (_parts_p4[0] if _parts_p4 else "")
-                    # 키워드 끝의 "의 기운"/"기운" 중복 제거 (앞의 "~의 기운 —"과 겹침 방지)
-                    _kw_p4 = _core_short4
-                    for _suf in ("의 기운", "기운"):
-                        if _kw_p4.endswith(_suf):
-                            _kw_p4 = _kw_p4[:-len(_suf)].rstrip("· ").rstrip()
-                            break
-                    _seg_p4.append(f"{_pos_name4}({_pos_mean4})에는 {_ss_cg4}의 기운 — {_kw_p4}")
-            if _seg_p4:
-                _pillar_body4 = ". ".join(_seg_p4) + "."
-                _pillar_l = f"<b>【자리마다 새겨진 운】</b> {_pillar_body4}"
-        except Exception:
-            _pillar_l = ""
-
-        # ── 타고난 인연의 자리 (육친, get_yukjin 재사용, 양면화 내장) ──
-        _yuk_l = ""
-        try:
-            _yuk_list4 = get_yukjin(ilgan, pils, gender, marriage_status)
-            _yuk_seg4 = []
-            # present=True 우선, 없으면 재해석 문구 있는 것 일부
-            _yuk_present4 = [y for y in (_yuk_list4 or []) if y.get("present")]
-            _yuk_absent4 = [y for y in (_yuk_list4 or []) if not y.get("present")]
-            # present 관계 전부 + absent 중 desc 있는 것 최대 1개 (없는 인연도 한마디)
-            _yuk_pick4 = _yuk_present4 + _yuk_absent4[:1]
-            for _y4 in _yuk_pick4:
-                _y_rel4 = _y4.get("관계", "")
-                _y_desc4 = _y4.get("desc", "")
-                _y_present4 = _y4.get("present", False)
-                if _y_rel4 and _y_desc4:
-                    if _y_present4:
-                        # 있는 육친(긍정 톤): 첫 문장 압축 OK
-                        _y_txt4 = _y_desc4.split(".")[0].strip()
-                    else:
-                        # 없는 육친: 양면·재해석 문구 보존 위해 전체 desc 유지 (낙인 방지)
-                        _y_txt4 = _y_desc4.strip().rstrip(".")
-                    if _y_txt4:
-                        _yuk_seg4.append(_y_txt4)
-            if _yuk_seg4:
-                _yuk_body4 = ". ".join(_yuk_seg4[:5]) + "."   # 최대 5관계
-                _yuk_l = f"<b>【타고난 인연의 자리】</b> {_yuk_body4}"
-        except Exception:
-            _yuk_l = ""
-
-        _l1_4 = (
-            f"<b>【전체 구조】</b> {ilgan}일간 — {_bonjil4 or '독특한 기운을 지닌 존재입니다.'} "
-            f"여기에 {sn} 사주가 겹쳐지고 <b>{_gyeok_kr4}({_gyeok_hj4})</b> 구조까지 갖추었으니, {_gujo4} "
-            f"이 구조는 타고난 성격 묘사에서 그치지 않고, 살면서 반복적으로 마주치는 선택의 순간마다 "
-            f"본인도 모르게 끌려가는 방향을 결정짓습니다."
-        )
-
-        # ── 타고난 온도 (조후) ──
-        _temp_l = ""
-        try:
-            _jo_need4 = ys_info.get("조후_need", "")
-            _jo_prior4 = ys_info.get("조후_우선", False)
-            _wol_jj4 = pils[2].get("jj", "")
-
-            # 월지 → 계절 매핑
-            _SEASON4 = {
-                "寅": ("봄", "기운이 처음 움트는"), "卯": ("봄", "만물이 자라나는"), "辰": ("봄", "봄이 무르익어 흙이 촉촉한"),
-                "巳": ("여름", "열기가 오르기 시작하는"), "午": ("여름", "불기운이 가장 뜨거운"), "未": ("여름", "마른 흙이 뜨겁게 달아오른"),
-                "申": ("가을", "서늘한 금기운이 도는"), "酉": ("가을", "금기운이 가장 날카로운"), "戌": ("가을", "가을이 저물어 흙이 메마른"),
-                "亥": ("겨울", "물이 왕성해지는"), "子": ("겨울", "한기가 가장 깊은"), "丑": ("겨울", "얼어붙은 흙의"),
-            }
-            _season4, _season_desc4 = _SEASON4.get(_wol_jj4, ("", ""))
-
-            if _season4 and _jo_need4:
-                # 조후_need를 문자열로 정규화 (리스트면 · 로 결합)
-                _need_txt4 = "·".join(_jo_need4) if isinstance(_jo_need4, (list, tuple)) else str(_jo_need4)
-                _temp_body4 = (
-                    f"{_wol_jj4}월({_season4}) 태생 — {_season_desc4} 계절에 태어난 {ilgan}일간입니다. "
-                    f"이 사주의 온도를 맞추는 데 급한 기운은 <b>{_need_txt4}</b>입니다."
-                )
-                if _jo_prior4:
-                    _temp_body4 += (
-                        " 이건 강약(억부)보다 먼저 보아야 하는 요소로, "
-                        "아무리 힘을 보태거나 덜어내도 온도가 맞지 않으면 그 힘이 제대로 쓰이지 않습니다."
-                    )
-                else:
-                    _temp_body4 += " 온도는 비교적 균형이 잡혀 있어, 강약(억부)의 흐름을 우선해 보면 됩니다."
-                _temp_l = f"<b>【타고난 온도】</b> {_temp_body4}"
-        except Exception:
-            _temp_l = ""
-
-        _l2_4 = (
-            f"<b>【근거】</b> " + _gugeo4_pre +
-            (f"{_yong4}(용신)" if _yong4 else "") +
-            (" · " if _yong4 and _gi4 else "") +
-            (f"{_gi4}(기신)" if _gi4 else "") +
-            f" 오행의 힘겨루기 위에 이 사주의 십성 구조가 짜여 있으니, 이건 막연한 느낌이 아니라 "
-            f"사주 여덟 글자 안에서 어느 오행이 힘을 받고 어느 오행이 억눌리는지를 그대로 읽어낸 결과입니다. "
-            f"용신이 힘을 받으면 순탄하고 기신이 힘을 받으면 굴곡이 생기기 쉬운 흐름이니, "
-            f"이 두 기운의 움직임을 눈여겨봐야 합니다."
-        )
-        if sw_gil in ("길", "대길"):
-            _now_txt4 = (f"{_sw_label4}이 용신과 통하니 흐름을 타기 좋은 시기일 가능성이 높습니다. "
-                         f"다만 좋은 시기일수록 자만하지 말고, 지금의 흐름을 실질적인 성과로 "
-                         f"바꾸는 데 집중해야 합니다.")
-        elif sw_gil in ("흉", "대흉"):
-            _now_txt4 = (f"{_sw_label4}이 기신 쪽에 가까우니 무리한 결정보다 신중함이 필요한 시기일 수 있습니다. "
-                         f"큰 결정은 잠시 미루고, 지금은 버티고 정비하는 데 힘을 쏟는 편이 낫습니다.")
-        else:
-            _now_txt4 = (f"{_sw_label4}은 크게 기울지 않는 평이한 흐름이니, 큰 변수보다 꾸준함이 중요한 시기입니다. "
-                         f"화려한 전환점을 기대하기보다 하루하루 쌓아가는 노력이 다음 흐름을 준비하는 밑거름이 됩니다.")
-        _cross_sum4 = cross.get("summary", "")
-        _cross_fin4 = cross.get("finance", "").replace("재물:", "").strip()
-        _cross_car4 = cross.get("career", "").replace("직업:", "").strip()
-        _cross_detail4 = ""
-        def _pd(s):  # 마침표 없으면 붙이기
-            s = s.rstrip()
-            return s if (not s or s[-1] in ".!?") else s + "."
-        if _cross_sum4:
-            _cross_detail4 += f" 올해의 큰 흐름은 이렇습니다 — {_pd(_cross_sum4)}"
-        if _cross_fin4:
-            _cross_detail4 += f" 재물 면에서는 {_pd(_cross_fin4)}"
-        if _cross_car4:
-            _cross_detail4 += f" 일·사회 면에서는 {_pd(_cross_car4)}"
-        _l3_4 = (
-            f"<b>【그래서 지금】</b> {cur_year}년 {cur_age}세, {_dw_label4}{_age_range4}에 {_now_txt4}"
-            f"{_cross_detail4}"
-        )
-        _cheobang4_txt = (_cheobang4 or "용신 오행을 가까이하고 기신 오행의 기운을 줄이는 것이 실질적인 개운법입니다.").rstrip()
-        if _cheobang4_txt and _cheobang4_txt[-1] not in ".!?":
-            _cheobang4_txt += "."
-        _l4_4 = (
-            f"<b>【대비책】</b> {_cheobang4_pre}{_cheobang4_txt}"
-            + (f" {_yong_action4} 지금 실행할 수 있는 가장 확실한 방법입니다." if _yong4 else "")
-            + " 거창하게 접근할 필요 없이, 오늘 하나씩 실천할 수 있는 작은 습관부터 바꿔나가는 것이 "
-              "결국 큰 흐름을 바꾸는 시작이 됩니다."
-        )
-
-        # ── 핵심 한 방 (구조 요약 + 평생 주의) ──
-        _key_l = ""
-        try:
-            # 구조 요약 — 격국+신강약 기반 한 줄
-            _CORE_ID4 = {
-                "정인격": "배우고 쌓아서 그것으로 서는 사람",
-                "편인격": "남다른 시선으로 자기 길을 내는 사람",
-                "정재격": "성실하게 쌓아 지키는 사람",
-                "편재격": "크게 벌이고 크게 움직이는 사람",
-                "정관격": "질서와 명예 안에서 빛나는 사람",
-                "편관격": "책임과 압박을 뚫고 나아가는 사람",
-                "식신격": "만들어내고 표현하며 사는 사람",
-                "상관격": "틀을 깨고 새로 짜는 사람",
-                "비견격": "혼자 힘으로 서는 사람",
-                "겁재격": "경쟁 속에서 자기를 세우는 사람",
-            }
-            _core_id4 = _CORE_ID4.get(_gyeok_kr4, "자기만의 방식으로 살아가는 사람")
-            _strong4 = "신강" in sn
-            _bal4 = "넘치는 힘을 어디에 쓸지" if _strong4 else "부족한 힘을 어디서 채울지"
-
-            # 평생 주의 — natal 패턴 기반 (_hit4 첫번째)
-            _KEY_WARN4 = {
-                "홍염": "이성과의 인연이 들어오고 나가는 자리",
-                "양인": "속도와 결단이 지나쳐 부딪히는 자리",
-                "비겁쟁재": "가까운 사람과 돈이 겹치는 자리",
-                "재다신약": "욕심이 몸을 앞지르는 자리",
-                "관살혼잡": "책임을 가리지 않고 다 떠안는 자리",
-                "상관견관": "말과 재주가 윗사람을 건드리는 자리",
-                "식상태왕": "재능이 흩어져 하나도 못 맺는 자리",
-                "인성과다": "생각이 길어져 때를 놓치는 자리",
-            }
-            _warn4 = ""
-            if _hit4:
-                _warn4 = _KEY_WARN4.get(_hit4[0], "")
-
-            _key_body4 = f"당신은 <b>‘{_core_id4}’</b>입니다. 평생의 과제는 {_bal4}이고"
-            if _warn4:
-                _key_body4 += f", 평생 조심할 것은 <b>‘{_warn4}’</b>입니다"
-            _key_body4 += "."
-            _key_l = f"<b>【한마디로 말하면】</b> {_key_body4}"
-        except Exception:
-            _key_l = ""
-
-        _gangsa_slot.markdown(
-            '<div style="background:#faf7f0;border-left:4px solid #d4af37;border-radius:10px;'
-            'padding:16px 18px;margin:8px 0 16px;font-size:13px;color:#333;line-height:2;">'
-            + "<br><br>".join([x for x in [_l0_4, _trait_l, _relation_l, _pillar_l, _yuk_l, _life_l, _event_l, _l1_4, _temp_l, _l2_4, _l3_4, _l4_4, _key_l] if x]) +
-            '</div>',
-            unsafe_allow_html=True,
-        )
+        _gangsa_html = build_gangsa_block(pils, name, birth_year, gender, marriage_status)
+        _gangsa_slot.markdown(_gangsa_html, unsafe_allow_html=True)
     except Exception:
         pass
+
 
     # ── 십성별 힘든 이유 & 공감 문장 ──────────────────────
     _HARD_REASON = {
