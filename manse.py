@@ -15139,11 +15139,6 @@ def build_gangsa_block(pils, name, birth_year, gender, marriage_status=None):
 def menu_current_situation(pils, name, birth_year, gender, marriage_status=None):
     """🎯 나의 현재 상황 — 공감형 서술 (무엇 때문에 힘드신지 짚어드립니다)"""
 
-    # 강사식 골드박스 자리 예약 (계산은 아래에서, 화면엔 여기 최상단에 렌더)
-    # try 블록 밖에서 생성 — build_saju_core_diagnosis 예외 시에도 슬롯은 항상 존재해야
-    # 나중의 _gangsa_slot.markdown() 호출이 NameError 없이 안전하게 no-op 처리됨
-    _gangsa_slot = st.empty()
-
     # X-4-I-3: 사주 핵심 종합 진단 헤더
     try:
         _core_diag = build_saju_core_diagnosis(pils, name, birth_year, gender)
@@ -15242,14 +15237,6 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
     }
     dw_kr = _SS_KR.get(dw_ss, dw_ss)
     sw_kr = _SS_KR.get(sw_ss, sw_ss)
-
-    # ── 강사식 13항목 골드박스 (build_gangsa_block() 로 추출됨, 렌더 위치는 유지) ──
-    try:
-        _gangsa_html = build_gangsa_block(pils, name, birth_year, gender, marriage_status)
-        _gangsa_slot.markdown(_gangsa_html, unsafe_allow_html=True)
-    except Exception:
-        pass
-
 
     # ── 십성별 힘든 이유 & 공감 문장 ──────────────────────
     _HARD_REASON = {
@@ -18135,6 +18122,14 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
         _core_diag = build_saju_core_diagnosis(pils, name, birth_year, gender)
         if _core_diag:
             st.markdown(_core_diag, unsafe_allow_html=True)
+    except Exception:
+        pass
+
+    # 강사식 13항목 골드박스 (현재상황탭에서 이설, build_gangsa_block() 재사용)
+    try:
+        _gangsa_html = build_gangsa_block(pils, name, birth_year, gender)
+        if _gangsa_html:
+            st.markdown(_gangsa_html, unsafe_allow_html=True)
     except Exception:
         pass
 
