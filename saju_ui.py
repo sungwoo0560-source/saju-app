@@ -372,8 +372,12 @@ def render_quick_consult_response(response: str):
     """퀵 상담 응답 렌더링"""
     if not response:
         return
+    # raw HTML div 안에서는 마크다운(**, ###)이 해석되지 않으므로 태그로 치환
+    import re as _re_qc
+    _resp_tagged = _re_qc.sub(r"^#{2,4}\s*(.+)$", r"<b>\1</b>", response, flags=_re_qc.MULTILINE)
+    _resp_tagged = _re_qc.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", _resp_tagged)
     # \n → <br> 변환 (HTML에서 줄바꿈 표시)
-    _html_resp = response.replace('\n', '<br>')
+    _html_resp = _resp_tagged.replace('\n', '<br>')
     st.markdown(
         f"""
 <div style="background:linear-gradient(135deg,#fffbf0,#fff8e0);
