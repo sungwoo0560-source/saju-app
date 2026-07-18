@@ -5562,111 +5562,6 @@ def build_ilju_core_line(pils):
         line = f"🎯 한 줄 본질: {ilgan}{ilji} 일주 — {bonjil}."
         if depict:
             line += f" {depict} 기질입니다."
-        # Y-10 2단계: 격국(그릇) 한 줄
-        try:
-            gk = get_gyeokguk(pils)
-            gyeok_name = gk.get("격국명", "") if gk else ""
-            gk_depict = ""
-            for k in _GK_DEPICT:
-                if k in gyeok_name:
-                    gk_depict = _GK_DEPICT[k]
-                    break
-            if gyeok_name and gk_depict:
-                line += f"\n\n📐 타고난 그릇: {gyeok_name} — {gk_depict}."
-        except Exception:
-            pass
-        # Y-10 3단계: 가장 강한 십성 → 삶의 방식
-        try:
-            _top_sc = {}
-            for _sv in _ss_list:
-                for _k in ["cg_ss", "jj_ss"]:
-                    _v = _sv.get(_k, "-")
-                    if _v and _v != "-":
-                        for _han in _SS_TO_GROUP:
-                            if _han in _v:
-                                _grp = _SS_TO_GROUP[_han]
-                                _top_sc[_grp] = _top_sc.get(_grp, 0) + 1
-                                break
-            if _top_sc:
-                _top_grp = sorted(_top_sc, key=_top_sc.get, reverse=True)[0]
-                _way = _LIFE_WAY.get(_top_grp, "")
-                if _way:
-                    _skip = False
-                    if _top_grp == "인성":
-                        _gk_n = ""
-                        try: _gk_n = gyeok_name
-                        except NameError: pass
-                        _wj_chk = _ss_list[2].get("jj_ss","") if len(_ss_list)>2 else ""
-                        if any(k in _gk_n for k in ("正印","偏印")) or \
-                           any(k in _wj_chk for k in ("편인","정인")):
-                            _skip = True
-                    if not _skip:
-                        line += f"\n\n🧭 삶의 방식: {_way}."
-        except Exception:
-            pass
-        # Y-10 4단계: 일지 → 연애·배우자
-        try:
-            _love = ""
-            for k in _ILJI_LOVE:
-                if k in ilji_ss:
-                    _love = _ILJI_LOVE[k]
-                    break
-            if _love:
-                line += f"\n\n💑 연애·배우자(일지 {ilji}): {_love}."
-        except Exception:
-            pass
-        # Y-10 4단계: 월지 → 직업
-        try:
-            _wj_ss = _ss_list[2].get("jj_ss","") if len(_ss_list)>2 else ""
-            _wj = pils[2].get("jj","")
-            _job = ""
-            for k in _WOLJI_JOB:
-                if k in _wj_ss:
-                    _job = _WOLJI_JOB[k]; break
-            if _job:
-                line += f"\n\n💼 직업·사회(월지 {_wj}): {_job}."
-        except Exception:
-            pass
-        # Y-10 4단계: 년지 → 초년
-        try:
-            _yj_ss = _ss_list[3].get("jj_ss","") if len(_ss_list)>3 else ""
-            _yj = pils[3].get("jj","")
-            _root = ""
-            for k in _YEONJI_ROOT:
-                if k in _yj_ss:
-                    _root = _YEONJI_ROOT[k]; break
-            if _root:
-                line += f"\n\n🌱 초년·뿌리(년지 {_yj}): {_root}."
-        except Exception:
-            pass
-        # Y-10 4단계: 시지 → 말년
-        try:
-            _sj_ss = _ss_list[0].get("jj_ss","") if _ss_list else ""
-            _sj = pils[0].get("jj","")
-            _late = ""
-            for k in _SIJI_LATE:
-                if k in _sj_ss:
-                    _late = _SIJI_LATE[k]; break
-            if _late:
-                line += f"\n\n🌙 말년·자녀(시지 {_sj}): {_late}."
-        except Exception:
-            pass
-        # Y-23: 형제 자리 (비겁) — 단정 X, 자리 경향만
-        try:
-            _bicap_c = sum(
-                1 for _s in _ss_list
-                for _k in ["cg_ss","jj_ss"]
-                if "비견" in _s.get(_k,"") or "겁재" in _s.get(_k,"")
-            )
-            if _bicap_c >= 2:
-                _hj = "형제·동료가 많고 경쟁 속에서도 의리가 깊은 자리. 함께 가는 힘이 강합니다"
-            elif _bicap_c == 1:
-                _hj = "형제·동료와 적당한 거리의 자리. 협력은 되나 깊은 의존보다 독립이 편합니다"
-            else:
-                _hj = "혼자 서서 개척하는 자리. 형제·동료보다 스스로의 힘으로 길을 엽니다"
-            line += f"\n\n👫 형제·동료: {_hj}."
-        except Exception:
-            pass
         # Y-12 5단계: 🔮 한마디 헤드라인 (맨 앞에 prepend)
         try:
             _gk_short = ""
@@ -5790,19 +5685,6 @@ def build_saju_core_diagnosis(pils, name, birth_year, gender, current_year=None)
         if _ilju_line:
             out.append(_ilju_line + "\n")
         out.append("**▣ 핵심 구조 진단**")
-        if yangin_active or internal_chung or cur_chung_targets:
-            # Y-7-B Step 3: 발동 패턴에 "조심할 것" 한 줄 설명 추가
-            parts = []
-            if yangin_active:
-                _loc_txt = yangin_loc[0].replace("주", "지") if yangin_loc else "원국"
-                parts.append(f"{_loc_txt} 양인살({yangin_pos}) — 칼날 같은 추진력. 충 운 해에 사고·수술·이성 충돌수가 발동합니다")
-            if internal_chung:
-                parts.append(f"원국 충({internal_chung[0]}) — 부딪히는 두 기운이 상존하는 구조. 관계에 긴장이 들기 쉬운 만큼, 변화·추진력으로 쓰면 강한 동력이 됩니다")
-            if cur_chung_targets:
-                parts.append(f"세운 충({cur_jj}-{cur_chung_targets[0]}) — 올해 충 발동. 이동·변화·전환이 잦은 해, 큰 결정은 신중히")
-            out.append(f"- 발동 패턴: {' × '.join(parts)}\n")
-        else:
-            out.append("- 원국 안정 — 큰 충극 패턴 없음\n")
 
         if risk_score >= 70:
             out.append("- 🔴 **매우 위험** — 사고·수술·큰 결정 최대 주의\n")
@@ -6274,14 +6156,6 @@ def build_saju_core_diagnosis(pils, name, birth_year, gender, current_year=None)
                 if len(_sel) >= 7:
                     break
             _remain = len(active_scenarios) - len(_sel)
-
-            # 단일 결론 박스 (충격 진단 상단)
-            try:
-                _uc = build_unified_conclusion(name, _saju_data_6i, active_scenarios)
-                if _uc:
-                    out.append(_uc)
-            except Exception:
-                pass
 
             # X-6-J: 올해 인연 시나리오
             try:
