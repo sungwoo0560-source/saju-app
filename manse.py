@@ -14782,6 +14782,40 @@ def build_gangsa_block(pils, name, birth_year, gender, marriage_status=None):
                 _yang4 = bool(_yd4 and _yd4.get("존재", False))
                 _wk4 = "신약" in sn   # 부분일치 (발견2 반영, 원본 exact-match 버그 미적용)
 
+                # ── R1/R2: 충·형 위치 산출 (신규) ──
+                _pos_lab4 = ["시주","일주","월주","년주"]  # pils 순서
+                _CHUNG6 = [frozenset(["子","午"]),frozenset(["丑","未"]),frozenset(["寅","申"]),
+                           frozenset(["卯","酉"]),frozenset(["辰","戌"]),frozenset(["巳","亥"])]
+                _chung_pairs4 = []   # [(지지A, 지지B, 위치A, 위치B), ...]
+                for _i4 in range(4):
+                    for _j4 in range(_i4 + 1, 4):
+                        _jja4 = pils[_i4].get("jj", "")
+                        _jjb4 = pils[_j4].get("jj", "")
+                        if frozenset([_jja4, _jjb4]) in _CHUNG6:
+                            _chung_pairs4.append((_jja4, _jjb4, _pos_lab4[_i4], _pos_lab4[_j4]))
+                _hyung_pairs4 = []   # 자형: 같은 지지가 2곳 이상 → (지지, [위치들])
+                _jjs4c = [p.get("jj", "") for p in pils]
+                for _z4c in set(_jjs4c):
+                    if _jjs4c.count(_z4c) >= 2 and _z4c in ("辰","午","酉","亥"):
+                        _hyung_pairs4.append((_z4c, [_pos_lab4[_k4] for _k4 in range(4) if _jjs4c[_k4] == _z4c]))
+
+                # R3: 충 대상 지지의 오행이 "둘 다" 기신이면 거병(去病) — 흉사 근거에서 제외
+                _gi_ohs4b = locals().get("gi_ohs") or []
+                _chung_pairs4 = [
+                    p for p in _chung_pairs4
+                    if not (OH.get(p[0], "") in _gi_ohs4b and OH.get(p[1], "") in _gi_ohs4b)
+                ]
+
+                # R2: 양인봉충/백호충/괴강충 판정 재료
+                _has_baekho4 = any("백호" in (s.get("name","") if isinstance(s,dict) else str(s)) for s in (_es4 or []))
+                _has_goegang4 = any("괴강" in (s.get("name","") if isinstance(s,dict) else str(s)) for s in (_es4 or []))
+                _yangin_bongchung4 = bool(
+                    _yd4 and _yd4.get("존재") and _chung_pairs4 and
+                    any(_yd4.get("양인_지지") in (p[0], p[1]) for p in _chung_pairs4)
+                )
+                _baekho_chung4 = bool(_has_baekho4 and _chung_pairs4)
+                _goegang_chung4 = bool(_has_goegang4 and _chung_pairs4)
+
                 _TRAITS4 = {
                     "홍염": "당신은 가만있어도 이성의 눈길이 따라붙는 사람입니다. 원치 않아도 인연이 얽히고, 그 때문에 구설에 오른 적 이미 있으시죠? 타고난 매력이라 없앨 순 없지만, 선을 분명히 하면 그 매력이 독이 아니라 복이 됩니다.",
                     "양인": "당신 안에는 칼날 같은 추진력이 있습니다. 한번 결정하면 밀어붙이다 크게 부딪히거나 다친 적, 사고·수술·큰 충돌을 겪은 적 있으시죠? 이 힘은 없앨 게 아니라 방향을 잡아줄 것입니다 — 속도만 조절하면 남들이 못 하는 일을 해냅니다.",
@@ -14793,18 +14827,29 @@ def build_gangsa_block(pils, name, birth_year, gender, marriage_status=None):
                     "인성과다": "당신은 생각이 깊고 배움이 끝없는 사람입니다. 너무 재고 따지다 정작 기회를 놓치거나 시작을 못 한 적 이미 있으시죠? 생각은 이미 충분하니, 어느 순간엔 몸이 먼저 움직여야 그 깊이가 결실이 됩니다.",
                 }
                 _hit4 = []
+                if _yangin_bongchung4: _hit4.append("양인봉충")
+                if _baekho_chung4: _hit4.append("백호충")
+                if _goegang_chung4: _hit4.append("괴강충")
                 if _hy_natal4: _hit4.append("홍염")
-                if _yang4: _hit4.append("양인")
+                if _yang4 and not _yangin_bongchung4: _hit4.append("양인")
                 if _bi4 >= 2 and _jae4 >= 1: _hit4.append("비겁쟁재")
                 if _jae4 >= 2 and _wk4: _hit4.append("재다신약")
                 if _pg4 >= 1 and _jg4 >= 1: _hit4.append("관살혼잡")
                 if _sg4 >= 1 and _jg4 >= 1: _hit4.append("상관견관")
                 if _sik4 >= 2: _hit4.append("식상태왕")
                 if _in4 >= 3: _hit4.append("인성과다")
-                _hit4 = _hit4[:2]   # 최대 2개
+                if _chung_pairs4 and not _yangin_bongchung4 and not _baekho_chung4 and not _goegang_chung4:
+                    _hit4.append("충")
+                if _hyung_pairs4:
+                    _hit4.append("자형")
+                _hit4 = _hit4[:3]   # 최대 3개 (R2 조합 대응 슬롯 확대)
                 if _hit4:
-                    _trait_body4 = " ".join(_TRAITS4[h] for h in _hit4)
-                    _trait_l = f"<b>【타고난 구조의 특징】</b> {_trait_body4}"
+                    # _TRAITS4에 없는 신규 패턴(양인봉충/백호충/괴강충/충/자형)은
+                    # 이 항목에서만 조용히 스킵 — KeyError로 항목 전체가 비는 것 방지
+                    _trait_parts4 = [_TRAITS4[h] for h in _hit4 if h in _TRAITS4]
+                    if _trait_parts4:
+                        _trait_body4 = " ".join(_trait_parts4)
+                        _trait_l = f"<b>【타고난 구조의 특징】</b> {_trait_body4}"
             except Exception:
                 _trait_l = ""
 
@@ -14821,7 +14866,74 @@ def build_gangsa_block(pils, name, birth_year, gender, marriage_status=None):
                     "상관견관": "윗사람이나 조직과 정면으로 부딪혀 손해 본 일이 있었습니다. 옳은 말 했다가 찍혔거나, 못 참고 자리를 박차고 나왔거나, 억울하게 뒤집어썼거나 — 실력은 있는데 판이 받아주지 않던 시기입니다.",
                     "식상태왕": "재주가 많아 여기저기 벌였다가 하나도 못 맺고 흩어진 시기가 있었습니다. 시작은 화려했는데 마무리가 되지 않았고, 남 좋은 일만 시킨 것 같아 허탈했던 때입니다.",
                     "인성과다": "너무 재고 따지다 눈앞의 기회를 놓친 일이 있었습니다. 준비만 하다 때를 흘려보냈거나, 남이 먼저 채간 것을 보며 뒤늦게 후회했던 시기입니다.",
+                    "백호충": "백호에 충이 겹쳤습니다. 갑작스러운 사고나 급한 병 — 예고 없이 오는 쪽입니다. 대신 결정적인 순간에 밀어붙이는 힘이 남다릅니다.",
+                    "괴강충": "괴강이 충을 맞은 구조입니다. 극과 극을 오갑니다. 크게 올라갔다 크게 꺾이는 일을 이미 겪으셨을 겁니다. 그 낙차가 그릇을 키웁니다.",
+                    "자형": "같은 기운이 겹쳐 스스로를 치는 자형입니다. 남 탓보다 자기 탓을 하며 속으로 삭이셨을 겁니다. 그 자기검열이 완성도를 만듭니다.",
                 }
+                # 발동 연도 산출 — 트리거 지지가 실제 세운으로 들어온 최근 해 (최대 2개, R2 확장)
+                _trig_years4 = []
+                _cycle4 = 12
+                if _chung_pairs4:
+                    if _yangin_bongchung4:
+                        _yangin_jj4 = _yd4.get("양인_지지", "")
+                        _trig_jj4 = set()
+                        for _p4t in _chung_pairs4:
+                            if _yangin_jj4 in (_p4t[0], _p4t[1]):
+                                _trig_jj4 = {_p4t[0], _p4t[1]}
+                                break
+                    else:
+                        _trig_jj4 = set(_chung_pairs4[0][:2])
+
+                    if _trig_jj4:
+                        _cycle4 = 6 if len(_trig_jj4) == 2 else 12
+                        _cand_years4 = []
+                        for _yy4 in range(birth_year + 18, cur_year):
+                            _yl4 = get_yearly_luck(pils, _yy4)
+                            if _yl4 and _yl4.get("jj", "") in _trig_jj4:
+                                _cand_years4.append(_yy4)
+                        _trig_years4 = _cand_years4[-2:]   # [older, newer] — 가장 최근 2개
+
+                # 양인봉충 / 충 — 위치·지지가 사람마다 달라 동적으로 채움 (R1 재료: _chung_pairs4)
+                if _chung_pairs4:
+                    _cp0_4 = _chung_pairs4[0]
+                    _ev_ca4, _ev_cb4, _ev_pa4, _ev_pb4 = _cp0_4[0], _cp0_4[1], _cp0_4[2], _cp0_4[3]
+                    if len(_trig_years4) == 2:
+                        _y1_4, _y2_4 = _trig_years4[0], _trig_years4[1]
+                        _EVENT_BAD4["양인봉충"] = (
+                            f"양인이 충을 정면으로 맞았습니다. {_y1_4}년, {_y2_4}년 무렵입니다 — 몸에 칼 대는 일, 수술이든 큰 사고든 "
+                            f"그때들 지나가셨을 겁니다. {_ev_pa4}와 {_ev_pb4}가 부딪히는 자리라 그 영역에서 터지고, 이 흐름은 {_cycle4}년마다 돌아옵니다. "
+                            f"다만 이 구조는 위기에서 손이 먼저 움직입니다. 남들이 얼어붙는 순간에 판단이 서는 사람입니다."
+                        )
+                        _EVENT_BAD4["충"] = (
+                            f"{_ev_ca4}{_ev_cb4} 충이 원국에 박혀 있습니다. {_y1_4}년, {_y2_4}년 무렵에 크게 움직이셨을 겁니다 — "
+                            f"{_ev_pa4}·{_ev_pb4} 영역입니다. {_cycle4}년 주기로 돌아오는 흐름이라 이사, 이직, 관계 정리가 남들보다 잦으셨을 겁니다. "
+                            f"한자리에 못 있는 게 아니라, 움직여야 풀리는 구조입니다."
+                        )
+                        _EVENT_BAD4["백호충"] = f"{_y1_4}년, {_y2_4}년 무렵입니다 — " + _EVENT_BAD4["백호충"]
+                        _EVENT_BAD4["괴강충"] = f"{_y1_4}년, {_y2_4}년 무렵입니다 — " + _EVENT_BAD4["괴강충"]
+                    elif len(_trig_years4) == 1:
+                        _trig_year4 = _trig_years4[0]
+                        _EVENT_BAD4["양인봉충"] = (
+                            f"양인이 충을 정면으로 맞았습니다. {_trig_year4}년 무렵입니다 — 몸에 칼 대는 일, 수술이든 큰 사고든 "
+                            f"그때 지나가셨을 겁니다. 아니면 코앞에서 그런 일을 보셨거나. {_ev_pa4}와 {_ev_pb4}가 부딪히는 자리라 그 영역에서 터집니다. "
+                            f"다만 이 구조는 위기에서 손이 먼저 움직입니다. 남들이 얼어붙는 순간에 판단이 서는 사람입니다."
+                        )
+                        _EVENT_BAD4["충"] = (
+                            f"{_ev_ca4}{_ev_cb4} 충이 원국에 박혀 있습니다. {_trig_year4}년 무렵에 크게 한 번 움직이셨을 겁니다 — "
+                            f"{_ev_pa4}·{_ev_pb4} 영역입니다. 이사, 이직, 관계 정리가 남들보다 잦으셨을 겁니다. 한자리에 못 있는 게 아니라, 움직여야 풀리는 구조입니다."
+                        )
+                        _EVENT_BAD4["백호충"] = f"{_trig_year4}년 무렵입니다 — " + _EVENT_BAD4["백호충"]
+                        _EVENT_BAD4["괴강충"] = f"{_trig_year4}년 무렵입니다 — " + _EVENT_BAD4["괴강충"]
+                    else:
+                        _EVENT_BAD4["양인봉충"] = (
+                            f"양인이 충을 정면으로 맞았습니다. 몸에 칼 대는 일 — 수술이든 큰 사고든 한 번은 지나가셨을 겁니다. "
+                            f"아니면 코앞에서 그런 일을 보셨거나. {_ev_pa4}와 {_ev_pb4}가 부딪히는 자리라 그 영역에서 터집니다. "
+                            f"다만 이 구조는 위기에서 손이 먼저 움직입니다. 남들이 얼어붙는 순간에 판단이 서는 사람입니다."
+                        )
+                        _EVENT_BAD4["충"] = (
+                            f"{_ev_ca4}{_ev_cb4} 충이 원국에 박혀 있습니다. {_ev_pa4}·{_ev_pb4} 영역이 흔들립니다 — "
+                            f"이사, 이직, 관계 정리가 남들보다 잦으셨을 겁니다. 한자리에 못 있는 게 아니라, 움직여야 풀리는 구조입니다."
+                        )
                 # 대운 천간 십성별 길사
                 _EVENT_GOOD4 = {
                     "正印": "배움·자격·시험으로 자기 자리를 만든", "偏印": "남다른 기술이나 안목으로 길을 튼",
@@ -15109,6 +15221,11 @@ def build_gangsa_block(pils, name, birth_year, gender, marriage_status=None):
                     "상관견관": "말과 재주가 윗사람을 건드리는 자리",
                     "식상태왕": "재능이 흩어져 하나도 못 맺는 자리",
                     "인성과다": "생각이 길어져 때를 놓치는 자리",
+                    "양인봉충": "칼과 속도가 겹치는 자리",
+                    "백호충": "예고 없이 사고와 급병이 드는 자리",
+                    "괴강충": "정점 직후에 꺾이는 자리",
+                    "충": "한자리에 묶으면 탈이 나는 자리",
+                    "자형": "자책이 병이 되는 자리",
                 }
                 _warn4 = ""
                 if _hit4:
