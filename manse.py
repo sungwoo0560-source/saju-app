@@ -8330,6 +8330,7 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
                     return H - MARGIN
 
                 def _write(text, y, size=10, color=(0.1, 0.1, 0.1)):
+                    import html as _html
                     if y < BOT + 10 * mm:
                         y = _new_page()
                     c.setFont(_BF, size)
@@ -8337,7 +8338,16 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
                     max_w = W - 2 * MARGIN
                     text = _re.sub(r'\*{1,3}([^*]+)\*{1,3}', r'\1', str(text or ""))
                     text = _re.sub(r'#{1,6}\s*', '', text)
+                    # 블록성 태그 → 개행 (일반 태그 제거보다 먼저 처리해 문장 붙음 방지)
+                    text = _re.sub(r'<br\s*/?>|</(?:p|div|li|tr|h[1-6])\s*>', '\n', text, flags=_re.I)
                     text = _re.sub(r'<[^>]+>', '', text)
+                    # HTML 엔티티 변환 (&nbsp;는 일반 공백으로)
+                    text = text.replace('&nbsp;', ' ')
+                    text = _html.unescape(text)
+                    text = text.replace('\xa0', ' ')
+                    # 공백 정리 (내용 삭제 없이 줄끝 공백/과다 개행만 정리)
+                    text = _re.sub(r'[ \t]+(?=\n)', '', text)
+                    text = _re.sub(r'\n{3,}', '\n\n', text)
                     for raw in text.split("\n"):
                         raw = raw.strip()
                         if not raw:
