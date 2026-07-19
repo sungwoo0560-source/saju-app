@@ -18231,55 +18231,8 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
     # SSOT 끝
     # ════════════════════════════════════════════
 
-    # Patch Y-6: 한눈 요약 카드 (최상단) — Y-7 수정
-    try:
-        from saju_zhengtong import render_quick_summary_card
-        _name_y6 = name or "내담자"
-
-        # yongshin/gisin 직접 계산
-        _yong_y6 = None
-        _gisin_y6 = None
-        try:
-            _ys_y6 = get_yongshin(pils)
-            if _ys_y6:
-                _yong_y6 = _ys_y6
-                _gisin_list_y6 = _ys_y6.get("기신", [])
-                if isinstance(_gisin_list_y6, list) and _gisin_list_y6:
-                    _gisin_y6 = _gisin_list_y6
-        except Exception:
-            _yong_y6 = None
-            _gisin_y6 = None
-
-        # 용신/기신 강제 fallback — "계산 중" 표시 방지
-        if not _yong_y6:
-            try:
-                _ys_fb = get_yongshin(pils)
-                if isinstance(_ys_fb, dict):
-                    _yong_y6 = _ys_fb.get("종합_용신") or _ys_fb.get("용신") or ["水", "木"]
-                elif isinstance(_ys_fb, list):
-                    _yong_y6 = _ys_fb
-            except Exception:
-                _yong_y6 = ["水", "木"]
-
-        if not _gisin_y6:
-            _opp = {"水": "土", "木": "金", "火": "水", "土": "木", "金": "火"}
-            if _yong_y6 and isinstance(_yong_y6, list):
-                _gisin_y6 = [_opp.get(y, "土") for y in _yong_y6[:2]]
-            elif _yong_y6 and isinstance(_yong_y6, dict):
-                _yl_fb = _yong_y6.get("종합_용신", _yong_y6.get("용신", ["水"]))
-                _gisin_y6 = [_opp.get(y, "土") for y in (_yl_fb if isinstance(_yl_fb, list) else ["水"])[:2]]
-            else:
-                _gisin_y6 = ["土", "金"]
-
-        _quick_html = render_quick_summary_card(
-            pils, _name_y6,
-            yongshin=_yong_y6,
-            gisin=_gisin_y6,
-        )
-        if _quick_html:
-            st.markdown(_quick_html, unsafe_allow_html=True)
-    except Exception as _e_y6:
-        st.warning(f"Y-6 한눈 요약 카드 로드 실패: {_e_y6}")
+    # _name_y6: Y-9-A(render_life_risk_card)에서 재사용 — 한눈 요약 카드 제거 후에도 유지 필요
+    _name_y6 = name or "내담자"
 
     # Y-13: 정통 만세력 보드 (시각 표)
     try:
@@ -19124,16 +19077,6 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
             )
     except Exception as _e_y4:
         st.warning(f"Y-4 정통 명리학 통합 카드 로드 실패: {_e_y4}")
-
-    # Patch Y-6-D: 최종 결론 박스
-    try:
-        from saju_zhengtong import render_final_verdict_card
-        st.markdown(
-            render_final_verdict_card(pils, _name_y4),
-            unsafe_allow_html=True,
-        )
-    except Exception as _e_y6d:
-        pass
 
     # ③ 성향 판독
 
