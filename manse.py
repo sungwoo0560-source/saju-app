@@ -14934,6 +14934,36 @@ def build_gangsa_block(pils, name, birth_year, gender, marriage_status=None):
                             f"{_ev_ca4}{_ev_cb4} 충이 원국에 박혀 있습니다. {_ev_pa4}·{_ev_pb4} 영역이 흔들립니다 — "
                             f"이사, 이직, 관계 정리가 남들보다 잦으셨을 겁니다. 한자리에 못 있는 게 아니라, 움직여야 풀리는 구조입니다."
                         )
+                # 패턴별 발동 십성 매핑 (양인·홍염 제외 — 양인은 양인봉충이 연도 담당, 홍염은 지지기반이라 범위 밖)
+                _PAT_SS4 = {
+                    "비겁쟁재": {"比肩", "劫財"},
+                    "재다신약": {"偏財", "正財"},
+                    "관살혼잡": {"偏官", "正官"},
+                    "상관견관": {"傷官", "正官"},
+                    "식상태왕": {"食神", "傷官"},
+                    "인성과다": {"偏印", "正印"},
+                }
+                for _pat4 in (_hit4 or []):
+                    if _pat4 not in _PAT_SS4:
+                        continue
+                    _dw_hit4 = None
+                    for _d4s in reversed(_past4 or []):   # 최근 대운부터
+                        _dcg4s = _d4s.get("cg", "")
+                        _djj4s = _d4s.get("jj", "")
+                        _dcg_ss4 = TEN_GODS_MATRIX.get(ilgan, {}).get(_dcg4s, "")
+                        _dcg_ss4n = _dcg_ss4.split("(")[0] if _dcg_ss4 else ""
+                        _jijang4s = JIJANGGAN.get(_djj4s, [])
+                        _djj_main4s = _jijang4s[-1] if _jijang4s else ""
+                        _djj_ss4 = TEN_GODS_MATRIX.get(ilgan, {}).get(_djj_main4s, "")
+                        _djj_ss4n = _djj_ss4.split("(")[0] if _djj_ss4 else ""
+                        if _dcg_ss4n in _PAT_SS4[_pat4] or _djj_ss4n in _PAT_SS4[_pat4]:
+                            _dw_hit4 = _d4s
+                            break
+                    if _dw_hit4:
+                        _sy4, _ey4 = _dw_hit4.get("시작연도", 0), _dw_hit4.get("종료연도", 0)
+                        if _sy4 and _ey4 and _pat4 in _EVENT_BAD4:
+                            _EVENT_BAD4[_pat4] = f"{_sy4}~{_ey4}년 무렵입니다 — " + _EVENT_BAD4[_pat4]
+
                 # 대운 천간 십성별 길사
                 _EVENT_GOOD4 = {
                     "正印": "배움·자격·시험으로 자기 자리를 만든", "偏印": "남다른 기술이나 안목으로 길을 튼",
