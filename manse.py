@@ -18512,6 +18512,7 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
         f"🎯 {name}님은 {_ilgan_x}{_iljj_x} 일주입니다 — 아래는 원국에서 계산된 사실 기반 진단입니다.</div>",
         unsafe_allow_html=True,
     )
+    _pdf_only(f"🎯 {name}님은 {_ilgan_x}{_iljj_x} 일주입니다 — 아래는 원국에서 계산된 사실 기반 진단입니다.")
 
     # Patch Y-9-A: 7대 운명 코드 박스 (충격 임팩트)
     try:
@@ -18827,6 +18828,15 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
             f'border-radius:16px;padding:20px;">{_card_html}</div>',
             unsafe_allow_html=True
         )
+        _pdf_only(
+            f"🎯 {_cur_year}년 운기 5대 지표\n"
+            f"💰 재물운 {_bar8(_sm)} {_sm}/10 — {_money_1l}\n"
+            f"⚡ 올해 사고수 {_bar8(_ss)} {_ss}/10 — {_sago_1l}\n"
+            f"💑 이성·관계 {_bar8(_sl)} {_sl}/10 — {_love_1l}\n"
+            f"💼 직업운 {_bar8(_sj)} {_sj}/10 — {_job_1l}\n"
+            f"🏥 건강운 {_bar8(_sh)} {_sh}/10 — {_health_1l}\n"
+            f"🔔 이번달 최우선: 【{_low8}】 ▶ {_warn8}"
+        )
     except Exception:
         pass
 
@@ -18937,6 +18947,7 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
         _OH_CAL2= _OH_CG
         _orig_jjs_cal = {p.get("jj","") for p in pils}
         _cal_rows = []
+        _pdf_buf = []
         for _mi in range(12):
             _ml_cal = get_monthly_luck(pils, _cy_cal, _mi + 1) or {}
             _mcg = _ml_cal.get("간", "")
@@ -18954,6 +18965,7 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
                 f"<div style='font-size:11px;color:{_tc};'>{_sig} {_mss[:2] if len(_mss)>2 else _mss}</div>"
                 f"</div>"
             )
+            _pdf_buf.append(f"{_mi+1}월 {_mcg}{_mjj} {_sig} {_mss}")
 
         st.markdown("---")
         st.markdown(
@@ -18968,6 +18980,10 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
             f"<div style='font-size:11px;color:#888;margin-top:6px;'>"
             f"🟢 용신월 (적극 행동) | 🔴 기신월 (수비) | 🟡 중립월 (꾸준히)</div>",
             unsafe_allow_html=True,
+        )
+        _pdf_only(
+            f"📅 {_cy_cal}년 월별 길흉 캘린더\n" + "\n".join(_pdf_buf) +
+            "\n🟢 용신월 (적극 행동) | 🔴 기신월 (수비) | 🟡 중립월 (꾸준히)"
         )
     except Exception:
         pass
@@ -19267,6 +19283,7 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
         with st.spinner("성향 계산 중..."):
             hl = generate_engine_highlights(pils, birth_year, gender)
 
+        _pdf_buf = []
         for trait in hl["personality"]:
             tag_color = "#9b7ccc" if ("겉" in trait or "속" in trait) else "#4a90d9"
 
@@ -19276,6 +19293,7 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
 <div style="border-left:4px solid {tag_color};background:#ffffff; padding:11px 16px;border-radius:8px;margin:5px 0; font-size:13px;line-height:1.9;color:#000000;border:1px solid #000000">{trait}</div>""",
                 unsafe_allow_html=True,
             )
+            _pdf_buf.append(trait)
 
         # 십성 太旺(태왕) — 십성 차원 과다 진단 (오행% 과다와 보완 관계)
         try:
@@ -19288,8 +19306,11 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
                     f'<span style="color:#444;font-size:14px;">{_twdesc}</span></div>',
                     unsafe_allow_html=True,
                 )
+                _pdf_buf.append(f"💢 {_twname}: {_twdesc}")
         except Exception:
             pass
+
+        _pdf_only("🧠 성향 판독\n" + "\n".join(_pdf_buf))
 
     except Exception as e:
         st.warning(f"성향 계산 오류: {e}")
@@ -19417,6 +19438,7 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
         # ③ 1~12월 바 타임라인
 
         _bar_html = ""
+        _pdf_buf10 = []
 
         for _md in _months_data:
             _lv = _md["길흉"]
@@ -19435,6 +19457,7 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
                 f'<div style="font-size:9px;color:{_col};font-weight:700">{_lv}</div>'
                 f"</div>"
             )
+            _pdf_buf10.append(f"{_md['월']}월 {_em} {_lv}")
 
         st.markdown(
             f"""
@@ -19449,6 +19472,13 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
             unsafe_allow_html=True,
         )
 
+        _pdf_only(
+            "📅 올해 길흉월 분석 (大運·歲運·月運 교차)\n"
+            f"🌟 올해 최고의 달: {_best_m['월']}월 {_LEVEL_EMOJI.get(_best_m['길흉'], '')} {_best_m['길흉']} · {_best_m['십성']} — {_best_m.get('short','')}\n"
+            f"⚠️ 올해 주의할 달: {_worst_m['월']}월 {_LEVEL_EMOJI.get(_worst_m['길흉'], '')} {_worst_m['길흉']} · {_worst_m['십성']} — {_worst_m.get('short','')}\n"
+            + (f"⚙️ 大運·歲運 교차 분석 ({_cur_year}년): 현재 대운 {_cross['대운']['str']}({_cross['대운_천간십성']}) × 올해 세운 {_cross['세운'].get('세운','')}({_cross['세운_천간십성']}) → {_cross['교차해석']}\n" if _cross else "")
+            + "📊 1~12월 월운 길흉 타임라인\n" + "\n".join(_pdf_buf10)
+        )
 
     except Exception as e:
         st.warning(f"길흉월 분석 오류: {e}")
