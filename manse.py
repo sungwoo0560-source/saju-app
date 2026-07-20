@@ -18540,11 +18540,13 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
             _gongmang_pyong = get_gongmang(pils).get("공망_지지") or ()
         except Exception:
             _gongmang_pyong = ()
+        # 2-3-③: 12개월 순회 SSOT — 원본 ml + 등급/이모지/시그널을 함께 보관해
+        # 아래 3곳(월별캘린더·귀인타이밍·길흉월분석)이 재순회 없이 재사용한다.
         _mg12 = []
         for _m_pyong in range(1, 13):
             _ml_pyong = get_monthly_luck(pils, _cy_pyong, _m_pyong) or {}
-            _gr_pyong, _, _ = _month_grade(_ml_pyong, _yl_pyong, _orig_jjs_pyong, gi_list=_gisin_pyong, gm_list=_gongmang_pyong)
-            _mg12.append({"월": _m_pyong, "등급": _gr_pyong})
+            _gr_pyong, _ge_pyong, _gs_pyong = _month_grade(_ml_pyong, _yl_pyong, _orig_jjs_pyong, gi_list=_gisin_pyong, gm_list=_gongmang_pyong)
+            _mg12.append({"월": _m_pyong, "등급": _gr_pyong, "이모지": _ge_pyong, "시그널": _gs_pyong, "ml": _ml_pyong})
         _gilwol_pyong = [_x["월"] for _x in _mg12 if _x["등급"] in ("대길", "길")]
         _hyungwol_pyong = [_x["월"] for _x in _mg12 if _x["등급"] in ("흉", "흉흉")]
         # 2-3-①: 대길/길, 흉흉/흉 2단 분리 (표시 전용, 판정 로직 무변경)
@@ -19016,12 +19018,14 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
         _orig_jjs_cal = {p.get("jj","") for p in pils}
         _cal_rows = []
         _pdf_buf = []
+        # 2-3-③: 재순회 대신 2-1 SSOT(_mg12) 재사용 — ml 읽기 전용이라 원본 그대로 참조
         for _mi in range(12):
-            _ml_cal = get_monthly_luck(pils, _cy_cal, _mi + 1) or {}
+            _mg_x = _mg12[_mi]
+            _ml_cal = _mg_x["ml"]
             _mcg = _ml_cal.get("간", "")
             _mjj = _ml_cal.get("지", "")
             _mss = _ml_cal.get("십성", "-")
-            _gr_cal, _ge_cal, _gs_cal = _month_grade(_ml_cal, _yong_cal, _orig_jjs_cal, gi_list=_gisin_pyong, gm_list=_gongmang_pyong)
+            _gr_cal, _ge_cal, _gs_cal = _mg_x["등급"], _mg_x["이모지"], _mg_x["시그널"]
             _sig  = "🟢" if _gr_cal in ("대길","길") else "🔴" if _gr_cal in ("흉","흉흉") else "🟡"
             _col  = "#1a3d1a" if _sig == "🟢" else "#3d1a1a" if _sig == "🔴" else "#1a1a2e"
             _tc   = "#7fff7f" if _sig == "🟢" else "#ffaaaa" if _sig == "🔴" else "#aaaaaa"
@@ -19114,9 +19118,9 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
         # 2-3-②(나): 대길/길, 흉흉/흉 2단 분리 (2-3-①과 같은 문구 체계·같은 0개 생략 규칙)
         # 이전(2-3-① 이전) 동작: _danger_months[:3] — 1~12월 순서상 처음 발견되는 흉월 3개
         _good_top_g, _good_sub_g, _danger_top_g, _danger_sub_g = [], [], [], []
+        # 2-3-③: 재순회 대신 2-1 SSOT(_mg12) 재사용
         for _mi_g in range(12):
-            _ml_g = get_monthly_luck(pils, _cy_g, _mi_g + 1) or {}
-            _gr_g, _, _ = _month_grade(_ml_g, _yong_g, _orig_jjs_g, gi_list=_gisin_pyong, gm_list=_gongmang_pyong)
+            _gr_g = _mg12[_mi_g]["등급"]
             if _gr_g == "대길":
                 _good_top_g.append(f"<b>{_mi_g+1}월</b>")
             elif _gr_g == "길":
@@ -19424,13 +19428,15 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
     try:
         _cur_year = datetime.now().year
 
-        _months_data = [get_monthly_luck(pils, _cur_year, m) for m in range(1, 13)]
-
-        _ys_mg = get_yongshin(pils) or {}
-        _yong_mg = _ys_mg.get("종합_용신", [])
-        _orig_jjs_mg = {p.get("jj", "") for p in pils}
-        for _ml_mg in _months_data:
-            _ml_mg["길흉"], _ml_mg["_grade_emoji"], _ml_mg["_grade_signal"] = _month_grade(_ml_mg, _yong_mg, _orig_jjs_mg, gi_list=_gisin_pyong, gm_list=_gongmang_pyong)
+        # 2-3-③: 재순회 대신 2-1 SSOT(_mg12) 재사용.
+        # ★ 이 블록은 ml["길흉"] 등을 in-place로 덮어쓰므로(원래도 그랬음),
+        #   _mg12["ml"]는 다른 소비처(⑤월별캘린더)와 공유되는 원본이라
+        #   반드시 복사본(dict copy)에만 대입한다 — 원본 오염 방지.
+        _months_data = []
+        for _x_mg in _mg12:
+            _ml_mg = dict(_x_mg["ml"])
+            _ml_mg["길흉"], _ml_mg["_grade_emoji"], _ml_mg["_grade_signal"] = _x_mg["등급"], _x_mg["이모지"], _x_mg["시그널"]
+            _months_data.append(_ml_mg)
 
         _LEVEL_RANK = {"대길": 5, "길": 4, "평길": 3, "평": 2, "흉": 1, "흉흉": 0}
 
