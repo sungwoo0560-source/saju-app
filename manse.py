@@ -18497,6 +18497,29 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
         }
         if "marriage_status" in _sig_pyong.parameters:
             _kw_pyong["marriage_status"] = st.session_state.get("marriage_status", "미혼")
+
+        # 2-1: 실계산 길월/흉월 (계절 하드코딩 대체 — _month_grade 재사용, 판정 로직 자체는 무수정)
+        _yl_pyong = (
+            _yong_pyong.get("종합_용신") if isinstance(_yong_pyong, dict)
+            else _yong_pyong if isinstance(_yong_pyong, list)
+            else []
+        )
+        if not isinstance(_yl_pyong, list):
+            _yl_pyong = []
+        _cy_pyong = datetime.now().year
+        _orig_jjs_pyong = {p.get("jj", "") for p in pils}
+        _mg12 = []
+        for _m_pyong in range(1, 13):
+            _ml_pyong = get_monthly_luck(pils, _cy_pyong, _m_pyong) or {}
+            _gr_pyong, _, _ = _month_grade(_ml_pyong, _yl_pyong, _orig_jjs_pyong)
+            _mg12.append({"월": _m_pyong, "등급": _gr_pyong})
+        _gilwol_pyong = [_x["월"] for _x in _mg12 if _x["등급"] in ("대길", "길")]
+        _hyungwol_pyong = [_x["월"] for _x in _mg12 if _x["등급"] in ("흉", "흉흉")]
+        if "gilwol_list" in _sig_pyong.parameters:
+            _kw_pyong["gilwol_list"] = _gilwol_pyong
+        if "hyungwol_list" in _sig_pyong.parameters:
+            _kw_pyong["hyungwol_list"] = _hyungwol_pyong
+
         _pdf_cap(
             render_jonghap_pyongron(pils, name or "내담자", birth_year, gender or "男", **_kw_pyong)
         )

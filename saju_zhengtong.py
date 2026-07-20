@@ -7551,7 +7551,8 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
                              yongshin=None, gisin=None,
                              gyeokguk_name="", shin_status="",
                              sinsal_data=None, saewoon_data=None,
-                             marriage_status="미혼"):
+                             marriage_status="미혼",
+                             gilwol_list=None, hyungwol_list=None):
     """종합 사주 평론서 — 12개 섹션 통합. 원국 사실 기반 + 친절 직설 톤."""
     if not pils or len(pils) < 4:
         return ""
@@ -7868,8 +7869,14 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
         "金": "4월·5월 <span style='color:#888;font-size:12px;'>(火가 金을 극함)</span>",
         "水": "3월·6월·9월 <span style='color:#888;font-size:12px;'>(土가 水를 극함)</span>",
     }
-    _gilwol_str = _GILWOL_MAP.get(_YONG_OH1, "용신 기운이 강한 달")
-    _흉wol_str  = _흉WOL_MAP.get(_GI_OH1,   "기신 기운이 강한 달")
+    if gilwol_list:
+        _gilwol_str = "·".join(f"{m}월" for m in gilwol_list)
+    else:
+        _gilwol_str = _GILWOL_MAP.get(_YONG_OH1, "용신 기운이 강한 달")
+    if hyungwol_list:
+        _흉wol_str = "·".join(f"{m}월" for m in hyungwol_list)
+    else:
+        _흉wol_str  = _흉WOL_MAP.get(_GI_OH1,   "기신 기운이 강한 달")
 
     _YONG_KAEWOON_TBL = {
         "木": "색상: 초록·녹색·청색<br>방향: 동쪽<br>음식: 신맛·새싹채소·견과류·키위<br>활동: 등산·스트레칭·목공·독서<br>계절: 봄(1~3월) 적극 활용",
