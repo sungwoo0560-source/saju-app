@@ -8214,6 +8214,11 @@ def _pdf_cap(html, tab="jonghap_full"):
     st.markdown(html, unsafe_allow_html=True)
 
 
+def _pdf_only(text, tab="jonghap_full"):
+    """화면 렌더 없이 PDF용 텍스트만 세션에 누적 (B안 2차 대비, 현재 호출부 없음)"""
+    st.session_state.setdefault("_pdf_blocks", {}).setdefault(tab, []).append(text)
+
+
 def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
     """각 탭 전용 PDF 즉시 생성 버튼"""
     import io
@@ -18588,6 +18593,7 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
             "</div>",
             unsafe_allow_html=True,
         )
+        _pdf_buf = []
         for _jk in [jk_job, jk_hea, jk_win, jk_gui, jk_aff, jk_mar, jk_kid]:
             st.markdown(
                 f"<div style='background:#fafafa;border:1px solid #e0e0e0;"
@@ -18600,6 +18606,8 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
                 f"</div>",
                 unsafe_allow_html=True,
             )
+            _pdf_buf.append(f"{_jk['title']}\n{_jk['line1']}\n{_jk['line2']}\n{_jk['line3']}")
+        _pdf_only("🎯 도사 적중 — 지금 이 7가지, 맞죠?\n" + "\n\n".join(_pdf_buf))
         st.markdown("---")
     except Exception as _e_jk:
         # 적중 박스 영역 폴백 (사용자에겐 조용히)
@@ -18912,6 +18920,10 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
             f"</div></div>",
             unsafe_allow_html=True,
         )
+        _pdf_only(
+            f"🔍 {name}님 사주의 핵심\n{_strategy_txt}\n"
+            f"✅ 용신: {_yong_str_s}\n⚠️ 기신: {_gisin_str_s}\n📋 격국: {_gkn_s or '분석중'} / {_sn_str}"
+        )
     except Exception:
         pass
 
@@ -19055,6 +19067,12 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
             f"</div></div>",
             unsafe_allow_html=True,
         )
+        _pdf_only(
+            "🌟 귀인 타이밍 & 주의 시기\n"
+            f"👼 천을귀인 활성 달: {' · '.join(_guiin_months) if _guiin_months else '확인 중'}\n"
+            f"🌟 용신 활성 달: {' · '.join(_good_months) if _good_months else '안정 흐름 — 큰 변화 없음'}\n"
+            f"⚠️ 최대 주의 달: {' · '.join(_danger_months[:3]) if _danger_months else '특별 주의월 없음 — 평이한 흐름'}"
+        )
     except Exception:
         pass
 
@@ -19177,6 +19195,13 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
 
 """,
         unsafe_allow_html=True,
+    )
+    _pdf_only(
+        "📋 종합 사주 리포트 - 원국/성향/格局/用神\n"
+        f"日干: {_ilgan_cg}{_ilgan_jj}\n"
+        f"身强弱: {_sn_char} ({sn_label})\n"
+        f"用神: {yong_str}\n"
+        f"格局: {gk_name}"
     )
 
     # Patch Y-1: 정통 천간 풀이 카드
