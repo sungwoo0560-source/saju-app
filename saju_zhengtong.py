@@ -7552,7 +7552,9 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
                              gyeokguk_name="", shin_status="",
                              sinsal_data=None, saewoon_data=None,
                              marriage_status="미혼",
-                             gilwol_list=None, hyungwol_list=None):
+                             gilwol_list=None, hyungwol_list=None,
+                             gilwol_top=None, gilwol_sub=None,
+                             hyungwol_top=None, hyungwol_sub=None):
     """종합 사주 평론서 — 12개 섹션 통합. 원국 사실 기반 + 친절 직설 톤."""
     if not pils or len(pils) < 4:
         return ""
@@ -7878,6 +7880,28 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
     else:
         _흉wol_str  = _흉WOL_MAP.get(_GI_OH1,   "기신 기운이 강한 달")
 
+    # 2-3-①: 대길/길, 흉흉/흉 2단 표시 (판정 로직 무변경, 표시만 세분화)
+    _gilwol_2tier_lines = []
+    if gilwol_top is not None or gilwol_sub is not None:
+        if gilwol_top:
+            _gilwol_2tier_lines.append(f"★ 적극 활용할 달 (대길): {'·'.join(f'{m}월' for m in gilwol_top)}")
+        if gilwol_sub:
+            _gilwol_2tier_lines.append(f"○ 무난히 좋은 달 (길): {'·'.join(f'{m}월' for m in gilwol_sub)}")
+    _hyungwol_2tier_lines = []
+    if hyungwol_top is not None or hyungwol_sub is not None:
+        if hyungwol_top:
+            _hyungwol_2tier_lines.append(f"⚠ 특히 조심할 달 (흉흉): {'·'.join(f'{m}월' for m in hyungwol_top)}")
+        if hyungwol_sub:
+            _hyungwol_2tier_lines.append(f"△ 주의할 달 (흉): {'·'.join(f'{m}월' for m in hyungwol_sub)}")
+    _gilwol_display = (
+        "<br>".join(_gilwol_2tier_lines) if _gilwol_2tier_lines
+        else f"🌟 <b>길월(吉月) — {name}님이 반드시 활용할 달:</b> {_gilwol_str}"
+    )
+    _hyungwol_display = (
+        "<br>".join(_hyungwol_2tier_lines) if _hyungwol_2tier_lines
+        else f"⚠️ <b>흉월(凶月) — 절대 조심할 달:</b> {_흉wol_str}"
+    )
+
     _YONG_KAEWOON_TBL = {
         "木": "색상: 초록·녹색·청색<br>방향: 동쪽<br>음식: 신맛·새싹채소·견과류·키위<br>활동: 등산·스트레칭·목공·독서<br>계절: 봄(1~3월) 적극 활용",
         "火": "색상: 빨강·주황·분홍·자주<br>방향: 남쪽<br>음식: 쓴맛·견과류·불로 조리한 음식·홍삼<br>활동: 운동·사교·발표·공연<br>계절: 여름(4~6월) 적극 활용",
@@ -7930,6 +7954,13 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
     _ip_yeonae_s  = _ip_yeonae
     _ip_cheobang_s= _ip_cheobang
     _gilwol_plain = _gilwol_str.split('<')[0].strip()
+    # 2-3-②(다): 【5.재물】 전용 — 대길 우선, 대길 0개면 길로 폴백 (【9.세운】 표시는 무변경)
+    if gilwol_top:
+        _gilwol_plain_c5 = "·".join(f"{m}월" for m in gilwol_top)
+    elif gilwol_sub:
+        _gilwol_plain_c5 = "·".join(f"{m}월" for m in gilwol_sub)
+    else:
+        _gilwol_plain_c5 = _gilwol_plain
     _shin_adv = ("에너지를 발산하는 방향으로 일하면 성과가 납니다"
                  if _shin_core == "신강" else
                  "좋은 파트너·팀을 활용할 때 가장 빛납니다")
@@ -7961,7 +7992,7 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
     _causal5 = _cb(
         f"{name}님 재물 인과",
         f"일간 {ilgan}({ilgan_kr})이라서 재물 형성 방식이 '{_ip_jaemul_s}' 패턴입니다.",
-        f"용신 {yong_str} 기운이 강한 길월({_gilwol_plain})에만 큰 투자·계약을 하세요. 이때 결정한 것이 자산이 됩니다.",
+        f"용신 {yong_str} 기운이 강한 길월({_gilwol_plain_c5})에만 큰 투자·계약을 하세요. 이때 결정한 것이 자산이 됩니다.",
         f"기신 {gisin_str} 강한 시기에 욕심 부리면 100% 후회합니다. 이 시기의 투자는 결코 돌아오지 않습니다."
     )
     _causal6 = _cb(
@@ -8198,9 +8229,9 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
     <div style="background:#faf5ee;padding:18px 20px;border-radius:10px;line-height:2;font-size:clamp(13px, 3vw, 15px);color:#3e2723;">
       세운(歲運)은 올해 1년의 흐름을 결정하는 기운입니다.<br>
       → 대운(10년)이 큰 계절이라면, 세운(1년)은 그 안의 날씨입니다.<br><br>
-      🌟 <b>길월(吉月) — {name}님이 반드시 활용할 달:</b> {_gilwol_str}<br>
+      {_gilwol_display}<br>
       → 용신 <b>{yong_str}</b> 기운이 가장 강한 달. <b>중요 결정·계약·시작을 이 달에 집중하세요.</b><br>
-      ⚠️ <b>흉월(凶月) — 절대 조심할 달:</b> {_흉wol_str}<br>
+      {_hyungwol_display}<br>
       → 기신 <b>{gisin_str}</b> 기운이 강해지는 달. <b>큰 결정·투자·계약 절대 X.</b> 이 달에 무리하면 반드시 후회합니다.<br><br>
       {cur_year}년 전략: 길월에 모든 에너지 집중 → 흉월에 수비 모드. 이것만 지켜도 실패 확률이 반으로 줍니다.
       {_causal9}

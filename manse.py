@@ -18547,10 +18547,23 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
             _mg12.append({"월": _m_pyong, "등급": _gr_pyong})
         _gilwol_pyong = [_x["월"] for _x in _mg12 if _x["등급"] in ("대길", "길")]
         _hyungwol_pyong = [_x["월"] for _x in _mg12 if _x["등급"] in ("흉", "흉흉")]
+        # 2-3-①: 대길/길, 흉흉/흉 2단 분리 (표시 전용, 판정 로직 무변경)
+        _gilwol_top = [_x["월"] for _x in _mg12 if _x["등급"] == "대길"]
+        _gilwol_sub = [_x["월"] for _x in _mg12 if _x["등급"] == "길"]
+        _hyungwol_top = [_x["월"] for _x in _mg12 if _x["등급"] == "흉흉"]
+        _hyungwol_sub = [_x["월"] for _x in _mg12 if _x["등급"] == "흉"]
         if "gilwol_list" in _sig_pyong.parameters:
             _kw_pyong["gilwol_list"] = _gilwol_pyong
         if "hyungwol_list" in _sig_pyong.parameters:
             _kw_pyong["hyungwol_list"] = _hyungwol_pyong
+        if "gilwol_top" in _sig_pyong.parameters:
+            _kw_pyong["gilwol_top"] = _gilwol_top
+        if "gilwol_sub" in _sig_pyong.parameters:
+            _kw_pyong["gilwol_sub"] = _gilwol_sub
+        if "hyungwol_top" in _sig_pyong.parameters:
+            _kw_pyong["hyungwol_top"] = _hyungwol_top
+        if "hyungwol_sub" in _sig_pyong.parameters:
+            _kw_pyong["hyungwol_sub"] = _hyungwol_sub
 
         _pdf_cap(
             render_jonghap_pyongron(pils, name or "내담자", birth_year, gender or "男", **_kw_pyong)
@@ -19098,15 +19111,34 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
         _orig_jjs_g = {p.get("jj","") for p in pils}
         _CHUNG_G = _JJCHUNG
         _JJ_LIST_G = ["丑","寅","卯","辰","巳","午","未","申","酉","戌","亥","子"]
-        _danger_months = []
-        _good_months = []
+        # 2-3-②(나): 대길/길, 흉흉/흉 2단 분리 (2-3-①과 같은 문구 체계·같은 0개 생략 규칙)
+        # 이전(2-3-① 이전) 동작: _danger_months[:3] — 1~12월 순서상 처음 발견되는 흉월 3개
+        _good_top_g, _good_sub_g, _danger_top_g, _danger_sub_g = [], [], [], []
         for _mi_g in range(12):
             _ml_g = get_monthly_luck(pils, _cy_g, _mi_g + 1) or {}
             _gr_g, _, _ = _month_grade(_ml_g, _yong_g, _orig_jjs_g, gi_list=_gisin_pyong, gm_list=_gongmang_pyong)
-            if _gr_g in ("흉","흉흉"):
-                _danger_months.append(f"<b>{_mi_g+1}월</b>")
-            elif _gr_g in ("대길","길"):
-                _good_months.append(f"<b>{_mi_g+1}월</b>")
+            if _gr_g == "대길":
+                _good_top_g.append(f"<b>{_mi_g+1}월</b>")
+            elif _gr_g == "길":
+                _good_sub_g.append(f"<b>{_mi_g+1}월</b>")
+            elif _gr_g == "흉흉":
+                _danger_top_g.append(f"<b>{_mi_g+1}월</b>")
+            elif _gr_g == "흉":
+                _danger_sub_g.append(f"<b>{_mi_g+1}월</b>")
+        _good_months = _good_top_g + _good_sub_g
+        _danger_months = _danger_top_g + _danger_sub_g
+        _good_lines_g = []
+        if _good_top_g:
+            _good_lines_g.append(f"★ 적극 활용할 달 (대길): {' · '.join(_good_top_g)}")
+        if _good_sub_g:
+            _good_lines_g.append(f"○ 무난히 좋은 달 (길): {' · '.join(_good_sub_g)}")
+        _danger_lines_g = []
+        if _danger_top_g:
+            _danger_lines_g.append(f"⚠ 특히 조심할 달 (흉흉): {' · '.join(_danger_top_g)}")
+        if _danger_sub_g:
+            _danger_lines_g.append(f"△ 주의할 달 (흉): {' · '.join(_danger_sub_g)}")
+        _good_display_g = "<br>".join(_good_lines_g) if _good_lines_g else "안정 흐름 — 큰 변화 없음"
+        _danger_display_g = "<br>".join(_danger_lines_g) if _danger_lines_g else "특별 주의월 없음 — 평이한 흐름"
 
         st.markdown(
             f"<div style='background:#0d1117;border:1.5px solid #d4af3744;"
@@ -19124,14 +19156,14 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
             f"<div>"
             f"<div style='color:#7fff7f;font-weight:700;margin-bottom:4px'>"
             f"🌟 용신 활성 달</div>"
-            f"<div style='color:#ccc;'>{' · '.join(_good_months) if _good_months else '안정 흐름 — 큰 변화 없음'}</div>"
+            f"<div style='color:#ccc;'>{_good_display_g}</div>"
             f"<div style='color:#888;font-size:11px;margin-top:2px'>"
             f"중요한 일은 이 달에 시작하세요</div>"
             f"</div>"
             f"<div>"
             f"<div style='color:#ffaaaa;font-weight:700;margin-bottom:4px'>"
             f"⚠️ 최대 주의 달</div>"
-            f"<div style='color:#ccc;'>{' · '.join(_danger_months[:3]) if _danger_months else '특별 주의월 없음 — 평이한 흐름'}</div>"
+            f"<div style='color:#ccc;'>{_danger_display_g}</div>"
             f"<div style='color:#888;font-size:11px;margin-top:2px'>"
             f"이 달엔 중요 결정 보류하세요</div>"
             f"</div>"
@@ -19141,8 +19173,8 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
         _pdf_only(
             "🌟 귀인 타이밍 & 주의 시기\n"
             f"👼 천을귀인 활성 달: {' · '.join(_guiin_months) if _guiin_months else '확인 중'}\n"
-            f"🌟 용신 활성 달: {' · '.join(_good_months) if _good_months else '안정 흐름 — 큰 변화 없음'}\n"
-            f"⚠️ 최대 주의 달: {' · '.join(_danger_months[:3]) if _danger_months else '특별 주의월 없음 — 평이한 흐름'}"
+            f"{_good_display_g}\n"
+            f"{_danger_display_g}"
         )
     except Exception:
         pass
@@ -19402,9 +19434,13 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
 
         _LEVEL_RANK = {"대길": 5, "길": 4, "평길": 3, "평": 2, "흉": 1, "흉흉": 0}
 
-        _best_m = max(_months_data, key=lambda x: _LEVEL_RANK.get(x["길흉"], 2))
+        # 2-3-②(가) 흉월 선정 기준 통일: 최저/최고 등급 우선, 동일 등급이면 월 순서 오름차순
+        # 이전 동작: _best_m = max(...), _worst_m = min(...) — _months_data가 이미 1~12월
+        # 오름차순이라 Python min/max의 stable 특성상 동일 등급 시 앞선(빠른) 월이 선택되던
+        # 것과 결과는 동일하나, 선정 기준을 명시적으로 재작성함
+        _best_m = sorted(_months_data, key=lambda x: (-_LEVEL_RANK.get(x["길흉"], 2), x["월"]))[0]
 
-        _worst_m = min(_months_data, key=lambda x: _LEVEL_RANK.get(x["길흉"], 2))
+        _worst_m = sorted(_months_data, key=lambda x: (_LEVEL_RANK.get(x["길흉"], 2), x["월"]))[0]
 
         _LEVEL_COLOR = {
             "대길": "#4caf50",
