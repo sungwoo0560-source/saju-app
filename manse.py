@@ -18265,11 +18265,12 @@ _LEVEL_EMOJI = {
 }
 
 
-def _month_grade(ml, yong_list, orig_jjs):
+def _month_grade(ml, yong_list, orig_jjs, gi_list=None, gm_list=None):
     base = ml["길흉"]; 간오행 = _OH_CG.get(ml["간"], "")
     is_yong = 간오행 in yong_list
     is_chung = _JJCHUNG.get(ml["지"], "") in orig_jjs
     RANK = {"대길": 5, "길": 4, "평길": 3, "평": 2, "흉": 1, "흉흉": 0}
+    RANK_REV = {5: "대길", 4: "길", 3: "평길", 2: "평", 1: "흉", 0: "흉흉"}
 
     if is_yong:
         if is_chung:
@@ -18285,6 +18286,32 @@ def _month_grade(ml, yong_list, orig_jjs):
             등급 = "평"; 시그널 = "충(冲) — 변동 주의"
         else:
             등급 = ("길" if base == "대길" else base); 시그널 = ""
+
+    # 2-2: 월지 오행 보정 — 월운의 주체는 월지 (기존 등급 확정 직후 적용)
+    월지오행 = _OH_JJ.get(ml.get("지", ""), "")
+    _rank = RANK.get(등급, 2)
+    if 월지오행 and 월지오행 in yong_list:
+        if _rank < 5:
+            _rank += 1
+            등급 = RANK_REV.get(_rank, 등급)
+            시그널 = (시그널 + " · " if 시그널 else "") + "월지도 용신 - 힘 실림"
+    elif gi_list and 월지오행 and 월지오행 in gi_list:
+        if _rank > 0:
+            _rank -= 1
+            등급 = RANK_REV.get(_rank, 등급)
+            시그널 = (시그널 + " · " if 시그널 else "") + "월지 기신 - 실속 주의"
+
+    # 2-2b: 공망 보정 — 길신 공망은 길이 반감, 흉신 공망은 흉이 반감 (양방향 중립화)
+    if gm_list and ml.get("지", "") in gm_list:
+        if _rank >= 4:
+            _rank -= 1
+            등급 = RANK_REV.get(_rank, 등급)
+            시그널 = (시그널 + " · " if 시그널 else "") + "공망月 - 성과 남기 어려움"
+        elif _rank <= 1:
+            _rank += 1
+            등급 = RANK_REV.get(_rank, 등급)
+            시그널 = (시그널 + " · " if 시그널 else "") + "공망月 - 흉도 비워짐"
+
     이모지 = _LEVEL_EMOJI.get(등급, "")
     return (등급, 이모지, 시그널)
 
@@ -18508,10 +18535,15 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
             _yl_pyong = []
         _cy_pyong = datetime.now().year
         _orig_jjs_pyong = {p.get("jj", "") for p in pils}
+        # 2-2b: 공망 지지 2글자 (saju_sinsal.get_gongmang, 읽기 전용 호출)
+        try:
+            _gongmang_pyong = get_gongmang(pils).get("공망_지지") or ()
+        except Exception:
+            _gongmang_pyong = ()
         _mg12 = []
         for _m_pyong in range(1, 13):
             _ml_pyong = get_monthly_luck(pils, _cy_pyong, _m_pyong) or {}
-            _gr_pyong, _, _ = _month_grade(_ml_pyong, _yl_pyong, _orig_jjs_pyong)
+            _gr_pyong, _, _ = _month_grade(_ml_pyong, _yl_pyong, _orig_jjs_pyong, gi_list=_gisin_pyong, gm_list=_gongmang_pyong)
             _mg12.append({"월": _m_pyong, "등급": _gr_pyong})
         _gilwol_pyong = [_x["월"] for _x in _mg12 if _x["등급"] in ("대길", "길")]
         _hyungwol_pyong = [_x["월"] for _x in _mg12 if _x["등급"] in ("흉", "흉흉")]
@@ -18976,7 +19008,7 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
             _mcg = _ml_cal.get("간", "")
             _mjj = _ml_cal.get("지", "")
             _mss = _ml_cal.get("십성", "-")
-            _gr_cal, _ge_cal, _gs_cal = _month_grade(_ml_cal, _yong_cal, _orig_jjs_cal)
+            _gr_cal, _ge_cal, _gs_cal = _month_grade(_ml_cal, _yong_cal, _orig_jjs_cal, gi_list=_gisin_pyong, gm_list=_gongmang_pyong)
             _sig  = "🟢" if _gr_cal in ("대길","길") else "🔴" if _gr_cal in ("흉","흉흉") else "🟡"
             _col  = "#1a3d1a" if _sig == "🟢" else "#3d1a1a" if _sig == "🔴" else "#1a1a2e"
             _tc   = "#7fff7f" if _sig == "🟢" else "#ffaaaa" if _sig == "🔴" else "#aaaaaa"
@@ -19070,7 +19102,7 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
         _good_months = []
         for _mi_g in range(12):
             _ml_g = get_monthly_luck(pils, _cy_g, _mi_g + 1) or {}
-            _gr_g, _, _ = _month_grade(_ml_g, _yong_g, _orig_jjs_g)
+            _gr_g, _, _ = _month_grade(_ml_g, _yong_g, _orig_jjs_g, gi_list=_gisin_pyong, gm_list=_gongmang_pyong)
             if _gr_g in ("흉","흉흉"):
                 _danger_months.append(f"<b>{_mi_g+1}월</b>")
             elif _gr_g in ("대길","길"):
@@ -19366,7 +19398,7 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
         _yong_mg = _ys_mg.get("종합_용신", [])
         _orig_jjs_mg = {p.get("jj", "") for p in pils}
         for _ml_mg in _months_data:
-            _ml_mg["길흉"], _ml_mg["_grade_emoji"], _ml_mg["_grade_signal"] = _month_grade(_ml_mg, _yong_mg, _orig_jjs_mg)
+            _ml_mg["길흉"], _ml_mg["_grade_emoji"], _ml_mg["_grade_signal"] = _month_grade(_ml_mg, _yong_mg, _orig_jjs_mg, gi_list=_gisin_pyong, gm_list=_gongmang_pyong)
 
         _LEVEL_RANK = {"대길": 5, "길": 4, "평길": 3, "평": 2, "흉": 1, "흉흉": 0}
 
