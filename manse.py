@@ -18465,7 +18465,7 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
         except Exception:
             _dw_board = []
 
-        _cur_yr_board = _dt_y13.now().year
+        _cur_yr_board = get_saju_year()
 
         st.markdown(
             render_manse_board(
@@ -18598,6 +18598,8 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
             _kw_pyong["hyungwol_sub"] = _hyungwol_sub
         if "month_footnote" in _sig_pyong.parameters:
             _kw_pyong["month_footnote"] = _month_footnote
+        if "cur_year" in _sig_pyong.parameters:
+            _kw_pyong["cur_year"] = _cy_pyong
 
         _pdf_cap(
             render_jonghap_pyongron(pils, name or "내담자", birth_year, gender or "男", **_kw_pyong)
@@ -18619,7 +18621,11 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
     # Patch Y-9-A: 7대 운명 코드 박스 (충격 임팩트)
     try:
         from saju_zhengtong import render_life_risk_card
-        _pdf_cap(render_life_risk_card(pils, _name_y6, gender=gender, marriage_status=st.session_state.get("in_marriage","미혼")))
+        import inspect as _insp_y9a
+        _kw_y9a = {"gender": gender, "marriage_status": st.session_state.get("in_marriage", "미혼")}
+        if "cur_year" in _insp_y9a.signature(render_life_risk_card).parameters:
+            _kw_y9a["cur_year"] = _cy_pyong
+        _pdf_cap(render_life_risk_card(pils, _name_y6, **_kw_y9a))
     except Exception as _e_y9a:
         st.warning(f"Y-9-A 운명 코드 박스 로드 실패: {_e_y9a}")
 
@@ -18750,7 +18756,7 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
     # ── 현재 운기 5대 지표 요약 카드 ──────────────────────────
     try:
         import re as _re8
-        _cur_year = datetime.now().year
+        _cur_year = _cy_pyong
         _sw_now   = get_yearly_luck(pils, _cur_year)
         _ys       = get_yongshin(pils)
         _yong_ohs = _ys.get("종합_용신", [])
@@ -19041,7 +19047,7 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
 
     # ── 올해 월별 길흉 캘린더 ──────────────────────────────────
     try:
-        _cy_cal = datetime.now().year
+        _cy_cal = _cy_pyong
         _ilgan_cal = pils[1]["cg"] if len(pils) > 1 else ""
         _ys_cal = get_yongshin(pils)
         _yong_cal = _ys_cal.get("종합_용신",[]) if _ys_cal else []
@@ -19110,7 +19116,7 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
             "육해살":       "가까운 사람이 등을 찌릅니다. 돈거래·보증 — 지금 당장 끊으십시오.",
             "화개살":       "혼자 있는 시간이 지금 가장 귀합니다. 깊이 생각한 그것이 창의성의 씨앗이 됩니다.",
         }
-        _sw_jj = get_yearly_luck(pils, datetime.now().year).get("jj", "")
+        _sw_jj = get_yearly_luck(pils, _cy_pyong).get("jj", "")
         _ss12 = get_12sinsal(pils)
         _active = [s for s in _ss12 if s.get("해당지지") == _sw_jj]
         if _active:
@@ -19462,7 +19468,7 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
     )
 
     try:
-        _cur_year = datetime.now().year
+        _cur_year = _cy_pyong
 
         # 2-3-③: 재순회 대신 2-1 SSOT(_mg12) 재사용.
         # ★ 이 블록은 ml["길흉"] 등을 in-place로 덮어쓰므로(원래도 그랬음),
@@ -19629,7 +19635,7 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
         _share_gyeok = gk_name if gk_name else "-"
         _share_yong  = yong_str if yong_str else "-"
         _cur_mon_k   = datetime.now().month
-        _mon_luck_k  = get_monthly_luck(pils, datetime.now().year, _cur_mon_k) or {}
+        _mon_luck_k  = get_monthly_luck(pils, _cy_pyong, _cur_mon_k) or {}
         _today_gihung = _mon_luck_k.get("길흉", "보통")
         _share_text  = f"{name}님의 사주풀이 | 만세력 사주 천명풀이"
         _app_url    = "https://saju-manse.streamlit.app"

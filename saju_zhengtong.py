@@ -7021,7 +7021,7 @@ def render_final_verdict_card(pils, name="내담자"):
     return html
 
 
-def detect_life_risk_signals(pils, saewoon_data=None, gender=None, marriage_status=None):
+def detect_life_risk_signals(pils, saewoon_data=None, gender=None, marriage_status=None, cur_year=None):
     """7대 운명 코드 자동 감지: 바람/사고/횡재/이혼/병/결혼/사업"""
     if not pils or len(pils) < 4:
         return {}
@@ -7122,7 +7122,7 @@ def detect_life_risk_signals(pils, saewoon_data=None, gender=None, marriage_stat
     # === X-6-F: 세운 연동 5개 추가 조건 ===
     try:
         from datetime import datetime as _dt6f
-        _cur_yr6f = _dt6f.now().year
+        _cur_yr6f = cur_year if cur_year is not None else _dt6f.now().year
         _JJ6F = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"]
         _sw_jj = _JJ6F[(_cur_yr6f - 4) % 12]
 
@@ -7372,9 +7372,9 @@ def detect_life_risk_signals(pils, saewoon_data=None, gender=None, marriage_stat
     return results
 
 
-def render_life_risk_card(pils, name="내담자", gender=None, marriage_status=None):
+def render_life_risk_card(pils, name="내담자", gender=None, marriage_status=None, cur_year=None):
     """7대 운명 코드 박스 — 광고 임팩트 최대화"""
-    results = detect_life_risk_signals(pils, gender=gender, marriage_status=marriage_status)
+    results = detect_life_risk_signals(pils, gender=gender, marriage_status=marriage_status, cur_year=cur_year)
     if not results:
         return ""
 
@@ -7555,7 +7555,7 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
                              gilwol_list=None, hyungwol_list=None,
                              gilwol_top=None, gilwol_sub=None,
                              hyungwol_top=None, hyungwol_sub=None,
-                             month_footnote=None):
+                             month_footnote=None, cur_year=None):
     """종합 사주 평론서 — 12개 섹션 통합. 원국 사실 기반 + 친절 직설 톤."""
     if not pils or len(pils) < 4:
         return ""
@@ -7623,7 +7623,7 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
     try:
         _CG10_K = ["甲","乙","丙","丁","戊","己","庚","辛","壬","癸"]
         _JJ12_K = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"]
-        _cur_yr_k = datetime.now().year
+        _cur_yr_k = cur_year if cur_year is not None else datetime.now().year
         _sw_cg_k  = _CG10_K[(_cur_yr_k - 4) % 10]
         _sw_jj_k  = _JJ12_K[(_cur_yr_k - 4) % 12]
         _SS_K = {
@@ -7688,7 +7688,7 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
         if _ihon_score < 20:
             risks.setdefault("이혼·이별", {})["메시지"] = "✅ 만나면 결혼 안정 — 끝까지 가는 인연 만날 운입니다."
 
-    cur_year = datetime.now().year
+    cur_year = cur_year if cur_year is not None else datetime.now().year
     cur_age  = cur_year - birth_year
 
     sinsal_names = []
