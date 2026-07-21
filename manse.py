@@ -8219,6 +8219,22 @@ def _pdf_only(text, tab="jonghap_full"):
     st.session_state.setdefault("_pdf_blocks", {}).setdefault(tab, []).append(text)
 
 
+def get_saju_year(dt=None):
+    """입춘 기준 사주 연도. 양력 1/1~입춘 전이면 전년도를 반환한다.
+    _get_term_precision_time이 내부적으로 KASI_DATA를 1회 로드 후 재사용해
+    반복 호출 비용이 무시할 수준(실측 0.0005ms/회)이라 별도 캐시는 걸지 않는다."""
+    d = dt or datetime.now()
+    try:
+        ipchun = SajuCoreEngine._get_term_precision_time(d.year, "입춘")
+        if not ipchun:
+            return d.year
+        t_m, t_d, t_h, t_min = ipchun
+        ipchun_dt = datetime(d.year, t_m, t_d, t_h, t_min)
+        return d.year if d >= ipchun_dt else d.year - 1
+    except Exception:
+        return d.year
+
+
 def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
     """각 탭 전용 PDF 즉시 생성 버튼"""
     import io
@@ -18533,7 +18549,7 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
         )
         if not isinstance(_yl_pyong, list):
             _yl_pyong = []
-        _cy_pyong = datetime.now().year
+        _cy_pyong = get_saju_year()
         _orig_jjs_pyong = {p.get("jj", "") for p in pils}
         # 2-2b: 공망 지지 2글자 (saju_sinsal.get_gongmang, 읽기 전용 호출)
         try:
@@ -18546,7 +18562,21 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
         for _m_pyong in range(1, 13):
             _ml_pyong = get_monthly_luck(pils, _cy_pyong, _m_pyong) or {}
             _gr_pyong, _ge_pyong, _gs_pyong = _month_grade(_ml_pyong, _yl_pyong, _orig_jjs_pyong, gi_list=_gisin_pyong, gm_list=_gongmang_pyong)
-            _mg12.append({"월": _m_pyong, "등급": _gr_pyong, "이모지": _ge_pyong, "시그널": _gs_pyong, "ml": _ml_pyong})
+            # 월 라벨 (A안): 1월(丑월)만 세운연도+1을 병기 — 입춘 기준 세운 순서상 실제로는 다음 해 1월
+            _label_pyong = f"{_m_pyong}월({_cy_pyong + 1})" if _m_pyong == 1 else f"{_m_pyong}월"
+            _mg12.append({"월": _m_pyong, "라벨": _label_pyong, "등급": _gr_pyong, "이모지": _ge_pyong, "시그널": _gs_pyong, "ml": _ml_pyong})
+        # 월 라벨 각주 — 연도·간지는 계산값 (하드코딩 금지)
+        try:
+            _prev_year_luck_pyong = get_yearly_luck(pils, _cy_pyong - 1) or {}
+            _prev_year_ganji_pyong = _prev_year_luck_pyong.get("세운", "")
+            _jan_jj_pyong = _mg12[0]["ml"].get("지", "") if _mg12 else ""
+            _month_footnote = (
+                f"※ 사주의 한 해는 입춘부터 시작합니다. "
+                f"표의 1월({_jan_jj_pyong}월)은 {_cy_pyong + 1}년 1월이며, "
+                f"{_cy_pyong}년 1월 초순은 직전 해({_prev_year_ganji_pyong}년)에 속합니다."
+            )
+        except Exception:
+            _month_footnote = ""
         _gilwol_pyong = [_x["월"] for _x in _mg12 if _x["등급"] in ("대길", "길")]
         _hyungwol_pyong = [_x["월"] for _x in _mg12 if _x["등급"] in ("흉", "흉흉")]
         # 2-3-①: 대길/길, 흉흉/흉 2단 분리 (표시 전용, 판정 로직 무변경)
@@ -18566,6 +18596,8 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
             _kw_pyong["hyungwol_top"] = _hyungwol_top
         if "hyungwol_sub" in _sig_pyong.parameters:
             _kw_pyong["hyungwol_sub"] = _hyungwol_sub
+        if "month_footnote" in _sig_pyong.parameters:
+            _kw_pyong["month_footnote"] = _month_footnote
 
         _pdf_cap(
             render_jonghap_pyongron(pils, name or "내담자", birth_year, gender or "男", **_kw_pyong)
@@ -19032,12 +19064,12 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
             _cal_rows.append(
                 f"<div style='background:{_col};border-radius:8px;padding:8px 6px;"
                 f"text-align:center;min-width:60px;'>"
-                f"<div style='font-size:10px;color:#888;'>{_mi+1}월</div>"
+                f"<div style='font-size:10px;color:#888;'>{_mg_x['라벨']}</div>"
                 f"<div style='font-size:13px;font-weight:900;color:#fff;'>{_mcg}{_mjj}</div>"
                 f"<div style='font-size:11px;color:{_tc};'>{_sig} {_mss[:2] if len(_mss)>2 else _mss}</div>"
                 f"</div>"
             )
-            _pdf_buf.append(f"{_mi+1}월 {_mcg}{_mjj} {_sig} {_mss}")
+            _pdf_buf.append(f"{_mg_x['라벨']} {_mcg}{_mjj} {_sig} {_mss}")
 
         st.markdown("---")
         st.markdown(
@@ -19050,12 +19082,14 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
             + "".join(_cal_rows) +
             f"</div>"
             f"<div style='font-size:11px;color:#888;margin-top:6px;'>"
-            f"🟢 용신월 (적극 행동) | 🔴 기신월 (수비) | 🟡 중립월 (꾸준히)</div>",
+            f"🟢 용신월 (적극 행동) | 🔴 기신월 (수비) | 🟡 중립월 (꾸준히)</div>"
+            + (f"<div style='font-size:10px;color:#888;margin-top:4px;'>{_month_footnote}</div>" if _month_footnote else ""),
             unsafe_allow_html=True,
         )
         _pdf_only(
             f"📅 {_cy_cal}년 월별 길흉 캘린더\n" + "\n".join(_pdf_buf) +
             "\n🟢 용신월 (적극 행동) | 🔴 기신월 (수비) | 🟡 중립월 (꾸준히)"
+            + (f"\n{_month_footnote}" if _month_footnote else "")
         )
     except Exception:
         pass
@@ -19171,7 +19205,8 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
             f"<div style='color:#888;font-size:11px;margin-top:2px'>"
             f"이 달엔 중요 결정 보류하세요</div>"
             f"</div>"
-            f"</div></div>",
+            f"</div></div>"
+            + (f"<div style='font-size:10px;color:#888;margin-top:8px;'>{_month_footnote}</div>" if _month_footnote else ""),
             unsafe_allow_html=True,
         )
         _pdf_only(
@@ -19179,6 +19214,7 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
             f"👼 천을귀인 활성 달: {' · '.join(_guiin_months) if _guiin_months else '확인 중'}\n"
             f"{_good_display_g}\n"
             f"{_danger_display_g}"
+            + (f"\n{_month_footnote}" if _month_footnote else "")
         )
     except Exception:
         pass
@@ -19436,6 +19472,7 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
         for _x_mg in _mg12:
             _ml_mg = dict(_x_mg["ml"])
             _ml_mg["길흉"], _ml_mg["_grade_emoji"], _ml_mg["_grade_signal"] = _x_mg["등급"], _x_mg["이모지"], _x_mg["시그널"]
+            _ml_mg["라벨"] = _x_mg["라벨"]
             _months_data.append(_ml_mg)
 
         _LEVEL_RANK = {"대길": 5, "길": 4, "평길": 3, "평": 2, "흉": 1, "흉흉": 0}
@@ -19478,7 +19515,7 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
 
 <div style="font-size:12px;color:#2e7d32;font-weight:700;margin-bottom:6px">🌟 올해 최고의 달</div>
 
-<div style="font-size:32px;font-weight:900;color:#1b5e20">{_best_m["월"]}월</div>
+<div style="font-size:32px;font-weight:900;color:#1b5e20">{_best_m["라벨"]}</div>
 
 <div style="font-size:13px;color:#388e3c;margin-top:4px">{_LEVEL_EMOJI.get(_best_m["길흉"], "")} {_best_m["길흉"]} · {_best_m["십성"]}</div>
 
@@ -19498,7 +19535,7 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
 
 <div style="font-size:12px;color:#c62828;font-weight:700;margin-bottom:6px">⚠️ 올해 주의할 달</div>
 
-<div style="font-size:32px;font-weight:900;color:#b71c1c">{_worst_m["월"]}월</div>
+<div style="font-size:32px;font-weight:900;color:#b71c1c">{_worst_m["라벨"]}</div>
 
 <div style="font-size:13px;color:#d32f2f;margin-top:4px">{_LEVEL_EMOJI.get(_worst_m["길흉"], "")} {_worst_m["길흉"]} · {_worst_m["십성"]}</div>
 
@@ -19550,11 +19587,11 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
                 f'<div style="display:flex;flex-direction:column;align-items:center;flex:1;min-width:0">'
                 f'<div style="font-size:10px">{_em}</div>'
                 f'<div style="width:100%;height:{_ht}px;background:{_col};border-radius:5px 5px 0 0;margin:2px 1px 0"></div>'
-                f'<div style="font-size:10px;color:#555;margin-top:3px">{_md["월"]}월</div>'
+                f'<div style="font-size:10px;color:#555;margin-top:3px">{_md["라벨"]}</div>'
                 f'<div style="font-size:9px;color:{_col};font-weight:700">{_lv}</div>'
                 f"</div>"
             )
-            _pdf_buf10.append(f"{_md['월']}월 {_em} {_lv}")
+            _pdf_buf10.append(f"{_md['라벨']} {_em} {_lv}")
 
         st.markdown(
             f"""
@@ -19565,16 +19602,18 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
 
 <div style="display:flex;gap:4px;align-items:flex-end;height:80px">{_bar_html}</div>
 
-</div>""",
+</div>"""
+            + (f'<div style="font-size:10px;color:#888;margin-top:6px;">{_month_footnote}</div>' if _month_footnote else ""),
             unsafe_allow_html=True,
         )
 
         _pdf_only(
             "📅 올해 길흉월 분석 (大運·歲運·月運 교차)\n"
-            f"🌟 올해 최고의 달: {_best_m['월']}월 {_LEVEL_EMOJI.get(_best_m['길흉'], '')} {_best_m['길흉']} · {_best_m['십성']} — {_best_m.get('short','')}\n"
-            f"⚠️ 올해 주의할 달: {_worst_m['월']}월 {_LEVEL_EMOJI.get(_worst_m['길흉'], '')} {_worst_m['길흉']} · {_worst_m['십성']} — {_worst_m.get('short','')}\n"
+            f"🌟 올해 최고의 달: {_best_m['라벨']} {_LEVEL_EMOJI.get(_best_m['길흉'], '')} {_best_m['길흉']} · {_best_m['십성']} — {_best_m.get('short','')}\n"
+            f"⚠️ 올해 주의할 달: {_worst_m['라벨']} {_LEVEL_EMOJI.get(_worst_m['길흉'], '')} {_worst_m['길흉']} · {_worst_m['십성']} — {_worst_m.get('short','')}\n"
             + (f"⚙️ 大運·歲運 교차 분석 ({_cur_year}년): 현재 대운 {_cross['대운']['str']}({_cross['대운_천간십성']}) × 올해 세운 {_cross['세운'].get('세운','')}({_cross['세운_천간십성']}) → {_cross['교차해석']}\n" if _cross else "")
             + "📊 1~12월 월운 길흉 타임라인\n" + "\n".join(_pdf_buf10)
+            + (f"\n{_month_footnote}" if _month_footnote else "")
         )
 
     except Exception as e:

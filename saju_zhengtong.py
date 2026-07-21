@@ -7554,7 +7554,8 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
                              marriage_status="미혼",
                              gilwol_list=None, hyungwol_list=None,
                              gilwol_top=None, gilwol_sub=None,
-                             hyungwol_top=None, hyungwol_sub=None):
+                             hyungwol_top=None, hyungwol_sub=None,
+                             month_footnote=None):
     """종합 사주 평론서 — 12개 섹션 통합. 원국 사실 기반 + 친절 직설 톤."""
     if not pils or len(pils) < 4:
         return ""
@@ -8178,6 +8179,7 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
       → 기신 <b>{gisin_str}</b> 강한 시기 — <b>보증·동업·투기 절대 X.</b> 이 시기에 욕심 부리면 100% 후회합니다.<br>
       → 큰돈 들어오면 즉시 안전 자산에 고정. 유동성으로 놔두면 반드시 새어나갑니다.
       {_causal5}
+      {f'<div style="font-size:11px;color:#888;margin-top:8px;">{month_footnote}</div>' if month_footnote else ''}
     </div>
   </div>
 
@@ -8235,6 +8237,7 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
       → 기신 <b>{gisin_str}</b> 기운이 강해지는 달. <b>큰 결정·투자·계약 절대 X.</b> 이 달에 무리하면 반드시 후회합니다.<br><br>
       {cur_year}년 전략: 길월에 모든 에너지 집중 → 흉월에 수비 모드. 이것만 지켜도 실패 확률이 반으로 줍니다.
       {_causal9}
+      {f'<div style="font-size:11px;color:#888;margin-top:8px;">{month_footnote}</div>' if month_footnote else ''}
     </div>
   </div>
 
