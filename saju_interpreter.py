@@ -2619,7 +2619,7 @@ class LocalSajuNarrator:
         if sw_gan:
             dw_meaning = LocalSajuNarrator.DW_SS_MEANING.get(sw_ss, "")
 
-            lines.append(f"<b>올해(2026년) 세운</b>: {sw_gan} [{sw_ss}] — 길흉: <b>{sw_gh}</b>")
+            lines.append(f"<b>올해({b.get('cur_year', datetime.now().year)}년) 세운</b>: {sw_gan} [{sw_ss}] — 길흉: <b>{sw_gh}</b>")
 
             if dw_meaning:
                 lines.append(f"  - 💡 {dw_meaning}")
