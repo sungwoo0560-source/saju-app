@@ -14618,7 +14618,11 @@ def build_gangsa_block(pils, name, birth_year, gender, marriage_status=None):
         if marriage_status is None:
             marriage_status = st.session_state.get("marriage_status", "미혼")
 
-        cur_year = datetime.now().year
+        # 3-B1: 입춘 기준 세운 연도 (build_gangsa_block은 manse.py 전역 함수 — 같은 파일이라 직접 호출)
+        try:
+            cur_year = get_saju_year()
+        except Exception:
+            cur_year = datetime.now().year
         cur_age  = cur_year - birth_year + 1
 
         # ── 데이터 수집 ────────────────────────────────────────
