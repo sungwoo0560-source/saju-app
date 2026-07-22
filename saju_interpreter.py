@@ -1819,7 +1819,12 @@ class LocalSajuNarrator:
             bh  = max(0, min(23, int(_ss.get("birth_hour") or _ss.get("in_birth_hour") or 12)))   # 키 통일
             bmi = max(0, min(59, int(_ss.get("birth_minute") or _ss.get("in_birth_minute") or 0))) # 키 통일
 
-            cur_year = datetime.now().year
+            # 3-A: 입춘 기준 세운 연도 (manse.get_saju_year 지연 import — 순환참조 회피, 실패 시 폴백)
+            try:
+                from manse import get_saju_year
+                cur_year = get_saju_year()
+            except Exception:
+                cur_year = datetime.now().year
 
             dw_list_raw = SajuCoreEngine.get_daewoon(pils, birth_year, bm, bd, bh, bmi, gender) or []
             # ★ 십성_천간/십성_지지 키 보강 (get_daewoon 반환값에 없는 경우 직접 계산)
@@ -12255,7 +12260,12 @@ def build_rich_narrative(pils, birth_year, gender, name, section="report"):
 
         iljj_kr = JJ_KR[iljj_idx]
 
-        current_year = datetime.now().year
+        # 3-A: 입춘 기준 세운 연도 (manse.get_saju_year 지연 import — 순환참조 회피, 실패 시 폴백)
+        try:
+            from manse import get_saju_year
+            current_year = get_saju_year()
+        except Exception:
+            current_year = datetime.now().year
 
         current_age = current_year - birth_year + 1
 
