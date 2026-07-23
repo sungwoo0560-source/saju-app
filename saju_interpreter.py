@@ -12817,6 +12817,12 @@ def get_jeokjung_guiin(ilgan, pils, yukjin_list, cur_year=None, gongmang=None):
     # 지지 표기 한자 정규화 (원국·세운·공망이 모두 한자이므로 매칭 기준을 한자로 통일)
     # ddi_list/ddi_str는 JIJI_DDI(한글 키) 계산을 마친 뒤에 변환해야 띠 계산이 깨지지 않음
     guiin_ji = [JJ[JJ_KR.index(g)] if g in JJ_KR else g for g in guiin_ji]
+    # 지지 표기 하우스 스타일: 한자(한글) 병기 — saju_interpreter.py:1602 선례
+    def _jj_lab(g):
+        try:
+            return f"{g}({JJ_KR[JJ.index(g)]})"
+        except Exception:
+            return g
 
     own_branches = []
     try:
@@ -12826,7 +12832,12 @@ def get_jeokjung_guiin(ilgan, pils, yukjin_list, cur_year=None, gongmang=None):
                 own_branches.append(str(v)[:1])
     except Exception:
         pass
-    has_inner = any(g in own_branches for g in guiin_ji)
+    # 원국에 든 귀인을 공망 여부로 분리 (공망=비어있음 → 있어도 발동 약함)
+    _gm_in = tuple(gongmang) if gongmang else ()
+    _inner_all = [g for g in guiin_ji if g in own_branches]
+    _inner_live = [g for g in _inner_all if g not in _gm_in]
+    _inner_sealed = [g for g in _inner_all if g in _gm_in]
+    has_inner = bool(_inner_live)
 
     cnt_inn = 0; cnt_gwan = 0; cnt_bg = 0; cnt_sik = 0
     try:
@@ -12856,9 +12867,11 @@ def get_jeokjung_guiin(ilgan, pils, yukjin_list, cur_year=None, gongmang=None):
         direction = "우연히 마주치는 형태"
 
     title = f"✨ 당신의 귀인 — {ddi_str} 입니다"
-    line1 = f"천을귀인이 {'·'.join(guiin_ji) if guiin_ji else '미상'}({ddi_str}). 위기 때 이 사람들이 옵니다."
+    line1 = f"천을귀인이 {'·'.join(_jj_lab(g) for g in guiin_ji) if guiin_ji else '미상'}({ddi_str}). 위기 때 이 사람들이 옵니다."
     if has_inner:
         line2 = f"이미 본인 사주에 귀인이 박혀있습니다(內藏). → {person_type}이 가까이 있을 가능성 높음."
+    elif _inner_sealed:
+        line2 = f"사주에 {'·'.join(_jj_lab(g) for g in _inner_sealed)} 귀인이 있으나 공망에 들어 평소에는 잠들어 있습니다."
     else:
         line2 = f"외부에서 옵니다. → {person_type} 형태로, {direction}."
     # 천을귀인 지지가 세운으로 실제 들어오는 해를 계산 (향후 10년)
@@ -12879,9 +12892,9 @@ def get_jeokjung_guiin(ilgan, pils, yukjin_list, cur_year=None, gongmang=None):
                 _hit.append((_y, _sw_jj))
     _parts = []
     if _hit:
-        _parts.append("・".join(f"{_y}년({_j})" for _y, _j in _hit) + " — 천을귀인이 세운으로 들어옵니다. 이때 만난 사람 놓치지 마세요.")
+        _parts.append("・".join(f"{_y}년({_jj_lab(_j)})" for _y, _j in _hit) + " — 천을귀인이 세운으로 들어옵니다. 이때 만난 사람 놓치지 마세요.")
     if _sealed:
-        _parts.append("단, " + "・".join(_sealed) + " 귀인은 공망에 들어 봉인 상태입니다(塡實·沖 시 발동).")
+        _parts.append("단, " + "・".join(_jj_lab(g) for g in _sealed) + " 귀인은 공망에 들어 봉인 상태입니다(塡實·沖 시 발동).")
     line3 = " ".join(_parts) if _parts else "향후 10년 내 천을귀인이 세운으로 드는 해는 없습니다."
 
     return {"title": title, "line1": line1, "line2": line2, "line3": line3}
