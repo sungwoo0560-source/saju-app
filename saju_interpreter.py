@@ -12790,7 +12790,7 @@ def get_jeokjung_windfall(yukjin_list, daeun_list, birth_year):
     return {"title": title, "line1": line1, "line2": line2, "line3": line3}
 
 
-def get_jeokjung_guiin(ilgan, pils, yukjin_list):
+def get_jeokjung_guiin(ilgan, pils, yukjin_list, cur_year=None, gongmang=None):
     """천을귀인 띠 변환 + 십성별 귀인 유형 적중 박스 반환.
     반환: dict {title, line1, line2, line3}
     """
@@ -12814,6 +12814,9 @@ def get_jeokjung_guiin(ilgan, pils, yukjin_list):
     guiin_ji = GUIIN_MAP.get(ig, [])
     ddi_list = [JIJI_DDI.get(j, "") for j in guiin_ji if j in JIJI_DDI]
     ddi_str = "·".join([d+"띠" for d in ddi_list if d]) if ddi_list else "특정 띠(일간 추출 실패)"
+    # 지지 표기 한자 정규화 (원국·세운·공망이 모두 한자이므로 매칭 기준을 한자로 통일)
+    # ddi_list/ddi_str는 JIJI_DDI(한글 키) 계산을 마친 뒤에 변환해야 띠 계산이 깨지지 않음
+    guiin_ji = [JJ[JJ_KR.index(g)] if g in JJ_KR else g for g in guiin_ji]
 
     own_branches = []
     try:
@@ -12858,7 +12861,28 @@ def get_jeokjung_guiin(ilgan, pils, yukjin_list):
         line2 = f"이미 본인 사주에 귀인이 박혀있습니다(內藏). → {person_type}이 가까이 있을 가능성 높음."
     else:
         line2 = f"외부에서 옵니다. → {person_type} 형태로, {direction}."
-    line3 = "2026~2027년 — 천을귀인 활성화 핵심 구간. 이때 만난 사람 놓치지 마세요."
+    # 천을귀인 지지가 세운으로 실제 들어오는 해를 계산 (향후 10년)
+    # 공망에 걸린 귀인은 봉인 상태로 보아 연도를 단정하지 않음
+    _gm = tuple(gongmang) if gongmang else ()
+    _base_y = cur_year if cur_year else datetime.now().year
+    _hit, _sealed = [], []
+    for _y in range(_base_y, _base_y + 10):
+        try:
+            _sw_jj = get_yearly_luck(pils, _y).get("jj", "")
+        except Exception:
+            continue
+        if _sw_jj and _sw_jj in guiin_ji:
+            if _sw_jj in _gm:
+                if _sw_jj not in _sealed:
+                    _sealed.append(_sw_jj)
+            else:
+                _hit.append((_y, _sw_jj))
+    _parts = []
+    if _hit:
+        _parts.append("・".join(f"{_y}년({_j})" for _y, _j in _hit) + " — 천을귀인이 세운으로 들어옵니다. 이때 만난 사람 놓치지 마세요.")
+    if _sealed:
+        _parts.append("단, " + "・".join(_sealed) + " 귀인은 공망에 들어 봉인 상태입니다(塡實·沖 시 발동).")
+    line3 = " ".join(_parts) if _parts else "향후 10년 내 천을귀인이 세운으로 드는 해는 없습니다."
 
     return {"title": title, "line1": line1, "line2": line2, "line3": line3}
 
