@@ -1528,6 +1528,15 @@ def clean_hanja(text):
     return re.sub(r"\(.*?\)", "", text).strip()
 
 
+def _cur_saju_year():
+    """입춘 기준 세운 연도 (manse.get_saju_year 지연 import — 순환참조 회피, 실패 시 폴백). 3-B2."""
+    try:
+        from manse import get_saju_year
+        return get_saju_year()
+    except Exception:
+        return datetime.now().year
+
+
 def get_yongshin_match(dw_cg_ss, yongshin_ohs, ilgan_oh):
     """대운/세운 십성이 용신 오행과 맞는지 판단 → 'yong' | 'normal' (공개 함수)"""
     return _get_yongshin_match(dw_cg_ss, yongshin_ohs, ilgan_oh)
@@ -7355,7 +7364,7 @@ class LocalSajuNarrator:
 
         # yearly는 기존 1/2부에서 만든 방식+future3과 겹치므로 깔끔하게 처리
 
-        cur_year = datetime.now().year
+        cur_year = _cur_saju_year()
         return LocalSajuNarrator.future3(pils, name, birth_year, gender, "미혼").replace("미래 3년 심층 예측", f"{cur_year}년 신년 심층 리포트")
 
         # 주의: 여기엔 b가 없으니 예외처리 필요. 간단히 기존 1/2부로 된 yearly 사용.
@@ -7366,7 +7375,7 @@ class LocalSajuNarrator:
         try:
             ilgan = pils[1]["cg"]
             ilp = ILGAN_PROFILE.get(ilgan, {})
-            cur_year = datetime.now().year
+            cur_year = _cur_saju_year()
             sw = get_yearly_luck(pils, cur_year)
             sw_ss = sw.get("십성_천간", "")
             sw_gh = sw.get("길흉", "보통")
@@ -8014,7 +8023,7 @@ def get_ohang_health_info(ilgan, pils):
 def get_yongshin_multilayer(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0, target_year=None):
     """다층 용신 분석 (1순위~3순위 + 희신 + 기신 + 대운별 용신)"""
     if target_year is None:
-        target_year = datetime.now().year
+        target_year = _cur_saju_year()
     if not pils or len(pils) < 2:
         return {}
     ys = get_yongshin(pils)
@@ -10852,7 +10861,7 @@ def _nar_report(ctx):
     top2 = top_ss[1] if len(top_ss) > 1 else (_ctx_top_ss[1] if len(_ctx_top_ss) > 1 else "식신")
 
     # 운세 흐름 (대운/세운)
-    cur_year = datetime.now().year
+    cur_year = _cur_saju_year()
     try:
         this_year_flow = get_yearly_luck(pils, cur_year)
     except Exception:
@@ -12146,7 +12155,7 @@ def _nar_past(ctx):
         try:
             # generate_engine_highlights는 manse.py에만 있으므로 ctx의 daewoon으로 직접 생성
             _past_events = []
-            _now_year = datetime.now().year
+            _now_year = _cur_saju_year()
             _SS_DOM = {
                 "남": {
                     "偏財": "재물/이성 인연",  "正財": "재물/안정적 수입",
@@ -12476,9 +12485,7 @@ def get_monthly_timing(pils, birth_year, gender, target_year=None, focus="재물
     focus: "재물" | "인연" | "직업" | "건강" | "전체"
     반환: dict { "peak": [(월, 설명)], "caution": [(월, 설명)], "summary": str }
     """
-    from datetime import datetime as _dt
-
-    cur_year = target_year or _dt.now().year
+    cur_year = target_year or _cur_saju_year()
     _ss = st.session_state
 
     try:
@@ -12750,8 +12757,7 @@ def get_jeokjung_windfall(yukjin_list, daeun_list, birth_year):
 
     hit_years = []
     try:
-        from datetime import datetime
-        now_y = datetime.now().year
+        now_y = _cur_saju_year()
         now_age = now_y - int(birth_year or 0)
         for du in daeun_list:
             sy = int(du.get("시작연도", 0))
