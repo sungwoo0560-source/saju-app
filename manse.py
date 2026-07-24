@@ -24353,7 +24353,14 @@ def tab_ai_chat(pils, name, birth_year, gender):
 
         current_year = datetime.now().year
 
-        luck_score = calc_luck_score(pils, birth_year, gender, current_year)
+        luck_score = calc_luck_score(
+            pils, birth_year, gender,
+            bm=max(1, min(12, int(st.session_state.get("birth_month") or 1))),
+            bd=max(1, min(31, int(st.session_state.get("birth_day") or 1))),
+            bh=max(0, min(23, int(st.session_state.get("birth_hour") or 12))),
+            bmi=max(0, min(59, int(st.session_state.get("birth_minute") or 0))),
+            target_year=current_year,
+        )
 
         DestinyMatrix.calculate_sync(name, pils, luck_score)
 
