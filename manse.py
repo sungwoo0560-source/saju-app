@@ -784,7 +784,7 @@ def _local_saju_engine(pils, name, birth_year, gender, query):
 
     q = query or ""
 
-    current_year = datetime.now().year
+    current_year = get_saju_year()
 
     ilgan = pils[1]["cg"] if len(pils) > 1 else "?"
 
@@ -6613,7 +6613,7 @@ def build_past_events(pils, birth_year, gender):
 
     orig_cgs = [p["cg"] for p in pils]
 
-    current_year = datetime.now().year
+    current_year = get_saju_year()
 
     birth_month = max(1, min(12, int(st.session_state.get("birth_month") or 1)))
 
@@ -10133,7 +10133,7 @@ def tab_daewoon(pils, birth_year, gender):
         gender=gender,
     )
 
-    current_year = datetime.now().year
+    current_year = get_saju_year()
     _cur_sw_jj = (get_yearly_luck(pils, current_year) or {}).get("jj", "")
 
     ilgan = pils[1]["cg"]
@@ -13435,7 +13435,7 @@ def tab_cross_analysis(pils, birth_year, gender):
         unsafe_allow_html=True,
     )
 
-    current_year = datetime.now().year
+    current_year = get_saju_year()
 
     year_sel = st.selectbox(
         "분석 연도",
@@ -14470,7 +14470,7 @@ def render_worry_inference(pils, birth_year, gender, marital_status=None):
         _gi_mon="·".join(f"{_JJ_MON[j]}월" for j in _gi_jj if j in _JJ_MON) or "확인중"
         _ys=get_yongshin(pils) or {}
         _yo=_ys.get("종합_용신",[]) if isinstance(_ys.get("종합_용신",[]),list) else []
-        _gw=[m for m in range(1,13) if (_OH_CG.get(get_monthly_luck(pils,datetime.now().year,m).get("간",""),"") in _yo)]
+        _gw=[m for m in range(1,13) if (_OH_CG.get(get_monthly_luck(pils,get_saju_year(),m).get("간",""),"") in _yo)]
         _gw_str="·".join(f"{m}월" for m in _gw[:5]) or "확인중"
         from saju_zhengtong import detect_life_risk_signals
         _risks_in = detect_life_risk_signals(pils, gender=gender, marriage_status=marital_status)
@@ -15335,7 +15335,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
 
     # X-4-I-3: 사주 핵심 종합 진단 헤더
     try:
-        _core_diag = build_saju_core_diagnosis(pils, name, birth_year, gender)
+        _core_diag = build_saju_core_diagnosis(pils, name, birth_year, gender, current_year=get_saju_year())
         if _core_diag:
             st.markdown(_core_diag, unsafe_allow_html=True)
     except Exception:
@@ -15345,7 +15345,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
         marriage_status = st.session_state.get("marriage_status", "미혼")
     _is_married = marriage_status in ["기혼", "재혼"]
 
-    cur_year  = datetime.now().year
+    cur_year  = get_saju_year()
     cur_month = datetime.now().month
     cur_age   = cur_year - birth_year + 1
     _season   = "봄" if cur_month in [3,4,5] else "여름" if cur_month in [6,7,8] else "가을" if cur_month in [9,10,11] else "겨울"
@@ -19136,7 +19136,7 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
 
     # ── 귀인 타이밍 + 올해 주의 시기 ───────────────────────────
     try:
-        _cy_g = datetime.now().year
+        _cy_g = get_saju_year()
         _ilgan_g = pils[1]["cg"] if len(pils) > 1 else ""
         _ys_g = get_yongshin(pils)
         _yong_g = _ys_g.get("종합_용신",[]) if _ys_g else []
@@ -19236,7 +19236,7 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
     try:
         ilgan = pils[1]["cg"]
 
-        current_year = datetime.now().year
+        current_year = get_saju_year()
 
         current_age = current_year - birth_year + 1
 
