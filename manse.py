@@ -10728,7 +10728,7 @@ def detect_event_triggers(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0, ta
     """
 
     if target_year is None:
-        target_year = datetime.now().year
+        target_year = get_saju_year()
 
     ilgan = pils[1]["cg"]
 
@@ -10895,7 +10895,7 @@ def calc_luck_score(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0, target_y
     """대운+세운 종합 운세 점수 (0~100)"""
 
     if target_year is None:
-        target_year = datetime.now().year
+        target_year = get_saju_year()
 
     ys = get_yongshin(pils)
 
@@ -10948,7 +10948,7 @@ def calc_turning_point(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0, targe
     """
 
     if target_year is None:
-        target_year = datetime.now().year
+        target_year = get_saju_year()
 
     prev_score = calc_luck_score(pils, birth_year, gender, bm, bd, bh, bmi, target_year - 1)
 
@@ -11094,7 +11094,7 @@ def get_yongshin_multilayer(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0, 
     """
 
     if target_year is None:
-        target_year = datetime.now().year
+        target_year = get_saju_year()
 
     ys = get_yongshin(pils)
 
