@@ -1,0 +1,72 @@
+{
+  "正印": {
+    "result": "배움·자격·시험으로 자기 자리를 만든",
+    "category": "길사",
+    "tone_level": 2,
+    "specificity": 0.5,
+    "conflicts": []
+  },
+  "偏印": {
+    "result": "남다른 기술이나 안목으로 길을 튼",
+    "category": "길사",
+    "tone_level": 2,
+    "specificity": 0.5,
+    "conflicts": []
+  },
+  "正官": {
+    "result": "이름과 자리를 얻고 인정받은",
+    "category": "길사",
+    "tone_level": 2,
+    "specificity": 0.5,
+    "conflicts": []
+  },
+  "偏官": {
+    "result": "큰 책임을 떠맡아 실력을 증명한",
+    "category": "길사",
+    "tone_level": 2,
+    "specificity": 0.5,
+    "conflicts": []
+  },
+  "正財": {
+    "result": "성실하게 쌓아 재물이 붙은",
+    "category": "길사",
+    "tone_level": 2,
+    "specificity": 0.5,
+    "conflicts": []
+  },
+  "偏財": {
+    "result": "크게 벌이고 기회를 잡은",
+    "category": "길사",
+    "tone_level": 2,
+    "specificity": 0.5,
+    "conflicts": []
+  },
+  "食神": {
+    "result": "재능이 빛을 보고 사람이 따른",
+    "category": "길사",
+    "tone_level": 2,
+    "specificity": 0.5,
+    "conflicts": []
+  },
+  "傷官": {
+    "result": "자기 방식으로 판을 새로 짠",
+    "category": "길사",
+    "tone_level": 2,
+    "specificity": 0.5,
+    "conflicts": []
+  },
+  "比肩": {
+    "result": "자기 힘으로 홀로 서기 시작한",
+    "category": "길사",
+    "tone_level": 2,
+    "specificity": 0.5,
+    "conflicts": []
+  },
+  "劫財": {
+    "result": "경쟁 속에서 자기 몫을 지켜낸",
+    "category": "길사",
+    "tone_level": 2,
+    "specificity": 0.5,
+    "conflicts": []
+  }
+}

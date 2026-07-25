@@ -9,6 +9,12 @@ _RULES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "rules")
 with open(os.path.join(_RULES_DIR, "traits.json"), encoding="utf-8") as _f:
     TRAITS_RULES = json.load(_f)
 
+with open(os.path.join(_RULES_DIR, "key_warn.json"), encoding="utf-8") as _f:
+    KEY_WARN_RULES = json.load(_f)
+
+with open(os.path.join(_RULES_DIR, "event_good.json"), encoding="utf-8") as _f:
+    EVENT_GOOD_RULES = json.load(_f)
+
 _JJ_HOUR_FULL = [
     "子(자) (자시)",
     "子(자) (자시)",

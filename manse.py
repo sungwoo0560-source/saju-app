@@ -15006,13 +15006,8 @@ def build_gangsa_block(pils, name, birth_year, gender, marriage_status=None):
                             _EVENT_BAD4[_pat4] = f"{_sy4}~{_ey4}년 무렵입니다 — " + _EVENT_BAD4[_pat4]
 
                 # 대운 천간 십성별 길사
-                _EVENT_GOOD4 = {
-                    "正印": "배움·자격·시험으로 자기 자리를 만든", "偏印": "남다른 기술이나 안목으로 길을 튼",
-                    "正官": "이름과 자리를 얻고 인정받은", "偏官": "큰 책임을 떠맡아 실력을 증명한",
-                    "正財": "성실하게 쌓아 재물이 붙은", "偏財": "크게 벌이고 기회를 잡은",
-                    "食神": "재능이 빛을 보고 사람이 따른", "傷官": "자기 방식으로 판을 새로 짠",
-                    "比肩": "자기 힘으로 홀로 서기 시작한", "劫財": "경쟁 속에서 자기 몫을 지켜낸",
-                }
+                # 쪽집게 룰 외부화 2단계: rules/event_good.json → saju_data.EVENT_GOOD_RULES 경유
+                _EVENT_GOOD4 = {k: v["result"] for k, v in EVENT_GOOD_RULES.items()}
                 _ev_bad4 = []
                 for _h4 in (_hit4 or [])[:2]:
                     _b4 = _EVENT_BAD4.get(_h4, "")
@@ -15283,21 +15278,8 @@ def build_gangsa_block(pils, name, birth_year, gender, marriage_status=None):
                 _bal4 = "넘치는 힘을 어디에 쓸지" if _strong4 else "부족한 힘을 어디서 채울지"
 
                 # 평생 주의 — natal 패턴 기반 (_hit4 첫번째)
-                _KEY_WARN4 = {
-                    "홍염": "이성과의 인연이 들어오고 나가는 자리",
-                    "양인": "속도와 결단이 지나쳐 부딪히는 자리",
-                    "비겁쟁재": "가까운 사람과 돈이 겹치는 자리",
-                    "재다신약": "욕심이 몸을 앞지르는 자리",
-                    "관살혼잡": "책임을 가리지 않고 다 떠안는 자리",
-                    "상관견관": "말과 재주가 윗사람을 건드리는 자리",
-                    "식상태왕": "재능이 흩어져 하나도 못 맺는 자리",
-                    "인성과다": "생각이 길어져 때를 놓치는 자리",
-                    "양인봉충": "칼과 속도가 겹치는 자리",
-                    "백호충": "예고 없이 사고와 급병이 드는 자리",
-                    "괴강충": "정점 직후에 꺾이는 자리",
-                    "충": "한자리에 묶으면 탈이 나는 자리",
-                    "자형": "자책이 병이 되는 자리",
-                }
+                # 쪽집게 룰 외부화 2단계: rules/key_warn.json → saju_data.KEY_WARN_RULES 경유
+                _KEY_WARN4 = {k: v["result"] for k, v in KEY_WARN_RULES.items()}
                 _warn4 = ""
                 if _hit4:
                     _warn4 = _KEY_WARN4.get(_hit4[0], "")
