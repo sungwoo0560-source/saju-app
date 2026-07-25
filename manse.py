@@ -20610,7 +20610,7 @@ def menu5_money(pils, birth_year, gender, name="내담자"):
 
     ilgan = pils[1]["cg"]
     ilgan_oh = OH.get(ilgan, "")
-    current_year = datetime.now().year
+    current_year = get_saju_year()
     current_age = current_year - birth_year + 1
     ys = get_yongshin(pils)
     yongshin_ohs = ys.get("종합_용신", []) or []
@@ -21001,7 +21001,7 @@ def menu5_money(pils, birth_year, gender, name="내담자"):
         unsafe_allow_html=True,
     )
     try:
-        _cy_mc = datetime.now().year
+        _cy_mc = get_saju_year()
         _cm_mc = datetime.now().month
         _ilgan_mc = pils[1]["cg"] if len(pils)>1 else "甲"
         _ys_mc = get_yongshin(pils) or {}
@@ -21190,7 +21190,7 @@ def menu5_money(pils, birth_year, gender, name="내담자"):
 
     ilgan_oh = OH.get(ilgan, "")
 
-    current_year = datetime.now().year
+    current_year = get_saju_year()
 
     # ① 십성 조합 기반 재물 기질
 
@@ -22205,7 +22205,7 @@ def menu9_daily(pils, name, birth_year, gender):
 def menu10_monthly(pils, name, birth_year, gender):
     """🔟 월별 운세 - 이달의 주의해야 할 날짜 특화 분석"""
 
-    cur_year = datetime.now().year
+    cur_year = get_saju_year()
 
     # ── 이달 개인화 운기 요약 카드 ──────────────────────────────
     try:
@@ -23178,7 +23178,7 @@ def menu8_bihang(pils, name, birth_year, gender):
 
     display_name = name if name else "내담자"
 
-    current_year = datetime.now().year
+    current_year = get_saju_year()
 
     current_age = current_year - birth_year + 1
 
@@ -25679,7 +25679,7 @@ def menu14_health(pils, name, birth_year, gender):
 
     try:
         ilgan = pils[1]["cg"]
-        current_year = datetime.now().year
+        current_year = get_saju_year()
         current_age  = current_year - birth_year + 1
         oh_strength  = calc_ohaeng_strength(ilgan, pils)
         weak_oh      = min(oh_strength, key=oh_strength.get)
@@ -30826,7 +30826,7 @@ def menu16_ohaeng_deep(pils, name, birth_year, gender):
     ilji    = pils[1]["jj"]
     all_cg  = [p["cg"] for p in pils]
     all_jj  = [p["jj"] for p in pils]
-    cur_year = datetime.now().year
+    cur_year = get_saju_year()
 
     # ── 색상 상수 ──────────────────────────────────────────────
     _OH_COLOR = {"木":"#2d8a4e","火":"#e53935","土":"#f9a825","金":"#9e9e9e","水":"#1565c0"}
@@ -32449,7 +32449,7 @@ border-radius:14px;padding:16px 20px;margin:16px 0 6px">
         _has_geop = "겁살" in _GEOP_SAL
 
         # 연도별 사고 위험도 계산 (현재+5년)
-        _cur_yr2 = datetime.now().year
+        _cur_yr2 = get_saju_year()
         accident_data = []
 
         for _yr in range(_cur_yr2, _cur_yr2 + 6):
@@ -32642,7 +32642,7 @@ border-radius:14px;padding:16px 20px;margin:16px 0 6px">
         _mc_jj = _MC_MAP.get(ilgan,"")
         _mc_hits = [p["jj"] for p in pils if p["jj"] == _mc_jj]
 
-        _cur_yr3 = datetime.now().year
+        _cur_yr3 = get_saju_year()
         windfall_data = []
 
         for _yr in range(_cur_yr3, _cur_yr3 + 6):
