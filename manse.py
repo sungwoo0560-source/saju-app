@@ -14883,7 +14883,13 @@ def build_gangsa_block(pils, name, birth_year, gender, marriage_status=None):
                     _hit4.append("충")
                 if _hyung_pairs4:
                     _hit4.append("자형")
-                _hit4 = _hit4[:3]   # 최대 3개 (R2 조합 대응 슬롯 확대)
+                # specificity(발동 희소도) 내림차순 정렬 후 상위 3개 노출
+                # — 흔한 바넘 패턴(비겁쟁재 등)보다 희소 패턴(양인봉충 등)을 우선.
+                #   안정정렬이라 동점은 기존 append 우선순위 유지.
+                _hit4 = sorted(
+                    _hit4,
+                    key=lambda _p4: -KEY_WARN_RULES.get(_p4, {}).get("specificity", 0.5),
+                )[:3]   # 최대 3개 (R2 조합 대응 슬롯 확대)
                 if _hit4:
                     # _TRAITS4에 없는 신규 패턴(양인봉충/백호충/괴강충/충/자형)은
                     # 이 항목에서만 조용히 스킵 — KeyError로 항목 전체가 비는 것 방지
