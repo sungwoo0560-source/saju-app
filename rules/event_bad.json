@@ -3,21 +3,21 @@
     "result": "한번 밀어붙이다 크게 다치거나 부러진 일이 있었습니다. 사고나 수술을 겪었거나, 사람과 세게 부딪혀 관계가 끊어졌거나 — 그 순간 자기 성질을 못 이겼던 기억이 남아 있을 자리입니다.",
     "category": "사건",
     "tone_level": 3,
-    "specificity": 0.5,
+    "specificity": 0.77,
     "conflicts": []
   },
   "홍염": {
     "result": "원치 않아도 이성 문제로 말이 돌았던 시기가 있었습니다. 얽히지 말았어야 할 인연에 걸렸거나, 오해로 구설에 올랐거나, 정리가 깔끔하지 못해 뒤끝이 남았거나 — 매력이 강한 만큼 치른 대가입니다.",
     "category": "사건",
     "tone_level": 2,
-    "specificity": 0.5,
+    "specificity": 0.68,
     "conflicts": []
   },
   "자형": {
     "result": "같은 기운이 겹쳐 스스로를 치는 자형입니다. 남 탓보다 자기 탓을 하며 속으로 삭이셨을 겁니다. 그 자기검열이 완성도를 만듭니다.",
     "category": "사건",
     "tone_level": 2,
-    "specificity": 0.5,
+    "specificity": 0.85,
     "conflicts": []
   },
   "비겁쟁재": {
@@ -25,7 +25,7 @@
     "prefix_template": "{start_year}~{end_year}년 무렵입니다 — ",
     "category": "사건",
     "tone_level": 2,
-    "specificity": 0.5,
+    "specificity": 0.4,
     "conflicts": []
   },
   "재다신약": {
@@ -33,7 +33,7 @@
     "prefix_template": "{start_year}~{end_year}년 무렵입니다 — ",
     "category": "사건",
     "tone_level": 3,
-    "specificity": 0.5,
+    "specificity": 0.73,
     "conflicts": []
   },
   "관살혼잡": {
@@ -41,7 +41,7 @@
     "prefix_template": "{start_year}~{end_year}년 무렵입니다 — ",
     "category": "사건",
     "tone_level": 2,
-    "specificity": 0.5,
+    "specificity": 0.76,
     "conflicts": []
   },
   "상관견관": {
@@ -49,7 +49,7 @@
     "prefix_template": "{start_year}~{end_year}년 무렵입니다 — ",
     "category": "사건",
     "tone_level": 2,
-    "specificity": 0.5,
+    "specificity": 0.77,
     "conflicts": []
   },
   "식상태왕": {
@@ -57,7 +57,7 @@
     "prefix_template": "{start_year}~{end_year}년 무렵입니다 — ",
     "category": "사건",
     "tone_level": 2,
-    "specificity": 0.5,
+    "specificity": 0.58,
     "conflicts": []
   },
   "인성과다": {
@@ -65,7 +65,7 @@
     "prefix_template": "{start_year}~{end_year}년 무렵입니다 — ",
     "category": "사건",
     "tone_level": 2,
-    "specificity": 0.5,
+    "specificity": 0.84,
     "conflicts": []
   },
   "백호충": {
@@ -77,7 +77,7 @@
     },
     "category": "사건",
     "tone_level": 3,
-    "specificity": 0.5,
+    "specificity": 0.85,
     "conflicts": []
   },
   "괴강충": {
@@ -89,7 +89,7 @@
     },
     "category": "사건",
     "tone_level": 3,
-    "specificity": 0.5,
+    "specificity": 0.96,
     "conflicts": []
   },
   "양인봉충": {
@@ -100,7 +100,7 @@
     },
     "category": "사건",
     "tone_level": 3,
-    "specificity": 0.7,
+    "specificity": 0.92,
     "conflicts": []
   },
   "충": {
@@ -111,7 +111,7 @@
     },
     "category": "사건",
     "tone_level": 2,
-    "specificity": 0.7,
+    "specificity": 0.71,
     "conflicts": []
   }
 }

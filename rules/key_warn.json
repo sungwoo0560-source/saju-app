@@ -3,91 +3,91 @@
     "result": "이성과의 인연이 들어오고 나가는 자리",
     "category": "경고",
     "tone_level": 2,
-    "specificity": 0.5,
+    "specificity": 0.68,
     "conflicts": []
   },
   "양인": {
     "result": "속도와 결단이 지나쳐 부딪히는 자리",
     "category": "경고",
     "tone_level": 3,
-    "specificity": 0.5,
+    "specificity": 0.77,
     "conflicts": []
   },
   "비겁쟁재": {
     "result": "가까운 사람과 돈이 겹치는 자리",
     "category": "경고",
     "tone_level": 2,
-    "specificity": 0.5,
+    "specificity": 0.4,
     "conflicts": []
   },
   "재다신약": {
     "result": "욕심이 몸을 앞지르는 자리",
     "category": "경고",
     "tone_level": 3,
-    "specificity": 0.5,
+    "specificity": 0.73,
     "conflicts": []
   },
   "관살혼잡": {
     "result": "책임을 가리지 않고 다 떠안는 자리",
     "category": "경고",
     "tone_level": 2,
-    "specificity": 0.5,
+    "specificity": 0.76,
     "conflicts": []
   },
   "상관견관": {
     "result": "말과 재주가 윗사람을 건드리는 자리",
     "category": "경고",
     "tone_level": 2,
-    "specificity": 0.5,
+    "specificity": 0.77,
     "conflicts": []
   },
   "식상태왕": {
     "result": "재능이 흩어져 하나도 못 맺는 자리",
     "category": "경고",
     "tone_level": 2,
-    "specificity": 0.5,
+    "specificity": 0.58,
     "conflicts": []
   },
   "인성과다": {
     "result": "생각이 길어져 때를 놓치는 자리",
     "category": "경고",
     "tone_level": 2,
-    "specificity": 0.5,
+    "specificity": 0.84,
     "conflicts": []
   },
   "양인봉충": {
     "result": "칼과 속도가 겹치는 자리",
     "category": "경고",
     "tone_level": 3,
-    "specificity": 0.5,
+    "specificity": 0.92,
     "conflicts": []
   },
   "백호충": {
     "result": "예고 없이 사고와 급병이 드는 자리",
     "category": "경고",
     "tone_level": 3,
-    "specificity": 0.5,
+    "specificity": 0.85,
     "conflicts": []
   },
   "괴강충": {
     "result": "정점 직후에 꺾이는 자리",
     "category": "경고",
     "tone_level": 3,
-    "specificity": 0.5,
+    "specificity": 0.96,
     "conflicts": []
   },
   "충": {
     "result": "한자리에 묶으면 탈이 나는 자리",
     "category": "경고",
     "tone_level": 2,
-    "specificity": 0.5,
+    "specificity": 0.71,
     "conflicts": []
   },
   "자형": {
     "result": "자책이 병이 되는 자리",
     "category": "경고",
     "tone_level": 2,
-    "specificity": 0.5,
+    "specificity": 0.85,
     "conflicts": []
   }
 }
