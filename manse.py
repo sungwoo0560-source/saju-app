@@ -19685,7 +19685,7 @@ def menu2_lifeline(pils, birth_year, gender, name="내담자"):
     """2️⃣ 인생 흐름 (대운 100년) - 프리미엄 글래스모피즘 UI"""
 
     ilgan        = pils[1]["cg"]
-    current_year = datetime.now().year
+    current_year = get_saju_year()
     birth_month  = st.session_state.get("birth_month", 1)
     birth_day    = st.session_state.get("birth_day",   1)
     birth_hour   = st.session_state.get("birth_hour",  12)
@@ -19794,7 +19794,7 @@ def menu2_lifeline(pils, birth_year, gender, name="내담자"):
 
     # ── 현재 대운 × 세운 교차 분석 카드 ────────────────────────
     try:
-        _cy2 = datetime.now().year
+        _cy2 = get_saju_year()
         _sw2 = get_yearly_luck(pils, _cy2) or {}
         _sw2n = get_yearly_luck(pils, _cy2+1) or {}
         _sw2_ss  = _sw2.get("십성_천간","")
@@ -19943,7 +19943,7 @@ def menu2_lifeline(pils, birth_year, gender, name="내담자"):
                 _dw2_action  = f"용신 오행({', '.join(yongshin_ohs)}) 방향으로 에너지를 집중하십시오."
                 _dw2_col     = "#7f8c8d"
                 _dw2_bg      = "#1a1a2a"
-            _remain2 = cur_dw["종료연도"] - datetime.now().year
+            _remain2 = cur_dw["종료연도"] - get_saju_year()
             st.markdown(
                 f"<div style='background:{_dw2_bg};border-radius:14px;padding:20px 24px;"
                 f"margin:12px 0;border:2px solid {_dw2_col}66;'>"
@@ -19976,7 +19976,7 @@ def menu3_past(pils, birth_year, gender, name=""):
 
     # ── 과거 대운 타임라인 시각화 카드 ───────────────────────────
     try:
-        _cy3 = datetime.now().year
+        _cy3 = get_saju_year()
         _ilgan3 = pils[1]["cg"]
         _ys3 = get_yongshin(pils)
         _yong3 = _ys3.get("종합_용신",[])
@@ -20110,7 +20110,7 @@ def menu3_past(pils, birth_year, gender, name=""):
         _ilp_s = ILGAN_PROFILE.get(_ilgan_s, {})
         _gy_s = get_gyeokguk(pils)
         _gname_s = _gy_s.get("격국명", "독특한 격국") if _gy_s else "독특한 격국"
-        _cur_year_s = datetime.now().year
+        _cur_year_s = get_saju_year()
         _daewoon_s = SajuCoreEngine.get_daewoon(
             pils, birth_year,
             st.session_state.get("birth_month", 1),
@@ -20180,7 +20180,7 @@ def menu4_future3(
 
     ilgan = pils[1]["cg"]
 
-    current_year = datetime.now().year
+    current_year = get_saju_year()
 
     current_age = current_year - birth_year + 1
 
@@ -20509,7 +20509,7 @@ def menu4_future3(
         "분야", ["재물", "인연", "직업", "건강"], horizontal=True,
         key="future3_timing_focus", index=0,
     )
-    for _yr in range(datetime.now().year, datetime.now().year + 3):
+    for _yr in range(get_saju_year(), get_saju_year() + 3):
         try:
             _mt3 = get_monthly_timing(pils, birth_year, gender, _yr, _focus_f3)
             _peak_str   = ", ".join([f"{m}월" for m, d in _mt3["peak"]   if "⭐⭐⭐" in d or "⭐⭐" in d])
