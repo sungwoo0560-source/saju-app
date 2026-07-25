@@ -1265,7 +1265,7 @@ def _local_saju_engine(pils, name, birth_year, gender, query):
             # 대운×세운 재물 더블 황금기
 
             try:
-                hl_m = generate_engine_highlights(pils, birth_year, gender, bm, bd, bh, bmn)
+                hl_m = generate_engine_highlights(pils, birth_year, gender, bm, bd, bh, bmn, target_year=current_year)
 
                 double_mp = [m for m in hl_m.get("money_peak", []) if m.get("ss") == "더블"]
 
@@ -1787,7 +1787,7 @@ def _local_saju_engine(pils, name, birth_year, gender, query):
 
         elif is_past:
             try:
-                hl = generate_engine_highlights(pils, birth_year, gender, bm, bd, bh, bmn)
+                hl = generate_engine_highlights(pils, birth_year, gender, bm, bd, bh, bmn, target_year=current_year)
             except Exception:
                 hl = []
 
@@ -7327,7 +7327,7 @@ def build_life_analysis(pils, gender):
 
 
 @st.cache_data
-def generate_engine_highlights(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0):
+def generate_engine_highlights(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0, target_year=None):
     """
 
     * 핵심 엔진 *
@@ -7358,7 +7358,9 @@ def generate_engine_highlights(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=
 
     ilgan_oh = OH.get(ilgan, "")
 
-    current_year = datetime.now().year
+    if target_year is None:
+        target_year = get_saju_year()
+    current_year = target_year
 
     # TEN_GODS_MATRIX는 '偏財(편재)' 형식 반환 → 한글 부분만 추출하는 헬퍼
     def _ss_k(s):
@@ -7873,7 +7875,7 @@ def get_cached_ai_interpretation(
     # -- 엔진 하이라이트 계산 (핵심) -------------------
 
     try:
-        hl = generate_engine_highlights(pils, birth_year, gender)
+        hl = generate_engine_highlights(pils, birth_year, gender, target_year=get_saju_year())
     except Exception:
         hl = []
 
@@ -13195,7 +13197,7 @@ def tab_past_events(pils, birth_year, gender, name=""):
     # ── 데이터 계산
     with st.spinner("과거 사건 계산 중..."):
         try:
-            hl = generate_engine_highlights(pils, birth_year, gender)
+            hl = generate_engine_highlights(pils, birth_year, gender, target_year=get_saju_year())
         except Exception:
             hl = []
 
@@ -19418,7 +19420,7 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
 
     try:
         with st.spinner("성향 계산 중..."):
-            hl = generate_engine_highlights(pils, birth_year, gender)
+            hl = generate_engine_highlights(pils, birth_year, gender, target_year=get_saju_year())
 
         _pdf_buf = []
         for trait in hl["personality"]:
@@ -24209,7 +24211,7 @@ def tab_ai_chat(pils, name, birth_year, gender):
     # === 사주 원국 기반 핵심 예측 (AI 챗 상단 직접 노출) ===
 
     try:
-        hl = generate_engine_highlights(pils, birth_year, gender)
+        hl = generate_engine_highlights(pils, birth_year, gender, target_year=get_saju_year())
 
         if False:  # UI-2: 핵심 예측치 expander 비활성화
             # 1. 타고난 성향
@@ -24575,7 +24577,7 @@ def tab_ai_chat(pils, name, birth_year, gender):
                     # 대운×세운 재물 더블 황금기
 
                     try:
-                        hl_m = generate_engine_highlights(pils, birth_year, gender, bm, bd, bh, bmn)
+                        hl_m = generate_engine_highlights(pils, birth_year, gender, bm, bd, bh, bmn, target_year=current_year)
 
                         double_mp = [m for m in hl_m.get("money_peak", []) if m.get("ss") == "더블"]
 
@@ -24943,7 +24945,7 @@ def tab_ai_chat(pils, name, birth_year, gender):
 
                 elif is_past:
                     try:
-                        hl = generate_engine_highlights(pils, birth_year, gender, bm, bd, bh, bmn)
+                        hl = generate_engine_highlights(pils, birth_year, gender, bm, bd, bh, bmn, target_year=current_year)
                     except Exception:
                         hl = []
 
@@ -25236,7 +25238,7 @@ def tab_ai_chat(pils, name, birth_year, gender):
                     # 2️⃣ 신안의 복기
 
                     try:
-                        hl_e = generate_engine_highlights(pils, birth_year, gender, bm, bd, bh, bmn)
+                        hl_e = generate_engine_highlights(pils, birth_year, gender, bm, bd, bh, bmn, target_year=current_year)
 
                         pevs_e = sorted(
                             hl_e.get("past_events", []),
