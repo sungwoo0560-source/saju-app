@@ -15,6 +15,65 @@ with open(os.path.join(_RULES_DIR, "key_warn.json"), encoding="utf-8") as _f:
 with open(os.path.join(_RULES_DIR, "event_good.json"), encoding="utf-8") as _f:
     EVENT_GOOD_RULES = json.load(_f)
 
+with open(os.path.join(_RULES_DIR, "event_bad.json"), encoding="utf-8") as _f:
+    EVENT_BAD_RULES = json.load(_f)
+
+
+class _SafeFormatDict(dict):
+    """포맷 변수 누락/None → 빈 문자열. "None년" 같은 오염 문자열이 화면에 나가는 것을 막는다."""
+    def __missing__(self, key):
+        return ""
+
+
+def render_event_bad(pattern_key, *, start_year=None, end_year=None, trig_years=None,
+                      position_a=None, position_b=None, char_a=None, char_b=None, cycle=None):
+    """rules/event_bad.json 패턴 1건을 런타임 변수로 치환해 완성 문장을 반환.
+
+    그룹별 처리:
+      A(정적)            → result 그대로
+      B(prefix_template) → start_year/end_year 둘 다 있으면 접두사 + result
+      C(prefix_variants) → trig_years 개수(0/1/2)로 접두사 variant 선택 + result
+      D(variants)        → trig_years 개수(0/1/2)로 문장 전체 variant 선택
+    """
+    entry = EVENT_BAD_RULES.get(pattern_key)
+    if not entry:
+        return ""
+    trig_years = trig_years or []
+    fmt_vars = _SafeFormatDict({
+        "y1": trig_years[0] if len(trig_years) >= 1 else None,
+        "y2": trig_years[1] if len(trig_years) >= 2 else None,
+        "trig_year": trig_years[0] if len(trig_years) == 1 else None,
+        "position_a": position_a, "position_b": position_b,
+        "char_a": char_a, "char_b": char_b, "cycle": cycle,
+        "start_year": start_year, "end_year": end_year,
+    })
+    # None 값도 "None" 문자열로 나가지 않도록 빈 문자열로 미리 치환
+    fmt_vars = _SafeFormatDict({k: ("" if v is None else v) for k, v in fmt_vars.items()})
+
+    def _safe_format(tpl):
+        try:
+            return tpl.format_map(fmt_vars)
+        except (KeyError, ValueError, IndexError) as e:
+            print(f"[render_event_bad] 템플릿 치환 실패 pattern={pattern_key!r}: {e}")
+            return entry.get("result", "")
+
+    if "variants" in entry:
+        _n = len(trig_years)
+        _vkey = {2: "2y", 1: "1y"}.get(_n, "0y")
+        return _safe_format(entry["variants"][_vkey])
+
+    if "prefix_variants" in entry:
+        _n = len(trig_years)
+        _vkey = {2: "2y", 1: "1y"}.get(_n, "0y")
+        return _safe_format(entry["prefix_variants"][_vkey]) + entry["result"]
+
+    if "prefix_template" in entry:
+        if start_year and end_year:
+            return _safe_format(entry["prefix_template"]) + entry["result"]
+        return entry["result"]
+
+    return entry["result"]
+
 _JJ_HOUR_FULL = [
     "子(자) (자시)",
     "子(자) (자시)",
