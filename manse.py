@@ -24351,7 +24351,7 @@ def tab_ai_chat(pils, name, birth_year, gender):
 
         GoalCreationEngine.extract_goal(name, user_query)  # 목표 발견
 
-        current_year = datetime.now().year
+        current_year = get_saju_year()
 
         luck_score = calc_luck_score(
             pils, birth_year, gender,
@@ -24399,7 +24399,7 @@ def tab_ai_chat(pils, name, birth_year, gender):
 
         # 🚨 V2 돌발 사건 감지
 
-        risk_info = FatePredictionEngine.detect_risk(pils, datetime.now().year)
+        risk_info = FatePredictionEngine.detect_risk(pils, get_saju_year())
 
         if risk_info["is_risk"]:
             st.error(f"⚠️ **위험 경고 ({risk_info['severity']}):** " + " / ".join(risk_info["messages"]))
@@ -25429,7 +25429,7 @@ def menu7_ai(pils, name, birth_year, gender):
                     _gy_e     = get_gyeokguk(pils) or {}
                     _ys_e     = get_yongshin(pils) or {}
                     _si_e     = get_ilgan_strength(_ilgan_e, pils) or {}
-                    _sw_e     = get_yearly_luck(pils, datetime.now().year) or {}
+                    _sw_e     = get_yearly_luck(pils, get_saju_year()) or {}
                     _bm_e     = max(1, min(12, int(st.session_state.get("birth_month") or 1)))
                     _bd_e     = max(1, min(31, int(st.session_state.get("birth_day") or 1)))
                     _bh_e     = max(0, min(23, int(st.session_state.get("birth_hour") or 12)))
@@ -25439,7 +25439,7 @@ def menu7_ai(pils, name, birth_year, gender):
                     ) or []
                     _cur_dw_e = next(
                         (d for d in _dw_e
-                         if d["시작연도"] <= datetime.now().year <= d["종료연도"]), {}
+                         if d["시작연도"] <= get_saju_year() <= d["종료연도"]), {}
                     )
 
                     _ctx_data = f"""
@@ -27057,7 +27057,7 @@ def menu_gaewoon(pils, name, birth_year, gender):
             _gis_gw = []
         # 오행 글자가 아닌 값 필터링
         _gis_gw = [g for g in _gis_gw if g in ["木","火","土","金","水"]]
-        _sw_gw       = get_yearly_luck(pils, datetime.now().year)
+        _sw_gw       = get_yearly_luck(pils, get_saju_year())
         _sw_ss_gw    = _sw_gw.get("십성_천간", "")
         _sinsal_gw   = get_12sinsal(pils)
         _marriage_gw = st.session_state.get("in_marriage", "미혼")
@@ -27141,7 +27141,7 @@ def menu_gaewoon(pils, name, birth_year, gender):
         "偏印":"공부·자격증·내면 탐구","正印":"인맥 활용·학업·상사 지원 받기",
         "比肩":"독립 행보·경쟁 도전·체력 강화","劫財":"동업 주의·현금 보관·지출 절제",
     }
-    _cur_yr_gw   = datetime.now().year
+    _cur_yr_gw   = get_saju_year()
     _mon_data_gw = []
     for _m_g in range(1, 13):
         try:
@@ -30291,7 +30291,7 @@ def main():
                     gender,
                 )
 
-                cur_year = datetime.now().year
+                cur_year = get_saju_year()
 
                 cur_dw = next(
                     (d for d in dw_list if d.get("시작연도", 0) <= cur_year <= d.get("종료연도", 9999)),
@@ -30667,7 +30667,7 @@ def main():
                 _dramatic_text = ""
                 try:
                     _pdf_ilgan = pils[1].get("cg", "") if len(pils) > 1 else ""
-                    _pdf_sw    = get_yearly_luck(pils, datetime.now().year) or {}
+                    _pdf_sw    = get_yearly_luck(pils, get_saju_year()) or {}
                     _pdf_ss_t  = _pdf_sw.get("십성_천간", "")
                     _pdf_cnt   = {}
                     if _pdf_ilgan:
@@ -30692,7 +30692,7 @@ def main():
                     _pdf_ypos = _pdf_yd.get("양인_지지", "")
                     _pdf_ctx  = {
                         "pils": pils, "name": name, "birth_year": birth_year,
-                        "current_year": datetime.now().year,
+                        "current_year": get_saju_year(),
                         "ilgan": _pdf_ilgan,
                         "sewoon_sipsung": _pdf_ss_t,
                         "yangin_active": _pdf_ya, "yangin_pos": _pdf_ypos,
@@ -33473,7 +33473,7 @@ padding:14px;margin:6px 0;text-align:center">
 
         # 올해 이사 방위 판단
         with st.expander("🏠 올해 이사 방위 판단", expanded=False):
-            _sw_f2 = get_yearly_luck(pils, _dt_tj.datetime.now().year) or {}
+            _sw_f2 = get_yearly_luck(pils, get_saju_year()) or {}
             _sw_ss_f2 = _sw_f2.get("십성_천간","")
             _MOVE2 = {
                 "偏財": f"편재 세운 — 이사는 {_gm2.get('생기','길방')} 방향으로 하면 재물운 상승.",
