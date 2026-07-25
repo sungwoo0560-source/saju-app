@@ -33234,7 +33234,7 @@ unsafe_allow_html=True)
 
 def menu_yearly(pils, name, birth_year, gender):
     """🎊 신년운세 — 올해·내년 집중 분석"""
-    cur_year = datetime.now().year
+    cur_year = get_saju_year()
     st.markdown(
         f"<div style='background:linear-gradient(135deg,#0d0820,#2d1f5e);"
         f"border-radius:16px;padding:20px 24px;margin-bottom:16px;"
