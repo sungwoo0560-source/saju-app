@@ -32,7 +32,7 @@ from saju_sinsal import get_gongmang
 # 값을 고칠 때는 반드시 근거를 확인할 것.
 CASES = {
     "박성우": {
-        "birth": (1969, 7, 14, 23, 0),
+        "birth": (1969, 7, 14, 22, 30),
         "gender": "남",
         "longitude": 126.98,
         "use_yaja_time": True,
