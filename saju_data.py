@@ -1,6 +1,14 @@
 # -*- coding: utf-8 -*-
 """만신 사주 데이터 모음집 (saju_data.py)"""
 
+import json
+import os
+
+_RULES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "rules")
+
+with open(os.path.join(_RULES_DIR, "traits.json"), encoding="utf-8") as _f:
+    TRAITS_RULES = json.load(_f)
+
 _JJ_HOUR_FULL = [
     "子(자) (자시)",
     "子(자) (자시)",
