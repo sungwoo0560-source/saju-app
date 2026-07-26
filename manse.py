@@ -6747,6 +6747,13 @@ def build_past_events(pils, birth_year, gender):
         if dw_tg_chung and dw_jj_chung:
             ojj, ck = dw_jj_chung[0]
 
+            # 거병(去病) 보정 — 충 맞는 원국 지지가 기신 오행이면 흉작용 완화(High→Mid)
+            _dw_intensity = "High"
+            _dw_gubyeong_note = ""
+            if _OH_JJ.get(ojj, "") in gi_ohs:
+                _dw_intensity = "Mid"
+                _dw_gubyeong_note = " 다만 충을 맞은 자리가 원래 힘이 약한 기신 자리라, 겉보기보다 충격은 크지 않았을 가능성이 있습니다."
+
             domain, cdd = CHUNG_DOMAIN_DESC.get(ck, (dw_domain, "큰 변화가 왔다"))
 
             adj_domain, adj_desc = _adjust_for_youth(domain, cdd, age_start)
@@ -6761,9 +6768,9 @@ def build_past_events(pils, birth_year, gender):
                         "desc": (
                             f"【{age_start}세 대운 진입 · 천간충+지지충 동시】"
                             f"천간({dw['cg']})과 지지({dw['jj']})가 동시에 원국을 강타."
-                            f" {adj_desc}. 이 시기 삶이 크게 뒤흔들렸을 가능성이 매우 높습니다."
+                            f" {adj_desc}. 이 시기 삶이 크게 뒤흔들렸을 가능성이 매우 높습니다." + _dw_gubyeong_note
                         ),
-                        "intensity": "High",
+                        "intensity": _dw_intensity,
                     }
                 )
 
@@ -6780,8 +6787,8 @@ def build_past_events(pils, birth_year, gender):
                         "year": dw["시작연도"],
                         "type": "대운 지지충",
                         "domain": adj_domain,
-                        "desc": f"【{age_start}세 대운 진입 · 지지충】{adj_desc}.",
-                        "intensity": "High",
+                        "desc": f"【{age_start}세 대운 진입 · 지지충】{adj_desc}." + _dw_gubyeong_note,
+                        "intensity": _dw_intensity,
                     }
                 )
 
