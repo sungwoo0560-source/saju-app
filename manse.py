@@ -6637,6 +6637,8 @@ def build_past_events(pils, birth_year, gender):
 
     current_year = get_saju_year()
 
+    gi_ohs = compute_gi_ohs(pils)  # 거병(去病) 보정용 기신 오행 — 루프 밖에서 1회만 산출
+
     birth_month = max(1, min(12, int(st.session_state.get("birth_month") or 1)))
 
     birth_day = max(1, min(31, int(st.session_state.get("birth_day") or 1)))
@@ -6887,16 +6889,22 @@ def build_past_events(pils, birth_year, gender):
 
                 intensity = "High"  # 충 발생 시 최소 High
 
+                # 거병(去病) 보정 — 충 맞는 원국 지지가 기신 오행이면 흉작용 완화(High→Mid)
+                _gubyeong_note = ""
+                if _OH_JJ.get(ojj, "") in gi_ohs:
+                    intensity = "Mid"
+                    _gubyeong_note = " 다만 충을 맞은 자리가 원래 힘이 약한 기신 자리라, 겉보기보다 충격은 크지 않았을 가능성이 있습니다."
+
                 adj_domain, adj_cdd = _adjust_for_youth(domain, cdd, age)
 
                 _, adj_combo = _adjust_for_youth(domain, combo_hit[1] if combo_hit else "", age)
 
                 if adj_domain:
                     if combo_hit:
-                        full_desc = f"【{y}년 · {age}세】{adj_cdd}. {adj_combo}"
+                        full_desc = f"【{y}년 · {age}세】{adj_cdd}. {adj_combo}" + _gubyeong_note
 
                     else:
-                        full_desc = f"【{y}년 · {age}세】{adj_cdd}."
+                        full_desc = f"【{y}년 · {age}세】{adj_cdd}." + _gubyeong_note
 
                     events.append(
                         {
