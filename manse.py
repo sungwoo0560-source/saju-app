@@ -6589,6 +6589,28 @@ def get_ai_interpretation(
 # ✅ BUG 3 FIX: hash_funcs를 사용하여 dict 인수 해싱 가능하게 처리
 
 
+def compute_gi_ohs(pils):
+    """기신(忌神) 오행 리스트 산출 — build_gangsa_block과 동일 규칙(신강=인성·비겁 / 신약=관성·재성).
+    get_yongshin()의 "기신"이 오행 리스트로 오면 그대로 쓰고, 없으면(서술형 문자열) 신강/신약 판정으로 역산한다."""
+    try:
+        ilgan = pils[1]["cg"]
+        sn = get_ilgan_strength(ilgan, pils).get("신강신약", "중화")
+        gi = get_yongshin(pils).get("기신", [])
+        if isinstance(gi, list) and gi:
+            return gi
+        oh = _OH_CG.get(ilgan, "")
+        birth = {"木": "水", "火": "木", "土": "火", "金": "土", "水": "金"}
+        ctrl = {"木": "土", "火": "金", "土": "水", "金": "木", "水": "火"}
+        if "신강" in sn:
+            return [o for o in (birth.get(oh), oh) if o]
+        if "신약" in sn:
+            gwan = next((k for k, v in ctrl.items() if v == oh), "")
+            return [o for o in (gwan, ctrl.get(oh)) if o]
+        return []
+    except Exception:
+        return []
+
+
 # @cache_data 제거 — session_state 내부 접근으로 캐시 불가
 def build_past_events(pils, birth_year, gender):
     """
