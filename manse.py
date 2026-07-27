@@ -18352,6 +18352,41 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
     except Exception:
         pass
 
+    # 피드백 루프 3단계: 발동 룰별 맞음/틀림 버튼 (rule_id 단위 기록, 본문 불변)
+    # 명식별 구분·영속 저장은 4단계(파일 로그: rule_id, hit/miss, 명식식별, ts)에서 처리.
+    try:
+        _fb_hits = st.session_state.get("_gangsa_rule_hits", [])
+        if _fb_hits:
+            st.session_state.setdefault("_feedback_pending", {})
+            st.markdown(
+                '<div style="font-size:12px;color:#888;margin:10px 0 4px;">'
+                '📝 위 해석, 항목별로 맞았나요?</div>',
+                unsafe_allow_html=True,
+            )
+            for _fb_hit in _fb_hits:
+                _fb_rid = _fb_hit.get("rule_id", "")
+                _fb_text = _fb_hit.get("text", "")
+                if not _fb_rid:
+                    continue
+                _fb_summary = _fb_text[:36] + ("…" if len(_fb_text) > 36 else "")
+                _fb_state = st.session_state["_feedback_pending"].get(_fb_rid)
+                _fb_mark = (
+                    " ✅ 맞음으로 기록됨" if _fb_state == "hit"
+                    else " ❌ 틀림으로 기록됨" if _fb_state == "miss"
+                    else ""
+                )
+                _fb_col1, _fb_col2, _fb_col3 = st.columns([7, 1, 1])
+                with _fb_col1:
+                    st.caption(f"「{_fb_summary}」{_fb_mark}")
+                with _fb_col2:
+                    if st.button("👍", key=f"fb_{_fb_rid}_up"):
+                        st.session_state["_feedback_pending"][_fb_rid] = "hit"
+                with _fb_col3:
+                    if st.button("👎", key=f"fb_{_fb_rid}_down"):
+                        st.session_state["_feedback_pending"][_fb_rid] = "miss"
+    except Exception:
+        pass
+
     # ════════════════════════════════════════════
     # JONGHAP-SSOT : 개발자 진단판 (URL ?dev=1 활성화)
     # 사용자에겐 안 보임 — 개발자 전용
