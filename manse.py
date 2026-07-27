@@ -14652,7 +14652,9 @@ def render_worry_inference(pils, birth_year, gender, marital_status=None):
 
 
 def build_gangsa_block(pils, name, birth_year, gender, marriage_status=None):
-    """강사식 13항목 HTML 문자열을 반환. 실패 시 빈 문자열."""
+    """강사식 13항목 HTML 문자열을 반환. 실패 시 빈 문자열.
+    발동 룰의 rule_id는 st.session_state["_gangsa_rule_hits"]에 함께 기록한다(피드백 루프 2단계)."""
+    st.session_state["_gangsa_rule_hits"] = []
     try:
         if marriage_status is None:
             marriage_status = st.session_state.get("marriage_status", "미혼")
@@ -14934,6 +14936,12 @@ def build_gangsa_block(pils, name, birth_year, gender, marriage_status=None):
                     if _trait_parts4:
                         _trait_body4 = " ".join(_trait_parts4)
                         _trait_l = f"<b>【타고난 구조의 특징】</b> {_trait_body4}"
+                        for _h4t in _hit4:
+                            if _h4t in TRAITS_RULES:
+                                st.session_state["_gangsa_rule_hits"].append({
+                                    "rule_id": TRAITS_RULES[_h4t]["rule_id"],
+                                    "text": TRAITS_RULES[_h4t]["result"],
+                                })
             except Exception:
                 _trait_l = ""
 
@@ -15016,6 +15024,11 @@ def build_gangsa_block(pils, name, birth_year, gender, marriage_status=None):
                     _b4 = _EVENT_BAD4.get(_h4, "")
                     if _b4:
                         _ev_bad4.append(_b4)
+                        if _h4 in EVENT_BAD_RULES:
+                            st.session_state["_gangsa_rule_hits"].append({
+                                "rule_id": EVENT_BAD_RULES[_h4]["rule_id"],
+                                "text": _b4,
+                            })
                 # 길사 — 과거 대운 중 천간 오행이 용신에 드는 대운만 (기신 대운을 길사로 쓰지 않도록)
                 _ev_good4 = ""
                 _yong_set4 = set(_yong_ohs4 or [])
@@ -15029,6 +15042,11 @@ def build_gangsa_block(pils, name, birth_year, gender, marriage_status=None):
                     _g4 = _EVENT_GOOD4.get(_dhj4, "")
                     if _g4:
                         _ev_good4 = f"다만 {_d4.get('시작나이',0)}세 무렵 {_d4.get('str','')} 대운은 용신이 힘을 받아 {_g4} 시기였습니다. 그때 쌓은 것이 지금 당신을 버티게 하는 밑천입니다."
+                        if _dhj4 in EVENT_GOOD_RULES:
+                            st.session_state["_gangsa_rule_hits"].append({
+                                "rule_id": EVENT_GOOD_RULES[_dhj4]["rule_id"],
+                                "text": _g4,
+                            })
                         break
                 if _ev_bad4:
                     # 문구가 이미 마침표로 끝나므로 공백만으로 연결
@@ -15286,6 +15304,11 @@ def build_gangsa_block(pils, name, birth_year, gender, marriage_status=None):
                 _warn4 = ""
                 if _hit4:
                     _warn4 = _KEY_WARN4.get(_hit4[0], "")
+                    if _warn4 and _hit4[0] in KEY_WARN_RULES:
+                        st.session_state["_gangsa_rule_hits"].append({
+                            "rule_id": KEY_WARN_RULES[_hit4[0]]["rule_id"],
+                            "text": _warn4,
+                        })
 
                 _key_body4 = f"당신은 <b>‘{_core_id4}’</b>입니다. 평생의 과제는 {_bal4}이고"
                 if _warn4:
