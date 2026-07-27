@@ -13218,6 +13218,61 @@ def append_feedback_log(rule_id, verdict, myeongsik_id):
         pass
 
 
+def compute_rule_hit_rates():
+    """쪽집게 피드백 루프 5단계: feedback_log.jsonl을 읽어 '패턴명' 단위 적중률을 집계한다.
+    한 패턴(예 "양인")은 traits/event_bad/key_warn 세 rule_id(traits:양인 등)로 나뉘어
+    피드백을 받으므로, 콜론 뒤 key가 같은 rule_id끼리 합쳐 표본을 모은다.
+    (명식,rule_id) 조합은 ts가 가장 최신인 레코드만 유효하게 센다(재클릭 시 마지막 판정만 반영).
+    반환: {패턴명: {"hit": n, "total": m, "rate": hit/total}}.
+    파일이 없거나 읽기 실패하면 빈 dict(보정 없이 기존 순위 유지)."""
+    try:
+        if not os.path.exists(_FEEDBACK_LOG_PATH):
+            return {}
+        _latest = {}   # (명식, rule_id) -> (ts, verdict)
+        with open(_FEEDBACK_LOG_PATH, "r", encoding="utf-8") as f:
+            for _line in f:
+                _line = _line.strip()
+                if not _line:
+                    continue
+                try:
+                    _rec = json.loads(_line)
+                except Exception:
+                    continue
+                _key = (_rec.get("myeongsik", ""), _rec.get("rule_id", ""))
+                _ts = _rec.get("ts", "")
+                if _key not in _latest or _ts >= _latest[_key][0]:
+                    _latest[_key] = (_ts, _rec.get("verdict", ""))
+        _stats = {}
+        for (_myeong, _rid), (_ts, _verdict) in _latest.items():
+            if ":" not in _rid:
+                continue
+            _pattern_key = _rid.split(":", 1)[1]
+            _s = _stats.setdefault(_pattern_key, {"hit": 0, "total": 0})
+            _s["total"] += 1
+            if _verdict == "hit":
+                _s["hit"] += 1
+        for _s in _stats.values():
+            _s["rate"] = _s["hit"] / _s["total"] if _s["total"] else 0.0
+        return _stats
+    except Exception:
+        return {}
+
+
+def compute_pattern_rank_score(pattern_key, hit_stats, min_total=5):
+    """쪽집게 피드백 루프 5단계: _hit4 정렬용 결합 스코어.
+    specificity(실측 발동희소도, KEY_WARN_RULES 원본)는 절대 덮어쓰지 않고, 적중률을
+    별도 계수로 곱해서만 반영한다. 표본(total)이 min_total 미만이면 콜드스타트로 보정하지
+    않고 specificity 그대로 반환(계수 1.0 중립) — 한두 번 클릭으로 순위가 뒤집히지 않게.
+    표본이 충분하면 rate(0~1)를 (0.5+rate) 계수로 매핑해 곱한다 — rate=0.5(반반)가 중립점,
+    낮으면 감점(최대 반토막), 높으면 가점(최대 1.5배)."""
+    _base = KEY_WARN_RULES.get(pattern_key, {}).get("specificity", 0.5)
+    _stat = hit_stats.get(pattern_key)
+    if not _stat or _stat.get("total", 0) < min_total:
+        return _base
+    _rate = _stat.get("rate", 0.5)
+    return _base * (0.5 + _rate)
+
+
 def get_feedback_stats():
     """피드백 통계 반환"""
 
@@ -14944,12 +14999,14 @@ def build_gangsa_block(pils, name, birth_year, gender, marriage_status=None):
                     _hit4.append("충")
                 if _hyung_pairs4:
                     _hit4.append("자형")
-                # specificity(발동 희소도) 내림차순 정렬 후 상위 3개 노출
+                # specificity(발동 희소도) 기반 결합 스코어 내림차순 정렬 후 상위 3개 노출
                 # — 흔한 바넘 패턴(비겁쟁재 등)보다 희소 패턴(양인봉충 등)을 우선.
                 #   안정정렬이라 동점은 기존 append 우선순위 유지.
+                # 피드백 루프 5단계: 표본 충분한 룰만 적중률 계수를 곱해 보정(콜드스타트는 중립).
+                _hit_stats4 = compute_rule_hit_rates()
                 _hit4 = sorted(
                     _hit4,
-                    key=lambda _p4: -KEY_WARN_RULES.get(_p4, {}).get("specificity", 0.5),
+                    key=lambda _p4: -compute_pattern_rank_score(_p4, _hit_stats4),
                 )[:3]   # 최대 3개 (R2 조합 대응 슬롯 확대)
                 if _hit4:
                     # _TRAITS4에 없는 신규 패턴(양인봉충/백호충/괴강충/충/자형)은
