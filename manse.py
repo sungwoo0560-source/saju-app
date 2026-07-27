@@ -13196,6 +13196,28 @@ def save_feedback(feedback_key, hit):
     pass
 
 
+_FEEDBACK_LOG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "feedback_log.jsonl")
+
+
+def append_feedback_log(rule_id, verdict, myeongsik_id):
+    """쪽집게 피드백 루프 4단계: 버튼 클릭을 JSONL 로그로 영속 저장.
+    한 줄에 한 레코드(append 전용) — 같은 (명식,rule_id)에 재클릭해도 새 줄로 쌓이며,
+    최신 verdict 판단은 5단계 집계 시점에 ts 기준으로 한다. 개인정보(이름·생일)는 저장하지 않고
+    명식 8글자(간지 조합)만 식별자로 쓴다. 쓰기 실패는 UI 흐름을 막지 않도록 조용히 무시."""
+    try:
+        os.makedirs(os.path.dirname(_FEEDBACK_LOG_PATH), exist_ok=True)
+        record = {
+            "ts": datetime.now().isoformat(timespec="seconds"),
+            "rule_id": rule_id,
+            "verdict": verdict,
+            "myeongsik": myeongsik_id,
+        }
+        with open(_FEEDBACK_LOG_PATH, "a", encoding="utf-8") as f:
+            f.write(json.dumps(record, ensure_ascii=False) + "\n")
+    except Exception:
+        pass
+
+
 def get_feedback_stats():
     """피드백 통계 반환"""
 
@@ -18358,6 +18380,7 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
         _fb_hits = st.session_state.get("_gangsa_rule_hits", [])
         if _fb_hits:
             st.session_state.setdefault("_feedback_pending", {})
+            _fb_myeongsik = "".join(_p.get("str", "") for _p in pils)
             st.markdown(
                 '<div style="font-size:12px;color:#888;margin:10px 0 4px;">'
                 '📝 위 해석, 항목별로 맞았나요?</div>',
@@ -18381,9 +18404,11 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
                 with _fb_col2:
                     if st.button("👍", key=f"fb_{_fb_rid}_up"):
                         st.session_state["_feedback_pending"][_fb_rid] = "hit"
+                        append_feedback_log(_fb_rid, "hit", _fb_myeongsik)
                 with _fb_col3:
                     if st.button("👎", key=f"fb_{_fb_rid}_down"):
                         st.session_state["_feedback_pending"][_fb_rid] = "miss"
+                        append_feedback_log(_fb_rid, "miss", _fb_myeongsik)
     except Exception:
         pass
 

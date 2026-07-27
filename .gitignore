@@ -11,6 +11,9 @@ history_memory.json
 usage_stats.json
 lotto_data.json
 
+# 쪽집게 피드백 루프 4단계 - 런타임 사용자 데이터 (개인정보 없음, 명식 8글자만)
+data/feedback_log.jsonl
+
 # 백업 파일
 *.bak_*
 
