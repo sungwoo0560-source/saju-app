@@ -19761,46 +19761,8 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
 
     render_pdf_download_btn("jonghap_full", pils, name, birth_year, gender)
 
-    # 피드백 루프 3단계(사후 분리형): 본문을 다 읽은 뒤에만 노출되는 회고형 피드백.
-    # rule_id 단위 hit/miss 기록 구조는 5단계 자동보정을 위해 그대로 유지 — 라벨만 순화.
-    try:
-        _fb_hits = st.session_state.get("_gangsa_rule_hits", [])
-        if _fb_hits:
-            st.session_state.setdefault("_feedback_pending", {})
-            _fb_myeongsik = "".join(_p.get("str", "") for _p in pils)
-            st.markdown("---")
-            st.markdown(
-                '<div style="font-size:13px;color:#888;margin:10px 0 4px;">'
-                '풀이를 계속 정교하게 다듬고 있습니다. '
-                '특히 마음에 남은 대목이 있다면 표시해 주세요.</div>',
-                unsafe_allow_html=True,
-            )
-            st.caption("이름·생일은 저장하지 않으며, 명식과 표시 내용만 해석 품질 개선에 쓰입니다.")
-            for _fb_hit in _fb_hits:
-                _fb_rid = _fb_hit.get("rule_id", "")
-                _fb_text = _fb_hit.get("text", "")
-                if not _fb_rid:
-                    continue
-                _fb_summary = _fb_text[:36] + ("…" if len(_fb_text) > 36 else "")
-                _fb_state = st.session_state["_feedback_pending"].get(_fb_rid)
-                _fb_mark = (
-                    " · 공감돼요로 표시됨" if _fb_state == "hit"
-                    else " · 글쎄요로 표시됨" if _fb_state == "miss"
-                    else ""
-                )
-                _fb_col1, _fb_col2, _fb_col3 = st.columns([6, 2, 2])
-                with _fb_col1:
-                    st.caption(f"「{_fb_summary}」{_fb_mark}")
-                with _fb_col2:
-                    if st.button("공감돼요", key=f"fb_{_fb_rid}_up"):
-                        st.session_state["_feedback_pending"][_fb_rid] = "hit"
-                        append_feedback_log(_fb_rid, "hit", _fb_myeongsik)
-                with _fb_col3:
-                    if st.button("글쎄요", key=f"fb_{_fb_rid}_down"):
-                        st.session_state["_feedback_pending"][_fb_rid] = "miss"
-                        append_feedback_log(_fb_rid, "miss", _fb_myeongsik)
-    except Exception:
-        pass
+    # 피드백 버튼 UI 제거됨(화면 노출만 제거, append_feedback_log·compute_rule_hit_rates·
+    # compute_pattern_rank_score 등 저장/집계 로직은 유지 — 다른 방식으로 재부착 가능).
 
 
 def menu2_lifeline(pils, birth_year, gender, name="내담자"):
