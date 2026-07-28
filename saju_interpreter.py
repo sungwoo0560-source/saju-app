@@ -7714,12 +7714,15 @@ def get_yongshin(pils):
     all_yong = list(dict.fromkeys(o for o in priority_yong if o))  # 중복 제거
 
     # 병약용신(病藥用神): 가장 강한 오행이 병(病)이면 그것을 제어하는 오행이 약(藥)
+    # ★방향 수정(백로그였던 버그): CONTROL_MAP.get(병)은 "병이 극하는 대상"을 내는데,
+    # 병약 원리상 필요한 건 "병을 극하는 약"(반대 방향)이다. 값이 병인 key를 찾는
+    # 역방향 조회로 고쳤다(is_byeong_gu가 이미 쓰던 정방향과 동일한 방식).
     byeong_yong = None
     byeong_desc = ""
     if oh_list:
         strongest_oh, strongest_val = oh_list[0]
         if strongest_val >= 40:  # 한 오행이 40% 이상 독점 → 병(病)으로 판단
-            byeong_yong = CONTROL_MAP.get(strongest_oh, "")
+            byeong_yong = next((k for k, v in CONTROL_MAP.items() if v == strongest_oh), "")
             byeong_desc = (
                 f"{strongest_oh}({OHN.get(strongest_oh, '')}) 기운이 과도({strongest_val:.0f}%)하여 병(病)을 이룸. "
                 f"이를 제어하는 {byeong_yong}({OHN.get(byeong_yong, '')}) 기운이 병약용신(病藥用神)입니다."
