@@ -24,6 +24,7 @@ from saju_data import (
 )
 from saju_ui import *
 from saju_report import menu_pdf
+from yukhyo_data import *  # 육효(六爻) 전용 — 사주 데이터와 분리된 독립 파일
 
 # ── saju_ui / saju_report 없을 경우 폴백 정의 ─────────────────────
 if "render_quick_consult_header" not in dir():
@@ -28747,6 +28748,83 @@ def menu_gaewoon(pils, name, birth_year, gender):
 
     render_pdf_download_btn("gaewoon", pils, name, birth_year, gender)
 
+
+def menu_yukhyo():
+    """육효(六爻) — 사주 엔진과 완전히 분리된 독립 기능.
+    ★이 함수 안에서 pils·SajuCoreEngine·get_saju_year·용신·격국 등 사주
+    계산 함수를 절대 호출하지 않는다(인자로도 받지 않음). yukhyo_data.py의
+    BAGUA·NAPGAP·GUA_64와 random 모듈만 쓴다.
+    질문하는 순간 동전 3개를 6번 던져 괘를 뽑는 정통 금전과(金錢卦) 방식.
+    1단계: 괘 생성·표시까지. 육친·세응·용신 해석은 2단계로 미룸."""
+
+    st.markdown('<div class="gold-section">🎲 육효(六爻) — 지금 이 순간의 점괘</div>', unsafe_allow_html=True)
+    st.caption(
+        "사주와는 별개의 점법입니다. 마음속으로 궁금한 것 하나를 또렷이 떠올린 뒤 "
+        "동전을 던지세요. (해석은 다음 업데이트에서 이어집니다 — 이번은 괘 뽑기까지)"
+    )
+
+    _yh_key = "_yukhyo_gwa"
+
+    if st.button("🪙 동전 던져 괘 뽑기", key="_yukhyo_roll_btn", type="primary"):
+        _lines = []  # 초효(0)→상효(5), 각 원소 = (효값(1양/0음), 변효여부, 합계6~9)
+        for _ in range(6):
+            _coins = [random.choice((2, 3)) for _ in range(3)]  # 뒷면=2(음), 앞면=3(양)
+            _total = sum(_coins)  # 6·7·8·9
+            _yao = 1 if _total in (7, 9) else 0    # 7=소양·9=노양→양효 / 6=노음·8=소음→음효
+            _byeon = _total in (6, 9)               # 노음(6)·노양(9)만 변효
+            _lines.append((_yao, _byeon, _total))
+        st.session_state[_yh_key] = _lines
+
+    _lines = st.session_state.get(_yh_key)
+    if not _lines:
+        st.info("아직 뽑힌 괘가 없습니다. 위 버튼을 눌러 동전을 던져 보세요.")
+        return
+
+    def _gua_of(hexa6):
+        """6효(초→상)에서 하괘·상괘 이름과 64괘명을 구한다."""
+        _ha = tuple(hexa6[0:3])
+        _sa = tuple(hexa6[3:6])
+        _ha_name = next((k for k, v in BAGUA.items() if v["효"] == _ha), None)
+        _sa_name = next((k for k, v in BAGUA.items() if v["효"] == _sa), None)
+        _gname = GUA_64.get((_sa_name, _ha_name), "") if (_ha_name and _sa_name) else ""
+        return _ha_name, _sa_name, _gname
+
+    def _render_hexa(hexa6, meta, label, gname, ha_name, sa_name):
+        st.markdown(f"**{label} — {gname or '(괘명 확인 불가)'}**")
+        _rows = []
+        for _i in range(5, -1, -1):   # 상효→초효 순서로 위에서부터 그림
+            _bar = "▅▅▅▅▅▅" if hexa6[_i] == 1 else "▅▅　　▅▅"
+            _mark = ""
+            if meta and meta[_i][1]:
+                _mark = "  ○ 변효(老陰→陽)" if meta[_i][0] == 0 else "  × 변효(老陽→陰)"
+            _rows.append(f"{_i + 1}효  {_bar}{_mark}")
+        st.code("\n".join(_rows), language=None)
+        if ha_name and sa_name:
+            st.caption(f"상괘 {sa_name}({BAGUA[sa_name]['상징']}) · 하괘 {ha_name}({BAGUA[ha_name]['상징']})")
+
+    _bon_hexa = [_l[0] for _l in _lines]
+    _bon_ha, _bon_sa, _bon_name = _gua_of(_bon_hexa)
+    _render_hexa(_bon_hexa, _lines, "본괘(本卦)", _bon_name, _bon_ha, _bon_sa)
+
+    # 납갑(각 효 간지) — 본괘 기준. 내괘(초·2·3효)는 하괘 납갑, 외괘(4·5·6효)는 상괘 납갑.
+    if _bon_ha and _bon_sa:
+        _ha_nap = NAPGAP[_bon_ha]
+        _sa_nap = NAPGAP[_bon_sa]
+        _jiji6 = list(_ha_nap["내괘_지지"]) + list(_sa_nap["외괘_지지"])
+        _cg6 = [_ha_nap["내괘_천간"]] * 3 + [_sa_nap["외괘_천간"]] * 3
+        _nap_rows = [f"{_i + 1}효 {_cg6[_i]}{_jiji6[_i]}" for _i in range(5, -1, -1)]
+        st.caption("납갑(효별 간지): " + " · ".join(_nap_rows))
+
+    _has_byeon = any(_l[1] for _l in _lines)
+    if _has_byeon:
+        _byeon_hexa = [(1 - _l[0]) if _l[1] else _l[0] for _l in _lines]
+        _byeon_ha, _byeon_sa, _byeon_name = _gua_of(_byeon_hexa)
+        st.markdown("---")
+        _render_hexa(_byeon_hexa, None, "변괘(變卦)", _byeon_name, _byeon_ha, _byeon_sa)
+    else:
+        st.caption("변효 없음 — 정지괘(안정된 괘)입니다.")
+
+
 _Y51_DEPLOY = "X-4F: 2026-05-30 cache clear"
 
 def main():
@@ -30761,6 +30839,7 @@ def main():
                 ("🎊", "신년운세"),
                 ("📄", "PDF리포트"),
                 ("🌟", "개운처방"),
+                ("🎲", "육효"),
             ]
             _cur_tab = _ss.get("active_tab", 0)
 
@@ -30792,9 +30871,9 @@ def main():
 }
 </style>""", unsafe_allow_html=True)
 
-            # 버튼 행 1 (8개)
-            _btn_cols1 = st.columns(8)
-            for _bi, (_em, _nm) in enumerate(_TAB_DEFS[:8]):
+            # 버튼 행 1 (9개)
+            _btn_cols1 = st.columns(9)
+            for _bi, (_em, _nm) in enumerate(_TAB_DEFS[:9]):
                 _is_active = (_cur_tab == _bi)
                 _btn_style = "primary" if _is_active else "secondary"
                 with _btn_cols1[_bi]:
@@ -30804,10 +30883,10 @@ def main():
                         st.rerun()
 
             st.markdown('<div style="height:4px"></div>', unsafe_allow_html=True)
-            # 버튼 행 2 (9개)
+            # 버튼 행 2 (9개, 육효 포함)
             _btn_cols2 = st.columns(9)
-            for _bi, (_em, _nm) in enumerate(_TAB_DEFS[8:]):
-                _real_idx = _bi + 8
+            for _bi, (_em, _nm) in enumerate(_TAB_DEFS[9:]):
+                _real_idx = _bi + 9
                 _is_active = (_cur_tab == _real_idx)
                 _btn_style = "primary" if _is_active else "secondary"
                 with _btn_cols2[_bi]:
@@ -30896,6 +30975,8 @@ def main():
                 menu_pdf(pils, birth_year, gender, name, str(_ss.get("in_birth_hour", "")), dramatic_text=_dramatic_text)
             elif _cur_tab == 16:
                 menu_gaewoon(pils, name, birth_year, gender)
+            elif _cur_tab == 17:
+                menu_yukhyo()  # ★사주 엔진 완전 분리 — pils 등 인자 자체를 안 넘김
 
     # ---- 맨 위로 플로팅 버튼 (window.parent 로 Streamlit iframe 대응) ----
     st.markdown(
