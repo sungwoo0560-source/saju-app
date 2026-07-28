@@ -7448,29 +7448,36 @@ def get_gyeokguk(pils):
 
     jeongi = jijang[-1]
 
-    sipsung = TEN_GODS_MATRIX.get(ilgan, {}).get(jeongi, "기타")
-
-    gyeok_name = f"{sipsung}格"
-
     cgs_all = [p["cg"] for p in pils]
     jjs_all = [p["jj"] for p in pils]
 
-    is_toucht = jeongi in cgs_all
+    # 격국 판정(정통 자평 원칙): 월지 지장간 중 "천간에 실제 투출된 것" 우선.
+    # jijang[::-1] = [정기, 중기, 여기] 순으로(2글자 지지는 [정기, 여기]) 원국 4천간에
+    # 있는 첫 글자를 찾아 그 십성으로 격을 정한다. 아무것도 투출 안 되면 정기로 폴백(暗格).
+    _tou_gan = next((g for g in jijang[::-1] if g in cgs_all), None)
 
-    if is_toucht:
-        grade = "純格 - 월지 정기가 천간에 투출하여 격이 매우 청명하다!"
+    if _tou_gan is not None:
+        gyeok_gan = _tou_gan
+        is_toucht = True
+        if _tou_gan == jeongi:
+            grade = "純格 - 월지 정기가 천간에 투출하여 격이 매우 청명하다!"
 
-        grade_score = 95
+            grade_score = 95
+        else:
+            grade = "雜格 - 중기/여기가 투출, 격이 복잡하나 쓸모가 있다."
 
-    elif len(jijang) > 1 and jijang[-2] in cgs_all:
-        grade = "雜格 - 중기가 투출, 격이 복잡하나 쓸모가 있다."
-
-        grade_score = 70
-
+            grade_score = 70
     else:
+        gyeok_gan = jeongi
+        is_toucht = False
+
         grade = "暗格 - 지장간에 숨어있어 격의 힘이 약하다."
 
         grade_score = 50
+
+    sipsung = TEN_GODS_MATRIX.get(ilgan, {}).get(gyeok_gan, "기타")
+
+    gyeok_name = f"{sipsung}格"
 
     # 외격 판단 — 종격(從格): 일간과 같은 오행 + 생해주는 오행이 없을 때
     _BIRTH_R = {"木": "水", "火": "木", "土": "火", "金": "土", "水": "金"}
@@ -7513,7 +7520,8 @@ def get_gyeokguk(pils):
         "신급_판정": desc_data["god_rank"],
         "narrative": (
             f"🏛️ **격국 판별**: {gyeok_name}!\n"
-            f"  월지 {wolji}의 정기 {jeongi}로 {'투출된 청명한 ' if is_toucht else '숨은 '}{gyeok_name}을 이루었도다.\n"
+            f"  월지 {wolji}의 {'정기' if gyeok_gan == jeongi else '지장간'} {gyeok_gan}로 "
+            f"{'투출된 청명한 ' if is_toucht else '숨은 '}{gyeok_name}을 이루었도다.\n"
             f"  등급: {grade}\n  {desc_data['summary']}\n"
             f"  적합 분야: {desc_data['lucky_career']}\n  경계: {desc_data['caution']}"
         ),
