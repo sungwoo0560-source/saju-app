@@ -6611,6 +6611,41 @@ def compute_gi_ohs(pils):
         return []
 
 
+def is_byeong_gu(pils):
+    """병중유구(病中有救) 판정 — 병(病) 오행이 있고 그 병을 극(剋)하는 약(藥) 오행이
+    원국 8글자에 실재하면 성립. get_yongshin()의 병약_yong 필드는 방향이 뒤집힌
+    버그가 있어(A剋B의 A를 병으로 넣었을 때 B를 약으로 반환 — 실제론 병을 극하는
+    쪽이 약이어야 함) 신뢰하지 않고 소비도 하지 않는다. 대신 calc_ohaeng_strength로
+    병(최강 오행 ≥40%, get_yongshin과 동일 임계값)을 직접 재산출한 뒤, "값이 병인
+    key"를 찾는 역방향 조회로 병을 극하는 진짜 약을 구해 원국 8글자 실존 여부를 본다.
+    반환: {"성립": bool, "병": str, "약": str, "병비율": float} — 병 자체가 없으면
+    성립 False에 병·약은 빈 문자열."""
+    try:
+        ilgan = pils[1]["cg"]
+        oh_strength = calc_ohaeng_strength(ilgan, pils)
+        if not oh_strength:
+            return {"성립": False, "병": "", "약": "", "병비율": 0.0}
+        byeong_oh, byeong_val = max(oh_strength.items(), key=lambda x: x[1])
+        if byeong_val < 40:
+            return {"성립": False, "병": "", "약": "", "병비율": byeong_val}
+        _CTRL = {"木": "土", "火": "金", "土": "水", "金": "木", "水": "火"}
+        gu_oh = next((k for k, v in _CTRL.items() if v == byeong_oh), "")
+        if not gu_oh:
+            return {"성립": False, "병": byeong_oh, "약": "", "병비율": byeong_val}
+        wonguk_oh = set()
+        for p in pils:
+            wonguk_oh.add(OH.get(p.get("cg", ""), ""))
+            wonguk_oh.add(OH.get(p.get("jj", ""), ""))
+        return {
+            "성립": gu_oh in wonguk_oh,
+            "병": byeong_oh,
+            "약": gu_oh,
+            "병비율": byeong_val,
+        }
+    except Exception:
+        return {"성립": False, "병": "", "약": "", "병비율": 0.0}
+
+
 # @cache_data 제거 — session_state 내부 접근으로 캐시 불가
 def build_past_events(pils, birth_year, gender):
     """
@@ -15310,6 +15345,27 @@ def build_gangsa_block(pils, name, birth_year, gender, marriage_status=None):
             except Exception:
                 _temp_l = ""
 
+            # 설계도 해석 시범1: 병중유구(病中有救) — get_yongshin()의 병약_yong 필드는
+            # 방향 버그가 있어 신뢰하지 않고(saju_interpreter.py:7654, 백로그 기록),
+            # is_byeong_gu()로 원재료(calc_ohaeng_strength)에서 독립 재산출한다.
+            _byeonggu_l = ""
+            try:
+                _bg4 = is_byeong_gu(pils)
+                if _bg4.get("성립"):
+                    _bg_byeong4 = _bg4.get("병", "")
+                    _bg_yak4 = _bg4.get("약", "")
+                    _byeonggu_l = (
+                        f"<b>【병약 구조】</b> {_bg_byeong4}({OHN.get(_bg_byeong4,'')}) 기운이 과도하지만, "
+                        f"이를 다스리는 {_bg_yak4}({OHN.get(_bg_yak4,'')}) 기운이 원국에 함께 자리하고 있어 "
+                        f"병중유구(病中有救) — 위기가 있어도 그 안에 구제할 힘을 함께 갖춘 짜임입니다."
+                    )
+                    st.session_state["_gangsa_rule_hits"].append({
+                        "rule_id": "byeonggu:병중유구",
+                        "text": _byeonggu_l,
+                    })
+            except Exception:
+                _byeonggu_l = ""
+
             _l2_4 = (
                 f"<b>【근거】</b> " + _gugeo4_pre +
                 (f"{_yong4}(용신)" if _yong4 else "") +
@@ -15400,7 +15456,7 @@ def build_gangsa_block(pils, name, birth_year, gender, marriage_status=None):
             _gangsa_html = (
                 '<div style="background:#faf7f0;border-left:4px solid #d4af37;border-radius:10px;'
                 'padding:16px 18px;margin:8px 0 16px;font-size:13px;color:#333;line-height:2;">'
-                + "<br><br>".join([x for x in [_l0_4, _trait_l, _relation_l, _pillar_l, _yuk_l, _life_l, _event_l, _l1_4, _temp_l, _l2_4, _l3_4, _l4_4, _key_l] if x]) +
+                + "<br><br>".join([x for x in [_l0_4, _trait_l, _relation_l, _pillar_l, _yuk_l, _life_l, _event_l, _l1_4, _temp_l, _byeonggu_l, _l2_4, _l3_4, _l4_4, _key_l] if x]) +
                 '</div>'
             )
         except Exception:
