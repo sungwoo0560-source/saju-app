@@ -14868,7 +14868,11 @@ def build_gangsa_block(pils, name, birth_year, gender, marriage_status=None):
             _age_range4 = f" ({dw_age_s}~{dw_age_e}세)" if dw_age_s and dw_age_e else ""
 
             _gk4 = get_gyeokguk(pils) or {}
-            _gyeok_raw4 = TEN_GODS_MATRIX.get(ilgan, {}).get(_gk4.get("정기", ""), "")
+            # get_gyeokguk()이 실제로 정한 "격국명"(투출 우선순위 반영)을 그대로 쓴다.
+            # 예전엔 "정기" 필드로 여기서 다시 계산해 투출 우선순위가 화면에 반영 안 됐음.
+            # 종격(從强格 등)은 "格"으로 안 끝나 아래 조건에서 자동 제외 → 기존과 동일하게 격국미상 폴백.
+            _gk_name4 = _gk4.get("격국명", "")
+            _gyeok_raw4 = _gk_name4[:-1] if _gk_name4.endswith("格") else ""
             _gyeok_kr4 = (_SS_KR.get(_gyeok_raw4, "") + "격") if _gyeok_raw4 else "격국미상"
             _gyeok_hj4 = (clean_hanja(_gyeok_raw4) + "格") if _gyeok_raw4 else ""
             _ip4 = ILGAN_PROFILE.get(ilgan, {})
