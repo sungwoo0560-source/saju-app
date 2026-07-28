@@ -7528,6 +7528,66 @@ def get_gyeokguk(pils):
     }
 
 
+def get_gyeokguk_status(pils):
+    """격국 성격(成格)/파격(破格) 판정 — 격을 살리는 상신(相神)이 원국에 있는지,
+    격을 깨는 기신(忌神)이 원국에 있는지를 GYEOKGUK_SANGSIN(자평진전 표준 매핑,
+    saju_data.py)으로 본다. get_gyeokguk·calc_ohaeng_strength·get_yongshin은
+    무수정, 그 결과만 소비한다. 원국 8글자(calc_sipsung의 cg_ss+jj_ss 8개 라벨)
+    실존만 보며 대운·세운은 이번 범위 밖(원국만).
+    반환: {격명, 성격여부, 상신_실존, 기신_실존, 근거}.
+    상신·기신이 둘 다 있거나 둘 다 없으면 "미정/평격" — 종격·비견격·겁재격 등
+    GYEOKGUK_SANGSIN에 없는 격도 동일하게 "미정/평격"으로 판정 대상 제외."""
+    try:
+        gk = get_gyeokguk(pils)
+        if not gk:
+            return {"격명": "", "성격여부": "미정/평격", "상신_실존": [], "기신_실존": [], "근거": "격국 판정 불가"}
+
+        gyeok_name = gk.get("격국명", "")
+        mapping = GYEOKGUK_SANGSIN.get(gyeok_name)
+        if not mapping:
+            return {
+                "격명": gyeok_name,
+                "성격여부": "미정/평격",
+                "상신_실존": [],
+                "기신_실존": [],
+                "근거": "종격 또는 8정격 외 격이라 상신/기신 판정 대상 아님",
+            }
+
+        ilgan = pils[1]["cg"]
+        sp = calc_sipsung(ilgan, pils)
+        ss_set = set()
+        for p in sp:
+            for k in (p.get("cg_ss", ""), p.get("jj_ss", "")):
+                if k and k != "-":
+                    ss_set.add(k)
+
+        sangsin_hit = [s for s in mapping.get("상신", []) if s in ss_set]
+        gisin_hit = [g for g in mapping.get("기신", []) if g in ss_set]
+
+        if sangsin_hit and not gisin_hit:
+            status = "성격(成格)"
+            geun = f"상신 {'·'.join(sangsin_hit)}이(가) 원국에 있어 격이 살아 있습니다."
+        elif gisin_hit and not sangsin_hit:
+            status = "파격(破格)"
+            geun = f"기신 {'·'.join(gisin_hit)}이(가) 원국에 있어 격이 깨집니다."
+        elif sangsin_hit and gisin_hit:
+            status = "미정/평격"
+            geun = f"상신({'·'.join(sangsin_hit)})과 기신({'·'.join(gisin_hit)})이 함께 있어 성격·파격이 엇갈립니다."
+        else:
+            status = "미정/평격"
+            geun = "상신·기신이 모두 원국에 없어 격의 성패가 뚜렷하지 않습니다."
+
+        return {
+            "격명": gyeok_name,
+            "성격여부": status,
+            "상신_실존": sangsin_hit,
+            "기신_실존": gisin_hit,
+            "근거": geun,
+        }
+    except Exception:
+        return {"격명": "", "성격여부": "미정/평격", "상신_실존": [], "기신_실존": [], "근거": ""}
+
+
 # 삼합/반합/방합
 
 SAM_HAP_MAP = {
