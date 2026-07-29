@@ -186,3 +186,101 @@ def get_ilju(target_date=None):
     _delta = (target_date - _ILJIN_REF_DATE).days
     _idx = (_ILJIN_REF_IDX + _delta) % 60
     return _CG10[_idx % 10] + _JJ12[_idx % 12]
+
+
+# ── 월건(月建) 근사 ───────────────────────────────────────────────
+# 정통 월건은 절기(입춘 등) 환산이 필요하지만, 이 파일은 사주 절기 모듈
+# (SOLAR_TERMS 등)을 쓰지 않기로 했으므로 1단계에서는 달력 월(月)을 그대로
+# 인월(寅月=1월) 기준 순환으로 근사한다. 절기 환산 정밀화는 3단계 과제.
+_WOLGEON_JJ_BY_MONTH = {
+    1: "寅", 2: "卯", 3: "辰", 4: "巳", 5: "午", 6: "未",
+    7: "申", 8: "酉", 9: "戌", 10: "亥", 11: "子", 12: "丑",
+}
+
+
+def get_wolgeon_jj(target_date=None):
+    """점치는 달의 월건 지지 — 달력 월 기준 근사(절기 미반영, 1단계)."""
+    if target_date is None:
+        target_date = _date.today()
+    return _WOLGEON_JJ_BY_MONTH[target_date.month]
+
+
+# ── 질문 유형 → 용신(用神) 육친 매핑 ──────────────────────────────
+QUESTION_TYPES = ("재물", "시험/취업/관운", "문서/부동산", "자식/소망", "경쟁/동업", "기타")
+QUESTION_YONGSHIN = {
+    "재물": "처재",
+    "시험/취업/관운": "관귀",
+    "문서/부동산": "부모",
+    "자식/소망": "자손",
+    "경쟁/동업": "형제",
+    "기타": None,   # 특정 육친 없음 — 세효 자신의 왕쇠로 판단
+}
+
+
+def _yeonghyang_score(a_ohang, b_ohang):
+    """오행 a가 b에 미치는 영향력 점수 — a生b:+2(b를 도움) · a=b:+1(비화) ·
+    a剋b:-2(b가 다침) · b生a:-1(b가 a를 생하느라 힘이 빠짐, 설기) ·
+    b剋a:0(b가 a를 극함, a 입장에선 중립적 소모)."""
+    if a_ohang == b_ohang:
+        return 1
+    if _OHANG_SAENG[a_ohang] == b_ohang:
+        return 2
+    if _OHANG_GEUK[a_ohang] == b_ohang:
+        return -2
+    if _OHANG_SAENG[b_ohang] == a_ohang:
+        return -1
+    if _OHANG_GEUK[b_ohang] == a_ohang:
+        return 0
+    raise ValueError(f"오행 생극표에 없는 조합: {a_ohang}, {b_ohang}")
+
+
+def get_wangsae_score(yongshin_ohang, wolgeon_jj, iljin_jj):
+    """용신 오행이 월건·일진으로부터 받는 왕쇠 점수(생조/극제 합산)."""
+    _wg_oh = JIJI_OHANG[wolgeon_jj]
+    _il_oh = JIJI_OHANG[iljin_jj]
+    return _yeonghyang_score(_wg_oh, yongshin_ohang) + _yeonghyang_score(_il_oh, yongshin_ohang)
+
+
+def get_wangsae_label(score):
+    """왕쇠 점수를 왕(旺)/평(平)/쇠(衰) 세 단계로 단순화."""
+    if score >= 2:
+        return "왕(旺)"
+    if score <= -2:
+        return "쇠(衰)"
+    return "평(平)"
+
+
+def pick_yongshin_idx(yukchin6, target_yukchin, dong6, se_pos):
+    """6효 육친 배열(초→상)에서 목표 육친에 해당하는 효 인덱스(0=초효~5=상효)를
+    고른다. 여러 개면 동효(動)를 우선하고, 그다음 세효와 가까운 효를 우선한다.
+    해당 육친이 괘 안에 없으면 None(복신伏神 — 3단계 과제)."""
+    _candidates = [i for i, _yc in enumerate(yukchin6) if _yc == target_yukchin]
+    if not _candidates:
+        return None
+    _dong_candidates = [i for i in _candidates if dong6[i]]
+    if _dong_candidates:
+        _candidates = _dong_candidates
+    _candidates.sort(key=lambda i: abs(i - (se_pos - 1)))
+    return _candidates[0]
+
+
+def judge_yukhyo(yongshin_ohang, se_ohang, wolgeon_jj, iljin_jj, is_dong=False):
+    """1단계 용신 판단 — 왕쇠(월·일 생조/극제) + 세효와의 생극 + 동정(변효)을
+    합산해 길흉 라벨과 설명을 반환한다: (label, detail).
+    삼합·공망·복신·화효(化爻) 등 고급 판단은 다음 단계 과제로 미룬다."""
+    _wang_score = get_wangsae_score(yongshin_ohang, wolgeon_jj, iljin_jj)
+    _rel_score = _yeonghyang_score(yongshin_ohang, se_ohang)
+    _total = _wang_score + _rel_score
+    if is_dong:
+        _total += 1 if _total > 0 else (-1 if _total < 0 else 0)
+    if _total >= 3:
+        _label, _detail = "길(吉)", "용신의 기운이 왕성하고 세효를 도우니 순조롭게 이루어지겠습니다."
+    elif _total >= 1:
+        _label, _detail = "무난", "흐름이 나쁘지 않으나 아직 확신하기엔 이릅니다."
+    elif _total >= -2:
+        _label, _detail = "보통", "뚜렷한 길흉이 드러나지 않는 평이한 상입니다."
+    else:
+        _label, _detail = "흉(凶)", "용신이 쇠약하거나 세효를 거스르니 뜻대로 되기 어려워 보입니다."
+    if is_dong:
+        _detail += " 이 효가 동(動)해 그 기세가 더 뚜렷합니다."
+    return _label, _detail

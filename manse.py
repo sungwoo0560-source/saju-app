@@ -28752,16 +28752,25 @@ def menu_gaewoon(pils, name, birth_year, gender):
 def menu_yukhyo():
     """육효(六爻) — 사주 엔진과 완전히 분리된 독립 기능.
     ★이 함수 안에서 pils·SajuCoreEngine·get_saju_year·용신·격국 등 사주
-    계산 함수를 절대 호출하지 않는다(인자로도 받지 않음). yukhyo_data.py의
-    BAGUA·NAPGAP·GUA_64와 random 모듈만 쓴다.
-    질문하는 순간 동전 3개를 6번 던져 괘를 뽑는 정통 금전과(金錢卦) 방식.
-    1단계: 괘 생성·표시까지. 육친·세응·용신 해석은 2단계로 미룸."""
+    계산 함수를 절대 호출하지 않는다(인자로도 받지 않음). 입력받는 생년월일도
+    화면 축원 문구 표시용 문자열로만 쓰고 어떤 사주 계산 함수에도 넘기지 않는다.
+    yukhyo_data.py의 상수·함수와 random 모듈만 쓴다.
+    동전 3개를 6번 던져 괘를 뽑는 정통 금전과(金錢卦) 방식 + 육친·세응·육수
+    배속 + 질문 유형별 용신효 왕쇠·동정·세효생극으로 1단계 길흉 판단."""
 
     st.markdown('<div class="gold-section">🎲 육효(六爻) — 지금 이 순간의 점괘</div>', unsafe_allow_html=True)
-    st.caption(
-        "사주와는 별개의 점법입니다. 마음속으로 궁금한 것 하나를 또렷이 떠올린 뒤 "
-        "동전을 던지세요. (해석은 다음 업데이트에서 이어집니다 — 이번은 괘 뽑기까지)"
+    st.caption("사주와는 별개의 점법입니다. 아래에 여쭙고 싶은 것을 적으신 뒤 동전을 던지세요.")
+
+    _yh_name = st.text_input("성함", key="_yukhyo_name", placeholder="예: 홍길동")
+    _yh_birth = st.date_input(
+        "생년월일 (기록용 — 사주 계산에는 쓰이지 않습니다)",
+        key="_yukhyo_birth", value=date(2000, 1, 1),
+        min_value=date(1900, 1, 1), max_value=date.today(),
     )
+    _yh_question = st.text_input(
+        "무엇을 알고 싶으신가요?", key="_yukhyo_question", placeholder="예: 이번 이직이 잘 될까요?"
+    )
+    _yh_qtype = st.selectbox("질문 유형", QUESTION_TYPES, key="_yukhyo_qtype")
 
     _yh_key = "_yukhyo_gwa"
 
@@ -28789,7 +28798,7 @@ def menu_yukhyo():
         _gname = GUA_64.get((_sa_name, _ha_name), "") if (_ha_name and _sa_name) else ""
         return _ha_name, _sa_name, _gname
 
-    def _render_hexa(hexa6, meta, label, gname, ha_name, sa_name):
+    def _render_hexa(hexa6, meta, label, gname, ha_name, sa_name, extra6=None):
         st.markdown(f"**{label} — {gname or '(괘명 확인 불가)'}**")
         _rows = []
         for _i in range(5, -1, -1):   # 상효→초효 순서로 위에서부터 그림
@@ -28797,6 +28806,8 @@ def menu_yukhyo():
             _mark = ""
             if meta and meta[_i][1]:
                 _mark = "  ○ 변효(老陰→陽)" if meta[_i][0] == 0 else "  × 변효(老陽→陰)"
+            if extra6:
+                _mark += "  " + extra6[_i]
             _rows.append(f"{_i + 1}효  {_bar}{_mark}")
         st.code("\n".join(_rows), language=None)
         if ha_name and sa_name:
@@ -28804,16 +28815,41 @@ def menu_yukhyo():
 
     _bon_hexa = [_l[0] for _l in _lines]
     _bon_ha, _bon_sa, _bon_name = _gua_of(_bon_hexa)
-    _render_hexa(_bon_hexa, _lines, "본괘(本卦)", _bon_name, _bon_ha, _bon_sa)
+
+    # 육친·세응·육수 — 본괘가 8궁 64괘 표에 있을 때만 계산(64괘 전수이므로 항상 있음)
+    _jiji6 = _yukchin6 = _extra6 = None
+    _se_pos = _eung_pos = None
+    _ilju = _wolgeon_jj = None
+    if _bon_ha and _bon_sa and _bon_name in GUA_GUNG:
+        _ha_nap0 = NAPGAP[_bon_ha]
+        _sa_nap0 = NAPGAP[_bon_sa]
+        _jiji6 = list(_ha_nap0["내괘_지지"]) + list(_sa_nap0["외괘_지지"])
+        _gung_oh = get_gung_ohang(_bon_name)
+        _yukchin6 = [get_yukchin(_gung_oh, JIJI_OHANG[_j]) for _j in _jiji6]
+        _se_pos, _eung_pos = SEEUNG[_bon_name]
+        _ilju = get_ilju()            # 점치는 날(오늘)의 일진 — 사주 생일과 무관, 자체 계산
+        _wolgeon_jj = get_wolgeon_jj()
+        _yuksu6 = get_yuksu_order(_ilju[0])
+        _extra6 = []
+        for _i in range(6):
+            _tag = _yukchin6[_i]
+            if _se_pos == _i + 1:
+                _tag += "·세(世)"
+            elif _eung_pos == _i + 1:
+                _tag += "·응(應)"
+            _tag += f"·{_yuksu6[_i]}"
+            _extra6.append(f"[{_tag}]")
+
+    _render_hexa(_bon_hexa, _lines, "본괘(本卦)", _bon_name, _bon_ha, _bon_sa, extra6=_extra6)
 
     # 납갑(각 효 간지) — 본괘 기준. 내괘(초·2·3효)는 하괘 납갑, 외괘(4·5·6효)는 상괘 납갑.
-    if _bon_ha and _bon_sa:
-        _ha_nap = NAPGAP[_bon_ha]
-        _sa_nap = NAPGAP[_bon_sa]
-        _jiji6 = list(_ha_nap["내괘_지지"]) + list(_sa_nap["외괘_지지"])
-        _cg6 = [_ha_nap["내괘_천간"]] * 3 + [_sa_nap["외괘_천간"]] * 3
+    if _jiji6:
+        _cg6 = [NAPGAP[_bon_ha]["내괘_천간"]] * 3 + [NAPGAP[_bon_sa]["외괘_천간"]] * 3
         _nap_rows = [f"{_i + 1}효 {_cg6[_i]}{_jiji6[_i]}" for _i in range(5, -1, -1)]
         st.caption("납갑(효별 간지): " + " · ".join(_nap_rows))
+
+    if _ilju:
+        st.caption(f"점친 날 일진(日辰): {_ilju} · 월건(月建): {_wolgeon_jj}")
 
     _has_byeon = any(_l[1] for _l in _lines)
     if _has_byeon:
@@ -28823,6 +28859,36 @@ def menu_yukhyo():
         _render_hexa(_byeon_hexa, None, "변괘(變卦)", _byeon_name, _byeon_ha, _byeon_sa)
     else:
         st.caption("변효 없음 — 정지괘(안정된 괘)입니다.")
+
+    # ── 용신 판단 — 질문 유형별 육친을 잡아 왕쇠·동정·세효생극으로 길흉 판단 ──
+    if _yukchin6:
+        st.markdown("---")
+        _name_str = (_yh_name or "").strip() or "귀하"
+        _birth_str = _yh_birth.strftime("%Y년 %m월 %d일")
+        _q_str = (_yh_question or "").strip() or _yh_qtype
+        st.caption(f"{_name_str}님({_birth_str}생)이 오늘 이 일을 묻습니다 — 「{_q_str}」")
+
+        _target_yukchin = QUESTION_YONGSHIN[_yh_qtype]
+        _se_ohang = JIJI_OHANG[_jiji6[_se_pos - 1]]
+        _dong6 = [_l[1] for _l in _lines]
+
+        if _target_yukchin is None:
+            _yongshin_idx = _se_pos - 1   # 기타 질문 — 용신을 세효 자신으로 봄
+        else:
+            _yongshin_idx = pick_yongshin_idx(_yukchin6, _target_yukchin, _dong6, _se_pos)
+
+        if _yongshin_idx is None:
+            st.info(
+                f"이번 괘에는 '{_target_yukchin}'에 해당하는 효가 드러나지 않았습니다"
+                "(복신伏神) — 이 판단은 다음 단계 과제입니다."
+            )
+        else:
+            _yongshin_ohang = JIJI_OHANG[_jiji6[_yongshin_idx]]
+            _label, _detail = judge_yukhyo(
+                _yongshin_ohang, _se_ohang, _wolgeon_jj, _ilju[1], is_dong=_dong6[_yongshin_idx]
+            )
+            st.markdown(f"**{_name_str}님이 물으신 '{_yh_qtype}'에 대해 — {_label}**")
+            st.write(_detail)
 
 
 _Y51_DEPLOY = "X-4F: 2026-05-30 cache clear"
