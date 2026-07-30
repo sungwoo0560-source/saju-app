@@ -284,3 +284,128 @@ def judge_yukhyo(yongshin_ohang, se_ohang, wolgeon_jj, iljin_jj, is_dong=False):
     if is_dong:
         _detail += " 이 효가 동(動)해 그 기세가 더 뚜렷합니다."
     return _label, _detail
+
+
+# ══════════════════════════════════════════════════════════════════
+# 3단계 — 공망(空亡)·복신(伏神)·삼합(三合)·화효(化爻) 고급 판단
+# ══════════════════════════════════════════════════════════════════
+
+# ── 공망(空亡) — 순중공망(旬中空亡) ───────────────────────────────
+# 60갑자는 갑(甲)으로 시작하는 10개씩 6순(旬)으로 나뉘며, 각 순에서
+# 쓰이지 않는 지지 2개가 그 순의 공망이다. 손검산(직접 나열):
+#   甲子旬(甲子~癸酉) 공망=戌亥 · 甲戌旬(甲戌~癸未) 공망=申酉
+#   甲申旬(甲申~癸巳) 공망=午未 · 甲午旬(甲午~癸卯) 공망=辰巳
+#   甲辰旬(甲辰~癸丑) 공망=寅卯 · 甲寅旬(甲寅~癸亥) 공망=子丑
+# 아래 함수는 이 표를 60갑자 순번으로 일반화해 구현한다(암기표를 그대로
+# 코드화한 것일 뿐 별도 계산 이론이 아님).
+def _ganzhi_idx(cg, jj):
+    """천간+지지 한 글자씩을 60갑자 순번(0~59, 甲子=0)으로 변환."""
+    _cg_i = _CG10.index(cg)
+    _jj_i = _JJ12.index(jj)
+    for _i in range(60):
+        if _i % 10 == _cg_i and _i % 12 == _jj_i:
+            return _i
+    raise ValueError(f"존재할 수 없는 간지 조합: {cg}{jj}")
+
+
+def get_gongmang(ganji_str):
+    """간지 2글자(예: 점친 날 일진)가 속한 순(旬)의 공망 지지 2개를 구한다."""
+    _idx = _ganzhi_idx(ganji_str[0], ganji_str[1])
+    _sun_start = _idx - (_idx % 10)
+    _i1 = (_sun_start + 10) % 12
+    _i2 = (_sun_start + 11) % 12
+    return (_JJ12[_i1], _JJ12[_i2])
+
+
+def is_gongmang(jiji, ganji_str):
+    """지지 하나가 ganji_str(간지) 기준 공망에 해당하는지."""
+    return jiji in get_gongmang(ganji_str)
+
+
+# ── 복신(伏神) ────────────────────────────────────────────────────
+# 용신 육친이 본괘 6효에 없으면(用神不現), 그 육친은 본궁 순괘(首卦,
+# 예: 乾宮이면 乾為天)의 같은 자리 아래 "伏"(숨음)해 있다고 본다.
+# 본궁 순괘 6효의 지지·육친을 미리 표로 만들어 둔다(내괘=외괘=궁 자신).
+PURE_JIJI = {}     # 궁 트라이그램 → 6효 지지(초→상), 본궁 순괘 기준
+PURE_YUKCHIN = {}  # 궁 트라이그램 → 6효 육친(초→상), 본궁 순괘 기준
+for _t in BAGUA:
+    _t_nap = NAPGAP[_t]
+    _t_jiji6 = list(_t_nap["내괘_지지"]) + list(_t_nap["외괘_지지"])
+    _t_oh = BAGUA[_t]["오행"]
+    PURE_JIJI[_t] = tuple(_t_jiji6)
+    PURE_YUKCHIN[_t] = tuple(get_yukchin(_t_oh, JIJI_OHANG[_j]) for _j in _t_jiji6)
+
+
+def get_bokshin(gua_name, target_yukchin, se_pos):
+    """gua_name(현재 본괘)에 target_yukchin이 없을 때, 본궁 순괘에서 그
+    육친이 있는 자리를 찾아 복신 정보를 반환한다. 후보가 여럿이면 세효와
+    가까운 자리를 우선한다(2단계 pick_yongshin_idx와 같은 관례).
+    반환: {"위치": 0~5, "복신_지지": 지지, "복신_오행": 오행} 또는 None."""
+    _t = GUA_GUNG[gua_name]
+    _positions = [i for i, _yc in enumerate(PURE_YUKCHIN[_t]) if _yc == target_yukchin]
+    if not _positions:
+        return None
+    _positions.sort(key=lambda i: abs(i - (se_pos - 1)))
+    _pos = _positions[0]
+    _jiji = PURE_JIJI[_t][_pos]
+    return {"위치": _pos, "복신_지지": _jiji, "복신_오행": JIJI_OHANG[_jiji]}
+
+
+# ── 삼합(三合)·육합(六合) ─────────────────────────────────────────
+SAMHAP_JIGUK = {
+    frozenset({"申", "子", "辰"}): "水",
+    frozenset({"亥", "卯", "未"}): "木",
+    frozenset({"寅", "午", "戌"}): "火",
+    frozenset({"巳", "酉", "丑"}): "金",
+}
+
+# 육합(六合) — 子丑·寅亥·卯戌·辰酉·巳申은 화기 오행이 정해지나, 午未合은
+# 유파마다 갈려 여기서는 화기 오행을 배정하지 않는다(합 성립 여부만 판정).
+YUKHAP = {
+    frozenset({"子", "丑"}): "土",
+    frozenset({"寅", "亥"}): "木",
+    frozenset({"卯", "戌"}): "火",
+    frozenset({"辰", "酉"}): "金",
+    frozenset({"巳", "申"}): "水",
+    frozenset({"午", "未"}): None,
+}
+
+
+def check_samhap_guk(jiji6):
+    """6효 지지 안에 삼합국(申子辰·亥卯未·寅午戌·巳酉丑)이 통째로 있으면
+    그 오행 리스트를 반환(보통 0~1개)."""
+    _jiji_set = set(jiji6)
+    return [_oh for _trio, _oh in SAMHAP_JIGUK.items() if _trio.issubset(_jiji_set)]
+
+
+def check_yukhap(jiji_a, jiji_b):
+    """두 지지가 육합인지 판정. 반환: (합 성립 여부, 화기 오행 또는 None)."""
+    _pair = frozenset({jiji_a, jiji_b})
+    if _pair in YUKHAP:
+        return True, YUKHAP[_pair]
+    return False, None
+
+
+# ── 화효(化爻) — 동효가 변한 지지(化爻)가 원래 효(本爻)에 미치는 영향 ──
+# 回頭生(化爻가 本爻를 생함, 길) · 回頭剋(化爻가 本爻를 극함, 흉) ·
+# 化空(化爻가 공망) · 化墓(化爻가 本爻 오행의 묘지로 들어감, 정체).
+# 12운성 묘지표: 水·土는 辰에 입묘, 火는 戌, 木은 未, 金은 丑.
+MYO_JIJI = {"水": "辰", "土": "辰", "火": "戌", "木": "未", "金": "丑"}
+
+
+def judge_hwahyo(bon_ohang, hwa_ohang, hwa_jiji, ilju_str):
+    """동효의 본효 오행(bon_ohang)과 화효(변괘 쪽) 오행·지지(hwa_ohang,
+    hwa_jiji)로 회두생/회두극/화공/화묘를 판정한다.
+    반환: (분류명, 설명) — 분류명은 "回頭生"·"回頭剋"·"化空"·"化墓"·"보통" 중 하나.
+    화공·화묘가 회두생/극과 겹치면 화공·화묘를 우선 보고한다(변화 자체가
+    무력화되거나 정체되는 쪽이 그 위의 생극보다 실전에서 더 자주 우선됨)."""
+    if is_gongmang(hwa_jiji, ilju_str):
+        return "化空", "동효가 변한 자리가 공망이라 변화의 힘이 무력해집니다."
+    if MYO_JIJI.get(bon_ohang) == hwa_jiji:
+        return "化墓", "동효가 변해 스스로의 묘(墓)로 들어가니 일이 정체되기 쉽습니다."
+    _rel = _yeonghyang_score(hwa_ohang, bon_ohang)
+    if _rel == 2:
+        return "回頭生", "동효가 변하며 오히려 자신을 도우니(回頭生) 기세가 강해집니다."
+    if _rel == -2:
+        return "回頭剋", "동효가 변하며 스스로를 해치니(回頭剋) 기세가 꺾입니다."
+    return "보통", "동효의 변화가 본효에 뚜렷한 영향을 주지 않습니다."
