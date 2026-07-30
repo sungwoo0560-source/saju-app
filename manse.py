@@ -28799,8 +28799,15 @@ def menu_yukhyo():
         _gname = GUA_64.get((_sa_name, _ha_name), "") if (_ha_name and _sa_name) else ""
         return _ha_name, _sa_name, _gname
 
-    def _render_hexa(hexa6, meta, label, gname, ha_name, sa_name, extra6=None):
+    def _render_hexa(hexa6, meta, label, gname, ha_name, sa_name, extra6=None, is_byeon=False):
         st.markdown(f"**{label} — {gname or '(괘명 확인 불가)'}**")
+        _gtext = GUA_TEXT.get(gname, "")
+        if _gtext:
+            if is_byeon:
+                _gtext_first = _gtext.split(". ")[0].rstrip(".") + "."
+                st.caption(f"괘사(卦辭) — 변화의 방향: {_gtext_first}")
+            else:
+                st.markdown(f"> {_gtext}")
         _rows = []
         for _i in range(5, -1, -1):   # 상효→초효 순서로 위에서부터 그림
             _bar = "▅▅▅▅▅▅" if hexa6[_i] == 1 else "▅▅　　▅▅"
@@ -28884,7 +28891,7 @@ def menu_yukhyo():
 
     if _has_byeon:
         st.markdown("---")
-        _render_hexa(_byeon_hexa, None, "변괘(變卦)", _byeon_name, _byeon_ha, _byeon_sa)
+        _render_hexa(_byeon_hexa, None, "변괘(變卦)", _byeon_name, _byeon_ha, _byeon_sa, is_byeon=True)
     else:
         st.caption("변효 없음 — 정지괘(안정된 괘)입니다.")
 
