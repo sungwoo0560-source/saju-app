@@ -28876,6 +28876,19 @@ def menu_yukhyo():
 
     _render_hexa(_bon_hexa, _lines, "본괘(本卦)", _bon_name, _bon_ha, _bon_sa, extra6=_extra6)
 
+    # 동효(動爻) 효사 — 육효는 동한 효가 핵심이므로 동효 자리에만 표시.
+    # 동효 없으면(정지괘) 표시하지 않는다. 효사 데이터가 없는 괘가 있어도
+    # (전수 채워졌으나 방어적으로) 앱이 깨지지 않게 누락 처리한다.
+    _dong_positions = [_i for _i in range(6) if _dong6[_i]]
+    if _dong_positions:
+        _hyo6 = HYO_TEXT.get(_bon_name, ())
+        if _hyo6:
+            st.markdown("**동효(動爻) 효사**")
+            for _i in _dong_positions:
+                st.caption(f"{_i + 1}효: {_hyo6[_i]}")
+        else:
+            st.caption("동효 효사 준비 중입니다.")
+
     # 납갑(각 효 간지) — 본괘 기준. 내괘(초·2·3효)는 하괘 납갑, 외괘(4·5·6효)는 상괘 납갑.
     if _jiji6:
         _cg6 = [NAPGAP[_bon_ha]["내괘_천간"]] * 3 + [NAPGAP[_bon_sa]["외괘_천간"]] * 3
