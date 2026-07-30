@@ -264,26 +264,87 @@ def pick_yongshin_idx(yukchin6, target_yukchin, dong6, se_pos):
     return _candidates[0]
 
 
-def judge_yukhyo(yongshin_ohang, se_ohang, wolgeon_jj, iljin_jj, is_dong=False):
-    """1단계 용신 판단 — 왕쇠(월·일 생조/극제) + 세효와의 생극 + 동정(변효)을
-    합산해 길흉 라벨과 설명을 반환한다: (label, detail).
-    삼합·공망·복신·화효(化爻) 등 고급 판단은 다음 단계 과제로 미룬다."""
+def _yukhyo_base_score(yongshin_ohang, se_ohang, wolgeon_jj, iljin_jj, is_dong=False):
+    """2단계 기본 점수(왕쇠+세효생극+동정) — judge_yukhyo와 judge_yukhyo_advanced가
+    공유하는 핵심 계산. judge_yukhyo의 기존 수식을 그대로 옮긴 것뿐이라 결과는
+    이전과 완전히 같다(순수 리팩터링, 동작 변경 없음)."""
     _wang_score = get_wangsae_score(yongshin_ohang, wolgeon_jj, iljin_jj)
     _rel_score = _yeonghyang_score(yongshin_ohang, se_ohang)
     _total = _wang_score + _rel_score
     if is_dong:
         _total += 1 if _total > 0 else (-1 if _total < 0 else 0)
-    if _total >= 3:
-        _label, _detail = "길(吉)", "용신의 기운이 왕성하고 세효를 도우니 순조롭게 이루어지겠습니다."
-    elif _total >= 1:
-        _label, _detail = "무난", "흐름이 나쁘지 않으나 아직 확신하기엔 이릅니다."
-    elif _total >= -2:
-        _label, _detail = "보통", "뚜렷한 길흉이 드러나지 않는 평이한 상입니다."
-    else:
-        _label, _detail = "흉(凶)", "용신이 쇠약하거나 세효를 거스르니 뜻대로 되기 어려워 보입니다."
+    return _total
+
+
+def _yukhyo_label(total):
+    """총점을 길(吉)/무난/보통/흉(凶) 라벨과 기본 설명으로 변환 — judge_yukhyo와
+    judge_yukhyo_advanced가 같은 경계값을 쓰도록 공유한다."""
+    if total >= 3:
+        return "길(吉)", "용신의 기운이 왕성하고 세효를 도우니 순조롭게 이루어지겠습니다."
+    if total >= 1:
+        return "무난", "흐름이 나쁘지 않으나 아직 확신하기엔 이릅니다."
+    if total >= -2:
+        return "보통", "뚜렷한 길흉이 드러나지 않는 평이한 상입니다."
+    return "흉(凶)", "용신이 쇠약하거나 세효를 거스르니 뜻대로 되기 어려워 보입니다."
+
+
+def judge_yukhyo(yongshin_ohang, se_ohang, wolgeon_jj, iljin_jj, is_dong=False):
+    """2단계 용신 판단 — 왕쇠(월·일 생조/극제) + 세효와의 생극 + 동정(변효)을
+    합산해 길흉 라벨과 설명을 반환한다: (label, detail).
+    삼합·공망·복신·화효(化爻) 등 고급 판단은 judge_yukhyo_advanced가 담당한다."""
+    _total = _yukhyo_base_score(yongshin_ohang, se_ohang, wolgeon_jj, iljin_jj, is_dong)
+    _label, _detail = _yukhyo_label(_total)
     if is_dong:
         _detail += " 이 효가 동(動)해 그 기세가 더 뚜렷합니다."
     return _label, _detail
+
+
+def judge_yukhyo_advanced(
+    yongshin_ohang, se_ohang, wolgeon_jj, iljin_jj, is_dong=False,
+    is_bokshin=False, is_gongmang_flag=False, samhap_match=False, hwahyo_label=None,
+):
+    """3단계 정밀 용신 판단 — judge_yukhyo의 기본 점수(왕쇠+세효생극+동정) 위에
+    공망(-2)·복신(-3)·삼합국 성립(+2)·화효(회두생 +2 · 회두극 -2 · 化空/化墓
+    각 -1) 가중을 더해 길흉과 근거 문장 목록을 반환한다: (label, reasons).
+    고급 요소가 전혀 없으면(is_bokshin=False, is_gongmang_flag=False,
+    samhap_match=False, hwahyo_label이 None 또는 "보통") 가중이 0이라
+    judge_yukhyo와 동일한 라벨이 나온다(회귀 안전선).
+    삼합은 '괘 안에 용신과 같은 오행의 국이 성립하는지'만 보는 1단계
+    단순화이며, 용신 자신의 효가 그 국을 이루는 세 효 중 하나인지까지
+    따지는 정밀화는 다음 단계 과제다."""
+    _base = _yukhyo_base_score(yongshin_ohang, se_ohang, wolgeon_jj, iljin_jj, is_dong)
+    _adj = 0
+    _reasons = []
+
+    if is_bokshin:
+        _adj -= 3
+        _reasons.append("용신이 괘 안에 드러나지 않아 복신(伏神)입니다 — 아직 겉으로 나설 때가 아닙니다.")
+    if is_gongmang_flag:
+        _adj -= 2
+        _reasons.append("용신이 공망(空亡)에 걸려 있어 아직 때가 이릅니다.")
+    if samhap_match:
+        _adj += 2
+        _reasons.append("용신과 같은 오행의 삼합국(三合局)이 괘 안에 이루어져 기운이 크게 강해집니다.")
+
+    if hwahyo_label == "回頭生":
+        _adj += 2
+        _reasons.append("동효가 변하며 회두생(回頭生)해 오히려 힘을 더합니다.")
+    elif hwahyo_label == "回頭剋":
+        _adj -= 2
+        _reasons.append("동효가 변하며 회두극(回頭剋)을 당해 기세가 꺾입니다.")
+    elif hwahyo_label == "化空":
+        _adj -= 1
+        _reasons.append("동효가 변한 자리가 공망이라(化空) 변화의 힘이 흐지부지됩니다.")
+    elif hwahyo_label == "化墓":
+        _adj -= 1
+        _reasons.append("동효가 변해 묘(墓)로 들어가(化墓) 일이 정체되기 쉽습니다.")
+    elif hwahyo_label == "보통" and is_dong:
+        _reasons.append("동효가 변했으나 그 화효가 본효에 뚜렷한 영향을 주지는 않습니다.")
+
+    _total = _base + _adj
+    _label, _base_detail = _yukhyo_label(_total)
+    _reasons.insert(0, _base_detail)
+    return _label, _reasons
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -308,8 +369,12 @@ def _ganzhi_idx(cg, jj):
     raise ValueError(f"존재할 수 없는 간지 조합: {cg}{jj}")
 
 
-def get_gongmang(ganji_str):
-    """간지 2글자(예: 점친 날 일진)가 속한 순(旬)의 공망 지지 2개를 구한다."""
+def get_yukhyo_gongmang(ganji_str):
+    """간지 2글자(예: 점친 날 일진)가 속한 순(旬)의 공망 지지 2개를 구한다.
+    ★이름에 yukhyo_를 붙인 이유: saju_sinsal.py에 사주용 get_gongmang(pils)이
+    이미 있어, manse.py의 `from ... import *` 순서상(yukhyo_data가 saju_sinsal
+    보다 먼저 import됨) 이름이 같으면 나중에 import되는 saju_sinsal 쪽이 이
+    함수를 덮어써 육효 탭에서 엉뚱한 사주 함수가 호출되는 사고가 실제로 났다."""
     _idx = _ganzhi_idx(ganji_str[0], ganji_str[1])
     _sun_start = _idx - (_idx % 10)
     _i1 = (_sun_start + 10) % 12
@@ -317,9 +382,9 @@ def get_gongmang(ganji_str):
     return (_JJ12[_i1], _JJ12[_i2])
 
 
-def is_gongmang(jiji, ganji_str):
+def is_yukhyo_gongmang(jiji, ganji_str):
     """지지 하나가 ganji_str(간지) 기준 공망에 해당하는지."""
-    return jiji in get_gongmang(ganji_str)
+    return jiji in get_yukhyo_gongmang(ganji_str)
 
 
 # ── 복신(伏神) ────────────────────────────────────────────────────
@@ -399,7 +464,7 @@ def judge_hwahyo(bon_ohang, hwa_ohang, hwa_jiji, ilju_str):
     반환: (분류명, 설명) — 분류명은 "回頭生"·"回頭剋"·"化空"·"化墓"·"보통" 중 하나.
     화공·화묘가 회두생/극과 겹치면 화공·화묘를 우선 보고한다(변화 자체가
     무력화되거나 정체되는 쪽이 그 위의 생극보다 실전에서 더 자주 우선됨)."""
-    if is_gongmang(hwa_jiji, ilju_str):
+    if is_yukhyo_gongmang(hwa_jiji, ilju_str):
         return "化空", "동효가 변한 자리가 공망이라 변화의 힘이 무력해집니다."
     if MYO_JIJI.get(bon_ohang) == hwa_jiji:
         return "化墓", "동효가 변해 스스로의 묘(墓)로 들어가니 일이 정체되기 쉽습니다."

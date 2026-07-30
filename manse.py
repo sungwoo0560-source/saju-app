@@ -28756,7 +28756,8 @@ def menu_yukhyo():
     화면 축원 문구 표시용 문자열로만 쓰고 어떤 사주 계산 함수에도 넘기지 않는다.
     yukhyo_data.py의 상수·함수와 random 모듈만 쓴다.
     동전 3개를 6번 던져 괘를 뽑는 정통 금전과(金錢卦) 방식 + 육친·세응·육수
-    배속 + 질문 유형별 용신효 왕쇠·동정·세효생극으로 1단계 길흉 판단."""
+    배속 + 질문 유형별 용신효 왕쇠·동정·세효생극에 공망(空亡)·복신(伏神)·
+    삼합국(三合局)·화효(化爻) 판단을 얹은 정밀 길흉 판단."""
 
     st.markdown('<div class="gold-section">🎲 육효(六爻) — 지금 이 순간의 점괘</div>', unsafe_allow_html=True)
     st.caption("사주와는 별개의 점법입니다. 아래에 여쭙고 싶은 것을 적으신 뒤 동전을 던지세요.")
@@ -28815,11 +28816,23 @@ def menu_yukhyo():
 
     _bon_hexa = [_l[0] for _l in _lines]
     _bon_ha, _bon_sa, _bon_name = _gua_of(_bon_hexa)
+    _dong6 = [_l[1] for _l in _lines]
 
-    # 육친·세응·육수 — 본괘가 8궁 64괘 표에 있을 때만 계산(64괘 전수이므로 항상 있음)
+    # 변괘 준비 — 화효(化爻) 판정에 변괘 쪽 납갑 지지가 필요해 본괘 표시보다 먼저 구해 둔다.
+    _has_byeon = any(_dong6)
+    _byeon_hexa = _byeon_ha = _byeon_sa = _byeon_name = _byeon_jiji6 = None
+    if _has_byeon:
+        _byeon_hexa = [(1 - _l[0]) if _l[1] else _l[0] for _l in _lines]
+        _byeon_ha, _byeon_sa, _byeon_name = _gua_of(_byeon_hexa)
+        if _byeon_ha and _byeon_sa:
+            _byeon_jiji6 = list(NAPGAP[_byeon_ha]["내괘_지지"]) + list(NAPGAP[_byeon_sa]["외괘_지지"])
+
+    # 육친·세응·육수·공망·화효 — 본괘가 8궁 64괘 표에 있을 때만 계산(64괘 전수이므로 항상 있음)
     _jiji6 = _yukchin6 = _extra6 = None
     _se_pos = _eung_pos = None
     _ilju = _wolgeon_jj = None
+    _samhap_ohangs = []
+    _hwahyo_by_idx = {}   # 동효 위치(0~5) → 화효 판정 라벨("回頭生"/"回頭剋"/"化空"/"化墓"/"보통")
     if _bon_ha and _bon_sa and _bon_name in GUA_GUNG:
         _ha_nap0 = NAPGAP[_bon_ha]
         _sa_nap0 = NAPGAP[_bon_sa]
@@ -28830,6 +28843,16 @@ def menu_yukhyo():
         _ilju = get_ilju()            # 점치는 날(오늘)의 일진 — 사주 생일과 무관, 자체 계산
         _wolgeon_jj = get_wolgeon_jj()
         _yuksu6 = get_yuksu_order(_ilju[0])
+        _samhap_ohangs = check_samhap_guk(_jiji6)
+
+        if _byeon_jiji6:
+            for _i in range(6):
+                if _dong6[_i]:
+                    _bon_oh_i = JIJI_OHANG[_jiji6[_i]]
+                    _hwa_oh_i = JIJI_OHANG[_byeon_jiji6[_i]]
+                    _hwa_label_i, _ = judge_hwahyo(_bon_oh_i, _hwa_oh_i, _byeon_jiji6[_i], _ilju)
+                    _hwahyo_by_idx[_i] = _hwa_label_i
+
         _extra6 = []
         for _i in range(6):
             _tag = _yukchin6[_i]
@@ -28838,6 +28861,10 @@ def menu_yukhyo():
             elif _eung_pos == _i + 1:
                 _tag += "·응(應)"
             _tag += f"·{_yuksu6[_i]}"
+            if is_yukhyo_gongmang(_jiji6[_i], _ilju):
+                _tag += "·공망(空亡)"
+            if _hwahyo_by_idx.get(_i) in ("回頭生", "回頭剋", "化空", "化墓"):
+                _tag += f"·{_hwahyo_by_idx[_i]}"
             _extra6.append(f"[{_tag}]")
 
     _render_hexa(_bon_hexa, _lines, "본괘(本卦)", _bon_name, _bon_ha, _bon_sa, extra6=_extra6)
@@ -28849,18 +28876,19 @@ def menu_yukhyo():
         st.caption("납갑(효별 간지): " + " · ".join(_nap_rows))
 
     if _ilju:
-        st.caption(f"점친 날 일진(日辰): {_ilju} · 월건(月建): {_wolgeon_jj}")
+        _gm1, _gm2 = get_yukhyo_gongmang(_ilju)
+        st.caption(f"점친 날 일진(日辰): {_ilju} · 월건(月建): {_wolgeon_jj} · 공망(空亡): {_gm1}{_gm2}")
 
-    _has_byeon = any(_l[1] for _l in _lines)
+    if _samhap_ohangs:
+        st.caption("삼합국(三合局) 성립: " + "·".join(f"{_oh}국" for _oh in _samhap_ohangs))
+
     if _has_byeon:
-        _byeon_hexa = [(1 - _l[0]) if _l[1] else _l[0] for _l in _lines]
-        _byeon_ha, _byeon_sa, _byeon_name = _gua_of(_byeon_hexa)
         st.markdown("---")
         _render_hexa(_byeon_hexa, None, "변괘(變卦)", _byeon_name, _byeon_ha, _byeon_sa)
     else:
         st.caption("변효 없음 — 정지괘(안정된 괘)입니다.")
 
-    # ── 용신 판단 — 질문 유형별 육친을 잡아 왕쇠·동정·세효생극으로 길흉 판단 ──
+    # ── 용신 판단 — 질문 유형별 육친을 잡아 왕쇠·공망·복신·삼합·화효로 정밀 길흉 판단 ──
     if _yukchin6:
         st.markdown("---")
         _name_str = (_yh_name or "").strip() or "귀하"
@@ -28870,25 +28898,46 @@ def menu_yukhyo():
 
         _target_yukchin = QUESTION_YONGSHIN[_yh_qtype]
         _se_ohang = JIJI_OHANG[_jiji6[_se_pos - 1]]
-        _dong6 = [_l[1] for _l in _lines]
 
         if _target_yukchin is None:
             _yongshin_idx = _se_pos - 1   # 기타 질문 — 용신을 세효 자신으로 봄
         else:
             _yongshin_idx = pick_yongshin_idx(_yukchin6, _target_yukchin, _dong6, _se_pos)
 
-        if _yongshin_idx is None:
-            st.info(
-                f"이번 괘에는 '{_target_yukchin}'에 해당하는 효가 드러나지 않았습니다"
-                "(복신伏神) — 이 판단은 다음 단계 과제입니다."
-            )
+        _is_bokshin = _yongshin_idx is None
+        _bokshin_info = None
+        if _is_bokshin:
+            _bokshin_info = get_bokshin(_bon_name, _target_yukchin, _se_pos)
+            _yongshin_ohang = _bokshin_info["복신_오행"] if _bokshin_info else _se_ohang
+            _yongshin_jiji = _bokshin_info["복신_지지"] if _bokshin_info else _jiji6[_se_pos - 1]
+            _is_dong_y = False   # 복신은 동정(動靜) 개념을 1단계 범위에서 다루지 않음
+            _hwahyo_label = None
         else:
             _yongshin_ohang = JIJI_OHANG[_jiji6[_yongshin_idx]]
-            _label, _detail = judge_yukhyo(
-                _yongshin_ohang, _se_ohang, _wolgeon_jj, _ilju[1], is_dong=_dong6[_yongshin_idx]
+            _yongshin_jiji = _jiji6[_yongshin_idx]
+            _is_dong_y = _dong6[_yongshin_idx]
+            _hwahyo_label = _hwahyo_by_idx.get(_yongshin_idx) if _is_dong_y else None
+
+        if _is_bokshin and _bokshin_info:
+            st.info(
+                f"'{_target_yukchin}' 용신이 이 괘에 드러나지 않아 복신(伏神)입니다 — "
+                f"본궁 {_bokshin_info['위치'] + 1}효 아래 "
+                f"{_bokshin_info['복신_지지']}({_bokshin_info['복신_오행']})가 숨어 있습니다."
             )
-            st.markdown(f"**{_name_str}님이 물으신 '{_yh_qtype}'에 대해 — {_label}**")
-            st.write(_detail)
+        elif _is_bokshin:
+            st.info(f"이번 괘에는 '{_target_yukchin}'에 해당하는 효가 드러나지 않았습니다(복신伏神).")
+
+        _is_gongmang_flag = is_yukhyo_gongmang(_yongshin_jiji, _ilju)
+        _samhap_match = _yongshin_ohang in _samhap_ohangs
+
+        _label, _reasons = judge_yukhyo_advanced(
+            _yongshin_ohang, _se_ohang, _wolgeon_jj, _ilju[1], is_dong=_is_dong_y,
+            is_bokshin=_is_bokshin, is_gongmang_flag=_is_gongmang_flag,
+            samhap_match=_samhap_match, hwahyo_label=_hwahyo_label,
+        )
+        st.markdown(f"**{_name_str}님이 물으신 '{_yh_qtype}'에 대해 — {_label}**")
+        for _r in _reasons:
+            st.write(_r)
 
 
 _Y51_DEPLOY = "X-4F: 2026-05-30 cache clear"
