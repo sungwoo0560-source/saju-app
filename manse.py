@@ -28851,6 +28851,7 @@ def menu_yukhyo():
         _wolgeon_jj = get_wolgeon_jj()
         _yuksu6 = get_yuksu_order(_ilju[0])
         _samhap_ohangs = check_samhap_guk(_jiji6)
+        _sinsal_targets = get_yukhyo_sinsal_targets(_ilju)   # 4-C: 역마·도화·양인·천을귀인(일진 기준)
 
         if _byeon_jiji6:
             for _i in range(6):
@@ -28872,6 +28873,9 @@ def menu_yukhyo():
                 _tag += "·공망(空亡)"
             if _hwahyo_by_idx.get(_i) in ("回頭生", "回頭剋", "化空", "化墓"):
                 _tag += f"·{_hwahyo_by_idx[_i]}"
+            _sinsal_i = tag_yukhyo_sinsal(_jiji6[_i], _sinsal_targets)
+            if _sinsal_i:
+                _tag += "·" + "·".join(_sinsal_i)
             _extra6.append(f"[{_tag}]")
 
     _render_hexa(_bon_hexa, _lines, "본괘(本卦)", _bon_name, _bon_ha, _bon_sa, extra6=_extra6)
@@ -28958,6 +28962,27 @@ def menu_yukhyo():
         st.markdown(f"**{_name_str}님이 물으신 '{_yh_qtype}'에 대해 — {_label}**")
         for _r in _reasons:
             st.write(_r)
+
+        # 4-C: 종합 총평 — 위 개별 판단(label·근거)은 그대로 두고, 질문 맥락에
+        # 동효 효사·신살을 얹어 한 문단으로 엮는다. judge_yukhyo_advanced의
+        # 판단값(label)을 그대로 재사용할 뿐 새로 판정하지 않는다.
+        _yongshin_sinsal_tags = tag_yukhyo_sinsal(_yongshin_jiji, _sinsal_targets)
+        _dong_hyo_text = None
+        if not _is_bokshin and _is_dong_y:
+            _hyo6_y = HYO_TEXT.get(_bon_name, ())
+            if _hyo6_y:
+                _dong_hyo_text = _hyo6_y[_yongshin_idx]
+
+        _summary = build_yukhyo_summary(
+            _name_str, _q_str, _label, _target_yukchin,
+            is_bokshin=_is_bokshin, is_gongmang_flag=_is_gongmang_flag,
+            samhap_match=_samhap_match, hwahyo_label=_hwahyo_label,
+            is_dong_y=_is_dong_y, dong_hyo_text=_dong_hyo_text,
+            sinsal_tags=_yongshin_sinsal_tags,
+        )
+        st.markdown("---")
+        st.markdown("**종합(綜合)**")
+        st.write(_summary)
 
 
 _Y51_DEPLOY = "X-4F: 2026-05-30 cache clear"
