@@ -1164,3 +1164,76 @@ def tag_yukhyo_sinsal(jiji, sinsal_targets):
     if jiji in sinsal_targets["천을귀인"]:
         _tags.append("천을귀인")
     return _tags
+
+
+_YUKHYO_SINSAL_PHRASE = {
+    "역마": "역마(驛馬)의 기운도 걸려 있어 이동이나 변동의 조짐이 함께 나타납니다.",
+    "도화": "도화(桃花)의 기운이 함께 있어 사람 사이의 관심이나 매력이 얽힌 자리이기도 합니다.",
+    "양인": "양인(羊刃)의 기운이 걸려 있어 다툼이나 무리한 힘겨루기는 삼가는 것이 좋겠습니다.",
+    "천을귀인": "천을귀인(天乙貴人)의 기운도 함께 있어 뜻밖의 도움을 받을 가능성이 있습니다.",
+}
+
+_YUKHYO_LABEL_CLOSING = {
+    "길(吉)": "전체적으로 순조로운 흐름이니 자신 있게 나아가도 좋겠습니다.",
+    "무난": "나쁘지 않은 흐름이나 아직 확신하기엔 이르니 조금 더 지켜보시길 권합니다.",
+    "보통": "뚜렷한 길흉이 드러나지 않는 평이한 상이니, 무리하게 서두르지 않는 것이 좋겠습니다.",
+    "흉(凶)": "지금은 뜻대로 되기 어려운 때이니 무리하지 마시고 때를 기다리시길 권합니다.",
+}
+
+
+def build_yukhyo_summary(
+    name, q_str, label, target_yukchin,
+    is_bokshin=False, is_gongmang_flag=False, samhap_match=False, hwahyo_label=None,
+    is_dong_y=False, dong_hyo_text=None, sinsal_tags=None,
+):
+    """질문 맥락(질문+용신 판단)에 동효 효사·신살을 얹어 2~4문장짜리 종합
+    총평을 조합한다. ★새 판단 로직이 아니다 — judge_yukhyo_advanced가 이미
+    계산한 label과 그 근거 요인(공망·복신·삼합·화효)을, 이미 채워진
+    HYO_TEXT 효사·get_yukhyo_sinsal_targets 신살과 함께 문장으로 엮을
+    뿐, 어떤 값도 새로 판정하지 않는다(판단값 무변).
+
+    모순 방지 원칙: 중간 절(대표 근거·동효 인용·신살)은 전부 사실 서술일
+    뿐 자체적으로 길흉을 단정하지 않는다 — 실제 길흉 판정은 오프닝·
+    마무리 두 곳에서만, 오직 같은 label 하나로 통일해서 말한다. 따라서
+    삼합(+가산 요인)이 있어도 최종 label이 흉이면 오프닝·마무리 모두
+    흉으로만 말하고, 삼합 절은 "삼합국이 이루어져 있다"는 사실만 전한다.
+
+    반환: 완성된 총평 문단(str)."""
+    _sinsal_tags = sinsal_tags or []
+    # 한글 조사(으로/로) — ㄹ받침(길)만 예외로 "로", 나머지(무난·보통·흉)는 "으로".
+    _josa = "로" if label.startswith("길") else "으로"
+
+    if target_yukchin is None:
+        _opening = f"{name}님이 물으신 「{q_str}」에 대해 — 세효(世爻), 즉 본인의 기운은 {label}{_josa} 나타났습니다."
+    else:
+        _opening = f"{name}님이 물으신 「{q_str}」에 대해 — 용신은 {label}{_josa} 나타났습니다."
+
+    _basis = None
+    if is_bokshin:
+        _basis = "용신이 이 괘에 드러나지 않은 복신(伏神)이라 아직 겉으로 나설 때가 아닙니다."
+    elif is_gongmang_flag:
+        _basis = "용신이 공망(空亡)에 걸려 있어 지금은 힘을 온전히 쓰지 못하는 상태입니다."
+    elif samhap_match:
+        _basis = "용신과 같은 오행의 삼합국(三合局)이 괘 안에 이루어져 기운이 한데 뭉쳐 있습니다."
+    elif hwahyo_label == "回頭生":
+        _basis = "동효가 변하며 회두생(回頭生)해 용신의 기세를 오히려 북돋고 있습니다."
+    elif hwahyo_label == "回頭剋":
+        _basis = "동효가 변하며 회두극(回頭剋)을 당해 용신의 기세가 한풀 꺾였습니다."
+    elif hwahyo_label == "化空":
+        _basis = "동효가 변한 자리마저 공망이라(化空) 변화의 힘이 흐지부지되는 모습입니다."
+    elif hwahyo_label == "化墓":
+        _basis = "동효가 변해 스스로의 묘(墓)로 들어가(化墓) 흐름이 정체되기 쉬운 자리입니다."
+
+    _dong_quote = None
+    if is_dong_y and dong_hyo_text:
+        _dong_quote = f'동효가 말하는 바는 — "{dong_hyo_text}"'
+
+    _sinsal_phrase = None
+    if _sinsal_tags:
+        _sinsal_phrase = " ".join(_YUKHYO_SINSAL_PHRASE[_t] for _t in _sinsal_tags if _t in _YUKHYO_SINSAL_PHRASE)
+
+    _candidates = [_c for _c in (_basis, _dong_quote, _sinsal_phrase) if _c]
+    _closing = _YUKHYO_LABEL_CLOSING.get(label, "흐름을 살피며 차분히 지켜보시길 권합니다.")
+
+    _clauses = [_opening] + _candidates[:2] + [_closing]
+    return " ".join(_clauses)
