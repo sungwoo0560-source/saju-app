@@ -7756,13 +7756,15 @@ def get_yongshin(pils):
 
 
 def build_saju_tongbyeon(pils):
-    """원국(原局) 통변(通辯) — 격국·성격/파격·용신·희신·기신을 인생 서술 한 편으로 엮는다.
-    ★새 판단 로직이 아니다 — get_gyeokguk·get_gyeokguk_status·get_yongshin을 pils로 그대로
-    호출해 그 반환값만 문장으로 조합할 뿐, 어떤 값도 새로 판정하지 않는다(판단값 무변).
-    build_yukhyo_summary(yukhyo_data.py)와 같은 모순 방지 원칙: 중간 절(②격의 성패 근거·
-    ③용신·희신·④기신)은 전부 사실 서술일 뿐이고, 실제 성격(成格)/파격(破格)/평격 최종
-    판정은 오프닝(①)과 마무리(⑤) 두 곳에서만, 오직 같은 gs_stat 하나로 통일해서 말한다.
-    ★대운·세운 운로는 다음 단계 — 이 함수는 원국만 다룬다.
+    """원국(原局) 통변(通辯) — 격국·성격/파격·신강신약·오행분포·용신·희신·기신을 인생
+    서술 한 편으로 엮는다. ★새 판단 로직이 아니다 — get_gyeokguk·get_gyeokguk_status·
+    get_yongshin·get_ilgan_strength를 pils로 그대로 호출해 그 반환값만 문장으로 조합할
+    뿐, 어떤 값도 새로 판정하지 않는다(판단값 무변). build_yukhyo_summary(yukhyo_data.py)
+    와 같은 모순 방지 원칙: 중간 절(②격의 성패 근거·③신강신약·오행분포·④용신·희신·
+    ⑤기신)은 전부 사실 서술일 뿐이고, 실제 성격(成格)/파격(破格)/평격 최종 판정은
+    오프닝(①)과 마무리(⑥) 두 곳에서만, 오직 같은 gs_stat 하나로 통일해서 말한다.
+    ★대운·세운 운로는 다음 단계 — 이 함수는 원국만 다룬다(신강신약·오행분포도 원국
+    재료이지 운로가 아니다).
     반환: 완성된 통변 문단(str). 격 판정 불가 시 "" ."""
     try:
         if not pils or len(pils) < 4:
@@ -7780,42 +7782,99 @@ def build_saju_tongbyeon(pils):
         ilgan_kr = CG_KR[CG.index(ilgan)] if ilgan in CG else ilgan
         wolji = gk.get("월지", "")
         grade = gk.get("격의_등급", "")
-        flavor = (gk.get("격국_해설", "") or "").split("\n\n")[0].strip()
 
         OH_KR_TB = {"木": "목(木)", "火": "화(火)", "土": "토(土)", "金": "금(金)", "水": "수(水)"}
+        _OH_IMG = {"木": "뻗어나가는 나무", "火": "타오르는 불", "土": "묵직한 흙", "金": "벼려진 쇠", "水": "흐르는 물"}
 
         def _oh_join(ohs):
             _seen = list(dict.fromkeys(o for o in ohs if o))
             return "·".join(OH_KR_TB.get(o, o) for o in _seen)
 
-        # ① 격국 소개 — 뭘 쓰는 그릇인가 (오프닝: 격명만 소개, 성패는 아직 말하지 않음)
-        p1 = f"{ilgan_kr}({ilgan}) 일간에 월지 {wolji} 자리, <b>{gname}</b>을(를) 그릇으로 타고났습니다. {grade} {flavor}".strip()
+        # ① 격국 소개 — 뭘 쓰는 그릇이고 무엇을 낳는 그릇인지 (오프닝: 격명만 소개, 성패는 아직 말하지 않음)
+        _flavor_paras = [s.strip() for s in (gk.get("격국_해설", "") or "").split("\n\n") if s.strip()]
+        _flavor = " ".join(_flavor_paras[:2])
+        _career_list = [c.strip() for c in (gk.get("적합_진로", "") or "").split(",") if c.strip()][:3]
+        _career_txt = f" 이 기운이 특히 빛나는 자리는 {'·'.join(_career_list)} 같은 분야입니다." if _career_list else ""
+        p1 = (
+            f"{ilgan_kr}({ilgan}) 일간에 월지 {wolji} 자리, <b>{gname}</b>을(를) 그릇으로 타고났습니다. "
+            f"{grade} {_flavor}{_career_txt}"
+        ).strip()
 
-        # ② 격의 성패 — get_gyeokguk_status() 값 그대로 서술 (여기서만 성격/파격/평격 최종 판정)
+        # ② 격의 성패 — get_gyeokguk_status() 값 그대로 서술, 상신·기신이 실제로 어떻게
+        # 작용하는지(격을 살리는/막는 '손'이라는 일반 정의)까지 풀되 새 판정은 없음.
+        # (여기와 ⑥에서만 성격/파격/평격 최종 톤을 말한다.)
         gs_stat = gks.get("성격여부", "")
         gs_sang = gks.get("상신_실존", [])
         gs_gi = gks.get("기신_실존", [])
+        _gname_bare = gname.replace("格", "")
         if gs_stat == "성격(成格)":
             p2 = (
                 f"이 격을 살리는 상신 {'·'.join(gs_sang)}이(가) 원국에 있어 <b>성격(成格)</b>입니다. "
-                f"격이 제 역할을 하고 있어 {gname.replace('格','')}의 기운을 온전히 쓸 수 있는 구조입니다."
+                f"상신은 격을 그릇 안에 가두지 않고 실제로 쓰이게 만드는 손입니다 — "
+                f"{'·'.join(gs_sang)}이(가) {_gname_bare}의 기운이 흘러갈 길을 터주니, 격이 제 역할을 하고 있어 "
+                f"그 기운을 온전히 쓸 수 있는 구조입니다. 이런 사주는 겉으로 드러나는 재능과 속에 쌓인 실력이 "
+                f"크게 어긋나지 않아, 애쓴 만큼 인정받는 흐름을 탑니다."
             )
         elif gs_stat == "파격(破格)":
             p2 = (
                 f"이 격을 깨는 기신 {'·'.join(gs_gi)}이(가) 원국에 있어 <b>파격(破格)</b>입니다. "
+                f"기신은 {_gname_bare}의 기운이 뻗어가야 할 길목을 막아서는 힘이라, 재능은 있으나 그 재능이 "
+                f"곧바로 성과로 이어지지 않고 한 번씩 어긋나거나 뒤늦게 인정받는 흐름이 반복되기 쉽습니다. "
                 f"격 본연의 기운을 온전히 쓰지 못하는 흐름이니, 대운·세운에서 상신을 만나는 시기를 눈여겨봐야 합니다."
             )
         elif gs_stat == "미정/평격" and gs_sang and gs_gi:
             p2 = (
                 f"이 격을 살리는 상신 {'·'.join(gs_sang)}, 깨는 기신 {'·'.join(gs_gi)}이(가) 함께 있어 "
-                f"<b>성격과 파격이 팽팽히 얽힌 평격</b>입니다. 살아나는 힘과 흔드는 힘이 함께 작용하는 구조입니다."
+                f"<b>성격과 파격이 팽팽히 얽힌 평격</b>입니다. 살리는 손과 흔드는 손이 원국 안에서 동시에 "
+                f"움직이니, 밀물과 썰물처럼 잘 풀리는 시기와 막히는 시기가 번갈아 오는 굴곡 있는 흐름으로 "
+                f"나타나기 쉽습니다. 어느 쪽이 더 크게 작동하느냐는 결국 뒤에 나올 용신·희신 기운을 "
+                f"본인이 얼마나 살려 쓰느냐에 달려 있습니다."
             )
         else:
             p2 = (
-                f"이 격은 상신도 기신도 뚜렷하지 않아 <b>격의 좋고 나쁨보다 용신·오행 균형이 더 크게 작용하는 평격</b>입니다."
+                f"이 격은 상신도 기신도 뚜렷하지 않아 <b>격의 좋고 나쁨보다 용신·오행 균형이 더 크게 작용하는 평격</b>입니다. "
+                f"격 자체가 삶을 강하게 밀거나 당기지 않는다는 뜻이라, 타고난 그릇의 이름값보다는 뒤에 이어지는 "
+                f"용신·희신을 얼마나 잘 쓰느냐가 실제 인생의 굴곡을 더 크게 좌우합니다."
             )
 
-        # ③ 용신·희신 — get_yongshin() 값 그대로 풀어씀 (조후_우선 플래그만 참조, 새 우선순위 판단 안 함)
+        # ③ 신강신약·오행분포 — get_ilgan_strength() 값 그대로 서술(원국 재료, 운로 아님).
+        # ①②(격국)와 ④(용신)를 잇는 다리: 이 균형/쏠림이 용신이 실제로 힘을 받을 수 있는 바탕이 된다.
+        strength_info = get_ilgan_strength(ilgan, pils) or {}
+        sn_label = strength_info.get("신강신약", "")
+        il_score = strength_info.get("일간점수", 50)
+        oh_str = strength_info.get("oh_strength", {}) or {}
+
+        p_sn = ""
+        _max_oh = None
+        if sn_label and oh_str:
+            _sorted_oh = sorted(oh_str.items(), key=lambda x: -x[1])
+            _max_oh, _max_val = _sorted_oh[0]
+            _min_oh, _min_val = _sorted_oh[-1]
+            _gap = _max_val - _min_val
+            _dist_txt = " · ".join(f"{OH_KR_TB.get(o, o)} {v:.0f}%" for o, v in _sorted_oh)
+            if _gap >= 25:
+                _bal_txt = (
+                    f"{OH_KR_TB.get(_max_oh, _max_oh)} 기운이 {_max_val:.0f}%로 확연히 쏠려 있고 "
+                    f"{OH_KR_TB.get(_min_oh, _min_oh)}은(는) {_min_val:.0f}%로 거의 자리를 잡지 못했습니다. "
+                    f"{_OH_IMG.get(_max_oh, '')}이(가) 이 사주 전체를 이끌고 가는 그림이라 색깔이 뚜렷한 만큼, "
+                    f"{OH_KR_TB.get(_min_oh, _min_oh)}이(가) 맡는 몫은 스스로 채우거나 주변 사람에게서 빌려 써야 합니다."
+                )
+            elif _gap >= 12:
+                _bal_txt = (
+                    f"{OH_KR_TB.get(_max_oh, _max_oh)} {_max_val:.0f}% 기운이 상대적으로 두드러지고 "
+                    f"{OH_KR_TB.get(_min_oh, _min_oh)} {_min_val:.0f}%은(는) 옅은, 한쪽으로 살짝 기운 구조입니다."
+                )
+            else:
+                _bal_txt = "오행 다섯 기운이 어느 한쪽으로 크게 치우치지 않고 고르게 퍼져 있어, 그 자체로 안정적인 밑그림입니다."
+            p_sn = (
+                f"숫자로 짚어보면 일간의 힘은 {il_score:.0f}점, <b>{sn_label}</b>입니다 — 원국 여덟 글자를 "
+                f"오행별로 나누면 {_dist_txt}의 분포입니다. {_bal_txt} 이 균형(또는 쏠림)이 앞서 말한 격국과, "
+                f"뒤에 이어질 용신이 실제로 힘을 받을 수 있느냐를 결정하는 바탕입니다."
+            )
+
+        # ④ 용신·희신 — get_yongshin() 값 그대로 풀어씀(조후_우선 플래그만 참조, 새 우선순위
+        # 판단 안 함). sn_label에 따라 "이 용신이 없으면/있으면 어떤지"까지 풀되, 이는 이미
+        # 계산된 신강신약 범주에 딸린 일반론이지 새 판정이 아니다.
         yong_all = ys.get("종합_용신", []) or []
         huisin = ys.get("희신", "")
         jokhu_priority = ys.get("조후_우선", False)
@@ -7839,47 +7898,80 @@ def build_saju_tongbyeon(pils):
         if byeong_desc:
             _y_clauses.append(byeong_desc)
 
-        p3_body = " ".join(c for c in _y_clauses if c)
+        p4_body = " ".join(c for c in _y_clauses if c)
         if yong_all:
-            p3 = f"{p3_body} 이를 종합하면 <b>{_oh_join(yong_all)}</b> 순서로 용신을 삼습니다.".strip()
+            p4 = f"{p4_body} 이를 종합하면 <b>{_oh_join(yong_all)}</b> 순서로 용신을 삼습니다.".strip()
         else:
-            p3 = f"{p3_body} 특정 오행에 치우치기보다 전체 균형을 유지하는 것 자체가 용신입니다.".strip()
-        if huisin:
-            p3 += f" 희신은 {OH_KR_TB.get(huisin, huisin)}, 용신을 생(生)해 뒤에서 돕는 기운입니다."
+            p4 = f"{p4_body} 특정 오행에 치우치기보다 전체 균형을 유지하는 것 자체가 용신입니다.".strip()
 
-        # ④ 기신 주의 — get_yongshin()의 '기신'(서술형)·'조후_avoid' 값 그대로 서술
+        if "신강" in sn_label:
+            _yong_stake = (
+                " 이 용신이 자리를 잡지 못하면 넘치는 기운을 주체하지 못해 부딪히고 소모하는 데 힘을 다 쓰기 쉽고, "
+                "반대로 이 기운이 살아나면 그 넘치는 힘이 성과로 정리되어 그릇을 채웁니다."
+            )
+        elif "신약" in sn_label:
+            _yong_stake = (
+                " 이 용신이 자리를 잡지 못하면 얼마 안 되는 힘마저 쉽게 바닥나 지치고 흔들리기 쉽고, "
+                "반대로 이 기운이 살아나면 든든한 뒷심을 얻어 오래 버티는 힘이 생깁니다."
+            )
+        else:
+            _yong_stake = " 이 용신이 자리를 잡으면 균형 잡힌 구조가 확실한 무게중심을 얻어, 무난함을 넘어서는 결과를 만들어냅니다."
+        p4 += _yong_stake
+
+        if huisin:
+            p4 += (
+                f" 희신은 {OH_KR_TB.get(huisin, huisin)}, 용신을 생(生)해 뒤에서 돕는 기운입니다. "
+                f"용신 혼자여도 힘을 쓰지만, 희신이 함께 밀어줄 때 그 힘이 더 오래, 더 안정적으로 갑니다."
+            )
+
+        # ⑤ 기신 주의 — get_yongshin()의 '기신'(서술형)·'조후_avoid' 값 그대로 서술 +
+        # sn_label에 딸린 일반적 상황 묘사(달력상 시기 아님, 심리·행동 국면).
         gisin_desc = ys.get("기신", "")
         jokhu_avoid = ys.get("조후_avoid", []) or []
-        p4 = f"반대로 {gisin_desc}." if gisin_desc else ""
+        p5 = f"반대로 {gisin_desc}." if gisin_desc else ""
         _avoid_ohs = list(dict.fromkeys(OH.get(c, "") for c in jokhu_avoid if OH.get(c)))
         if _avoid_ohs:
-            p4 += f" 여기에 {_oh_join(_avoid_ohs)} 기운까지 짙어지는 시기는 특히 조심해야 합니다."
+            p5 += f" 여기에 {_oh_join(_avoid_ohs)} 기운까지 짙어지면 특히 조심해야 합니다."
+        if "신강" in sn_label:
+            p5 += " 특히 스스로 세력을 과신해 남의 말을 안 듣고 일을 키우려 할 때, 이 기운이 발목을 잡기 쉽습니다."
+        elif "신약" in sn_label:
+            p5 += " 특히 혼자 다 짊어지려 하거나 무리해서 확장하려 할 때, 이 기운 앞에서 쉽게 무너지기 쉽습니다."
+        else:
+            p5 += " 특히 평소와 다르게 감정적으로 한쪽에 쏠린 결정을 내릴 때, 이 기운이 균형을 무너뜨리기 쉽습니다."
+        p5 = p5.strip()
 
-        # ⑤ 마무리 — 오프닝(gs_stat)과 같은 최종 톤으로 종합. 파격이어도 출구를 제시한다.
+        # ⑥ 마무리 — 오프닝(gs_stat)과 같은 최종 톤으로 종합, 오행 이미지로 서사적으로 갈무리.
+        # 파격이어도 출구를 제시한다.
         yong1_kr = OH_KR_TB.get(yong_all[0], yong_all[0]) if yong_all else "균형"
+        _dominant_img = _OH_IMG.get(_max_oh, "") if _max_oh else ""
         if gs_stat == "성격(成格)":
-            p5 = (
+            p6 = (
                 f"정리하면 {gname}이 상신을 얻어 살아 있는 격이니, {yong1_kr} 기운을 가까이할 때 "
                 f"타고난 그릇이 가장 온전하게 쓰입니다."
+                + (f" {_dominant_img}처럼 뚜렷한 색깔의 기운을 가진 사람이니," if _dominant_img else "")
+                + " 그 색깔을 굳이 감추려 하지 말고 격이 가리키는 방향으로 뚝심 있게 밀고 나가는 편이 이 사주에는 오히려 순리입니다."
             )
         elif gs_stat == "파격(破格)":
-            p5 = (
+            p6 = (
                 f"정리하면 {gname}이 기신에 흔들리는 파격이지만, {yong1_kr} 기운으로 몸과 흐름을 다스릴 때 "
                 f"그 격이 흉기가 아니라 무기로 쓰입니다. 고난이 클수록 단단해지는 구조이니, "
                 f"기신이 짙어지는 시기만 조심스레 넘기면 뒷심이 강한 인생입니다."
+                + (f" {_dominant_img} 같은 원재료는 이미 갖췄으니, 그것을 벼리고 다듬는 손(용신)만 곁에 있으면 됩니다." if _dominant_img else "")
             )
         elif gs_stat == "미정/평격" and gs_sang and gs_gi:
-            p5 = (
+            p6 = (
                 f"정리하면 {gname}은 살리는 힘과 흔드는 힘이 함께 있어 스스로 어느 쪽에 무게를 싣느냐가 관건이며, "
-                f"{yong1_kr} 기운을 가까이할 때 격이 가장 맑게 빛납니다."
+                f"{yong1_kr} 기운을 가까이할 때 격이 가장 맑게 빛납니다. 타고난 그릇 자체보다 그 그릇을 "
+                f"어떻게 다루느냐가 인생의 결을 가르는, 스스로 하기 나름인 사주입니다."
             )
         else:
-            p5 = (
+            p6 = (
                 f"정리하면 {gname}은 격 자체의 좋고 나쁨보다 용신·오행의 흐름이 삶을 더 크게 좌우하니, "
-                f"{yong1_kr} 기운을 중심에 두고 사는 것이 실질적인 개운의 길입니다."
+                f"{yong1_kr} 기운을 중심에 두고 사는 것이 실질적인 개운의 길입니다. 격의 이름값에 기대기보다, "
+                f"오행의 균형을 스스로 맞춰가는 사람에게 유리하게 설계된 사주라 할 수 있습니다."
             )
 
-        paragraphs = [p for p in [p1, p2, p3, p4, p5] if p]
+        paragraphs = [p for p in [p1, p2, p_sn, p4, p5, p6] if p]
         return "\n\n".join(paragraphs)
     except Exception:
         return ""
