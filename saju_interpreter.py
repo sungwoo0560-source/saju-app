@@ -7755,6 +7755,136 @@ def get_yongshin(pils):
     }
 
 
+def build_saju_tongbyeon(pils):
+    """원국(原局) 통변(通辯) — 격국·성격/파격·용신·희신·기신을 인생 서술 한 편으로 엮는다.
+    ★새 판단 로직이 아니다 — get_gyeokguk·get_gyeokguk_status·get_yongshin을 pils로 그대로
+    호출해 그 반환값만 문장으로 조합할 뿐, 어떤 값도 새로 판정하지 않는다(판단값 무변).
+    build_yukhyo_summary(yukhyo_data.py)와 같은 모순 방지 원칙: 중간 절(②격의 성패 근거·
+    ③용신·희신·④기신)은 전부 사실 서술일 뿐이고, 실제 성격(成格)/파격(破格)/평격 최종
+    판정은 오프닝(①)과 마무리(⑤) 두 곳에서만, 오직 같은 gs_stat 하나로 통일해서 말한다.
+    ★대운·세운 운로는 다음 단계 — 이 함수는 원국만 다룬다.
+    반환: 완성된 통변 문단(str). 격 판정 불가 시 "" ."""
+    try:
+        if not pils or len(pils) < 4:
+            return ""
+        gk = get_gyeokguk(pils)
+        if not gk:
+            return ""
+        gname = gk.get("격국명", "")
+        if not gname:
+            return ""
+        gks = get_gyeokguk_status(pils) or {}
+        ys = get_yongshin(pils) or {}
+
+        ilgan = pils[1].get("cg", "")
+        ilgan_kr = CG_KR[CG.index(ilgan)] if ilgan in CG else ilgan
+        wolji = gk.get("월지", "")
+        grade = gk.get("격의_등급", "")
+        flavor = (gk.get("격국_해설", "") or "").split("\n\n")[0].strip()
+
+        OH_KR_TB = {"木": "목(木)", "火": "화(火)", "土": "토(土)", "金": "금(金)", "水": "수(水)"}
+
+        def _oh_join(ohs):
+            _seen = list(dict.fromkeys(o for o in ohs if o))
+            return "·".join(OH_KR_TB.get(o, o) for o in _seen)
+
+        # ① 격국 소개 — 뭘 쓰는 그릇인가 (오프닝: 격명만 소개, 성패는 아직 말하지 않음)
+        p1 = f"{ilgan_kr}({ilgan}) 일간에 월지 {wolji} 자리, <b>{gname}</b>을(를) 그릇으로 타고났습니다. {grade} {flavor}".strip()
+
+        # ② 격의 성패 — get_gyeokguk_status() 값 그대로 서술 (여기서만 성격/파격/평격 최종 판정)
+        gs_stat = gks.get("성격여부", "")
+        gs_sang = gks.get("상신_실존", [])
+        gs_gi = gks.get("기신_실존", [])
+        if gs_stat == "성격(成格)":
+            p2 = (
+                f"이 격을 살리는 상신 {'·'.join(gs_sang)}이(가) 원국에 있어 <b>성격(成格)</b>입니다. "
+                f"격이 제 역할을 하고 있어 {gname.replace('格','')}의 기운을 온전히 쓸 수 있는 구조입니다."
+            )
+        elif gs_stat == "파격(破格)":
+            p2 = (
+                f"이 격을 깨는 기신 {'·'.join(gs_gi)}이(가) 원국에 있어 <b>파격(破格)</b>입니다. "
+                f"격 본연의 기운을 온전히 쓰지 못하는 흐름이니, 대운·세운에서 상신을 만나는 시기를 눈여겨봐야 합니다."
+            )
+        elif gs_stat == "미정/평격" and gs_sang and gs_gi:
+            p2 = (
+                f"이 격을 살리는 상신 {'·'.join(gs_sang)}, 깨는 기신 {'·'.join(gs_gi)}이(가) 함께 있어 "
+                f"<b>성격과 파격이 팽팽히 얽힌 평격</b>입니다. 살아나는 힘과 흔드는 힘이 함께 작용하는 구조입니다."
+            )
+        else:
+            p2 = (
+                f"이 격은 상신도 기신도 뚜렷하지 않아 <b>격의 좋고 나쁨보다 용신·오행 균형이 더 크게 작용하는 평격</b>입니다."
+            )
+
+        # ③ 용신·희신 — get_yongshin() 값 그대로 풀어씀 (조후_우선 플래그만 참조, 새 우선순위 판단 안 함)
+        yong_all = ys.get("종합_용신", []) or []
+        huisin = ys.get("희신", "")
+        jokhu_priority = ys.get("조후_우선", False)
+        jokhu_desc = ys.get("조후_desc", "")
+        eokbu_desc = ys.get("억부_desc", "")
+        tongkwan_desc = ys.get("통관_desc", "")
+        byeong_desc = ys.get("병약_desc", "")
+
+        _y_clauses = []
+        if jokhu_priority and jokhu_desc:
+            _y_clauses.append(f"태어난 {wolji}월은 조후가 억부보다 급한 시기라, {jokhu_desc}")
+            if eokbu_desc:
+                _y_clauses.append(f"그다음으로 {eokbu_desc}")
+        else:
+            if eokbu_desc:
+                _y_clauses.append(eokbu_desc)
+            if jokhu_desc:
+                _y_clauses.append(f"여기에 조후로 {jokhu_desc}")
+        if tongkwan_desc:
+            _y_clauses.append(tongkwan_desc)
+        if byeong_desc:
+            _y_clauses.append(byeong_desc)
+
+        p3_body = " ".join(c for c in _y_clauses if c)
+        if yong_all:
+            p3 = f"{p3_body} 이를 종합하면 <b>{_oh_join(yong_all)}</b> 순서로 용신을 삼습니다.".strip()
+        else:
+            p3 = f"{p3_body} 특정 오행에 치우치기보다 전체 균형을 유지하는 것 자체가 용신입니다.".strip()
+        if huisin:
+            p3 += f" 희신은 {OH_KR_TB.get(huisin, huisin)}, 용신을 생(生)해 뒤에서 돕는 기운입니다."
+
+        # ④ 기신 주의 — get_yongshin()의 '기신'(서술형)·'조후_avoid' 값 그대로 서술
+        gisin_desc = ys.get("기신", "")
+        jokhu_avoid = ys.get("조후_avoid", []) or []
+        p4 = f"반대로 {gisin_desc}." if gisin_desc else ""
+        _avoid_ohs = list(dict.fromkeys(OH.get(c, "") for c in jokhu_avoid if OH.get(c)))
+        if _avoid_ohs:
+            p4 += f" 여기에 {_oh_join(_avoid_ohs)} 기운까지 짙어지는 시기는 특히 조심해야 합니다."
+
+        # ⑤ 마무리 — 오프닝(gs_stat)과 같은 최종 톤으로 종합. 파격이어도 출구를 제시한다.
+        yong1_kr = OH_KR_TB.get(yong_all[0], yong_all[0]) if yong_all else "균형"
+        if gs_stat == "성격(成格)":
+            p5 = (
+                f"정리하면 {gname}이 상신을 얻어 살아 있는 격이니, {yong1_kr} 기운을 가까이할 때 "
+                f"타고난 그릇이 가장 온전하게 쓰입니다."
+            )
+        elif gs_stat == "파격(破格)":
+            p5 = (
+                f"정리하면 {gname}이 기신에 흔들리는 파격이지만, {yong1_kr} 기운으로 몸과 흐름을 다스릴 때 "
+                f"그 격이 흉기가 아니라 무기로 쓰입니다. 고난이 클수록 단단해지는 구조이니, "
+                f"기신이 짙어지는 시기만 조심스레 넘기면 뒷심이 강한 인생입니다."
+            )
+        elif gs_stat == "미정/평격" and gs_sang and gs_gi:
+            p5 = (
+                f"정리하면 {gname}은 살리는 힘과 흔드는 힘이 함께 있어 스스로 어느 쪽에 무게를 싣느냐가 관건이며, "
+                f"{yong1_kr} 기운을 가까이할 때 격이 가장 맑게 빛납니다."
+            )
+        else:
+            p5 = (
+                f"정리하면 {gname}은 격 자체의 좋고 나쁨보다 용신·오행의 흐름이 삶을 더 크게 좌우하니, "
+                f"{yong1_kr} 기운을 중심에 두고 사는 것이 실질적인 개운의 길입니다."
+            )
+
+        paragraphs = [p for p in [p1, p2, p3, p4, p5] if p]
+        return "\n\n".join(paragraphs)
+    except Exception:
+        return ""
+
+
 # ==================================================
 
 #  충(沖)/형(刑)/파(破)/해(害)/천간합
@@ -8647,8 +8777,24 @@ def _nar_ch1_ilgan(ctx):
 
 
 def _nar_ch3_gyeokguk(ctx):
-    """3~4장: 격국 + 용신 (GYEOKGUK_DETAIL 강화)"""
-    return ""
+    """3장: 격국(格局)과 용신(用神) — build_saju_tongbyeon(pils) 원국 통변을 챕터 형식으로 감싼다.
+    ★포맷팅만 담당 — 판단은 build_saju_tongbyeon 내부(get_gyeokguk 등 무수정 소비)에서 끝난다."""
+    try:
+        pils = ctx.get("pils", [])
+        display_name = ctx.get("display_name", "내담자")
+        body = build_saju_tongbyeon(pils)
+        if not body:
+            return ""
+        lines = [
+            "",
+            f"    ┌ 격국(格局)과 용신(用神) — {display_name}님이 쓰는 그릇과 필요한 기운 ┐",
+            "",
+            body,
+            "",
+        ]
+        return "\n".join(lines)
+    except Exception:
+        return ""
 
 def _nar_ch5_sipsong(ctx):
     """5장: 십성(十星) 조합 — 당신만의 인생 코드 (SIPSUNG_COMBO_LIFE 재사용)"""
@@ -11075,10 +11221,11 @@ def _nar_report(ctx):
     try:
         intro = _nar_intro_scene(ctx)
         ch1 = _nar_ch1_ilgan(ctx)
+        ch3 = _nar_ch3_gyeokguk(ctx)
         ch5 = _nar_ch5_sipsong(ctx)
         ch6 = _nar_ch6_daewoon(ctx)
         ch8 = _nar_ch8_flow(ctx)
-        chapter_text = "\n\n".join(c for c in [intro, ch1, ch5, ch6, ch8] if c)
+        chapter_text = "\n\n".join(c for c in [intro, ch1, ch3, ch5, ch6, ch8] if c)
         report += f"""<div style="background:#f9f5e8; border:1px solid #d4af37; border-radius:12px; padding:20px; margin-top:16px; font-size:13px; line-height:1.9; white-space:pre-wrap; color:#333; font-family:'Nanum Gothic',sans-serif;">
 {chapter_text}
 </div>
