@@ -310,7 +310,7 @@ def _golden_checks():
         _add("[박후규] line2 분기", cls == "live", f"실제={cls} 기대=live(內藏)")
 
         gm_str = "".join(get_gongmang(pils).get("공망_지지", ("", "")))
-        _add("[박후규] 공망", gm_str == "辰巳", f"실제={gm_str} 기대=辰巳")
+        _add("[박후규] 공망", gm_str == "寅卯", f"실제={gm_str} 기대=寅卯")
     else:
         out.append(("[박후규] 전체", None, "CASES에 없어 skip"))
 

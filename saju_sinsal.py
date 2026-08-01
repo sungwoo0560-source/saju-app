@@ -143,18 +143,36 @@ def get_chung_hyung(pils):
 
 # ==================================================
 
-GONGMANG_TABLE = {
-    "甲": ("戌", "亥"),
-    "乙": ("戌", "亥"),
-    "丙": ("申", "酉"),
-    "丁": ("申", "酉"),
-    "戊": ("午", "未"),
-    "己": ("午", "未"),
-    "庚": ("辰", "巳"),
-    "辛": ("辰", "巳"),
-    "壬": ("寅", "卯"),
-    "癸": ("寅", "卯"),
+# 순중공망(旬中空亡) — 60갑자는 甲으로 시작하는 10개씩 6순(旬)으로 나뉘며,
+# 각 순에서 쓰이지 않는 지지 2개가 그 순의 공망이다. 甲子旬=戌亥·甲戌旬=
+# 申酉·甲申旬=午未·甲午旬=辰巳·甲辰旬=寅卯·甲寅旬=子丑. 키는 각 순의 시작
+# 순번(60갑자 순번 0·10·20·30·40·50, 甲子=0). ★천간 1글자만으로는 순을
+# 특정할 수 없다 — 甲子일과 甲戌일은 천간이 같아도 순이 다르고 공망도
+# 다르므로, 반드시 일주(day pillar)의 천간+지지 조합 전체로 순을 판정
+# 해야 한다(get_sunjung_gongmang 참고).
+SUN_GONGMANG = {
+    0: ("戌", "亥"),   # 甲子순(甲子~癸酉)
+    10: ("申", "酉"),  # 甲戌순(甲戌~癸未)
+    20: ("午", "未"),  # 甲申순(甲申~癸巳)
+    30: ("辰", "巳"),  # 甲午순(甲午~癸卯)
+    40: ("寅", "卯"),  # 甲辰순(甲辰~癸丑)
+    50: ("子", "丑"),  # 甲寅순(甲寅~癸亥)
 }
+
+
+def get_sunjung_gongmang(cg, jj):
+    """간지(주로 일주) 60갑자로 순중공망(旬中空亡) 지지 2개를 구한다.
+    천간+지지 조합의 60갑자 순번을 직접 역산해 그 순의 시작점을 찾고,
+    SUN_GONGMANG에서 해당 순의 공망을 반환한다."""
+    try:
+        cg_idx = CG.index(cg)
+        jj_idx = JJ.index(jj)
+    except ValueError:
+        return ("", "")
+    for idx in range(60):
+        if idx % 10 == cg_idx and idx % 12 == jj_idx:
+            return SUN_GONGMANG[idx - (idx % 10)]
+    return ("", "")
 
 GONGMANG_JJ_DESC = {
     "子": "자(子(자)) 공망 - 지혜/재물 기운이 허공에 뜹니다. 재물과 학업에 공허함이 따릅니다.",
@@ -174,11 +192,13 @@ GONGMANG_JJ_DESC = {
 
 @st.cache_data(hash_funcs=_PILS_HF)
 def get_gongmang(pils):
-    """공망(空亡) 계산"""
+    """공망(空亡) 계산 — 정통 순중공망(旬中空亡), 일주(day pillar) 60갑자
+    기준. 일주의 천간+지지 조합 전체로 어느 순(旬)에 속하는지 판정한다."""
 
-    nyon_cg = pils[3]["cg"] if len(pils) > 3 else ""
+    il_cg = pils[1]["cg"] if len(pils) > 1 else ""
+    il_jj = pils[1]["jj"] if len(pils) > 1 else ""
 
-    gong_pair = GONGMANG_TABLE.get(nyon_cg, ("", ""))
+    gong_pair = get_sunjung_gongmang(il_cg, il_jj)
 
     result = {"공망_지지": gong_pair, "해당_기둥": []}
 
