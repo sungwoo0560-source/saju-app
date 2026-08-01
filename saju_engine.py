@@ -1655,10 +1655,16 @@ def calc_ohaeng_strength(ilgan, pils):
         frozenset(["丙", "辛"]): "水", frozenset(["丁", "壬"]): "木",
         frozenset(["戊", "癸"]): "火",
     }
+    # A안(project_chung_score_pending.md 승인, ⑦-A): 왕지충(子午·卯酉)-6 ·
+    # 생지충(寅申·巳亥)-5 · 고지충(丑未·辰戌)-4. 원국충 6쌍은 카테고리가
+    # 겹치지 않아(각 쌍 모두 같은 종류끼리 충) 쌍별 고정 배율로 충분하다.
     _JJ_CHUNG = [
-        (frozenset(["子", "午"]), "水", "火"), (frozenset(["丑", "未"]), "土", "土"),
-        (frozenset(["寅", "申"]), "木", "金"), (frozenset(["卯", "酉"]), "木", "金"),
-        (frozenset(["辰", "戌"]), "土", "土"), (frozenset(["巳", "亥"]), "火", "水"),
+        (frozenset(["子", "午"]), "水", "火", 6.0),   # 왕지충
+        (frozenset(["丑", "未"]), "土", "土", 4.0),   # 고지충
+        (frozenset(["寅", "申"]), "木", "金", 5.0),   # 생지충
+        (frozenset(["卯", "酉"]), "木", "金", 6.0),   # 왕지충
+        (frozenset(["辰", "戌"]), "土", "土", 4.0),   # 고지충
+        (frozenset(["巳", "亥"]), "火", "水", 5.0),   # 생지충
     ]
     _TG_CHUNG = [
         (frozenset(["甲", "庚"]), "木", "金"), (frozenset(["乙", "辛"]), "木", "金"),
@@ -1769,10 +1775,10 @@ def calc_ohaeng_strength(ilgan, pils):
             power[oh] += 5.0
 
     # ── ④ 충 감산 ────────────────────────────────────────────────
-    for combo, oh1, oh2 in _JJ_CHUNG:
+    for combo, oh1, oh2, rate in _JJ_CHUNG:
         if combo.issubset(jjs):
-            power[oh1] = max(0.0, power[oh1] - 5.0)
-            power[oh2] = max(0.0, power[oh2] - 5.0)
+            power[oh1] = max(0.0, power[oh1] - rate)
+            power[oh2] = max(0.0, power[oh2] - rate)
 
     for combo, oh1, oh2 in _TG_CHUNG:
         if combo.issubset(cgs):
