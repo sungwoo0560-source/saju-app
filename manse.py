@@ -15316,45 +15316,18 @@ def build_gangsa_block(pils, name, birth_year, gender, marriage_status=None):
                 f"본인도 모르게 끌려가는 방향을 결정짓습니다."
             )
 
-            # 격의 성패(成格/破格) — get_gyeokguk_status() 소비만, get_gyeokguk 등 무수정.
-            # 종격·비견격/겁재격·판정불가(격명 빈값 또는 GYEOKGUK_SANGSIN 매핑 없음)는
-            # 이 줄 자체를 생략한다. ★get_gyeokguk_status는 매핑이 없어도 "미정/평격"에
-            # 상신/기신 빈 리스트를 반환하므로, 아래 "_gs_name4 in GYEOKGUK_SANGSIN" 체크가
-            # 없으면 "상신도 기신도 없다"는 엉뚱한 문구가 8정격 외 격에도 뜬다(실제 발견·수정).
+            # 원국 통변(通辯) — build_saju_tongbyeon() 소비만, get_gyeokguk 등 무수정.
+            # ★기존에는 "격의 성패"만 다루는 좁은 문구였으나, 격국 소개→성패→용신·희신→
+            # 기신 주의→마무리 5단으로 엮은 원국 통변으로 교체했다(같은 【】 슬롯 재사용,
+            # 겹치는 신규 섹션 없음). build_saju_tongbyeon 내부에서 격명 없음/8정격 외
+            # 등은 이미 "" 처리하므로 여기선 결과 유무만 본다.
             _gyeok_status_l = ""
             try:
-                _gs4 = get_gyeokguk_status(pils)
-                _gs_name4 = _gs4.get("격명", "")
-                _gs_stat4 = _gs4.get("성격여부", "")
-                _gs_sang4 = _gs4.get("상신_실존", [])
-                _gs_gi4 = _gs4.get("기신_실존", [])
-                if _gs_name4 not in GYEOKGUK_SANGSIN:
-                    pass
-                elif _gs_stat4 == "성격(成格)":
-                    _gyeok_status_l = (
-                        f"<b>【격의 성패】</b> {_gs_name4}이 상신 {'·'.join(_gs_sang4)}을(를) 얻어 "
-                        f"살아있는 격입니다. 격이 제 역할을 하고 있어 그 방면의 기운을 온전히 쓸 수 있습니다."
-                    )
-                elif _gs_name4 and _gs_stat4 == "파격(破格)":
-                    _gyeok_status_l = (
-                        f"<b>【격의 성패】</b> {_gs_name4}이 기신 {'·'.join(_gs_gi4)}에 흔들려 격이 깨진 모습입니다. "
-                        f"격 본연의 기운을 온전히 쓰지 못하는 흐름이 있으니, "
-                        f"대운·세운에서 상신을 만나는 시기를 눈여겨봐야 합니다."
-                    )
-                elif _gs_name4 and _gs_stat4 == "미정/평격" and _gs_sang4 and _gs_gi4:
-                    _gyeok_status_l = (
-                        f"<b>【격의 성패】</b> {_gs_name4}에 상신과 기신이 함께 있어, "
-                        f"격이 뚜렷하게 서지도 완전히 깨지지도 않았습니다. "
-                        f"살아나는 힘과 흔드는 힘이 팽팽히 얽혀 있는 구조입니다."
-                    )
-                elif _gs_name4 and _gs_stat4 == "미정/평격" and not _gs_sang4 and not _gs_gi4:
-                    _gyeok_status_l = (
-                        f"<b>【격의 성패】</b> {_gs_name4}에 상신도 기신도 뚜렷하지 않아, "
-                        f"격의 좋고 나쁨보다는 원국의 다른 흐름(용신·오행 균형)이 더 크게 작용하는 구조입니다."
-                    )
-                if _gyeok_status_l:
+                _tb_text4 = build_saju_tongbyeon(pils)
+                if _tb_text4:
+                    _gyeok_status_l = "<b>【격국과 용신】</b> " + "<br>".join(_tb_text4.split("\n\n"))
                     st.session_state["_gangsa_rule_hits"].append({
-                        "rule_id": f"gyeokstatus:{_gs_stat4}",
+                        "rule_id": "tongbyeon:격국용신",
                         "text": _gyeok_status_l,
                     })
             except Exception:
