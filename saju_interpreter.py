@@ -7730,6 +7730,12 @@ def get_yongshin(pils):
             if byeong_yong and byeong_yong not in all_yong:
                 all_yong.insert(0, byeong_yong) if is_extreme else all_yong.append(byeong_yong)
 
+    # 희신(喜神): 용신(1순위)을 생(生)하는 오행 — 역방향 상생표(_BIRTH_R)로 산출.
+    # ★정방향(_BIRTH_F, 용신이 생하는 오행)을 쓰면 get_yongshin_multilayer에 있는
+    # 것과 같은 방향 버그가 되므로 반드시 역방향을 써야 한다.
+    _BIRTH_R = {"木": "水", "火": "木", "土": "火", "金": "土", "水": "金"}
+    huisin = _BIRTH_R.get(all_yong[0], "") if all_yong else ""
+
     return {
         "억부_base": eokbu_base,
         "억부_desc": eokbu_desc,
@@ -7743,6 +7749,7 @@ def get_yongshin(pils):
         "병약_yong": byeong_yong,
         "병약_desc": byeong_desc,
         "기신": kihwa,
+        "희신": huisin,
         "종합_용신": all_yong,
         "월지": wol_jj,
     }
