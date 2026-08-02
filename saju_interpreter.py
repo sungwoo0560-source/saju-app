@@ -7969,6 +7969,52 @@ def build_saju_tongbyeon(pils):
                 f"용신 혼자여도 힘을 쓰지만, 희신이 함께 밀어줄 때 그 힘이 더 오래, 더 안정적으로 갑니다."
             )
 
+        # ④-보강: 용신이 원국 8글자에 실재하는가 — 약이 곁에 있나/밖에 있나. 새 판정 아님 —
+        # 이미 있는 yong_all(오행)과 pils 원문 cg/jj·OH·JIJANGGAN(둘 다 saju_data.py, ②·⑤에서
+        # 이미 무import로 쓰던 재료)만으로 실재 여부만 사실 서술. 원국 전용 — 대운·세운·특정
+        # 연도는 다루지 않는다. 1순위 용신(yong_all[0]) 중심 + 종합 1문장으로 상한, 개별 용신
+        # 전부 나열하지 않는다.
+        _cg4 = [p.get("cg", "") for p in pils]
+        _jj4 = [p.get("jj", "") for p in pils]
+
+        def _yong_presence(oh):
+            if any(OH.get(c, "") == oh for c in _cg4):
+                return "천간투출"
+            if any(OH.get(j, "") == oh for j in _jj4):
+                return "지지본기"
+            for j in _jj4:
+                if any(OH.get(g, "") == oh for g in JIJANGGAN.get(j, [])):
+                    return "지장간암장"
+            return "부재"
+
+        if yong_all:
+            _presence_map = {o: _yong_presence(o) for o in yong_all}
+            _first_oh = yong_all[0]
+            _first_state = _presence_map[_first_oh]
+            if _first_state in ("천간투출", "지지본기"):
+                p4 += (
+                    f" 게다가 {_oh_join([_first_oh])} 기운은 원국 안에 이미 자리 잡고 있어, "
+                    f"가장 필요한 약이 몸 가까이 있는 셈이니 스스로 균형을 잡는 힘이 있습니다."
+                )
+            elif _first_state == "지장간암장":
+                p4 += (
+                    f" 다만 {_oh_join([_first_oh])} 기운은 겉으로 드러나지 않고 지지 속에 잠겨 있어, "
+                    f"이를 끌어내 줄 계기가 왔을 때 비로소 발현되는 힘입니다."
+                )
+            else:
+                p4 += (
+                    f" 다만 {_oh_join([_first_oh])} 기운이 원국 안에 없어 밖에서 구해야 하니, "
+                    f"그 기운이 드는 인연이나 시기를 만나느냐가 결정적인 변수입니다."
+                )
+
+            _surface_cnt = sum(1 for o in yong_all if _presence_map[o] in ("천간투출", "지지본기"))
+            if _surface_cnt == len(yong_all):
+                p4 += " 용신 기운을 두루 갖춘 원국이라, 남의 도움 없이도 제 힘으로 균형을 만들어가는 사주입니다."
+            elif _surface_cnt == 0:
+                p4 += " 용신 기운 대부분이 원국 밖에 있어, 스스로 채우기보다 바깥에서 그 기운을 만나는 것이 인생의 큰 변수로 작용합니다."
+            else:
+                p4 += " 용신 기운 일부는 이미 갖췄고 일부는 아직 오지 않은 상태라, 가진 것을 다지며 나머지를 기다리는 흐름입니다."
+
         # ⑤ 기신 주의 — get_yongshin()의 '기신'(서술형)·'조후_avoid' 값 그대로 서술 +
         # sn_label에 딸린 일반적 상황 묘사(달력상 시기 아님, 심리·행동 국면).
         gisin_desc = ys.get("기신", "")
