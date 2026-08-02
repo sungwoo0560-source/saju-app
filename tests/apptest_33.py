@@ -15,6 +15,10 @@ tests/apptest_33.py — N케이스 × 11메뉴 검증 하네스 (예외 0건 / �
 사용법:
     python tests/apptest_33.py --dump    tests/snapshots/baseline.json
     python tests/apptest_33.py --compare tests/snapshots/baseline.json
+    python tests/apptest_33.py --dump    tests/snapshots/baseline.json --freeze-date 2026-08-01
+    python tests/apptest_33.py --compare tests/snapshots/baseline.json  # --freeze-date 생략 시
+                                                                          # baseline meta의 freeze_date
+                                                                          # 자동 적용(재현성 보장)
 
 종료코드: 예외 발생(어느 모드든) 또는 --compare에서 차이 발견 시 1, 정상 0.
 
@@ -41,6 +45,7 @@ import re
 import json
 import argparse
 import difflib
+from datetime import datetime
 
 _THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 _ROOT = os.path.dirname(_THIS_DIR)
@@ -49,6 +54,7 @@ sys.path.insert(0, _THIS_DIR)  # pils_fixtures
 
 import streamlit as st  # noqa: E402
 import manse  # noqa: E402  (import만 함 — main()은 __main__ 가드 안이라 실행되지 않음)
+import saju_interpreter  # noqa: E402  (freeze 대상 — .datetime 이름 교체용, 모듈 자체 참조 필요)
 from pils_fixtures import CASES, get_pils  # noqa: E402  (값 재사용, 복제 금지)
 from saju_engine import calc_sipsung, SajuCoreEngine  # noqa: E402
 from saju_interpreter import get_jeokjung_guiin  # noqa: E402
@@ -72,6 +78,45 @@ _CAPTURE_FUNCS = [
 _VOLATILE_PATTERNS = [
     (re.compile(r"\b\d{1,2}/\d{1,2}\b"), "<MMDD>"),
 ]
+
+
+# ── freeze-time 인프라 ───────────────────────────────────────────────────
+# daily/monthly/money/④대운시제(build_saju_tongbyeon)가 "오늘"을 읽는 경로는
+# manse.py·saju_interpreter.py 모듈레벨 datetime 이름(둘 다 `from datetime import
+# ... datetime`) 하나로 수렴한다(프로토타입 실측 확인, 8/8 PASS). 이 두 이름만
+# FrozenDatetime으로 교체하면 4경로 전부 고정된 날짜를 재현한다. manse.py/
+# saju_interpreter.py 소스는 무수정 — import된 모듈 네임스페이스의 이름만 이
+# 테스트 프로세스 안에서 갈아끼운다(다른 프로세스인 실제 앱 런타임은 영향 없음).
+_REAL_DATETIME = datetime
+
+
+class FrozenDatetime(_REAL_DATETIME):
+    """now()/today()만 고정 시각을 반환. 그 외는 datetime.datetime 그대로 상속되어
+    strftime·비교·timedelta 연산 등 정상 동작(freeze 프로토타입에서 검증됨)."""
+    _frozen = None
+
+    @classmethod
+    def now(cls, tz=None):
+        return cls._frozen if tz is None else cls._frozen.astimezone(tz)
+
+    @classmethod
+    def today(cls):
+        return cls._frozen
+
+
+def freeze(freeze_date):
+    """freeze_date: 'YYYY-MM-DD' 문자열. manse.datetime·saju_interpreter.datetime을
+    FrozenDatetime으로 교체한다."""
+    y, m, d = (int(x) for x in freeze_date.split("-"))
+    FrozenDatetime._frozen = _REAL_DATETIME(y, m, d, 12, 0, 0)
+    manse.datetime = FrozenDatetime
+    saju_interpreter.datetime = FrozenDatetime
+
+
+def unfreeze():
+    """freeze() 이전 상태(실제 datetime.datetime)로 복원."""
+    manse.datetime = _REAL_DATETIME
+    saju_interpreter.datetime = _REAL_DATETIME
 
 
 class _Capturer:
@@ -173,8 +218,14 @@ def _normalize(entry):
     return entry
 
 
-def dump(path):
-    results, exc_count = run_all()
+def dump(path, freeze_date=None):
+    if freeze_date:
+        freeze(freeze_date)
+    try:
+        results, exc_count = run_all()
+    finally:
+        if freeze_date:
+            unfreeze()
     os.makedirs(os.path.dirname(os.path.abspath(path)) or ".", exist_ok=True)
     payload = {
         "meta": {
@@ -183,12 +234,13 @@ def dump(path):
             "combo_count": len(CASES) * len(MENU_ORDER),
             "cases": list(CASES.keys()),
             "menus": MENU_ORDER,
+            "freeze_date": freeze_date,  # None이면 미고정 실행(현행 동작과 동일)
         },
         "results": results,
     }
     with open(path, "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=1)
-    print(f"[DUMP] 저장 완료: {path}")
+    print(f"[DUMP] 저장 완료: {path}" + (f" (freeze_date={freeze_date})" if freeze_date else " (freeze 미적용)"))
     if exc_count:
         print(f"[FAIL] 예외 {exc_count}건 발생")
     else:
@@ -196,10 +248,24 @@ def dump(path):
     return exc_count
 
 
-def compare(path):
+def compare(path, freeze_date=None):
     with open(path, "r", encoding="utf-8") as f:
         baseline = json.load(f)
-    current, exc_count = run_all()
+
+    baseline_freeze = baseline.get("meta", {}).get("freeze_date")
+    if freeze_date and baseline_freeze and freeze_date != baseline_freeze:
+        print(f"[WARN] --freeze-date({freeze_date})가 baseline meta의 freeze_date({baseline_freeze})와 "
+              f"다릅니다 — CLI 값({freeze_date})을 우선 적용합니다.")
+    effective_freeze = freeze_date or baseline_freeze
+    if effective_freeze:
+        print(f"[FREEZE] {effective_freeze} 기준으로 고정 실행"
+              + (" (baseline meta에서 자동 적용)" if not freeze_date else ""))
+        freeze(effective_freeze)
+    try:
+        current, exc_count = run_all()
+    finally:
+        if effective_freeze:
+            unfreeze()
 
     base_results = baseline.get("results", {})
     diff_count = 0
@@ -333,16 +399,22 @@ def main():
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--dump", metavar="PATH")
     group.add_argument("--compare", metavar="PATH")
+    parser.add_argument(
+        "--freeze-date", metavar="YYYY-MM-DD", default=None,
+        help="현재 시각을 이 날짜로 고정하고 실행(daily/monthly/money/④대운시제 노이즈 제거용). "
+             "미지정 시 실제 현재 시각 사용(현행 동작과 동일, 하위호환). --compare에서 미지정 시 "
+             "baseline meta의 freeze_date를 자동으로 읽어 재현한다.",
+    )
     args = parser.parse_args()
 
     exit_code = 0
 
     if args.dump:
-        exc_count = dump(args.dump)
+        exc_count = dump(args.dump, freeze_date=args.freeze_date)
         if exc_count:
             exit_code = 1
     else:
-        diff_count, exc_count = compare(args.compare)
+        diff_count, exc_count = compare(args.compare, freeze_date=args.freeze_date)
         if exc_count or diff_count:
             exit_code = 1
 
