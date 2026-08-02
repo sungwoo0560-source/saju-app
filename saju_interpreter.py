@@ -8015,6 +8015,43 @@ def build_saju_tongbyeon(pils, daewoon=None):
             else:
                 p4 += " 용신 기운 일부는 이미 갖췄고 일부는 아직 오지 않은 상태라, 가진 것을 다지며 나머지를 기다리는 흐름입니다."
 
+            # ④-대운: 1순위 용신(_first_oh)이 대운 천간으로 드는 시기 — 원국 판정 무변,
+            # 새 판단 아님(daewoon 인자·_cur_saju_year()·yong_all·OH 전부 기존 재료). jj·2순위
+            # 이하는 안 씀(OR 기준은 과포화 확인됨). 현재 1개 + 미래 최근 1개만 상한, 둘 다
+            # 없을 때만 과거 1개(회고)로 대체 — daewoon 없거나 해당 대운 없으면 문구 생략.
+            if daewoon:
+                _yong_dw = [d for d in daewoon if OH.get(d.get("cg", "")) == _first_oh]
+                if _yong_dw:
+                    _cur_year_tb = _cur_saju_year()
+                    _now_dw = next(
+                        (d for d in _yong_dw if d.get("시작연도", 0) <= _cur_year_tb <= d.get("종료연도", 0)),
+                        None,
+                    )
+                    _future_dw = min(
+                        (d for d in _yong_dw if d.get("시작연도", 0) > _cur_year_tb),
+                        key=lambda d: d.get("시작연도", 0), default=None,
+                    )
+                    if _now_dw:
+                        _sa = _now_dw.get("시작나이", 0)
+                        p4 += (
+                            f" 지금 지나는 {_sa}세~{_sa + 9}세 대운이 바로 그 시기 — "
+                            f"1순위 용신 {_oh_join([_first_oh])} 기운이 천간에 드러나 크게 쓰는 구간입니다."
+                        )
+                    if _future_dw:
+                        _fa, _fy = _future_dw.get("시작나이", 0), _future_dw.get("시작연도", "")
+                        if _first_state in ("천간투출", "지지본기"):
+                            p4 += f" {_fa}세({_fy}년)부터 오는 대운에 그 약이 천간으로 강하게 들어옵니다."
+                        else:
+                            p4 += f" {_fa}세({_fy}년)부터 오는 대운에 부족했던 그 기운이 천간으로 채워지는 시기가 옵니다."
+                    if not _now_dw and not _future_dw:
+                        _past_dw = max(
+                            (d for d in _yong_dw if d.get("종료연도", 0) < _cur_year_tb),
+                            key=lambda d: d.get("종료연도", 0), default=None,
+                        )
+                        if _past_dw:
+                            _pa = _past_dw.get("시작나이", 0)
+                            p4 += f" 이미 지난 {_pa}세~{_pa + 9}세가 그 약이 천간에 드러났던 구간입니다."
+
         # ⑤ 기신 주의 — get_yongshin()의 '기신'(서술형)·'조후_avoid' 값 그대로 서술 +
         # sn_label에 딸린 일반적 상황 묘사(달력상 시기 아님, 심리·행동 국면).
         gisin_desc = ys.get("기신", "")
