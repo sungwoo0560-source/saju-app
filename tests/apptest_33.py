@@ -45,7 +45,7 @@ import re
 import json
 import argparse
 import difflib
-from datetime import datetime
+from datetime import date, datetime
 
 _THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 _ROOT = os.path.dirname(_THIS_DIR)
@@ -82,12 +82,16 @@ _VOLATILE_PATTERNS = [
 
 # ── freeze-time 인프라 ───────────────────────────────────────────────────
 # daily/monthly/money/④대운시제(build_saju_tongbyeon)가 "오늘"을 읽는 경로는
-# manse.py·saju_interpreter.py 모듈레벨 datetime 이름(둘 다 `from datetime import
-# ... datetime`) 하나로 수렴한다(프로토타입 실측 확인, 8/8 PASS). 이 두 이름만
-# FrozenDatetime으로 교체하면 4경로 전부 고정된 날짜를 재현한다. manse.py/
-# saju_interpreter.py 소스는 무수정 — import된 모듈 네임스페이스의 이름만 이
-# 테스트 프로세스 안에서 갈아끼운다(다른 프로세스인 실제 앱 런타임은 영향 없음).
+# manse.py·saju_interpreter.py 모듈레벨 datetime/date 이름(둘 다 `from datetime
+# import date, datetime`) 두 개로 수렴한다. datetime만 패치했을 때 daily·monthly가
+# LocalSajuNarrator.daily()/monthly()(saju_interpreter.py) 안의 별도 `date.today()`
+# 호출을 못 잡아 실제 오늘 날짜가 새는 버그가 실측으로 드러나서(재생성 baseline의
+# daily 헤더가 freeze-date가 아니라 진짜 오늘로 찍힘), datetime과 date를 둘 다
+# 패치하도록 고쳤다. manse.py/saju_interpreter.py 소스는 무수정 — import된 모듈
+# 네임스페이스의 이름만 이 테스트 프로세스 안에서 갈아끼운다(다른 프로세스인 실제
+# 앱 런타임은 영향 없음).
 _REAL_DATETIME = datetime
+_REAL_DATE = date
 
 
 class FrozenDatetime(_REAL_DATETIME):
@@ -104,19 +108,34 @@ class FrozenDatetime(_REAL_DATETIME):
         return cls._frozen
 
 
+class FrozenDate(_REAL_DATE):
+    """date.today()만 고정 날짜 반환. LocalSajuNarrator.daily()/monthly()가 쓰는
+    `date.today()` 경로 전용(datetime과는 별개 클래스라 따로 패치 필요)."""
+    _frozen = None
+
+    @classmethod
+    def today(cls):
+        return cls._frozen
+
+
 def freeze(freeze_date):
-    """freeze_date: 'YYYY-MM-DD' 문자열. manse.datetime·saju_interpreter.datetime을
-    FrozenDatetime으로 교체한다."""
+    """freeze_date: 'YYYY-MM-DD' 문자열. manse.datetime/date·saju_interpreter.
+    datetime/date를 FrozenDatetime/FrozenDate로 교체한다."""
     y, m, d = (int(x) for x in freeze_date.split("-"))
     FrozenDatetime._frozen = _REAL_DATETIME(y, m, d, 12, 0, 0)
+    FrozenDate._frozen = _REAL_DATE(y, m, d)
     manse.datetime = FrozenDatetime
+    manse.date = FrozenDate
     saju_interpreter.datetime = FrozenDatetime
+    saju_interpreter.date = FrozenDate
 
 
 def unfreeze():
-    """freeze() 이전 상태(실제 datetime.datetime)로 복원."""
+    """freeze() 이전 상태(실제 datetime.datetime/date)로 복원."""
     manse.datetime = _REAL_DATETIME
+    manse.date = _REAL_DATE
     saju_interpreter.datetime = _REAL_DATETIME
+    saju_interpreter.date = _REAL_DATE
 
 
 class _Capturer:
