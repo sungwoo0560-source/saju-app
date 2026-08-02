@@ -7837,6 +7837,51 @@ def build_saju_tongbyeon(pils):
                 f"용신·희신을 얼마나 잘 쓰느냐가 실제 인생의 굴곡을 더 크게 좌우합니다."
             )
 
+        # ②-보강: 상신/기신 충(沖) 상대 지지 — 원국 전용(대운·세운 재료 없음).
+        # calc_sipsung()의 jj_ss(지지 정기 십성)로 상신·기신이 실제로 앉은 지지를 찾고,
+        # 그 지지가 원국 나머지 지지와 CHUNG_MAP(6충)에 걸리면 문구를 덧붙인다. 새 판정
+        # 아님 — 이미 계산된 상신/기신 이름·jj_ss·CHUNG_MAP(saju_data.py) 사실만 서술.
+        # 상신·기신 각 1개(리스트 첫 항목)만 보고, 그 십성이 정기로 앉은 첫 지지만 본다
+        # (더 찾지 않고 상한) — 없거나 충이 없으면 아무것도 추가하지 않는다(p2 그대로).
+        _JJ_POS_TB = ["시지", "일지", "월지", "년지"]
+        try:
+            _sp_tb = calc_sipsung(ilgan, pils)
+        except Exception:
+            _sp_tb = []
+
+        def _find_sangsin_gisin_chung(ss_list):
+            if not ss_list or not _sp_tb:
+                return None
+            target = ss_list[0].split("(")[0]
+            for idx, s in enumerate(_sp_tb):
+                if s.get("jj_ss", "-").split("(")[0] != target:
+                    continue
+                _jj = s.get("jj", "")
+                for oidx, other in enumerate(_sp_tb):
+                    if oidx == idx:
+                        continue
+                    _ojj = other.get("jj", "")
+                    if frozenset([_jj, _ojj]) in CHUNG_MAP:
+                        _pos = _JJ_POS_TB[idx] if idx < len(_JJ_POS_TB) else ""
+                        return (ss_list[0], _pos, _jj, _ojj)
+                return None  # 정기로 앉은 첫 지지를 찾았으나 충 상대가 없음 — 상한
+            return None  # 정기로 앉은 지지 자체가 없음
+
+        _sang_chung_tb = _find_sangsin_gisin_chung(gs_sang)
+        _gi_chung_tb = _find_sangsin_gisin_chung(gs_gi)
+        if _sang_chung_tb:
+            _s_ss_tb, _s_pos_tb, _s_jj_tb, _s_ojj_tb = _sang_chung_tb
+            p2 += (
+                f" 다만 이 상신 {_s_ss_tb}이(가) {_s_pos_tb}({_s_jj_tb})에 앉아 {_s_ojj_tb}와 정면으로 충(沖)을 맞고 있어, "
+                f"격을 살리는 힘 자체가 흔들리는 지점이기도 합니다."
+            )
+        if _gi_chung_tb:
+            _g_ss_tb, _g_pos_tb, _g_jj_tb, _g_ojj_tb = _gi_chung_tb
+            p2 += (
+                f" 흥미롭게도 이 기신 {_g_ss_tb}은(는) {_g_pos_tb}({_g_jj_tb})에서 {_g_ojj_tb}와 충(沖)을 맞고 있는데, "
+                f"이는 격을 깨던 기운을 오히려 충이 흔들어 병(病)을 덜어내는 거병(去病)의 자리라 마냥 나쁘게만 볼 자리는 아닙니다."
+            )
+
         # ③ 신강신약·오행분포 — get_ilgan_strength() 값 그대로 서술(원국 재료, 운로 아님).
         # ①②(격국)와 ④(용신)를 잇는 다리: 이 균형/쏠림이 용신이 실제로 힘을 받을 수 있는 바탕이 된다.
         strength_info = get_ilgan_strength(ilgan, pils) or {}
