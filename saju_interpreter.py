@@ -7755,7 +7755,7 @@ def get_yongshin(pils):
     }
 
 
-def build_saju_tongbyeon(pils):
+def build_saju_tongbyeon(pils, daewoon=None):
     """원국(原局) 통변(通辯) — 격국·성격/파격·신강신약·오행분포·용신·희신·기신을 인생
     서술 한 편으로 엮는다. ★새 판단 로직이 아니다 — get_gyeokguk·get_gyeokguk_status·
     get_yongshin·get_ilgan_strength를 pils로 그대로 호출해 그 반환값만 문장으로 조합할
@@ -8965,7 +8965,7 @@ def _nar_ch3_gyeokguk(ctx):
     try:
         pils = ctx.get("pils", [])
         display_name = ctx.get("display_name", "내담자")
-        body = build_saju_tongbyeon(pils)
+        body = build_saju_tongbyeon(pils, daewoon=ctx.get("daewoon", []))
         if not body:
             return ""
         lines = [

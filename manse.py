@@ -15323,7 +15323,7 @@ def build_gangsa_block(pils, name, birth_year, gender, marriage_status=None):
             # 등은 이미 "" 처리하므로 여기선 결과 유무만 본다.
             _gyeok_status_l = ""
             try:
-                _tb_text4 = build_saju_tongbyeon(pils)
+                _tb_text4 = build_saju_tongbyeon(pils, daewoon=_dw_all4)
                 if _tb_text4:
                     _gyeok_status_l = "<b>【격국과 용신】</b> " + "<br>".join(_tb_text4.split("\n\n"))
                     st.session_state["_gangsa_rule_hits"].append({
