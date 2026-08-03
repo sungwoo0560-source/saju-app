@@ -1173,6 +1173,21 @@ _YUKHYO_SINSAL_PHRASE = {
     "천을귀인": "천을귀인(天乙貴人)의 기운도 함께 있어 뜻밖의 도움을 받을 가능성이 있습니다.",
 }
 
+# get_yukchin()이 반환하는 5개 값과 정확히 같은 키(처재·관귀·부모·자손·형제) —
+# 육효 육친은 6개가 아니라 5개(오행 생극 5가지 관계)뿐이다. 화면·총평에서
+# 육친명이 해설 없이 태그로만 노출되는 지점(예: 6효 표 [처재·世·靑龍])에
+# 짧은 뜻을 붙이기 위한 위성 dict — _YUKHYO_SINSAL_PHRASE와 같은 패턴.
+_YUKHYO_YUKCHIN_DESC = {
+    "처재": "재물과 아내(이성)를 상징하는 기운",
+    "관귀": "직장·명예·압박을 상징하는 기운",
+    "부모": "문서·후원·윗사람을 상징하는 기운",
+    "자손": "자식·아랫사람·재능을 상징하는 기운",
+    "형제": "경쟁과 협력을 함께 품은 동료의 기운",
+}
+assert len(_YUKHYO_YUKCHIN_DESC) == 5, "_YUKHYO_YUKCHIN_DESC는 육친 5개 전수여야 한다"
+assert set(_YUKHYO_YUKCHIN_DESC) == {"처재", "관귀", "부모", "자손", "형제"}, \
+    "_YUKHYO_YUKCHIN_DESC 키가 get_yukchin() 반환값(처재·관귀·부모·자손·형제)과 불일치"
+
 _YUKHYO_LABEL_CLOSING = {
     "길(吉)": "전체적으로 순조로운 흐름이니 자신 있게 나아가도 좋겠습니다.",
     "무난": "나쁘지 않은 흐름이나 아직 확신하기엔 이르니 조금 더 지켜보시길 권합니다.",
@@ -1186,19 +1201,26 @@ def build_yukhyo_summary(
     is_bokshin=False, is_gongmang_flag=False, samhap_match=False, hwahyo_label=None,
     is_dong_y=False, dong_hyo_text=None, sinsal_tags=None,
 ):
-    """질문 맥락(질문+용신 판단)에 동효 효사·신살을 얹어 2~4문장짜리 종합
-    총평을 조합한다. ★새 판단 로직이 아니다 — judge_yukhyo_advanced가 이미
-    계산한 label과 그 근거 요인(공망·복신·삼합·화효)을, 이미 채워진
-    HYO_TEXT 효사·get_yukhyo_sinsal_targets 신살과 함께 문장으로 엮을
-    뿐, 어떤 값도 새로 판정하지 않는다(판단값 무변).
+    """질문 맥락(질문+용신 판단)에 육친 소개·동효 효사·신살을 얹어 2~3문단짜리
+    종합 총평을 조합한다. ★새 판단 로직이 아니다 — judge_yukhyo_advanced가 이미
+    계산한 label과 그 근거 요인(공망·복신·삼합·화효)을, 이미 채워진 HYO_TEXT
+    효사·_YUKHYO_YUKCHIN_DESC 육친 뜻·get_yukhyo_sinsal_targets 신살과 함께
+    문장으로 엮을 뿐, 어떤 값도 새로 판정하지 않는다(판단값 무변 — target_yukchin도
+    호출부가 이미 가진 값을 그대로 받아 쓸 뿐 여기서 새로 정하지 않는다).
 
-    모순 방지 원칙: 중간 절(대표 근거·동효 인용·신살)은 전부 사실 서술일
-    뿐 자체적으로 길흉을 단정하지 않는다 — 실제 길흉 판정은 오프닝·
-    마무리 두 곳에서만, 오직 같은 label 하나로 통일해서 말한다. 따라서
-    삼합(+가산 요인)이 있어도 최종 label이 흉이면 오프닝·마무리 모두
-    흉으로만 말하고, 삼합 절은 "삼합국이 이루어져 있다"는 사실만 전한다.
+    모순 방지 원칙: 중간 문단(육친 소개·근거·동효 인용·신살)은 전부 사실
+    서술일 뿐 자체적으로 길흉을 단정하지 않는다 — 실제 길흉 판정은 오프닝
+    문단과 마지막 문단의 마무리 문장에서만, 오직 같은 label 하나로 통일해서
+    말한다. 따라서 삼합(+가산 요인)이 있어도 최종 label이 흉이면 오프닝·
+    마무리 모두 흉으로만 말하고, 삼합 문단은 "삼합국이 이루어져 있다"는
+    사실만 전한다.
 
-    반환: 완성된 총평 문단(str)."""
+    문단 구성(있는 재료만큼 2~3문단, "\\n\\n"로 구분):
+      1문단(항상) — 오프닝(길흉 label) + 용신 육친 소개(target_yukchin 있을 때만)
+      2문단(근거·동효 중 하나라도 있을 때만) — 근거(공망/복신/삼합/화효) + 동효 효사 인용
+      3문단(항상) — 신살(있을 때만) + 마무리(label 기반)
+
+    반환: 완성된 총평(str, 문단 사이 빈 줄)."""
     _sinsal_tags = sinsal_tags or []
     # 한글 조사(으로/로) — ㄹ받침(길)만 예외로 "로", 나머지(무난·보통·흉)는 "으로".
     _josa = "로" if label.startswith("길") else "으로"
@@ -1207,6 +1229,9 @@ def build_yukhyo_summary(
         _opening = f"{name}님이 물으신 「{q_str}」에 대해 — 세효(世爻), 즉 본인의 기운은 {label}{_josa} 나타났습니다."
     else:
         _opening = f"{name}님이 물으신 「{q_str}」에 대해 — 용신은 {label}{_josa} 나타났습니다."
+        _yukchin_desc = _YUKHYO_YUKCHIN_DESC.get(target_yukchin, "")
+        if _yukchin_desc:
+            _opening += f" 이번 용신은 {target_yukchin} — {_yukchin_desc}입니다."
 
     _basis = None
     if is_bokshin:
@@ -1232,8 +1257,15 @@ def build_yukhyo_summary(
     if _sinsal_tags:
         _sinsal_phrase = " ".join(_YUKHYO_SINSAL_PHRASE[_t] for _t in _sinsal_tags if _t in _YUKHYO_SINSAL_PHRASE)
 
-    _candidates = [_c for _c in (_basis, _dong_quote, _sinsal_phrase) if _c]
     _closing = _YUKHYO_LABEL_CLOSING.get(label, "흐름을 살피며 차분히 지켜보시길 권합니다.")
 
-    _clauses = [_opening] + _candidates[:2] + [_closing]
-    return " ".join(_clauses)
+    _paragraphs = [_opening]
+
+    _mid_para = " ".join(_c for _c in (_basis, _dong_quote) if _c)
+    if _mid_para:
+        _paragraphs.append(_mid_para)
+
+    _last_para = " ".join(_c for _c in (_sinsal_phrase, _closing) if _c)
+    _paragraphs.append(_last_para)
+
+    return "\n\n".join(_paragraphs)
