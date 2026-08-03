@@ -30819,6 +30819,17 @@ def main():
                 unsafe_allow_html=True,
             )
 
+            # 관법 명시 — 진태양시 기준임을 화면에 표기. region·offset은 고급설정
+            # 캡션(30294~30296행)과 동일한 기존 공식 재사용, 새 계산 아님.
+            _tc_region_disp = _ss.get("in_birth_region", "서울")
+            _tc_lon_disp = getattr(TimeCorrection, "REGION_LONGITUDE", {}).get(_tc_region_disp, 126.98)
+            _tc_offset_disp = round((_tc_lon_disp - 135.0) * 4)
+            st.caption(
+                f"본 풀이는 진태양시(眞太陽時) 기준입니다. 출생지 {_tc_region_disp}의 경도로 시각을 보정"
+                f"(표준시 대비 {_tc_offset_disp:+d}분)하여 명식을 세웠습니다. 시계시각을 그대로 쓰는 일반 앱과는 "
+                f"자정·경계 시각에서 사주가 다르게 나올 수 있습니다."
+            )
+
             # 3단 만세력 그리드 (입력 완료 직후)
             render_manse_grid(
                 pils, birth_year, birth_month, birth_day,

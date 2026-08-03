@@ -869,6 +869,22 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str="", dram
 
             y = H - 108*mm
 
+            # 관법 명시 — 진태양시 기준임을 표지에 표기. region·offset은 고급설정
+            # 캡션(manse.py in_birth_region 캡션)과 동일한 기존 공식 재사용, 새 계산
+            # 아님. write()는 자동 줄바꿈+페이지네이션(599행 정의)이라 표지 좁은
+            # 여백에 직접 좌표로 그리지 않고 body 흐름 첫 문단으로 안전하게 얹는다.
+            _tc_region_pdf = st.session_state.get("in_birth_region", "서울")
+            _tc_lon_pdf = getattr(TimeCorrection, "REGION_LONGITUDE", {}).get(_tc_region_pdf, 126.98)
+            _tc_offset_pdf = round((_tc_lon_pdf - 135.0) * 4)
+            y = write(
+                c,
+                f"본 풀이는 진태양시(眞太陽時) 기준입니다. 출생지 {_tc_region_pdf}의 경도로 시각을 보정"
+                f"(표준시 대비 {_tc_offset_pdf:+d}분)하여 명식을 세웠습니다. 시계시각을 그대로 쓰는 일반 앱과는 "
+                f"자정·경계 시각에서 사주가 다르게 나올 수 있습니다.",
+                y, size=8, color=(0.5, 0.47, 0.4), line_h=4.2,
+            )
+            y -= 2*mm
+
             try:
                 from saju_engine import get_ilgan_strength
                 from saju_interpreter import get_yongshin, get_gyeokguk
