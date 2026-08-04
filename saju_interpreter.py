@@ -7790,6 +7790,23 @@ def build_saju_tongbyeon(pils, daewoon=None):
             _seen = list(dict.fromkeys(o for o in ohs if o))
             return "·".join(OH_KR_TB.get(o, o) for o in _seen)
 
+        # ③-④ 사이 "천간 물상+관계" 절에서 쓰는 데이터 2개 — 서술용 물상 이름표일
+        # 뿐 새 판정 테이블이 아니다. _CHEONGAN_COMBO는 TG_HAP_MAP(saju_data.py 5대
+        # 천간합)과 겹치지 않는 물상 특수조합만 담는다.
+        _CHEONGAN_MULSANG = {
+            "甲": "곧게 뻗은 큰 나무", "乙": "바람에 흔들리는 화초", "丙": "만물을 비추는 태양",
+            "丁": "어둠을 밝히는 촛불", "戊": "묵직하게 자리 잡은 산", "己": "만물을 길러내는 논밭",
+            "庚": "제련을 기다리는 무쇠", "辛": "잘 다듬어진 보석", "壬": "쉼 없이 흐르는 강물",
+            "癸": "새벽에 맺히는 이슬",
+        }
+        _CHEONGAN_COMBO = {
+            frozenset(["丁", "庚"]): ("화련진금(火煉眞金)", "丁火가 庚金을 뜨겁게 달궈 참된 그릇으로 벼려내는 관계"),
+            frozenset(["甲", "庚"]): ("벽갑인정(劈甲引丁)", "庚金 도끼가 甲木을 쪼개 불쏘시개로 삼아 불을 끌어들이는 관계"),
+            frozenset(["壬", "丙"]): ("강휘상영(江暉相映)", "丙火 태양빛이 壬水 강물 위에 비쳐 반짝이는 관계"),
+            frozenset(["甲", "丁"]): ("목화통명(木火通明)", "甲木이 丁火로 타올라 밝고 총명한 기운을 드러내는 관계"),
+            frozenset(["庚", "壬"]): ("금백수청(金白水淸)", "庚金이 壬水를 만나 맑게 씻겨 내리는 관계"),
+        }
+
         # ① 격국 소개 — 뭘 쓰는 그릇이고 무엇을 낳는 그릇인지 (오프닝: 격명만 소개, 성패는 아직 말하지 않음)
         _flavor_paras = [s.strip() for s in (gk.get("격국_해설", "") or "").split("\n\n") if s.strip()]
         _flavor = " ".join(_flavor_paras[:2])
@@ -7916,6 +7933,90 @@ def build_saju_tongbyeon(pils, daewoon=None):
                 f"오행별로 나누면 {_dist_txt}의 분포입니다. {_bal_txt} 이 균형(또는 쏠림)이 앞서 말한 격국과, "
                 f"뒤에 이어질 용신이 실제로 힘을 받을 수 있느냐를 결정하는 바탕입니다."
             )
+
+        # ③-④ 천간 물상+관계 — 새 계산 없음. 일간 물상(_CHEONGAN_MULSANG)을 축으로,
+        # 원국에서 일간과 직접 얽히는 천간 1개를 골라(시간→월간→년간 순으로 훑되,
+        # _CHEONGAN_COMBO 히트를 최우선) 그 관계(생조/극제/설기/극출/동조 — OH+
+        # BIRTH_MAP+CONTROL_MAP으로 판별)를 서술하고, 같은 천간이 1순위 용신을
+        # 생조·보호하는지(순용) 극·설하는지(역용)까지 잡는다. 원국 전용(대운·세운
+        # 미사용) — ★상한: 일간 물상 + 관계 천간 1개 + 용신 방향 한 마디, 4천간
+        # 나열 금지. 조합·관계 둘 다 없으면 물상 소개만 남기고 조용히 끝난다.
+        p_mul = ""
+        ilgan_mulsang = _CHEONGAN_MULSANG.get(ilgan, "")
+        if ilgan_mulsang:
+            ilgan_oh = OH.get(ilgan, "")
+
+            def _stem_relation(other_oh):
+                if other_oh == ilgan_oh:
+                    return "동조"
+                if BIRTH_MAP.get(other_oh) == ilgan_oh:
+                    return "생조"
+                if CONTROL_MAP.get(other_oh) == ilgan_oh:
+                    return "극제"
+                if BIRTH_MAP.get(ilgan_oh) == other_oh:
+                    return "설기"
+                if CONTROL_MAP.get(ilgan_oh) == other_oh:
+                    return "극출"
+                return ""
+
+            _POS_TB2 = [("시간", pils[0].get("cg", "")), ("월간", pils[2].get("cg", "")), ("년간", pils[3].get("cg", ""))]
+            _rel_priority = {"극제": 0, "생조": 1, "설기": 2, "극출": 3, "동조": 4}
+            _combo_hit = None
+            _picked_pos, _picked_cg, _picked_rel = "", "", ""
+            for _pos, _cg in _POS_TB2:
+                if not _cg or _cg == ilgan:
+                    continue
+                _combo = _CHEONGAN_COMBO.get(frozenset([ilgan, _cg]))
+                if _combo:
+                    _combo_hit = _combo
+                    _picked_pos, _picked_cg = _pos, _cg
+                    _picked_rel = _stem_relation(OH.get(_cg, ""))
+                    break
+            if not _combo_hit:
+                _cands = [
+                    (_pos, _cg, _stem_relation(OH.get(_cg, "")))
+                    for _pos, _cg in _POS_TB2 if _cg and _cg != ilgan
+                ]
+                _cands = [c for c in _cands if c[2]]
+                if _cands:
+                    _cands.sort(key=lambda c: _rel_priority.get(c[2], 9))
+                    _picked_pos, _picked_cg, _picked_rel = _cands[0]
+
+            p_mul = f"천간의 모습으로 보면 {ilgan_kr}({ilgan}) 일간은 <b>{ilgan_mulsang}</b>입니다."
+            if _picked_cg:
+                if _combo_hit:
+                    _combo_name, _combo_desc = _combo_hit
+                    p_mul += f" 여기에 {_picked_pos} {_picked_cg}이(가) 함께 있어 <b>{_combo_name}</b> — {_combo_desc}가 만들어집니다."
+                else:
+                    _rel_txt_tb = {
+                        "극제": f"{_picked_pos} {_picked_cg}이(가) 일간을 극(剋)해 다스리려 드는 관계",
+                        "생조": f"{_picked_pos} {_picked_cg}이(가) 일간을 생(生)해 밀어주는 관계",
+                        "설기": f"일간이 {_picked_pos} {_picked_cg}을(를) 생(生)해 기운을 내어주는 관계",
+                        "극출": f"일간이 {_picked_pos} {_picked_cg}을(를) 극(剋)해 다스리는 관계",
+                        "동조": f"{_picked_pos} {_picked_cg}과(와) 같은 기운이 나란히 선 관계",
+                    }.get(_picked_rel, "")
+                    if _rel_txt_tb:
+                        p_mul += f" 여기에 {_rel_txt_tb}입니다."
+
+                _yong_all_tb = ys.get("종합_용신", []) or []
+                if _yong_all_tb:
+                    _yong1_oh_tb = _yong_all_tb[0]
+                    _other_oh_tb = OH.get(_picked_cg, "")
+                    if (
+                        _other_oh_tb == _yong1_oh_tb
+                        or BIRTH_MAP.get(_other_oh_tb) == _yong1_oh_tb
+                        or CONTROL_MAP.get(_yong1_oh_tb) == _other_oh_tb
+                    ):
+                        p_mul += (
+                            f" 이 천간은 1순위 용신 {OH_KR_TB.get(_yong1_oh_tb, _yong1_oh_tb)} 기운을 살리거나 지켜주는 "
+                            f"쪽이라, 용신이 <b>순용(順用)</b>으로 편하게 힘을 쓰는 자리입니다."
+                        )
+                    elif CONTROL_MAP.get(_other_oh_tb) == _yong1_oh_tb or BIRTH_MAP.get(_yong1_oh_tb) == _other_oh_tb:
+                        p_mul += (
+                            f" 이 천간은 1순위 용신 {OH_KR_TB.get(_yong1_oh_tb, _yong1_oh_tb)} 기운을 극(剋)하거나 "
+                            f"새게 하는 쪽이라, 용신이 <b>역용(逆用)</b>으로 힘겹게 작동하는 자리입니다."
+                        )
+            p_mul = p_mul.strip()
 
         # ④ 용신·희신 — get_yongshin() 값 그대로 풀어씀(조후_우선 플래그만 참조, 새 우선순위
         # 판단 안 함). sn_label에 따라 "이 용신이 없으면/있으면 어떤지"까지 풀되, 이는 이미
@@ -8099,7 +8200,7 @@ def build_saju_tongbyeon(pils, daewoon=None):
                 f"오행의 균형을 스스로 맞춰가는 사람에게 유리하게 설계된 사주라 할 수 있습니다."
             )
 
-        paragraphs = [p for p in [p1, p2, p_sn, p4, p5, p6] if p]
+        paragraphs = [p for p in [p1, p2, p_sn, p_mul, p4, p5, p6] if p]
         return "\n\n".join(paragraphs)
     except Exception:
         return ""
