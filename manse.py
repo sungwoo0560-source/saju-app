@@ -30294,11 +30294,7 @@ def main():
             )
             st.markdown("---")
             st.markdown("**🌐 출생지 (지방시 보정)**")
-            _region_list = ["서울","부산","인천","대구","대전","광주","울산","세종",
-                           "수원","고양","용인","부천","성남","안산","안양","평택",
-                           "춘천","원주","강릉","속초","청주","충주","전주","군산",
-                           "목포","여수","순천","포항","경주","구미","안동","창원",
-                           "진주","거제","제주","서귀포"]
+            _region_list = list(TimeCorrection.REGION_LONGITUDE.keys())
             _cur_region = _ss.get("in_birth_region", "서울")
             _cur_idx = _region_list.index(_cur_region) if _cur_region in _region_list else 0
             st.selectbox(
