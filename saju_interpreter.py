@@ -2366,6 +2366,8 @@ class LocalSajuNarrator:
 
         lines.append("\n---")
         lines.append("<h3>🏛️ 사주 8글자 — 기둥별 천간·지지 풀이</h3>")
+        if st.session_state.get("in_unknown_time", False):
+            lines.append("※ 출생시각 미상으로 <b>시주(時柱)</b> 및 시주 기반 해석(자녀운·말년운 등)은 제외됩니다.")
 
         _pil_map = [
             ("년주", pils[3]["cg"] if len(pils)>3 else "", pils[3]["jj"] if len(pils)>3 else ""),
