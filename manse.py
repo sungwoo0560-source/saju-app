@@ -11858,6 +11858,7 @@ def save_to_favorites(label: str):
         "in_marriage": _ss.get("in_marriage", "미혼"),
         "in_occupation": _ss.get("in_occupation", "선택 안 함"),
         "in_premium_correction": _ss.get("in_premium_correction", True),
+        "in_birth_region": _ss.get("in_birth_region") or "서울",
         "saju_pils": _ss.get("saju_pils"),
         "birth_year": _ss.get("birth_year"),
         "birth_month": _ss.get("birth_month"),
