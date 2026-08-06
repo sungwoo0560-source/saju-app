@@ -30447,6 +30447,10 @@ def main():
                 st.error(f"⚠️ 사주 계산 중 오류가 발생했습니다. 다시 시도해주세요.\n({str(_pils_err)[:80]})")
                 return
 
+            # 시간 미상 시 시주(pils[0])를 계산에서 배제 — 용신/격국/오행강약 오염 차단
+            if _ss.get("in_unknown_time"):
+                pils[0] = {"cg": "", "jj": "", "str": ""}
+
             # 세션 스테이트에 최종 반영 (Key Binding 영구화)
 
             st.session_state["saju_pils"] = pils
