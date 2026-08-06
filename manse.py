@@ -11938,6 +11938,15 @@ def load_from_favorite(idx: int):
         if key in data:
             _ss[key] = data[key]
 
+    # 출생지 유효성 검증 — 손상/구버전 값이면 서울로 안전 대체 + 경고 플래그
+    # (콜백 안이라 st.warning 직접 호출은 렌더되지 않음 → main() 렌더 경로에서 플래그로 표시)
+    _loaded_region = data.get("in_birth_region")
+    if _loaded_region is not None and _loaded_region not in TimeCorrection.REGION_LONGITUDE:
+        _ss["in_birth_region"] = "서울"
+        _ss["_region_fallback_warn"] = _loaded_region
+    else:
+        _ss.pop("_region_fallback_warn", None)
+
     if "in_solar_date" in data:
         try:
             _ss["in_solar_date"] = date.fromisoformat(data["in_solar_date"])
@@ -29597,6 +29606,14 @@ def main():
 
     if "in_birth_region" not in _ss:
         _ss["in_birth_region"] = "서울"
+
+    # 즐겨찾기 로드 시 손상된 출생지 값이 감지되면(load_from_favorite) 1회 경고 표시 후 플래그 소거
+    if _ss.get("_region_fallback_warn"):
+        st.warning(
+            f"저장된 출생지 '{_ss['_region_fallback_warn']}'를 인식할 수 없어 서울 기준으로 보정됩니다. "
+            f"정확한 진태양시 계산을 위해 출생지를 다시 선택해 주세요."
+        )
+        del _ss["_region_fallback_warn"]
 
     # in_premium_correction은 위젯이 key로 생성·관리 (세션 선설정 시 위젯 경고/뻑 방지)
     if "form_expanded" not in _ss:
