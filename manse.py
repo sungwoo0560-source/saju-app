@@ -5560,7 +5560,8 @@ def build_ilju_core_line(pils):
         depict = _SS_DEPICT.get(_ss_key, "")
         if not bonjil:
             return ""
-        line = f"🎯 한 줄 본질: {ilgan}{ilji} 일주 — {bonjil}."
+        _bonjil_rest = bonjil.split(",", 1)[1].strip() if "," in bonjil else bonjil
+        line = f"🎯 {ilgan}{ilji} 일주 — {_bonjil_rest}."
         if depict:
             line += f" {depict} 기질입니다."
         # Y-12 5단계: 🔮 한마디 헤드라인 (맨 앞에 prepend)
