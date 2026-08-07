@@ -6254,17 +6254,11 @@ def generate_four_pillars_synthesis(pils: list) -> str:
     if not ilgan:
         return "일간 정보가 없습니다."
 
-    ohaeng_count = {"木": 0, "火": 0, "土": 0, "金": 0, "水": 0}
-    for p in pils:
-        cg = p.get("cg", "")
-        jj = p.get("jj", "")
-        if cg in _CG_OHAENG:
-            ohaeng_count[_CG_OHAENG[cg]] += 1
-        if jj in _JJ_OHAENG:
-            ohaeng_count[_JJ_OHAENG[jj]] += 1
-
-    dominant_oh = max(ohaeng_count, key=ohaeng_count.get)
-    min_oh = min(ohaeng_count, key=ohaeng_count.get)
+    from saju_engine import get_ilgan_strength
+    _strength_info = get_ilgan_strength(ilgan, pils)
+    oh_strength = _strength_info["oh_strength"]
+    dominant_oh = max(oh_strength, key=oh_strength.get)
+    min_oh = min(oh_strength, key=oh_strength.get)
 
     ss_list = _get_all_ss(ilgan, pils)
     bigyeon = ss_list.count("비견") + ss_list.count("겁재")
@@ -6277,8 +6271,7 @@ def generate_four_pillars_synthesis(pils: list) -> str:
         "木": "진취·성장", "火": "열정·명예",
         "土": "안정·신뢰", "金": "결단·원칙", "水": "지혜·축적",
     }
-    is_strong = (bigyeon + inseong) >= 3
-    strength_desc = "신강(身强)" if is_strong else "신약(身弱)"
+    strength_desc = _strength_info["신강신약"]
     ilgan_oh = _CG_OHAENG.get(ilgan, "")
     iljj = pils[1].get("jj", "")
     iljj_unsung = _calc_unsung(ilgan, iljj)
