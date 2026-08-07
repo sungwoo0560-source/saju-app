@@ -18188,7 +18188,6 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
     )
     st.markdown("\n".join(lines), unsafe_allow_html=True)
 
-    render_worry_inference(pils, birth_year, gender, marriage_status)
     render_pdf_download_btn("current_situation", pils, name, birth_year, gender)
 
 
@@ -21781,6 +21780,8 @@ def menu6_relations(pils, name, birth_year, gender, marriage_status="미혼"):
         "</div>",
         unsafe_allow_html=True,
     )
+
+    render_worry_inference(pils, birth_year, gender, marriage_status)
 
     # AI 정밀 분석 버튼
 
