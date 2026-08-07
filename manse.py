@@ -5697,17 +5697,18 @@ def build_saju_core_diagnosis(pils, name, birth_year, gender, current_year=None)
         else:
             out.append("- ✅ **안정** — 평이한 흐름\n")
 
-        if past_active:
-            out.append(f"**▣ 최근 발동**")
-            for _lbl in past_active[-2:]:
-                out.append(f"- {_lbl}: {past_danger.get(_lbl, '주의')}")
-            out.append("- 이 시기에 실제 사고·수술·이별·재물 손실 등이 있었을 가능성 높음. 사주 패턴이 가리킨 시기.\n")
-
-        if future_active:
-            out.append(f"**▣ 다가올 위험**")
-            for _lbl in future_active[:2]:
-                out.append(f"- {_lbl}: {future_danger.get(_lbl, '주의')}")
-            out.append("- 미리 대비 + 안전 관리 + 정기 검진 필수\n")
+        if past_active or future_active:
+            out.append(f"**▣ 시기 흐름**")
+            if past_active:
+                out.append(f"**· 지난 충격**")
+                for _lbl in past_active[-2:]:
+                    out.append(f"- {_lbl}: {past_danger.get(_lbl, '주의')}")
+                out.append("- 이 시기에 실제 사고·수술·이별·재물 손실 등이 있었을 가능성 높음. 사주 패턴이 가리킨 시기.\n")
+            if future_active:
+                out.append(f"**· 앞으로 조심**")
+                for _lbl in future_active[:2]:
+                    out.append(f"- {_lbl}: {future_danger.get(_lbl, '주의')}")
+                out.append("- 미리 대비 + 안전 관리 + 정기 검진 필수\n")
 
         # 종합 한 줄은 X-6-G 필터 후 시나리오 수 확정 이후 출력 (X-6-Q 이동)
 
