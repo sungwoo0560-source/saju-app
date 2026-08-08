@@ -15550,8 +15550,8 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
     # "평(平)" → "평" 정규화
     import re as _re
     sw_gil = _re.sub(r'\([^)]+\)', '', str(sw_gil)).strip()
-    dw_age_s = cross.get("dw_start_age", cross.get("시작나이", ""))
-    dw_age_e = cross.get("dw_end_age",   cross.get("종료나이", ""))
+    dw_age_s = cross.get("dw_start_age_counting", "")
+    dw_age_e = cross.get("dw_end_age_counting", "")
 
     try:
         ilgan   = pils[1]["cg"]
@@ -19843,7 +19843,7 @@ def menu2_lifeline(pils, birth_year, gender, name="내담자"):
                 "戌":"戌土 — 가을의 수확 기운. 마무리·결실·저장에 유리.",
                 "亥":"亥水 — 깊고 조용한 기운. 준비·내면 성장·연구에 유리.",
             }
-            _age_s2 = cur_dw.get("시작나이", cur_dw["시작연도"] - birth_year)
+            _age_s2 = _counting_age(cur_dw, birth_year)
             _age_e2 = _age_s2 + 9
             _dw2_oh_cg = OH.get(_dw_cg2, "")
             _dw2_oh_jj = OH.get(_dw_jj2, "")
@@ -19886,7 +19886,7 @@ def menu2_lifeline(pils, birth_year, gender, name="내담자"):
                 f"font-size:13px;color:{_dw2_col};font-weight:700;'>"
                 f"💎 행동 지침: {_dw2_action}<br>"
                 f"<span style='color:#aaa;font-weight:400;font-size:12px'>"
-                f"📅 {cur_dw['시작연도']}~{cur_dw['종료연도']}년 (만 {_age_s2}~{_age_e2}세) · "
+                f"📅 {cur_dw['시작연도']}~{cur_dw['종료연도']}년 ({_age_s2}~{_age_e2}세) · "
                 f"<b>{'올해가 마지막 해' if _remain2 == 0 else f'{_remain2}년 남음'}</b></span>"
                 f"</div></div>",
                 unsafe_allow_html=True,
