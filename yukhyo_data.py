@@ -1720,6 +1720,21 @@ assert len(_YUKHYO_YUKCHIN_DESC) == 5, "_YUKHYO_YUKCHIN_DESC는 육친 5개 전�
 assert set(_YUKHYO_YUKCHIN_DESC) == {"처재", "관귀", "부모", "자손", "형제"}, \
     "_YUKHYO_YUKCHIN_DESC 키가 get_yukchin() 반환값(처재·관귀·부모·자손·형제)과 불일치"
 
+# 용신 자리에 실린 육수(六獸) 한 줄 뜻 — _YUKHYO_YUKCHIN_DESC·_YUKHYO_SINSAL_PHRASE와
+# 같은 패턴의 위성 dict. 총평 오프닝에서 "용신이 어떤 성격의 자리에 있는지"를
+# 한 문장 더 보태는 용도일 뿐, 육수 자체의 길흉 판정 로직은 아니다(장식적 서술).
+_YUKHYO_YUKSU_PHRASE = {
+    "靑龍": "청룡(靑龍)이 함께 있어 기쁘고 원만한 기운이 실려 있습니다.",
+    "朱雀": "주작(朱雀)이 함께 있어 말과 문서, 소식이 오가는 자리입니다.",
+    "勾陳": "구진(勾陳)이 함께 있어 일이 더디고 신중하게 진행되는 자리입니다.",
+    "螣蛇": "등사(螣蛇)가 함께 있어 마음이 어수선하거나 뜻밖의 변수가 있을 수 있는 자리입니다.",
+    "白虎": "백호(白虎)가 함께 있어 일이 강하고 빠르게 몰아치는 자리입니다.",
+    "玄武": "현무(玄武)가 함께 있어 애매하거나 드러나지 않는 부분을 살펴야 하는 자리입니다.",
+}
+assert len(_YUKHYO_YUKSU_PHRASE) == 6, "_YUKHYO_YUKSU_PHRASE는 육수 6개 전수여야 한다"
+assert set(_YUKHYO_YUKSU_PHRASE) == set(_YUKSU_ORDER), \
+    "_YUKHYO_YUKSU_PHRASE 키가 _YUKSU_ORDER(청룡·주작·구진·등사·백호·현무)와 불일치"
+
 _YUKHYO_LABEL_CLOSING = {
     "길(吉)": "전체적으로 순조로운 흐름이니 자신 있게 나아가도 좋겠습니다.",
     "무난": "나쁘지 않은 흐름이나 아직 확신하기엔 이르니 조금 더 지켜보시길 권합니다.",
@@ -1727,30 +1742,74 @@ _YUKHYO_LABEL_CLOSING = {
     "흉(凶)": "지금은 뜻대로 되기 어려운 때이니 무리하지 마시고 때를 기다리시길 권합니다.",
 }
 
+# 질문유형(QUESTION_TYPES) × 길흉 label 교차 실용 조언 — "그래서 지금 뭘 하면
+# 좋은지" 한 문장. label 판정에는 관여하지 않는 순수 서술이며, judge_yukhyo_advanced가
+# 이미 낸 label을 그대로 키로 받아 조언 문장만 고를 뿐이다(응기·시기는 다루지 않는다).
+_YUKHYO_QTYPE_ADVICE = {
+    ("재물", "길(吉)"): "재물운을 물으셨으니, 지금은 적극적으로 움직여 기회를 붙잡아도 좋은 시점입니다.",
+    ("재물", "무난"): "재물운을 물으셨으니, 무리한 투자보다는 들어오는 기회를 차분히 지켜보며 준비하시길 권합니다.",
+    ("재물", "보통"): "재물운을 물으셨으니, 큰 변화를 서두르기보다 지금 하던 대로 꾸준히 이어가는 편이 안전합니다.",
+    ("재물", "흉(凶)"): "재물운을 물으셨으니, 지금은 새로운 투자나 큰 지출을 미루고 지키는 데 집중하시길 권합니다.",
+    ("시험/취업/관운", "길(吉)"): "시험·취업·관운을 물으셨으니, 지금 도전하고 있는 일에 자신감을 갖고 밀어붙이셔도 좋습니다.",
+    ("시험/취업/관운", "무난"): "시험·취업·관운을 물으셨으니, 결과를 서두르기보다 준비를 조금 더 다지며 때를 기다리시길 권합니다.",
+    ("시험/취업/관운", "보통"): "시험·취업·관운을 물으셨으니, 결과에 일희일비하기보다 지금의 노력을 담담히 이어가시길 권합니다.",
+    ("시험/취업/관운", "흉(凶)"): "시험·취업·관운을 물으셨으니, 지금은 무리하게 밀어붙이기보다 부족한 부분을 다시 점검할 때입니다.",
+    ("문서/부동산", "길(吉)"): "문서·부동산 일을 물으셨으니, 지금 진행 중인 계약이나 서류를 적극적으로 추진하셔도 좋은 흐름입니다.",
+    ("문서/부동산", "무난"): "문서·부동산 일을 물으셨으니, 계약 조건을 한 번 더 꼼꼼히 살핀 뒤 진행하시길 권합니다.",
+    ("문서/부동산", "보통"): "문서·부동산 일을 물으셨으니, 서두르지 말고 서류와 조건을 차분히 검토하며 진행하시길 권합니다.",
+    ("문서/부동산", "흉(凶)"): "문서·부동산 일을 물으셨으니, 지금은 계약이나 서명을 서두르지 말고 조건을 재차 확인하시길 권합니다.",
+    ("자식/소망", "길(吉)"): "자식·소망하시는 일을 물으셨으니, 지금 마음먹은 바를 적극적으로 밀고 나가셔도 좋겠습니다.",
+    ("자식/소망", "무난"): "자식·소망하시는 일을 물으셨으니, 서두르지 않고 지금처럼 정성을 기울이시면 됩니다.",
+    ("자식/소망", "보통"): "자식·소망하시는 일을 물으셨으니, 당장 결과를 기대하기보다 꾸준히 마음을 쏟으시길 권합니다.",
+    ("자식/소망", "흉(凶)"): "자식·소망하시는 일을 물으셨으니, 지금은 조급해하지 마시고 시기를 조금 늦춰 지켜보시길 권합니다.",
+    ("경쟁/동업", "길(吉)"): "경쟁·동업 관계를 물으셨으니, 지금은 상대와 적극적으로 협력하거나 맞서도 유리한 시점입니다.",
+    ("경쟁/동업", "무난"): "경쟁·동업 관계를 물으셨으니, 상대의 의중을 좀 더 살피며 신중하게 다가가시길 권합니다.",
+    ("경쟁/동업", "보통"): "경쟁·동업 관계를 물으셨으니, 지금은 무리하게 승부를 보려 하기보다 관계를 지켜보시길 권합니다.",
+    ("경쟁/동업", "흉(凶)"): "경쟁·동업 관계를 물으셨으니, 지금은 다툼이나 무리한 동업을 피하고 한 발 물러서시길 권합니다.",
+    ("기타", "길(吉)"): "물으신 일에 대해, 지금은 마음먹은 방향으로 나아가셔도 좋은 흐름입니다.",
+    ("기타", "무난"): "물으신 일에 대해, 조급해하지 않고 상황을 좀 더 지켜보시길 권합니다.",
+    ("기타", "보통"): "물으신 일에 대해, 특별한 변화를 서두르기보다 지금의 흐름을 유지하시길 권합니다.",
+    ("기타", "흉(凶)"): "물으신 일에 대해, 지금은 무리하게 추진하기보다 때를 기다리시길 권합니다.",
+}
+assert len(_YUKHYO_QTYPE_ADVICE) == 24, "_YUKHYO_QTYPE_ADVICE는 질문유형 6종 × label 4종 = 24개 전수여야 한다"
+assert {_k[0] for _k in _YUKHYO_QTYPE_ADVICE} == set(QUESTION_TYPES), \
+    "_YUKHYO_QTYPE_ADVICE 키의 질문유형이 QUESTION_TYPES와 불일치"
+assert {_k[1] for _k in _YUKHYO_QTYPE_ADVICE} == set(_YUKHYO_LABEL_CLOSING), \
+    "_YUKHYO_QTYPE_ADVICE 키의 label이 _YUKHYO_LABEL_CLOSING과 불일치"
+
 
 def build_yukhyo_summary(
     name, q_str, label, target_yukchin,
     is_bokshin=False, is_gongmang_flag=False, samhap_match=False, hwahyo_label=None,
     is_dong_y=False, dong_hyo_text=None, sinsal_tags=None,
+    se_pos=None, eung_pos=None, yongshin_yuksu=None, qtype=None,
 ):
-    """질문 맥락(질문+용신 판단)에 육친 소개·동효 효사·신살을 얹어 2~3문단짜리
-    종합 총평을 조합한다. ★새 판단 로직이 아니다 — judge_yukhyo_advanced가 이미
-    계산한 label과 그 근거 요인(공망·복신·삼합·화효)을, 이미 채워진 HYO_TEXT
-    효사·_YUKHYO_YUKCHIN_DESC 육친 뜻·get_yukhyo_sinsal_targets 신살과 함께
-    문장으로 엮을 뿐, 어떤 값도 새로 판정하지 않는다(판단값 무변 — target_yukchin도
-    호출부가 이미 가진 값을 그대로 받아 쓸 뿐 여기서 새로 정하지 않는다).
+    """질문 맥락(질문+용신 판단)에 육친 소개·세응 위치·육수·동효 효사·신살·
+    질문유형별 실용 조언을 얹어 2~3문단짜리 종합 총평을 조합한다. ★새 판단
+    로직이 아니다 — judge_yukhyo_advanced가 이미 계산한 label과 그 근거 요인
+    (공망·복신·삼합·화효)을, 이미 채워진 HYO_TEXT 효사·_YUKHYO_YUKCHIN_DESC
+    육친 뜻·get_yukhyo_sinsal_targets 신살·get_yuksu_order 육수·SEEUNG 세응과
+    함께 문장으로 엮을 뿐, 어떤 값도 새로 판정하지 않는다(판단값 무변 —
+    target_yukchin·se_pos·eung_pos·yongshin_yuksu·qtype 모두 호출부가 이미
+    가진 값을 그대로 받아 쓸 뿐 여기서 새로 정하지 않는다). 응기(시기)는
+    이를 산출하는 판단 함수 자체가 아직 없어 다루지 않는다.
 
-    모순 방지 원칙: 중간 문단(육친 소개·근거·동효 인용·신살)은 전부 사실
-    서술일 뿐 자체적으로 길흉을 단정하지 않는다 — 실제 길흉 판정은 오프닝
-    문단과 마지막 문단의 마무리 문장에서만, 오직 같은 label 하나로 통일해서
-    말한다. 따라서 삼합(+가산 요인)이 있어도 최종 label이 흉이면 오프닝·
-    마무리 모두 흉으로만 말하고, 삼합 문단은 "삼합국이 이루어져 있다"는
-    사실만 전한다.
+    모순 방지 원칙: 오프닝의 세응·육수, 근거 문단(공망/복신/삼합/화효), 동효
+    인용, 신살, 조언은 전부 사실 서술일 뿐 자체적으로 길흉을 단정하지 않는다
+    — 실제 길흉 판정은 오프닝 문단과 마지막 문단의 마무리 문장에서만, 오직
+    같은 label 하나로 통일해서 말한다. 따라서 삼합(+가산 요인)이 있어도
+    최종 label이 흉이면 오프닝·마무리 모두 흉으로만 말하고, 삼합 문단은
+    "삼합국이 이루어져 있다"는 사실만 전한다.
+
+    근거 문단은 공망·복신·삼합·화효가 동시에 참이면 전부 문장화한다(단,
+    화효 4종은 judge_hwahyo가 애초에 하나만 반환하므로 그 안에서는 배타적).
+    judge_yukhyo_advanced가 낸 _reasons 점수 가중과 이 문단의 문장 개수가
+    서로 어긋나지 않도록 맞춘 것뿐, 가중치 자체는 건드리지 않는다.
 
     문단 구성(있는 재료만큼 2~3문단, "\\n\\n"로 구분):
-      1문단(항상) — 오프닝(길흉 label) + 용신 육친 소개(target_yukchin 있을 때만)
-      2문단(근거·동효 중 하나라도 있을 때만) — 근거(공망/복신/삼합/화효) + 동효 효사 인용
-      3문단(항상) — 신살(있을 때만) + 마무리(label 기반)
+      1문단(항상) — 오프닝(길흉 label) + 용신 육친 소개 + 세응 위치 + 육수 한 줄
+      2문단(근거·동효 중 하나라도 있을 때만) — 근거(공망/복신/삼합/화효, 전부 나열) + 동효 효사 인용
+      3문단(항상) — 신살(있을 때만) + 질문유형별 실용 조언(있을 때만) + 마무리(label 기반)
 
     반환: 완성된 총평(str, 문단 사이 빈 줄)."""
     _sinsal_tags = sinsal_tags or []
@@ -1765,21 +1824,29 @@ def build_yukhyo_summary(
         if _yukchin_desc:
             _opening += f" 이번 용신은 {target_yukchin} — {_yukchin_desc}입니다."
 
-    _basis = None
+    if se_pos is not None and eung_pos is not None:
+        _opening += f" 세효(世)는 {se_pos}효, 응효(應)는 {eung_pos}효 자리에 있습니다."
+
+    _yuksu_phrase = _YUKHYO_YUKSU_PHRASE.get(yongshin_yuksu) if yongshin_yuksu else None
+    if _yuksu_phrase:
+        _opening += f" {_yuksu_phrase}"
+
+    _basis_list = []
     if is_bokshin:
-        _basis = "용신이 이 괘에 드러나지 않은 복신(伏神)이라 아직 겉으로 나설 때가 아닙니다."
-    elif is_gongmang_flag:
-        _basis = "용신이 공망(空亡)에 걸려 있어 지금은 힘을 온전히 쓰지 못하는 상태입니다."
-    elif samhap_match:
-        _basis = "용신과 같은 오행의 삼합국(三合局)이 괘 안에 이루어져 기운이 한데 뭉쳐 있습니다."
-    elif hwahyo_label == "回頭生":
-        _basis = "동효가 변하며 회두생(回頭生)해 용신의 기세를 오히려 북돋고 있습니다."
+        _basis_list.append("용신이 이 괘에 드러나지 않은 복신(伏神)이라 아직 겉으로 나설 때가 아닙니다.")
+    if is_gongmang_flag:
+        _basis_list.append("용신이 공망(空亡)에 걸려 있어 지금은 힘을 온전히 쓰지 못하는 상태입니다.")
+    if samhap_match:
+        _basis_list.append("용신과 같은 오행의 삼합국(三合局)이 괘 안에 이루어져 기운이 한데 뭉쳐 있습니다.")
+    if hwahyo_label == "回頭生":
+        _basis_list.append("동효가 변하며 회두생(回頭生)해 용신의 기세를 오히려 북돋고 있습니다.")
     elif hwahyo_label == "回頭剋":
-        _basis = "동효가 변하며 회두극(回頭剋)을 당해 용신의 기세가 한풀 꺾였습니다."
+        _basis_list.append("동효가 변하며 회두극(回頭剋)을 당해 용신의 기세가 한풀 꺾였습니다.")
     elif hwahyo_label == "化空":
-        _basis = "동효가 변한 자리마저 공망이라(化空) 변화의 힘이 흐지부지되는 모습입니다."
+        _basis_list.append("동효가 변한 자리마저 공망이라(化空) 변화의 힘이 흐지부지되는 모습입니다.")
     elif hwahyo_label == "化墓":
-        _basis = "동효가 변해 스스로의 묘(墓)로 들어가(化墓) 흐름이 정체되기 쉬운 자리입니다."
+        _basis_list.append("동효가 변해 스스로의 묘(墓)로 들어가(化墓) 흐름이 정체되기 쉬운 자리입니다.")
+    _basis = " ".join(_basis_list) if _basis_list else None
 
     _dong_quote = None
     if is_dong_y and dong_hyo_text:
@@ -1789,6 +1856,8 @@ def build_yukhyo_summary(
     if _sinsal_tags:
         _sinsal_phrase = " ".join(_YUKHYO_SINSAL_PHRASE[_t] for _t in _sinsal_tags if _t in _YUKHYO_SINSAL_PHRASE)
 
+    _advice = _YUKHYO_QTYPE_ADVICE.get((qtype, label)) if qtype else None
+
     _closing = _YUKHYO_LABEL_CLOSING.get(label, "흐름을 살피며 차분히 지켜보시길 권합니다.")
 
     _paragraphs = [_opening]
@@ -1797,7 +1866,7 @@ def build_yukhyo_summary(
     if _mid_para:
         _paragraphs.append(_mid_para)
 
-    _last_para = " ".join(_c for _c in (_sinsal_phrase, _closing) if _c)
+    _last_para = " ".join(_c for _c in (_sinsal_phrase, _advice, _closing) if _c)
     _paragraphs.append(_last_para)
 
     return "\n\n".join(_paragraphs)

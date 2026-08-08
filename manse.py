@@ -28728,6 +28728,7 @@ def menu_yukhyo():
             _hyo6_y = HYO_TEXT.get(_bon_name, ())
             if _hyo6_y:
                 _dong_hyo_text = _hyo6_y[_yongshin_idx]
+        _yongshin_yuksu = _yuksu6[_yongshin_idx] if not _is_bokshin else None
 
         _summary = build_yukhyo_summary(
             _name_str, _q_str, _label, _target_yukchin,
@@ -28735,6 +28736,8 @@ def menu_yukhyo():
             samhap_match=_samhap_match, hwahyo_label=_hwahyo_label,
             is_dong_y=_is_dong_y, dong_hyo_text=_dong_hyo_text,
             sinsal_tags=_yongshin_sinsal_tags,
+            se_pos=_se_pos, eung_pos=_eung_pos,
+            yongshin_yuksu=_yongshin_yuksu, qtype=_yh_qtype,
         )
         st.markdown("---")
         st.markdown("**종합(綜合)**")
