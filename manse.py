@@ -25,6 +25,7 @@ from saju_data import (
 from saju_ui import *
 from saju_report import menu_pdf
 from yukhyo_data import *  # 육효(六爻) 전용 — 사주 데이터와 분리된 독립 파일
+from yukhyo_data import _YUKHYO_HYO_EASY  # 언더스코어 이름은 * import에서 제외되므로 명시적으로 가져온다
 
 # ── saju_ui / saju_report 없을 경우 폴백 정의 ─────────────────────
 if "render_quick_consult_header" not in dir():
@@ -28638,10 +28639,13 @@ def menu_yukhyo():
     _dong_positions = [_i for _i in range(6) if _dong6[_i]]
     if _dong_positions:
         _hyo6 = HYO_TEXT.get(_bon_name, ())
+        _hyo6_easy = _YUKHYO_HYO_EASY.get(_bon_name, ())
         if _hyo6:
             st.markdown("**동효(動爻) 효사**")
             for _i in _dong_positions:
                 st.caption(f"{_i + 1}효: {_hyo6[_i]}")
+                if _hyo6_easy:
+                    st.caption(_hyo6_easy[_i])
         else:
             st.caption("동효 효사 준비 중입니다.")
 
