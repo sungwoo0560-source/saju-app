@@ -25,7 +25,12 @@ from saju_data import (
 from saju_ui import *
 from saju_report import menu_pdf
 from yukhyo_data import *  # 육효(六爻) 전용 — 사주 데이터와 분리된 독립 파일
-from yukhyo_data import _YUKHYO_HYO_EASY  # 언더스코어 이름은 * import에서 제외되므로 명시적으로 가져온다
+try:
+    from yukhyo_data import _YUKHYO_HYO_EASY  # 언더스코어 이름은 * import에서 제외되므로 명시적으로 가져온다
+except ImportError:
+    import logging as _logging
+    _logging.warning("[yukhyo_data] _YUKHYO_HYO_EASY import 실패 — 폴백 발동, 육효 동효 효사의 '쉽게 말하면' 캡션이 표시되지 않음")
+    _YUKHYO_HYO_EASY = {}
 
 # ── saju_ui / saju_report 없을 경우 폴백 정의 ─────────────────────
 if "render_quick_consult_header" not in dir():
