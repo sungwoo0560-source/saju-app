@@ -8633,7 +8633,8 @@ def get_crossing_interpretation(pils, cur_year, birth_year=None, birth_month=Non
         if not cur_dw or not sw:
             return {"summary": "", "finance": "", "career": "", "health": "", "relation": "",
                     "dw_ss": "", "sw_ss": "", "sw_gil": "평",
-                    "dw_start_age": "", "dw_end_age": ""}
+                    "dw_start_age": "", "dw_end_age": "",
+                    "dw_start_age_counting": "", "dw_end_age_counting": ""}
 
         dw_ss = TEN_GODS_MATRIX.get(ilgan, {}).get(cur_dw.get("cg", ""), "")
         sw_ss = sw.get("십성_천간", "")
@@ -8700,17 +8701,24 @@ def get_crossing_interpretation(pils, cur_year, birth_year=None, birth_month=Non
         _dw_age_s = cur_dw.get("시작나이", "")
         _dw_age_e = (_dw_age_s + 9) if isinstance(_dw_age_s, (int, float)) else ""
 
+        # 세는나이(한국 나이) 환산 — 시작연도 - birth_year + 1. 표시 전용, 판정 로직 무관.
+        _dw_start_year = cur_dw.get("시작연도", 0)
+        _dw_age_s_counting = (_dw_start_year - _by + 1) if (_dw_start_year and _by) else ""
+        _dw_age_e_counting = (_dw_age_s_counting + 9) if isinstance(_dw_age_s_counting, (int, float)) else ""
+
         return {
             "dw_ss": dw_ss, "sw_ss": sw_ss, "sw_gil": sw_gil,
             "summary": summary, "finance": finance,
             "career": career, "health": health, "relation": relation,
             "dw_start_age": _dw_age_s, "dw_end_age": _dw_age_e,
+            "dw_start_age_counting": _dw_age_s_counting, "dw_end_age_counting": _dw_age_e_counting,
         }
     except Exception as _e:
         _saju_log.debug("[crossing_interp] %s", _e)
         return {"summary": "", "finance": "", "career": "", "health": "", "relation": "",
                 "dw_ss": "", "sw_ss": "", "sw_gil": "평",
-                "dw_start_age": "", "dw_end_age": ""}
+                "dw_start_age": "", "dw_end_age": "",
+                "dw_start_age_counting": "", "dw_end_age_counting": ""}
 
 
 def get_relationship_reading(pils, gender="남", marriage_status="미혼"):

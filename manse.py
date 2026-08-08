@@ -10266,8 +10266,7 @@ def tab_daewoon(pils, birth_year, gender):
         _dw_str = dw["str"]
         _dw_kr = "".join(_GZ_KR.get(c, c) for c in _dw_str)
 
-        _extra_m = dw.get("시작나이_월", 0)
-        _age_label = f'{dw["시작나이"]}세{"·" + str(_extra_m) + "개월" if _extra_m else ""}'
+        _age_label = f'{_counting_age(dw, birth_year)}세'
         tl += f'<div style="background:{bg};color:{tc};{bdr}border-radius:10px;padding:8px 12px;text-align:center;min-width:68px"><div style="font-size:10px;opacity:.8">{_age_label}</div><div style="font-size:15px;font-weight:800">{_dw_str}</div><div style="font-size:10px;opacity:.75">({_dw_kr})</div><div style="font-size:10px">{d_ss}</div>{"<div style=font-size:10px;color:#ffe;font-weight:700>🌟용신</div>" if is_yong else ""}{"<div style=font-size:10px;color:#ff6b00;font-weight:800>◀현재</div>" if is_cur else ""}</div>'
 
     tl += "</div>"
@@ -14776,6 +14775,14 @@ def render_worry_inference(pils, birth_year, gender, marital_status=None):
         pass
 
 
+def _counting_age(dw, birth_year):
+    """대운 시작 나이를 세는나이(한국 나이)로 환산. 시작연도 없거나 0이면 0 반환."""
+    _sy = dw.get("시작연도", 0) if dw else 0
+    if not _sy or not birth_year:
+        return 0
+    return _sy - birth_year + 1
+
+
 def build_gangsa_block(pils, name, birth_year, gender, marriage_status=None):
     """강사식 13항목 HTML 문자열을 반환. 실패 시 빈 문자열.
     발동 룰의 rule_id는 st.session_state["_gangsa_rule_hits"]에 함께 기록한다(피드백 루프 2단계)."""
@@ -14813,8 +14820,8 @@ def build_gangsa_block(pils, name, birth_year, gender, marriage_status=None):
         # "평(平)" → "평" 정규화
         import re as _re
         sw_gil = _re.sub(r'\([^)]+\)', '', str(sw_gil)).strip()
-        dw_age_s = cross.get("dw_start_age", cross.get("시작나이", ""))
-        dw_age_e = cross.get("dw_end_age",   cross.get("종료나이", ""))
+        dw_age_s = cross.get("dw_start_age_counting", "")
+        dw_age_e = cross.get("dw_end_age_counting", "")
 
         try:
             ilgan   = pils[1]["cg"]
@@ -14952,7 +14959,7 @@ def build_gangsa_block(pils, name, birth_year, gender, marriage_status=None):
                     _cg_d = d.get("cg", "")
                     _jj_d = d.get("jj", "")
                     _str_d = d.get("str", "")
-                    _a_s = d.get("시작나이", 0)
+                    _a_s = _counting_age(d, birth_year)
                     _ck = _core_interp4(DAEWOON_INTERP.get(_cg_d, ""), _cg_d)
                     _jk = _core_interp4(DAEWOON_INTERP.get(_jj_d, ""), _jj_d)
                     # 천간·지지 핵심 합치기 (빈값 가드)
@@ -15172,7 +15179,7 @@ def build_gangsa_block(pils, name, birth_year, gender, marriage_status=None):
                     _dhj4 = _dss4.split("(")[0] if _dss4 else ""
                     _g4 = _EVENT_GOOD4.get(_dhj4, "")
                     if _g4:
-                        _ev_good4 = f"다만 {_d4.get('시작나이',0)}세 무렵 {_d4.get('str','')} 대운은 용신이 힘을 받아 {_g4} 시기였습니다. 그때 쌓은 것이 지금 당신을 버티게 하는 밑천입니다."
+                        _ev_good4 = f"다만 {_counting_age(_d4, birth_year)}세 무렵 {_d4.get('str','')} 대운은 용신이 힘을 받아 {_g4} 시기였습니다. 그때 쌓은 것이 지금 당신을 버티게 하는 밑천입니다."
                         if _dhj4 in EVENT_GOOD_RULES:
                             st.session_state["_gangsa_rule_hits"].append({
                                 "rule_id": EVENT_GOOD_RULES[_dhj4]["rule_id"],
