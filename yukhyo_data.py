@@ -1810,6 +1810,24 @@ assert len(_YUKHYO_YUKCHIN_DESC) == 5, "_YUKHYO_YUKCHIN_DESC는 육친 5개 전�
 assert set(_YUKHYO_YUKCHIN_DESC) == {"처재", "관귀", "부모", "자손", "형제"}, \
     "_YUKHYO_YUKCHIN_DESC 키가 get_yukchin() 반환값(처재·관귀·부모·자손·형제)과 불일치"
 
+# 육친 성격 해설(구조 설명, 2문장) — _YUKHYO_YUKCHIN_DESC(짧은 명사구)는 무손질,
+# build_yukhyo_summary 오프닝에서 그 명사구 뒤에 이어붙이는 확장판이다. get_yukchin()의
+# 오행 생극 정의(생아자=부모·아생자=자손·극아자=관귀·아극자=처재·동아자=형제)를 근거로,
+# 왜 그 두 개념(예: 재물+아내)이 한 육친으로 묶이는지와 세효와 어떤 관계로 읽히는지만
+# 구조로 설명한다 — 길흉 단정("좋다/나쁘다")도, 실용 조언("그래서 이렇게 하세요")도
+# 하지 않는다. 길흉은 label의 몫이고 조언은 _YUKHYO_QTYPE_ADVICE의 몫이다(모순 방지
+# 원칙, build_yukhyo_summary docstring 참고).
+_YUKHYO_YUKCHIN_EASY = {
+    "처재": "내 기운이 다스리고 부리는 대상이라는 점에서 재물과 배우자(이성)가 같은 자리에 묶입니다. 이 효가 세효와 얼마나 가깝고 잘 맞는 자리에 있는지를 보면, 지금 그 재물이나 인연이 나와 어떤 관계로 걸려 있는지가 함께 드러납니다.",
+    "관귀": "나를 억누르고 다스리는 대상이라는 점에서 직장·명예와 압박·근심이 같은 자리에 묶입니다. 이 효가 세효와 어떤 관계로 걸려 있는지를 보면, 지금 그 책임이나 압박이 나와 얼마나 깊이 얽혀 있는 상황인지가 함께 드러납니다.",
+    "부모": "나를 낳고 뒷받침해주는 대상이라는 점에서 문서·후원과 윗사람이 같은 자리에 묶입니다. 이 효가 세효를 어떤 자리에서 받쳐주고 있는지를 보면, 지금 그 도움이나 근거가 나와 얼마나 밀접하게 걸려 있는지가 함께 드러납니다.",
+    "자손": "내가 낳고 길러내는 대상이라는 점에서 자식·아랫사람과 재능이 같은 자리에 묶입니다. 이 효가 세효와 어떤 관계로 걸려 있는지를 보면, 지금 그 결과물이나 아랫사람이 나와 얼마나 가깝게 이어져 있는지가 함께 드러납니다.",
+    "형제": "나와 같은 자리에서 같은 것을 두고 겨루거나 나누는 존재라는 점에서 경쟁과 협력이 한 기운 안에 묶입니다. 이 효가 세효와 얼마나 가까운 자리에 있는지를 보면, 지금 주변 사람들과 내가 자원을 어떻게 나눠 쓰는 관계인지가 함께 드러납니다.",
+}
+assert len(_YUKHYO_YUKCHIN_EASY) == 5, "_YUKHYO_YUKCHIN_EASY는 육친 5개 전수여야 한다"
+assert set(_YUKHYO_YUKCHIN_EASY) == {"처재", "관귀", "부모", "자손", "형제"}, \
+    "_YUKHYO_YUKCHIN_EASY 키가 get_yukchin() 반환값(처재·관귀·부모·자손·형제)과 불일치"
+
 # 용신 자리에 실린 육수(六獸) 한 줄 뜻 — _YUKHYO_YUKCHIN_DESC·_YUKHYO_SINSAL_PHRASE와
 # 같은 패턴의 위성 dict. 총평 오프닝에서 "용신이 어떤 성격의 자리에 있는지"를
 # 한 문장 더 보태는 용도일 뿐, 육수 자체의 길흉 판정 로직은 아니다(장식적 서술).
@@ -1913,6 +1931,9 @@ def build_yukhyo_summary(
         _yukchin_desc = _YUKHYO_YUKCHIN_DESC.get(target_yukchin, "")
         if _yukchin_desc:
             _opening += f" 이번 용신은 {target_yukchin} — {_yukchin_desc}입니다."
+            _yukchin_easy = _YUKHYO_YUKCHIN_EASY.get(target_yukchin, "")
+            if _yukchin_easy:
+                _opening += f" {_yukchin_easy}"
 
     if se_pos is not None and eung_pos is not None:
         _opening += f" 세효(世)는 {se_pos}효, 응효(應)는 {eung_pos}효 자리에 있습니다."
