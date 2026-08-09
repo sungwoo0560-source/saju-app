@@ -28513,6 +28513,26 @@ def menu_gaewoon(pils, name, birth_year, gender):
     render_pdf_download_btn("gaewoon", pils, name, birth_year, gender)
 
 
+def _yukhyo_easy_relabel(text, unit):
+    """_YUKHYO_GUA_EASY·_YUKHYO_HYO_EASY(총 448개 문자열, yukhyo_data.py)는
+    무손질 — 이 함수는 표시 시점에만 접두어를 바꿔 붙인다. 원문의 "쉽게
+    말하면: "은 괘사·효사의 뜻을 현대어로 풀었을 뿐인데, 화면·PDF에서 판정
+    라벨과 나란히 보이면 마치 이번 점의 길흉인 것처럼 읽혀 모순처럼 보일
+    수 있다(진단 라운드에서 낙관 어조 176개 전부가 실제로 흉 판정과 동시
+    발생 가능함을 실측 확인). "쉽게 말하면: " 대신 "이 괘/효의 뜻은: "으로
+    바꿔 이게 괘·효 자체의 상징이지 이번 질문의 판단이 아님을 표시 단에서
+    드러낸다 — 데이터도 판정 로직도 건드리지 않는 순수 표시 조정이다.
+    replace(...,1)이라 첫 등장(=항상 맨 앞, assert로 보장됨)만 바뀌고
+    본문 중간에 우연히 같은 어구가 있어도 건드리지 않는다."""
+    return text.replace("쉽게 말하면: ", f"이 {unit}의 뜻은: ", 1)
+
+
+_YUKHYO_LAYER_NOTE = (
+    "※ 괘사·효사는 괘와 효 자체가 지닌 뜻이며, 이번 질문의 길흉은 용신의 "
+    "왕쇠·일진·월건을 종합한 이 판정과 아래 종합(綜合)에서 가려집니다."
+)
+
+
 def render_yukhyo_pdf_btn(name, birth_str, question, qtype, ilju, wolgeon_jj,
                            bon_hexa, lines, extra6, bon_name, byeon_name,
                            label, summary, dong_positions):
@@ -28648,7 +28668,7 @@ def render_yukhyo_pdf_btn(name, birth_str, question, qtype, ilju, wolgeon_jj,
                 y = _write(_gtext, y, size=10)
             _gua_easy_pdf = _YUKHYO_GUA_EASY.get(bon_name, "")
             if _gua_easy_pdf:
-                y = _write(_gua_easy_pdf, y, size=9, color=(0.35, 0.35, 0.35))
+                y = _write(_yukhyo_easy_relabel(_gua_easy_pdf, "괘"), y, size=9, color=(0.35, 0.35, 0.35))
 
             # 변괘명 1줄
             if byeon_name:
@@ -28660,6 +28680,7 @@ def render_yukhyo_pdf_btn(name, birth_str, question, qtype, ilju, wolgeon_jj,
 
             # 판단 라벨
             y = _write(f"판단 — {label}", y, size=13, color=(0.05, 0.05, 0.05))
+            y = _write(_YUKHYO_LAYER_NOTE, y, size=8, color=(0.4, 0.4, 0.4))
             y -= 2 * mm
 
             # 종합 총평 전문
@@ -28676,7 +28697,7 @@ def render_yukhyo_pdf_btn(name, birth_str, question, qtype, ilju, wolgeon_jj,
                     for _i in dong_positions:
                         y = _write(f"{_i + 1}효: {_hyo6_pdf[_i]}", y, size=9)
                         if _hyo6_easy_pdf:
-                            y = _write(_hyo6_easy_pdf[_i], y, size=9, color=(0.35, 0.35, 0.35))
+                            y = _write(_yukhyo_easy_relabel(_hyo6_easy_pdf[_i], "효"), y, size=9, color=(0.35, 0.35, 0.35))
 
             # 푸터
             c.setFont(_BF, 7)
@@ -28765,7 +28786,7 @@ def menu_yukhyo():
                 st.markdown(f"> {_gtext}")
                 _gua_easy = _YUKHYO_GUA_EASY.get(gname, "")
                 if _gua_easy:
-                    st.caption(_gua_easy)
+                    st.caption(_yukhyo_easy_relabel(_gua_easy, "괘"))
         _rows = []
         for _i in range(5, -1, -1):   # 상효→초효 순서로 위에서부터 그림
             _bar = "▅▅▅▅▅▅" if hexa6[_i] == 1 else "▅▅　　▅▅"
@@ -28850,7 +28871,7 @@ def menu_yukhyo():
             for _i in _dong_positions:
                 st.caption(f"{_i + 1}효: {_hyo6[_i]}")
                 if _hyo6_easy:
-                    st.caption(_hyo6_easy[_i])
+                    st.caption(_yukhyo_easy_relabel(_hyo6_easy[_i], "효"))
         else:
             st.caption("동효 효사 준비 중입니다.")
 
@@ -28921,6 +28942,7 @@ def menu_yukhyo():
             samhap_match=_samhap_match, hwahyo_label=_hwahyo_label,
         )
         st.markdown(f"**{_name_str}님이 물으신 '{_yh_qtype}'에 대해 — {_label}**")
+        st.caption(_YUKHYO_LAYER_NOTE)
         for _r in _reasons:
             st.write(_r)
 
