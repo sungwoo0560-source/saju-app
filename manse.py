@@ -28513,6 +28513,197 @@ def menu_gaewoon(pils, name, birth_year, gender):
     render_pdf_download_btn("gaewoon", pils, name, birth_year, gender)
 
 
+def render_yukhyo_pdf_btn(name, birth_str, question, qtype, ilju, wolgeon_jj,
+                           bon_hexa, lines, extra6, bon_name, byeon_name,
+                           label, summary, dong_positions):
+    """육효 결과 1p 점괘 카드 PDF. render_pdf_download_btn(사주 전용, pils·gender
+    필요)과는 완전히 독립된 함수다 — 육효는 pils·대운 개념이 없어 그 함수를
+    그대로 못 쓴다. 폰트 등록·_write·_new_page 패턴만 그 함수에서 그대로
+    복사했을 뿐, render_pdf_download_btn 본체는 참조도 수정도 하지 않는다.
+    GUA_TEXT·HYO_TEXT·_YUKHYO_GUA_EASY·_YUKHYO_HYO_EASY는 manse.py 전역에
+    이미 import돼 있으므로 bon_name으로 직접 조회한다(신규 데이터 없음).
+    「既」(U+65E2, 水火既濟 괘명에만 등장)가 NotoSansKR-Regular.ttf에 없어
+    그리기 직전에만 이체자 「旣」(U+65E4, 폰트에 존재 확인됨)로 치환한다 —
+    화면 표기(GUA_TEXT·GUA_64 등)는 건드리지 않는다."""
+    import io
+    from datetime import datetime as _dt3
+
+    if st.button("📄 육효 점괘 카드 PDF 출력", key="_yukhyo_pdf_btn", use_container_width=True, type="secondary"):
+        try:
+            from reportlab.lib.pagesizes import A4
+            from reportlab.lib.units import mm
+            from reportlab.pdfgen import canvas
+            from reportlab.pdfbase.ttfonts import TTFont
+            from reportlab.pdfbase import pdfmetrics
+            import os, re as _re3
+
+            _buf = io.BytesIO()
+            W, H = A4
+            MARGIN = 18 * mm
+            BOT = 20 * mm
+
+            # 폰트 등록 — render_pdf_download_btn의 _FONTS_Y27과 동일한 패턴을
+            # 이 함수 안에 복사(공용화하지 않음). 레포 내 NotoSansKR-Regular.ttf
+            # 1순위 — 한자 138/139자(육효 용어 전수) 실측 커버 확인됨.
+            _FONTS_YH = [
+                ("NotoSansKR",  os.path.join(os.path.dirname(__file__), "fonts", "NotoSansKR-Regular.ttf"), None),
+                ("Batang",      "C:/Windows/Fonts/batang.ttc",   0),
+                ("Gulim",       "C:/Windows/Fonts/gulim.ttc",    0),
+                ("Malgun",      "C:/Windows/Fonts/malgun.ttf",   None),
+                ("NotoSansCJKL","/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc", 0),
+                ("NotoSansCJK2","/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc", 0),
+                ("NanumGothicL","/usr/share/fonts/truetype/nanum/NanumGothic.ttf", None),
+                ("NanumGothic", os.path.join(os.path.dirname(__file__), "fonts", "NanumGothic.ttf"), None),
+            ]
+            _BF = "Helvetica"
+            _reg_fonts_yh = getattr(pdfmetrics, '_fonts', {})
+            for _fn, _fp, _fi in _FONTS_YH:
+                if _fn in _reg_fonts_yh:
+                    _BF = _fn
+                    break
+            if _BF == "Helvetica":
+                for _fn, _fp, _fi in _FONTS_YH:
+                    if not os.path.exists(_fp):
+                        continue
+                    try:
+                        if _fi is not None:
+                            try:
+                                pdfmetrics.registerFont(TTFont(_fn, _fp, subfontIndex=_fi))
+                            except Exception:
+                                pdfmetrics.registerFont(TTFont(_fn, _fp))
+                        else:
+                            pdfmetrics.registerFont(TTFont(_fn, _fp))
+                        _BF = _fn
+                        break
+                    except Exception:
+                        pass
+
+            c = canvas.Canvas(_buf, pagesize=A4)
+            y = H - MARGIN
+
+            def _new_page():
+                c.showPage()
+                return H - MARGIN
+
+            def _write(text, y, size=10, color=(0.1, 0.1, 0.1)):
+                if y < BOT + 10 * mm:
+                    y = _new_page()
+                c.setFont(_BF, size)
+                c.setFillColorRGB(*color)
+                max_w = W - 2 * MARGIN
+                text = str(text or "")
+                for raw in text.split("\n"):
+                    raw = raw.strip()
+                    if not raw:
+                        y -= 3 * mm
+                        continue
+                    while raw:
+                        if c.stringWidth(raw, _BF, size) <= max_w:
+                            if y < BOT + 8 * mm:
+                                y = _new_page()
+                                c.setFont(_BF, size)
+                                c.setFillColorRGB(*color)
+                            c.drawString(MARGIN, y, raw)
+                            y -= (size * 0.55) * mm
+                            break
+                        lo, hi = 1, len(raw)
+                        while lo < hi - 1:
+                            mid = (lo + hi) // 2
+                            if c.stringWidth(raw[:mid], _BF, size) <= max_w:
+                                lo = mid
+                            else:
+                                hi = mid
+                        if y < BOT + 8 * mm:
+                            y = _new_page()
+                            c.setFont(_BF, size)
+                            c.setFillColorRGB(*color)
+                        c.drawString(MARGIN, y, raw[:lo])
+                        y -= (size * 0.55) * mm
+                        raw = raw[lo:].lstrip()
+                return y
+
+            # 헤더 — 이름·생년월일·질문·질문유형·일진
+            y = _write(f"육효 점괘 카드 — {name}님", y, size=15, color=(0.05, 0.05, 0.05))
+            y = _write(f"생년월일: {birth_str}   질문유형: {qtype}", y, size=10, color=(0.3, 0.3, 0.3))
+            y = _write(f"질문: {question}", y, size=10, color=(0.3, 0.3, 0.3))
+            y = _write(f"일진(日辰): {ilju}   월건(月建): {wolgeon_jj}", y, size=10, color=(0.3, 0.3, 0.3))
+            y -= 3 * mm
+
+            # 6효 다이어그램 — 화면(_render_hexa)과 동일한 문자·순서·태그 구성
+            for _i in range(5, -1, -1):
+                _bar = "▅▅▅▅▅▅" if bon_hexa[_i] == 1 else "▅▅　　▅▅"
+                _mark = ""
+                if lines and lines[_i][1]:
+                    _mark = "  ○ 변효(老陰→陽)" if lines[_i][0] == 0 else "  × 변효(老陽→陰)"
+                if extra6:
+                    _mark += "  " + extra6[_i]
+                y = _write(f"{_i + 1}효  {_bar}{_mark}", y, size=9, color=(0.15, 0.15, 0.15))
+            y -= 2 * mm
+
+            # 본괘명 + 괘사(원문/쉬운풀이) — 既(U+65E2)만 旣(U+65E4)로 표시 치환
+            _bon_disp = (bon_name or "").replace("既", "旣")
+            y = _write(f"본괘(本卦) — {_bon_disp}", y, size=13, color=(0.05, 0.05, 0.05))
+            _gtext = GUA_TEXT.get(bon_name, "")
+            if _gtext:
+                y = _write(_gtext, y, size=10)
+            _gua_easy_pdf = _YUKHYO_GUA_EASY.get(bon_name, "")
+            if _gua_easy_pdf:
+                y = _write(_gua_easy_pdf, y, size=9, color=(0.35, 0.35, 0.35))
+
+            # 변괘명 1줄
+            if byeon_name:
+                _byeon_disp = byeon_name.replace("既", "旣")
+                y = _write(f"변괘(變卦) — {_byeon_disp}", y, size=11, color=(0.2, 0.2, 0.2))
+            else:
+                y = _write("변효 없음 — 정지괘(안정된 괘)입니다.", y, size=11, color=(0.2, 0.2, 0.2))
+            y -= 2 * mm
+
+            # 판단 라벨
+            y = _write(f"판단 — {label}", y, size=13, color=(0.05, 0.05, 0.05))
+            y -= 2 * mm
+
+            # 종합 총평 전문
+            y = _write("종합(綜合)", y, size=12, color=(0.05, 0.05, 0.05))
+            y = _write(summary, y, size=10)
+
+            # 동효(動爻) 효사 — 정지괘(동효 0개)면 이 블록 자체를 스킵
+            if dong_positions:
+                _hyo6_pdf = HYO_TEXT.get(bon_name, ())
+                _hyo6_easy_pdf = _YUKHYO_HYO_EASY.get(bon_name, ())
+                if _hyo6_pdf:
+                    y -= 2 * mm
+                    y = _write("동효(動爻) 효사", y, size=12, color=(0.05, 0.05, 0.05))
+                    for _i in dong_positions:
+                        y = _write(f"{_i + 1}효: {_hyo6_pdf[_i]}", y, size=9)
+                        if _hyo6_easy_pdf:
+                            y = _write(_hyo6_easy_pdf[_i], y, size=9, color=(0.35, 0.35, 0.35))
+
+            # 푸터
+            c.setFont(_BF, 7)
+            c.setFillColorRGB(0.6, 0.55, 0.45)
+            c.drawCentredString(W / 2, 14 * mm, "본 점괘는 참고 자료이며, 의사결정의 최종 책임은 본인에게 있습니다.")
+            c.setFillColorRGB(0, 0, 0)
+            c.save()
+            _buf.seek(0)
+
+            _safe_name = _re3.sub(r'[\\/:*?"<>|]', '', (name or "귀하"))[:10].strip() or "귀하"
+            _safe_q = _re3.sub(r'[\\/:*?"<>|]', '', (question or "질문"))[:20].strip() or "질문"
+            st.download_button(
+                label="📥 육효 점괘 카드 PDF 다운로드",
+                data=_buf.read(),
+                file_name=f"육효점괘_{_safe_name}_{_safe_q}_{_dt3.now().strftime('%Y%m%d')}.pdf",
+                mime="application/pdf",
+                use_container_width=True,
+                key="_yukhyo_pdf_dl",
+            )
+            st.success("✅ 육효 점괘 카드 PDF 생성 완료!")
+
+        except ImportError:
+            st.error("❌ reportlab 미설치. pip install reportlab 실행 필요")
+        except Exception as _pe:
+            st.error(f"❌ PDF 오류: {str(_pe)[:80]}")
+
+
 def menu_yukhyo():
     """육효(六爻) — 사주 엔진과 완전히 분리된 독립 기능.
     ★이 함수 안에서 pils·SajuCoreEngine·get_saju_year·용신·격국 등 사주
@@ -28757,6 +28948,12 @@ def menu_yukhyo():
         st.markdown("---")
         st.markdown("**종합(綜合)**")
         st.write(_summary)
+
+        render_yukhyo_pdf_btn(
+            _name_str, _birth_str, _q_str, _yh_qtype, _ilju, _wolgeon_jj,
+            _bon_hexa, _lines, _extra6, _bon_name, _byeon_name,
+            _label, _summary, _dong_positions,
+        )
 
 
 _Y51_DEPLOY = "X-4F: 2026-05-30 cache clear"
