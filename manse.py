@@ -28936,10 +28936,26 @@ def menu_yukhyo():
         _is_gongmang_flag = is_yukhyo_gongmang(_yongshin_jiji, _ilju)
         _samhap_match = _yongshin_ohang in _samhap_ohangs
 
+        # 육충(六沖) 3종 — (a)일파: 용신↔일진 (b)월파: 용신↔월건
+        # (c)동효충: 용신이 아닌 동효 중 용신 지지를 충하는 효가 있는지.
+        # 복신은 6효 어디에도 없어 "동효가 용신을 충"이라는 개념 자체가
+        # 성립하지 않으므로 동효충은 False로 고정한다.
+        _is_ilpa_flag = is_yukhyo_chung(_yongshin_jiji, _ilju[1])
+        _is_wolpa_flag = is_yukhyo_chung(_yongshin_jiji, _wolgeon_jj)
+        if _is_bokshin:
+            _is_donghyo_chung_flag = False
+        else:
+            _is_donghyo_chung_flag = any(
+                _dong6[_i] and _i != _yongshin_idx and is_yukhyo_chung(_jiji6[_i], _yongshin_jiji)
+                for _i in range(6)
+            )
+
         _label, _reasons = judge_yukhyo_advanced(
             _yongshin_ohang, _se_ohang, _wolgeon_jj, _ilju[1], is_dong=_is_dong_y,
             is_bokshin=_is_bokshin, is_gongmang_flag=_is_gongmang_flag,
             samhap_match=_samhap_match, hwahyo_label=_hwahyo_label,
+            is_ilpa_flag=_is_ilpa_flag, is_wolpa_flag=_is_wolpa_flag,
+            is_donghyo_chung_flag=_is_donghyo_chung_flag,
         )
         st.markdown(f"**{_name_str}님이 물으신 '{_yh_qtype}'에 대해 — {_label}**")
         st.caption(_YUKHYO_LAYER_NOTE)

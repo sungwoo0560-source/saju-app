@@ -1541,16 +1541,36 @@ def judge_yukhyo(yongshin_ohang, se_ohang, wolgeon_jj, iljin_jj, is_dong=False):
 def judge_yukhyo_advanced(
     yongshin_ohang, se_ohang, wolgeon_jj, iljin_jj, is_dong=False,
     is_bokshin=False, is_gongmang_flag=False, samhap_match=False, hwahyo_label=None,
+    is_ilpa_flag=False, is_wolpa_flag=False, is_donghyo_chung_flag=False,
 ):
     """3단계 정밀 용신 판단 — judge_yukhyo의 기본 점수(왕쇠+세효생극+동정) 위에
     공망(-2)·복신(-3)·삼합국 성립(+2)·화효(회두생 +2 · 회두극 -2 · 化空/化墓
-    각 -1) 가중을 더해 길흉과 근거 문장 목록을 반환한다: (label, reasons).
+    각 -1)·육충(六沖: 일파 -3 · 월파 -3 · 동효충 -2) 가중을 더해 길흉과
+    근거 문장 목록을 반환한다: (label, reasons).
     고급 요소가 전혀 없으면(is_bokshin=False, is_gongmang_flag=False,
-    samhap_match=False, hwahyo_label이 None 또는 "보통") 가중이 0이라
-    judge_yukhyo와 동일한 라벨이 나온다(회귀 안전선).
+    samhap_match=False, hwahyo_label이 None 또는 "보통", 육충 3종
+    모두 False) 가중이 0이라 judge_yukhyo와 동일한 라벨이 나온다
+    (회귀 안전선 — 이 3개 신규 파라미터는 전부 기본값 False라 호출부가
+    안 넘기면 기존 동작과 완전히 같다).
     삼합은 '괘 안에 용신과 같은 오행의 국이 성립하는지'만 보는 1단계
     단순화이며, 용신 자신의 효가 그 국을 이루는 세 효 중 하나인지까지
-    따지는 정밀화는 다음 단계 과제다."""
+    따지는 정밀화는 다음 단계 과제다(육충으로 삼합국이 깨지는 파생
+    이슈도 마찬가지로 이번 범위 밖).
+
+    ★충공즉실(沖空則實): 용신이 공망(空亡)이면서 동시에 일진과 충(일파)
+    하면, 공망(-2)과 일파(-3)를 각각 가산하지 않고 서로 상쇄해 합계
+    0으로 처리한다(단순 가산 금지) — 순중공망은 애초에 "일진이 속한
+    순(旬)"을 기준으로 정해지므로, 그 공망을 깨뜨리는 것도 반드시
+    일진의 충이어야 이론적 정합성이 맞는다. 월파·동효충은 공망을
+    매긴 기준(일진)과 무관한 다른 주체의 충이라 이 상쇄에 관여하지
+    않고 공망 여부와 상관없이 항상 독립적으로 가산된다.
+
+    ★★한계(1단계 단순화— YUKHYO_YUKCHUNG 위 주석에 상세): 여기 육충
+    3종은 전부 "충=항상 감점"으로만 처리한다. 정통 육효에서는 기신이
+    충을 맞으면 오히려 길이고 묘에 갇힌 용신을 충하면 열리는(沖開)
+    경우도 있는데, 원신·기신 구분이 없는 지금 구조로는 "이 충이 용신을
+    때린 건지 기신을 때린 건지"를 가릴 수 없어 구현이 불가능하다.
+    원신·기신을 넣는 다음 단계에서 반드시 재검토해야 한다."""
     _base = _yukhyo_base_score(yongshin_ohang, se_ohang, wolgeon_jj, iljin_jj, is_dong)
     _adj = 0
     _reasons = []
@@ -1558,9 +1578,26 @@ def judge_yukhyo_advanced(
     if is_bokshin:
         _adj -= 3
         _reasons.append("용신이 괘 안에 드러나지 않아 복신(伏神)입니다 — 아직 겉으로 나설 때가 아닙니다.")
-    if is_gongmang_flag:
+
+    _is_chunggong = is_gongmang_flag and is_ilpa_flag
+    if _is_chunggong:
+        _reasons.append("용신이 공망(空亡)이지만 일진과 충(沖)하여 오히려 채워집니다(沖空則實) — 공망과 일파의 감점이 서로 상쇄됩니다.")
+    else:
+        if is_gongmang_flag:
+            _adj -= 2
+            _reasons.append("용신이 공망(空亡)에 걸려 있어 아직 때가 이릅니다.")
+        if is_ilpa_flag:
+            _adj -= 3
+            _reasons.append("용신이 일진과 충(沖)해 일파(日破)입니다 — 오늘 하루 자리가 크게 흔들립니다.")
+
+    if is_wolpa_flag:
+        _adj -= 3
+        _reasons.append("용신이 월건과 충(沖)해 월파(月破)입니다 — 이번 시기 내내 뿌리가 흔들립니다.")
+
+    if is_donghyo_chung_flag:
         _adj -= 2
-        _reasons.append("용신이 공망(空亡)에 걸려 있어 아직 때가 이릅니다.")
+        _reasons.append("동한 다른 효가 용신을 충(沖)해 자리가 흔들립니다.")
+
     if samhap_match:
         _adj += 2
         _reasons.append("용신과 같은 오행의 삼합국(三合局)이 괘 안에 이루어져 기운이 크게 강해집니다.")
@@ -1688,6 +1725,41 @@ def check_yukhap(jiji_a, jiji_b):
     if _pair in YUKHAP:
         return True, YUKHAP[_pair]
     return False, None
+
+
+# ── 육충(六沖) — 육효 전용 신설 ───────────────────────────────────
+# ★사주 쪽 saju_engine.py의 _JJ_CHUNG(원국 오행 파워 감산용, 다른 목적)을
+# import하지 않고 육효 전용으로 새로 만든다 — get_yukhyo_gongmang 주석에
+# 남은 전례(사주 get_gongmang(pils)이 이름 충돌로 육효 함수를 덮어써
+# 실제 사고가 났던 사례)와 같은 이유로 YUKHYO_ 접두를 반드시 붙인다.
+# 왕지충(子午·卯酉)·생지충(寅申·巳亥)·고지충(丑未·辰戌) 3계열 6쌍 —
+# 육효는 사주처럼 오행별 파워 배율을 매기지 않고 "충 성립 여부"만
+# 본다(judge_yukhyo_advanced 쪽에서 성립 여부에 고정 가중치를 매긴다).
+#
+# ★★한계(1단계 단순화, check_samhap_guk과 같은 방식으로 여기 명시) —
+# 이 구현은 "충이 걸리면 항상 감점"이다. 정통 육효에서는 실제로 충이
+# 길(吉)로 작용하는 경우가 있다 — 기신(忌神, 용신을 극하거나 방해하는
+# 효)이 충을 맞으면 오히려 좋고, 묘(墓)에 갇힌 용신을 충하면 열린다
+# (沖開). 지금 이 파일엔 원신(原神)·기신(忌神) 구분 자체가 없어서
+# "이 충이 용신에게 걸린 건지 기신에게 걸린 건지"를 판별할 수 없다 —
+# 그래서 "충=항상 감점"으로 단순화할 수밖에 없었다. 원신·기신을
+# 도입하는 다음 단계에서 반드시 재검토해야 하는 지점이다(진단 라운드
+# 표의 C단계 — "용신 왕쇠만 보는 구조의 근본 한계"와 같은 갈래).
+YUKHYO_YUKCHUNG = {
+    frozenset({"子", "午"}): "왕지충",
+    frozenset({"丑", "未"}): "고지충",
+    frozenset({"寅", "申"}): "생지충",
+    frozenset({"卯", "酉"}): "왕지충",
+    frozenset({"辰", "戌"}): "고지충",
+    frozenset({"巳", "亥"}): "생지충",
+}
+
+
+def is_yukhyo_chung(jiji_a, jiji_b):
+    """두 지지가 육충(六沖) 관계인지 판정. 같은 지지끼리는 충이 성립하지
+    않는다(frozenset이 원소 1개가 되어 YUKHYO_YUKCHUNG의 어떤 키와도
+    일치하지 않으므로 자동으로 False)."""
+    return frozenset({jiji_a, jiji_b}) in YUKHYO_YUKCHUNG
 
 
 # ── 화효(化爻) — 동효가 변한 지지(化爻)가 원래 효(本爻)에 미치는 영향 ──

@@ -79,3 +79,7 @@ test_results.txt
 
 # 테스트/샘플 PDF 산출물 (2026-07-06)
 test_*.pdf
+
+# 육효 판정 골든 baseline — 442,368행 대용량(약 40MB), 생성기(tests/yukhyo_judge_golden.py)
+# 와 메타 파일(.meta.txt, MD5·행수·라벨분포)만 커밋하고 CSV 본체는 제외한다.
+tests/yukhyo_judge_golden_baseline.csv
