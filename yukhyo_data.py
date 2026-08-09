@@ -1890,7 +1890,7 @@ def build_yukhyo_summary(
     name, q_str, label, target_yukchin,
     is_bokshin=False, is_gongmang_flag=False, samhap_match=False, hwahyo_label=None,
     is_dong_y=False, dong_hyo_text=None, sinsal_tags=None,
-    se_pos=None, eung_pos=None, yongshin_yuksu=None, qtype=None,
+    se_pos=None, eung_pos=None, yongshin_yuksu=None, qtype=None, se_yukchin=None,
 ):
     """질문 맥락(질문+용신 판단)에 육친 소개·세응 위치·육수·동효 효사·신살·
     질문유형별 실용 조언을 얹어 2~3문단짜리 종합 총평을 조합한다. ★새 판단
@@ -1926,6 +1926,15 @@ def build_yukhyo_summary(
 
     if target_yukchin is None:
         _opening = f"{name}님이 물으신 「{q_str}」에 대해 — 세효(世爻), 즉 본인의 기운은 {label}{_josa} 나타났습니다."
+        _se_desc = _YUKHYO_YUKCHIN_DESC.get(se_yukchin, "") if se_yukchin else ""
+        if _se_desc:
+            _opening += (
+                f" 이번엔 특정 육친을 용신으로 잡지 않으니, 본인 자리인 세효가 무슨 기운에 놓였는지로 "
+                f"읽습니다 — 세효는 {se_yukchin} — {_se_desc}입니다."
+            )
+            _se_easy = _YUKHYO_YUKCHIN_EASY.get(se_yukchin, "")
+            if _se_easy:
+                _opening += f" {_se_easy}"
     else:
         _opening = f"{name}님이 물으신 「{q_str}」에 대해 — 용신은 {label}{_josa} 나타났습니다."
         _yukchin_desc = _YUKHYO_YUKCHIN_DESC.get(target_yukchin, "")

@@ -28752,6 +28752,7 @@ def menu_yukhyo():
             sinsal_tags=_yongshin_sinsal_tags,
             se_pos=_se_pos, eung_pos=_eung_pos,
             yongshin_yuksu=_yongshin_yuksu, qtype=_yh_qtype,
+            se_yukchin=_yukchin6[_se_pos - 1],
         )
         st.markdown("---")
         st.markdown("**종합(綜合)**")
