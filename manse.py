@@ -28950,12 +28950,56 @@ def menu_yukhyo():
                 for _i in range(6)
             )
 
+        # 원신(原神)·기신(忌神) — get_yukhyo_wongisin()으로 도출한 라벨이
+        # 6효 중 어디 있는지 pick_yongshin_idx를 그대로 재사용해 찾는다
+        # (용신 찾을 때 쓰던 것과 같은 함수·같은 우선순위 규칙). "기타"
+        # 질문(용신=세효 자신)일 때도 세효 자신의 육친 라벨을 기준으로
+        # 원신·기신을 도출한다 — 용신 육친이 없는 게 아니라 세효 자신이
+        # 곧 용신 육친이기 때문이다. 원신·기신이 6효에 없으면(복신)
+        # get_bokshin을 부르지 않고 그냥 False로 둔다 — "원신 없음=0"
+        # 설계 결정상 복신 위치를 찾을 이유가 없다(복잡도 최소화, C단계
+        # 1라운드 설계 진단의 충돌 지점 4번을 이렇게 자연 해소했다).
+        _yongshin_yukchin_label = _target_yukchin if _target_yukchin is not None else _yukchin6[_se_pos - 1]
+        _wongisin = get_yukhyo_wongisin(_yongshin_yukchin_label)
+
+        _wonsin_idx = pick_yongshin_idx(_yukchin6, _wongisin["원신"], _dong6, _se_pos)
+        if _wonsin_idx is None:
+            _is_wonsin_dong = False
+            _is_wonsin_broken = False
+        else:
+            _wonsin_jiji = _jiji6[_wonsin_idx]
+            _is_wonsin_dong = _dong6[_wonsin_idx]
+            _is_wonsin_broken = (
+                is_yukhyo_gongmang(_wonsin_jiji, _ilju)
+                or is_yukhyo_chung(_wonsin_jiji, _ilju[1])
+                or is_yukhyo_chung(_wonsin_jiji, _wolgeon_jj)
+            )
+
+        _gisin_idx = pick_yongshin_idx(_yukchin6, _wongisin["기신"], _dong6, _se_pos)
+        if _gisin_idx is None:
+            _is_gisin_dong = False
+            _is_gisin_broken = False
+            _is_gisin_wang = False
+        else:
+            _gisin_jiji = _jiji6[_gisin_idx]
+            _gisin_ohang = JIJI_OHANG[_gisin_jiji]
+            _is_gisin_dong = _dong6[_gisin_idx]
+            _is_gisin_broken = (
+                is_yukhyo_gongmang(_gisin_jiji, _ilju)
+                or is_yukhyo_chung(_gisin_jiji, _ilju[1])
+                or is_yukhyo_chung(_gisin_jiji, _wolgeon_jj)
+            )
+            _is_gisin_wang = get_wangsae_label(get_wangsae_score(_gisin_ohang, _wolgeon_jj, _ilju[1])) == "왕(旺)"
+
         _label, _reasons = judge_yukhyo_advanced(
             _yongshin_ohang, _se_ohang, _wolgeon_jj, _ilju[1], is_dong=_is_dong_y,
             is_bokshin=_is_bokshin, is_gongmang_flag=_is_gongmang_flag,
             samhap_match=_samhap_match, hwahyo_label=_hwahyo_label,
             is_ilpa_flag=_is_ilpa_flag, is_wolpa_flag=_is_wolpa_flag,
             is_donghyo_chung_flag=_is_donghyo_chung_flag,
+            is_wonsin_dong=_is_wonsin_dong, is_wonsin_broken=_is_wonsin_broken,
+            is_gisin_dong=_is_gisin_dong, is_gisin_broken=_is_gisin_broken,
+            is_gisin_wang=_is_gisin_wang,
         )
         st.markdown(f"**{_name_str}님이 물으신 '{_yh_qtype}'에 대해 — {_label}**")
         st.caption(_YUKHYO_LAYER_NOTE)

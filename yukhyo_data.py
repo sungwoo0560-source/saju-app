@@ -724,6 +724,80 @@ def get_yukchin(gung_ohang, hyo_ohang):
     raise ValueError(f"오행 생극표에 없는 조합: 궁={gung_ohang}, 효={hyo_ohang}")
 
 
+# ── 원신(原神)·기신(忌神)·구신(仇神) — 용신 주변 육친 도출(C단계 1라운드) ──
+# 육친 5종의 생 순환(부모→형제→자손→처재→관귀→부모)은 get_yukchin()의
+# 오행 생극 정의에서 대수적으로 늘 성립하는 고정 순환이다 — 어느 궁오행을
+# "나"로 잡아도 이 5개 라벨 사이의 상대적 생극 관계 자체는 궁오행과
+# 무관하게 불변이라(손검산: 궁=木일 때 형제=木·부모=水·자손=火·관귀=金·
+# 처재=土로 놓고 오행표를 그대로 따라가면 부모생형제→형제생자손→
+# 자손생처재→처재생관귀→관귀생부모가 나온다), 용신 자신이 5종 중
+# 무엇이든 순환 위치만으로 다음이 결정론적으로 정해진다:
+#   원신 = 용신을 생하는 육친(순환에서 한 칸 앞)
+#   기신 = 용신을 극하는 육친(순환에서 두 칸 앞 — 오행 상극은 상생
+#          순환을 두 걸음 진행한 것과 같아 자동으로 두 칸 앞이 된다)
+#   구신 = 기신을 생하는 육친(기신의 원신, 즉 순환에서 세 칸 앞)
+# ★이번 라운드는 이 3개 표와 라벨 도출 함수까지만 신설한다 — 6효 중
+# 어느 위치에 원신·기신이 있는지 찾는 것과 judge_yukhyo_advanced 점수
+# 편입은 다음 라운드 과제(섹션3 설계 참고, 이번엔 구현하지 않는다).
+# ★사주 쪽 용신·기신 시스템(get_yongshin 등)과 이름이 겹쳐 YUKHYO_
+# 접두를 반드시 붙인다 — get_yukhyo_gongmang 주석에 남은 전례(사주
+# get_gongmang(pils)이 이름 충돌로 육효 함수를 덮어써 실제 사고가
+# 났던 사례)와 같은 이유. 사주 get_yongshin·기신 로직은 import하지
+# 않는다(육효는 사주 계산과 완전히 독립이라는 이 파일 원칙 그대로).
+YUKHYO_WONSIN_MAP = {
+    "형제": "부모", "자손": "형제", "처재": "자손", "관귀": "처재", "부모": "관귀",
+}
+YUKHYO_GISIN_MAP = {
+    "형제": "관귀", "자손": "부모", "처재": "형제", "관귀": "자손", "부모": "처재",
+}
+YUKHYO_GUSIN_MAP = {
+    "형제": "처재", "자손": "관귀", "처재": "부모", "관귀": "형제", "부모": "자손",
+}
+
+# ★검산 — 위 3개 표는 사람이 손으로 옮겨 적은 것이라 한 칸만 밀려도 전
+# 판정이 틀어진다. 표를 신뢰하지 않고, get_yukchin()의 오행 생극 정의로
+# 5개 궁오행(木火土金水) × 5개 용신 라벨 = 25가지 조합 전수를 독립적으로
+# 재계산해 표와 일치하는지 확인한다(check_samhap_guk과 달리 이번엔 assert
+# 대상 자체가 25개 조합 전수 루프).
+for _gung in ("木", "火", "土", "金", "水"):
+    for _target_yukchin in ("형제", "자손", "처재", "관귀", "부모"):
+        # 용신 육친이 이 궁에서 어떤 실제 오행인지 역산(get_yukchin의 반대 방향)
+        _yongshin_oh = next(
+            _oh for _oh in ("木", "火", "土", "金", "水")
+            if get_yukchin(_gung, _oh) == _target_yukchin
+        )
+        _wonsin_oh = next(_oh for _oh in _OHANG_SAENG if _OHANG_SAENG[_oh] == _yongshin_oh)
+        _wonsin_label = get_yukchin(_gung, _wonsin_oh)
+        assert _wonsin_label == YUKHYO_WONSIN_MAP[_target_yukchin], (
+            f"원신 검산 실패: 궁={_gung} 용신={_target_yukchin} "
+            f"재계산={_wonsin_label} != 표={YUKHYO_WONSIN_MAP[_target_yukchin]}"
+        )
+        _gisin_oh = next(_oh for _oh in _OHANG_GEUK if _OHANG_GEUK[_oh] == _yongshin_oh)
+        _gisin_label = get_yukchin(_gung, _gisin_oh)
+        assert _gisin_label == YUKHYO_GISIN_MAP[_target_yukchin], (
+            f"기신 검산 실패: 궁={_gung} 용신={_target_yukchin} "
+            f"재계산={_gisin_label} != 표={YUKHYO_GISIN_MAP[_target_yukchin]}"
+        )
+        _gushin_oh = next(_oh for _oh in _OHANG_SAENG if _OHANG_SAENG[_oh] == _gisin_oh)
+        _gushin_label = get_yukchin(_gung, _gushin_oh)
+        assert _gushin_label == YUKHYO_GUSIN_MAP[_target_yukchin], (
+            f"구신 검산 실패: 궁={_gung} 용신={_target_yukchin} "
+            f"재계산={_gushin_label} != 표={YUKHYO_GUSIN_MAP[_target_yukchin]}"
+        )
+
+
+def get_yukhyo_wongisin(target_yukchin):
+    """용신 육친(target_yukchin)에서 원신(原神)·기신(忌神)·구신(仇神) 육친
+    라벨만 도출한다 — 6효 중 어느 위치에 그 육친이 있는지(있는지 없는지,
+    복신인지, 동했는지 등)는 찾지 않는다. 그건 다음 라운드 과제다.
+    반환: {"원신": 육친명, "기신": 육친명, "구신": 육친명}."""
+    return {
+        "원신": YUKHYO_WONSIN_MAP[target_yukchin],
+        "기신": YUKHYO_GISIN_MAP[target_yukchin],
+        "구신": YUKHYO_GUSIN_MAP[target_yukchin],
+    }
+
+
 # ── 8궁(八宮) 소속 64괘 — GUA_64 값과 정확히 같은 이름이어야 한다 ──
 # 순서는 GUA_64 주석과 동일: [본궁, 1세, 2세, 3세, 4세, 5세, 유혼, 귀혼]
 _GUNG_GROUPS = {
@@ -1542,16 +1616,19 @@ def judge_yukhyo_advanced(
     yongshin_ohang, se_ohang, wolgeon_jj, iljin_jj, is_dong=False,
     is_bokshin=False, is_gongmang_flag=False, samhap_match=False, hwahyo_label=None,
     is_ilpa_flag=False, is_wolpa_flag=False, is_donghyo_chung_flag=False,
+    is_wonsin_dong=False, is_wonsin_broken=False,
+    is_gisin_dong=False, is_gisin_broken=False, is_gisin_wang=False,
 ):
     """3단계 정밀 용신 판단 — judge_yukhyo의 기본 점수(왕쇠+세효생극+동정) 위에
     공망(-2)·복신(-3)·삼합국 성립(+2)·화효(회두생 +2 · 회두극 -2 · 化空/化墓
-    각 -1)·육충(六沖: 일파 -3 · 월파 -3 · 동효충 -2) 가중을 더해 길흉과
-    근거 문장 목록을 반환한다: (label, reasons).
+    각 -1)·육충(六沖: 일파 -3 · 월파 -3 · 동효충 -2)·원신기신(원신 동왕성
+    +3 · 기신 동 -3 · 기신 왕부동 -1) 가중을 더해 길흉과 근거 문장 목록을
+    반환한다: (label, reasons).
     고급 요소가 전혀 없으면(is_bokshin=False, is_gongmang_flag=False,
-    samhap_match=False, hwahyo_label이 None 또는 "보통", 육충 3종
-    모두 False) 가중이 0이라 judge_yukhyo와 동일한 라벨이 나온다
-    (회귀 안전선 — 이 3개 신규 파라미터는 전부 기본값 False라 호출부가
-    안 넘기면 기존 동작과 완전히 같다).
+    samhap_match=False, hwahyo_label이 None 또는 "보통", 육충 3종·
+    원신기신 5종 모두 기본값) 가중이 0이라 judge_yukhyo와 동일한
+    라벨이 나온다(회귀 안전선 — 이 신규 파라미터들은 전부 기본값이
+    "영향 없음"이라 호출부가 안 넘기면 기존 동작과 완전히 같다).
     삼합은 '괘 안에 용신과 같은 오행의 국이 성립하는지'만 보는 1단계
     단순화이며, 용신 자신의 효가 그 국을 이루는 세 효 중 하나인지까지
     따지는 정밀화는 다음 단계 과제다(육충으로 삼합국이 깨지는 파생
@@ -1565,12 +1642,25 @@ def judge_yukhyo_advanced(
     매긴 기준(일진)과 무관한 다른 주체의 충이라 이 상쇄에 관여하지
     않고 공망 여부와 상관없이 항상 독립적으로 가산된다.
 
-    ★★한계(1단계 단순화— YUKHYO_YUKCHUNG 위 주석에 상세): 여기 육충
-    3종은 전부 "충=항상 감점"으로만 처리한다. 정통 육효에서는 기신이
-    충을 맞으면 오히려 길이고 묘에 갇힌 용신을 충하면 열리는(沖開)
-    경우도 있는데, 원신·기신 구분이 없는 지금 구조로는 "이 충이 용신을
-    때린 건지 기신을 때린 건지"를 가릴 수 없어 구현이 불가능하다.
-    원신·기신을 넣는 다음 단계에서 반드시 재검토해야 한다."""
+    ★원신(原神)·기신(忌神): get_yukhyo_wongisin()으로 도출한 라벨이 6효
+    중 어디 있는지(공망·복신·동정 포함)는 호출부가 이미 계산해 boolean
+    으로 넘긴다(용신·공망·삼합과 같은 아키텍처). is_wonsin_dong=True인데
+    is_wonsin_broken(공망 또는 충)이면 가산하지 않는다 — "동해서 살아
+    있는" 원신만 인정한다. 원신이 6효에 아예 없으면(복신) 애초에
+    is_wonsin_dong=False로 들어오므로 이 함수는 복신 위치를 찾을
+    필요가 없다(1단계 설계 결정 — "원신 없음은 0"이라 복신 조회 자체가
+    불필요, 복잡도를 늘리지 않는다). 기신도 동일하게 6효에 없으면
+    is_gisin_dong=False·is_gisin_wang은 판단 자체가 무의미해 보통 False로
+    들어온다.
+
+    ★★기신 무력화(이번 라운드 신규): 기신이 동했어도(is_gisin_dong=True)
+    공망이나 충을 맞았으면(is_gisin_broken=True) -3을 가산하지 않고
+    0으로 상쇄한다 — 정통 육효에서 "기신이 충을 맞으면 오히려 길"이라는
+    원칙을 처음 반영한 지점이다(육충 3종 도입 때 남긴 한계 주석,
+    YUKHYO_YUKCHUNG 위 "★★한계" 참고 — 거기서 "원신·기신 구분이 없어
+    구현 불가능"이라 적어뒀던 것을 여기서 해소한다). 1단계는 상쇄까지만
+    — "기신이 충을 맞으면 오히려 가산(+)"으로 뒤집는 것은 다음 단계
+    과제로 남긴다(이번엔 0 처리만)."""
     _base = _yukhyo_base_score(yongshin_ohang, se_ohang, wolgeon_jj, iljin_jj, is_dong)
     _adj = 0
     _reasons = []
@@ -1597,6 +1687,20 @@ def judge_yukhyo_advanced(
     if is_donghyo_chung_flag:
         _adj -= 2
         _reasons.append("동한 다른 효가 용신을 충(沖)해 자리가 흔들립니다.")
+
+    if is_wonsin_dong and not is_wonsin_broken:
+        _adj += 3
+        _reasons.append("원신이 동하며 힘 있게 살아 있어 용신을 강하게 밀어줍니다.")
+
+    if is_gisin_dong:
+        if is_gisin_broken:
+            _reasons.append("기신이 동했지만 공망이나 충을 맞아 오히려 힘을 못 씁니다 — 위협이 무력화됩니다.")
+        else:
+            _adj -= 3
+            _reasons.append("기신이 동해 용신을 강하게 위협합니다.")
+    elif is_gisin_wang:
+        _adj -= 1
+        _reasons.append("기신이 왕성한 기운을 띠고 있어 은근한 부담이 됩니다.")
 
     if samhap_match:
         _adj += 2
