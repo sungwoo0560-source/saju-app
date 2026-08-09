@@ -31,6 +31,12 @@ except ImportError:
     import logging as _logging
     _logging.warning("[yukhyo_data] _YUKHYO_HYO_EASY import 실패 — 폴백 발동, 육효 동효 효사의 '쉽게 말하면' 캡션이 표시되지 않음")
     _YUKHYO_HYO_EASY = {}
+try:
+    from yukhyo_data import _YUKHYO_GUA_EASY  # 언더스코어 이름은 * import에서 제외되므로 명시적으로 가져온다
+except ImportError:
+    import logging as _logging
+    _logging.warning("[yukhyo_data] _YUKHYO_GUA_EASY import 실패 — 폴백 발동, 육효 괘사의 '쉽게 말하면' 캡션이 표시되지 않음")
+    _YUKHYO_GUA_EASY = {}
 
 # ── saju_ui / saju_report 없을 경우 폴백 정의 ─────────────────────
 if "render_quick_consult_header" not in dir():
@@ -28566,6 +28572,9 @@ def menu_yukhyo():
                 st.caption(f"괘사(卦辭) — 변화의 방향: {_gtext_first}")
             else:
                 st.markdown(f"> {_gtext}")
+                _gua_easy = _YUKHYO_GUA_EASY.get(gname, "")
+                if _gua_easy:
+                    st.caption(_gua_easy)
         _rows = []
         for _i in range(5, -1, -1):   # 상효→초효 순서로 위에서부터 그림
             _bar = "▅▅▅▅▅▅" if hexa6[_i] == 1 else "▅▅　　▅▅"
