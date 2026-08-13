@@ -2042,36 +2042,261 @@ def is_banum_gua(jiji6, hwa_jiji6, dong6):
 #      힘을 받는다"는 문구를 덧붙인다(용신이 약할 땐 때가 와도 그 자체로
 #      부족하다는 뜻 — 동정 기준과 왕쇠 기준은 서로 다른 축이라 동시에
 #      말할 수 있다).
+#
+# ★E-확장(문구 상세화, 판정 무변경): 위 5원칙·우선순위·분기 조건은 전혀
+# 손대지 않는다 — 어떤 케이스가 뽑히는지는 그대로이고, 그 케이스마다
+# 나가는 "문장"만 시점(계절 환산)·원리(왜 그때인지)·국면(그 무렵 뭐가
+# 어떻게 되는지) 3요소로 풀어썼다. 골든 diff가 애초에 이 함수를 스치지도
+# 않으므로(judge_yukhyo_advanced와 완전 분리) 0건임은 자명하다.
+#
+# 12지지 → 계절 참고 환산표(전통 맹중계孟仲季 배정 — 음력 월건 기준
+# 寅월=1월~丑월=12월 순환과 동일한 배정, 임의 창작 아님). "대략/무렵"
+# 방향성 표현과 함께만 쓴다 — 절기 경계일을 특정하지 않는다.
+JIJI_SEASON = {
+    "寅": "초봄", "卯": "한봄", "辰": "늦봄",
+    "巳": "초여름", "午": "한여름", "未": "늦여름",
+    "申": "초가을", "酉": "한가을", "戌": "늦가을",
+    "亥": "초겨울", "子": "한겨울", "丑": "늦겨울",
+}
+
+
+def _eunggi_sijeom(jiji):
+    """지지 하나를 응기 문장 앞머리에 쓰는 "○(지지) 계열의 때, 대략 ○○
+    무렵" 형태로 환산한다(JIJI_SEASON 재사용, 신규 판정 없음)."""
+    return f"{jiji}(지지) 계열의 때, 대략 {JIJI_SEASON[jiji]} 무렵"
+
+
+def _eunggi_target_jiji(yongshin_jiji, yongshin_ohang, is_dong, is_gongmang_flag, hwahyo_label):
+    """응기 목표 지지 하나만 뽑는다 — get_yukhyo_eunggi와 완전히 같은
+    우선순위(化墓>공망>動/靜)를 쓰는 판정을 여기 한 곳에만 두고,
+    get_yukhyo_eunggi·get_yukhyo_action_guide(E-확장2, 응기 연결 문구)가
+    이 헬퍼 하나를 같이 재사용한다 — 같은 분기를 두 군데서 따로 손으로
+    맞추다 어긋나는 사고를 원천 차단한다."""
+    if hwahyo_label == "化墓":
+        return _yukhyo_chung_partner(MYO_JIJI[yongshin_ohang])
+    if is_gongmang_flag:
+        return _yukhyo_chung_partner(yongshin_jiji)
+    if is_dong:
+        return _yukhyo_hap_partner(yongshin_jiji)
+    return _yukhyo_chung_partner(yongshin_jiji)
+
+
 def get_yukhyo_eunggi(yongshin_jiji, yongshin_ohang, is_dong, is_gongmang_flag, hwahyo_label, wolgeon_jj, iljin_jj):
     """용신효 상태(전부 호출부가 이미 계산해 넘기는 기존 값)로 응기(시기)
-    방향성 문장 하나를 반환한다. 전부 기존 함수 재사용 —
+    안내 문단을 반환한다 — 시점(계절 환산)·원리(왜 그때인지)·국면(그
+    무렵 어떤 변화가 오는지) 3요소 easy 문장. 전부 기존 함수 재사용 —
     get_wangsae_score/get_wangsae_label(왕쇠), MYO_JIJI(judge_hwahyo가 쓰는
-    묘지표), _yukhyo_chung_partner/_yukhyo_hap_partner(위 신설, 기존
-    YUKHYO_YUKCHUNG·YUKHAP 대응표 재사용) — 신규 판정 데이터 0건."""
+    묘지표), _yukhyo_chung_partner/_yukhyo_hap_partner(기존
+    YUKHYO_YUKCHUNG·YUKHAP 대응표 재사용), JIJI_SEASON(위 신설, 계절
+    환산 참고표일 뿐 판정 아님) — 신규 판정 데이터 0건. 분기 조건·
+    우선순위는 위 5원칙 주석 그대로이며 이번엔 문장만 풍부해졌다."""
     _wangsae = get_wangsae_label(get_wangsae_score(yongshin_ohang, wolgeon_jj, iljin_jj))
 
     if hwahyo_label == "化墓":
-        _myo_jiji = MYO_JIJI[yongshin_ohang]
-        _target = _yukhyo_chung_partner(_myo_jiji)
-        return f"동효가 변해 묘(墓)로 들어간 자리이니, {_target}(지지) 계열의 때에 그 묘를 충(沖)해 여는 시점에 움직임이 있을 수 있습니다."
+        _target = _eunggi_target_jiji(yongshin_jiji, yongshin_ohang, is_dong, is_gongmang_flag, hwahyo_label)
+        return (
+            f"{_eunggi_sijeom(_target)}이 응기(應期)로 보입니다. "
+            f"지금은 동효가 변해 묘(墓)에 갇힌 자리라 힘을 못 쓰고 있는데, "
+            f"그 무렵이 되면 묘를 충(沖)해 열어(沖開) 갇혀 있던 기운이 풀려납니다. "
+            f"그동안 정체되거나 막혀 있던 일이 그즈음 다시 움직이기 시작할 수 있습니다."
+        )
 
     if is_gongmang_flag:
         _target = _yukhyo_chung_partner(yongshin_jiji)
-        return f"용신이 공망(空亡)에 걸려 있으니, {_target}(지지) 계열의 때가 되어 공망에서 벗어나면(出空) 움직임이 있을 수 있습니다."
+        return (
+            f"{_eunggi_sijeom(_target)}이 응기(應期)로 보입니다. "
+            f"지금은 용신이 공망(空亡)에 걸려 자리는 있으나 속이 빈 상태인데, "
+            f"그 무렵 공망을 충(沖)하면 빈 자리가 채워집니다(沖空則實). "
+            f"미뤄지거나 확실치 않던 일이 그즈음 윤곽이 잡히거나 답이 나오기 시작할 수 있습니다."
+        )
 
     if is_dong:
         _target = _yukhyo_hap_partner(yongshin_jiji)
-        _phrase = f"동효(動爻)는 합(合)하는 때에 응하니, {_target}(지지) 계열의 때에 움직임이 있을 수 있습니다."
+        _phrase = (
+            f"{_eunggi_sijeom(_target)}이 응기(應期)로 보입니다. "
+            f"지금 움직이고 있는 기운(動爻)은 합(合)을 만나는 때에 매듭이 지어지니, "
+            f"그 무렵 합을 만나며 흐름이 한 단락 마무리됩니다. "
+            f"진행 중이던 일이 그즈음 구체적인 결과나 매듭으로 이어질 수 있습니다."
+        )
         if _wangsae == "왕(旺)":
-            _phrase += " 용신이 왕성한 기운이라 비교적 가까운 시점일 수 있습니다."
+            _phrase += " 이미 용신의 기운이 왕성한 편이라, 굳이 멀리 갈 것 없이 비교적 가까운 시점에 결과가 드러날 수 있습니다."
     else:
         _target = _yukhyo_chung_partner(yongshin_jiji)
-        _phrase = f"정효(靜爻)는 충(沖)하는 때에 응하니, {_target}(지지) 계열의 때에 움직임이 있을 수 있습니다."
+        _phrase = (
+            f"{_eunggi_sijeom(_target)}이 응기(應期)로 보입니다. "
+            f"지금 가만히 있는 기운(靜爻)은 충(沖)을 만나는 때에 흔들려 깨어나니, "
+            f"그 무렵 그 자리가 흔들리며 움직임이 생겨납니다. "
+            f"묶여 있거나 잠잠하던 일이 그즈음 다시 움직이거나 답이 보이기 시작할 수 있습니다."
+        )
 
     if _wangsae == "쇠(衰)":
-        _phrase += " 다만 용신이 지금은 쇠약한 편이라, 그 기운을 생조(生助)받거나 왕해지는 시점이 되어야 온전히 힘을 받으실 수 있습니다."
+        _phrase += " 다만 지금은 용신이 쇠약한 편이라, 그때가 와도 생조(生助)받는 흐름이 함께 있어야 온전히 풀립니다 — 그전까지는 서서히 기운을 회복해가는 과정으로 보시면 됩니다."
 
     return _phrase
+
+
+# ── 행동 처방(進退 가이드) — get_yukhyo_eunggi와 마찬가지로 판정과
+# 완전히 분리된 텍스트 신설이다(E-확장2). judge_yukhyo_advanced가 이미
+# 낸 label과 그 산출에 쓰인 재료들(용신·세효 왕쇠, 월파·일파, 공망,
+# 복음괘·반음괘, 원신·기신 動, 동효충, 化墓, 육수)을 호출부가 그대로
+# 넘기면, 여기서는 새 판정 없이 종합해 안내만 한다. 재료가 이미 전부
+# 있으므로 신규 판정 데이터 0건 — judge의 _adj 가중치·_yukhyo_label
+# 경계값 어느 것도 참조하지 않는다(딱 하나 재사용하는 게
+# get_wangsae_score/label뿐 — 이마저 왕쇠 "라벨"만 볼 뿐 새 점수를
+# 만들지 않는다).
+#
+# ★E-확장2 개정: 각 항목을 '계기(왜)→예상 국면(카테고리 수준, 사건·
+# 날짜 단정 금지)→대응(조심/활용)' 3단 인과 문장으로 쓴다(형 요청).
+# "나설 때(進)"만 상호배타(길+용신왕+(원신動 or 세효왕) 조건, 흐름이
+# 받쳐준다는 유일한 긍정 신호라 다른 경고 문구와 나란히 두면 메시지가
+# 흐려진다) — 나머지 9항목(월파일파·반음·복음·기신動·공망·동효충·
+# 세효쇠약·化墓·백호)은 judge_yukhyo_advanced의 _adj가 여러 요인을
+# 순가산하는 것과 같은 설계로 전부 독립적으로 덧붙인다. 진(進)도 못
+# 채우고 위 9항목도 전부 해당 없으면(예: label=무난, 특이 신호 없음)
+# 무리하지 않는 중립 문구로, label=흉인데 9항목 중 뚜렷한 원인이 하나도
+# 안 잡히면(용신 자체가 약해 흉인 경우) 그것대로 원인 문구를 낸다 —
+# 흉이 나왔는데 왜 조심해야 하는지 아무 이유도 안 붙는 건 안내로서
+# 불완전하다고 판단해 이번 개정에서 추가했다(명령서 10항목 목록에는
+# 없지만 같은 인과 설계 원칙의 자연스러운 완결이라 덧붙임 — 불필요하면
+# 빼도 됨).
+def get_yukhyo_action_guide(
+    label, yongshin_ohang, se_ohang, wolgeon_jj, iljin_jj,
+    is_dong, yongshin_jiji, hwahyo_label,
+    is_wolpa_flag, is_ilpa_flag, is_gongmang_flag,
+    is_donghyo_chung_flag,
+    is_bokum_gua, is_banum_gua,
+    is_wonsin_dong, wonsin_yukchin,
+    is_gisin_dong, gisin_yukchin,
+    yongshin_yuksu=None,
+):
+    """판정 재료(전부 호출부가 이미 계산해 넘기는 기존 값)를 종합해
+    '계기→예상 국면→대응' 3단 인과의 개운 처방 문단을 반환한다. 개운
+    조언이지 예언이 아니므로 단정하지 않는다("~수 있습니다"류 방향성
+    어투 유지, 총평·응기와 같은 원칙) — 국면도 사건·날짜를 특정하지
+    않고 카테고리 수준(계약·이동·구설·다툼 등)까지만 말한다."""
+    _yongshin_wangsae = get_wangsae_label(get_wangsae_score(yongshin_ohang, wolgeon_jj, iljin_jj))
+    _se_wangsae = get_wangsae_label(get_wangsae_score(se_ohang, wolgeon_jj, iljin_jj))
+
+    _sentences = []
+
+    if label == "길(吉)" and _yongshin_wangsae == "왕(旺)" and (is_wonsin_dong or _se_wangsae == "왕(旺)"):
+        _jin = "용신이 왕성하고 흐름이 받쳐주는 때라, 지금 나서면 순조롭게 풀릴 수 있는 국면입니다."
+        if is_wonsin_dong and wonsin_yukchin:
+            _jin += f" 미루지 말고 나서보시되, {wonsin_yukchin}(원신)의 도움을 적극 활용해 보세요."
+        else:
+            _jin += " 미루지 말고 나서보시되, 세효 스스로도 힘이 있으니 자신 있게 밀어붙여도 좋습니다."
+        _sentences.append(_jin)
+
+    if hwahyo_label == "化墓":
+        _sentences.append("동효가 변해 용신이 묘(墓)에 갇힌 자리라, 일이 묶여 답답하게 흘러가는 국면이 이어질 수 있습니다. 충개(沖開)되는 시점까지는 그 답답함을 감수하며 지켜보세요.")
+
+    if is_wolpa_flag or is_ilpa_flag:
+        _sentences.append("용신이 충(沖)을 맞아 기반이 흔들리는 자리라, 일이 어긋나거나 계획이 틀어지는 국면이 올 수 있습니다. 계약·이동·큰 결정은 지금 확정 짓지 말고 미뤄 두세요.")
+
+    if is_donghyo_chung_flag:
+        _sentences.append("다른 동효가 용신을 충(沖)하고 있어, 예정해 둔 일이 틀어지는 국면이 올 수 있습니다. 갑작스러운 변동에 대비해 두세요.")
+
+    if is_banum_gua:
+        _sentences.append("괘 전체가 번복의 기운(反吟)에 걸려 있어, 정해둔 것이 뒤집히거나 상대가 말을 바꾸는 국면이 올 수 있습니다. 약속이나 계약은 다시 한번 확인하고, 확정은 미뤄 두세요.")
+
+    if is_bokum_gua:
+        _sentences.append("괘 전체가 정체의 기운(伏吟)에 걸려 있어, 답보 상태로 지연되며 밀어붙여도 잘 나가지 않는 국면이 이어질 수 있습니다. 억지로 밀지 마시고 준비만 해두며 기다려 보세요.")
+
+    if is_gongmang_flag:
+        _sentences.append("용신이 힘이 실리지 않는 빈 자리(空亡)에 있어, 애써도 헛수고가 되기 쉬운 국면입니다. 출공(出空)하는 시점까지는 섣불리 나서지 말고 기다려 보세요.")
+
+    if is_gisin_dong:
+        _gisin_label = f"{gisin_yukchin}, 忌神" if gisin_yukchin else "忌神"
+        _sentences.append(f"방해가 되는 육친({_gisin_label})이 움직이고 있어, 경쟁이나 구설, 훼방이 생기기 쉬운 국면입니다. 경쟁 상대나 주변의 말을 특히 조심하세요.")
+
+    if _se_wangsae == "쇠(衰)":
+        _sentences.append("세효, 즉 본인의 기운이 지금 약한 편이라, 혼자 힘으로 밀어붙이기엔 벅찬 국면일 수 있습니다. 무리하지 마시고 주변의 도움을 구해 보세요.")
+
+    if yongshin_yuksu == "白虎":
+        _sentences.append("용신 자리에 백호(白虎)가 실려 있어, 일이 급하게 몰아치며 사고나 다툼, 급변이 생기기 쉬운 국면입니다. 안전과 감정 관리를 특히 조심하세요.")
+
+    if not _sentences:
+        if label == "흉(凶)":
+            _sentences.append("용신의 기운 자체가 약해 뜻대로 되지 않는 국면이 이어질 수 있습니다. 무리한 추진은 삼가고 조심스럽게 움직여 보세요.")
+        else:
+            _sentences.append("뚜렷하게 나설 때도 조심할 때도 아닌 평이한 흐름이니, 무리하지 않는 선에서 상황을 살펴가며 진행해 보세요.")
+
+    _target = _eunggi_target_jiji(yongshin_jiji, yongshin_ohang, is_dong, is_gongmang_flag, hwahyo_label)
+    _sentences.append(f"그러다 {_eunggi_sijeom(_target)}을 기점으로 국면이 전환될 수 있으니, 그 전엔 조심스럽게 움직이고 그 이후로 본격적으로 나서보세요.")
+
+    return " ".join(_sentences)
+
+
+# ── 대인(對人) 조언 — get_yukhyo_eunggi·get_yukhyo_action_guide와 같은
+# 원칙(판정과 완전 분리, 재료는 전부 호출부가 이미 계산해 넘김)의
+# 세 번째 텍스트(E-확장 파트3). "어떤 성향·어떤 관계의 사람을
+# 조심/활용할지"를 세효(世爻, 나)의 육수(六獸)와 기신(忌神) 육친,
+# 응효(應爻, 상대)와 세효의 생극(生剋)으로 종합한다. 응효 생극은 이번
+# 라운드에서 텍스트로만 쓴다 — judge_yukhyo_advanced 판정 편입은 하지
+# 않는다((F) 단계 별도 과제, 명령서에 명시).
+YUKHYO_YUKSU_PERSON_TRAIT = {
+    "靑龍": "귀인처럼 도움이 되거나 경사스러운 인연일 수 있습니다",
+    "朱雀": "말이나 문서, 구설이 오가는 관계일 수 있습니다",
+    "勾陳": "일 처리가 더디고 답답하거나, 부동산·자리 문제와 얽힌 관계일 수 있습니다",
+    "螣蛇": "얽히고설키거나 예상치 못한 일로 놀랄 일이 생기는, 변덕스러운 관계일 수 있습니다",
+    "白虎": "성격이 강하고 급해 다투거나 사고로 이어지기 쉬운 관계일 수 있습니다",
+    "玄武": "속내를 알기 어렵거나 은밀한 부분이 있는, 조심스러운 관계일 수 있습니다",
+}
+assert set(YUKHYO_YUKSU_PERSON_TRAIT) == set(_YUKSU_ORDER), \
+    "YUKHYO_YUKSU_PERSON_TRAIT 키가 _YUKSU_ORDER(청룡·주작·구진·등사·백호·현무)와 불일치"
+
+# 기신(忌神) 육친 → "그런 관계의 사람" 카테고리(구체 인물 단정 금지).
+# get_yukchin()의 5가지 반환값과 1:1 대응(assert로 전수 확인).
+_YUKHYO_GISIN_PERSON = {
+    "형제": "경쟁 관계에 있는 또래나 동료",
+    "관귀": "윗사람이나 권위 있는 자리, 혹은 법적·제도적 압박을 주는 쪽",
+    "처재": "금전 문제로 얽히거나 이성 관계로 얽힌 쪽",
+    "부모": "윗사람이나 문서·계약과 관련된 쪽",
+    "자손": "아랫사람이나 후배뻘 되는 쪽",
+}
+assert set(_YUKHYO_GISIN_PERSON) == {"처재", "관귀", "부모", "자손", "형제"}, \
+    "_YUKHYO_GISIN_PERSON 키가 get_yukchin() 반환값과 불일치"
+
+
+def get_yukhyo_person_guide(
+    se_ohang, se_yuksu,
+    is_gisin_dong, gisin_yukchin,
+    eung_ohang, is_eung_dong, is_eung_gongmang,
+):
+    """대인 조언 문단을 반환한다(재료 전부 호출부가 이미 계산해 넘긴 값
+    — 신규 판정 데이터 0건). 해당 사항이 하나도 없으면 None을 반환해
+    호출부(build_yukhyo_summary)가 문단 자체를 생략하게 한다(eunggi·
+    action_guide처럼 항상 채워지는 게 아니라, 재료 자체가 없을 수
+    있어서다 — 예: 응효가 세효와 오행이 같아 생도 극도 아니고, 육수도
+    해당 없고, 기신도 動하지 않은 경우).
+
+    ★세효 육수만 쓴다(용신 육수는 안 씀, E-확장3 최종 조정) — 대인 조언은
+    "나(세효)가 지금 놓인 기운"으로 통일한다는 취지다. 초안은 세효·용신
+    육수를 둘 다 병기했는데, 둘이 다르면(예: 세효=白虎·용신=靑龍) 한
+    문단 안에서 "강압적이다"와 "귀인처럼 도움된다"가 나란히 나와 모순
+    처럼 읽히는 문제가 있었다 — 육수 자체가 "이 자리의 기운"이지 사람
+    자체를 가리키는 게 아니라, 세효(나) 쪽 하나로 좁히는 게 더 명확했다."""
+    _sentences = []
+
+    if se_yuksu and se_yuksu in YUKHYO_YUKSU_PERSON_TRAIT:
+        _sentences.append(f"{se_yuksu}(六獸)의 기운이 실려 있어, {YUKHYO_YUKSU_PERSON_TRAIT[se_yuksu]}.")
+
+    if is_gisin_dong and gisin_yukchin in _YUKHYO_GISIN_PERSON:
+        _sentences.append(f"방해가 되는 육친이 {gisin_yukchin}(忌神)이니, {_YUKHYO_GISIN_PERSON[gisin_yukchin]} 사람을 특히 조심하세요.")
+
+    _rel = _yeonghyang_score(eung_ohang, se_ohang)
+    if _rel == 2:
+        _sentences.append("상대(應爻)가 나(世爻)를 생(生)해주는 관계라, 만나는 사람이 도움이 될 수 있습니다.")
+    elif _rel == -2:
+        _sentences.append("상대(應爻)가 나(世爻)를 극(剋)하는 관계라, 만나는 사람이 부담이 되거나 해가 될 수 있으니 조심하세요.")
+
+    if is_eung_gongmang or is_eung_dong:
+        _sentences.append("응효(상대 자리)가 공망이거나 動하고 있어, 상대의 마음이 아직 비어 있거나 변하기 쉬운 편일 수 있습니다.")
+
+    if not _sentences:
+        return None
+
+    return " ".join(_sentences)
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -2250,7 +2475,7 @@ def build_yukhyo_summary(
     is_bokshin=False, is_gongmang_flag=False, samhap_match=False, hwahyo_label=None,
     is_dong_y=False, dong_hyo_text=None, sinsal_tags=None,
     se_pos=None, eung_pos=None, yongshin_yuksu=None, qtype=None, se_yukchin=None,
-    eunggi_text=None,
+    eunggi_text=None, action_guide_text=None, person_guide_text=None,
 ):
     """질문 맥락(질문+용신 판단)에 육친 소개·세응 위치·육수·동효 효사·신살·
     질문유형별 실용 조언을 얹어 2~3문단짜리 종합 총평을 조합한다. ★새 판단
@@ -2259,30 +2484,37 @@ def build_yukhyo_summary(
     육친 뜻·get_yukhyo_sinsal_targets 신살·get_yuksu_order 육수·SEEUNG 세응과
     함께 문장으로 엮을 뿐, 어떤 값도 새로 판정하지 않는다(판단값 무변 —
     target_yukchin·se_pos·eung_pos·yongshin_yuksu·qtype 모두 호출부가 이미
-    가진 값을 그대로 받아 쓸 뿐 여기서 새로 정하지 않는다). 응기(시기)도
-    같은 원칙 — get_yukhyo_eunggi()가 미리 계산한 문장(eunggi_text)을
-    호출부가 넘기면 마지막에 별도 문단으로 얹을 뿐, 여기서 새로 판정하지
-    않는다.
+    가진 값을 그대로 받아 쓸 뿐 여기서 새로 정하지 않는다). 응기(시기)·
+    행동 처방(進退)·대인(對人) 조언도 같은 원칙 — get_yukhyo_eunggi()·
+    get_yukhyo_action_guide()·get_yukhyo_person_guide()(E-확장1·2·3)가
+    미리 계산한 문장(eunggi_text·action_guide_text·person_guide_text)을
+    호출부가 넘기면 마지막에 각각 별도 문단으로 얹을 뿐, 여기서 새로
+    판정하지 않는다.
 
     모순 방지 원칙: 오프닝의 세응·육수, 근거 문단(공망/복신/삼합/화효), 동효
     인용, 신살, 조언은 전부 사실 서술일 뿐 자체적으로 길흉을 단정하지 않는다
     — 실제 길흉 판정은 오프닝 문단과 마지막 문단의 마무리 문장에서만, 오직
     같은 label 하나로 통일해서 말한다. 따라서 삼합(+가산 요인)이 있어도
     최종 label이 흉이면 오프닝·마무리 모두 흉으로만 말하고, 삼합 문단은
-    "삼합국이 이루어져 있다"는 사실만 전한다. 응기 문단(4문단)도 같은
-    원칙을 따른다 — "언제"만 말할 뿐 길흉을 다시 단정하지 않고, 판정이
-    담긴 문단들과 앵커가 겹치지 않도록 맨 뒤에 완전히 분리해 둔다.
+    "삼합국이 이루어져 있다"는 사실만 전한다. 응기·행동 처방·대인 조언
+    문단(4·5·6문단)도 같은 원칙을 따른다 — "언제"·"어떻게 하면 좋을지"·
+    "어떤 사람을 조심/활용할지"만 말할 뿐 길흉을 다시 단정하지 않고,
+    판정이 담긴 문단들과 앵커가 겹치지 않도록 맨 뒤에 완전히 분리해 둔다.
 
     근거 문단은 공망·복신·삼합·화효가 동시에 참이면 전부 문장화한다(단,
     화효 4종은 judge_hwahyo가 애초에 하나만 반환하므로 그 안에서는 배타적).
     judge_yukhyo_advanced가 낸 _reasons 점수 가중과 이 문단의 문장 개수가
     서로 어긋나지 않도록 맞춘 것뿐, 가중치 자체는 건드리지 않는다.
 
-    문단 구성(있는 재료만큼 2~4문단, "\\n\\n"로 구분):
+    문단 구성(있는 재료만큼 2~6문단, "\\n\\n"로 구분):
       1문단(항상) — 오프닝(길흉 label) + 용신 육친 소개 + 세응 위치 + 육수 한 줄
       2문단(근거·동효 중 하나라도 있을 때만) — 근거(공망/복신/삼합/화효, 전부 나열) + 동효 효사 인용
       3문단(항상) — 신살(있을 때만) + 질문유형별 실용 조언(있을 때만) + 마무리(label 기반)
       4문단(eunggi_text 있을 때만) — 응기(시기) 방향성 안내, 길흉 판정과 분리된 별도 문단
+      5문단(action_guide_text 있을 때만) — 행동 처방(進退 가이드), 마찬가지로 별도 문단
+      6문단(person_guide_text 있을 때만) — 대인(對人) 조언, 마찬가지로 별도 문단
+        (get_yukhyo_person_guide가 재료 자체가 없으면 None을 반환하니,
+        eunggi·action_guide와 달리 항상 나오지는 않는다)
 
     반환: 완성된 총평(str, 문단 사이 빈 줄)."""
     _sinsal_tags = sinsal_tags or []
@@ -2356,5 +2588,11 @@ def build_yukhyo_summary(
 
     if eunggi_text:
         _paragraphs.append(f"응기(應期) — {eunggi_text}")
+
+    if action_guide_text:
+        _paragraphs.append(f"행동 처방(進退) — {action_guide_text}")
+
+    if person_guide_text:
+        _paragraphs.append(f"대인(對人) 조언 — {person_guide_text}")
 
     return "\n\n".join(_paragraphs)

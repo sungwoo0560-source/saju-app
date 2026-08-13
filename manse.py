@@ -29032,6 +29032,37 @@ def menu_yukhyo():
             _hwahyo_label, _wolgeon_jj, _ilju[1],
         )
 
+        # 행동 처방(進退 가이드, E-확장2) — 마찬가지로 판정과 분리된 안내.
+        # judge_yukhyo_advanced에 이미 넘긴 재료(월파·일파·공망·동효충·
+        # 복음괘·반음괘·원신기신 動)에 화공화묘·육수(백호)까지 그대로
+        # 재사용, 새 판정 없음.
+        _action_guide_text = get_yukhyo_action_guide(
+            _label, _yongshin_ohang, _se_ohang, _wolgeon_jj, _ilju[1],
+            _is_dong_y, _yongshin_jiji, _hwahyo_label,
+            _is_wolpa_flag, _is_ilpa_flag, _is_gongmang_flag,
+            _is_donghyo_chung_flag,
+            _is_bokum_gua, _is_banum_gua,
+            _is_wonsin_dong, _wongisin["원신"],
+            _is_gisin_dong, _wongisin["기신"],
+            yongshin_yuksu=_yongshin_yuksu,
+        )
+
+        # 대인(對人) 조언(E-확장3) — 세효 육수(六獸, 용신 육수는 최종
+        # 조정에서 제외 — get_yukhyo_person_guide 주석 참고), 기신 육친,
+        # 응효(상대)-세효 생극으로 종합. 응효 생극·공망·動 여부는 이번
+        # 라운드에서 조언 텍스트로만 쓴다 — 판정(judge_yukhyo_advanced)
+        # 편입은 (F) 별도 과제로 남긴다.
+        _se_yuksu = _yuksu6[_se_pos - 1]
+        _eung_jiji = _jiji6[_eung_pos - 1]
+        _eung_ohang = JIJI_OHANG[_eung_jiji]
+        _is_eung_dong = _dong6[_eung_pos - 1]
+        _is_eung_gongmang = is_yukhyo_gongmang(_eung_jiji, _ilju)
+        _person_guide_text = get_yukhyo_person_guide(
+            _se_ohang, _se_yuksu,
+            _is_gisin_dong, _wongisin["기신"],
+            _eung_ohang, _is_eung_dong, _is_eung_gongmang,
+        )
+
         _summary = build_yukhyo_summary(
             _name_str, _q_str, _label, _target_yukchin,
             is_bokshin=_is_bokshin, is_gongmang_flag=_is_gongmang_flag,
@@ -29042,6 +29073,8 @@ def menu_yukhyo():
             yongshin_yuksu=_yongshin_yuksu, qtype=_yh_qtype,
             se_yukchin=_yukchin6[_se_pos - 1],
             eunggi_text=_eunggi_text,
+            action_guide_text=_action_guide_text,
+            person_guide_text=_person_guide_text,
         )
         st.markdown("---")
         st.markdown("**종합(綜合)**")
