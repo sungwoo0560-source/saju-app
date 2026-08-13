@@ -28991,6 +28991,13 @@ def menu_yukhyo():
             )
             _is_gisin_wang = get_wangsae_label(get_wangsae_score(_gisin_ohang, _wolgeon_jj, _ilju[1])) == "왕(旺)"
 
+        # 복음괘(伏吟卦)·반음괘(反吟卦) — 용신효 한정이 아니라 괘 전체를
+        # 본다. 動한 효 전체(_jiji6·_byeon_jiji6·_dong6)를 그대로 넘기면
+        # 헬퍼가 알아서 2효 짝(초효/4효 靜 + 나머지 2효 動) 조건을 판별
+        # 한다(A라운드1 진단 근거, yukhyo_data.py is_bokum_gua 주석 참고).
+        _is_bokum_gua = is_bokum_gua(_jiji6, _byeon_jiji6, _dong6)
+        _is_banum_gua = is_banum_gua(_jiji6, _byeon_jiji6, _dong6)
+
         _label, _reasons = judge_yukhyo_advanced(
             _yongshin_ohang, _se_ohang, _wolgeon_jj, _ilju[1], is_dong=_is_dong_y,
             is_bokshin=_is_bokshin, is_gongmang_flag=_is_gongmang_flag,
@@ -29000,6 +29007,7 @@ def menu_yukhyo():
             is_wonsin_dong=_is_wonsin_dong, is_wonsin_broken=_is_wonsin_broken,
             is_gisin_dong=_is_gisin_dong, is_gisin_broken=_is_gisin_broken,
             is_gisin_wang=_is_gisin_wang,
+            is_bokum_gua=_is_bokum_gua, is_banum_gua=_is_banum_gua,
         )
         st.markdown(f"**{_name_str}님이 물으신 '{_yh_qtype}'에 대해 — {_label}**")
         st.caption(_YUKHYO_LAYER_NOTE)

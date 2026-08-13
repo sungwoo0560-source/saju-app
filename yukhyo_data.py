@@ -1619,6 +1619,7 @@ def judge_yukhyo_advanced(
     is_wonsin_dong=False, is_wonsin_broken=False,
     is_gisin_dong=False, is_gisin_broken=False, is_gisin_wang=False,
     is_banum=False, is_bokum=False,
+    is_bokum_gua=False, is_banum_gua=False,
 ):
     """3단계 정밀 용신 판단 — judge_yukhyo의 기본 점수(왕쇠+세효생극+동정) 위에
     공망(-2)·복신(-3)·삼합국 성립(+2)·화효(회두생 +2 · 회두극 -2 · 化空/化墓
@@ -1675,7 +1676,26 @@ def judge_yukhyo_advanced(
     "용신이 아닌 다른 동효"가 용신의 본지지를 충하는 것(호출부에서
     `_i != _yongshin_idx` 조건으로 명시 배제, manse.py의 judge_yukhyo_advanced
     호출부 참고)이고, 반음은 "용신효 자신"이 화한 뒤 자기 본지지를
-    충하는 것이라 주체와 비교 대상이 둘 다 다르다(이중계산 아님)."""
+    충하는 것이라 주체와 비교 대상이 둘 다 다르다(이중계산 아님).
+
+    ★★복음괘(伏吟卦)·반음괘(反吟卦)(A라운드2 신규 편입, is_bokum·is_banum과
+    별개): 위 is_banum·is_bokum은 "용신효 하나"만 보는 효단위 판정인데,
+    골든 442,368행(정지괘·단일효동6·전효개동)으로 검증했더니 전부 0건
+    이었다 — 원래 골든이 스윕하는 8가지 동효패턴 안에서는 이 현상이
+    구조적으로 절대 발생하지 않기 때문(D라운드2 진단). 63개 동효조합
+    전수 스캔으로 추적한 결과, 실제로는 "한 트라이그램 안에서 초효
+    (내괘) 또는 4효(외괘)는 靜하고 나머지 2효만 짝으로 함께 動"할 때만
+    (乾↔震 궁쌍이면 복음, 巽↔坤 궁쌍이면 반음) 나타나는 괘단위 현상
+    이었다(A라운드1 진단). is_bokum_gua·is_banum_gua는 이 조건을 호출부가
+    is_bokum_gua()·is_banum_gua()(judge_hwahyo·is_yukhyo_bokum/banum 옆
+    신설, 動한 효 전체를 스캔해 효단위 복음·반음이 2개 이상이면 True)로
+    미리 계산해 넘긴다. 복음괘 -2(정체, 회두극·化墓·동효충과 같은 급)·
+    반음괘 -3(번복, 일파·월파와 같은 급 — 복음괘보다 불리) — A라운드3에서
+    확정. 한 괘·한 조합에서 복음괘·반음괘가 동시에 성립하는 "혼합" 경우
+    (하괘·상괘가 각각 乾/震형·巽/坤형으로 다른 괘가 2·3효+5·6효를 동시에
+    動할 때, 63조합 전수에서 8건 실측)도 배타 처리하지 않고 감점을 그대로
+    합산한다(-5, PLANNER 확정). ★복음괘 흉(凶) 하한 클램프(A라운드3)도
+    같이 들어간다 — 자세한 근거는 아래 클램프 코드 블록 주석 참고."""
     _base = _yukhyo_base_score(yongshin_ohang, se_ohang, wolgeon_jj, iljin_jj, is_dong)
     _adj = 0
     _reasons = []
@@ -1736,8 +1756,31 @@ def judge_yukhyo_advanced(
     elif hwahyo_label == "보통" and is_dong:
         _reasons.append("동효가 변했으나 그 화효가 본효에 뚜렷한 영향을 주지는 않습니다.")
 
+    if is_bokum_gua:
+        _adj -= 2
+        _reasons.append("괘 전체가 복음(伏吟)에 걸려 제자리에 머물러 있어 일이 더디게 갑니다.")
+    if is_banum_gua:
+        _adj -= 3
+        _reasons.append("괘 전체가 반음(反吟)에 걸려 번복이 잦아 왔다갔다하기 쉽습니다.")
+
     _total = _base + _adj
     _label, _base_detail = _yukhyo_label(_total)
+
+    # ★복음괘 흉(凶) 하한 클램프(A라운드2 골든 분리집계 근거) — 복음(伏吟)은
+    # "정체·지연"이지 "흉(凶, 불리·실패)"과 의미가 다르다. 그런데 복음괘
+    # 단독(반음괘가 같이 걸리지 않은) -2 감점만으로 라벨이 흉까지 떨어지는
+    # 경우가 골든 확장 23,424건 중 4,684건(20.00%)이나 나왔다 — 유의미한
+    # 규모라 하한을 보통으로 막는다. 반음괘·혼합(복음+반음 동시)·원래부터
+    # 흉이던 행은 손대지 않는다(반음괘 -3은 "번복·불안정"이라 흉과 의미가
+    # 가깝고, 혼합·원래흉은 복음 단독의 책임이 아니라서 그대로 둔다).
+    # 판정: 복음 감점을 뺐을 때도 흉이면(_total + 2) 복음 탓이 아니므로
+    # 클램프하지 않는다 — "복음 감점이 흉을 유발한 경우만" 상향.
+    if is_bokum_gua and not is_banum_gua and _label == "흉(凶)":
+        _label_without_bokum, _ = _yukhyo_label(_total + 2)
+        if _label_without_bokum != "흉(凶)":
+            _label, _base_detail = _yukhyo_label(-2)  # "보통" 라벨·문구 재사용(경계값 -2는 항상 보통)
+            _reasons.append("다만 복음(伏吟)은 정체일 뿐 흉(凶)까지는 아니므로 — 복음괘 감점만으로 흉까지 떨어지는 것은 보통으로 상향 조정합니다.")
+
     _reasons.insert(0, _base_detail)
     return _label, _reasons
 
@@ -1938,6 +1981,45 @@ def is_yukhyo_bokum(bon_jiji, hwa_jiji):
 def is_yukhyo_banum(bon_jiji, hwa_jiji):
     """용신효의 본지지와 化지지가 충(沖)이면 반음(反吟)."""
     return is_yukhyo_chung(bon_jiji, hwa_jiji)
+
+
+# ── 복음괘(伏吟卦)·반음괘(反吟卦) — 괘단위(용신효 한정 아님) ────────────
+# ★효단위(is_yukhyo_bokum/banum, 용신효 하나만 봄) 편입을 골든
+# diff로 검증했더니 442,368행 전부 0건이었다(63개 동효조합 중 원래
+# 골든이 스윕하는 8가지 — 정지괘·단일효동6·전효개동 — 에서는 이 현상
+# 자체가 절대 발생하지 않는 구조였기 때문, D라운드2 진단 참고). 63조합
+# 전수 스캔으로 원인을 추적한 결과: 乾↔震 궁(納甲 지지표가 완전히
+# 동일)과 巽↔坤 궁(納甲 지지표가 자리마다 정확히 沖) 두 쌍에서만, "그
+# 트라이그램의 초효(내괘) 또는 4효(외괘)는 靜하고 나머지 2효만 함께
+# 動"할 때 발생한다 — 즉 효단위가 아니라 "한 트라이그램 안에서 2효가
+# 짝을 이뤄 함께 動하는" 괘단위 현상이다(A라운드1 진단 근거).
+# 이 판정은 트라이그램 이름을 직접 판별할 필요가 없다 — 動한 효들의
+# 본지지·화지지 관계를 전부 is_yukhyo_bokum/banum으로 재보고 2개 이상
+# 겹치는지만 세면, 乾/震·巽/坤 여부는 그 결과에 자연히 반영된다(63조합
+# 전수 스캔에서 "정확히 1개"인 경계 케이스가 0건이었다 — 이 현상은
+# 항상 2개 단위로만 나타나므로 "2개 이상" 임계가 유일하게 관측되는
+# 패턴이다). 복음괘·반음괘가 같은 괘·같은 조합에서 동시에 성립하는
+# "혼합" 케이스도 실측 8건 나왔다(하괘·상괘가 각각 乾/震형·巽/坤형으로
+# 다른 괘가 5·6효+2·3효를 동시에 動할 때) — PLANNER 확정: 배타 처리
+# 하지 않고 둘 다 True 허용, 호출부에서 감점을 합산한다.
+def is_bokum_gua(jiji6, hwa_jiji6, dong6):
+    """6효 전체(jiji6=본지지, hwa_jiji6=화지지, dong6=動 여부)를 받아
+    動한 효 중 효단위 복음(化==本)이 2개 이상이면 복음괘(伏吟卦)로 본다.
+    화지지가 없으면(byeon_jiji6=None, 변효가 없거나 변괘를 못 찾은 경우)
+    당연히 False."""
+    if not hwa_jiji6:
+        return False
+    _n = sum(1 for _i in range(6) if dong6[_i] and is_yukhyo_bokum(jiji6[_i], hwa_jiji6[_i]))
+    return _n >= 2
+
+
+def is_banum_gua(jiji6, hwa_jiji6, dong6):
+    """is_bokum_gua와 같은 구조 — 動한 효 중 효단위 반음(化沖本)이 2개
+    이상이면 반음괘(反吟卦)로 본다."""
+    if not hwa_jiji6:
+        return False
+    _n = sum(1 for _i in range(6) if dong6[_i] and is_yukhyo_banum(jiji6[_i], hwa_jiji6[_i]))
+    return _n >= 2
 
 
 # ── 응기(應期) — "언제 되는지"의 방향성 안내 ─────────────────────────
