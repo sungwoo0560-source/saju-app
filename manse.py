@@ -29017,6 +29017,13 @@ def menu_yukhyo():
                 _dong_hyo_text = _hyo6_y[_yongshin_idx]
         _yongshin_yuksu = _yuksu6[_yongshin_idx] if not _is_bokshin else None
 
+        # 응기(應期) — 판정(label)과 완전히 분리된 "언제" 안내. 용신효 상태
+        # (공망/동정/왕쇠/化墓)는 위에서 이미 계산해 둔 값을 그대로 재사용.
+        _eunggi_text = get_yukhyo_eunggi(
+            _yongshin_jiji, _yongshin_ohang, _is_dong_y, _is_gongmang_flag,
+            _hwahyo_label, _wolgeon_jj, _ilju[1],
+        )
+
         _summary = build_yukhyo_summary(
             _name_str, _q_str, _label, _target_yukchin,
             is_bokshin=_is_bokshin, is_gongmang_flag=_is_gongmang_flag,
@@ -29026,6 +29033,7 @@ def menu_yukhyo():
             se_pos=_se_pos, eung_pos=_eung_pos,
             yongshin_yuksu=_yongshin_yuksu, qtype=_yh_qtype,
             se_yukchin=_yukchin6[_se_pos - 1],
+            eunggi_text=_eunggi_text,
         )
         st.markdown("---")
         st.markdown("**종합(綜合)**")

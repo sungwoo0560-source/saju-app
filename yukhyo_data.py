@@ -1618,6 +1618,7 @@ def judge_yukhyo_advanced(
     is_ilpa_flag=False, is_wolpa_flag=False, is_donghyo_chung_flag=False,
     is_wonsin_dong=False, is_wonsin_broken=False,
     is_gisin_dong=False, is_gisin_broken=False, is_gisin_wang=False,
+    is_banum=False, is_bokum=False,
 ):
     """3단계 정밀 용신 판단 — judge_yukhyo의 기본 점수(왕쇠+세효생극+동정) 위에
     공망(-2)·복신(-3)·삼합국 성립(+2)·화효(회두생 +2 · 회두극 -2 · 化空/化墓
@@ -1660,7 +1661,21 @@ def judge_yukhyo_advanced(
     YUKHYO_YUKCHUNG 위 "★★한계" 참고 — 거기서 "원신·기신 구분이 없어
     구현 불가능"이라 적어뒀던 것을 여기서 해소한다). 1단계는 상쇄까지만
     — "기신이 충을 맞으면 오히려 가산(+)"으로 뒤집는 것은 다음 단계
-    과제로 남긴다(이번엔 0 처리만)."""
+    과제로 남긴다(이번엔 0 처리만).
+
+    ★★반음(反吟)·복음(伏吟)(이번 라운드 신규 파라미터, 아직 미편입):
+    is_banum·is_bokum은 용신효가 동(動)해 화(化)한 지지가 본지지와
+    충(反吟) 또는 동일(伏吟)인지를 호출부가 is_yukhyo_banum·
+    is_yukhyo_bokum(judge_hwahyo 옆 신설)으로 미리 계산해 넘긴다(용신·
+    공망·화효와 같은 아키텍처). 이번 라운드는 파라미터만 받아둘 뿐
+    가중치를 _adj에 편입하지 않는다 — 골든 diff로 전이행렬을 본 뒤
+    다음 라운드에서 확정한다. 제안 값(확정 아님): 복음 -1(되나 늦다,
+    화공·화묘와 같은 급의 정체) · 반음 -2(회두극과 같은 급의 급변·번복).
+    ★동효충(is_donghyo_chung_flag, -2)과는 겹치지 않는다 — 동효충은
+    "용신이 아닌 다른 동효"가 용신의 본지지를 충하는 것(호출부에서
+    `_i != _yongshin_idx` 조건으로 명시 배제, manse.py의 judge_yukhyo_advanced
+    호출부 참고)이고, 반음은 "용신효 자신"이 화한 뒤 자기 본지지를
+    충하는 것이라 주체와 비교 대상이 둘 다 다르다(이중계산 아님)."""
     _base = _yukhyo_base_score(yongshin_ohang, se_ohang, wolgeon_jj, iljin_jj, is_dong)
     _adj = 0
     _reasons = []
@@ -1831,6 +1846,15 @@ def check_yukhap(jiji_a, jiji_b):
     return False, None
 
 
+def _yukhyo_hap_partner(jiji):
+    """지지 하나를 받아 그 육합(六合) 상대 지지를 반환 — YUKHAP 12지지
+    전수(6쌍)라 반드시 하나가 나온다(응기 계산용, 화기 오행은 안 씀)."""
+    for _pair in YUKHAP:
+        if jiji in _pair:
+            return next(iter(_pair - {jiji}))
+    raise ValueError(f"YUKHAP에 없는 지지: {jiji}")
+
+
 # ── 육충(六沖) — 육효 전용 신설 ───────────────────────────────────
 # ★사주 쪽 saju_engine.py의 _JJ_CHUNG(원국 오행 파워 감산용, 다른 목적)을
 # import하지 않고 육효 전용으로 새로 만든다 — get_yukhyo_gongmang 주석에
@@ -1866,6 +1890,15 @@ def is_yukhyo_chung(jiji_a, jiji_b):
     return frozenset({jiji_a, jiji_b}) in YUKHYO_YUKCHUNG
 
 
+def _yukhyo_chung_partner(jiji):
+    """지지 하나를 받아 그 육충(六沖) 상대 지지를 반환 — YUKHYO_YUKCHUNG
+    12지지 전수(6쌍)라 반드시 하나가 나온다(응기 계산용)."""
+    for _pair in YUKHYO_YUKCHUNG:
+        if jiji in _pair:
+            return next(iter(_pair - {jiji}))
+    raise ValueError(f"YUKHYO_YUKCHUNG에 없는 지지: {jiji}")
+
+
 # ── 화효(化爻) — 동효가 변한 지지(化爻)가 원래 효(本爻)에 미치는 영향 ──
 # 回頭生(化爻가 本爻를 생함, 길) · 回頭剋(化爻가 本爻를 극함, 흉) ·
 # 化空(化爻가 공망) · 化墓(化爻가 本爻 오행의 묘지로 들어감, 정체).
@@ -1889,6 +1922,74 @@ def judge_hwahyo(bon_ohang, hwa_ohang, hwa_jiji, ilju_str):
     if _rel == -2:
         return "回頭剋", "동효가 변하며 스스로를 해치니(回頭剋) 기세가 꺾입니다."
     return "보통", "동효의 변화가 본효에 뚜렷한 영향을 주지 않습니다."
+
+
+# ── 반음(反吟)·복음(伏吟) — 용신효 한정 ────────────────────────────
+# 動爻가 化한 지지(化爻)가 본래 지지(本爻)와 어떤 관계인지로 판정한다.
+# 복음(伏吟) = 化지지가 本지지와 동일 — "엎드려 신음", 제자리에 머물러
+# 정체·반복되는 상. 반음(反吟) = 化지지가 本지지와 충(沖) — "뒤집혀
+# 신음", 번복·왔다갔다하며 불안정한 상. 반음의 충 판정은 신규 지지표를
+# 만들지 않고 YUKHYO_YUKCHUNG 대응표(is_yukhyo_chung)를 그대로 재사용한다.
+def is_yukhyo_bokum(bon_jiji, hwa_jiji):
+    """용신효의 본지지와 化지지가 같으면 복음(伏吟)."""
+    return bon_jiji == hwa_jiji
+
+
+def is_yukhyo_banum(bon_jiji, hwa_jiji):
+    """용신효의 본지지와 化지지가 충(沖)이면 반음(反吟)."""
+    return is_yukhyo_chung(bon_jiji, hwa_jiji)
+
+
+# ── 응기(應期) — "언제 되는지"의 방향성 안내 ─────────────────────────
+# ★판정(길흉) 로직과 완전히 분리된 신규 기능이다 — 이 함수는 어떤 값도
+# 새로 판정하지 않고, 이미 나온 용신효 상태(공망·동정·왕쇠·化墓)를 읽어
+# "어느 지지 계열의 때"인지 방향만 짚어준다. 정확한 날짜를 단정하지
+# 않는다(반증불가 미적용 원칙 — 총평의 길흉 판정과 같은 원칙).
+#
+# 전통 응기법 5원칙과 이 함수의 우선순위 배정:
+#   1) 化墓(入墓) → 그 묘(墓)를 충개(沖開)하는 지지 계열의 때. 化墓는
+#      hwahyo_label로 이미 動爻만 가질 수 있는 특수 상태라 최우선으로
+#      본다(구조적으로 가장 특정적인 상태이므로 다른 조건보다 앞선다).
+#   2) 공망(空亡) → 출공(出空)하는 지지 계열의 때. 그 지지를 충(沖)하면
+#      채워진다는 원리(충공즉실沖空則實)를 그대로 재사용해, 용신 지지의
+#      충 상대 지지를 출공 시점으로 본다.
+#   3)/4) 動爻는 합(合)하는 때, 靜爻는 충(沖)하는 때(動逢合·靜逢冲) —
+#      위 두 특수 상태가 아니면 이 동정(動靜) 기준이 응기의 뼈대가 된다.
+#   3-보조) 動 + 왕상(旺): "가까운 시점"이라는 문구를 덧붙인다.
+#   4-보조) 휴수(衰): 動·靜 어느 쪽이든 "생조받거나 왕해지는 시점이라야
+#      힘을 받는다"는 문구를 덧붙인다(용신이 약할 땐 때가 와도 그 자체로
+#      부족하다는 뜻 — 동정 기준과 왕쇠 기준은 서로 다른 축이라 동시에
+#      말할 수 있다).
+def get_yukhyo_eunggi(yongshin_jiji, yongshin_ohang, is_dong, is_gongmang_flag, hwahyo_label, wolgeon_jj, iljin_jj):
+    """용신효 상태(전부 호출부가 이미 계산해 넘기는 기존 값)로 응기(시기)
+    방향성 문장 하나를 반환한다. 전부 기존 함수 재사용 —
+    get_wangsae_score/get_wangsae_label(왕쇠), MYO_JIJI(judge_hwahyo가 쓰는
+    묘지표), _yukhyo_chung_partner/_yukhyo_hap_partner(위 신설, 기존
+    YUKHYO_YUKCHUNG·YUKHAP 대응표 재사용) — 신규 판정 데이터 0건."""
+    _wangsae = get_wangsae_label(get_wangsae_score(yongshin_ohang, wolgeon_jj, iljin_jj))
+
+    if hwahyo_label == "化墓":
+        _myo_jiji = MYO_JIJI[yongshin_ohang]
+        _target = _yukhyo_chung_partner(_myo_jiji)
+        return f"동효가 변해 묘(墓)로 들어간 자리이니, {_target}(지지) 계열의 때에 그 묘를 충(沖)해 여는 시점에 움직임이 있을 수 있습니다."
+
+    if is_gongmang_flag:
+        _target = _yukhyo_chung_partner(yongshin_jiji)
+        return f"용신이 공망(空亡)에 걸려 있으니, {_target}(지지) 계열의 때가 되어 공망에서 벗어나면(出空) 움직임이 있을 수 있습니다."
+
+    if is_dong:
+        _target = _yukhyo_hap_partner(yongshin_jiji)
+        _phrase = f"동효(動爻)는 합(合)하는 때에 응하니, {_target}(지지) 계열의 때에 움직임이 있을 수 있습니다."
+        if _wangsae == "왕(旺)":
+            _phrase += " 용신이 왕성한 기운이라 비교적 가까운 시점일 수 있습니다."
+    else:
+        _target = _yukhyo_chung_partner(yongshin_jiji)
+        _phrase = f"정효(靜爻)는 충(沖)하는 때에 응하니, {_target}(지지) 계열의 때에 움직임이 있을 수 있습니다."
+
+    if _wangsae == "쇠(衰)":
+        _phrase += " 다만 용신이 지금은 쇠약한 편이라, 그 기운을 생조(生助)받거나 왕해지는 시점이 되어야 온전히 힘을 받으실 수 있습니다."
+
+    return _phrase
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -2067,6 +2168,7 @@ def build_yukhyo_summary(
     is_bokshin=False, is_gongmang_flag=False, samhap_match=False, hwahyo_label=None,
     is_dong_y=False, dong_hyo_text=None, sinsal_tags=None,
     se_pos=None, eung_pos=None, yongshin_yuksu=None, qtype=None, se_yukchin=None,
+    eunggi_text=None,
 ):
     """질문 맥락(질문+용신 판단)에 육친 소개·세응 위치·육수·동효 효사·신살·
     질문유형별 실용 조언을 얹어 2~3문단짜리 종합 총평을 조합한다. ★새 판단
@@ -2075,25 +2177,30 @@ def build_yukhyo_summary(
     육친 뜻·get_yukhyo_sinsal_targets 신살·get_yuksu_order 육수·SEEUNG 세응과
     함께 문장으로 엮을 뿐, 어떤 값도 새로 판정하지 않는다(판단값 무변 —
     target_yukchin·se_pos·eung_pos·yongshin_yuksu·qtype 모두 호출부가 이미
-    가진 값을 그대로 받아 쓸 뿐 여기서 새로 정하지 않는다). 응기(시기)는
-    이를 산출하는 판단 함수 자체가 아직 없어 다루지 않는다.
+    가진 값을 그대로 받아 쓸 뿐 여기서 새로 정하지 않는다). 응기(시기)도
+    같은 원칙 — get_yukhyo_eunggi()가 미리 계산한 문장(eunggi_text)을
+    호출부가 넘기면 마지막에 별도 문단으로 얹을 뿐, 여기서 새로 판정하지
+    않는다.
 
     모순 방지 원칙: 오프닝의 세응·육수, 근거 문단(공망/복신/삼합/화효), 동효
     인용, 신살, 조언은 전부 사실 서술일 뿐 자체적으로 길흉을 단정하지 않는다
     — 실제 길흉 판정은 오프닝 문단과 마지막 문단의 마무리 문장에서만, 오직
     같은 label 하나로 통일해서 말한다. 따라서 삼합(+가산 요인)이 있어도
     최종 label이 흉이면 오프닝·마무리 모두 흉으로만 말하고, 삼합 문단은
-    "삼합국이 이루어져 있다"는 사실만 전한다.
+    "삼합국이 이루어져 있다"는 사실만 전한다. 응기 문단(4문단)도 같은
+    원칙을 따른다 — "언제"만 말할 뿐 길흉을 다시 단정하지 않고, 판정이
+    담긴 문단들과 앵커가 겹치지 않도록 맨 뒤에 완전히 분리해 둔다.
 
     근거 문단은 공망·복신·삼합·화효가 동시에 참이면 전부 문장화한다(단,
     화효 4종은 judge_hwahyo가 애초에 하나만 반환하므로 그 안에서는 배타적).
     judge_yukhyo_advanced가 낸 _reasons 점수 가중과 이 문단의 문장 개수가
     서로 어긋나지 않도록 맞춘 것뿐, 가중치 자체는 건드리지 않는다.
 
-    문단 구성(있는 재료만큼 2~3문단, "\\n\\n"로 구분):
+    문단 구성(있는 재료만큼 2~4문단, "\\n\\n"로 구분):
       1문단(항상) — 오프닝(길흉 label) + 용신 육친 소개 + 세응 위치 + 육수 한 줄
       2문단(근거·동효 중 하나라도 있을 때만) — 근거(공망/복신/삼합/화효, 전부 나열) + 동효 효사 인용
       3문단(항상) — 신살(있을 때만) + 질문유형별 실용 조언(있을 때만) + 마무리(label 기반)
+      4문단(eunggi_text 있을 때만) — 응기(시기) 방향성 안내, 길흉 판정과 분리된 별도 문단
 
     반환: 완성된 총평(str, 문단 사이 빈 줄)."""
     _sinsal_tags = sinsal_tags or []
@@ -2164,5 +2271,8 @@ def build_yukhyo_summary(
 
     _last_para = " ".join(_c for _c in (_sinsal_phrase, _advice, _closing) if _c)
     _paragraphs.append(_last_para)
+
+    if eunggi_text:
+        _paragraphs.append(f"응기(應期) — {eunggi_text}")
 
     return "\n\n".join(_paragraphs)
