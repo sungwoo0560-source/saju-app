@@ -1616,7 +1616,7 @@ def judge_yukhyo_advanced(
     yongshin_ohang, se_ohang, wolgeon_jj, iljin_jj, is_dong=False,
     is_bokshin=False, is_gongmang_flag=False, samhap_match=False, hwahyo_label=None,
     is_ilpa_flag=False, is_wolpa_flag=False, is_donghyo_chung_flag=False,
-    is_wonsin_dong=False, is_wonsin_broken=False,
+    is_wonsin_dong=False, is_wonsin_broken=False, wonsin_hwahyo_label=None,
     is_gisin_dong=False, is_gisin_broken=False, is_gisin_wang=False,
     is_banum=False, is_bokum=False,
     is_bokum_gua=False, is_banum_gua=False,
@@ -1647,8 +1647,22 @@ def judge_yukhyo_advanced(
     ★원신(原神)·기신(忌神): get_yukhyo_wongisin()으로 도출한 라벨이 6효
     중 어디 있는지(공망·복신·동정 포함)는 호출부가 이미 계산해 boolean
     으로 넘긴다(용신·공망·삼합과 같은 아키텍처). is_wonsin_dong=True인데
-    is_wonsin_broken(공망 또는 충)이면 가산하지 않는다 — "동해서 살아
-    있는" 원신만 인정한다. 원신이 6효에 아예 없으면(복신) 애초에
+    is_wonsin_broken(충— 動逢冲散, 動해도 흩어짐)이면 가산하지 않는다.
+    ★★원신 무력화 차등(F라운드2, D라운드2 진단 확정): is_wonsin_broken은
+    이제 충(일파·월파)만 본다 — 이전엔 공망도 broken 조건에 들어 있었는데
+    ,동효는 動不爲空(動하면 공망이 무효)이 정통이라 "원신 動+공망"까지
+    깎는 건 버그였다(F라운드1 진단, 골든 8,569건 전량 손해 확인). 대신
+    wonsin_hwahyo_label(judge_hwahyo가 판정한, 원신 위치의 화효 라벨 —
+    호출부가 이미 계산해 둔 _hwahyo_by_idx에서 그대로 꺼내 넘김, 신규
+    판정 아님)로 세분화한다: 回頭剋(원신이 오히려 극당함)이면 0(가산
+    없음) · 化墓·化空(변화가 묘에 갇히거나 무력해짐, 같은 급)이면
+    +1(제한적 도움) · 그 외(化空/化墓 아닌 動空·클린 포함)면 +3(정상
+    가산, 動空도 여기 포함되어 정통대로 원상복구된다). 충(is_wonsin_broken)
+    이 걸리면 위 화효 상태와 무관하게 항상 0 — 動이 흩어지면 화효 상태를
+    따질 계제가 아니기 때문(우선순위: 회두극>화묘=화공>動空>충만>클린,
+    단 화공/화묘가 확인되면 이미 그 값을 쓰므로 충 여부는 그 경우엔
+    영향 없음 — 실제 순서는 코드 분기 그대로 회두극→화묘/화공→충→
+    나머지). 원신이 6효에 아예 없으면(복신) 애초에
     is_wonsin_dong=False로 들어오므로 이 함수는 복신 위치를 찾을
     필요가 없다(1단계 설계 결정 — "원신 없음은 0"이라 복신 조회 자체가
     불필요, 복잡도를 늘리지 않는다). 기신도 동일하게 6효에 없으면
@@ -1723,9 +1737,20 @@ def judge_yukhyo_advanced(
         _adj -= 2
         _reasons.append("동한 다른 효가 용신을 충(沖)해 자리가 흔들립니다.")
 
-    if is_wonsin_dong and not is_wonsin_broken:
-        _adj += 3
-        _reasons.append("원신이 동하며 힘 있게 살아 있어 용신을 강하게 밀어줍니다.")
+    if is_wonsin_dong:
+        if wonsin_hwahyo_label == "回頭剋":
+            _reasons.append("원신이 동했으나 회두극(回頭剋)을 당해 오히려 힘을 잃어 이번엔 도움이 되지 못합니다.")
+        elif wonsin_hwahyo_label == "化墓":
+            _adj += 1
+            _reasons.append("원신이 동했으나 화묘(化墓)에 걸려 스스로 갇혀 있어 제한적으로만 도움이 됩니다.")
+        elif wonsin_hwahyo_label == "化空":
+            _adj += 1
+            _reasons.append("원신이 동했으나 화공(化空)이라 변화의 힘이 흐지부지돼 제한적으로만 도움이 됩니다.")
+        elif is_wonsin_broken:
+            _reasons.append("원신이 동했으나 충(沖)을 맞아 흩어져 힘을 쓰지 못합니다.")
+        else:
+            _adj += 3
+            _reasons.append("원신이 동하며 힘 있게 살아 있어 용신을 강하게 밀어줍니다.")
 
     if is_gisin_dong:
         if is_gisin_broken:
@@ -2168,12 +2193,19 @@ def get_yukhyo_action_guide(
     is_wonsin_dong, wonsin_yukchin,
     is_gisin_dong, gisin_yukchin,
     yongshin_yuksu=None,
+    wonsin_hwahyo_label=None,
 ):
     """판정 재료(전부 호출부가 이미 계산해 넘기는 기존 값)를 종합해
     '계기→예상 국면→대응' 3단 인과의 개운 처방 문단을 반환한다. 개운
     조언이지 예언이 아니므로 단정하지 않는다("~수 있습니다"류 방향성
     어투 유지, 총평·응기와 같은 원칙) — 국면도 사건·날짜를 특정하지
-    않고 카테고리 수준(계약·이동·구설·다툼 등)까지만 말한다."""
+    않고 카테고리 수준(계약·이동·구설·다툼 등)까지만 말한다.
+
+    ★원신 무력 연동(F라운드2): wonsin_hwahyo_label이 회두극·화묘·화공
+    이면(judge_yukhyo_advanced의 원신 차등과 같은 재료, 신규 판정 아님)
+    "적극 활용" 문구를 "기대할 수 있으나 지금은 힘이 약하다"로 누그러
+    뜨린다 — judge 쪽 점수가 이미 줄어도(회두극 0·화묘화공 +1) 다른
+    요인으로 label이 어쩌다 길로 나오는 예외 상황을 대비한 안전장치다."""
     _yongshin_wangsae = get_wangsae_label(get_wangsae_score(yongshin_ohang, wolgeon_jj, iljin_jj))
     _se_wangsae = get_wangsae_label(get_wangsae_score(se_ohang, wolgeon_jj, iljin_jj))
 
@@ -2181,7 +2213,10 @@ def get_yukhyo_action_guide(
 
     if label == "길(吉)" and _yongshin_wangsae == "왕(旺)" and (is_wonsin_dong or _se_wangsae == "왕(旺)"):
         _jin = "용신이 왕성하고 흐름이 받쳐주는 때라, 지금 나서면 순조롭게 풀릴 수 있는 국면입니다."
-        if is_wonsin_dong and wonsin_yukchin:
+        if is_wonsin_dong and wonsin_yukchin and wonsin_hwahyo_label in ("回頭剋", "化墓", "化空"):
+            _weak_label = {"回頭剋": "회두극", "化墓": "화묘", "化空": "화공"}[wonsin_hwahyo_label]
+            _jin += f" {wonsin_yukchin}(원신)의 도움을 기대할 수 있으나 지금은 {_weak_label}으로 힘이 약한 상태라, 온전히 받으려면 그 기운이 채워지는 때를 기다리는 편이 낫습니다."
+        elif is_wonsin_dong and wonsin_yukchin:
             _jin += f" 미루지 말고 나서보시되, {wonsin_yukchin}(원신)의 도움을 적극 활용해 보세요."
         else:
             _jin += " 미루지 말고 나서보시되, 세효 스스로도 힘이 있으니 자신 있게 밀어붙여도 좋습니다."

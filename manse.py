@@ -28966,14 +28966,20 @@ def menu_yukhyo():
         if _wonsin_idx is None:
             _is_wonsin_dong = False
             _is_wonsin_broken = False
+            _wonsin_hwahyo_label = None
         else:
             _wonsin_jiji = _jiji6[_wonsin_idx]
             _is_wonsin_dong = _dong6[_wonsin_idx]
+            # ★F라운드2: 動不爲空(動하면 공망 무효) — 공망 항목 제거, 충
+            # (일파·월파, 動逢冲散)만 본다(D라운드2 진단, 골든 8,569건
+            # 전량 실측 확인). 원신 위치의 화효(회두극/화묘/화공)는 이미
+            # 계산돼 있는 _hwahyo_by_idx에서 그대로 꺼낸다 — judge_hwahyo
+            # 재호출 없음.
             _is_wonsin_broken = (
-                is_yukhyo_gongmang(_wonsin_jiji, _ilju)
-                or is_yukhyo_chung(_wonsin_jiji, _ilju[1])
+                is_yukhyo_chung(_wonsin_jiji, _ilju[1])
                 or is_yukhyo_chung(_wonsin_jiji, _wolgeon_jj)
             )
+            _wonsin_hwahyo_label = _hwahyo_by_idx.get(_wonsin_idx) if _is_wonsin_dong else None
 
         _gisin_idx = pick_yongshin_idx(_yukchin6, _wongisin["기신"], _dong6, _se_pos)
         if _gisin_idx is None:
@@ -29005,6 +29011,7 @@ def menu_yukhyo():
             is_ilpa_flag=_is_ilpa_flag, is_wolpa_flag=_is_wolpa_flag,
             is_donghyo_chung_flag=_is_donghyo_chung_flag,
             is_wonsin_dong=_is_wonsin_dong, is_wonsin_broken=_is_wonsin_broken,
+            wonsin_hwahyo_label=_wonsin_hwahyo_label,
             is_gisin_dong=_is_gisin_dong, is_gisin_broken=_is_gisin_broken,
             is_gisin_wang=_is_gisin_wang,
             is_bokum_gua=_is_bokum_gua, is_banum_gua=_is_banum_gua,
@@ -29045,6 +29052,7 @@ def menu_yukhyo():
             _is_wonsin_dong, _wongisin["원신"],
             _is_gisin_dong, _wongisin["기신"],
             yongshin_yuksu=_yongshin_yuksu,
+            wonsin_hwahyo_label=_wonsin_hwahyo_label,
         )
 
         # 대인(對人) 조언(E-확장3) — 세효 육수(六獸, 용신 육수는 최종
