@@ -28986,16 +28986,19 @@ def menu_yukhyo():
             _is_gisin_dong = False
             _is_gisin_broken = False
             _is_gisin_wang = False
+            _gisin_hwahyo_label = None
         else:
             _gisin_jiji = _jiji6[_gisin_idx]
             _gisin_ohang = JIJI_OHANG[_gisin_jiji]
             _is_gisin_dong = _dong6[_gisin_idx]
+            # ★F라운드3: 動不爲空 — 원신(F2)과 동일 수정, 공망 항목 제거,
+            # 충(일파·월파, 動逢冲散)만 본다.
             _is_gisin_broken = (
-                is_yukhyo_gongmang(_gisin_jiji, _ilju)
-                or is_yukhyo_chung(_gisin_jiji, _ilju[1])
+                is_yukhyo_chung(_gisin_jiji, _ilju[1])
                 or is_yukhyo_chung(_gisin_jiji, _wolgeon_jj)
             )
             _is_gisin_wang = get_wangsae_label(get_wangsae_score(_gisin_ohang, _wolgeon_jj, _ilju[1])) == "왕(旺)"
+            _gisin_hwahyo_label = _hwahyo_by_idx.get(_gisin_idx) if _is_gisin_dong else None
 
         # 복음괘(伏吟卦)·반음괘(反吟卦) — 용신효 한정이 아니라 괘 전체를
         # 본다. 動한 효 전체(_jiji6·_byeon_jiji6·_dong6)를 그대로 넘기면
@@ -29013,7 +29016,7 @@ def menu_yukhyo():
             is_wonsin_dong=_is_wonsin_dong, is_wonsin_broken=_is_wonsin_broken,
             wonsin_hwahyo_label=_wonsin_hwahyo_label,
             is_gisin_dong=_is_gisin_dong, is_gisin_broken=_is_gisin_broken,
-            is_gisin_wang=_is_gisin_wang,
+            is_gisin_wang=_is_gisin_wang, gisin_hwahyo_label=_gisin_hwahyo_label,
             is_bokum_gua=_is_bokum_gua, is_banum_gua=_is_banum_gua,
         )
         st.markdown(f"**{_name_str}님이 물으신 '{_yh_qtype}'에 대해 — {_label}**")
@@ -29053,6 +29056,7 @@ def menu_yukhyo():
             _is_gisin_dong, _wongisin["기신"],
             yongshin_yuksu=_yongshin_yuksu,
             wonsin_hwahyo_label=_wonsin_hwahyo_label,
+            gisin_hwahyo_label=_gisin_hwahyo_label,
         )
 
         # 대인(對人) 조언(E-확장3) — 세효 육수(六獸, 용신 육수는 최종
@@ -29069,6 +29073,7 @@ def menu_yukhyo():
             _se_ohang, _se_yuksu,
             _is_gisin_dong, _wongisin["기신"],
             _eung_ohang, _is_eung_dong, _is_eung_gongmang,
+            gisin_hwahyo_label=_gisin_hwahyo_label,
         )
 
         _summary = build_yukhyo_summary(

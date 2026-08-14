@@ -1617,7 +1617,7 @@ def judge_yukhyo_advanced(
     is_bokshin=False, is_gongmang_flag=False, samhap_match=False, hwahyo_label=None,
     is_ilpa_flag=False, is_wolpa_flag=False, is_donghyo_chung_flag=False,
     is_wonsin_dong=False, is_wonsin_broken=False, wonsin_hwahyo_label=None,
-    is_gisin_dong=False, is_gisin_broken=False, is_gisin_wang=False,
+    is_gisin_dong=False, is_gisin_broken=False, is_gisin_wang=False, gisin_hwahyo_label=None,
     is_banum=False, is_bokum=False,
     is_bokum_gua=False, is_banum_gua=False,
 ):
@@ -1669,14 +1669,22 @@ def judge_yukhyo_advanced(
     is_gisin_dong=False·is_gisin_wang은 판단 자체가 무의미해 보통 False로
     들어온다.
 
-    ★★기신 무력화(이번 라운드 신규): 기신이 동했어도(is_gisin_dong=True)
-    공망이나 충을 맞았으면(is_gisin_broken=True) -3을 가산하지 않고
-    0으로 상쇄한다 — 정통 육효에서 "기신이 충을 맞으면 오히려 길"이라는
-    원칙을 처음 반영한 지점이다(육충 3종 도입 때 남긴 한계 주석,
-    YUKHYO_YUKCHUNG 위 "★★한계" 참고 — 거기서 "원신·기신 구분이 없어
-    구현 불가능"이라 적어뒀던 것을 여기서 해소한다). 1단계는 상쇄까지만
-    — "기신이 충을 맞으면 오히려 가산(+)"으로 뒤집는 것은 다음 단계
-    과제로 남긴다(이번엔 0 처리만).
+    ★★기신 무력화·차등(F라운드3, 원신 무력화·차등의 대칭 완성): 기신도
+    원신(F라운드2)과 완전히 같은 구조다. is_gisin_broken은 이제 충(일파·
+    월파, 動逢冲散)만 본다 — 공망은 動不爲空 원칙상 動한 효를 못 깎는데
+    예전엔 is_gisin_broken이 動 여부와 무관하게 공망도 감점 조건에 넣고
+    있었다(원신에서 F2 때 고친 것과 완전히 같은 버그, 골든 442,368행
+    스윕에서 "기신 動+공망(충 없음)" 8,459건 전량이 실제로 이 버그의
+    영향을 받고 있었음을 F3 진단으로 확인). gisin_hwahyo_label(judge_hwahyo가
+    판정한 기신 위치의 화효 라벨 — 호출부가 이미 계산해 둔 _hwahyo_by_idx
+    에서 그대로 꺼내 넘김, 신규 판정 아님)로 세분화: 回頭生(오히려 기신이
+    강해짐)이면 -4(원신 회두생 +4와 대칭, 위협 더 강함) · 回頭剋(기신이
+    거꾸로 극당함)이면 0(원신 회두극 0과 대칭 — 완전 무력) · 化墓·化空
+    (같은 급)이면 -1(제한적 위협) · 충 걸리면(動逢冲散) 화효 상태와
+    무관하게 0 · 그 외(動空 포함, 클린)면 -3(정상, 動空도 여기 포함되어
+    정통대로 원상복구). 원신도 이번 라운드에서 回頭生 분기가 추가됐다
+    (+4, 기존 +3보다 강한 도움 — 회두극 0·화묘화공 +1·충만 0·클린動空 +3은
+    F2 그대로).
 
     ★★반음(反吟)·복음(伏吟)(이번 라운드 신규 파라미터, 아직 미편입):
     is_banum·is_bokum은 용신효가 동(動)해 화(化)한 지지가 본지지와
@@ -1738,7 +1746,10 @@ def judge_yukhyo_advanced(
         _reasons.append("동한 다른 효가 용신을 충(沖)해 자리가 흔들립니다.")
 
     if is_wonsin_dong:
-        if wonsin_hwahyo_label == "回頭剋":
+        if wonsin_hwahyo_label == "回頭生":
+            _adj += 4
+            _reasons.append("원신이 동해 회두생(回頭生)까지 받아 오히려 기세가 더 강해져 용신을 더욱 든든하게 밀어줍니다.")
+        elif wonsin_hwahyo_label == "回頭剋":
             _reasons.append("원신이 동했으나 회두극(回頭剋)을 당해 오히려 힘을 잃어 이번엔 도움이 되지 못합니다.")
         elif wonsin_hwahyo_label == "化墓":
             _adj += 1
@@ -1753,8 +1764,19 @@ def judge_yukhyo_advanced(
             _reasons.append("원신이 동하며 힘 있게 살아 있어 용신을 강하게 밀어줍니다.")
 
     if is_gisin_dong:
-        if is_gisin_broken:
-            _reasons.append("기신이 동했지만 공망이나 충을 맞아 오히려 힘을 못 씁니다 — 위협이 무력화됩니다.")
+        if gisin_hwahyo_label == "回頭生":
+            _adj -= 4
+            _reasons.append("기신이 동해 회두생(回頭生)까지 받아 오히려 기세가 더 강해져 용신을 더 거세게 위협합니다.")
+        elif gisin_hwahyo_label == "回頭剋":
+            _reasons.append("기신이 동했으나 회두극(回頭剋)을 당해 완전히 무력해져 위협이 되지 못합니다.")
+        elif gisin_hwahyo_label == "化墓":
+            _adj -= 1
+            _reasons.append("기신이 동했으나 화묘(化墓)에 걸려 스스로 갇혀 있어 위협이 제한적입니다.")
+        elif gisin_hwahyo_label == "化空":
+            _adj -= 1
+            _reasons.append("기신이 동했으나 화공(化空)이라 그 힘이 흐지부지돼 위협이 제한적입니다.")
+        elif is_gisin_broken:
+            _reasons.append("기신이 동했지만 충(沖)을 맞아 흩어져 오히려 힘을 못 씁니다 — 위협이 무력화됩니다.")
         else:
             _adj -= 3
             _reasons.append("기신이 동해 용신을 강하게 위협합니다.")
@@ -2194,6 +2216,7 @@ def get_yukhyo_action_guide(
     is_gisin_dong, gisin_yukchin,
     yongshin_yuksu=None,
     wonsin_hwahyo_label=None,
+    gisin_hwahyo_label=None,
 ):
     """판정 재료(전부 호출부가 이미 계산해 넘기는 기존 값)를 종합해
     '계기→예상 국면→대응' 3단 인과의 개운 처방 문단을 반환한다. 개운
@@ -2201,11 +2224,12 @@ def get_yukhyo_action_guide(
     어투 유지, 총평·응기와 같은 원칙) — 국면도 사건·날짜를 특정하지
     않고 카테고리 수준(계약·이동·구설·다툼 등)까지만 말한다.
 
-    ★원신 무력 연동(F라운드2): wonsin_hwahyo_label이 회두극·화묘·화공
-    이면(judge_yukhyo_advanced의 원신 차등과 같은 재료, 신규 판정 아님)
-    "적극 활용" 문구를 "기대할 수 있으나 지금은 힘이 약하다"로 누그러
-    뜨린다 — judge 쪽 점수가 이미 줄어도(회두극 0·화묘화공 +1) 다른
-    요인으로 label이 어쩌다 길로 나오는 예외 상황을 대비한 안전장치다."""
+    ★원신·기신 무력/강화 연동(F라운드2·3): wonsin_hwahyo_label·
+    gisin_hwahyo_label이 회두극·화묘·화공이면(judge_yukhyo_advanced의
+    원신·기신 차등과 같은 재료, 신규 판정 아님) 문구를 누그러뜨리고,
+    回頭生이면 강조한다 — judge 쪽 점수가 이미 반영돼도(원신 회두생 +4·
+    기신 회두생 -4 등) 다른 요인으로 label이 예외적으로 나오는 상황을
+    대비한 안전장치다."""
     _yongshin_wangsae = get_wangsae_label(get_wangsae_score(yongshin_ohang, wolgeon_jj, iljin_jj))
     _se_wangsae = get_wangsae_label(get_wangsae_score(se_ohang, wolgeon_jj, iljin_jj))
 
@@ -2213,7 +2237,9 @@ def get_yukhyo_action_guide(
 
     if label == "길(吉)" and _yongshin_wangsae == "왕(旺)" and (is_wonsin_dong or _se_wangsae == "왕(旺)"):
         _jin = "용신이 왕성하고 흐름이 받쳐주는 때라, 지금 나서면 순조롭게 풀릴 수 있는 국면입니다."
-        if is_wonsin_dong and wonsin_yukchin and wonsin_hwahyo_label in ("回頭剋", "化墓", "化空"):
+        if is_wonsin_dong and wonsin_yukchin and wonsin_hwahyo_label == "回頭生":
+            _jin += f" {wonsin_yukchin}(원신)이 회두생(回頭生)까지 받아 도움이 더욱 든든하니, 자신 있게 나서보세요."
+        elif is_wonsin_dong and wonsin_yukchin and wonsin_hwahyo_label in ("回頭剋", "化墓", "化空"):
             _weak_label = {"回頭剋": "회두극", "化墓": "화묘", "化空": "화공"}[wonsin_hwahyo_label]
             _jin += f" {wonsin_yukchin}(원신)의 도움을 기대할 수 있으나 지금은 {_weak_label}으로 힘이 약한 상태라, 온전히 받으려면 그 기운이 채워지는 때를 기다리는 편이 낫습니다."
         elif is_wonsin_dong and wonsin_yukchin:
@@ -2242,7 +2268,12 @@ def get_yukhyo_action_guide(
 
     if is_gisin_dong:
         _gisin_label = f"{gisin_yukchin}, 忌神" if gisin_yukchin else "忌神"
-        _sentences.append(f"방해가 되는 육친({_gisin_label})이 움직이고 있어, 경쟁이나 구설, 훼방이 생기기 쉬운 국면입니다. 경쟁 상대나 주변의 말을 특히 조심하세요.")
+        if gisin_hwahyo_label == "回頭生":
+            _sentences.append(f"방해가 되는 육친({_gisin_label})이 동한 데다 회두생(回頭生)까지 받아 방해 기운이 더 거세졌습니다. 경쟁이나 구설, 훼방을 각별히 조심하세요.")
+        elif gisin_hwahyo_label in ("回頭剋", "化墓", "化空"):
+            _sentences.append(f"방해가 되는 육친({_gisin_label})이 動하긴 했으나 힘을 못 써 방해가 약해진 편이니, 크게 개의치 않아도 됩니다.")
+        else:
+            _sentences.append(f"방해가 되는 육친({_gisin_label})이 움직이고 있어, 경쟁이나 구설, 훼방이 생기기 쉬운 국면입니다. 경쟁 상대나 주변의 말을 특히 조심하세요.")
 
     if _se_wangsae == "쇠(衰)":
         _sentences.append("세효, 즉 본인의 기운이 지금 약한 편이라, 혼자 힘으로 밀어붙이기엔 벅찬 국면일 수 있습니다. 무리하지 마시고 주변의 도움을 구해 보세요.")
@@ -2297,6 +2328,7 @@ def get_yukhyo_person_guide(
     se_ohang, se_yuksu,
     is_gisin_dong, gisin_yukchin,
     eung_ohang, is_eung_dong, is_eung_gongmang,
+    gisin_hwahyo_label=None,
 ):
     """대인 조언 문단을 반환한다(재료 전부 호출부가 이미 계산해 넘긴 값
     — 신규 판정 데이터 0건). 해당 사항이 하나도 없으면 None을 반환해
@@ -2310,14 +2342,24 @@ def get_yukhyo_person_guide(
     육수를 둘 다 병기했는데, 둘이 다르면(예: 세효=白虎·용신=靑龍) 한
     문단 안에서 "강압적이다"와 "귀인처럼 도움된다"가 나란히 나와 모순
     처럼 읽히는 문제가 있었다 — 육수 자체가 "이 자리의 기운"이지 사람
-    자체를 가리키는 게 아니라, 세효(나) 쪽 하나로 좁히는 게 더 명확했다."""
+    자체를 가리키는 게 아니라, 세효(나) 쪽 하나로 좁히는 게 더 명확했다.
+
+    ★기신 강화·무력 연동(F라운드3): gisin_hwahyo_label이 회두생이면
+    방해 인물 경계를 강조하고, 회두극·화묘·화공이면 누그러뜨린다 —
+    get_yukhyo_action_guide와 같은 재료(judge_yukhyo_advanced의 기신
+    차등과 동일), 신규 판정 아님."""
     _sentences = []
 
     if se_yuksu and se_yuksu in YUKHYO_YUKSU_PERSON_TRAIT:
         _sentences.append(f"{se_yuksu}(六獸)의 기운이 실려 있어, {YUKHYO_YUKSU_PERSON_TRAIT[se_yuksu]}.")
 
     if is_gisin_dong and gisin_yukchin in _YUKHYO_GISIN_PERSON:
-        _sentences.append(f"방해가 되는 육친이 {gisin_yukchin}(忌神)이니, {_YUKHYO_GISIN_PERSON[gisin_yukchin]} 사람을 특히 조심하세요.")
+        if gisin_hwahyo_label == "回頭生":
+            _sentences.append(f"방해가 되는 육친이 {gisin_yukchin}(忌神)인데 회두생(回頭生)까지 받아 그 기세가 더 강해졌으니, {_YUKHYO_GISIN_PERSON[gisin_yukchin]} 사람을 각별히 조심하세요.")
+        elif gisin_hwahyo_label in ("回頭剋", "化墓", "化空"):
+            _sentences.append(f"방해가 되는 육친이 {gisin_yukchin}(忌神)이긴 하나 힘을 못 써 위협이 약해진 편이니, {_YUKHYO_GISIN_PERSON[gisin_yukchin]} 사람을 크게 경계하지 않아도 됩니다.")
+        else:
+            _sentences.append(f"방해가 되는 육친이 {gisin_yukchin}(忌神)이니, {_YUKHYO_GISIN_PERSON[gisin_yukchin]} 사람을 특히 조심하세요.")
 
     _rel = _yeonghyang_score(eung_ohang, se_ohang)
     if _rel == 2:

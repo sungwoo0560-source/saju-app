@@ -139,16 +139,18 @@ def compute_judge_inputs(gua_name, dong_idx_set, qtype, wolgeon_jj, iljin_ganji)
         is_gisin_dong = False
         is_gisin_broken = False
         is_gisin_wang = False
+        gisin_hwahyo_label = None
     else:
         gisin_jiji = jiji6[gisin_idx]
         gisin_ohang = yd.JIJI_OHANG[gisin_jiji]
         is_gisin_dong = dong6[gisin_idx]
+        # F라운드3: 動不爲空 — 원신(F2)과 동일 수정, 공망 항목 제거, 충만.
         is_gisin_broken = (
-            yd.is_yukhyo_gongmang(gisin_jiji, iljin_ganji)
-            or yd.is_yukhyo_chung(gisin_jiji, iljin_ganji[1])
+            yd.is_yukhyo_chung(gisin_jiji, iljin_ganji[1])
             or yd.is_yukhyo_chung(gisin_jiji, wolgeon_jj)
         )
         is_gisin_wang = yd.get_wangsae_label(yd.get_wangsae_score(gisin_ohang, wolgeon_jj, iljin_ganji[1])) == "왕(旺)"
+        gisin_hwahyo_label = hwahyo_by_idx.get(gisin_idx) if is_gisin_dong else None
 
     is_bokum_gua = yd.is_bokum_gua(jiji6, byeon_jiji6, dong6) if byeon_jiji6 else False
     is_banum_gua = yd.is_banum_gua(jiji6, byeon_jiji6, dong6) if byeon_jiji6 else False
@@ -169,6 +171,7 @@ def compute_judge_inputs(gua_name, dong_idx_set, qtype, wolgeon_jj, iljin_ganji)
         "is_wonsin_broken": is_wonsin_broken, "wonsin_hwahyo_label": wonsin_hwahyo_label,
         "gisin_yukchin": wongisin["기신"], "is_gisin_dong": is_gisin_dong,
         "is_gisin_broken": is_gisin_broken, "is_gisin_wang": is_gisin_wang,
+        "gisin_hwahyo_label": gisin_hwahyo_label,
         "is_bokum_gua": is_bokum_gua, "is_banum_gua": is_banum_gua,
         "base_score": base_score,
     }
@@ -178,7 +181,7 @@ _JUDGE_KEYS = (
     "is_bokshin", "is_gongmang_flag", "samhap_match", "hwahyo_label",
     "is_ilpa_flag", "is_wolpa_flag", "is_donghyo_chung_flag",
     "is_wonsin_dong", "is_wonsin_broken", "wonsin_hwahyo_label",
-    "is_gisin_dong", "is_gisin_broken", "is_gisin_wang",
+    "is_gisin_dong", "is_gisin_broken", "is_gisin_wang", "gisin_hwahyo_label",
     "is_bokum_gua", "is_banum_gua",
 )
 
