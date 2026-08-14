@@ -22,17 +22,26 @@ A라운드1 진단으로 확인). 그래서 그 골든은 그대로 두고(회�
 현상 자체가 원래 라벨 경계 돌파율이 높다는 뜻 — -2/-3라는 감점 폭이
 길/무난/보통/흉 4단계 경계(폭 2~3점)와 거의 맞먹기 때문).
 
-행마다 label_before(복음괘·반음괘 미적용, 기존 4요소만: 복신·공망·삼합·화효)와
-label_after(+is_bokum_gua·is_banum_gua)를 동시에 기록해 이 파일 하나로
-전이행렬을 바로 집계할 수 있게 한다.
+행마다 label_before(복음괘·반음괘만 뺀 나머지 전부 — 복신·공망·삼합·화효·
+일파·월파·동효충·원신·기신)와 label_after(+is_bokum_gua·is_banum_gua)를
+동시에 기록해 이 파일 하나로 전이행렬을 바로 집계할 수 있게 한다.
+
+★F-골든 편입 라운드: label_before도 이제 tests/yukhyo_judge_common.py
+(공용 모듈)를 통해 일파·월파·동효충·원신·기신까지 전부 반영한다 — 예전엔
+이 4요소뿐이었다. before/after 둘 다 같은 입력을 공유하고 오직
+is_bokum_gua·is_banum_gua만 다르게 넘기므로, 이 diff는 여전히 "복음괘·
+반음괘 효과만" 정확히 격리해서 보여준다(다른 요소가 같이 섞여 들어오지
+않음).
 """
 import csv
 import itertools
 import os
 import sys
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import yukhyo_data as yd  # noqa: E402
+import yukhyo_judge_common as jc  # noqa: E402
 
 OUT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "yukhyo_judge_golden_ext_bokumbanum.csv")
 
@@ -62,107 +71,48 @@ DONG_COMBOS_15 = [
 assert len(DONG_COMBOS_15) == 15
 
 
-def _gua_of_hexa(hexa6):
-    _ha = tuple(hexa6[0:3])
-    _sa = tuple(hexa6[3:6])
-    _ha_name = next((k for k, v in yd.BAGUA.items() if v["효"] == _ha), None)
-    _sa_name = next((k for k, v in yd.BAGUA.items() if v["효"] == _sa), None)
-    return _ha_name, _sa_name
-
-
-def _prep_gua(gua_name):
-    sa_name = ha_name = None
-    for (sa, ha), name in yd.GUA_64.items():
-        if name == gua_name:
-            sa_name, ha_name = sa, ha
-            break
-    nap_ha = yd.NAPGAP[ha_name]
-    nap_sa = yd.NAPGAP[sa_name]
-    jiji6 = list(nap_ha["내괘_지지"]) + list(nap_sa["외괘_지지"])
-    hexa6 = tuple(yd.BAGUA[ha_name]["효"]) + tuple(yd.BAGUA[sa_name]["효"])
-    gung_oh = yd.get_gung_ohang(gua_name)
-    yukchin6 = [yd.get_yukchin(gung_oh, yd.JIJI_OHANG[j]) for j in jiji6]
-    se_pos, eung_pos = yd.SEEUNG[gua_name]
-    return ha_name, sa_name, jiji6, hexa6, yukchin6, se_pos, eung_pos
-
-
 def _row_for(gua_name, dong_idx_set, qtype, wolgeon_jj, iljin_ganji):
-    ha_name, sa_name, jiji6, hexa6, yukchin6, se_pos, eung_pos = _prep_gua(gua_name)
-    dong6 = [i in dong_idx_set for i in range(6)]
-    se_ohang = yd.JIJI_OHANG[jiji6[se_pos - 1]]
+    inputs = jc.compute_judge_inputs(gua_name, dong_idx_set, qtype, wolgeon_jj, iljin_ganji)
+    if inputs is None:
+        return None
 
-    byeon_hexa = tuple((1 - hexa6[i]) if dong6[i] else hexa6[i] for i in range(6))
-    byeon_ha_name, byeon_sa_name = _gua_of_hexa(byeon_hexa)
-    byeon_jiji6 = None
-    if byeon_ha_name and byeon_sa_name:
-        byeon_jiji6 = list(yd.NAPGAP[byeon_ha_name]["내괘_지지"]) + list(yd.NAPGAP[byeon_sa_name]["외괘_지지"])
+    is_bokum_gua = inputs["is_bokum_gua"]
+    is_banum_gua = inputs["is_banum_gua"]
 
-    is_bokum_gua = yd.is_bokum_gua(jiji6, byeon_jiji6, dong6) if byeon_jiji6 else False
-    is_banum_gua = yd.is_banum_gua(jiji6, byeon_jiji6, dong6) if byeon_jiji6 else False
-
-    target_yukchin = yd.QUESTION_YONGSHIN[qtype]
-    if target_yukchin is None:
-        yongshin_idx = se_pos - 1
-    else:
-        yongshin_idx = yd.pick_yongshin_idx(yukchin6, target_yukchin, dong6, se_pos)
-
-    is_bokshin = yongshin_idx is None
-    if is_bokshin:
-        bokshin_info = yd.get_bokshin(gua_name, target_yukchin, se_pos)
-        if bokshin_info is None:
-            return None
-        yongshin_ohang = bokshin_info["복신_오행"]
-        yongshin_jiji = bokshin_info["복신_지지"]
-        is_dong_y = False
-        hwahyo_label = None
-    else:
-        yongshin_ohang = yd.JIJI_OHANG[jiji6[yongshin_idx]]
-        yongshin_jiji = jiji6[yongshin_idx]
-        is_dong_y = dong6[yongshin_idx]
-        hwahyo_label = None
-        if is_dong_y and byeon_jiji6:
-            hwa_jiji = byeon_jiji6[yongshin_idx]
-            hwa_ohang = yd.JIJI_OHANG[hwa_jiji]
-            hwahyo_label, _ = yd.judge_hwahyo(yongshin_ohang, hwa_ohang, hwa_jiji, iljin_ganji)
-
-    is_gongmang_flag = yd.is_yukhyo_gongmang(yongshin_jiji, iljin_ganji)
-    samhap_ohangs = yd.check_samhap_guk(jiji6)
-    samhap_match = yongshin_ohang in samhap_ohangs
-
-    base_score = yd._yukhyo_base_score(yongshin_ohang, se_ohang, wolgeon_jj, iljin_ganji[1], is_dong=is_dong_y)
-
-    label_before, _ = yd.judge_yukhyo_advanced(
-        yongshin_ohang, se_ohang, wolgeon_jj, iljin_ganji[1], is_dong=is_dong_y,
-        is_bokshin=is_bokshin, is_gongmang_flag=is_gongmang_flag,
-        samhap_match=samhap_match, hwahyo_label=hwahyo_label,
-    )
-    label_after, _ = yd.judge_yukhyo_advanced(
-        yongshin_ohang, se_ohang, wolgeon_jj, iljin_ganji[1], is_dong=is_dong_y,
-        is_bokshin=is_bokshin, is_gongmang_flag=is_gongmang_flag,
-        samhap_match=samhap_match, hwahyo_label=hwahyo_label,
-        is_bokum_gua=is_bokum_gua, is_banum_gua=is_banum_gua,
-    )
+    label_before, _ = jc.judge_from_inputs(inputs, is_bokum_gua=False, is_banum_gua=False)
+    label_after, _ = jc.judge_from_inputs(inputs, is_bokum_gua=is_bokum_gua, is_banum_gua=is_banum_gua)
 
     return {
         "gua": gua_name,
         "dong_combo": "-".join(str(i + 1) for i in dong_idx_set),
         "qtype": qtype,
-        "target_yukchin": target_yukchin or "",
-        "yongshin_idx": "" if is_bokshin else yongshin_idx,
-        "is_bokshin": int(is_bokshin),
-        "yongshin_jiji": yongshin_jiji,
-        "yongshin_ohang": yongshin_ohang,
-        "se_pos": se_pos,
-        "se_ohang": se_ohang,
+        "target_yukchin": inputs["target_yukchin"] or "",
+        "yongshin_idx": "" if inputs["is_bokshin"] else inputs["yongshin_idx"],
+        "is_bokshin": int(inputs["is_bokshin"]),
+        "yongshin_jiji": inputs["yongshin_jiji"],
+        "yongshin_ohang": inputs["yongshin_ohang"],
+        "se_pos": inputs["se_pos"],
+        "se_ohang": inputs["se_ohang"],
         "wolgeon_jj": wolgeon_jj,
         "iljin_ganji": iljin_ganji,
-        "is_dong_y": int(is_dong_y),
-        "is_gongmang_flag": int(is_gongmang_flag),
-        "samhap_match": int(samhap_match),
-        "hwahyo_label": hwahyo_label or "",
+        "is_dong_y": int(inputs["is_dong_y"]),
+        "is_gongmang_flag": int(inputs["is_gongmang_flag"]),
+        "samhap_match": int(inputs["samhap_match"]),
+        "hwahyo_label": inputs["hwahyo_label"] or "",
+        "is_ilpa_flag": int(inputs["is_ilpa_flag"]),
+        "is_wolpa_flag": int(inputs["is_wolpa_flag"]),
+        "is_donghyo_chung_flag": int(inputs["is_donghyo_chung_flag"]),
+        "wonsin_yukchin": inputs["wonsin_yukchin"],
+        "is_wonsin_dong": int(inputs["is_wonsin_dong"]),
+        "is_wonsin_broken": int(inputs["is_wonsin_broken"]),
+        "wonsin_hwahyo_label": inputs["wonsin_hwahyo_label"] or "",
+        "gisin_yukchin": inputs["gisin_yukchin"],
+        "is_gisin_dong": int(inputs["is_gisin_dong"]),
+        "is_gisin_broken": int(inputs["is_gisin_broken"]),
+        "is_gisin_wang": int(inputs["is_gisin_wang"]),
         "is_bokum_gua": int(is_bokum_gua),
         "is_banum_gua": int(is_banum_gua),
-        "base_score": base_score,
+        "base_score": inputs["base_score"],
         "label_before": label_before,
         "label_after": label_after,
         "changed": int(label_before != label_after),
@@ -178,7 +128,11 @@ def generate():
         "gua", "dong_combo", "qtype", "target_yukchin", "yongshin_idx", "is_bokshin",
         "yongshin_jiji", "yongshin_ohang", "se_pos", "se_ohang",
         "wolgeon_jj", "iljin_ganji", "is_dong_y", "is_gongmang_flag", "samhap_match",
-        "hwahyo_label", "is_bokum_gua", "is_banum_gua", "base_score",
+        "hwahyo_label",
+        "is_ilpa_flag", "is_wolpa_flag", "is_donghyo_chung_flag",
+        "wonsin_yukchin", "is_wonsin_dong", "is_wonsin_broken", "wonsin_hwahyo_label",
+        "gisin_yukchin", "is_gisin_dong", "is_gisin_broken", "is_gisin_wang",
+        "is_bokum_gua", "is_banum_gua", "base_score",
         "label_before", "label_after", "changed",
     ]
     n_rows = 0
