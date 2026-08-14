@@ -114,6 +114,8 @@ def _row_for(gua_name, dong_label, dong_idx_set, qtype, wolgeon_jj, iljin_ganji)
         "is_gisin_broken": int(inputs["is_gisin_broken"]),
         "is_gisin_wang": int(inputs["is_gisin_wang"]),
         "gisin_hwahyo_label": inputs["gisin_hwahyo_label"] or "",
+        "gushin_yukchin": inputs["gushin_yukchin"],
+        "is_gushin_dong": int(inputs["is_gushin_dong"]),
         "base_score": inputs["base_score"],
         "label": label,
     }
@@ -128,6 +130,7 @@ def generate():
         "is_ilpa_flag", "is_wolpa_flag", "is_donghyo_chung_flag",
         "wonsin_yukchin", "is_wonsin_dong", "is_wonsin_broken", "wonsin_hwahyo_label",
         "gisin_yukchin", "is_gisin_dong", "is_gisin_broken", "is_gisin_wang", "gisin_hwahyo_label",
+        "gushin_yukchin", "is_gushin_dong",
         "base_score", "label",
     ]
     n_rows = 0

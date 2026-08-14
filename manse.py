@@ -29000,6 +29000,23 @@ def menu_yukhyo():
             _is_gisin_wang = get_wangsae_label(get_wangsae_score(_gisin_ohang, _wolgeon_jj, _ilju[1])) == "왕(旺)"
             _gisin_hwahyo_label = _hwahyo_by_idx.get(_gisin_idx) if _is_gisin_dong else None
 
+        # 구신(仇神, F라운드4) — 기신을 생하는 육친, 원신·기신과 같은
+        # pick_yongshin_idx 패턴. ★動不爲空을 원신·기신처럼 뒤늦게 고치는
+        # 게 아니라 처음부터 반영 — is_gushin_broken은 공망 없이 충
+        # (일파·월파)만 본다.
+        _gushin_idx = pick_yongshin_idx(_yukchin6, _wongisin["구신"], _dong6, _se_pos)
+        if _gushin_idx is None:
+            _is_gushin_dong = False
+            _is_gushin_broken = False
+        else:
+            _gushin_jiji = _jiji6[_gushin_idx]
+            _is_gushin_dong_raw = _dong6[_gushin_idx]
+            _is_gushin_broken = (
+                is_yukhyo_chung(_gushin_jiji, _ilju[1])
+                or is_yukhyo_chung(_gushin_jiji, _wolgeon_jj)
+            )
+            _is_gushin_dong = _is_gushin_dong_raw and not _is_gushin_broken
+
         # 복음괘(伏吟卦)·반음괘(反吟卦) — 용신효 한정이 아니라 괘 전체를
         # 본다. 動한 효 전체(_jiji6·_byeon_jiji6·_dong6)를 그대로 넘기면
         # 헬퍼가 알아서 2효 짝(초효/4효 靜 + 나머지 2효 動) 조건을 판별
@@ -29017,6 +29034,7 @@ def menu_yukhyo():
             wonsin_hwahyo_label=_wonsin_hwahyo_label,
             is_gisin_dong=_is_gisin_dong, is_gisin_broken=_is_gisin_broken,
             is_gisin_wang=_is_gisin_wang, gisin_hwahyo_label=_gisin_hwahyo_label,
+            is_gushin_dong=_is_gushin_dong,
             is_bokum_gua=_is_bokum_gua, is_banum_gua=_is_banum_gua,
         )
         st.markdown(f"**{_name_str}님이 물으신 '{_yh_qtype}'에 대해 — {_label}**")
@@ -29057,6 +29075,7 @@ def menu_yukhyo():
             yongshin_yuksu=_yongshin_yuksu,
             wonsin_hwahyo_label=_wonsin_hwahyo_label,
             gisin_hwahyo_label=_gisin_hwahyo_label,
+            is_gushin_dong=_is_gushin_dong, gushin_yukchin=_wongisin["구신"],
         )
 
         # 대인(對人) 조언(E-확장3) — 세효 육수(六獸, 용신 육수는 최종

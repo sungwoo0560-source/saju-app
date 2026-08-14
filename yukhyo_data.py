@@ -1618,6 +1618,7 @@ def judge_yukhyo_advanced(
     is_ilpa_flag=False, is_wolpa_flag=False, is_donghyo_chung_flag=False,
     is_wonsin_dong=False, is_wonsin_broken=False, wonsin_hwahyo_label=None,
     is_gisin_dong=False, is_gisin_broken=False, is_gisin_wang=False, gisin_hwahyo_label=None,
+    is_gushin_dong=False,
     is_banum=False, is_bokum=False,
     is_bokum_gua=False, is_banum_gua=False,
 ):
@@ -1685,6 +1686,20 @@ def judge_yukhyo_advanced(
     정통대로 원상복구). 원신도 이번 라운드에서 回頭生 분기가 추가됐다
     (+4, 기존 +3보다 강한 도움 — 회두극 0·화묘화공 +1·충만 0·클린動空 +3은
     F2 그대로).
+
+    ★★구신(仇神) 편입(F라운드4, 삼신 마무리): 구신 = 기신을 생하는
+    육친(기신의 원신) — 기신의 배후 후원자라는 간접·약한 위협이다.
+    get_yukhyo_wongisin()이 원신·기신과 함께 이미 도출해 두고 있던
+    "구신" 라벨(C단계 1라운드, YUKHYO_GUSIN_MAP 25건 검산 완료)의 위치·
+    동정만 호출부가 원신·기신과 똑같은 패턴(pick_yongshin_idx)으로 찾아
+    is_gushin_dong으로 넘긴다. 원신·기신과 달리 화효(회두생/회두극)
+    차등은 두지 않는다 — 약한 요인에 그 정도 세분화는 과하다고 판단해
+    이번 범위 밖으로 남겼다(백로그). 動했으면 항상 -1, 動 안 했거나
+    無(복신)거나 충(動逢冲散)으로 무력화됐으면 0 — 딱 두 상태뿐인
+    단순한 차등이다. ★is_gushin_broken(호출부에서 계산)은 원신·기신이
+    처음엔 겪었던 動空 버그(動 여부와 무관하게 공망도 깎던 실수)를
+    처음부터 만들지 않는다 — 애초에 충(일파·월파)만 보고 공망은 아예
+    넣지 않았다.
 
     ★★반음(反吟)·복음(伏吟)(이번 라운드 신규 파라미터, 아직 미편입):
     is_banum·is_bokum은 용신효가 동(動)해 화(化)한 지지가 본지지와
@@ -1783,6 +1798,10 @@ def judge_yukhyo_advanced(
     elif is_gisin_wang:
         _adj -= 1
         _reasons.append("기신이 왕성한 기운을 띠고 있어 은근한 부담이 됩니다.")
+
+    if is_gushin_dong:
+        _adj -= 1
+        _reasons.append("구신(仇神)이 동해 기신의 배후에서 은근히 힘을 보태는 간접 위협이 있습니다.")
 
     if samhap_match:
         _adj += 2
@@ -2217,6 +2236,7 @@ def get_yukhyo_action_guide(
     yongshin_yuksu=None,
     wonsin_hwahyo_label=None,
     gisin_hwahyo_label=None,
+    is_gushin_dong=False, gushin_yukchin=None,
 ):
     """판정 재료(전부 호출부가 이미 계산해 넘기는 기존 값)를 종합해
     '계기→예상 국면→대응' 3단 인과의 개운 처방 문단을 반환한다. 개운
@@ -2274,6 +2294,10 @@ def get_yukhyo_action_guide(
             _sentences.append(f"방해가 되는 육친({_gisin_label})이 動하긴 했으나 힘을 못 써 방해가 약해진 편이니, 크게 개의치 않아도 됩니다.")
         else:
             _sentences.append(f"방해가 되는 육친({_gisin_label})이 움직이고 있어, 경쟁이나 구설, 훼방이 생기기 쉬운 국면입니다. 경쟁 상대나 주변의 말을 특히 조심하세요.")
+
+        if is_gushin_dong:
+            _gushin_phrase = f"{gushin_yukchin}(구신)" if gushin_yukchin else "구신(仇神)"
+            _sentences.append(f"거기다 방해의 배후에 {_gushin_phrase}까지 있어 그 훼방이 더 끈질기게 이어질 수 있습니다.")
 
     if _se_wangsae == "쇠(衰)":
         _sentences.append("세효, 즉 본인의 기운이 지금 약한 편이라, 혼자 힘으로 밀어붙이기엔 벅찬 국면일 수 있습니다. 무리하지 마시고 주변의 도움을 구해 보세요.")
