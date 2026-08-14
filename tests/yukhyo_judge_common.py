@@ -60,6 +60,16 @@ def compute_judge_inputs(gua_name, dong_idx_set, qtype, wolgeon_jj, iljin_ganji)
     se_pos, eung_pos = yd.SEEUNG[gua_name]
     se_ohang = yd.JIJI_OHANG[jiji6[se_pos - 1]]
 
+    # 응효(F라운드5) — 괘 하나로 완전히 고정되는 값(월건·일진·동효·질문
+    # 유형 무관, F5 진단 실증). eung_rel은 질문유형이 '경쟁/동업'일 때만
+    # judge에 적용되는 게 실제 판정이라(호출부 조건), 여기서는 값만
+    # 계산해 두고 관계형 여부 필터링은 judge_from_inputs 호출부에서 한다.
+    eung_jiji = jiji6[eung_pos - 1]
+    eung_ohang = yd.JIJI_OHANG[eung_jiji]
+    is_eung_dong = dong6[eung_pos - 1]
+    is_eung_gongmang = yd.is_yukhyo_gongmang(eung_jiji, iljin_ganji)
+    eung_rel = yd.get_yukhyo_eung_rel(eung_ohang, se_ohang)
+
     # 변괘(화지지) — 화효(화공화묘·회두생극)뿐 아니라 원신 화효·복음괘·
     # 반음괘 전부 이 한 번의 계산을 공유한다(menu_yukhyo의 _byeon_jiji6와 동일 역할).
     byeon_hexa = tuple((1 - hexa6[i]) if dong6[i] else hexa6[i] for i in range(6))
@@ -187,11 +197,16 @@ def compute_judge_inputs(gua_name, dong_idx_set, qtype, wolgeon_jj, iljin_ganji)
         "is_gisin_broken": is_gisin_broken, "is_gisin_wang": is_gisin_wang,
         "gisin_hwahyo_label": gisin_hwahyo_label,
         "gushin_yukchin": wongisin["구신"], "is_gushin_dong": is_gushin_dong,
+        "eung_ohang": eung_ohang, "is_eung_dong": is_eung_dong,
+        "is_eung_gongmang": is_eung_gongmang, "eung_rel": eung_rel,
         "is_bokum_gua": is_bokum_gua, "is_banum_gua": is_banum_gua,
         "base_score": base_score,
     }
 
 
+# ★eung_rel(응효 생극)은 여기 안 넣는다 — 실제 앱(manse.py)은 질문유형이
+# '경쟁/동업'일 때만 judge에 이 값을 넘기므로(F5 확정), judge_from_inputs가
+# inputs["qtype"]을 보고 그 자리에서 게이팅한다(아래 참고).
 _JUDGE_KEYS = (
     "is_bokshin", "is_gongmang_flag", "samhap_match", "hwahyo_label",
     "is_ilpa_flag", "is_wolpa_flag", "is_donghyo_chung_flag",
@@ -201,13 +216,19 @@ _JUDGE_KEYS = (
     "is_bokum_gua", "is_banum_gua",
 )
 
+RELATIONAL_QTYPES = ("경쟁/동업",)
+
 
 def judge_from_inputs(inputs, **overrides):
     """compute_judge_inputs()가 반환한 dict를 judge_yukhyo_advanced 실제
     호출로 그대로 넘긴다 — 키 이름이 파라미터 이름과 1:1 대응이라 매핑
     실수가 날 자리가 없다. overrides로 특정 항목만 바꿔치기해 before/after
-    비교(예: 확장 골든의 is_bokum_gua/is_banum_gua on/off)를 만들 수 있다."""
+    비교(예: 확장 골든의 is_bokum_gua/is_banum_gua on/off)를 만들 수 있다.
+    eung_rel은 manse.py와 동일하게 질문유형이 관계형(RELATIONAL_QTYPES)
+    일 때만 실제로 넘기고, 그 외엔 None(미적용) — inputs["eung_rel"]은
+    항상 원값(분류자)을 담고 있고 여기서 게이팅한다."""
     _kwargs = {k: inputs[k] for k in _JUDGE_KEYS}
+    _kwargs["eung_rel"] = inputs["eung_rel"] if inputs["qtype"] in RELATIONAL_QTYPES else None
     _kwargs.update(overrides)
     return yd.judge_yukhyo_advanced(
         inputs["yongshin_ohang"], inputs["se_ohang"], inputs["wolgeon_jj"], inputs["iljin_ganji"][1],

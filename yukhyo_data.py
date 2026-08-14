@@ -1547,6 +1547,18 @@ def _yeonghyang_score(a_ohang, b_ohang):
     raise ValueError(f"오행 생극표에 없는 조합: {a_ohang}, {b_ohang}")
 
 
+def get_yukhyo_eung_rel(eung_ohang, se_ohang):
+    """응효-세효 오행 생극 5종 분류자(F라운드5) — _yeonghyang_score를
+    그대로 재사용할 뿐 신규 판정이 아니다. manse.py는 `from yukhyo_data
+    import *`로 언더스코어 시작 이름(_yeonghyang_score)을 못 가져오므로,
+    호출부(manse.py·judge_yukhyo_advanced의 eung_rel 파라미터)가 쓸 수
+    있는 공개 이름으로 얇게 감싼다. 반환값: 2=응생세·-2=응극세·
+    -1=세생응·0=세극응·1=비화(get_yukhyo_person_guide의 내부 분류와
+    동일 값 — 그쪽은 자기 파라미터로 다시 계산하지만 같은 함수를 쓰므로
+    항상 일치한다)."""
+    return _yeonghyang_score(eung_ohang, se_ohang)
+
+
 def get_wangsae_score(yongshin_ohang, wolgeon_jj, iljin_jj):
     """용신 오행이 월건·일진으로부터 받는 왕쇠 점수(생조/극제 합산)."""
     _wg_oh = JIJI_OHANG[wolgeon_jj]
@@ -1619,6 +1631,7 @@ def judge_yukhyo_advanced(
     is_wonsin_dong=False, is_wonsin_broken=False, wonsin_hwahyo_label=None,
     is_gisin_dong=False, is_gisin_broken=False, is_gisin_wang=False, gisin_hwahyo_label=None,
     is_gushin_dong=False,
+    eung_rel=None,
     is_banum=False, is_bokum=False,
     is_bokum_gua=False, is_banum_gua=False,
 ):
@@ -1700,6 +1713,25 @@ def judge_yukhyo_advanced(
     처음엔 겪었던 動空 버그(動 여부와 무관하게 공망도 깎던 실수)를
     처음부터 만들지 않는다 — 애초에 충(일파·월파)만 보고 공망은 아예
     넣지 않았다.
+
+    ★★응효(應爻) 생극 편입(F라운드5): 응효(상대·거래처·경쟁자)와 세효
+    (나)의 오행 생극 5종(응생세·응극세·세극응·세생응·비화)을 eung_rel로
+    받는다 — get_yukhyo_eung_rel()(_yeonghyang_score 재사용, 아래 신설)이
+    호출부에서 미리 분류해 넘긴 값이며, 이 함수는 그 값을 조회 테이블로
+    가중치만 매길 뿐 새로 판정하지 않는다. ★질문유형별 차등이 핵심이라
+    — 세효·응효는 괘(64괘) 하나로 완전히 고정돼(월건·일진·동효·질문유형
+    무관, F5 진단에서 442,368행 전수로 qtype 6종 분포가 완전히 동일함을
+    실증) 응효 생극 자체는 '경쟁/동업'이든 '재물'이든 똑같이 나오는데,
+    실전에서 응효가 유의미한 건 "상대가 핵심인" 관계형 질문뿐이다.
+    그래서 판정 자체를 질문유형으로 가지치지 않고(judge_yukhyo_advanced는
+    qtype을 아예 모른다 — 관심사 분리 유지), 호출부(manse.py)가 질문
+    유형이 '경쟁/동업'일 때만 eung_rel을 계산해 넘기고 그 외엔 None을
+    넘긴다 — eung_rel=None이면 이 블록 전체가 조용히 스킵된다(자기중심
+    5개 유형은 이번 라운드 무반영, F5 진단에서 실측한 두 안 중 A안
+    확정). 가중치: 응생세(응효가 세효를 생함, 상대가 도움) +2 · 응극세
+    (응효가 세효를 극함, 상대에게 부담) -2 · 세극응(세효가 응효를 극함,
+    내가 주도권) +1 · 세생응(세효가 응효를 생함, 내가 힘을 쏟아 소모)
+    -1 · 비화(같은 오행, 무관) 0(가산도 문구도 없음).
 
     ★★반음(反吟)·복음(伏吟)(이번 라운드 신규 파라미터, 아직 미편입):
     is_banum·is_bokum은 용신효가 동(動)해 화(化)한 지지가 본지지와
@@ -1802,6 +1834,20 @@ def judge_yukhyo_advanced(
     if is_gushin_dong:
         _adj -= 1
         _reasons.append("구신(仇神)이 동해 기신의 배후에서 은근히 힘을 보태는 간접 위협이 있습니다.")
+
+    if eung_rel is not None:
+        if eung_rel == 2:
+            _adj += 2
+            _reasons.append("응효(상대)가 세효(나)를 생(生)하는 관계라 상대의 도움을 받는 형국입니다.")
+        elif eung_rel == -2:
+            _adj -= 2
+            _reasons.append("응효(상대)가 세효(나)를 극(剋)하는 관계라 상대에게 부담이나 압박을 받는 형국입니다.")
+        elif eung_rel == 0:
+            _adj += 1
+            _reasons.append("세효(나)가 응효(상대)를 극(剋)하는 관계라 내가 주도권을 쥔 형국입니다.")
+        elif eung_rel == -1:
+            _adj -= 1
+            _reasons.append("세효(나)가 응효(상대)를 생(生)하는 관계라 내가 힘을 쏟아 다소 소모적인 형국입니다.")
 
     if samhap_match:
         _adj += 2
@@ -2371,7 +2417,18 @@ def get_yukhyo_person_guide(
     ★기신 강화·무력 연동(F라운드3): gisin_hwahyo_label이 회두생이면
     방해 인물 경계를 강조하고, 회두극·화묘·화공이면 누그러뜨린다 —
     get_yukhyo_action_guide와 같은 재료(judge_yukhyo_advanced의 기신
-    차등과 동일), 신규 판정 아님."""
+    차등과 동일), 신규 판정 아님.
+
+    ★응효 생극 5종 완결(F라운드5): 응생세·응극세만 텍스트가 있던 걸
+    세극응·세생응까지 채웠다(비화만 여전히 침묵 — 서로 무관한 오행
+    이라 딱히 할 말이 없다는 뜻 그대로 유지). judge_yukhyo_advanced의
+    eung_rel 판정(관계형 질문유형에서만 가중치 적용)과 부호가 일치한다
+    — 세극응은 +1(내가 주도권)이라 텍스트도 긍정, 세생응은 -1(소모적)
+    이라 텍스트도 유보적으로 맞춰뒀다. 단, 이 대인 조언 문단은 판정과
+    달리 질문유형과 무관하게 항상 나온다(E-확장3 설계 그대로 유지 —
+    "관계형 질문에서만 텍스트도 나온다"로 좁히지 않았다. 대인 조언은
+    질문유형과 상관없이 "지금 만나는 사람이 어떤지"를 안내하는 문단
+    이라, 판정 가중치의 질문유형 제한과는 성격이 달라 그대로 뒀다)."""
     _sentences = []
 
     if se_yuksu and se_yuksu in YUKHYO_YUKSU_PERSON_TRAIT:
@@ -2390,6 +2447,11 @@ def get_yukhyo_person_guide(
         _sentences.append("상대(應爻)가 나(世爻)를 생(生)해주는 관계라, 만나는 사람이 도움이 될 수 있습니다.")
     elif _rel == -2:
         _sentences.append("상대(應爻)가 나(世爻)를 극(剋)하는 관계라, 만나는 사람이 부담이 되거나 해가 될 수 있으니 조심하세요.")
+    elif _rel == 0:
+        _sentences.append("내(世爻)가 상대(應爻)를 극(剋)하는 관계라, 대체로 내가 주도권을 쥔 관계일 수 있습니다.")
+    elif _rel == -1:
+        _sentences.append("내(世爻)가 상대(應爻)를 생(生)해주는 관계라, 내가 힘을 쏟는 만큼 다소 소모적인 관계일 수 있습니다.")
+    # 비화(_rel == 1)는 특별히 말할 게 없어 침묵(F5 확정 — 서로 무관한 오행 관계)
 
     if is_eung_gongmang or is_eung_dong:
         _sentences.append("응효(상대 자리)가 공망이거나 動하고 있어, 상대의 마음이 아직 비어 있거나 변하기 쉬운 편일 수 있습니다.")

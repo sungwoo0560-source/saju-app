@@ -29024,6 +29024,20 @@ def menu_yukhyo():
         _is_bokum_gua = is_bokum_gua(_jiji6, _byeon_jiji6, _dong6)
         _is_banum_gua = is_banum_gua(_jiji6, _byeon_jiji6, _dong6)
 
+        # 응효(應爻, 상대)-세효(나) 오행 생극(F라운드5) — 괘(64괘) 하나로
+        # 완전히 고정되는 값이라 판정 호출보다 먼저 계산해 둔다. ★질문
+        # 유형이 '경쟁/동업'일 때만 judge에 넘긴다(관계형 질문에서만
+        # 응효가 유의미하다는 F5 진단·확정 — judge_yukhyo_advanced는
+        # qtype을 모르므로 호출부가 여기서 가지를 친다). eung_ohang·
+        # is_eung_dong·is_eung_gongmang은 대인 조언(E-확장3)에서도 그대로
+        # 재사용한다.
+        _eung_jiji = _jiji6[_eung_pos - 1]
+        _eung_ohang = JIJI_OHANG[_eung_jiji]
+        _is_eung_dong = _dong6[_eung_pos - 1]
+        _is_eung_gongmang = is_yukhyo_gongmang(_eung_jiji, _ilju)
+        _eung_rel = get_yukhyo_eung_rel(_eung_ohang, _se_ohang)
+        _eung_rel_for_judge = _eung_rel if _yh_qtype == "경쟁/동업" else None
+
         _label, _reasons = judge_yukhyo_advanced(
             _yongshin_ohang, _se_ohang, _wolgeon_jj, _ilju[1], is_dong=_is_dong_y,
             is_bokshin=_is_bokshin, is_gongmang_flag=_is_gongmang_flag,
@@ -29035,6 +29049,7 @@ def menu_yukhyo():
             is_gisin_dong=_is_gisin_dong, is_gisin_broken=_is_gisin_broken,
             is_gisin_wang=_is_gisin_wang, gisin_hwahyo_label=_gisin_hwahyo_label,
             is_gushin_dong=_is_gushin_dong,
+            eung_rel=_eung_rel_for_judge,
             is_bokum_gua=_is_bokum_gua, is_banum_gua=_is_banum_gua,
         )
         st.markdown(f"**{_name_str}님이 물으신 '{_yh_qtype}'에 대해 — {_label}**")
@@ -29080,14 +29095,11 @@ def menu_yukhyo():
 
         # 대인(對人) 조언(E-확장3) — 세효 육수(六獸, 용신 육수는 최종
         # 조정에서 제외 — get_yukhyo_person_guide 주석 참고), 기신 육친,
-        # 응효(상대)-세효 생극으로 종합. 응효 생극·공망·動 여부는 이번
-        # 라운드에서 조언 텍스트로만 쓴다 — 판정(judge_yukhyo_advanced)
-        # 편입은 (F) 별도 과제로 남긴다.
+        # 응효(상대)-세효 생극으로 종합. 이 문단은 질문유형과 무관하게
+        # 항상 나온다(판정의 eung_rel 질문유형 제한과 성격이 다름 —
+        # get_yukhyo_person_guide 주석 참고). eung_ohang 등은 위 판정
+        # 직전에 이미 계산해 둔 값을 그대로 재사용.
         _se_yuksu = _yuksu6[_se_pos - 1]
-        _eung_jiji = _jiji6[_eung_pos - 1]
-        _eung_ohang = JIJI_OHANG[_eung_jiji]
-        _is_eung_dong = _dong6[_eung_pos - 1]
-        _is_eung_gongmang = is_yukhyo_gongmang(_eung_jiji, _ilju)
         _person_guide_text = get_yukhyo_person_guide(
             _se_ohang, _se_yuksu,
             _is_gisin_dong, _wongisin["기신"],
