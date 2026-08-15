@@ -179,6 +179,12 @@ def compute_judge_inputs(gua_name, dong_idx_set, qtype, wolgeon_jj, iljin_ganji)
     is_bokum_gua = yd.is_bokum_gua(jiji6, byeon_jiji6, dong6) if byeon_jiji6 else False
     is_banum_gua = yd.is_banum_gua(jiji6, byeon_jiji6, dong6) if byeon_jiji6 else False
 
+    # 육충괘·육합괘(F라운드6) — 본괘(jiji6) 그대로의 대응쌍 3쌍, 動 여부
+    # 무관. 질문유형 게이팅 없이 전 유형 균일 적용이라 eung_rel과 달리
+    # _JUDGE_KEYS에 바로 넣는다.
+    is_yukchunggwe = yd.is_yukchunggwe(jiji6)
+    is_yukhapgwe = yd.is_yukhapgwe(jiji6)
+
     base_score = yd._yukhyo_base_score(yongshin_ohang, se_ohang, wolgeon_jj, iljin_ganji[1], is_dong=is_dong_y)
 
     return {
@@ -200,13 +206,15 @@ def compute_judge_inputs(gua_name, dong_idx_set, qtype, wolgeon_jj, iljin_ganji)
         "eung_ohang": eung_ohang, "is_eung_dong": is_eung_dong,
         "is_eung_gongmang": is_eung_gongmang, "eung_rel": eung_rel,
         "is_bokum_gua": is_bokum_gua, "is_banum_gua": is_banum_gua,
+        "is_yukchunggwe": is_yukchunggwe, "is_yukhapgwe": is_yukhapgwe,
         "base_score": base_score,
     }
 
 
 # ★eung_rel(응효 생극)은 여기 안 넣는다 — 실제 앱(manse.py)은 질문유형이
 # '경쟁/동업'일 때만 judge에 이 값을 넘기므로(F5 확정), judge_from_inputs가
-# inputs["qtype"]을 보고 그 자리에서 게이팅한다(아래 참고).
+# inputs["qtype"]을 보고 그 자리에서 게이팅한다(아래 참고). is_yukchunggwe·
+# is_yukhapgwe(F6)는 질문유형 게이팅이 없어(전 유형 균일) 그냥 넣는다.
 _JUDGE_KEYS = (
     "is_bokshin", "is_gongmang_flag", "samhap_match", "hwahyo_label",
     "is_ilpa_flag", "is_wolpa_flag", "is_donghyo_chung_flag",
@@ -214,6 +222,7 @@ _JUDGE_KEYS = (
     "is_gisin_dong", "is_gisin_broken", "is_gisin_wang", "gisin_hwahyo_label",
     "is_gushin_dong",
     "is_bokum_gua", "is_banum_gua",
+    "is_yukchunggwe", "is_yukhapgwe",
 )
 
 RELATIONAL_QTYPES = ("경쟁/동업",)

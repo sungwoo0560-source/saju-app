@@ -29024,6 +29024,12 @@ def menu_yukhyo():
         _is_bokum_gua = is_bokum_gua(_jiji6, _byeon_jiji6, _dong6)
         _is_banum_gua = is_banum_gua(_jiji6, _byeon_jiji6, _dong6)
 
+        # 육충괘(六沖卦)·육합괘(六合卦, F라운드6) — 본괘 그대로의 내괘-외괘
+        # 대응효 관계(動 여부 무관, 복음괘·반음괘와 비교축이 다름). 질문
+        # 유형 게이팅 없이 전 유형 균일 적용(F6 확정).
+        _is_yukchunggwe = is_yukchunggwe(_jiji6)
+        _is_yukhapgwe = is_yukhapgwe(_jiji6)
+
         # 응효(應爻, 상대)-세효(나) 오행 생극(F라운드5) — 괘(64괘) 하나로
         # 완전히 고정되는 값이라 판정 호출보다 먼저 계산해 둔다. ★질문
         # 유형이 '경쟁/동업'일 때만 judge에 넘긴다(관계형 질문에서만
@@ -29051,6 +29057,7 @@ def menu_yukhyo():
             is_gushin_dong=_is_gushin_dong,
             eung_rel=_eung_rel_for_judge,
             is_bokum_gua=_is_bokum_gua, is_banum_gua=_is_banum_gua,
+            is_yukchunggwe=_is_yukchunggwe, is_yukhapgwe=_is_yukhapgwe,
         )
         st.markdown(f"**{_name_str}님이 물으신 '{_yh_qtype}'에 대해 — {_label}**")
         st.caption(_YUKHYO_LAYER_NOTE)
@@ -29091,6 +29098,7 @@ def menu_yukhyo():
             wonsin_hwahyo_label=_wonsin_hwahyo_label,
             gisin_hwahyo_label=_gisin_hwahyo_label,
             is_gushin_dong=_is_gushin_dong, gushin_yukchin=_wongisin["구신"],
+            is_yukchunggwe=_is_yukchunggwe, is_yukhapgwe=_is_yukhapgwe,
         )
 
         # 대인(對人) 조언(E-확장3) — 세효 육수(六獸, 용신 육수는 최종

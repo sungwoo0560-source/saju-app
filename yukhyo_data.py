@@ -1634,6 +1634,7 @@ def judge_yukhyo_advanced(
     eung_rel=None,
     is_banum=False, is_bokum=False,
     is_bokum_gua=False, is_banum_gua=False,
+    is_yukchunggwe=False, is_yukhapgwe=False,
 ):
     """3단계 정밀 용신 판단 — judge_yukhyo의 기본 점수(왕쇠+세효생극+동정) 위에
     공망(-2)·복신(-3)·삼합국 성립(+2)·화효(회두생 +2 · 회두극 -2 · 化空/化墓
@@ -1732,6 +1733,19 @@ def judge_yukhyo_advanced(
     (응효가 세효를 극함, 상대에게 부담) -2 · 세극응(세효가 응효를 극함,
     내가 주도권) +1 · 세생응(세효가 응효를 생함, 내가 힘을 쏟아 소모)
     -1 · 비화(같은 오행, 무관) 0(가산도 문구도 없음).
+
+    ★★육충괘(六沖卦)·육합괘(六合卦) 편입(F라운드6): 복음괘·반음괘와
+    같은 "괘 단위" 층위지만 비교축이 다르다 — 복음·반음은 動한 효의
+    화지지(변환 후)를 보고(動 필요), 육충괘·육합괘는 본괘 그대로의
+    내괘-외괘 대응효 관계(動 여부 무관, 항상 존재)를 본다. 개념이
+    아예 달라 겹쳐도(F6 진단 실측: 乾為天 등 6개 육충괘가 특정 동효
+    조합에서 복음·반음괘도 되는 경우 다수 확인) 이중계산이 아니라
+    순가산한다. is_yukchunggwe·is_yukhapgwe는 호출부가
+    is_yukchunggwe()·is_yukhapgwe()(아래 신설, jiji6 대응쌍 3쌍
+    계산식 — 하드코딩 64괘 명단 아님)로 미리 계산해 넘긴다. 육충괘
+    -1(흩어짐)·육합괘 +1(화합) — 응효 생극(eung_rel)과 달리 질문
+    유형 게이팅 없이 전 유형 균일 적용한다(F6 확정 — "이 판 자체가
+    흩어지는지 뭉치는지"는 어떤 질문에도 다 관련 있다고 판단).
 
     ★★반음(反吟)·복음(伏吟)(이번 라운드 신규 파라미터, 아직 미편입):
     is_banum·is_bokum은 용신효가 동(動)해 화(化)한 지지가 본지지와
@@ -1874,6 +1888,13 @@ def judge_yukhyo_advanced(
     if is_banum_gua:
         _adj -= 3
         _reasons.append("괘 전체가 반음(反吟)에 걸려 번복이 잦아 왔다갔다하기 쉽습니다.")
+
+    if is_yukchunggwe:
+        _adj -= 1
+        _reasons.append("괘 전체가 흩어지는 기운(六沖卦)이라 일이 흩어지거나 성사되기 어려운 편입니다.")
+    if is_yukhapgwe:
+        _adj += 1
+        _reasons.append("괘 전체가 화합하는 기운(六合卦)이라 일이 모이고 이뤄지기 쉬운 편입니다.")
 
     _total = _base + _adj
     _label, _base_detail = _yukhyo_label(_total)
@@ -2134,6 +2155,46 @@ def is_banum_gua(jiji6, hwa_jiji6, dong6):
     return _n >= 2
 
 
+# ── 육충괘(六沖卦)·육합괘(六合卦) — 괘 전체의 구조적 성질(F라운드6) ──
+# 복음괘·반음괘와 마찬가지로 괘 단위 층위지만 비교축이 다르다 — 복음·
+# 반음은 "動한 효의 화지지(변환 후) vs 그 효 자신의 본지지"(動 필요)를
+# 보고, 육충괘·육합괘는 "본괘 그대로의 내괘-외괘 대응효 관계"(動 여부
+# 무관, 항상 존재)를 본다. 대응쌍은 초효-4효·2효-5효·3효-6효(코드로는
+# jiji6[i] vs jiji6[i+3], i=0,1,2) 3쌍 — 이 3쌍이 전부 충(沖)이면
+# 육충괘, 전부 육합(六合)이면 육합괘다. 하드코딩 64괘 명단이 아니라
+# is_bokum_gua·is_banum_gua와 같은 계산식이라 오타·누락 위험이 없다
+# (아래 자기검증으로 정통 개수와 실제 일치까지 확인).
+def is_yukchunggwe(jiji6):
+    """본괘 6효(jiji6, 초→상)의 대응쌍 3쌍이 전부 충(沖)이면 육충괘
+    (六沖卦)로 본다 — 정통 10개(8순괘 + 天雷无妄·雷天大壯), 動 여부와
+    무관한 괘 자체의 구조적 성질."""
+    return all(is_yukhyo_chung(jiji6[_i], jiji6[_i + 3]) for _i in range(3))
+
+
+def is_yukhapgwe(jiji6):
+    """is_yukchunggwe와 같은 구조 — 대응쌍 3쌍이 전부 육합(六合)이면
+    육합괘(六合卦)로 본다 — 정통 8개."""
+    return all(check_yukhap(jiji6[_i], jiji6[_i + 3])[0] for _i in range(3))
+
+
+# ★자기검증 — 64괘 전수로 재확인해 정통 개수(육충 10·육합 8)와 정확히
+# 일치하는지, 두 집합이 겹치지 않는지 모듈 로드 시마다 확인한다
+# (YUKHYO_GUSIN_MAP 25건 검산과 같은 패턴 — 표를 신뢰하지 않고 매번
+# 재계산해서 맞춰본다).
+_yukchunggwe_names = set()
+_yukhapgwe_names = set()
+for (_gc_sa, _gc_ha), _gc_name in GUA_64.items():
+    _gc_jiji6 = list(NAPGAP[_gc_ha]["내괘_지지"]) + list(NAPGAP[_gc_sa]["외괘_지지"])
+    if is_yukchunggwe(_gc_jiji6):
+        _yukchunggwe_names.add(_gc_name)
+    if is_yukhapgwe(_gc_jiji6):
+        _yukhapgwe_names.add(_gc_name)
+assert len(_yukchunggwe_names) == 10, f"육충괘 개수 불일치: {len(_yukchunggwe_names)}개 (정통 10개), {_yukchunggwe_names}"
+assert len(_yukhapgwe_names) == 8, f"육합괘 개수 불일치: {len(_yukhapgwe_names)}개 (정통 8개), {_yukhapgwe_names}"
+assert not (_yukchunggwe_names & _yukhapgwe_names), \
+    f"육충괘·육합괘가 겹친다(있을 수 없는 케이스): {_yukchunggwe_names & _yukhapgwe_names}"
+
+
 # ── 응기(應期) — "언제 되는지"의 방향성 안내 ─────────────────────────
 # ★판정(길흉) 로직과 완전히 분리된 신규 기능이다 — 이 함수는 어떤 값도
 # 새로 판정하지 않고, 이미 나온 용신효 상태(공망·동정·왕쇠·化墓)를 읽어
@@ -2283,6 +2344,7 @@ def get_yukhyo_action_guide(
     wonsin_hwahyo_label=None,
     gisin_hwahyo_label=None,
     is_gushin_dong=False, gushin_yukchin=None,
+    is_yukchunggwe=False, is_yukhapgwe=False,
 ):
     """판정 재료(전부 호출부가 이미 계산해 넘기는 기존 값)를 종합해
     '계기→예상 국면→대응' 3단 인과의 개운 처방 문단을 반환한다. 개운
@@ -2328,6 +2390,12 @@ def get_yukhyo_action_guide(
 
     if is_bokum_gua:
         _sentences.append("괘 전체가 정체의 기운(伏吟)에 걸려 있어, 답보 상태로 지연되며 밀어붙여도 잘 나가지 않는 국면이 이어질 수 있습니다. 억지로 밀지 마시고 준비만 해두며 기다려 보세요.")
+
+    if is_yukchunggwe:
+        _sentences.append("괘 전체가 흩어지는 기운(六沖卦)이라 일이 흩어지거나 성사되기 어려운 국면일 수 있습니다. 무리하게 밀어붙이기보다 지켜보는 편이 낫습니다.")
+
+    if is_yukhapgwe:
+        _sentences.append("괘 전체가 화합하는 기운(六合卦)이라 일이 모이고 이뤄지기 쉬운 국면입니다. 지금 밀어붙이기 좋은 때입니다.")
 
     if is_gongmang_flag:
         _sentences.append("용신이 힘이 실리지 않는 빈 자리(空亡)에 있어, 애써도 헛수고가 되기 쉬운 국면입니다. 출공(出空)하는 시점까지는 섣불리 나서지 말고 기다려 보세요.")
