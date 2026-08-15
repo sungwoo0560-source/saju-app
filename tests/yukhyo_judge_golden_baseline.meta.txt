@@ -1,5 +1,5 @@
 file=yukhyo_judge_golden_baseline.csv
-md5=deca6b9dae80e4701dafc73e0c857af4
+md5=9554b243689088d1591a44cb4fc98e37
 rows=442368
-size_bytes=68181651
-label_distribution=길(吉):85015,무난:77474,보통:128232,흉(凶):151647
+size_bytes=69695069
+label_distribution=길(吉):85189,무난:77511,보통:127950,흉(凶):151718

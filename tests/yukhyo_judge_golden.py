@@ -122,6 +122,9 @@ def _row_for(gua_name, dong_label, dong_idx_set, qtype, wolgeon_jj, iljin_ganji)
         "eung_rel": inputs["eung_rel"],
         "is_yukchunggwe": int(inputs["is_yukchunggwe"]),
         "is_yukhapgwe": int(inputs["is_yukhapgwe"]),
+        "yongshin_jinshen_label": inputs["yongshin_jinshen_label"] or "",
+        "wonsin_jinshen_label": inputs["wonsin_jinshen_label"] or "",
+        "gisin_jinshen_label": inputs["gisin_jinshen_label"] or "",
         "base_score": inputs["base_score"],
         "label": label,
     }
@@ -139,6 +142,7 @@ def generate():
         "gushin_yukchin", "is_gushin_dong",
         "eung_ohang", "is_eung_dong", "is_eung_gongmang", "eung_rel",
         "is_yukchunggwe", "is_yukhapgwe",
+        "yongshin_jinshen_label", "wonsin_jinshen_label", "gisin_jinshen_label",
         "base_score", "label",
     ]
     n_rows = 0

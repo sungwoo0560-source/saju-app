@@ -28918,11 +28918,20 @@ def menu_yukhyo():
             _yongshin_jiji = _bokshin_info["복신_지지"] if _bokshin_info else _jiji6[_se_pos - 1]
             _is_dong_y = False   # 복신은 동정(動靜) 개념을 1단계 범위에서 다루지 않음
             _hwahyo_label = None
+            _yongshin_jinshen_label = None
         else:
             _yongshin_ohang = JIJI_OHANG[_jiji6[_yongshin_idx]]
             _yongshin_jiji = _jiji6[_yongshin_idx]
             _is_dong_y = _dong6[_yongshin_idx]
             _hwahyo_label = _hwahyo_by_idx.get(_yongshin_idx) if _is_dong_y else None
+            # 진신(進神)·퇴신(退神, F라운드7) — hwahyo_label과 같은 화지지
+            # 소스(_byeon_jiji6)로 병렬 계산. judge_yukhyo_advanced가
+            # hwahyo_label=="보통"일 때만 이 값을 쓰므로(化空 등과 배타),
+            # 여기서는 무조건 계산해 넘겨도 안전하다.
+            _yongshin_jinshen_label = (
+                get_yukhyo_jinshen_label(_yongshin_jiji, _byeon_jiji6[_yongshin_idx])
+                if _is_dong_y and _byeon_jiji6 else None
+            )
 
         if _is_bokshin and _bokshin_info:
             st.info(
@@ -28967,12 +28976,13 @@ def menu_yukhyo():
             _is_wonsin_dong = False
             _is_wonsin_broken = False
             _wonsin_hwahyo_label = None
+            _wonsin_jinshen_label = None
         else:
             _wonsin_jiji = _jiji6[_wonsin_idx]
             _is_wonsin_dong = _dong6[_wonsin_idx]
             # ★F라운드2: 動不爲空(動하면 공망 무효) — 공망 항목 제거, 충
             # (일파·월파, 動逢冲散)만 본다(D라운드2 진단, 골든 8,569건
-            # 전량 실측 확인). 원신 위치의 화효(회두극/화묘/화공)는 이미
+            # 전량 실측 확인). 원신 위치의 화효(회두극/회묘/화공)는 이미
             # 계산돼 있는 _hwahyo_by_idx에서 그대로 꺼낸다 — judge_hwahyo
             # 재호출 없음.
             _is_wonsin_broken = (
@@ -28980,6 +28990,11 @@ def menu_yukhyo():
                 or is_yukhyo_chung(_wonsin_jiji, _wolgeon_jj)
             )
             _wonsin_hwahyo_label = _hwahyo_by_idx.get(_wonsin_idx) if _is_wonsin_dong else None
+            # 진신·퇴신(F라운드7) — 용신과 같은 패턴.
+            _wonsin_jinshen_label = (
+                get_yukhyo_jinshen_label(_wonsin_jiji, _byeon_jiji6[_wonsin_idx])
+                if _is_wonsin_dong and _byeon_jiji6 else None
+            )
 
         _gisin_idx = pick_yongshin_idx(_yukchin6, _wongisin["기신"], _dong6, _se_pos)
         if _gisin_idx is None:
@@ -28987,6 +29002,7 @@ def menu_yukhyo():
             _is_gisin_broken = False
             _is_gisin_wang = False
             _gisin_hwahyo_label = None
+            _gisin_jinshen_label = None
         else:
             _gisin_jiji = _jiji6[_gisin_idx]
             _gisin_ohang = JIJI_OHANG[_gisin_jiji]
@@ -28999,6 +29015,11 @@ def menu_yukhyo():
             )
             _is_gisin_wang = get_wangsae_label(get_wangsae_score(_gisin_ohang, _wolgeon_jj, _ilju[1])) == "왕(旺)"
             _gisin_hwahyo_label = _hwahyo_by_idx.get(_gisin_idx) if _is_gisin_dong else None
+            # 진신·퇴신(F라운드7) — 원신과 동일 패턴.
+            _gisin_jinshen_label = (
+                get_yukhyo_jinshen_label(_gisin_jiji, _byeon_jiji6[_gisin_idx])
+                if _is_gisin_dong and _byeon_jiji6 else None
+            )
 
         # 구신(仇神, F라운드4) — 기신을 생하는 육친, 원신·기신과 같은
         # pick_yongshin_idx 패턴. ★動不爲空을 원신·기신처럼 뒤늦게 고치는
@@ -29058,6 +29079,9 @@ def menu_yukhyo():
             eung_rel=_eung_rel_for_judge,
             is_bokum_gua=_is_bokum_gua, is_banum_gua=_is_banum_gua,
             is_yukchunggwe=_is_yukchunggwe, is_yukhapgwe=_is_yukhapgwe,
+            yongshin_jinshen_label=_yongshin_jinshen_label,
+            wonsin_jinshen_label=_wonsin_jinshen_label,
+            gisin_jinshen_label=_gisin_jinshen_label,
         )
         st.markdown(f"**{_name_str}님이 물으신 '{_yh_qtype}'에 대해 — {_label}**")
         st.caption(_YUKHYO_LAYER_NOTE)

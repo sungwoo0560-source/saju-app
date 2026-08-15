@@ -1559,6 +1559,33 @@ def get_yukhyo_eung_rel(eung_ohang, se_ohang):
     return _yeonghyang_score(eung_ohang, se_ohang)
 
 
+# 진신(進神)·퇴신(退神) — 水·木·火·金 4원소의 생지→왕지 인접쌍만(土
+# 辰戌丑未는 정통상 대상 아님). A라운드1 진단에서 이미 쓴 정의 그대로
+# (신규 창작 아님, F7에서 판정에 실제 편입).
+JINSHEN_PAIRS = {("亥", "子"): "水", ("寅", "卯"): "木", ("巳", "午"): "火", ("申", "酉"): "金"}
+TUISHEN_PAIRS = {(_b, _a): _oh for (_a, _b), _oh in JINSHEN_PAIRS.items()}
+
+
+def get_yukhyo_jinshen_label(bon_jiji, hwa_jiji):
+    """본지지→화지지가 진신(進神, 같은 오행 순행)·퇴신(退神, 같은 오행
+    역행)인지 분류한다(F라운드7) — JINSHEN_PAIRS·TUISHEN_PAIRS 조회일
+    뿐 신규 판정 로직 없음. 반환값: "진신"·"퇴신"·None(해당 없음, 예:
+    다른 오행 관계·土 4支 관계 등). ★같은 오행 관계라 回頭生·回頭剋과는
+    수학적으로 100% 배타(다른 오행 조건이라 동시 성립 불가)지만, 化空
+    (화효 지지가 그날 공망)은 오행과 무관한 날짜 조건이라 겹칠 수 있다
+    (F7 진단 실측: 442,368행에서 용신 1,680건·원신 1,680건·기신
+    1,800건, 전부 化空만 — 化墓와는 0건, 진퇴신 8쌍이 化墓 지지값과
+    수학적으로 안 겹치기 때문). 그래서 호출부(judge_yukhyo_advanced)는
+    hwahyo_label(또는 wonsin_/gisin_hwahyo_label)이 "보통"인 — 化空·
+    化墓·回頭生·回頭剋 전부 아닌 — 경우에만 이 라벨을 조회한다."""
+    _pair = (bon_jiji, hwa_jiji)
+    if _pair in JINSHEN_PAIRS:
+        return "진신"
+    if _pair in TUISHEN_PAIRS:
+        return "퇴신"
+    return None
+
+
 def get_wangsae_score(yongshin_ohang, wolgeon_jj, iljin_jj):
     """용신 오행이 월건·일진으로부터 받는 왕쇠 점수(생조/극제 합산)."""
     _wg_oh = JIJI_OHANG[wolgeon_jj]
@@ -1631,6 +1658,7 @@ def judge_yukhyo_advanced(
     is_wonsin_dong=False, is_wonsin_broken=False, wonsin_hwahyo_label=None,
     is_gisin_dong=False, is_gisin_broken=False, is_gisin_wang=False, gisin_hwahyo_label=None,
     is_gushin_dong=False,
+    yongshin_jinshen_label=None, wonsin_jinshen_label=None, gisin_jinshen_label=None,
     eung_rel=None,
     is_banum=False, is_bokum=False,
     is_bokum_gua=False, is_banum_gua=False,
@@ -1747,6 +1775,21 @@ def judge_yukhyo_advanced(
     유형 게이팅 없이 전 유형 균일 적용한다(F6 확정 — "이 판 자체가
     흩어지는지 뭉치는지"는 어떤 질문에도 다 관련 있다고 판단).
 
+    ★★진신(進神)·퇴신(退神) 편입(F라운드7): 회두생극(다른 오행)과는
+    완전히 별개 축 — 화효가 본효와 "같은 오행"으로 순행(진신)·역행
+    (퇴신)하는 경우다(get_yukhyo_jinshen_label, JINSHEN_PAIRS·
+    TUISHEN_PAIRS 조회, 8쌍 — 土 4支는 대상 아님). 回頭生·回頭剋과는
+    오행 자체가 달라 수학적으로 100% 배타이지만, 化空(화효 지지가 그날
+    공망인지, 오행과 무관한 날짜 조건)과는 실제로 겹칠 수 있다(F7 진단
+    실측 — get_yukhyo_jinshen_label 주석 참고). 그래서 용신·원신·기신
+    전부 hwahyo_label이 "보통"(化空·化墓·回頭生·回頭剋 전부 아님)일
+    때만 진신·퇴신을 추가로 살핀다 — 화효 우선순위 체계(化空>化墓>
+    回頭生/剋>보통) 안에 "보통의 하위 세분류"로 자연스럽게 얹었을 뿐,
+    이중계산 지점을 새로 만들지 않는다. 용신 진신 +2·퇴신 -2(회두생극과
+    동급). 원신·기신은 "clean"(動+무력화 없음) 상태에 보정으로 얹는다
+    — 원신 clean +3에서 진신이면 +4(회두생 +4와 동급)·퇴신이면 +2,
+    기신 clean -3에서 진신이면 -4(회두생 -4와 동급)·퇴신이면 -2.
+
     ★★반음(反吟)·복음(伏吟)(이번 라운드 신규 파라미터, 아직 미편입):
     is_banum·is_bokum은 용신효가 동(動)해 화(化)한 지지가 본지지와
     충(反吟) 또는 동일(伏吟)인지를 호출부가 is_yukhyo_banum·
@@ -1820,6 +1863,12 @@ def judge_yukhyo_advanced(
             _reasons.append("원신이 동했으나 화공(化空)이라 변화의 힘이 흐지부지돼 제한적으로만 도움이 됩니다.")
         elif is_wonsin_broken:
             _reasons.append("원신이 동했으나 충(沖)을 맞아 흩어져 힘을 쓰지 못합니다.")
+        elif wonsin_jinshen_label == "진신":
+            _adj += 4
+            _reasons.append("원신이 동한 데다 진신(進神)까지 더해져 그 도움이 한층 더 든든합니다.")
+        elif wonsin_jinshen_label == "퇴신":
+            _adj += 2
+            _reasons.append("원신이 동했으나 퇴신(退神)이라 그 도움이 한 걸음 물러선 편입니다.")
         else:
             _adj += 3
             _reasons.append("원신이 동하며 힘 있게 살아 있어 용신을 강하게 밀어줍니다.")
@@ -1838,6 +1887,12 @@ def judge_yukhyo_advanced(
             _reasons.append("기신이 동했으나 화공(化空)이라 그 힘이 흐지부지돼 위협이 제한적입니다.")
         elif is_gisin_broken:
             _reasons.append("기신이 동했지만 충(沖)을 맞아 흩어져 오히려 힘을 못 씁니다 — 위협이 무력화됩니다.")
+        elif gisin_jinshen_label == "진신":
+            _adj -= 4
+            _reasons.append("기신이 동한 데다 진신(進神)까지 더해져 그 위협이 한층 더 거세집니다.")
+        elif gisin_jinshen_label == "퇴신":
+            _adj -= 2
+            _reasons.append("기신이 동했으나 퇴신(退神)이라 그 위협이 한 걸음 물러선 편입니다.")
         else:
             _adj -= 3
             _reasons.append("기신이 동해 용신을 강하게 위협합니다.")
@@ -1880,7 +1935,14 @@ def judge_yukhyo_advanced(
         _adj -= 1
         _reasons.append("동효가 변해 묘(墓)로 들어가(化墓) 일이 정체되기 쉽습니다.")
     elif hwahyo_label == "보통" and is_dong:
-        _reasons.append("동효가 변했으나 그 화효가 본효에 뚜렷한 영향을 주지는 않습니다.")
+        if yongshin_jinshen_label == "진신":
+            _adj += 2
+            _reasons.append("동효가 변하며 진신(進神)해 이미 가진 기세가 한 걸음 더 나아갑니다.")
+        elif yongshin_jinshen_label == "퇴신":
+            _adj -= 2
+            _reasons.append("동효가 변하며 퇴신(退神)해 기세가 한 걸음 물러섭니다.")
+        else:
+            _reasons.append("동효가 변했으나 그 화효가 본효에 뚜렷한 영향을 주지는 않습니다.")
 
     if is_bokum_gua:
         _adj -= 2

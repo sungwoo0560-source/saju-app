@@ -1,11 +1,11 @@
 file=yukhyo_judge_golden_ext_bokumbanum.csv
-md5=04fd605b7774d36c82bcc833337a7f0d
+md5=78ae9f3e15a9fe07d4a255d7a23010d4
 rows=92160
-size_bytes=15289087
-changed=18968
+size_bytes=15585013
+changed=18975
 bokum_only=23424
 banum_only=23424
 both=768
-jump2=1495
+jump2=1489
 upper(개선방향)=0
-lower(악화방향)=18968
+lower(악화방향)=18975

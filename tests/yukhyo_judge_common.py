@@ -104,11 +104,17 @@ def compute_judge_inputs(gua_name, dong_idx_set, qtype, wolgeon_jj, iljin_ganji)
         yongshin_jiji = bokshin_info["복신_지지"]
         is_dong_y = False
         hwahyo_label = None
+        yongshin_jinshen_label = None
     else:
         yongshin_ohang = yd.JIJI_OHANG[jiji6[yongshin_idx]]
         yongshin_jiji = jiji6[yongshin_idx]
         is_dong_y = dong6[yongshin_idx]
         hwahyo_label = hwahyo_by_idx.get(yongshin_idx) if is_dong_y else None
+        # 진신·퇴신(F라운드7) — hwahyo_label과 같은 화지지 소스(byeon_jiji6).
+        yongshin_jinshen_label = (
+            yd.get_yukhyo_jinshen_label(yongshin_jiji, byeon_jiji6[yongshin_idx])
+            if is_dong_y and byeon_jiji6 else None
+        )
 
     is_gongmang_flag = yd.is_yukhyo_gongmang(yongshin_jiji, iljin_ganji)
     samhap_ohangs = yd.check_samhap_guk(jiji6)
@@ -134,6 +140,7 @@ def compute_judge_inputs(gua_name, dong_idx_set, qtype, wolgeon_jj, iljin_ganji)
         is_wonsin_dong = False
         is_wonsin_broken = False
         wonsin_hwahyo_label = None
+        wonsin_jinshen_label = None
     else:
         wonsin_jiji = jiji6[wonsin_idx]
         is_wonsin_dong = dong6[wonsin_idx]
@@ -143,6 +150,10 @@ def compute_judge_inputs(gua_name, dong_idx_set, qtype, wolgeon_jj, iljin_ganji)
             or yd.is_yukhyo_chung(wonsin_jiji, wolgeon_jj)
         )
         wonsin_hwahyo_label = hwahyo_by_idx.get(wonsin_idx) if is_wonsin_dong else None
+        wonsin_jinshen_label = (
+            yd.get_yukhyo_jinshen_label(wonsin_jiji, byeon_jiji6[wonsin_idx])
+            if is_wonsin_dong and byeon_jiji6 else None
+        )
 
     gisin_idx = yd.pick_yongshin_idx(yukchin6, wongisin["기신"], dong6, se_pos)
     if gisin_idx is None:
@@ -150,6 +161,7 @@ def compute_judge_inputs(gua_name, dong_idx_set, qtype, wolgeon_jj, iljin_ganji)
         is_gisin_broken = False
         is_gisin_wang = False
         gisin_hwahyo_label = None
+        gisin_jinshen_label = None
     else:
         gisin_jiji = jiji6[gisin_idx]
         gisin_ohang = yd.JIJI_OHANG[gisin_jiji]
@@ -161,6 +173,10 @@ def compute_judge_inputs(gua_name, dong_idx_set, qtype, wolgeon_jj, iljin_ganji)
         )
         is_gisin_wang = yd.get_wangsae_label(yd.get_wangsae_score(gisin_ohang, wolgeon_jj, iljin_ganji[1])) == "왕(旺)"
         gisin_hwahyo_label = hwahyo_by_idx.get(gisin_idx) if is_gisin_dong else None
+        gisin_jinshen_label = (
+            yd.get_yukhyo_jinshen_label(gisin_jiji, byeon_jiji6[gisin_idx])
+            if is_gisin_dong and byeon_jiji6 else None
+        )
 
     gushin_idx = yd.pick_yongshin_idx(yukchin6, wongisin["구신"], dong6, se_pos)
     if gushin_idx is None:
@@ -194,14 +210,17 @@ def compute_judge_inputs(gua_name, dong_idx_set, qtype, wolgeon_jj, iljin_ganji)
         "se_pos": se_pos, "se_ohang": se_ohang, "eung_pos": eung_pos,
         "wolgeon_jj": wolgeon_jj, "iljin_ganji": iljin_ganji,
         "is_dong_y": is_dong_y, "hwahyo_label": hwahyo_label,
+        "yongshin_jinshen_label": yongshin_jinshen_label,
         "is_gongmang_flag": is_gongmang_flag, "samhap_match": samhap_match,
         "is_ilpa_flag": is_ilpa_flag, "is_wolpa_flag": is_wolpa_flag,
         "is_donghyo_chung_flag": is_donghyo_chung_flag,
         "wonsin_yukchin": wongisin["원신"], "is_wonsin_dong": is_wonsin_dong,
         "is_wonsin_broken": is_wonsin_broken, "wonsin_hwahyo_label": wonsin_hwahyo_label,
+        "wonsin_jinshen_label": wonsin_jinshen_label,
         "gisin_yukchin": wongisin["기신"], "is_gisin_dong": is_gisin_dong,
         "is_gisin_broken": is_gisin_broken, "is_gisin_wang": is_gisin_wang,
         "gisin_hwahyo_label": gisin_hwahyo_label,
+        "gisin_jinshen_label": gisin_jinshen_label,
         "gushin_yukchin": wongisin["구신"], "is_gushin_dong": is_gushin_dong,
         "eung_ohang": eung_ohang, "is_eung_dong": is_eung_dong,
         "is_eung_gongmang": is_eung_gongmang, "eung_rel": eung_rel,
@@ -223,6 +242,7 @@ _JUDGE_KEYS = (
     "is_gushin_dong",
     "is_bokum_gua", "is_banum_gua",
     "is_yukchunggwe", "is_yukhapgwe",
+    "yongshin_jinshen_label", "wonsin_jinshen_label", "gisin_jinshen_label",
 )
 
 RELATIONAL_QTYPES = ("경쟁/동업",)
