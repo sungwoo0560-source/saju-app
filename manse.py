@@ -28905,6 +28905,12 @@ def menu_yukhyo():
         _target_yukchin = QUESTION_YONGSHIN[_yh_qtype]
         _se_ohang = JIJI_OHANG[_jiji6[_se_pos - 1]]
 
+        # ★'용신'→'세효' 표현 통일(백로그 확정) — target_yukchin이 없는
+        # 질문('기타'·'연애/궁합')은 용신=세효 자신이라 판정 근거·응기·
+        # 행동처방·진공가공 문구에서도 "용신" 대신 "세효"로 통일한다
+        # (신규 판정 아님, 표현만). 다른 질문유형은 기본값 "용신" 그대로.
+        _subject_label = "세효" if _target_yukchin is None else "용신"
+
         if _target_yukchin is None:
             _yongshin_idx = _se_pos - 1   # 기타 질문 — 용신을 세효 자신으로 봄
         else:
@@ -29091,6 +29097,7 @@ def menu_yukhyo():
             wonsin_jinshen_label=_wonsin_jinshen_label,
             gisin_jinshen_label=_gisin_jinshen_label,
             bisin_relation=_bisin_relation,
+            subject_label=_subject_label,
         )
         st.markdown(f"**{_name_str}님이 물으신 '{_yh_qtype}'에 대해 — {_label}**")
         st.caption(_YUKHYO_LAYER_NOTE)
@@ -29136,7 +29143,12 @@ def menu_yukhyo():
 
         _dokbal_role_text = None
         if _dokbal_lone_idx is not None:
-            if _dokbal_lone_idx == _yongshin_idx:
+            # ★'용신'→'세효' 표현 통일(백로그 확정): target_yukchin이
+            # 없으면 _yongshin_idx가 애초에 _se_pos-1과 같아(용신=세효
+            # 자신), 이 분기를 먼저 타면 "용신"이라고 잘못 표시된다(아래
+            # "세효" 분기가 있어도 이 if가 항상 먼저 걸려 못 옴) — 그래서
+            # target_yukchin이 있을 때만 "용신" 분류를 시도한다.
+            if _target_yukchin is not None and _dokbal_lone_idx == _yongshin_idx:
                 _dokbal_role_text = "용신"
             elif _dokbal_lone_idx == _wonsin_idx:
                 _dokbal_role_text = "원신"
@@ -29159,14 +29171,14 @@ def menu_yukhyo():
         _jingong_label_text = None
         if _is_gongmang_flag and not _is_dong_y and not _is_ilpa_flag:
             _yongshin_wangsae = get_wangsae_label(get_wangsae_score(_yongshin_ohang, _wolgeon_jj, _ilju[1]))
-            _jingong_label_text = get_yukhyo_jingong_label(_yongshin_wangsae)
+            _jingong_label_text = get_yukhyo_jingong_label(_yongshin_wangsae, subject_label=_subject_label)
 
         # 응기(應期) — 판정(label)과 완전히 분리된 "언제" 안내. 용신효 상태
         # (공망/동정/왕쇠/化墓)는 위에서 이미 계산해 둔 값을 그대로 재사용.
         _eunggi_text = get_yukhyo_eunggi(
             _yongshin_jiji, _yongshin_ohang, _is_dong_y, _is_gongmang_flag,
             _hwahyo_label, _wolgeon_jj, _ilju[1],
-            is_dokbal=_is_dokbal_yongshin,
+            is_dokbal=_is_dokbal_yongshin, subject_label=_subject_label,
         )
 
         # 행동 처방(進退 가이드, E-확장2) — 마찬가지로 판정과 분리된 안내.
@@ -29186,6 +29198,7 @@ def menu_yukhyo():
             gisin_hwahyo_label=_gisin_hwahyo_label,
             is_gushin_dong=_is_gushin_dong, gushin_yukchin=_wongisin["구신"],
             is_yukchunggwe=_is_yukchunggwe, is_yukhapgwe=_is_yukhapgwe,
+            subject_label=_subject_label,
         )
 
         # 대인(對人) 조언(E-확장3, F라운드12에서 응효 육수로 교체) — 응효

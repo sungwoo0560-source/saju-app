@@ -1657,6 +1657,32 @@ def judge_yukhyo(yongshin_ohang, se_ohang, wolgeon_jj, iljin_jj, is_dong=False):
     return _label, _detail
 
 
+def _has_batchim(word):
+    """한글 완성형 단어의 마지막 글자에 받침이 있는지(조사 이/가·을/를·
+    과/와 선택용). 한글이 아니면 받침 없다고 본다(이 파일에서 subject_label
+    로 쓰이는 값은 전부 순한글이라 실사용엔 영향 없음)."""
+    _last = word[-1]
+    if "가" <= _last <= "힣":
+        return (ord(_last) - ord("가")) % 28 != 0
+    return False
+
+
+def _replace_subject_label(text, subject_label):
+    """'용신'→subject_label 표현 통일(백로그 확정) — 단순 문자열 치환은
+    "용신이"→"세효이"처럼 조사가 어색해지므로(용신=받침 있음, 세효=받침
+    없음), 이/가·을/를·과/와 세 조사만 받침에 맞춰 먼저 바꾸고 나머지
+    ("용신의"·"용신 자체는"처럼 조사가 받침과 무관하거나 뒤에 다른 단어가
+    오는 경우)는 그대로 치환한다. subject_label이 기본값 "용신"이면
+    바꿀 게 없어 그대로 반환."""
+    if subject_label == "용신":
+        return text
+    _final = _has_batchim(subject_label)
+    text = text.replace("용신이", subject_label + ("이" if _final else "가"))
+    text = text.replace("용신을", subject_label + ("을" if _final else "를"))
+    text = text.replace("용신과", subject_label + ("과" if _final else "와"))
+    return text.replace("용신", subject_label)
+
+
 def judge_yukhyo_advanced(
     yongshin_ohang, se_ohang, wolgeon_jj, iljin_jj, is_dong=False,
     is_bokshin=False, is_gongmang_flag=False, samhap_match=False, hwahyo_label=None,
@@ -1670,6 +1696,7 @@ def judge_yukhyo_advanced(
     is_bokum_gua=False, is_banum_gua=False,
     is_yukchunggwe=False, is_yukhapgwe=False,
     bisin_relation=None,
+    subject_label="용신",
 ):
     """3단계 정밀 용신 판단 — judge_yukhyo의 기본 점수(왕쇠+세효생극+동정) 위에
     공망(-2)·복신(-3)·삼합국 성립(+2)·화효(회두생 +2 · 회두극 -2 · 化空/化墓
@@ -1858,7 +1885,14 @@ def judge_yukhyo_advanced(
     생부받는지는 이번 라운드 범위 밖(백로그) — 생부는 base_score의
     왕쇠(get_wangsae_score)와 재료가 같아 이중계산 위험이 있고, 공망/충/
     묘는 "비신 묘"의 정확한 정의(자기 오행 기준 묘지지로 좁힐지)를 먼저
-    확정해야 한다(F10 라운드1 진단 근거)."""
+    확정해야 한다(F10 라운드1 진단 근거).
+
+    ★★'용신'→'세효' 표현 통일(백로그 확정): target_yukchin이 없는
+    질문유형('기타'·'연애/궁합', F11)은 애초에 용신 자체가 세효 자신
+    이라 "용신"이라는 표현이 사용자에게 혼동을 준다. subject_label
+    (기본값 "용신")을 호출부가 "세효"로 넘기면 _reasons·_base_detail의
+    "용신" 단어를 전부 그 표현으로 바꾼다 — 신규 판정 아님, 이미 완성된
+    문장의 표현만 치환한다(맨 아래 반환 직전 코드 참고)."""
     _base = _yukhyo_base_score(yongshin_ohang, se_ohang, wolgeon_jj, iljin_jj, is_dong)
     _adj = 0
     _reasons = []
@@ -2045,6 +2079,16 @@ def judge_yukhyo_advanced(
         if _label_without_bokum != "흉(凶)":
             _label, _base_detail = _yukhyo_label(-2)  # "보통" 라벨·문구 재사용(경계값 -2는 항상 보통)
             _reasons.append("다만 복음(伏吟)은 정체일 뿐 흉(凶)까지는 아니므로 — 복음괘 감점만으로 흉까지 떨어지는 것은 보통으로 상향 조정합니다.")
+
+    # ★'용신'→'세효' 표현 통일(백로그 확정): target_yukchin이 없는 질문
+    # ('기타'·'연애/궁합')은 애초에 용신=세효 자신이라, 호출부가
+    # subject_label="세효"를 넘기면 여기서 문자열 그대로 치환한다 — 새
+    # 판정 데이터가 아니라 이미 완성된 문장의 표현만 바꾸는 것뿐이다
+    # (이 함수의 모든 사용자 노출 문장에서 "용신"은 예외 없이 독립된
+    # 단어로만 쓰여 부분 치환 오염 위험이 없다). 다른 질문유형은
+    # subject_label 기본값이 "용신"이라 치환이 아예 일어나지 않는다.
+    _base_detail = _replace_subject_label(_base_detail, subject_label)
+    _reasons = [_replace_subject_label(_r, subject_label) for _r in _reasons]
 
     _reasons.insert(0, _base_detail)
     return _label, _reasons
@@ -2413,7 +2457,7 @@ def _eunggi_target_jiji(yongshin_jiji, yongshin_ohang, is_dong, is_gongmang_flag
 
 def get_yukhyo_eunggi(
     yongshin_jiji, yongshin_ohang, is_dong, is_gongmang_flag, hwahyo_label, wolgeon_jj, iljin_jj,
-    is_dokbal=False,
+    is_dokbal=False, subject_label="용신",
 ):
     """용신효 상태(전부 호출부가 이미 계산해 넘기는 기존 값)로 응기(시기)
     안내 문단을 반환한다 — 시점(계절 환산)·원리(왜 그때인지)·국면(그
@@ -2447,12 +2491,19 @@ def get_yukhyo_eunggi(
     반영돼 있어 공망(-2) 위에 왕쇠 차등까지 얹으면 이중계산이 된다는
     F9 라운드1 진단 근거(靜+공망+비일파 27,552건 실측, 왕쇠별 현재 label
     흉 비중이 이미 15.5%~88.4%로 갈림)로 응기·총평(get_yukhyo_jingong_label)
-    서술 전용으로만 세분한다."""
+    서술 전용으로만 세분한다.
+
+    ★'용신'→'세효' 표현 통일(백로그 확정): subject_label(기본값 "용신")을
+    "세효"로 넘기면 반환 문장의 "용신" 단어를 전부 그 표현으로 바꾼다
+    (아래 _sub 헬퍼, 신규 판정 아님 — judge_yukhyo_advanced와 같은 방식)."""
+    def _sub(text):
+        return _replace_subject_label(text, subject_label)
+
     _wangsae = get_wangsae_label(get_wangsae_score(yongshin_ohang, wolgeon_jj, iljin_jj))
 
     if hwahyo_label == "化墓":
         _target = _eunggi_target_jiji(yongshin_jiji, yongshin_ohang, is_dong, is_gongmang_flag, hwahyo_label)
-        return (
+        return _sub(
             f"{_eunggi_sijeom(_target)}이 응기(應期)로 보입니다. "
             f"지금은 동효가 변해 묘(墓)에 갇힌 자리라 힘을 못 쓰고 있는데, "
             f"그 무렵이 되면 묘를 충(沖)해 열어(沖開) 갇혀 있던 기운이 풀려납니다. "
@@ -2462,20 +2513,20 @@ def get_yukhyo_eunggi(
     if is_gongmang_flag and not is_dong:
         _target = _yukhyo_chung_partner(yongshin_jiji)
         if _wangsae == "왕(旺)":
-            return (
+            return _sub(
                 f"{_eunggi_sijeom(_target)}이 응기(應期)로 보입니다. "
                 f"지금은 용신이 공망(空亡)에 걸려 자리는 있으나 속이 빈 듯 보이는데, "
                 f"용신 자체는 기운이 왕성한 편이라(가공假空) 겉만 비었을 뿐 속에는 채워질 힘이 남아 있습니다. "
                 f"그 무렵 공망을 충(沖)하면 빈 자리가 든든하게 채워지니(沖空則實), 미뤄지거나 확실치 않던 일이 그즈음 뚜렷하게 응할 수 있습니다."
             )
         if _wangsae == "쇠(衰)":
-            return (
+            return _sub(
                 f"{_eunggi_sijeom(_target)}이 응기(應期)로 보입니다. "
                 f"지금은 용신이 공망(空亡)에 걸린 데다 기운마저 쇠약해(진공眞空) 속까지 비어 있는 자리인데, "
                 f"그 무렵 공망을 충(沖)하더라도(沖空則實) 채울 힘 자체가 부족해 여전히 힘을 못 쓸 수 있습니다. "
                 f"뿌리부터 기운을 회복하는 시간이 먼저 필요해 보입니다."
             )
-        return (
+        return _sub(
             f"{_eunggi_sijeom(_target)}이 응기(應期)로 보입니다. "
             f"지금은 용신이 공망(空亡)에 걸려 자리는 있으나 속이 빈 상태인데, "
             f"그 무렵 공망을 충(沖)하면 빈 자리가 채워집니다(沖空則實) — 다만 용신의 기운이 왕성하지도 쇠약하지도 않은 평범한 수준이라, "
@@ -2515,7 +2566,7 @@ def get_yukhyo_eunggi(
     if _wangsae == "쇠(衰)":
         _phrase += " 다만 지금은 용신이 쇠약한 편이라, 그때가 와도 생조(生助)받는 흐름이 함께 있어야 온전히 풀립니다 — 그전까지는 서서히 기운을 회복해가는 과정으로 보시면 됩니다."
 
-    return _phrase
+    return _sub(_phrase)
 
 
 def get_yukhyo_dokbal_label(role_text, mode):
@@ -2529,12 +2580,18 @@ def get_yukhyo_dokbal_label(role_text, mode):
     role_text: 홀로인 효가 어떤 자리인지 — "용신"/"원신"/"기신"/"구신"/
     "세효"/"응효" 또는 실제 육친명(위 다섯에 해당하지 않을 때). mode:
     "독발" 또는 "독정". 둘 다 없으면(홀로 動/靜 상황 자체가 아니면)
-    None을 반환 — build_yukhyo_summary가 그 경우 문단을 아예 넣지 않는다."""
+    None을 반환 — build_yukhyo_summary가 그 경우 문단을 아예 넣지 않는다.
+
+    ★조사(이/가) 받침 처리(F라운드12 '용신'→'세효' 통일 편입 중 발견):
+    "용신"·"원신"·"기신"·"구신"은 받침이 있어 "이"가 맞지만 "세효"·
+    "응효"는 받침이 없어 "가"가 맞다 — role_text가 실제 육친명(부모·
+    자손 등)일 가능성까지 있어 _has_batchim으로 매번 판별한다."""
     if not role_text or mode not in ("독발", "독정"):
         return None
     if mode == "독발":
+        _i_ga = "이" if _has_batchim(role_text) else "가"
         return (
-            f"이번 점은 {role_text}이 홀로 動(獨發)해 이 괘의 핵심을 쥐고 있습니다. "
+            f"이번 점은 {role_text}{_i_ga} 홀로 動(獨發)해 이 괘의 핵심을 쥐고 있습니다. "
             f"여섯 효 중 이 효 하나만 움직이니, 이 괘 전체의 흐름과 변화를 읽는 중심을 "
             f"바로 이 효에 두고 보시면 됩니다."
         )
@@ -2545,19 +2602,23 @@ def get_yukhyo_dokbal_label(role_text, mode):
     )
 
 
-def get_yukhyo_jingong_label(wangsae_label):
+def get_yukhyo_jingong_label(wangsae_label, subject_label="용신"):
     """靜+공망+충 없는 용신을 진공(眞空)/가공(假空)/중간으로 세분한 총평
     한 줄을 반환한다(F라운드9 확정, (c) 총평 서술) — ★판정 무변경,
     get_wangsae_label 재사용뿐 신규 판정 데이터 0건. 호출부가 '靜+공망+
     비일파'일 때만 이 함수를 불러야 한다(動이면 動不爲空이라 애초에
     공망 취급이 아니고, 일파가 있으면 충공즉실 문구가 이미 따로 있어
     이 문구와 뜻이 겹친다 — get_yukhyo_eunggi의 공망 분기 게이트와
-    동일 조건)."""
+    동일 조건). ★'용신'→'세효' 표현 통일(백로그 확정): subject_label
+    (기본값 "용신")을 "세효"로 넘기면 반환 문장의 "용신"을 그 표현으로
+    바꾼다(신규 판정 아님, judge_yukhyo_advanced와 같은 방식)."""
     if wangsae_label == "왕(旺)":
-        return "다만 용신 자체는 기운이 왕성한 편이라(假空), 겉으로만 비었을 뿐 속에는 아직 채워질 힘이 남아 있는 상태로 보입니다."
-    if wangsae_label == "쇠(衰)":
-        return "게다가 용신의 기운마저 쇠약한 편이라(眞空), 속까지 완전히 빈 상태에 가까워 당장은 채워지기 어려워 보입니다."
-    return "용신의 기운은 왕하지도 쇠하지도 않은 평범한 수준이라, 훗날 채워지더라도 크게 기대하긴 이릅니다."
+        _text = "다만 용신 자체는 기운이 왕성한 편이라(假空), 겉으로만 비었을 뿐 속에는 아직 채워질 힘이 남아 있는 상태로 보입니다."
+    elif wangsae_label == "쇠(衰)":
+        _text = "게다가 용신의 기운마저 쇠약한 편이라(眞空), 속까지 완전히 빈 상태에 가까워 당장은 채워지기 어려워 보입니다."
+    else:
+        _text = "용신의 기운은 왕하지도 쇠하지도 않은 평범한 수준이라, 훗날 채워지더라도 크게 기대하긴 이릅니다."
+    return _replace_subject_label(_text, subject_label)
 
 
 # ── 행동 처방(進退 가이드) — get_yukhyo_eunggi와 마찬가지로 판정과
@@ -2597,6 +2658,7 @@ def get_yukhyo_action_guide(
     gisin_hwahyo_label=None,
     is_gushin_dong=False, gushin_yukchin=None,
     is_yukchunggwe=False, is_yukhapgwe=False,
+    subject_label="용신",
 ):
     """판정 재료(전부 호출부가 이미 계산해 넘기는 기존 값)를 종합해
     '계기→예상 국면→대응' 3단 인과의 개운 처방 문단을 반환한다. 개운
@@ -2609,7 +2671,11 @@ def get_yukhyo_action_guide(
     원신·기신 차등과 같은 재료, 신규 판정 아님) 문구를 누그러뜨리고,
     回頭生이면 강조한다 — judge 쪽 점수가 이미 반영돼도(원신 회두생 +4·
     기신 회두생 -4 등) 다른 요인으로 label이 예외적으로 나오는 상황을
-    대비한 안전장치다."""
+    대비한 안전장치다.
+
+    ★'용신'→'세효' 표현 통일(백로그 확정): subject_label(기본값 "용신")을
+    "세효"로 넘기면 반환 문장의 "용신"을 그 표현으로 바꾼다(신규 판정
+    아님, judge_yukhyo_advanced와 같은 방식)."""
     _yongshin_wangsae = get_wangsae_label(get_wangsae_score(yongshin_ohang, wolgeon_jj, iljin_jj))
     _se_wangsae = get_wangsae_label(get_wangsae_score(se_ohang, wolgeon_jj, iljin_jj))
 
@@ -2680,7 +2746,9 @@ def get_yukhyo_action_guide(
     _target = _eunggi_target_jiji(yongshin_jiji, yongshin_ohang, is_dong, is_gongmang_flag, hwahyo_label)
     _sentences.append(f"그러다 {_eunggi_sijeom(_target)}을 기점으로 국면이 전환될 수 있으니, 그 전엔 조심스럽게 움직이고 그 이후로 본격적으로 나서보세요.")
 
-    return " ".join(_sentences)
+    _text = " ".join(_sentences)
+    # ★'용신'→'세효' 표현 통일(백로그 확정) — judge_yukhyo_advanced와 같은 방식.
+    return _replace_subject_label(_text, subject_label)
 
 
 # ── 대인(對人) 조언 — get_yukhyo_eunggi·get_yukhyo_action_guide와 같은
@@ -3104,6 +3172,13 @@ def build_yukhyo_summary(
     elif hwahyo_label == "化墓":
         _basis_list.append("동효가 변해 스스로의 묘(墓)로 들어가(化墓) 흐름이 정체되기 쉬운 자리입니다.")
     _basis = " ".join(_basis_list) if _basis_list else None
+    # ★'용신'→'세효' 표현 통일(백로그 확정): target_yukchin이 없는 질문
+    # ('기타'·'연애/궁합')은 용신=세효 자신이라 근거 문단도 표현을 맞춘다
+    # — judge_yukhyo_advanced·get_yukhyo_eunggi 등과 같은 방식(신규
+    # 판정 아님, 오프닝은 이미 target_yukchin 분기로 따로 처리돼 있어
+    # 여기서 건드리지 않는다).
+    if target_yukchin is None and _basis:
+        _basis = _replace_subject_label(_basis, "세효")
 
     _dong_quote = None
     if is_dong_y and dong_hyo_text:
