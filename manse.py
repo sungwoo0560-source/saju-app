@@ -29133,6 +29133,15 @@ def menu_yukhyo():
                 _dokbal_role_text = _yukchin6[_dokbal_lone_idx]
         _dokbal_label_text = get_yukhyo_dokbal_label(_dokbal_role_text, _dokbal_mode)
 
+        # 진공(眞空)/가공(假空) 세분(F라운드9 확정) — 靜+공망+비일파 용신
+        # 에 한해 get_wangsae로 3단계 총평 한 줄을 만든다(★판정 무변경,
+        # get_yukhyo_jingong_label 주석 참고). 動이면 動不爲空이라, 일파면
+        # 충공즉실 문구가 이미 있어 각각 None으로 둔다.
+        _jingong_label_text = None
+        if _is_gongmang_flag and not _is_dong_y and not _is_ilpa_flag:
+            _yongshin_wangsae = get_wangsae_label(get_wangsae_score(_yongshin_ohang, _wolgeon_jj, _ilju[1]))
+            _jingong_label_text = get_yukhyo_jingong_label(_yongshin_wangsae)
+
         # 응기(應期) — 판정(label)과 완전히 분리된 "언제" 안내. 용신효 상태
         # (공망/동정/왕쇠/化墓)는 위에서 이미 계산해 둔 값을 그대로 재사용.
         _eunggi_text = get_yukhyo_eunggi(
@@ -29187,6 +29196,7 @@ def menu_yukhyo():
             action_guide_text=_action_guide_text,
             person_guide_text=_person_guide_text,
             dokbal_label_text=_dokbal_label_text,
+            jingong_label_text=_jingong_label_text,
         )
         st.markdown("---")
         st.markdown("**종합(綜合)**")

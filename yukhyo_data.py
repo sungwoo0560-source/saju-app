@@ -1685,7 +1685,21 @@ def judge_yukhyo_advanced(
     순(旬)"을 기준으로 정해지므로, 그 공망을 깨뜨리는 것도 반드시
     일진의 충이어야 이론적 정합성이 맞는다. 월파·동효충은 공망을
     매긴 기준(일진)과 무관한 다른 주체의 충이라 이 상쇄에 관여하지
-    않고 공망 여부와 상관없이 항상 독립적으로 가산된다.
+    않고 공망 여부와 상관없이 항상 독립적으로 가산된다. ★★용신
+    動不爲空 버그 수정(F라운드9 확정): 이 충공즉실 상쇄와 공망(-2)은
+    전부 용신이 靜(is_dong=False)일 때만 판단한다 — 動한 용신은
+    공망이 무효라 애초에 채울 공망 자체가 없다(원신·기신·구신은 F2/F3/
+    F4에서 이미 動 게이트가 걸려 있었는데, 용신 자신의 이 -2·충공즉실만
+    動 여부와 무관하게 걸리고 있던 게 버그였다 — 골든 442,368건 중
+    動+공망+비일파 9,312건이 실제로 영향을 받고 있었음을 F9 진단으로
+    확인). 動한 용신의 일파(-3)는 動 여부와 무관한 별개의 충이라 그대로
+    적용한다. ★★진공(眞空)·가공(假空) 세분(F라운드9 확정): 靜+공망+
+    일파 없음(충 안 맞음)인 용신에 한해 get_yukhyo_eunggi·
+    get_yukhyo_jingong_label(둘 다 아래 신설/개정)이 get_wangsae_label
+    로 왕(旺)=가공(속에 채워질 힘이 남음)/평(平)=중간/쇠(衰)=진공(속까지
+    빈 상태)을 서술한다 — ★판정 점수는 무변경(F9 확정, 이미 base_score에
+    왕쇠가 반영돼 있어 -2 위에 왕쇠 차등까지 얹으면 이중계산이 된다는
+    F9 라운드1 진단 근거), 응기·총평 서술 전용.
 
     ★원신(原神)·기신(忌神): get_yukhyo_wongisin()으로 도출한 라벨이 6효
     중 어디 있는지(공망·복신·동정 포함)는 호출부가 이미 계산해 boolean
@@ -1830,16 +1844,28 @@ def judge_yukhyo_advanced(
         _adj -= 3
         _reasons.append("용신이 괘 안에 드러나지 않아 복신(伏神)입니다 — 아직 겉으로 나설 때가 아닙니다.")
 
-    _is_chunggong = is_gongmang_flag and is_ilpa_flag
-    if _is_chunggong:
-        _reasons.append("용신이 공망(空亡)이지만 일진과 충(沖)하여 오히려 채워집니다(沖空則實) — 공망과 일파의 감점이 서로 상쇄됩니다.")
-    else:
-        if is_gongmang_flag:
-            _adj -= 2
-            _reasons.append("용신이 공망(空亡)에 걸려 있어 아직 때가 이릅니다.")
+    if is_dong:
+        # ★動不爲空(F라운드9 확정): 動한 용신은 공망이 무효라 공망(-2)도,
+        # 그걸 전제로 한 충공즉실 상쇄도 적용하지 않는다 — 애초에 채울
+        # 공망 자체가 없다(원신·기신·구신은 F2/F3/F4에서 is_wonsin_broken
+        # 등으로 이미 이렇게 動 게이트가 걸려 있었는데, 용신 자신의 이
+        # -2만 動 여부와 무관하게 걸리고 있던 게 버그였다 — F9 진단,
+        # 골든 442,368건 중 動+공망+비일파 9,312건 실측 확인). 일파(-3)는
+        # 動 여부와 무관한 별개의 충이라 動이어도 그대로 적용한다.
         if is_ilpa_flag:
             _adj -= 3
             _reasons.append("용신이 일진과 충(沖)해 일파(日破)입니다 — 오늘 하루 자리가 크게 흔들립니다.")
+    else:
+        _is_chunggong = is_gongmang_flag and is_ilpa_flag
+        if _is_chunggong:
+            _reasons.append("용신이 공망(空亡)이지만 일진과 충(沖)하여 오히려 채워집니다(沖空則實) — 공망과 일파의 감점이 서로 상쇄됩니다.")
+        else:
+            if is_gongmang_flag:
+                _adj -= 2
+                _reasons.append("용신이 공망(空亡)에 걸려 있어 아직 때가 이릅니다.")
+            if is_ilpa_flag:
+                _adj -= 3
+                _reasons.append("용신이 일진과 충(沖)해 일파(日破)입니다 — 오늘 하루 자리가 크게 흔들립니다.")
 
     if is_wolpa_flag:
         _adj -= 3
@@ -2338,7 +2364,21 @@ def get_yukhyo_eunggi(
     영향을 준다. 독정(獨靜, 5효 動+1효 靜)은 검토했으나 기존 "靜爻는
     충하는 때" 규칙과 정통 독정 응기법("충하는 때에 응한다")이 결과가
     같아 코드 변경이 필요 없다(F8 진단 결론 — 근거만 이 주석에 남긴다,
-    is_dokbal 파라미터는 독발 전용이고 독정용 별도 파라미터는 없다)."""
+    is_dokbal 파라미터는 독발 전용이고 독정용 별도 파라미터는 없다).
+
+    ★★진공(眞空)·가공(假空) 응기 세분(F라운드9 확정): 공망 분기는 이제
+    is_dong도 함께 본다 — 動한 용신은 動不爲空이라 공망 자체가 무효라서
+    (judge_yukhyo_advanced의 판정 수정과 대칭, 같은 F9 라운드) 이 분기에
+    들어오지 않고 아래 動/靜 일반 분기로 넘어간다. 靜+공망일 때만 이미
+    계산해 둔 _wangsae(get_wangsae_label/get_wangsae_score 재사용, 신규
+    판정 아님)로 3단계 세분: 왕(旺)=가공(假空, 겉만 비었을 뿐 속엔 채울
+    힘이 남아 있어 출공하면 뚜렷이 응함) · 쇠(衰)=진공(眞空, 속까지 비어
+    출공해도 잘 못 씀) · 평(平)=중간(출공하면 어느 정도는 살아나나 크게
+    기대긴 어려움). ★판정 점수는 무변경 — base_score에 이미 왕쇠가
+    반영돼 있어 공망(-2) 위에 왕쇠 차등까지 얹으면 이중계산이 된다는
+    F9 라운드1 진단 근거(靜+공망+비일파 27,552건 실측, 왕쇠별 현재 label
+    흉 비중이 이미 15.5%~88.4%로 갈림)로 응기·총평(get_yukhyo_jingong_label)
+    서술 전용으로만 세분한다."""
     _wangsae = get_wangsae_label(get_wangsae_score(yongshin_ohang, wolgeon_jj, iljin_jj))
 
     if hwahyo_label == "化墓":
@@ -2350,13 +2390,28 @@ def get_yukhyo_eunggi(
             f"그동안 정체되거나 막혀 있던 일이 그즈음 다시 움직이기 시작할 수 있습니다."
         )
 
-    if is_gongmang_flag:
+    if is_gongmang_flag and not is_dong:
         _target = _yukhyo_chung_partner(yongshin_jiji)
+        if _wangsae == "왕(旺)":
+            return (
+                f"{_eunggi_sijeom(_target)}이 응기(應期)로 보입니다. "
+                f"지금은 용신이 공망(空亡)에 걸려 자리는 있으나 속이 빈 듯 보이는데, "
+                f"용신 자체는 기운이 왕성한 편이라(가공假空) 겉만 비었을 뿐 속에는 채워질 힘이 남아 있습니다. "
+                f"그 무렵 공망을 충(沖)하면 빈 자리가 든든하게 채워지니(沖空則實), 미뤄지거나 확실치 않던 일이 그즈음 뚜렷하게 응할 수 있습니다."
+            )
+        if _wangsae == "쇠(衰)":
+            return (
+                f"{_eunggi_sijeom(_target)}이 응기(應期)로 보입니다. "
+                f"지금은 용신이 공망(空亡)에 걸린 데다 기운마저 쇠약해(진공眞空) 속까지 비어 있는 자리인데, "
+                f"그 무렵 공망을 충(沖)하더라도(沖空則實) 채울 힘 자체가 부족해 여전히 힘을 못 쓸 수 있습니다. "
+                f"뿌리부터 기운을 회복하는 시간이 먼저 필요해 보입니다."
+            )
         return (
             f"{_eunggi_sijeom(_target)}이 응기(應期)로 보입니다. "
             f"지금은 용신이 공망(空亡)에 걸려 자리는 있으나 속이 빈 상태인데, "
-            f"그 무렵 공망을 충(沖)하면 빈 자리가 채워집니다(沖空則實). "
-            f"미뤄지거나 확실치 않던 일이 그즈음 윤곽이 잡히거나 답이 나오기 시작할 수 있습니다."
+            f"그 무렵 공망을 충(沖)하면 빈 자리가 채워집니다(沖空則實) — 다만 용신의 기운이 왕성하지도 쇠약하지도 않은 평범한 수준이라, "
+            f"출공하면 어느 정도 살아나기는 해도 크게 기대긴 어렵습니다. "
+            f"미뤄지거나 확실치 않던 일이 그즈음 조금씩 윤곽이 잡히는 정도로 보시면 됩니다."
         )
 
     if is_dong and is_dokbal:
@@ -2419,6 +2474,21 @@ def get_yukhyo_dokbal_label(role_text, mode):
         f"나머지 다섯 효가 모두 움직이는 가운데 이 효 하나만 가만히 있으니, "
         f"이 괘 전체의 흐름과 변화를 읽는 중심을 바로 이 효에 두고 보시면 됩니다."
     )
+
+
+def get_yukhyo_jingong_label(wangsae_label):
+    """靜+공망+충 없는 용신을 진공(眞空)/가공(假空)/중간으로 세분한 총평
+    한 줄을 반환한다(F라운드9 확정, (c) 총평 서술) — ★판정 무변경,
+    get_wangsae_label 재사용뿐 신규 판정 데이터 0건. 호출부가 '靜+공망+
+    비일파'일 때만 이 함수를 불러야 한다(動이면 動不爲空이라 애초에
+    공망 취급이 아니고, 일파가 있으면 충공즉실 문구가 이미 따로 있어
+    이 문구와 뜻이 겹친다 — get_yukhyo_eunggi의 공망 분기 게이트와
+    동일 조건)."""
+    if wangsae_label == "왕(旺)":
+        return "다만 용신 자체는 기운이 왕성한 편이라(假空), 겉으로만 비었을 뿐 속에는 아직 채워질 힘이 남아 있는 상태로 보입니다."
+    if wangsae_label == "쇠(衰)":
+        return "게다가 용신의 기운마저 쇠약한 편이라(眞空), 속까지 완전히 빈 상태에 가까워 당장은 채워지기 어려워 보입니다."
+    return "용신의 기운은 왕하지도 쇠하지도 않은 평범한 수준이라, 훗날 채워지더라도 크게 기대하긴 이릅니다."
 
 
 # ── 행동 처방(進退 가이드) — get_yukhyo_eunggi와 마찬가지로 판정과
@@ -2820,6 +2890,7 @@ def build_yukhyo_summary(
     is_dong_y=False, dong_hyo_text=None, sinsal_tags=None,
     se_pos=None, eung_pos=None, yongshin_yuksu=None, qtype=None, se_yukchin=None,
     eunggi_text=None, action_guide_text=None, person_guide_text=None, dokbal_label_text=None,
+    jingong_label_text=None,
 ):
     """질문 맥락(질문+용신 판단)에 육친 소개·세응 위치·육수·동효 효사·신살·
     질문유형별 실용 조언을 얹어 2~3문단짜리 종합 총평을 조합한다. ★새 판단
@@ -2849,6 +2920,10 @@ def build_yukhyo_summary(
     화효 4종은 judge_hwahyo가 애초에 하나만 반환하므로 그 안에서는 배타적).
     judge_yukhyo_advanced가 낸 _reasons 점수 가중과 이 문단의 문장 개수가
     서로 어긋나지 않도록 맞춘 것뿐, 가중치 자체는 건드리지 않는다.
+    ★공망 문구는 is_dong_y가 False일 때만 나온다(F라운드9 확정, 動不爲空
+    — 판정 수정과 대칭). jingong_label_text(F9, get_yukhyo_jingong_label
+    이 만든 진공眞空/가공假空/중간 세분 한 줄 — ★판정 무변경, 서술
+    전용)는 있으면 공망 문구 바로 뒤에 이어 붙인다.
 
     문단 구성(있는 재료만큼 2~6문단, "\\n\\n"로 구분):
       1문단(항상) — 오프닝(길흉 label) + 용신 육친 소개 + 세응 위치 + 육수 한 줄
@@ -2898,8 +2973,16 @@ def build_yukhyo_summary(
     _basis_list = []
     if is_bokshin:
         _basis_list.append("용신이 이 괘에 드러나지 않은 복신(伏神)이라 아직 겉으로 나설 때가 아닙니다.")
-    if is_gongmang_flag:
+    if is_gongmang_flag and not is_dong_y:
+        # ★動不爲空(F라운드9 확정): 動한 용신은 공망이 무효라 이 문구를
+        # 넣지 않는다(judge_yukhyo_advanced의 판정 수정과 대칭 — 動하면
+        # -2가 아예 안 붙으니 근거 문단도 "힘을 못 쓴다"고 말하면 판정과
+        # 어긋난다). jingong_label_text(진공/가공 세분, 靜+공망+비일파
+        # 한정 — get_yukhyo_jingong_label 주석 참고)가 있으면 바로 이어
+        # 붙인다.
         _basis_list.append("용신이 공망(空亡)에 걸려 있어 지금은 힘을 온전히 쓰지 못하는 상태입니다.")
+        if jingong_label_text:
+            _basis_list.append(jingong_label_text)
     if samhap_match:
         _basis_list.append("용신과 같은 오행의 삼합국(三合局)이 괘 안에 이루어져 기운이 한데 뭉쳐 있습니다.")
     if hwahyo_label == "回頭生":
