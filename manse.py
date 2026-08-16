@@ -29099,11 +29099,46 @@ def menu_yukhyo():
                 _dong_hyo_text = _hyo6_y[_yongshin_idx]
         _yongshin_yuksu = _yuksu6[_yongshin_idx] if not _is_bokshin else None
 
+        # 독발(獨發)/獨靜(F라운드8) — 動효가 정확히 1개(독발) 또는 5개
+        # (=靜효 1개, 독정)일 때 그 홀로인 효가 이 괘의 주재(主宰)다.
+        # ★판정 점수 무변경(F8 확정) — 응기 정밀화(용신이 그 독발효일
+        # 때만)와 총평 국면 서술에만 쓴다. _dong_positions는 위에서 이미
+        # 계산해 둔 값 재사용, 새 판정 없음.
+        _n_dong = len(_dong_positions)
+        _is_dokbal_yongshin = bool(_is_dong_y) and _n_dong == 1
+        _dokbal_mode = None
+        _dokbal_lone_idx = None
+        if _n_dong == 1:
+            _dokbal_mode = "독발"
+            _dokbal_lone_idx = _dong_positions[0]
+        elif _n_dong == 5:
+            _dokbal_mode = "독정"
+            _dokbal_lone_idx = [_i for _i in range(6) if _i not in _dong_positions][0]
+
+        _dokbal_role_text = None
+        if _dokbal_lone_idx is not None:
+            if _dokbal_lone_idx == _yongshin_idx:
+                _dokbal_role_text = "용신"
+            elif _dokbal_lone_idx == _wonsin_idx:
+                _dokbal_role_text = "원신"
+            elif _dokbal_lone_idx == _gisin_idx:
+                _dokbal_role_text = "기신"
+            elif _dokbal_lone_idx == _gushin_idx:
+                _dokbal_role_text = "구신"
+            elif _dokbal_lone_idx == _se_pos - 1:
+                _dokbal_role_text = "세효"
+            elif _dokbal_lone_idx == _eung_pos - 1:
+                _dokbal_role_text = "응효"
+            else:
+                _dokbal_role_text = _yukchin6[_dokbal_lone_idx]
+        _dokbal_label_text = get_yukhyo_dokbal_label(_dokbal_role_text, _dokbal_mode)
+
         # 응기(應期) — 판정(label)과 완전히 분리된 "언제" 안내. 용신효 상태
         # (공망/동정/왕쇠/化墓)는 위에서 이미 계산해 둔 값을 그대로 재사용.
         _eunggi_text = get_yukhyo_eunggi(
             _yongshin_jiji, _yongshin_ohang, _is_dong_y, _is_gongmang_flag,
             _hwahyo_label, _wolgeon_jj, _ilju[1],
+            is_dokbal=_is_dokbal_yongshin,
         )
 
         # 행동 처방(進退 가이드, E-확장2) — 마찬가지로 판정과 분리된 안내.
@@ -29151,6 +29186,7 @@ def menu_yukhyo():
             eunggi_text=_eunggi_text,
             action_guide_text=_action_guide_text,
             person_guide_text=_person_guide_text,
+            dokbal_label_text=_dokbal_label_text,
         )
         st.markdown("---")
         st.markdown("**종합(綜合)**")

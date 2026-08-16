@@ -2316,7 +2316,10 @@ def _eunggi_target_jiji(yongshin_jiji, yongshin_ohang, is_dong, is_gongmang_flag
     return _yukhyo_chung_partner(yongshin_jiji)
 
 
-def get_yukhyo_eunggi(yongshin_jiji, yongshin_ohang, is_dong, is_gongmang_flag, hwahyo_label, wolgeon_jj, iljin_jj):
+def get_yukhyo_eunggi(
+    yongshin_jiji, yongshin_ohang, is_dong, is_gongmang_flag, hwahyo_label, wolgeon_jj, iljin_jj,
+    is_dokbal=False,
+):
     """용신효 상태(전부 호출부가 이미 계산해 넘기는 기존 값)로 응기(시기)
     안내 문단을 반환한다 — 시점(계절 환산)·원리(왜 그때인지)·국면(그
     무렵 어떤 변화가 오는지) 3요소 easy 문장. 전부 기존 함수 재사용 —
@@ -2324,7 +2327,18 @@ def get_yukhyo_eunggi(yongshin_jiji, yongshin_ohang, is_dong, is_gongmang_flag, 
     묘지표), _yukhyo_chung_partner/_yukhyo_hap_partner(기존
     YUKHYO_YUKCHUNG·YUKHAP 대응표 재사용), JIJI_SEASON(위 신설, 계절
     환산 참고표일 뿐 판정 아님) — 신규 판정 데이터 0건. 분기 조건·
-    우선순위는 위 5원칙 주석 그대로이며 이번엔 문장만 풍부해졌다."""
+    우선순위는 위 5원칙 주석 그대로이며 이번엔 문장만 풍부해졌다.
+
+    ★독발(獨發) 응기 정밀화(F라운드8): is_dokbal=True는 "용신이 動한
+    유일한 효"(호출부가 動효 총 개수를 세어 판단, 신규 판정 아님)일
+    때만 True다. 정통 응기법에서 독발효는 일반 動爻의 "합하는 때"가
+    아니라 "그 본지지 자체의 때"에 응한다(F8 진단에서 확인한 정통
+    규칙) — 화묘·공망처럼 이미 더 구체적인 상태가 있으면 그쪽이
+    우선이라(5원칙 우선순위 그대로) 이 분기는 그 두 경우가 아닐 때만
+    영향을 준다. 독정(獨靜, 5효 動+1효 靜)은 검토했으나 기존 "靜爻는
+    충하는 때" 규칙과 정통 독정 응기법("충하는 때에 응한다")이 결과가
+    같아 코드 변경이 필요 없다(F8 진단 결론 — 근거만 이 주석에 남긴다,
+    is_dokbal 파라미터는 독발 전용이고 독정용 별도 파라미터는 없다)."""
     _wangsae = get_wangsae_label(get_wangsae_score(yongshin_ohang, wolgeon_jj, iljin_jj))
 
     if hwahyo_label == "化墓":
@@ -2345,7 +2359,17 @@ def get_yukhyo_eunggi(yongshin_jiji, yongshin_ohang, is_dong, is_gongmang_flag, 
             f"미뤄지거나 확실치 않던 일이 그즈음 윤곽이 잡히거나 답이 나오기 시작할 수 있습니다."
         )
 
-    if is_dong:
+    if is_dong and is_dokbal:
+        _target = yongshin_jiji
+        _phrase = (
+            f"{_eunggi_sijeom(_target)}이 응기(應期)로 보입니다. "
+            f"용신 홀로 動한 독발(獨發)이라 이 괘의 흐름을 이 효 하나가 쥐고 있는데, "
+            f"이런 경우는 합을 기다릴 것 없이 그 본래 지지의 때(用神이 임한 그 자리 자체가 돌아오는 시점)에 바로 응합니다. "
+            f"진행 중이던 일이 그즈음 뚜렷한 결과나 매듭으로 이어질 수 있습니다."
+        )
+        if _wangsae == "왕(旺)":
+            _phrase += " 이미 용신의 기운이 왕성한 편이라, 굳이 멀리 갈 것 없이 비교적 가까운 시점에 결과가 드러날 수 있습니다."
+    elif is_dong:
         _target = _yukhyo_hap_partner(yongshin_jiji)
         _phrase = (
             f"{_eunggi_sijeom(_target)}이 응기(應期)로 보입니다. "
@@ -2368,6 +2392,33 @@ def get_yukhyo_eunggi(yongshin_jiji, yongshin_ohang, is_dong, is_gongmang_flag, 
         _phrase += " 다만 지금은 용신이 쇠약한 편이라, 그때가 와도 생조(生助)받는 흐름이 함께 있어야 온전히 풀립니다 — 그전까지는 서서히 기운을 회복해가는 과정으로 보시면 됩니다."
 
     return _phrase
+
+
+def get_yukhyo_dokbal_label(role_text, mode):
+    """독발(獨發, 動효가 6효 중 단 1개)/독정(獨靜, 動효가 5개=靜효 1개)일
+    때 그 홀로인 효가 이 괘의 주재(主宰)임을 알리는 국면 안내 문장을
+    반환한다(F라운드8, (c) 총평 서술) — ★판정 점수 아님. 주재효는
+    "해석의 중심을 어디에 두고 읽어야 하는지"를 알려줄 뿐, judge_yukhyo_advanced의
+    길흉 점수와는 무관하다(호출부가 動효 개수를 세어 role_text·mode를
+    판단, 이 함수는 신규 판정 데이터 0건).
+
+    role_text: 홀로인 효가 어떤 자리인지 — "용신"/"원신"/"기신"/"구신"/
+    "세효"/"응효" 또는 실제 육친명(위 다섯에 해당하지 않을 때). mode:
+    "독발" 또는 "독정". 둘 다 없으면(홀로 動/靜 상황 자체가 아니면)
+    None을 반환 — build_yukhyo_summary가 그 경우 문단을 아예 넣지 않는다."""
+    if not role_text or mode not in ("독발", "독정"):
+        return None
+    if mode == "독발":
+        return (
+            f"이번 점은 {role_text}이 홀로 動(獨發)해 이 괘의 핵심을 쥐고 있습니다. "
+            f"여섯 효 중 이 효 하나만 움직이니, 이 괘 전체의 흐름과 변화를 읽는 중심을 "
+            f"바로 이 효에 두고 보시면 됩니다."
+        )
+    return (
+        f"이번 점은 {role_text}만 홀로 靜(獨靜)해 이 괘의 핵심을 쥐고 있습니다. "
+        f"나머지 다섯 효가 모두 움직이는 가운데 이 효 하나만 가만히 있으니, "
+        f"이 괘 전체의 흐름과 변화를 읽는 중심을 바로 이 효에 두고 보시면 됩니다."
+    )
 
 
 # ── 행동 처방(進退 가이드) — get_yukhyo_eunggi와 마찬가지로 판정과
@@ -2768,7 +2819,7 @@ def build_yukhyo_summary(
     is_bokshin=False, is_gongmang_flag=False, samhap_match=False, hwahyo_label=None,
     is_dong_y=False, dong_hyo_text=None, sinsal_tags=None,
     se_pos=None, eung_pos=None, yongshin_yuksu=None, qtype=None, se_yukchin=None,
-    eunggi_text=None, action_guide_text=None, person_guide_text=None,
+    eunggi_text=None, action_guide_text=None, person_guide_text=None, dokbal_label_text=None,
 ):
     """질문 맥락(질문+용신 판단)에 육친 소개·세응 위치·육수·동효 효사·신살·
     질문유형별 실용 조언을 얹어 2~3문단짜리 종합 총평을 조합한다. ★새 판단
@@ -2804,6 +2855,9 @@ def build_yukhyo_summary(
       2문단(근거·동효 중 하나라도 있을 때만) — 근거(공망/복신/삼합/화효, 전부 나열) + 동효 효사 인용
       3문단(항상) — 신살(있을 때만) + 질문유형별 실용 조언(있을 때만) + 마무리(label 기반)
       4문단(eunggi_text 있을 때만) — 응기(시기) 방향성 안내, 길흉 판정과 분리된 별도 문단
+      4-1문단(dokbal_label_text 있을 때만, F라운드8) — 독발(獨發)/독정(獨靜)
+        국면 안내(응기 바로 뒤). ★대인 조언이 아니라 "이 괘의 핵심을 어느
+        효가 쥐고 있는지" 국면 정보라 person_guide와 무관하게 독립 문단.
       5문단(action_guide_text 있을 때만) — 행동 처방(進退 가이드), 마찬가지로 별도 문단
       6문단(person_guide_text 있을 때만) — 대인(對人) 조언, 마찬가지로 별도 문단
         (get_yukhyo_person_guide가 재료 자체가 없으면 None을 반환하니,
@@ -2881,6 +2935,9 @@ def build_yukhyo_summary(
 
     if eunggi_text:
         _paragraphs.append(f"응기(應期) — {eunggi_text}")
+
+    if dokbal_label_text:
+        _paragraphs.append(dokbal_label_text)
 
     if action_guide_text:
         _paragraphs.append(f"행동 처방(進退) — {action_guide_text}")
