@@ -2715,7 +2715,7 @@ assert set(_YUKHYO_GISIN_PERSON) == {"처재", "관귀", "부모", "자손", "�
 
 
 def get_yukhyo_person_guide(
-    se_ohang, se_yuksu,
+    se_ohang, eung_yuksu,
     is_gisin_dong, gisin_yukchin,
     eung_ohang, is_eung_dong, is_eung_gongmang,
     gisin_hwahyo_label=None,
@@ -2727,12 +2727,23 @@ def get_yukhyo_person_guide(
     있어서다 — 예: 응효가 세효와 오행이 같아 생도 극도 아니고, 육수도
     해당 없고, 기신도 動하지 않은 경우).
 
-    ★세효 육수만 쓴다(용신 육수는 안 씀, E-확장3 최종 조정) — 대인 조언은
-    "나(세효)가 지금 놓인 기운"으로 통일한다는 취지다. 초안은 세효·용신
-    육수를 둘 다 병기했는데, 둘이 다르면(예: 세효=白虎·용신=靑龍) 한
-    문단 안에서 "강압적이다"와 "귀인처럼 도움된다"가 나란히 나와 모순
-    처럼 읽히는 문제가 있었다 — 육수 자체가 "이 자리의 기운"이지 사람
-    자체를 가리키는 게 아니라, 세효(나) 쪽 하나로 좁히는 게 더 명확했다.
+    ★응효 육수로 교체(F라운드12 확정, 대인조언 응효 육수 교체 백로그
+    처리) — 대인 조언은 "지금 만나는 사람이 어떤지"를 안내하는 문단이라,
+    "나(세효)가 놓인 기운"보다 "상대(응효) 자리에 실린 기운"이 훨씬
+    직접적이다. E-확장3 최종 조정 당시엔 세효 육수로 좁혔지만(용신
+    육수와 병기하면 모순처럼 읽히는 문제가 있었음, 아래 옛 근거 문단
+    참고), 이번엔 세효가 아니라 응효 쪽으로 옮기는 것뿐이라 그 문제가
+    재발하지 않는다 — 응효 하나만 쓰므로 병기 모순 자체가 생기지 않는다.
+    YUKHYO_YUKSU_PERSON_TRAIT 문구는 원래도 "관계일 수 있습니다"류로
+    사람·관계 자체를 가리키게 쓰여 있어 문구 변경 없이 그대로 재사용
+    (신규 판정 아님, 값의 출처만 세효→응효로 바뀜).
+
+    (옛 근거, 세효 육수를 썼던 이유였음): 초안은 세효·용신 육수를 둘 다
+    병기했는데, 둘이 다르면(예: 세효=白虎·용신=靑龍) 한 문단 안에서
+    "강압적이다"와 "귀인처럼 도움된다"가 나란히 나와 모순처럼 읽히는
+    문제가 있었다 — 육수 자체가 "이 자리의 기운"이지 사람 자체를
+    가리키는 게 아니라, 한 자리(이제는 응효) 쪽 하나로 좁히는 게 더
+    명확했다.
 
     ★기신 강화·무력 연동(F라운드3): gisin_hwahyo_label이 회두생이면
     방해 인물 경계를 강조하고, 회두극·화묘·화공이면 누그러뜨린다 —
@@ -2751,8 +2762,8 @@ def get_yukhyo_person_guide(
     이라, 판정 가중치의 질문유형 제한과는 성격이 달라 그대로 뒀다)."""
     _sentences = []
 
-    if se_yuksu and se_yuksu in YUKHYO_YUKSU_PERSON_TRAIT:
-        _sentences.append(f"{se_yuksu}(六獸)의 기운이 실려 있어, {YUKHYO_YUKSU_PERSON_TRAIT[se_yuksu]}.")
+    if eung_yuksu and eung_yuksu in YUKHYO_YUKSU_PERSON_TRAIT:
+        _sentences.append(f"상대 자리(應爻)에 {eung_yuksu}(六獸)의 기운이 실려 있어, {YUKHYO_YUKSU_PERSON_TRAIT[eung_yuksu]}.")
 
     if is_gisin_dong and gisin_yukchin in _YUKHYO_GISIN_PERSON:
         if gisin_hwahyo_label == "回頭生":

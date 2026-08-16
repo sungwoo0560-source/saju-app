@@ -29188,15 +29188,16 @@ def menu_yukhyo():
             is_yukchunggwe=_is_yukchunggwe, is_yukhapgwe=_is_yukhapgwe,
         )
 
-        # 대인(對人) 조언(E-확장3) — 세효 육수(六獸, 용신 육수는 최종
-        # 조정에서 제외 — get_yukhyo_person_guide 주석 참고), 기신 육친,
-        # 응효(상대)-세효 생극으로 종합. 이 문단은 질문유형과 무관하게
-        # 항상 나온다(판정의 eung_rel 질문유형 제한과 성격이 다름 —
-        # get_yukhyo_person_guide 주석 참고). eung_ohang 등은 위 판정
-        # 직전에 이미 계산해 둔 값을 그대로 재사용.
-        _se_yuksu = _yuksu6[_se_pos - 1]
+        # 대인(對人) 조언(E-확장3, F라운드12에서 응효 육수로 교체) — 응효
+        # 육수(六獸, "만나는 사람" 자리라 세효보다 직접적 — get_yukhyo_
+        # person_guide 주석 참고), 기신 육친, 응효(상대)-세효 생극으로
+        # 종합. 이 문단은 질문유형과 무관하게 항상 나온다(판정의 eung_rel
+        # 질문유형 제한과 성격이 다름 — get_yukhyo_person_guide 주석
+        # 참고). eung_ohang 등은 위 판정 직전에 이미 계산해 둔 값을
+        # 그대로 재사용.
+        _eung_yuksu = _yuksu6[_eung_pos - 1]
         _person_guide_text = get_yukhyo_person_guide(
-            _se_ohang, _se_yuksu,
+            _se_ohang, _eung_yuksu,
             _is_gisin_dong, _wongisin["기신"],
             _eung_ohang, _is_eung_dong, _is_eung_gongmang,
             gisin_hwahyo_label=_gisin_hwahyo_label,
