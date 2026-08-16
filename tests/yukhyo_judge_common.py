@@ -96,6 +96,7 @@ def compute_judge_inputs(gua_name, dong_idx_set, qtype, wolgeon_jj, iljin_ganji)
         yongshin_idx = yd.pick_yongshin_idx(yukchin6, target_yukchin, dong6, se_pos)
 
     is_bokshin = yongshin_idx is None
+    bisin_relation = None
     if is_bokshin:
         bokshin_info = yd.get_bokshin(gua_name, target_yukchin, se_pos)
         if bokshin_info is None:
@@ -105,6 +106,12 @@ def compute_judge_inputs(gua_name, dong_idx_set, qtype, wolgeon_jj, iljin_ganji)
         is_dong_y = False
         hwahyo_label = None
         yongshin_jinshen_label = None
+        # 비신(飛神, F라운드10) — 복신 자리를 덮은 표면효(현재 실제 괘의
+        # 그 위치, jiji6[위치])와 복신의 오행 생극 관계. manse.py L28919+
+        # 와 동일 로직(get_yukhyo_bisin_relation 재사용).
+        feishen_jiji = jiji6[bokshin_info["위치"]]
+        feishen_ohang = yd.JIJI_OHANG[feishen_jiji]
+        bisin_relation = yd.get_yukhyo_bisin_relation(feishen_ohang, yongshin_ohang)
     else:
         yongshin_ohang = yd.JIJI_OHANG[jiji6[yongshin_idx]]
         yongshin_jiji = jiji6[yongshin_idx]
@@ -226,6 +233,7 @@ def compute_judge_inputs(gua_name, dong_idx_set, qtype, wolgeon_jj, iljin_ganji)
         "is_eung_gongmang": is_eung_gongmang, "eung_rel": eung_rel,
         "is_bokum_gua": is_bokum_gua, "is_banum_gua": is_banum_gua,
         "is_yukchunggwe": is_yukchunggwe, "is_yukhapgwe": is_yukhapgwe,
+        "bisin_relation": bisin_relation,
         "base_score": base_score,
     }
 
@@ -243,6 +251,7 @@ _JUDGE_KEYS = (
     "is_bokum_gua", "is_banum_gua",
     "is_yukchunggwe", "is_yukhapgwe",
     "yongshin_jinshen_label", "wonsin_jinshen_label", "gisin_jinshen_label",
+    "bisin_relation",
 )
 
 RELATIONAL_QTYPES = ("경쟁/동업",)

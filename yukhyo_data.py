@@ -1663,6 +1663,7 @@ def judge_yukhyo_advanced(
     is_banum=False, is_bokum=False,
     is_bokum_gua=False, is_banum_gua=False,
     is_yukchunggwe=False, is_yukhapgwe=False,
+    bisin_relation=None,
 ):
     """3단계 정밀 용신 판단 — judge_yukhyo의 기본 점수(왕쇠+세효생극+동정) 위에
     공망(-2)·복신(-3)·삼합국 성립(+2)·화효(회두생 +2 · 회두극 -2 · 化空/化墓
@@ -1835,14 +1836,51 @@ def judge_yukhyo_advanced(
     (하괘·상괘가 각각 乾/震형·巽/坤형으로 다른 괘가 2·3효+5·6효를 동시에
     動할 때, 63조합 전수에서 8건 실측)도 배타 처리하지 않고 감점을 그대로
     합산한다(-5, PLANNER 확정). ★복음괘 흉(凶) 하한 클램프(A라운드3)도
-    같이 들어간다 — 자세한 근거는 아래 클램프 코드 블록 주석 참고."""
+    같이 들어간다 — 자세한 근거는 아래 클램프 코드 블록 주석 참고.
+
+    ★★비신(飛神) 관계 차등(F라운드10 확정): 용신이 복신(伏神, 괘에
+    드러나지 않아 본궁 순괘에서 빌려온 자리)일 때, 기존엔 균일 -3
+    이었는데 그 복신 자리를 덮은 표면효(飛神 — 현재 실제 괘의 그 위치에
+    있는 진짜 효)와 복신의 오행 생극 관계로 4단계 차등한다.
+    bisin_relation은 호출부가 get_yukhyo_bisin_relation()(아래 신설)로
+    미리 분류해 넘긴다: 비신剋복신(복신이 눌려 나오기 어려움) -4 ·
+    복신生비신(설기泄氣, 복신 쪽 힘이 빠짐) -3(기존과 동급) · 복신剋비신
+    (복신이 비신을 밀어내 나올 여지) -1 · 비신生복신(비신이 복신에
+    힘을 보태 나올 가능성) 0. F10 라운드1 진단(골든 8패턴 64,512건
+    전수)에서 비화(같은 오행) 조합은 0건이었으나 이론상 대비해 남겨두고,
+    -3(기존과 동급)으로 처리한다. ★비신 공망/충/묘·복신이 일진·월건
+    생부받는지는 이번 라운드 범위 밖(백로그) — 생부는 base_score의
+    왕쇠(get_wangsae_score)와 재료가 같아 이중계산 위험이 있고, 공망/충/
+    묘는 "비신 묘"의 정확한 정의(자기 오행 기준 묘지지로 좁힐지)를 먼저
+    확정해야 한다(F10 라운드1 진단 근거)."""
     _base = _yukhyo_base_score(yongshin_ohang, se_ohang, wolgeon_jj, iljin_jj, is_dong)
     _adj = 0
     _reasons = []
 
     if is_bokshin:
-        _adj -= 3
-        _reasons.append("용신이 괘 안에 드러나지 않아 복신(伏神)입니다 — 아직 겉으로 나설 때가 아닙니다.")
+        # ★비신(飛神) 관계 차등(F라운드10 확정): 균일 -3 대신 복신을 덮은
+        # 표면효(비신)와 복신의 오행 생극 4종으로 나눈다 — bisin_relation은
+        # 호출부가 get_yukhyo_bisin_relation()(아래 신설, _yeonghyang_score와
+        # 같은 생극표 재사용)으로 미리 분류해 넘긴다. 비신剋복신(복신이
+        # 눌려 못 나옴) -4 · 복신生비신(설기泄氣, 복신 쪽 힘이 빠짐) -3
+        # (기존과 동급) · 복신剋비신(복신이 비신을 밀어내 나올 여지) -1 ·
+        # 비신生복신(비신이 복신에 힘을 보태 나올 가능성) 0(감점 없음).
+        # bisin_relation이 없거나 "비화"(F10 진단 골든 전수에서 0건 실측—
+        # 이론상 대비만)면 기존과 동일하게 -3.
+        if bisin_relation == "비신剋복신":
+            _adj -= 4
+            _reasons.append("용신이 복신(伏神)인데 표면의 비신(飛神)이 그 복신을 극(剋)해 눌려 있어, 겉으로 잘 드러나지 않는 흐름입니다.")
+        elif bisin_relation == "복신剋비신":
+            _adj -= 1
+            _reasons.append("용신이 복신(伏神)이지만 그 복신이 표면의 비신(飛神)을 극(剋)해 밀어내고 있어, 앞으로 드러날 여지가 있는 편입니다.")
+        elif bisin_relation == "비신生복신":
+            _reasons.append("용신이 복신(伏神)이지만 표면의 비신(飛神)이 그 복신을 생(生)해 힘을 보태주고 있어, 조만간 드러날 가능성이 있는 편입니다.")
+        elif bisin_relation == "복신生비신":
+            _adj -= 3
+            _reasons.append("용신이 복신(伏神)인데 그 복신이 표면의 비신(飛神)을 생(生)해 오히려 힘이 빠져(泄氣) 나서기 쉽지 않은 상태입니다.")
+        else:
+            _adj -= 3
+            _reasons.append("용신이 괘 안에 드러나지 않아 복신(伏神)입니다 — 아직 겉으로 나설 때가 아닙니다.")
 
     if is_dong:
         # ★動不爲空(F라운드9 확정): 動한 용신은 공망이 무효라 공망(-2)도,
@@ -2073,6 +2111,31 @@ def get_bokshin(gua_name, target_yukchin, se_pos):
     _pos = _positions[0]
     _jiji = PURE_JIJI[_t][_pos]
     return {"위치": _pos, "복신_지지": _jiji, "복신_오행": JIJI_OHANG[_jiji]}
+
+
+def get_yukhyo_bisin_relation(feishen_ohang, bokshin_ohang):
+    """비신(飛神, get_bokshin의 "위치"를 덮은 표면효 — 현재 실제 괘의
+    그 자리에 있는 진짜 효)과 복신(伏神)의 오행 생극 관계 4종을 분류한다
+    (F라운드10 확정) — _yeonghyang_score와 같은 생극표(_OHANG_GEUK·
+    _OHANG_SAENG) 재사용, 신규 판정 데이터 아님. 호출부(manse.py)가
+    jiji6[get_bokshin(...)["위치"]]로 비신 지지·오행을 구해 넘긴다.
+    반환: "비신剋복신"(비신이 복신을 극함, 복신이 눌려 나오기 어려움) ·
+    "복신生비신"(복신이 비신을 생함, 설기泄氣라 복신 쪽 힘이 빠짐) ·
+    "복신剋비신"(복신이 비신을 극함, 비신을 밀어내고 나오기 유리) ·
+    "비신生복신"(비신이 복신을 생함, 복신이 힘을 받아 나오기 유리) ·
+    "비화"(같은 오행, F10 라운드1 진단 골든 64,512건 전수에서 0건
+    실측됐으나 이론상 대비해 남겨둔다)."""
+    if feishen_ohang == bokshin_ohang:
+        return "비화"
+    if _OHANG_GEUK[feishen_ohang] == bokshin_ohang:
+        return "비신剋복신"
+    if _OHANG_GEUK[bokshin_ohang] == feishen_ohang:
+        return "복신剋비신"
+    if _OHANG_SAENG[feishen_ohang] == bokshin_ohang:
+        return "비신生복신"
+    if _OHANG_SAENG[bokshin_ohang] == feishen_ohang:
+        return "복신生비신"
+    raise ValueError(f"오행 생극표에 없는 조합: {feishen_ohang}, {bokshin_ohang}")
 
 
 # ── 삼합(三合)·육합(六合) ─────────────────────────────────────────

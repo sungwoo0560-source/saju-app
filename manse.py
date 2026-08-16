@@ -28912,6 +28912,7 @@ def menu_yukhyo():
 
         _is_bokshin = _yongshin_idx is None
         _bokshin_info = None
+        _bisin_relation = None
         if _is_bokshin:
             _bokshin_info = get_bokshin(_bon_name, _target_yukchin, _se_pos)
             _yongshin_ohang = _bokshin_info["복신_오행"] if _bokshin_info else _se_ohang
@@ -28919,6 +28920,12 @@ def menu_yukhyo():
             _is_dong_y = False   # 복신은 동정(動靜) 개념을 1단계 범위에서 다루지 않음
             _hwahyo_label = None
             _yongshin_jinshen_label = None
+            # 비신(飛神, F라운드10) — 복신 자리를 덮은 표면효(현재 실제
+            # 괘의 그 위치, _jiji6[위치])와 복신의 오행 생극 관계.
+            if _bokshin_info:
+                _feishen_jiji = _jiji6[_bokshin_info["위치"]]
+                _feishen_ohang = JIJI_OHANG[_feishen_jiji]
+                _bisin_relation = get_yukhyo_bisin_relation(_feishen_ohang, _yongshin_ohang)
         else:
             _yongshin_ohang = JIJI_OHANG[_jiji6[_yongshin_idx]]
             _yongshin_jiji = _jiji6[_yongshin_idx]
@@ -29082,6 +29089,7 @@ def menu_yukhyo():
             yongshin_jinshen_label=_yongshin_jinshen_label,
             wonsin_jinshen_label=_wonsin_jinshen_label,
             gisin_jinshen_label=_gisin_jinshen_label,
+            bisin_relation=_bisin_relation,
         )
         st.markdown(f"**{_name_str}님이 물으신 '{_yh_qtype}'에 대해 — {_label}**")
         st.caption(_YUKHYO_LAYER_NOTE)
