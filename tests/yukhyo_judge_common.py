@@ -254,7 +254,7 @@ _JUDGE_KEYS = (
     "bisin_relation",
 )
 
-RELATIONAL_QTYPES = ("경쟁/동업",)
+RELATIONAL_QTYPES = ("경쟁/동업", "연애/궁합")  # F라운드11: 연애/궁합도 관계형 확장
 
 
 def judge_from_inputs(inputs, **overrides):

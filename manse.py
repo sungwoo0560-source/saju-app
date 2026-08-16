@@ -29058,19 +29058,20 @@ def menu_yukhyo():
         _is_yukchunggwe = is_yukchunggwe(_jiji6)
         _is_yukhapgwe = is_yukhapgwe(_jiji6)
 
-        # 응효(應爻, 상대)-세효(나) 오행 생극(F라운드5) — 괘(64괘) 하나로
-        # 완전히 고정되는 값이라 판정 호출보다 먼저 계산해 둔다. ★질문
-        # 유형이 '경쟁/동업'일 때만 judge에 넘긴다(관계형 질문에서만
-        # 응효가 유의미하다는 F5 진단·확정 — judge_yukhyo_advanced는
-        # qtype을 모르므로 호출부가 여기서 가지를 친다). eung_ohang·
-        # is_eung_dong·is_eung_gongmang은 대인 조언(E-확장3)에서도 그대로
-        # 재사용한다.
+        # 응효(應爻, 상대)-세효(나) 오행 생극(F라운드5, F라운드11에서
+        # 연애/궁합 추가) — 괘(64괘) 하나로 완전히 고정되는 값이라 판정
+        # 호출보다 먼저 계산해 둔다. ★질문유형이 '경쟁/동업'·'연애/궁합'
+        # 일 때만 judge에 넘긴다(관계형 질문에서만 응효가 유의미하다는
+        # F5 진단·확정, F11에서 연애/궁합도 명백한 관계형이라 확장 —
+        # judge_yukhyo_advanced는 qtype을 모르므로 호출부가 여기서
+        # 가지를 친다). eung_ohang·is_eung_dong·is_eung_gongmang은 대인
+        # 조언(E-확장3)에서도 그대로 재사용한다.
         _eung_jiji = _jiji6[_eung_pos - 1]
         _eung_ohang = JIJI_OHANG[_eung_jiji]
         _is_eung_dong = _dong6[_eung_pos - 1]
         _is_eung_gongmang = is_yukhyo_gongmang(_eung_jiji, _ilju)
         _eung_rel = get_yukhyo_eung_rel(_eung_ohang, _se_ohang)
-        _eung_rel_for_judge = _eung_rel if _yh_qtype == "경쟁/동업" else None
+        _eung_rel_for_judge = _eung_rel if _yh_qtype in ("경쟁/동업", "연애/궁합") else None
 
         _label, _reasons = judge_yukhyo_advanced(
             _yongshin_ohang, _se_ohang, _wolgeon_jj, _ilju[1], is_dong=_is_dong_y,
@@ -29100,6 +29101,16 @@ def menu_yukhyo():
         # 동효 효사·신살을 얹어 한 문단으로 엮는다. judge_yukhyo_advanced의
         # 판단값(label)을 그대로 재사용할 뿐 새로 판정하지 않는다.
         _yongshin_sinsal_tags = tag_yukhyo_sinsal(_yongshin_jiji, _sinsal_targets)
+
+        # 도화(桃花) 궁합 서술(F라운드11) — 연애/궁합 질문에서만, 세효(나)
+        # 응효(상대) 둘 다 도화면 별도 문장을 얹는다. ★판정 무변경(텍스트
+        # 만) — tag_yukhyo_sinsal 재사용, 신규 판정 아님.
+        _dohwa_love_text = None
+        if _yh_qtype == "연애/궁합":
+            _se_has_dohwa = "도화" in tag_yukhyo_sinsal(_jiji6[_se_pos - 1], _sinsal_targets)
+            _eung_has_dohwa = "도화" in tag_yukhyo_sinsal(_eung_jiji, _sinsal_targets)
+            _dohwa_love_text = get_yukhyo_dohwa_love_label(_se_has_dohwa, _eung_has_dohwa)
+
         _dong_hyo_text = None
         if not _is_bokshin and _is_dong_y:
             _hyo6_y = HYO_TEXT.get(_bon_name, ())
@@ -29205,6 +29216,7 @@ def menu_yukhyo():
             person_guide_text=_person_guide_text,
             dokbal_label_text=_dokbal_label_text,
             jingong_label_text=_jingong_label_text,
+            dohwa_love_text=_dohwa_love_text,
         )
         st.markdown("---")
         st.markdown("**종합(綜合)**")
