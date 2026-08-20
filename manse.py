@@ -13019,6 +13019,7 @@ def get_jaemul_analysis(pils, birth_year, gender="남"):
         "재성_오행": jae_oh,
         "재성_강도": jae_strength,
         "재성_위치": jae_pos,
+        "재성_개수": len(jae_pos),  # F-재물운 척도설명 라운드: "양"(개수) vs "세력"(강도) 설명용, 판정 로직과 무관
         "재물_유형": jtype,
         "재물_전략": jstrat,
         "재물_피크_대운": peaks,
@@ -14085,6 +14086,23 @@ def tab_jaemul(pils, birth_year, gender="남"):
     )
 
     jm = get_jaemul_analysis(pils, birth_year, gender)
+
+    # ★재물운 척도 설명(F-재물운 척도설명 라운드 확정, C안) — 위 "재물/사업
+    # 분석" 카드(LocalSajuNarrator.money())는 재성 개수(양)로, 아래 이
+    # 카드는 재성 세력 점수(oh_strength, 월령·통근·합충 반영)로 판정한다.
+    # 두 척도가 다른 걸 재는 것이라(개수는 적어도 힘이 셀 수 있고, 개수는
+    # 많아도 힘이 약할 수 있음) 서로 다른 결론이 나올 수 있음을 미리
+    # 알려준다 — ★판정 로직 무변경, 이미 계산된 jm 값을 문구로만 보여줌.
+    st.markdown(
+        f"<div style='background:#f0f4ff;border:1px solid #6a7bd4aa;border-radius:10px;"
+        f"padding:10px 14px;margin-bottom:12px;font-size:12.5px;color:#333;line-height:1.7'>"
+        f"ℹ️ 재성이 몇 개 있는지(양)와 그 힘이 얼마나 센지(세력)는 다른 이야기예요. "
+        f"재성 개수: <b>{jm['재성_개수']}개</b> / 재성 세력: <b>{jm['재성_강도']}점</b> — "
+        f"개수는 적어도 힘이 셀 수 있고, 개수는 많아도 힘이 약할 수 있어서 "
+        f"위 [재물/사업 분석] 카드와 판정이 다르게 보일 수 있습니다."
+        f"</div>",
+        unsafe_allow_html=True,
+    )
 
     oh_emoji = {"木": "[木]", "火": "[火]", "土": "[土]", "金": "[金]", "水": "[水]"}
 
