@@ -63,6 +63,12 @@ try:
     from saju_data import ILGAN_PROFILE
 except ImportError:
     ILGAN_PROFILE = {}
+try:
+    # F-재물운 라운드2: 비겁쟁재·재다신약·신왕재왕 재물 텍스트 재활용
+    # (saju_zhengtong.py 원본은 무변경, 읽기 전용 딕셔너리만 가져온다)
+    from saju_zhengtong import SIPSEONG_COMBINATIONS
+except ImportError:
+    SIPSEONG_COMBINATIONS = {}
 # Y-46: ILGAN_PROFILE 별칭 키 + 운명 추가
 _ILGAN_DESTINY = {
     "甲": "큰 그릇 — 늦게 빛남", "乙": "꽃 같은 매력 — 사람 인연으로 성공",
@@ -12064,6 +12070,8 @@ def _nar_wealth(ctx):
 
     combos = ctx.get("combos", [])
 
+    wealth_patterns = ctx.get("wealth_patterns", [])
+
     ss_dist = ctx.get("ss_dist", {})
 
     # 십성 분포 키 정규화: "偏財(편재)" → "편재" (한글 키 비교용)
@@ -12154,6 +12162,28 @@ def _nar_wealth(ctx):
                         f"재물 버는 방식: {combo.get('재물', '')}",
                         f"맞는 사업/직업: {combo.get('직업', '')}",
                         f"재물 주의사항: {combo.get('주의', '')}",
+                        f"",
+                        f"",
+                    ]
+                )
+            )
+
+        # ── 비겁쟁재·재다신약/신약재왕·신강재약/신강재왕·종재격후보(F-재물운
+        # 라운드2) — 신강신약과 재성 왕쇠·일간 통근을 교차한 특수 재물
+        # 구조. 재물 조합(SIPSUNG_COMBO_LIFE)과 별개 축이라 독립 블록으로
+        # 얹는다(판정 자체는 build_life_analysis에서 이미 끝났고, 여기선
+        # 서술만 한다).
+        for label, pdata in wealth_patterns:
+            result.append(
+                "\n".join(
+                    [
+                        f"",
+                        f"",
+                        f"* [{label}] 재물 구조",
+                        f"",
+                        f"재물 흐름: {pdata.get('재물', '')}",
+                        f"맞는 사업\직업: {pdata.get('직업', '')}",
+                        f"주의사항: {pdata.get('주의', '')}",
                         f"",
                         f"",
                     ]
@@ -12776,6 +12806,76 @@ def _nar_past(ctx):
         return "".join(result)
 
 
+def _bigyeon_count_cgonly(ilgan, pils):
+    """비겁(비견+겁재) 천간 전용 카운트(F-재물운 라운드1 진단·라운드2 확정)
+    — 비겁쟁재는 천간에 명백히 드러난 비겁이 재성을 다투는 구조라 지지
+    (지장간) 비겁은 제외한다. saju_zhengtong.py의 기존 비겁쟁재 판별은
+    천간·지지를 구분하지 않아 5,000표본 실측 17.12%를 냈는데, 이 함수로
+    3.76%(78% 감소)까지 교정된다(saju_zhengtong.py 원본은 무변경 — 이
+    함수는 saju_interpreter.py 전용 재계산). 일주 천간(일간 자신)은
+    십성 대상이 아니라 제외한다."""
+    count = 0
+    for i, p in enumerate(pils):
+        if i == 1:
+            continue
+        ss = TEN_GODS_MATRIX.get(ilgan, {}).get(p.get("cg", ""), "")
+        if ss in ("比肩(비견)", "劫財(겁재)"):
+            count += 1
+    return count
+
+
+def _has_ilgan_tonggeun(ilgan, pils):
+    """일간 통근(通根, F-재물운 라운드1 확정) — 지지 4개의 지장간(정기·
+    중기·여기 전체) 중 일간과 같은 오행이 하나라도 있으면 통근으로
+    본다. 재다신약(무근, 위험)과 신약재왕(유근, 상대적으로 안정)을
+    가르는 기준으로 쓴다."""
+    ilgan_oh = OH.get(ilgan, "")
+    if not ilgan_oh:
+        return False
+    for p in pils:
+        for jg in JIJANGGAN.get(p.get("jj", ""), []):
+            if OH.get(jg, "") == ilgan_oh:
+                return True
+    return False
+
+
+def _is_jongjae_candidate(ilgan, pils, jaeseong_count, siksang_count):
+    """종재격(從財格) 후보(F-재물운 라운드1 확정) — 일간 무근 + 재성
+    압도(3개 이상) + 식상 존재(식상이 재성을 더 강화하는 조건)일 때
+    True. get_gyeokguk()의 격국명은 건드리지 않고(앱 전역 다른 기능이
+    gname을 참조하므로 영향 회피) 재물운 서술 전용 참고 플래그로만
+    쓴다."""
+    return (not _has_ilgan_tonggeun(ilgan, pils)) and jaeseong_count >= 3 and siksang_count >= 1
+
+
+# 신약재왕·신강재약·신강재왕·종재격후보 — SIPSEONG_COMBINATIONS(saju_zhengtong.py)
+# 20패턴에 없는 4종 재물 서술 텍스트(F-재물운 라운드2 신규 작성). 비겁쟁재·
+# 재다신약은 트리거 조건만 위 함수들로 교정하고 텍스트는 SIPSEONG_COMBINATIONS를
+# 그대로 재활용한다(아래 build_life_analysis 참고).
+_WEALTH_EXTRA_TEXT = {
+    "신약재왕": {
+        "재물": "재성은 왕성한데 일간이 뿌리(통근)를 갖고 있어, 그 재물을 감당해낼 여력은 있는 구조입니다. 다만 몸이 약한 채로 큰 재물을 다루니 체력 관리가 재물 관리만큼 중요합니다.",
+        "직업": "규모가 큰 일보다 내 페이스로 감당할 수 있는 범위의 사업·투자가 유리합니다.",
+        "주의": "욕심껏 확장하기보다 뿌리(비겁·인성) 운이 들어올 때를 기다려 감당력을 키운 뒤 움직이십시오.",
+    },
+    "신강재약": {
+        "재물": "일간의 그릇은 튼튼한데 정작 그 그릇을 채울 재성이 원국에 부족합니다. 타고난 재물복보다는 후천적 노력(대운·세운의 재성 시기)으로 채워가야 하는 구조입니다.",
+        "직업": "전문성·조직력으로 승부하는 편이 유리하며, 재성 대운·세운이 들어올 때 적극적으로 확장하십시오.",
+        "주의": "지금 당장 재물이 안 보인다고 조급해하지 말고, 그릇을 키우는 시기로 삼으십시오.",
+    },
+    "신강재왕": {
+        "재물": "일간도 강하고 재성도 왕성한, 재물을 감당하고 불려나갈 이상적인 구조입니다. 그릇도 크고 그 안에 채울 재물도 이미 갖춰져 있습니다.",
+        "직업": "사업 확장·투자·조직 경영 전반에서 두각을 나타낼 수 있는 구조입니다.",
+        "주의": "그릇이 큰 만큼 자만하지 말고 꾸준히 관리하는 습관을 들이십시오.",
+    },
+    "종재격후보": {
+        "재물": "일간이 뿌리를 못 내린 채 재성이 압도적이고 식상까지 그 재성을 밀어주는 구조라, 재성의 흐름에 순응하는(從財) 쪽이 유리할 수 있는 특수 구조입니다. 이런 경우 비겁·인성운이 오히려 부담이 되고 재성·식상운에 발복하는 경우가 많습니다.",
+        "직업": "재성 오행과 직결된 분야(유통·금융·영업 등)에 집중하는 편이 유리할 수 있습니다.",
+        "주의": "정통 신강신약 조언(인성·비겁운이 좋다)과 반대로 작용할 수 있는 특수 구조이니, 실제 상담 시 격국 정밀 재검토를 권합니다.",
+    },
+}
+
+
 def build_life_analysis(pils, gender):
     """십성 2-조합으로 인생 전체를 읽는 핵심 엔진"""
     if not pils or len(pils) < 2:
@@ -12800,12 +12900,50 @@ def build_life_analysis(pils, gender):
                 checked.add(k)
     strength_info = get_ilgan_strength(ilgan, pils)
     sn = strength_info["신강신약"]
+
+    # ── F-재물운 라운드2: 비겁쟁재(천간전용)·재다신약/신약재왕·
+    # 신강재약/신강재왕·종재격후보 판별 — 최소수정 원칙상 기존 필드는
+    # 그대로 두고 아래 필드만 추가한다. ──
+    jaeseong_cnt = ss_count.get("正財(정재)", 0) + ss_count.get("偏財(편재)", 0)
+    siksang_cnt = ss_count.get("食神(식신)", 0) + ss_count.get("傷官(상관)", 0)
+    bigyeon_cg = _bigyeon_count_cgonly(ilgan, pils)
+    tonggeun = _has_ilgan_tonggeun(ilgan, pils)
+
+    bigyeopjaengjae = bigyeon_cg >= 2 and jaeseong_cnt == 1
+    jongjae_candidate = _is_jongjae_candidate(ilgan, pils, jaeseong_cnt, siksang_cnt)
+
+    jae_pattern = None
+    if "신약" in sn and jaeseong_cnt >= 3:
+        jae_pattern = "신약재왕" if tonggeun else "재다신약"
+    elif "신강" in sn:
+        if jaeseong_cnt == 0:
+            jae_pattern = "신강재약"
+        elif jaeseong_cnt >= 2:
+            jae_pattern = "신강재왕"
+
+    # 재물 서술용 텍스트 — 비겁쟁재·재다신약은 SIPSEONG_COMBINATIONS
+    # (saju_zhengtong.py) 재활용, 나머지 3종은 _WEALTH_EXTRA_TEXT 신규.
+    wealth_patterns = []
+    if bigyeopjaengjae and "비겁쟁재" in SIPSEONG_COMBINATIONS:
+        wealth_patterns.append(("비겁쟁재", SIPSEONG_COMBINATIONS["비겁쟁재"]))
+    if jae_pattern == "재다신약" and "재다신약" in SIPSEONG_COMBINATIONS:
+        wealth_patterns.append(("재다신약", SIPSEONG_COMBINATIONS["재다신약"]))
+    elif jae_pattern in _WEALTH_EXTRA_TEXT:
+        wealth_patterns.append((jae_pattern, _WEALTH_EXTRA_TEXT[jae_pattern]))
+    if jongjae_candidate:
+        wealth_patterns.append(("종재격후보", _WEALTH_EXTRA_TEXT["종재격후보"]))
+
     return {
         "조합_결과": matched[:2],
         "전체_십성": ss_count,
         "주요_십성": top_ss[:4],
         "신강신약": sn,
         "일간": ilgan,
+        "비겁쟁재_여부": bigyeopjaengjae,
+        "재다신약_구분": jae_pattern,
+        "종재격_후보": jongjae_candidate,
+        "일간_통근": tonggeun,
+        "재물_특수패턴": wealth_patterns,
     }
 
 
@@ -12860,6 +12998,7 @@ def build_rich_narrative(pils, birth_year, gender, name, section="report"):
         top_ss = [k for k, v in sorted(ss_dist.items(), key=lambda x: -x[1])][:3]
 
         combos = life.get("조합_결과", [])
+        wealth_patterns = life.get("재물_특수패턴", [])
 
         birth_month = st.session_state.get("birth_month", 1)
 
@@ -12988,6 +13127,7 @@ def build_rich_narrative(pils, birth_year, gender, name, section="report"):
             "gname": gname, "gnarr": gnarr, "char": char,
             "yongshin_ohs": yongshin_ohs, "yong_kr": yong_kr,
             "top_ss": top_ss, "combos": combos, "ss_dist": ss_dist,
+            "wealth_patterns": wealth_patterns,
             "cur_dw": cur_dw, "cur_dw_ss": cur_dw_ss,
             "sw_now": sw_now, "sw_next": sw_next, "daewoon": daewoon,
             "oh_strength": oh_strength, "sinsal_list": sinsal_list,
