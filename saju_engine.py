@@ -13,6 +13,7 @@ try:
 except ImportError:
     _REQUESTS_AVAILABLE = False
 import json
+import math
 import os
 from datetime import date, datetime, timedelta
 import random
@@ -997,7 +998,15 @@ class TimeCorrection:
 
     @staticmethod
     def get_corrected_time(year, month, day, hour, minute, longitude=127.0):
-        """입력된 시간을 '진태양시'로 보정 (경도 반영)"""
+        """입력된 시간을 '진태양시'로 보정 (경도 + 균시차 반영)
+
+        ★균시차(均時差, Equation of Time) 반영 — 진태양시는 경도보정과
+        균시차 두 요소로 이뤄지는데, 기존엔 경도보정만 하고 있었다.
+        지구 공전궤도 이심률·자전축 기울기로 인해 태양이 남중하는 시각이
+        시계상의 정오와 최대 ±16분 어긋나는 걸 보정한다(2월 중순 -14.6분
+        ~ 10월말 +16.5분). 표준 근사식(정밀도 <1분, 사주 용도로 충분):
+        B = 2π(N-81)/365(N=1/1부터 일수), EoT = 9.87sin(2B)-7.53cosB-1.5sinB
+        [분] — 경도보정과 마찬가지로 가산 방식으로 적용한다."""
 
         dt = datetime(year, month, day, hour, minute)
 
@@ -1029,6 +1038,12 @@ class TimeCorrection:
         lon_offset_min = round((longitude - 135.0) * 4.0)
         dt += timedelta(minutes=lon_offset_min)
 
+        # 4. 균시차(均時差, Equation of Time) 보정 — 클래스 docstring 참고
+        n = dt.timetuple().tm_yday
+        b = 2 * math.pi * (n - 81) / 365
+        eot_min = 9.87 * math.sin(2 * b) - 7.53 * math.cos(b) - 1.5 * math.sin(b)
+        dt += timedelta(minutes=round(eot_min))
+
         return dt
 
 
@@ -1052,7 +1067,13 @@ class SajuPrecisionEngine:
 
     @staticmethod
     def get_pillars(year, month, day, hour, minute, gender="남", use_yaja_time=True, longitude=126.98):
-        """정밀 보정된 사주팔자 계산 (경도 기반 진태양시 반영)"""
+        """정밀 보정된 사주팔자 계산 (경도+균시차 기반 진태양시 반영)
+
+        ★절입 기준 분리(월주·연주 라운드2 확정): 진태양시 보정(경도+균시차)은
+        시주·일주 계산에만 쓰고, 월주·연주(절입 비교)는 보정 전 원시각(KST)
+        을 SajuCoreEngine.get_pillars의 term_*로 따로 넘긴다 — 절입은 위치와
+        무관한 전지구적 순간이라 KASI 발표 KST 시각과 직접 비교해야 한다
+        (자세한 근거는 SajuCoreEngine.get_pillars 클래스 docstring 참고)."""
 
         corrected_dt = TimeCorrection.get_corrected_time(year, month, day, hour, minute, longitude=longitude)
 
@@ -1064,7 +1085,10 @@ class SajuPrecisionEngine:
 
         # (기존 SajuCoreEngine의 메서드들을 정밀 옵션과 함께 호출하도록 설계 가능)
 
-        pils = SajuCoreEngine.get_pillars(cy, cm, cd, ch, cmin, gender, use_yaja_time=use_yaja_time)
+        pils = SajuCoreEngine.get_pillars(
+            cy, cm, cd, ch, cmin, gender, use_yaja_time=use_yaja_time,
+            term_year=year, term_month=month, term_day=day, term_hour=hour, term_minute=minute,
+        )
 
         # 추가적인 절기 정밀 보정 (초 단위 데이터가 있는 경우)
 
@@ -1422,8 +1446,29 @@ class SajuCoreEngine:
         birth_minute=0,
         gender="남",
         use_yaja_time=True,
+        term_year=None,
+        term_month=None,
+        term_day=None,
+        term_hour=None,
+        term_minute=None,
     ):
-        """사주팔자 계산 - 반환: [시주, 일주, 월주, 년주]"""
+        """사주팔자 계산 - 반환: [시주, 일주, 월주, 년주]
+
+        ★절입(월주·연주) 기준 분리 — term_*(선택, 절입 비교 전용 원시각)를
+        안 넘기면 birth_*를 그대로 써서 기존 동작과 100% 동일하다(이 함수를
+        직접 부르는 다른 모든 호출부는 무변경). SajuPrecisionEngine.get_pillars
+        만 진태양시(경도+균시차) 보정 전의 KST 원시각을 term_*로 따로 넘긴다
+        — 절입은 태양 황경이 특정 각도에 도달하는 전지구적 순간(위치 무관)
+        이라 KASI가 발표하는 KST 시각과 직접 비교해야 정합하고, 개인의
+        진태양시 보정을 섞으면 오히려 다른 두 기준(개인화 지역시 vs
+        절대 KST)을 혼용하는 셈이 된다. 시주·일주는 지역의 실제 태양
+        위치(진태양시)가 그대로 의미 있는 계산이라 birth_*(보정된 값)를
+        그대로 쓴다."""
+
+        if term_year is None:
+            term_year, term_month, term_day, term_hour, term_minute = (
+                birth_year, birth_month, birth_day, birth_hour, birth_minute,
+            )
 
         calc_y, calc_m, calc_d = birth_year, birth_month, birth_day
         if not use_yaja_time and birth_hour >= 23:
@@ -1431,8 +1476,8 @@ class SajuCoreEngine:
 
             next_d = date(birth_year, birth_month, birth_day) + timedelta(days=1)
             calc_y, calc_m, calc_d = next_d.year, next_d.month, next_d.day
-        year_p = SajuCoreEngine._get_year_pillar(birth_year, birth_month, birth_day, birth_hour, birth_minute)
-        month_p = SajuCoreEngine._get_month_pillar(birth_year, birth_month, birth_day, birth_hour, birth_minute)
+        year_p = SajuCoreEngine._get_year_pillar(term_year, term_month, term_day, term_hour, term_minute)
+        month_p = SajuCoreEngine._get_month_pillar(term_year, term_month, term_day, term_hour, term_minute)
         day_p = SajuCoreEngine._get_day_pillar(calc_y, calc_m, calc_d)
         hour_p = SajuCoreEngine._get_hour_pillar(birth_hour, birth_minute, day_p["cg"], use_yaja_time=use_yaja_time)
         return [hour_p, day_p, month_p, year_p]

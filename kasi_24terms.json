@@ -74,6 +74,12 @@
     },
     "입춘": {
       "month": 2,
+      "day": 4,
+      "hour": 21,
+      "minute": 40
+    },
+    "우수": {
+      "month": 2,
       "day": 19,
       "hour": 17,
       "minute": 33
