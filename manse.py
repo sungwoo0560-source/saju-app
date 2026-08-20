@@ -12984,14 +12984,20 @@ def get_jaemul_analysis(pils, birth_year, gender="남"):
     ]
 
     # 유형 판단
+    # ★sn exact-match 버그 교정(F-재물운 제3시스템 라운드2 확정) — get_ilgan_strength는
+    # 5단계("극신강(極身强)"/"신강(身强)"/"중화(中和)"/"신약(身弱)"/"극신약(極身弱)")를
+    # 반환하는데 기존엔 "신강(身强)"/"신약(身弱)"과 정확히 같을 때만 잡혀 극신강·극신약이
+    # 전부 else(균형형)로 새고 있었다(5,000표본 실측 모순 66건의 주원인). "신강"/"신약"
+    # 부분일치로 바꾸면 극신강·극신약도 함께 잡히고, 중화는 어느 쪽도 아니라 그대로
+    # else(균형형)로 남는다(LocalSajuNarrator.money()가 이미 쓰는 것과 동일 패턴).
 
-    if sn == "신강(身强)" and jae_strength >= 20:
+    if "신강" in sn and jae_strength >= 20:
         jtype, jstrat = (
             "적극형 - 강한 일간이 재성을 다루는 이상적 구조.",
             "재성 운에서 과감히 행동하십시오.",
         )
 
-    elif sn == "신약(身弱)" and jae_strength >= 30:
+    elif "신약" in sn and jae_strength >= 30:
         jtype, jstrat = (
             "부담형 - 재물이 있어도 감당하기 벅찬 구조.",
             "고정수입/저축 중심으로 운용하십시오.",
