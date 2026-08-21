@@ -4697,7 +4697,26 @@ class LocalSajuNarrator:
         if not _reasons_j:
             _reasons_j.append("전반적인 사주 구조를 종합적으로 고려한 판단")
 
-        return _biz_pts_j, _job_pts_j, _reasons_j, _gate_biz
+        # C5: 별도의 재능 축(전문직·창작 적성) — 사업/직장 점수·라벨에는
+        # 절대 반영하지 않는다(별개 축). 印剋傷의 반대 방향 검증: 상관+인성이
+        # 단순 동시존재하는 것만으로는 부족하고, 인성이 상관을 실제로 다스릴
+        # 만큼(인성세력 >= 상관세력) 세력이 있어야 성립한다. C4 게이트(인성<식상)
+        # 와는 등호 지점에서만 갈리는 정확히 반대 방향 조건이라 서로 배타적이다.
+        sanggwan_paein = False
+        _has_sanggwan = any(s.get("cg_ss")=="傷官(상관)" or s.get("jj_ss")=="傷官(상관)" for s in ss_list)
+        _has_inseong = any(s.get("cg_ss") in ("正印(정인)","偏印(편인)") or s.get("jj_ss") in ("正印(정인)","偏印(편인)") for s in ss_list)
+        if _has_sanggwan and _has_inseong:
+            _CG_OH2 = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
+                       "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
+            _PARENT_OH2 = {"木":"水","火":"木","土":"火","金":"土","水":"金"}
+            _CHILD_OH2  = {"木":"火","火":"土","土":"金","金":"水","水":"木"}
+            _ilgan_oh2 = _CG_OH2.get(ilgan, "")
+            _inseong_str2 = o_s.get(_PARENT_OH2.get(_ilgan_oh2, ""), 0)
+            _sanggwan_str2 = o_s.get(_CHILD_OH2.get(_ilgan_oh2, ""), 0)
+            if _inseong_str2 >= _sanggwan_str2:
+                sanggwan_paein = True
+
+        return _biz_pts_j, _job_pts_j, _reasons_j, _gate_biz, sanggwan_paein
 
     @staticmethod
     def _format_career_reasons(reasons_j, favor):
@@ -4843,7 +4862,7 @@ class LocalSajuNarrator:
         # 판별로 인한 44.78% 자기모순(4차 진단) 해소. gyeok_name은 여기서
         # 섹션11보다 먼저 확정해 아래에서 재사용(구 L4998 위치 중복계산 제거).
         _gyeok_j = b.get("gyeok_name", "")
-        _biz_pts_j, _job_pts_j, _reasons_j, _gate_biz = LocalSajuNarrator._score_career_fit_j(
+        _biz_pts_j, _job_pts_j, _reasons_j, _gate_biz, _sanggwan_paein_j = LocalSajuNarrator._score_career_fit_j(
             _gyeok_j, ss_list, sn, ilgan, o_s
         )
 
@@ -5230,6 +5249,16 @@ class LocalSajuNarrator:
             f"\n{name}님, 격국의 흐름은 <b>{_gyeok_j or '고유한 기운'}</b>입니다. "
             "억지로 거스르지 말고, 지금 이 시기의 기운에 맞게 움직이면 반드시 열립니다."
         )
+
+        # C5: 별도의 재능 축 — 사업형/직장형 결론과는 무관한 적성 축이므로
+        # 위 결론과 충돌하지 않는 맥락으로만 덧붙인다(격 이름은 노출하지 않음).
+        if _sanggwan_paein_j:
+            lines.append(
+                f"\n<b>🎨 또 하나의 결(적성의 다른 축)</b>  \n"
+                f"{name}님은 사업이냐 직장이냐의 틀과는 별개로, 재능을 드러내되 "
+                "배움과 자격이 그것을 다스리는 구조를 함께 갖고 있습니다. "
+                "전문직·연구·예술 계열에서 이 힘이 특히 잘 발휘됩니다."
+            )
 
         # ── 12. 부동산 운 섹션 ───────────────────────────────────────
         lines.append("\n<h3>🏠 부동산 운 — 매매·이사 길흉 정밀 분석</h3>")
