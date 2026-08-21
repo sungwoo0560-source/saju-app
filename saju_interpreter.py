@@ -4615,6 +4615,37 @@ class LocalSajuNarrator:
         return "\n".join(lines)
 
     @staticmethod
+    def _score_career_fit_j(gyeok_name, ss_list, sn):
+        """격국·십성분포·신강신약 기반 사업/직장 적합도 점수화 (0~100). money() 섹션11 전용."""
+        _biz_pts_j, _job_pts_j = 50, 50  # 기준 50점에서 시작
+
+        # 격국 기반 보정
+        if any(_g in gyeok_name for _g in ("偏財","食神","傷官","比肩")):
+            _biz_pts_j += 20
+        elif any(_g in gyeok_name for _g in ("正官","正財","正印","偏官")):
+            _job_pts_j += 20
+
+        # 십성 분포 보정 (각 +5점)
+        for _s in ss_list:
+            _cg = re.sub(r"\(.*?\)", "", _s.get("cg_ss","")).strip()
+            _jj_s = re.sub(r"\(.*?\)", "", _s.get("jj_ss","")).strip()
+            if _cg in ("偏財","傷官","食神") or _jj_s in ("偏財","傷官","食神"):
+                _biz_pts_j += 5
+            if _cg in ("正財","正官","偏官","正印") or _jj_s in ("正財","正官","偏官","正印"):
+                _job_pts_j += 5
+
+        # 신강/신약 보정
+        if "신강" in sn:
+            _biz_pts_j += 10
+        elif "신약" in sn:
+            _job_pts_j += 10
+
+        _biz_pts_j = min(100, max(0, _biz_pts_j))
+        _job_pts_j = min(100, max(0, _job_pts_j))
+
+        return _biz_pts_j, _job_pts_j
+
+    @staticmethod
     def money(pils, name, birth_year, gender):
         """💰 재물/사업 분석 ― 언제 벌고 언제 조심하나"""
 
@@ -5035,31 +5066,7 @@ class LocalSajuNarrator:
         lines.append("")
 
         # ─ 11-2. 사업 vs 직장 적합도 점수화 (0~100, 내부 판정용) ────────
-        _biz_pts_j, _job_pts_j = 50, 50  # 기준 50점에서 시작
-
-        # 격국 기반 보정
-        if any(_g in _gyeok_j for _g in ("偏財","食神","傷官","比肩")):
-            _biz_pts_j += 20
-        elif any(_g in _gyeok_j for _g in ("正官","正財","正印","偏官")):
-            _job_pts_j += 20
-
-        # 십성 분포 보정 (각 +5점)
-        for _s in ss_list:
-            _cg = re.sub(r"\(.*?\)", "", _s.get("cg_ss","")).strip()
-            _jj_s = re.sub(r"\(.*?\)", "", _s.get("jj_ss","")).strip()
-            if _cg in ("偏財","傷官","食神") or _jj_s in ("偏財","傷官","食神"):
-                _biz_pts_j += 5
-            if _cg in ("正財","正官","偏官","正印") or _jj_s in ("正財","正官","偏官","正印"):
-                _job_pts_j += 5
-
-        # 신강/신약 보정
-        if "신강" in sn:
-            _biz_pts_j += 10
-        elif "신약" in sn:
-            _job_pts_j += 10
-
-        _biz_pts_j = min(100, max(0, _biz_pts_j))
-        _job_pts_j = min(100, max(0, _job_pts_j))
+        _biz_pts_j, _job_pts_j = LocalSajuNarrator._score_career_fit_j(_gyeok_j, ss_list, sn)
 
         if _biz_pts_j >= _job_pts_j + 15:
             lines.append(
