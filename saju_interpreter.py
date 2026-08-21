@@ -4622,6 +4622,16 @@ class LocalSajuNarrator:
         _biz_pts_j, _job_pts_j = 50, 50  # 기준 50점에서 시작
         _reasons_j = []
 
+        # 조합정의 이식(구 섹션2 L4746-4763) — 계산만 준비, 판정 게이트 적용은 C4.
+        # detect_sipseong_combinations는 saju_zhengtong 공유 호출 리스크 회피를
+        # 위해 쓰지 않고, 섹션2의 기존 조건식을 그대로 옮겨온다.
+        _has_sik = any(s.get("cg_ss") in ["傷官(상관)","食神(식신)"] or s.get("jj_ss") in ["傷官(상관)","食神(식신)"] for s in ss_list)
+        _has_jae = any(s.get("cg_ss") in ["偏財(편재)","正財(정재)"] or s.get("jj_ss") in ["偏財(편재)","正財(정재)"] for s in ss_list)
+        sikshin_saengjae = _has_sik and _has_jae
+        _jg = any(s.get("cg_ss")=="正官(정관)" or s.get("jj_ss")=="正官(정관)" for s in ss_list)
+        _ji = any(s.get("cg_ss")=="正印(정인)" or s.get("jj_ss")=="正印(정인)" for s in ss_list)
+        gwanin_sangsaeng = _jg and _ji
+
         # 격국 기반 보정
         if any(_g in gyeok_name for _g in ("偏財","食神","傷官","比肩")):
             _biz_pts_j += 20
@@ -4789,40 +4799,6 @@ class LocalSajuNarrator:
         _biz_pts_j, _job_pts_j, _reasons_j = LocalSajuNarrator._score_career_fit_j(_gyeok_j, ss_list, sn)
 
         lines.append("<h3>🎯 사업 vs 직장 — 당신에게 맞는 방식</h3>")
-
-        _biz_score  = 0
-        _job_score  = 0
-        _biz_reasons = []
-        _job_reasons = []
-
-        # 사업형 — 편재 천간투출=강한 사업신호(지지암장보다 가중)
-        if any(s.get("cg_ss") == "偏財(편재)" for s in ss_list):
-            _biz_score += 3; _biz_reasons.append("편재 천간투출(사업재물 강)")
-        elif any(s.get("jj_ss") == "偏財(편재)" for s in ss_list):
-            _biz_score += 1; _biz_reasons.append("편재 지지(사업재물)")
-        _has_sik = any(s.get("cg_ss") in ["傷官(상관)","食神(식신)"] or s.get("jj_ss") in ["傷官(상관)","食神(식신)"] for s in ss_list)
-        _has_jae = any(s.get("cg_ss") in ["偏財(편재)","正財(정재)"] or s.get("jj_ss") in ["偏財(편재)","正財(정재)"] for s in ss_list)
-        if _has_sik and _has_jae:
-            _biz_score += 2; _biz_reasons.append("식상생재 구조(사업핵심)")
-        elif _has_sik:
-            _biz_score += 1; _biz_reasons.append("식상(재능 표현)")
-        # 직장형
-        if any(s.get("cg_ss") == "正財(정재)" or s.get("jj_ss") == "正財(정재)" for s in ss_list):
-            _job_score += 2; _job_reasons.append("정재(안정 수입)")
-        if any(s.get("cg_ss") in ["正官(정관)","偏官(편관)"] or s.get("jj_ss") in ["正官(정관)","偏官(편관)"] for s in ss_list):
-            _job_score += 2; _job_reasons.append("관성(조직 친화)")
-        if any(s.get("cg_ss") in ["正印(정인)","偏印(편인)"] or s.get("jj_ss") in ["正印(정인)","偏印(편인)"] for s in ss_list):
-            _job_score += 1; _job_reasons.append("인성(학습·자격)")
-        # 관인상생(정관+정인 동시)=강한 직장·명예 구조
-        _jg = any(s.get("cg_ss")=="正官(정관)" or s.get("jj_ss")=="正官(정관)" for s in ss_list)
-        _ji = any(s.get("cg_ss")=="正印(정인)" or s.get("jj_ss")=="正印(정인)" for s in ss_list)
-        if _jg and _ji:
-            _job_score += 2; _job_reasons.append("관인상생(조직·명예)")
-        _gyeok_c = b.get("gyeok_name", "")
-        if any(_g in _gyeok_c for _g in ("偏財","食神","傷官","比肩")):
-            _biz_score += 1; _biz_reasons.append("격국(사업 성향)")
-        elif any(_g in _gyeok_c for _g in ("正官","正財","正印","偏官")):
-            _job_score += 1; _job_reasons.append("격국(조직 성향)")
 
         if _biz_pts_j >= _job_pts_j + 15:
             lines.append(
