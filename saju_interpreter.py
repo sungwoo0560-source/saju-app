@@ -4762,6 +4762,12 @@ class LocalSajuNarrator:
         lines.append("")
 
         # ── 2. 재물 형태 — 사업 vs 직장 적성 판단 ─────────────────
+        # 판정은 섹션11(_score_career_fit_j)을 SSOT로 참조한다 — 섹션2 자체
+        # 판별로 인한 44.78% 자기모순(4차 진단) 해소. gyeok_name은 여기서
+        # 섹션11보다 먼저 확정해 아래에서 재사용(구 L4998 위치 중복계산 제거).
+        _gyeok_j = b.get("gyeok_name", "")
+        _biz_pts_j, _job_pts_j = LocalSajuNarrator._score_career_fit_j(_gyeok_j, ss_list, sn)
+
         lines.append("<h3>🎯 사업 vs 직장 — 당신에게 맞는 방식</h3>")
 
         _biz_score  = 0
@@ -4798,14 +4804,14 @@ class LocalSajuNarrator:
         elif any(_g in _gyeok_c for _g in ("正官","正財","正印","偏官")):
             _job_score += 1; _job_reasons.append("격국(조직 성향)")
 
-        if _biz_score > _job_score:
+        if _biz_pts_j >= _job_pts_j + 15:
             lines.append(
                 f"🏢 <b>사업·프리랜서형</b> (점수 {_biz_score} vs 직장 {_job_score})  \n"
                 f"근거: {', '.join(_biz_reasons)}  \n"
                 "조직의 틀보다 자기 주도로 움직일 때 재물 그릇이 더 크게 열립니다. "
                 "창업·프리랜서·개인사업자·영업직에서 성과가 납니다."
             )
-        elif _job_score > _biz_score:
+        elif _job_pts_j >= _biz_pts_j + 15:
             lines.append(
                 f"💼 <b>직장·조직형</b> (점수 {_job_score} vs 사업 {_biz_score})  \n"
                 f"근거: {', '.join(_job_reasons)}  \n"
@@ -5026,7 +5032,7 @@ class LocalSajuNarrator:
         lines.append("\n<h3>🎯 직업 적성 정밀 분석 — 격국×십성×일간 3중 천직 판별</h3>")
 
         # ─ 11-1. 격국×십성×일간 3중 천직 판별 ─────────────────────────
-        _gyeok_j = b.get("gyeok_name", "")
+        # _gyeok_j는 섹션2 직전(위)에서 이미 확정됨 — 재계산하지 않고 재사용.
         _ilp_j   = ILGAN_PROFILE.get(ilgan, {})
         _ilp_job = _ilp_j.get("직업", "")
 
@@ -5066,7 +5072,7 @@ class LocalSajuNarrator:
         lines.append("")
 
         # ─ 11-2. 사업 vs 직장 적합도 점수화 (0~100, 내부 판정용) ────────
-        _biz_pts_j, _job_pts_j = LocalSajuNarrator._score_career_fit_j(_gyeok_j, ss_list, sn)
+        # _biz_pts_j/_job_pts_j도 섹션2 직전(위)에서 이미 계산됨 — 재사용.
 
         if _biz_pts_j >= _job_pts_j + 15:
             lines.append(
