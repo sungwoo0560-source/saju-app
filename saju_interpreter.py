@@ -4806,14 +4806,14 @@ class LocalSajuNarrator:
 
         if _biz_pts_j >= _job_pts_j + 15:
             lines.append(
-                f"🏢 <b>사업·프리랜서형</b> (점수 {_biz_score} vs 직장 {_job_score})  \n"
+                f"🏢 <b>사업·프리랜서형</b> (점수 {_biz_pts_j} vs 직장 {_job_pts_j})  \n"
                 f"근거: {', '.join(_biz_reasons)}  \n"
                 "조직의 틀보다 자기 주도로 움직일 때 재물 그릇이 더 크게 열립니다. "
                 "창업·프리랜서·개인사업자·영업직에서 성과가 납니다."
             )
         elif _job_pts_j >= _biz_pts_j + 15:
             lines.append(
-                f"💼 <b>직장·조직형</b> (점수 {_job_score} vs 사업 {_biz_score})  \n"
+                f"💼 <b>직장·조직형</b> (점수 {_job_pts_j} vs 사업 {_biz_pts_j})  \n"
                 f"근거: {', '.join(_job_reasons)}  \n"
                 "안정적인 조직 안에서 성실하게 실력을 쌓을 때 재물이 꾸준히 쌓입니다. "
                 "공무원·대기업·전문직 자격으로 가는 길이 평생 재물을 지키는 최선입니다."
