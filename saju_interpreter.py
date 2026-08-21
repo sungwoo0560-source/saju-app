@@ -4615,10 +4615,12 @@ class LocalSajuNarrator:
         return "\n".join(lines)
 
     @staticmethod
-    def _score_career_fit_j(gyeok_name, ss_list, sn):
+    def _score_career_fit_j(gyeok_name, ss_list, sn, ilgan, o_s):
         """격국·십성분포·신강신약 기반 사업/직장 적합도 점수화 (0~100) + 근거 문장.
         근거(_reasons_j)는 점수를 만드는 이 함수 안에서 함께 생성한다 — 점수와 근거가
-        서로 다른 로직에서 나와 어긋나는 사고(C2.5 역전 786건)를 구조적으로 차단한다."""
+        서로 다른 로직에서 나와 어긋나는 사고(C2.5 역전 786건)를 구조적으로 차단한다.
+        _gate_biz(C4, A안)는 점수 가산이 아니라 라벨 확정 단계에서만 쓰이는 플래그다:
+        식신생재+신강 이상이라도 인성이 식상을 억누르면(印剋食) 게이트를 걸지 않는다."""
         _biz_pts_j, _job_pts_j = 50, 50  # 기준 50점에서 시작
         _reasons_j = []
 
@@ -4676,10 +4678,26 @@ class LocalSajuNarrator:
         _biz_pts_j = min(100, max(0, _biz_pts_j))
         _job_pts_j = min(100, max(0, _job_pts_j))
 
+        # A안 게이트(C4): 印剋食 여부까지 반영해 라벨단계에서 사업형을 확정한다.
+        # 점수(_biz_pts_j/_job_pts_j)는 절대 건드리지 않고 _gate_biz 플래그만 반환 —
+        # 최종 라벨은 호출부(섹션2)가 이 플래그를 조건 분기로만 사용한다.
+        _gate_biz = False
+        if not gwanin_sangsaeng and sikshin_saengjae and "신강" in sn:
+            _CG_OH = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
+                      "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
+            _PARENT_OH = {"木":"水","火":"木","土":"火","金":"土","水":"金"}  # 인성 오행
+            _CHILD_OH  = {"木":"火","火":"土","土":"金","金":"水","水":"木"}  # 식상 오행
+            _ilgan_oh = _CG_OH.get(ilgan, "")
+            _inseong_str = o_s.get(_PARENT_OH.get(_ilgan_oh, ""), 0)
+            _siksang_str = o_s.get(_CHILD_OH.get(_ilgan_oh, ""), 0)
+            if _inseong_str < _siksang_str:
+                _gate_biz = True
+                _reasons_j.append("식상이 인성에 눌리지 않고 재성으로 흐르는 구조")
+
         if not _reasons_j:
             _reasons_j.append("전반적인 사주 구조를 종합적으로 고려한 판단")
 
-        return _biz_pts_j, _job_pts_j, _reasons_j
+        return _biz_pts_j, _job_pts_j, _reasons_j, _gate_biz
 
     @staticmethod
     def _format_career_reasons(reasons_j, favor):
@@ -4690,6 +4708,7 @@ class LocalSajuNarrator:
             "격국이 사업·자유업 지향의 구조",
             "일간에 힘이 있어 재를 감당할 수 있는 구조",
             "원국에 편재·상관·식신 등 사업형 십성이 우세하게 분포",
+            "식상이 인성에 눌리지 않고 재성으로 흐르는 구조",
         }
         _JOB_DIR = {
             "격국이 조직·안정 지향의 구조",
@@ -4824,27 +4843,33 @@ class LocalSajuNarrator:
         # 판별로 인한 44.78% 자기모순(4차 진단) 해소. gyeok_name은 여기서
         # 섹션11보다 먼저 확정해 아래에서 재사용(구 L4998 위치 중복계산 제거).
         _gyeok_j = b.get("gyeok_name", "")
-        _biz_pts_j, _job_pts_j, _reasons_j = LocalSajuNarrator._score_career_fit_j(_gyeok_j, ss_list, sn)
+        _biz_pts_j, _job_pts_j, _reasons_j, _gate_biz = LocalSajuNarrator._score_career_fit_j(
+            _gyeok_j, ss_list, sn, ilgan, o_s
+        )
 
         lines.append("<h3>🎯 사업 vs 직장 — 당신에게 맞는 방식</h3>")
 
-        if _biz_pts_j >= _job_pts_j + 15:
+        # 점수(점수 {biz} vs 직장 {job}) 표시는 제거한다(C4-D안) — 게이트 발동 시
+        # 라벨은 조건으로 확정되는데 원점수 표시만 그대로 남으면 "점수는 직장이
+        # 높은데 결론은 사업형"처럼 읽히는 시각적 역전(18건)이 생기기 때문.
+        # 근거 문장이 점수 표시를 대신한다.
+        if _gate_biz or _biz_pts_j >= _job_pts_j + 15:
             lines.append(
-                f"🏢 <b>사업·프리랜서형</b> (점수 {_biz_pts_j} vs 직장 {_job_pts_j})  \n"
+                f"🏢 <b>사업·프리랜서형</b>  \n"
                 f"근거: {LocalSajuNarrator._format_career_reasons(_reasons_j, 'biz')}  \n"
                 "조직의 틀보다 자기 주도로 움직일 때 재물 그릇이 더 크게 열립니다. "
                 "창업·프리랜서·개인사업자·영업직에서 성과가 납니다."
             )
         elif _job_pts_j >= _biz_pts_j + 15:
             lines.append(
-                f"💼 <b>직장·조직형</b> (점수 {_job_pts_j} vs 사업 {_biz_pts_j})  \n"
+                f"💼 <b>직장·조직형</b>  \n"
                 f"근거: {LocalSajuNarrator._format_career_reasons(_reasons_j, 'job')}  \n"
                 "안정적인 조직 안에서 성실하게 실력을 쌓을 때 재물이 꾸준히 쌓입니다. "
                 "공무원·대기업·전문직 자격으로 가는 길이 평생 재물을 지키는 최선입니다."
             )
         else:
             lines.append(
-                f"⚖️ <b>하이브리드형</b> (점수 {_biz_pts_j} vs 직장 {_job_pts_j})  \n"
+                f"⚖️ <b>하이브리드형</b>  \n"
                 f"근거: {', '.join(_reasons_j)}  \n"
                 "직장을 다니며 부업·투자를 병행하는 구조가 최적입니다.  \n"
                 "본업 수입을 안정적으로 유지하면서 재능·부업으로 추가 파이프라인을 만드십시오."
@@ -5098,9 +5123,11 @@ class LocalSajuNarrator:
         lines.append("")
 
         # ─ 11-2. 사업 vs 직장 적합도 점수화 (0~100, 내부 판정용) ────────
-        # _biz_pts_j/_job_pts_j도 섹션2 직전(위)에서 이미 계산됨 — 재사용.
+        # _biz_pts_j/_job_pts_j/_gate_biz도 섹션2 직전(위)에서 이미 계산됨 — 재사용.
+        # 섹션11이 SSOT이므로 게이트(_gate_biz)도 섹션2와 동일하게 반영해야
+        # 두 섹션 결론이 다시 갈라지지 않는다(C2가 해소한 44.78% 자기모순 재발 방지).
 
-        if _biz_pts_j >= _job_pts_j + 15:
+        if _gate_biz or _biz_pts_j >= _job_pts_j + 15:
             lines.append(
                 f"\n🔮 신이 보시니 {name}님은 <b>조직의 틀보다 자기 주도로 움직일 때</b> "
                 "재물 그릇이 훨씬 크게 열리는 팔자입니다. "
