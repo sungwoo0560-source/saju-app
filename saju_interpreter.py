@@ -4640,22 +4640,28 @@ class LocalSajuNarrator:
             _job_pts_j += 20
             _reasons_j.append("격국이 조직·안정 지향의 구조")
 
-        # 십성 분포 보정 (각 +5점)
-        _biz_slot_hit = False
-        _job_slot_hit = False
+        # 십성 분포 보정 (각 +5점) — 점수 가산은 기존 그대로, 근거 문장만
+        # 슬롯 히트 '개수' 비교로 전환(C3c). 8글자 원국에서 여부만 보면 양쪽이
+        # 거의 항상 동시에 참이 되어(69%/66%) 반대방향 근거가 대량 동반되던
+        # 문제(사업형 93.57%/직장형 91.87%)를 해소한다.
+        _biz_slot_cnt = 0
+        _job_slot_cnt = 0
         for _s in ss_list:
             _cg = re.sub(r"\(.*?\)", "", _s.get("cg_ss","")).strip()
             _jj_s = re.sub(r"\(.*?\)", "", _s.get("jj_ss","")).strip()
             if _cg in ("偏財","傷官","食神") or _jj_s in ("偏財","傷官","食神"):
                 _biz_pts_j += 5
-                _biz_slot_hit = True
+                _biz_slot_cnt += 1
             if _cg in ("正財","正官","偏官","正印") or _jj_s in ("正財","正官","偏官","正印"):
                 _job_pts_j += 5
-                _job_slot_hit = True
-        if _biz_slot_hit:
-            _reasons_j.append("원국에 편재·상관·식신 등 사업형 십성이 다수 분포")
-        if _job_slot_hit:
-            _reasons_j.append("원국에 정재·정관·편관·정인 등 조직형 십성이 다수 분포")
+                _job_slot_cnt += 1
+        _slot_diff = _biz_slot_cnt - _job_slot_cnt
+        if _slot_diff >= 2:
+            _reasons_j.append("원국에 편재·상관·식신 등 사업형 십성이 우세하게 분포")
+        elif _slot_diff <= -2:
+            _reasons_j.append("원국에 정재·정관·편관·정인 등 조직형 십성이 우세하게 분포")
+        else:
+            _reasons_j.append("사업 요소와 조직 요소가 비슷하게 섞인 구조")
 
         # 신강/신약 보정 — 직업 적성의 1차 축이므로 반드시 근거에 포함
         if "신강" in sn:
@@ -4674,6 +4680,28 @@ class LocalSajuNarrator:
             _reasons_j.append("전반적인 사주 구조를 종합적으로 고려한 판단")
 
         return _biz_pts_j, _job_pts_j, _reasons_j
+
+    @staticmethod
+    def _format_career_reasons(reasons_j, favor):
+        """근거 문장을 결론 방향(favor: 'biz' 또는 'job') 기준으로 정렬.
+        같은 방향 근거를 먼저 나열하고, 반대 방향 근거는 삭제하지 않되
+        '다만'으로 후치한다. 격국·신강신약발 반대방향은 정상적으로 남는다."""
+        _BIZ_DIR = {
+            "격국이 사업·자유업 지향의 구조",
+            "일간에 힘이 있어 재를 감당할 수 있는 구조",
+            "원국에 편재·상관·식신 등 사업형 십성이 우세하게 분포",
+        }
+        _JOB_DIR = {
+            "격국이 조직·안정 지향의 구조",
+            "일간이 약해 큰 재물을 감당하기 어려운 구조",
+            "원국에 정재·정관·편관·정인 등 조직형 십성이 우세하게 분포",
+        }
+        _opposite = _JOB_DIR if favor == "biz" else _BIZ_DIR
+        _same = [r for r in reasons_j if r not in _opposite]
+        _opp = [r for r in reasons_j if r in _opposite]
+        if _opp:
+            return ', '.join(_same) + " — 다만 " + ', '.join(_opp)
+        return ', '.join(_same)
 
     @staticmethod
     def money(pils, name, birth_year, gender):
@@ -4803,20 +4831,22 @@ class LocalSajuNarrator:
         if _biz_pts_j >= _job_pts_j + 15:
             lines.append(
                 f"🏢 <b>사업·프리랜서형</b> (점수 {_biz_pts_j} vs 직장 {_job_pts_j})  \n"
-                f"근거: {', '.join(_reasons_j)}  \n"
+                f"근거: {LocalSajuNarrator._format_career_reasons(_reasons_j, 'biz')}  \n"
                 "조직의 틀보다 자기 주도로 움직일 때 재물 그릇이 더 크게 열립니다. "
                 "창업·프리랜서·개인사업자·영업직에서 성과가 납니다."
             )
         elif _job_pts_j >= _biz_pts_j + 15:
             lines.append(
                 f"💼 <b>직장·조직형</b> (점수 {_job_pts_j} vs 사업 {_biz_pts_j})  \n"
-                f"근거: {', '.join(_reasons_j)}  \n"
+                f"근거: {LocalSajuNarrator._format_career_reasons(_reasons_j, 'job')}  \n"
                 "안정적인 조직 안에서 성실하게 실력을 쌓을 때 재물이 꾸준히 쌓입니다. "
                 "공무원·대기업·전문직 자격으로 가는 길이 평생 재물을 지키는 최선입니다."
             )
         else:
             lines.append(
-                "⚖️ <b>하이브리드형</b> — 직장을 다니며 부업·투자를 병행하는 구조가 최적입니다.  \n"
+                f"⚖️ <b>하이브리드형</b> (점수 {_biz_pts_j} vs 직장 {_job_pts_j})  \n"
+                f"근거: {', '.join(_reasons_j)}  \n"
+                "직장을 다니며 부업·투자를 병행하는 구조가 최적입니다.  \n"
                 "본업 수입을 안정적으로 유지하면서 재능·부업으로 추가 파이프라인을 만드십시오."
             )
         lines.append("")
