@@ -4679,8 +4679,9 @@ class LocalSajuNarrator:
         _job_pts_j = min(100, max(0, _job_pts_j))
 
         # A안 게이트(C4): 印剋食 여부까지 반영해 라벨단계에서 사업형을 확정한다.
-        # 점수(_biz_pts_j/_job_pts_j)는 절대 건드리지 않고 _gate_biz 플래그만 반환 —
-        # 최종 라벨은 호출부(섹션2)가 이 플래그를 조건 분기로만 사용한다.
+        # 점수(_biz_pts_j/_job_pts_j)는 절대 건드리지 않고 _gate_biz는 라벨 확정
+        # (바로 아래)에만 쓰는 내부 변수다 — 조건식 자체는 이 함수 밖으로 절대
+        # 내보내지 않는다(백로그①, SSOT 완성: 섹션2/11 중복 조건식 제거).
         _gate_biz = False
         if not gwanin_sangsaeng and sikshin_saengjae and "신강" in sn:
             _CG_OH = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
@@ -4696,6 +4697,17 @@ class LocalSajuNarrator:
 
         if not _reasons_j:
             _reasons_j.append("전반적인 사주 구조를 종합적으로 고려한 판단")
+
+        # 라벨 확정(SSOT, 백로그①): 격차 ±15 판정 + A안 게이트를 이 헬퍼
+        # 안에서 한 번만 계산한다. 섹션2·섹션11은 이 문자열만 참조 —
+        # 조건식이 두 곳에 중복되면서 한쪽만 고쳐 생긴 C4 불일치(59건) 재발을
+        # 구조적으로 차단한다.
+        if _gate_biz or _biz_pts_j >= _job_pts_j + 15:
+            _label_j = "사업형"
+        elif _job_pts_j >= _biz_pts_j + 15:
+            _label_j = "직장형"
+        else:
+            _label_j = "하이브리드"
 
         # C5: 별도의 재능 축(전문직·창작 적성) — 사업/직장 점수·라벨에는
         # 절대 반영하지 않는다(별개 축). 印剋傷의 반대 방향 검증: 상관+인성이
@@ -4716,7 +4728,7 @@ class LocalSajuNarrator:
             if _inseong_str2 >= _sanggwan_str2:
                 sanggwan_paein = True
 
-        return _biz_pts_j, _job_pts_j, _reasons_j, _gate_biz, sanggwan_paein
+        return _biz_pts_j, _job_pts_j, _reasons_j, _label_j, sanggwan_paein
 
     @staticmethod
     def _format_career_reasons(reasons_j, favor):
@@ -4862,7 +4874,7 @@ class LocalSajuNarrator:
         # 판별로 인한 44.78% 자기모순(4차 진단) 해소. gyeok_name은 여기서
         # 섹션11보다 먼저 확정해 아래에서 재사용(구 L4998 위치 중복계산 제거).
         _gyeok_j = b.get("gyeok_name", "")
-        _biz_pts_j, _job_pts_j, _reasons_j, _gate_biz, _sanggwan_paein_j = LocalSajuNarrator._score_career_fit_j(
+        _biz_pts_j, _job_pts_j, _reasons_j, _label_j, _sanggwan_paein_j = LocalSajuNarrator._score_career_fit_j(
             _gyeok_j, ss_list, sn, ilgan, o_s
         )
 
@@ -4871,15 +4883,16 @@ class LocalSajuNarrator:
         # 점수(점수 {biz} vs 직장 {job}) 표시는 제거한다(C4-D안) — 게이트 발동 시
         # 라벨은 조건으로 확정되는데 원점수 표시만 그대로 남으면 "점수는 직장이
         # 높은데 결론은 사업형"처럼 읽히는 시각적 역전(18건)이 생기기 때문.
-        # 근거 문장이 점수 표시를 대신한다.
-        if _gate_biz or _biz_pts_j >= _job_pts_j + 15:
+        # 근거 문장이 점수 표시를 대신한다. 라벨(_label_j)은 헬퍼 안에서 이미
+        # 확정된 값을 그대로 참조한다(백로그①, 격차±15/게이트 조건식 여기 없음).
+        if _label_j == "사업형":
             lines.append(
                 f"🏢 <b>사업·프리랜서형</b>  \n"
                 f"근거: {LocalSajuNarrator._format_career_reasons(_reasons_j, 'biz')}  \n"
                 "조직의 틀보다 자기 주도로 움직일 때 재물 그릇이 더 크게 열립니다. "
                 "창업·프리랜서·개인사업자·영업직에서 성과가 납니다."
             )
-        elif _job_pts_j >= _biz_pts_j + 15:
+        elif _label_j == "직장형":
             lines.append(
                 f"💼 <b>직장·조직형</b>  \n"
                 f"근거: {LocalSajuNarrator._format_career_reasons(_reasons_j, 'job')}  \n"
@@ -5142,17 +5155,18 @@ class LocalSajuNarrator:
         lines.append("")
 
         # ─ 11-2. 사업 vs 직장 적합도 점수화 (0~100, 내부 판정용) ────────
-        # _biz_pts_j/_job_pts_j/_gate_biz도 섹션2 직전(위)에서 이미 계산됨 — 재사용.
-        # 섹션11이 SSOT이므로 게이트(_gate_biz)도 섹션2와 동일하게 반영해야
-        # 두 섹션 결론이 다시 갈라지지 않는다(C2가 해소한 44.78% 자기모순 재발 방지).
+        # _label_j는 섹션2 직전(위)에서 헬퍼가 이미 확정한 값 — 재사용.
+        # 섹션11이 SSOT이므로 조건식은 헬퍼 안에만 있고 여기·섹션2에는 없다
+        # (백로그①. C2가 해소한 44.78% 자기모순, C4의 59건 재발이 구조적으로
+        # 불가능해진다 — 조건을 고칠 지점이 헬퍼 하나뿐이므로).
 
-        if _gate_biz or _biz_pts_j >= _job_pts_j + 15:
+        if _label_j == "사업형":
             lines.append(
                 f"\n🔮 신이 보시니 {name}님은 <b>조직의 틀보다 자기 주도로 움직일 때</b> "
                 "재물 그릇이 훨씬 크게 열리는 팔자입니다. "
                 "직장을 기반으로 두되 개인 브랜드·부업·창업으로 확장하는 전략이 최선입니다."
             )
-        elif _job_pts_j >= _biz_pts_j + 15:
+        elif _label_j == "직장형":
             lines.append(
                 f"\n🔮 신이 보시니 {name}님은 <b>탄탄한 조직 안에서 실력을 쌓을 때</b> "
                 "평생 재물이 가장 안정적으로 쌓이는 팔자입니다. "
