@@ -4616,34 +4616,54 @@ class LocalSajuNarrator:
 
     @staticmethod
     def _score_career_fit_j(gyeok_name, ss_list, sn):
-        """격국·십성분포·신강신약 기반 사업/직장 적합도 점수화 (0~100). money() 섹션11 전용."""
+        """격국·십성분포·신강신약 기반 사업/직장 적합도 점수화 (0~100) + 근거 문장.
+        근거(_reasons_j)는 점수를 만드는 이 함수 안에서 함께 생성한다 — 점수와 근거가
+        서로 다른 로직에서 나와 어긋나는 사고(C2.5 역전 786건)를 구조적으로 차단한다."""
         _biz_pts_j, _job_pts_j = 50, 50  # 기준 50점에서 시작
+        _reasons_j = []
 
         # 격국 기반 보정
         if any(_g in gyeok_name for _g in ("偏財","食神","傷官","比肩")):
             _biz_pts_j += 20
+            _reasons_j.append("격국이 사업·자유업 지향의 구조")
         elif any(_g in gyeok_name for _g in ("正官","正財","正印","偏官")):
             _job_pts_j += 20
+            _reasons_j.append("격국이 조직·안정 지향의 구조")
 
         # 십성 분포 보정 (각 +5점)
+        _biz_slot_hit = False
+        _job_slot_hit = False
         for _s in ss_list:
             _cg = re.sub(r"\(.*?\)", "", _s.get("cg_ss","")).strip()
             _jj_s = re.sub(r"\(.*?\)", "", _s.get("jj_ss","")).strip()
             if _cg in ("偏財","傷官","食神") or _jj_s in ("偏財","傷官","食神"):
                 _biz_pts_j += 5
+                _biz_slot_hit = True
             if _cg in ("正財","正官","偏官","正印") or _jj_s in ("正財","正官","偏官","正印"):
                 _job_pts_j += 5
+                _job_slot_hit = True
+        if _biz_slot_hit:
+            _reasons_j.append("원국에 편재·상관·식신 등 사업형 십성이 다수 분포")
+        if _job_slot_hit:
+            _reasons_j.append("원국에 정재·정관·편관·정인 등 조직형 십성이 다수 분포")
 
-        # 신강/신약 보정
+        # 신강/신약 보정 — 직업 적성의 1차 축이므로 반드시 근거에 포함
         if "신강" in sn:
             _biz_pts_j += 10
+            _reasons_j.append("일간에 힘이 있어 재를 감당할 수 있는 구조")
         elif "신약" in sn:
             _job_pts_j += 10
+            _reasons_j.append("일간이 약해 큰 재물을 감당하기 어려운 구조")
+        else:
+            _reasons_j.append("일간의 강약이 균형을 이뤄 어느 쪽이든 무난한 구조")
 
         _biz_pts_j = min(100, max(0, _biz_pts_j))
         _job_pts_j = min(100, max(0, _job_pts_j))
 
-        return _biz_pts_j, _job_pts_j
+        if not _reasons_j:
+            _reasons_j.append("전반적인 사주 구조를 종합적으로 고려한 판단")
+
+        return _biz_pts_j, _job_pts_j, _reasons_j
 
     @staticmethod
     def money(pils, name, birth_year, gender):
@@ -4766,7 +4786,7 @@ class LocalSajuNarrator:
         # 판별로 인한 44.78% 자기모순(4차 진단) 해소. gyeok_name은 여기서
         # 섹션11보다 먼저 확정해 아래에서 재사용(구 L4998 위치 중복계산 제거).
         _gyeok_j = b.get("gyeok_name", "")
-        _biz_pts_j, _job_pts_j = LocalSajuNarrator._score_career_fit_j(_gyeok_j, ss_list, sn)
+        _biz_pts_j, _job_pts_j, _reasons_j = LocalSajuNarrator._score_career_fit_j(_gyeok_j, ss_list, sn)
 
         lines.append("<h3>🎯 사업 vs 직장 — 당신에게 맞는 방식</h3>")
 
@@ -4807,14 +4827,14 @@ class LocalSajuNarrator:
         if _biz_pts_j >= _job_pts_j + 15:
             lines.append(
                 f"🏢 <b>사업·프리랜서형</b> (점수 {_biz_pts_j} vs 직장 {_job_pts_j})  \n"
-                f"근거: {', '.join(_biz_reasons)}  \n"
+                f"근거: {', '.join(_reasons_j)}  \n"
                 "조직의 틀보다 자기 주도로 움직일 때 재물 그릇이 더 크게 열립니다. "
                 "창업·프리랜서·개인사업자·영업직에서 성과가 납니다."
             )
         elif _job_pts_j >= _biz_pts_j + 15:
             lines.append(
                 f"💼 <b>직장·조직형</b> (점수 {_job_pts_j} vs 사업 {_biz_pts_j})  \n"
-                f"근거: {', '.join(_job_reasons)}  \n"
+                f"근거: {', '.join(_reasons_j)}  \n"
                 "안정적인 조직 안에서 성실하게 실력을 쌓을 때 재물이 꾸준히 쌓입니다. "
                 "공무원·대기업·전문직 자격으로 가는 길이 평생 재물을 지키는 최선입니다."
             )
