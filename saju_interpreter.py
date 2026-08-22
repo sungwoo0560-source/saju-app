@@ -2587,7 +2587,7 @@ class LocalSajuNarrator:
 
             for d in b.get("ss_list", []):
                 if isinstance(d, dict):
-                    if d.get("cg_ss") and d.get("cg_ss") != "-":
+                    if d.get("cg_ss") and d.get("cg_ss") not in ("-", "일간(나)"):
                         ss_names.append(d["cg_ss"])
 
                     if d.get("jj_ss") and d.get("jj_ss") != "-":
