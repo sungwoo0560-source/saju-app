@@ -1792,6 +1792,13 @@ class LocalSajuNarrator:
                     gisin = list(dict.fromkeys(x for x in [_gw, _oc.get(_ih,"")] if x))
 
             ss_list = calc_sipsung(ilgan, pils) or []
+            # 일주(idx==1) 천간은 일간 자신이라 십성 대상이 아님(항상 比肩으로
+            # 계산되는 위양성, 백로그⑦-pre 실측: 5,000표본 전량). jj_ss(일지)는
+            # 정상적인 십성이므로 건드리지 않는다. calc_sipsung 자체는 manse.py
+            # 20여곳이 직접 호출하므로 수정 금지 — 이 함수(_get_base)의 결과물만
+            # 여기서 보정한다.
+            if len(ss_list) > 1 and isinstance(ss_list[1], dict):
+                ss_list[1]["cg_ss"] = "일간(나)"
 
             o_s = calc_ohaeng_strength(ilgan, pils) or {}
 
