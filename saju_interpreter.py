@@ -4661,9 +4661,13 @@ class LocalSajuNarrator:
         _ji = any(s.get("cg_ss")=="正印(정인)" or s.get("jj_ss")=="正印(정인)" for s in ss_list)
         gwanin_sangsaeng = _jg and _ji
 
-        # 격국 기반 보정 (⑧-3a: 建祿格은 比肩格과 동일 방향(biz)으로 매핑 유지 —
-        # 방향 재설계는 다음 라운드 사안. 月劫格은 劫財格처럼 무매핑 그대로 둔다.)
-        if any(_g in gyeok_name for _g in ("偏財","食神","傷官","比肩","建祿格")):
+        # 격국 기반 보정 (⑧-3c A안: 建祿格은 가산 0으로 둔다 — 建祿格은 정의상
+        # 월령 득세라 87.4%가 신강 계열이라 신강 보정(biz+10, 아래)을 이미 받는데
+        # 여기서 격국 biz+20까지 겹치면 이중계상이 되어 방향-슬롯 불일치율이
+        # 26.1%(다른 격의 2~6배)까지 벌어졌다(⑧-3c-pre 실측). 격국 가산만 빼서
+        # 신강 보정과 십성 슬롯 분포가 제 역할을 하게 한다. 月劫格·미정격은
+        # 기존대로 무매핑 유지.)
+        if any(_g in gyeok_name for _g in ("偏財","食神","傷官","比肩")):
             _biz_pts_j += 20
             _reasons_j.append("격국이 사업·자유업 지향의 구조")
         elif any(_g in gyeok_name for _g in ("正官","正財","正印","偏官")):
