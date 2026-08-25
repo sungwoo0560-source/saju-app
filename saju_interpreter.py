@@ -7078,7 +7078,7 @@ class LocalSajuNarrator:
             from saju_sinsal import get_12sinsal
             _sinsal = get_12sinsal(pils)
             _bad_sinsal = [s for s in _sinsal if s.get("type") == "흉" or "조심" in s.get("desc", "")]
-            _SINSAL_PRESCRIPTION = {
+            _SINSAL_PRESCRIPTION = make_hanja_safe({
                 "겁살":   "투자·보증·동업 절대 금지. 현금 비중 높이기.",
                 "도화살": "기혼이면 이성 경계. 미혼이면 적극적으로.",
                 "역마살": "이동·출장 활용. 충동적 이직 신중히.",
@@ -7090,7 +7090,7 @@ class LocalSajuNarrator:
                 "조객살": "밝은 옷 착용. 긍정적 환경 만들기.",
                 "삼재수": "삼재부적·빨간 팥죽은 액막이 전통으로 전해짐. 큰 결정 보류.",
                 "관재수": "계약서 확인. 보증 금지. 말조심.",
-            }
+            })
             if _bad_sinsal:
                 _sinsal_items = []
                 for _s in _bad_sinsal[:2]:
@@ -9929,7 +9929,7 @@ def _nar_ch8_flow(ctx):
     _age_ss_ctx = _AGE_SS_CONTEXT.get((_age_stage_key, _ss_hanja), "")
 
     # ── STEP 4: 신살 발동 현실 상황 묘사 ──────────────────────
-    _SINSAL_SITUATION = {
+    _SINSAL_SITUATION = make_hanja_safe({
         "상문살": f"상문살(喪門殺) 발동: 주변에 상(喪)이 있거나 이별·헤어짐의 기운이 강합니다. 장례식·병원 방문 후 반드시 소금물로 손을 씻고 귀가하십시오. 새로운 시작보다 기존 관계를 소중히 하는 시기입니다.",
         "겁살": f"겁살(劫殺) 발동: 주변에서 내 재물·에너지를 빼앗아가려는 기운이 강합니다. 보증·투자 권유·동업 제안에 절대 응하지 마십시오. '이번만은 괜찮겠지'가 가장 위험한 생각입니다.",
         "도화살": f"도화살(桃花殺) 발동: 이성 인연이 강하게 들어오는 시기입니다. 매력이 올라가고 인기가 높아지지만, 유부남·유부녀·조건이 안 맞는 인연이 섞여 올 수 있습니다. 눈을 높이 두고 신중하게 선택하십시오.",
@@ -9938,7 +9938,7 @@ def _nar_ch8_flow(ctx):
         "백호대살": f"백호대살(白虎大殺) 발동: 혈광(血光)의 기운이 강합니다. 수술·시술은 최대한 미루십시오. 교통사고·외상 위험이 높아지는 시기입니다. 날카로운 물건을 다룰 때 각별히 조심하십시오.",
         "양인살": f"양인살(羊刃殺) 발동: 의지와 고집이 극대화되는 시기입니다. 충동적 결정·다툼·수술 기운이 강합니다. 감정이 격해지면 3분만 참고 자리를 피하십시오.",
         "화개살": f"화개살(華蓋殺) 발동: 종교·철학·예술에 끌리는 시기입니다. 고독감이 강해지고 혼자 있고 싶은 마음이 듭니다. 영적 활동이나 창작 활동에서 큰 위안을 받을 수 있습니다.",
-    }
+    })
     _active_sinsal_msgs = []
     for _sn_item in sinsal_list:
         if not isinstance(_sn_item, dict):
@@ -11176,7 +11176,7 @@ def _nar_ch8_flow(ctx):
     lines.append(f"")
 
     # ── 발동 신살 현실 상황 카드 섹션 ──────────────────────────
-    _SINSAL_CARDS = {
+    _SINSAL_CARDS = make_hanja_safe({
         "상문살": {
             "상황": "주변 가까운 분의 건강이 걱정되거나 부고 소식이 들려오는 시기입니다. 본인도 건강에 적신호가 올 수 있습니다.",
             "주의": "장례식장·납골당 방문 최소화. 방문 후 반드시 소금으로 정화하십시오.",
@@ -11243,7 +11243,7 @@ def _nar_ch8_flow(ctx):
             "처방": "영적 활동이나 창작 활동에서 큰 위안과 재능 발휘의 기회를 얻습니다.",
             "icon": "🌸",
         },
-    }
+    })
     _sinsal_cards_found = []
     for _sc_item in sinsal_list:
         if not isinstance(_sc_item, dict):
