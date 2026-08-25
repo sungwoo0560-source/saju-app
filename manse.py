@@ -21599,12 +21599,42 @@ def menu6_relations(pils, name, birth_year, gender, marriage_status="미혼"):
     # ③ 관계 유형 진단 — 애정/애증/열애/집착
     st.markdown('<div class="gold-section">💘 ③ 나의 연애 유형 진단</div>', unsafe_allow_html=True)
     _iljj = pils[1]["jj"]
-    _has_dohwa = any(p.get("jj") in ["子","午","卯","酉"] for p in pils)
-    _sang_count = sum(1 for p in pils if "傷官" in p.get("ss",""))
-    _yang_in = any("양인" in str(p) for p in pils)
-    _dohwa = _has_dohwa
-    _hongran = any(p.get("jj") in ["寅","午","戌"] for p in pils)
-    _ilji_chung = _iljj in ["子","午","卯","酉","寅","申","巳","亥"]
+    _ilgan_r3 = pils[1]["cg"]
+
+    # ── R2a: 원자조건을 정식 신살·충 판정 함수로 교체 ──
+    # 일지충은 relations()(saju_interpreter.py L5976~5984)와 완전히 동일한
+    # CHUNG_MAP 판정 로직을 그대로 인라인 재현한다. relations() 쪽 인라인
+    # 코드를 공용 함수로 뽑아내려면 saju_interpreter.py를 함께 고쳐야 해
+    # 이번 "원자조건 교체만" 범위를 벗어난다 — 최소 침습 원칙에 따라 이번엔
+    # 동일 로직 인라인으로 두고, 공용 헬퍼화는 R2b(구조 개편) 대상으로 남긴다.
+    _ilji_chung = False
+    for _i3, _p3 in enumerate(pils):
+        if _i3 == 1:
+            continue
+        if frozenset([_iljj, _p3.get("jj", "")]) in CHUNG_MAP:
+            _ilji_chung = True
+            break
+
+    def _has_sinsal_r3(_name_prefix):
+        return any(_s.get("name", "").startswith(_name_prefix) for _s in get_extra_sinsal(pils))
+
+    _dohwa = _has_sinsal_r3("도화살")
+    _hongran = _has_sinsal_r3("홍염살")
+    _yang_in = _has_sinsal_r3("양인살")
+    _has_dohwa = _dohwa
+
+    _sp_r3 = calc_sipsung(_ilgan_r3, pils)
+    _sang_count = 0
+    for _i3, _s3 in enumerate(_sp_r3):
+        if _i3 == 1:
+            # 일주 cg_ss는 일간 자신이라 십성 대상 아님(항상 比肩 위양성) — 제외
+            if "傷官" in _s3.get("jj_ss", ""):
+                _sang_count += 1
+            continue
+        if "傷官" in _s3.get("cg_ss", ""):
+            _sang_count += 1
+        if "傷官" in _s3.get("jj_ss", ""):
+            _sang_count += 1
 
     # 유형 결정
     if _sang_count >= 2 and _ilji_chung:
