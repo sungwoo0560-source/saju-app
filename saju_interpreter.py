@@ -7096,7 +7096,9 @@ class LocalSajuNarrator:
                 for _s in _bad_sinsal[:2]:
                     _sname = _s.get("이름", _s.get("name", ""))
                     _sdesc = _s.get("desc", "")
-                    _spresc = _SINSAL_PRESCRIPTION.get(_sname, _s.get("caution", "주의하여 행동하십시오."))
+                    _spresc = _SINSAL_PRESCRIPTION.get(
+                        _normalize_sinsal_alias(_sname), _s.get("caution", "주의하여 행동하십시오.")
+                    )
                     _sinsal_items.append(
                         f"<div style='background:#fff5f5;border-left:4px solid #e74c3c;"
                         f"border-radius:8px;padding:12px 16px;margin:6px 0;'>"
@@ -7611,6 +7613,18 @@ def get_ilji_chung_hits(pils):
         if ck in CHUNG_MAP:
             hits.append(CHUNG_MAP[ck][0])
     return hits
+
+
+def _normalize_sinsal_alias(name):
+    """신살 딕셔너리 조회 전용 별칭 정규화(S2-b0). 판정 로직·항목은 무관.
+    '년살'(SINSAL_12_TABLE 삼합군 매핑)은 get_extra_sinsal의 도화살(_DOWHWA)과
+    12지지 전부 동일 매핑임을 실측 확인 — 사실상 같은 개념이라 조회 시에만
+    '도화살'로 맞춰준다."""
+    if not isinstance(name, str):
+        return name
+    if "년살" in name:
+        return name.replace("년살", "도화살")
+    return name
 
 
 # * BUG2 FIX: 일간=pils[1]["cg"], 월지=pils[2]["jj"] (pillar order: [시(0),일(1),월(2),년(3)])
