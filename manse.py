@@ -21601,19 +21601,9 @@ def menu6_relations(pils, name, birth_year, gender, marriage_status="미혼"):
     _iljj = pils[1]["jj"]
     _ilgan_r3 = pils[1]["cg"]
 
-    # ── R2a: 원자조건을 정식 신살·충 판정 함수로 교체 ──
-    # 일지충은 relations()(saju_interpreter.py L5976~5984)와 완전히 동일한
-    # CHUNG_MAP 판정 로직을 그대로 인라인 재현한다. relations() 쪽 인라인
-    # 코드를 공용 함수로 뽑아내려면 saju_interpreter.py를 함께 고쳐야 해
-    # 이번 "원자조건 교체만" 범위를 벗어난다 — 최소 침습 원칙에 따라 이번엔
-    # 동일 로직 인라인으로 두고, 공용 헬퍼화는 R2b(구조 개편) 대상으로 남긴다.
-    _ilji_chung = False
-    for _i3, _p3 in enumerate(pils):
-        if _i3 == 1:
-            continue
-        if frozenset([_iljj, _p3.get("jj", "")]) in CHUNG_MAP:
-            _ilji_chung = True
-            break
+    # ── R2b-1: 일지충 판정을 saju_interpreter.get_ilji_chung_hits()로 SSOT화 ──
+    # relations()와 물리적으로 같은 함수를 호출해, 두 판정이 갈라질 수 없게 한다.
+    _ilji_chung = bool(get_ilji_chung_hits(pils))
 
     def _has_sinsal_r3(_name_prefix):
         return any(_s.get("name", "").startswith(_name_prefix) for _s in get_extra_sinsal(pils))

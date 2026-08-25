@@ -5973,15 +5973,10 @@ class LocalSajuNarrator:
                 _tn, _, _ = TG_HAP_MAP[_tg_k]
                 _iljj_sc += 15
                 _iljj_notes.append(f"✅ 일주 천간합({_tn}) — 자연스러운 결합 기운")
-            # 충 여부 (일지 vs 타 기둥 지지)
-            for i, p in enumerate(pils):
-                if i == 1:
-                    continue
-                _ck = frozenset([_iljj_g, p.get("jj","")])
-                if _ck in CHUNG_MAP:
-                    _cn2, _, _ = CHUNG_MAP[_ck]
-                    _iljj_sc -= 20
-                    _iljj_notes.append(f"⚠️ 일지 충({_cn2}) — 배우자 자리 불안정. 결혼 후 갈등 조심")
+            # 충 여부 (일지 vs 타 기둥 지지) — SSOT: get_ilji_chung_hits() 공유
+            for _cn2 in get_ilji_chung_hits(pils):
+                _iljj_sc -= 20
+                _iljj_notes.append(f"⚠️ 일지 충({_cn2}) — 배우자 자리 불안정. 결혼 후 갈등 조심")
             # 형살 여부
             _HYUNG_PAIRS = {
                 "寅":("巳","申"),"巳":("寅","申"),"申":("寅","巳"),
@@ -7597,6 +7592,25 @@ def detect_structure(ilgan, wolji_jj):
 
     return f"{structure_type}格"
 
+
+def get_ilji_chung_hits(pils):
+    """일지(배우자 자리)가 원국의 다른 기둥 지지와 이루는 충(沖)을 전부 찾는다.
+    반환: 충 이름 문자열 리스트(예: ["寅申沖 (金木相沖)"]), 없으면 빈 리스트.
+    relations()와 manse.py 연애유형진단이 이 함수 하나를 공유해(SSOT)
+    두 판정이 서로 다른 결과를 내는 것을 구조적으로 막는다."""
+    if len(pils) < 2 or not pils[1]:
+        return []
+    iljj = pils[1].get("jj", "")
+    if not iljj:
+        return []
+    hits = []
+    for i, p in enumerate(pils):
+        if i == 1:
+            continue
+        ck = frozenset([iljj, p.get("jj", "")])
+        if ck in CHUNG_MAP:
+            hits.append(CHUNG_MAP[ck][0])
+    return hits
 
 
 # * BUG2 FIX: 일간=pils[1]["cg"], 월지=pils[2]["jj"] (pillar order: [시(0),일(1),월(2),년(3)])
