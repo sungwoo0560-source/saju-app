@@ -21596,14 +21596,16 @@ def menu6_relations(pils, name, birth_year, gender, marriage_status="미혼"):
 
     st.markdown("---")
 
-    # ③ 관계 유형 진단 — 애정/애증/열애/집착
+    # ③ 관계 유형 진단 — R2b-2: 배타 7분기(일지충 혼합) 대신 4조건 조합 라벨 + 일지충 독립 경고축
     st.markdown('<div class="gold-section">💘 ③ 나의 연애 유형 진단</div>', unsafe_allow_html=True)
     _iljj = pils[1]["jj"]
     _ilgan_r3 = pils[1]["cg"]
 
     # ── R2b-1: 일지충 판정을 saju_interpreter.get_ilji_chung_hits()로 SSOT화 ──
     # relations()와 물리적으로 같은 함수를 호출해, 두 판정이 갈라질 수 없게 한다.
-    _ilji_chung = bool(get_ilji_chung_hits(pils))
+    # R2b-2부터는 이 값을 유형 판정에 섞지 않고 아래 별도 경고 블록에서만 쓴다.
+    _ilji_chung_hits_r3 = get_ilji_chung_hits(pils)
+    _ilji_chung = bool(_ilji_chung_hits_r3)
 
     def _has_sinsal_r3(_name_prefix):
         return any(_s.get("name", "").startswith(_name_prefix) for _s in get_extra_sinsal(pils))
@@ -21625,36 +21627,48 @@ def menu6_relations(pils, name, birth_year, gender, marriage_status="미혼"):
             _sang_count += 1
         if "傷官" in _s3.get("jj_ss", ""):
             _sang_count += 1
+    _sang2 = _sang_count >= 2
 
-    # 유형 결정
-    if _sang_count >= 2 and _ilji_chung:
-        _love_type = "😈 애증형"
-        _love_desc = "끌리는데 싸운다. 헤어져도 다시 찾는다. 상관 과다+일지 충 구조 — 말 한마디로 깊은 상처를 주고받으면서도 그 강렬함에 중독된다. 평범한 연애는 시시하다고 느낀다."
-        _love_warn = "⚠️ 감정이 폭발하는 순간 한 발 물러서는 훈련이 필요하다. 강렬함이 사랑이라고 착각하지 말 것."
-    elif _dohwa and _hongran:
-        _love_type = "🔥 열애형"
-        _love_desc = "도화+홍란 동시 발동 — 이성이 먼저 다가온다. 연애할 때 전부를 쏟아붓는 스타일. 불꽃처럼 타오르지만 식는 것도 빠를 수 있다."
-        _love_warn = "⚠️ 초반 감정에 휩쓸려 중요한 판단을 놓치지 말 것. 뜨거울수록 천천히."
-    elif _sang_count >= 2:
-        _love_type = "💬 밀당형"
-        _love_desc = "상관 과다 — 매력적이고 재치 있어서 이성이 끌리지만, 연인에게 날카로운 말이 나오는 순간 관계가 흔들린다. 사랑할수록 더 많은 것을 요구한다."
-        _love_warn = "⚠️ 말투가 관계의 생명줄. 비판보다 인정 표현을 먼저 하는 연습이 필요하다."
-    elif _yang_in:
-        _love_type = "🌀 집착형"
-        _love_desc = "양인살 — 한번 마음을 주면 끝까지 놓지 않는다. 연인에 대한 기준이 높고 소유욕이 강하다. 상대가 자유를 원할 때 갈등이 폭발한다."
-        _love_warn = "⚠️ 집착과 사랑의 경계를 의식적으로 구분할 것. 믿음이 최고의 관계 유지법."
-    elif _ilji_chung:
-        _love_type = "💔 인연박복형"
-        _love_desc = "일지 충 구조 — 인연이 와도 끝까지 가기 어려운 구조. 만남과 헤어짐이 반복되기 쉽다. 그러나 이는 '나쁜 사람'이 아니라 타이밍과 구조의 문제다."
-        _love_warn = "⚠️ 용신 기운이 강한 세운에 만난 인연을 특히 소중히 할 것."
-    elif not _dohwa:
-        _love_type = "🥶 냉온탕형"
-        _love_desc = "도화살 없음 — 겉으로는 차갑게 보이지만 속으로는 깊이 감정을 쌓는 스타일. 표현이 서툴러서 오해를 받기 쉽다. 한번 정하면 오래간다."
-        _love_warn = "⚠️ 감정 표현을 조금만 더 하면 관계가 훨씬 부드러워진다."
-    else:
-        _love_type = "💕 순애형"
-        _love_desc = "헌신적이고 진지한 연애 스타일. 조건보다 감정을 중시한다. 한번 맺은 인연을 끝까지 지키려는 의리가 있다."
-        _love_warn = "⚠️ 자신을 너무 희생하지 않도록 주의. 내 감정도 중요하다."
+    # ── R2b-2(B'안): 일지충 제외 4조건(도화·홍염·상관2+·양인)의 실측 상위 5개
+    # 조합만 전용 라벨을 두고, 나머지 11개 조합은 "복합형"으로 묶는다(⑧ 트랙의
+    # HanjaSafeDict fuzzy 매칭과 달리 여기는 조합 키가 유한(16가지)해 딕셔너리
+    # 조회만으로 순서 문제 자체가 발생하지 않는다). 배타 if/elif를 없애 "먼저
+    # 걸리는 조건이 뒤 조건을 가리는" R2a까지의 구조적 문제를 원천 차단한다.
+    _LOVE_COMBO_R3 = {
+        # (도화, 홍염, 상관2+, 양인) : (표시명, 근거서술, 대비책)
+        (False, True, False, True): (
+            "🔥 저돌형",
+            "홍염(이성 흡인력)과 양인(추진력·소유욕)이 함께 있는 구조 — 마음을 정하면 망설임 없이 다가가고, 관계에서도 주도권을 쥐려는 경향이 있다. 매력과 추진력이 겹쳐 상대를 압도할 수 있다.",
+            "속도를 늦추고 상대의 속도를 배려하는 연습이 필요하다. 밀어붙이는 힘이 강할수록 상대에게 숨 쉴 틈을 주는 것이 관계를 오래 지킨다.",
+        ),
+        (False, True, False, False): (
+            "💫 매력형",
+            "홍염살 — 타고난 이성 흡인력이 있어 먼저 다가오는 인연이 많은 편이다. 매력과 인기가 자연스럽게 따르지만, 그만큼 이성 관계에서 구설에 오르기 쉬운 경향도 있다.",
+            "많은 관심이 오히려 혼란을 줄 수 있으니, 한 사람에게 집중하는 선택과 절제가 관계의 깊이를 만든다.",
+        ),
+        (False, False, False, True): (
+            "🌀 집착형",
+            "양인살 — 한번 마음을 주면 끝까지 놓지 않는 경향이 있다. 연인에 대한 기준이 높고 소유욕이 강한 편이라, 상대가 자유를 원할 때 갈등이 커질 수 있다.",
+            "집착과 사랑의 경계를 의식적으로 구분할 것. 믿음이 최고의 관계 유지법이다.",
+        ),
+        (True, False, False, False): (
+            "💕 순애형",
+            "도화살 — 헌신적이고 진지한 연애 스타일에 가깝다. 조건보다 감정을 중시하고, 한번 맺은 인연을 끝까지 지키려는 의리가 있는 편이다.",
+            "자신을 너무 희생하지 않도록 주의할 것. 내 감정도 중요하다.",
+        ),
+        (False, False, False, False): (
+            "🍃 잔잔형",
+            "도화·홍염·양인·상관 어느 쪽도 두드러지지 않는 구조 — 연애에 있어 극적인 기운보다는 잔잔하고 안정적인 흐름을 타는 편이다. 화려하진 않지만 꾸준함이 강점이 될 수 있다.",
+            "특별한 기운이 두드러지지 않는다고 인연이 약한 것은 아니다. 원국 전체의 흐름과 대운·세운의 타이밍을 함께 살피는 것이 중요하다.",
+        ),
+    }
+    _LOVE_COMBO_DEFAULT_R3 = (
+        "🎭 복합형",
+        "여러 기운이 동시에 겹쳐 있어 하나의 유형으로 단정하기 어려운 구조 — 상황과 상대에 따라 몇 가지 성향이 번갈아 나타날 수 있다.",
+        "겹친 기운 중 어느 것이 지금 더 강하게 작용하는지는 대운·세운의 흐름에 따라 달라지니, 시기별 운세를 함께 참고하는 것이 좋다.",
+    )
+    _love_key_r3 = (_dohwa, _hongran, _sang2, _yang_in)
+    _love_type, _love_desc, _love_warn = _LOVE_COMBO_R3.get(_love_key_r3, _LOVE_COMBO_DEFAULT_R3)
 
     # ── 강사식 4박자 (①전체구조 ②근거 ③그래서지금 ④대비책) — 궁합 맥락, 신규계산 0 ──
     _is_married6 = marriage_status in ("기혼", "재혼")
@@ -21666,7 +21680,7 @@ def menu6_relations(pils, name, birth_year, gender, marriage_status="미혼"):
     _p1_6 = f"**【전체 구조】** {name}님의 배우자 자리(일지 {_iljj})가 만드는 연애 구조는 **{_love_type}**입니다."
     _p2_6 = f"**【근거】** {_love_desc} 배우자궁(일지 {_iljj})의 기운이 이 성향의 뿌리입니다."
     _p3_6 = f"**【그래서 지금】** {_now_txt6}"
-    _p4_6 = f"**【대비책】** {_love_warn}"
+    _p4_6 = f"**【대비책】** ⚠️ {_love_warn}"
 
     st.markdown(
         "<div style='background:linear-gradient(145deg,#fff0f3,#ffe4e8);border:2px solid #e8638c;"
@@ -21675,6 +21689,22 @@ def menu6_relations(pils, name, birth_year, gender, marriage_status="미혼"):
         "</div>",
         unsafe_allow_html=True,
     )
+
+    # ── R2b-2: 일지충 독립 경고축 — 유형 판정과 무관하게 항상 검사한다.
+    # relations()가 이미 "배우자 자리 불안정"을 경고하므로 완전히 새 문구를
+    # 만들지 않고, 같은 축(일지 충)임을 명시해 두 서술이 서로 다른 근거처럼
+    # 보이지 않게 한다.
+    if _ilji_chung_hits_r3:
+        _chung_names_r3 = "·".join(_ilji_chung_hits_r3)
+        st.markdown(
+            "<div style='background:linear-gradient(145deg,#fff3f0,#ffe6e0);border:2px solid #d97757;"
+            "border-radius:14px;padding:18px 22px;margin:10px 0;font-size:14px;color:#4a1a00;line-height:1.9'>"
+            f"⚠️ <b>배우자 자리(일지) 충 — {_chung_names_r3}</b><br>"
+            "위 배우자 자리 분석에서 살펴본 것과 같은 일지 충입니다. "
+            "연애 유형과는 별개로, 인연의 흐름에 굴곡이나 변동이 있을 수 있는 구조라는 뜻이니 함께 참고하십시오."
+            "</div>",
+            unsafe_allow_html=True,
+        )
 
     render_worry_inference(pils, birth_year, gender, marriage_status)
 
