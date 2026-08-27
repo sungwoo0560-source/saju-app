@@ -31056,7 +31056,7 @@ def main():
                 # ① 백호대살 — 기둥 간지 조합으로 체크
                 _BAEKHOSA_COMBOS = {
                     "甲(갑)辰(진)","乙(을)未(미)","丙(병)戌(술)","丁(정)丑(축)",
-                    "戊(무)辰(진)","壬(임)辰(진)","癸(계)丑(축)",
+                    "戊(무)辰(진)","壬(임)戌(술)","癸(계)丑(축)",
                 }
                 _baekhosa_hits = [c for c in _pil_cgjj_b if c in _BAEKHOSA_COMBOS]
                 if _baekhosa_hits:
