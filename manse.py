@@ -18588,7 +18588,7 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
         _wolji8v = pils[2]["jj"] if len(pils) > 2 else ""
         if _JJCHUNG.get(_sw_jj8v, "") == _ilji8v:  _ss_raw += 25
         if _JJCHUNG.get(_sw_jj8v, "") == _wolji8v: _ss_raw += 20
-        _BAEKHO8s = {"甲辰","乙未","丙戌","丁丑","戊辰","壬辰","癸丑"}
+        _BAEKHO8s = {"甲辰","乙未","丙戌","丁丑","戊辰","壬戌","癸丑"}
         if any(p["cg"]+p["jj"] in _BAEKHO8s for p in pils) and _ss_raw >= 20:
             _ss_raw += 15
         _YANGIN8s = {"甲":"卯","丙":"午","戊":"午","庚":"酉","壬":"子"}
@@ -33032,7 +33032,7 @@ border-radius:14px;padding:16px 20px;margin:16px 0 6px">
 
     try:
         # 백호대살 원국 확인
-        _BAEKHO = {"甲辰","乙未","丙戌","丁丑","戊辰","壬辰","癸丑"}
+        _BAEKHO = {"甲辰","乙未","丙戌","丁丑","戊辰","壬戌","癸丑"}
         _pil_ganjis = [p["cg"]+p["jj"] for p in pils]
         _baekho_hits = [gj for gj in _pil_ganjis if gj in _BAEKHO]
 
