@@ -16773,6 +16773,16 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
             _중상등급16  = {"장생","관대"}
             _최약등급16  = {"사","묘","절"}
 
+            # J3: 태그 결정 전용 5단계 등급(위 3세트는 조합 경고문(_위험조합16) 로직 그대로 유지, 무변경)
+            _GRADE5_16 = {
+                "건록":"강","제왕":"강",
+                "장생":"중상","관대":"중상",
+                "태":"성장","양":"성장",
+                "목욕":"중하","쇠":"중하",
+                "병":"최약","사":"최약","묘":"최약","절":"최약",
+            }
+            _GSCORE16 = {"강":5,"중상":4,"성장":3,"중하":2,"최약":1}
+
             _UN_DESC16 = {
                 "장생": f"{name}님은 장생(長生) 기운을 타고났습니다. 새로운 것을 시작하는 힘이 강하고 생명력이 넘칩니다. 어떤 환경에서도 다시 일어서는 회복력이 탁월합니다.",
                 "목욕": f"{name}님은 목욕(沐浴) 기운을 타고났습니다. 감수성과 예술적 감각이 뛰어나지만 이성 문제와 유혹에 취약합니다. 한 곳에 정착하기 어려운 성향이 있습니다.",
@@ -16835,10 +16845,32 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                 if _위험조합16:
                     _full_msg16 += f" {_위험조합16}"
 
+                # J3: 태그를 등급(5단계) x 세운조합으로 결정 (기존엔 무조건 "주의")
+                _il_g16 = _GRADE5_16.get(_일지_운성, "중하")
+                _sw_g16 = _GRADE5_16.get(_세운_운성, "중하")
+                if _il_g16 == "강":
+                    # 정점(건록·제왕)에서 세운이 내려가는 건 순환상 정상 — 중하/최약일 때만 알림
+                    if _sw_g16 in ("중하", "최약"):
+                        _unsung_tag16 = "주의"
+                    elif _일지_운성 == "제왕" and _sw_g16 == "강":
+                        _unsung_tag16 = "주의"  # 제왕 특례: 강한 세운이 겹치면 충돌 위험 부각
+                    else:
+                        _unsung_tag16 = "참고"
+                else:
+                    _grade_diff16 = _GSCORE16[_sw_g16] - _GSCORE16[_il_g16]
+                    if _grade_diff16 >= 2:
+                        _unsung_tag16 = "참고"       # 세운이 원국을 확실히 끌어올림(반전)
+                    elif _grade_diff16 <= -2:
+                        _unsung_tag16 = "주의"       # 세운이 원국을 확실히 끌어내림
+                    elif _il_g16 in ("중상", "성장"):
+                        _unsung_tag16 = "참고"
+                    else:
+                        _unsung_tag16 = "주의"       # 중하, 최약
+
                 _danger_signals.append((
                     f"🌀 십이운성 — 일지 {_일지_운성} · 올해 세운 {_세운_운성}",
                     _full_msg16,
-                    "주의"
+                    _unsung_tag16
                 ))
         except Exception:
             pass
