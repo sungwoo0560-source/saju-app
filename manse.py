@@ -15978,18 +15978,20 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
 
             if "도화" in _nm:
                 _sinsal_done.add(_key)
+                _is_married_ds = marriage_status in ("기혼", "재혼")
                 if "일주" in _pos:
-                    _danger_signals.append(("🌸 일주 도화 — 외도·불륜 조심",
-                        "일주에 도화살이 박혔습니다. 이성이 사방에서 접근하는 구조입니다. "
-                        "기혼자는 올해 이성과 단둘이 있는 자리를 절대 만들지 마십시오. "
-                        "한 번의 실수가 가정을 완전히 박살낼 수 있습니다. "
-                        "미혼자도 상대가 기혼자인지 반드시 확인하십시오. 이 살은 불륜으로 끝나기 쉽습니다.", "주의"))
+                    _danger_signals.append(("🌸 일주 도화 — 이성에게 인기 많은 배우자궁",
+                        "일주에 도화살이 있어 이성에게 매력적으로 비치는 기운을 타고났습니다. "
+                        + ("배우자궁의 기운이라 결혼 후에도 이성 관계에 각별히 신경 쓰는 것이 관계를 지키는 데 도움이 됩니다."
+                           if _is_married_ds else
+                           "좋은 인연을 만들 기회가 많은 구조이니, 상대를 신중히 선택하는 안목을 함께 기르면 좋습니다."), "참고"))
                 else:
                     _pos_str = "·".join(_pos) if isinstance(_pos, list) else str(_pos)
-                    _danger_signals.append(("🌸 도화살 — 이성 문제로 망신 조심",
-                        f"도화살({_pos_str})이 작용합니다. "
-                        "이성 때문에 가정이 흔들리거나, 이성 관계로 구설에 오를 수 있습니다. "
-                        "감각적 유혹을 이기지 못하면 인생 전체가 꼬입니다.", "주의"))
+                    _danger_signals.append(("🌸 도화살 — 매력과 인기의 기운",
+                        f"도화살({_pos_str})이 작용합니다. 이성에게 호감을 사는 매력을 타고났습니다. "
+                        + ("이 매력이 오해로 번지지 않도록 처신에 신경 쓰는 것이 좋습니다."
+                           if _is_married_ds else
+                           "이 매력을 인연을 넓히는 쪽으로 잘 쓰면 좋은 만남으로 이어집니다."), "참고"))
 
             elif "망신" in _nm:
                 _sinsal_done.add(_key)
@@ -16053,11 +16055,10 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
 
             elif "화개" in _nm:
                 _sinsal_done.add(_key)
-                _danger_signals.append(("🙏 화개살 — 고독·종교 집착 조심",
-                    "화개살이 강합니다. 세상이 싫고 혼자 있고 싶어집니다. "
-                    "종교나 무속에 지나치게 빠져들거나, 현실을 도피하고 싶어집니다. "
-                    "돈을 쏟아붓는 종교 활동은 지금 당장 멈추십시오. "
-                    "사람들과 억지로라도 어울리는 것이 이 살을 이기는 방법입니다.", "주의"))
+                _danger_signals.append(("🙏 화개살 — 예술·종교적 감수성이 깊은 기운",
+                    "화개살이 있어 예술·종교·철학 쪽으로 마음이 깊이 끌리는 구조입니다. "
+                    "혼자 있는 시간을 답답해하기보다 독서·명상·창작에 써보면, "
+                    "그 시간이 오히려 좋은 성과로 이어지는 사주입니다.", "참고"))
 
         # ④ 세운 오행 조합별 건강 경고
         _OH_HEALTH = {
@@ -17480,15 +17481,18 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
             if _yangin_jj and _yangin_jj in _원국_지지2:
                 _yangin_pos = [["시지","일지","월지","년지"][i]
                                for i, jj in enumerate(_원국_지지2) if jj == _yangin_jj]
+                _YANGIN_POS_ADD = {
+                    "일지": "배우자와의 관계에서 주도권을 쥐려는 경향이 있습니다. ",
+                    "월지": "직업·사회활동에서 특히 두드러지는 추진력으로 나타납니다. ",
+                    "년지": "집안 내력이나 초년 시절부터 강한 기질로 드러납니다. ",
+                    "시지": "말년까지 이어지는 뚝심으로 나타나며, 아랫사람이나 자녀와는 기질이 부딪힐 수 있습니다. ",
+                }
                 _danger_signals.append((
                     f"⚔️ 양인살(羊刃殺) — {'·'.join(_yangin_pos)}에 위치",
                     f"양인살({_yangin_jj})이 {'·'.join(_yangin_pos)}에 있습니다. "
-                    f"양인살은 날카로운 칼날처럼 강렬한 기운입니다. "
-                    f"의지력과 추진력이 남다르지만 과하면 주변을 해칩니다. "
-                    f"사고·수술·폭력·재물 손실 위험이 평생 따릅니다. "
-                    f"{'일지에 있으면 배우자가 강하고 고집이 세며 갈등이 잦습니다. ' if '일지' in _yangin_pos else ''}"
-                    f"이 기운을 직업으로 승화시키면 군인·검사·외과의·운동선수로 대성합니다.",
-                    "주의"
+                    f"의지력과 추진력이 남다른 기운입니다. "
+                    + "".join(_YANGIN_POS_ADD.get(p, "") for p in _yangin_pos),
+                    "참고"
                 ))
             if _yangin_jj and _yangin_jj == _세운_jj_s:
                 _danger_signals.append((
