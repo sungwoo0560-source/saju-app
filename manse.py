@@ -17474,13 +17474,9 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
 
         # ㉒ 추가 신살 — 양인살·현침살·고란살·탕화살·급각살
         try:
-            _YANGIN = {
-                "甲":"卯","丙":"午","戊":"午","庚":"酉","壬":"子",
-                "乙":"寅","丁":"巳","己":"巳","辛":"亥","癸":"亥",
-            }
             _원국_지지2 = [p.get("jj","") for p in pils]
             _세운_jj_s  = _jj_cur  # 세운 지지
-            _yangin_jj  = _YANGIN.get(ilgan, "")
+            _yangin_jj  = get_yangin(pils).get("양인_지지", "")  # get_yangin 단일 소스, H1-b
             if _yangin_jj and _yangin_jj in _원국_지지2:
                 _yangin_pos = [["시지","일지","월지","년지"][i]
                                for i, jj in enumerate(_원국_지지2) if jj == _yangin_jj]
@@ -31074,12 +31070,10 @@ def main():
                         "bg": "#fff5f5",
                     })
 
-                # ② 양인살 — 일간 기준 지지 확인
-                _YANGIN_MAP = {"甲":"卯","丙":"午","戊":"午","庚":"酉","壬":"子",
-                               "乙":"辰","丁":"未","己":"未","辛":"戌","癸":"丑"}
-                _yangin_jj = _YANGIN_MAP.get(_ilgan_b, "")
-                _yangin_hits = [["시주","일주","월주","년주"][i] for i,p in enumerate(pils)
-                                if p.get("jj","") == _yangin_jj]
+                # ② 양인살 — 일간 기준 지지 확인 (get_yangin 단일 소스, H1-b)
+                _yd_main    = get_yangin(pils)
+                _yangin_jj  = _yd_main.get("양인_지지", "")
+                _yangin_hits = _yd_main.get("위치", [])
                 if _yangin_hits:
                     _sinsal_banners.append({
                         "icon": "⚡",
