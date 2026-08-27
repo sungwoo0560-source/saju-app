@@ -16546,6 +16546,9 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                 _next_jj2 = _next_dw2.get("jj","")
                 _cur_start_age2 = _cur_dw2.get("시작나이", 0) or 0
 
+                # M1: 3년/5년 경계는 명리 정설이 아닌 UX 구간 분할값(고전에 정량 기준 없음,
+                # 실무서도 1~3년으로 유파차 큼). "교체가 가까울수록 체감이 크다"는 정성적으로
+                # 맞고 구간 분할로는 기능하므로 구조는 유지, 근거 없음만 기록해둔다.
                 if _years_left2 <= 3:
                     _danger_signals.append((f"⚠️ 대운 교체 {_years_left2}년 전 — 지금이 가장 혼란스럽습니다",
                         f"현재 대운이 {_years_left2}년 후면 바뀝니다. "
@@ -16554,7 +16557,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                         f"직업·거주지·인간관계가 동시에 흔들리는 것처럼 느껴집니다. "
                         f"이 시기에 충동적으로 내린 결정은 대부분 후회로 이어집니다. "
                         f"대운이 완전히 바뀐 후 1~2년을 기다렸다가 새로운 결정을 내리십시오. "
-                        f"지금의 혼란은 새로운 10년을 준비하는 진통입니다.", "위험"))
+                        f"지금의 혼란은 새로운 10년을 준비하는 진통입니다.", "주의"))
                 elif _years_left2 <= 5:
                     _danger_signals.append((f"📅 대운 교체 {_years_left2}년 전 — 다음 10년을 준비하십시오",
                         f"{_years_left2}년 후 {_next_cg2}{_next_jj2} 대운으로 교체됩니다. "
@@ -17019,16 +17022,26 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                             f"일간이 세운에 묶이면 주체적 판단이 흐려질 수 있습니다. "
                             f"외부 흐름을 활용하되 자기 중심을 잃지 마십시오.",
                             "주의"))
-                    else:  # D/E: 기신화 또는 중립
+                    elif _hh_is_gisin:  # E: 합화오행이 기신
                         _danger_signals.append((
                             f"🔗 세운이 일간을 합으로 잡아끕니다 — 최고 경계",
                             f"올해 세운 천간({_세운_cg})이 일간({_pcg})과 {_합이름}을 이룹니다. "
                             f"일간이 세운에 합으로 묶이면 본인의 의지·결단력·에너지가 "
                             f"올해 세운의 기운에 완전히 종속됩니다. "
                             f"주체적인 판단이 흐려지고 외부 환경에 휩쓸리기 쉬운 해입니다. "
-                            f"합화 오행은 {_합화오행}으로 변질되어 용신·기신 계산이 달라집니다. "
+                            f"합화 오행은 {_합화오행}(기신)으로 변질되어 상황이 더 나빠집니다. "
                             f"중요한 결정은 반드시 신뢰할 수 있는 사람과 상의하십시오.",
                             "위험"))
+                    else:  # D: 합화오행이 용신도 기신도 아닌 중립
+                        _danger_signals.append((
+                            f"🔗 세운이 일간을 합으로 잡아끕니다 — 주체성 흔들림 주의",
+                            f"올해 세운 천간({_세운_cg})이 일간({_pcg})과 {_합이름}을 이룹니다. "
+                            f"일간이 세운에 합으로 묶이면 본인의 의지·결단력·에너지가 "
+                            f"올해 세운의 기운에 영향을 받기 쉽습니다. "
+                            f"주체적인 판단이 흐려질 수 있으니 중요한 결정은 "
+                            f"신뢰할 수 있는 사람과 상의하십시오. "
+                            f"합화 오행은 {_합화오행}으로 변질되어 용신·기신 계산이 달라집니다.",
+                            "주의"))
                 elif _pcg_oh == _일간_oh:  # 비겁과 합
                     if _hh_is_yong and _pcg_is_gisin:  # A: 기신비겁→용신화 (호재)
                         _danger_signals.append((
