@@ -878,7 +878,7 @@ def _local_saju_engine(pils, name, birth_year, gender, query):
         _sn_val   = _sn_info.get("신강신약","중화") if _sn_info else "중화"
         _ys_data  = get_yongshin(pils)
         _yong_ohs = _ys_data.get("종합_용신",[])
-        _gisin    = _ys_data.get("기신",[]) if isinstance(_ys_data.get("기신"), list) else []
+        _gisin    = _ys_data.get("종합_기신",[]) if isinstance(_ys_data.get("종합_기신"), list) else []
         _sw_now   = _gyl(pils, current_year) or {}
         _sw_oh    = _sw_now.get("오행_천간","")
         _sw_ss    = _sw_now.get("십성_천간","")
@@ -4343,8 +4343,7 @@ DRAMATIC_SCENARIOS_B = {
         "직장·고용·전문직 쪽에서 실력을 쌓으면 오히려 안정적인 흐름이 열립니다."
     ),
     "investment_burn": (
-        "🔥 {name}님은 투자에서 손실이 발생하기 쉬운 구조입니다.\n"
-        "편재+양인+기신 운이 겹치는 시기엔 특히 신중해야 합니다.\n"
+        "🔥 편재+양인+기신 운이 겹치는 시기엔 {name}님은 투자에서 손실이 나기 쉽습니다.\n"
         "고위험 투자(주식·코인·도박성 투자)는 미리 선을 그어두면 충분히 피해갈 수 있습니다."
     ),
     "self_made_rich": (
@@ -19805,7 +19804,7 @@ def menu3_past(pils, birth_year, gender, name=""):
         _ilgan3 = pils[1]["cg"]
         _ys3 = get_yongshin(pils)
         _yong3 = _ys3.get("종합_용신",[])
-        _gisin3 = _ys3.get("기신",[]) if isinstance(_ys3.get("기신"), list) else []
+        _gisin3 = _ys3.get("종합_기신",[]) if isinstance(_ys3.get("종합_기신"), list) else []
         _OH3 = _OH_CG
 
         _bm3 = max(1,min(12,int(st.session_state.get("birth_month") or 1)))
@@ -22092,7 +22091,7 @@ def menu10_monthly(pils, name, birth_year, gender):
         _ml_oh  = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土","己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}.get(_ml.get("간",""),"")
         _ys_m   = get_yongshin(pils)
         _yong_m = _ys_m.get("종합_용신",[])
-        _gisin_m= _ys_m.get("기신",[]) if isinstance(_ys_m.get("기신"),list) else []
+        _gisin_m= _ys_m.get("종합_기신",[]) if isinstance(_ys_m.get("종합_기신"),list) else []
         _is_yong_m  = _ml_oh in _yong_m
         _is_gisin_m = _ml_oh in _gisin_m
 
@@ -25175,7 +25174,7 @@ def tab_ai_chat(pils, name, birth_year, gender):
                     _gan_def = _sw_def.get("세운","")
                     _ys_def = get_yongshin(pils)
                     _yong_def = _ys_def.get("종합_용신",[]) if _ys_def else []
-                    _gisin_def = _ys_def.get("기신",[]) if _ys_def and isinstance(_ys_def.get("기신"),list) else []
+                    _gisin_def = _ys_def.get("종합_기신",[]) if _ys_def and isinstance(_ys_def.get("종합_기신"),list) else []
                     _OH_DEF = _OH_CG
                     _oh_def = _OH_DEF.get(_gan_def[:1],"") if _gan_def else ""
                     _is_y_def = _oh_def in _yong_def
@@ -25201,7 +25200,7 @@ def tab_ai_chat(pils, name, birth_year, gender):
                     if _gisin_def:
                         out.append(
                             f"\n기신은 **{'·'.join(_gisin_def[:2])}** 오행입니다. "
-                            f"이 기운이 강한 시기에는 중요한 결정을 삼가게.\n"
+                            f"이 시기엔 큰 확장이나 차입을 나눠서 접근하세요.\n"
                         )
                     out.append(
                         f"\n더 구체적으로 알고 싶은 것이 있다면 "
