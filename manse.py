@@ -27187,13 +27187,13 @@ def menu_gaewoon(pils, name, birth_year, gender):
         _oh_cg_dw = _HSM_CG_OH.get(_cur_dw_gw.get("cg",""),"")
         _oh_jj_dw = _HSM_JJ_OH.get(_cur_dw_gw.get("jj",""),"")
         _dw_is_yong = (bool(_oh_cg_dw and _oh_cg_dw in _yong_gw) or bool(_oh_jj_dw and _oh_jj_dw in _yong_gw))
-        _dw_is_gi   = (bool(_oh_cg_dw and _oh_cg_dw in _gis_gw)  or bool(_oh_jj_dw and _oh_jj_dw in _gis_gw))
+        _dw_is_gi   = (bool(_oh_cg_dw and _oh_cg_dw in _gisin_ohs_gw)  or bool(_oh_jj_dw and _oh_jj_dw in _gisin_ohs_gw))
         _dw_kind_str = "용신 대운" if _dw_is_yong else ("기신 대운" if _dw_is_gi else "중성 대운")
         _dw_label    = f"{_cur_dw_gw.get('str','')} 대운 ({_dw_kind_str})"
     _sw_cg_h = _sw_gw.get("cg",""); _sw_jj_h = _sw_gw.get("jj","")
     _oh_cg_sw = _HSM_CG_OH.get(_sw_cg_h,""); _oh_jj_sw = _HSM_JJ_OH.get(_sw_jj_h,"")
     _sw_is_yong = (bool(_oh_cg_sw and _oh_cg_sw in _yong_gw) or bool(_oh_jj_sw and _oh_jj_sw in _yong_gw))
-    _sw_is_gi   = (bool(_oh_cg_sw and _oh_cg_sw in _gis_gw)  or bool(_oh_jj_sw and _oh_jj_sw in _gis_gw))
+    _sw_is_gi   = (bool(_oh_cg_sw and _oh_cg_sw in _gisin_ohs_gw)  or bool(_oh_jj_sw and _oh_jj_sw in _gisin_ohs_gw))
     _sw_ss_clean_g = _sw_ss_gw.replace("(월덕)","").replace("(천덕)","").strip()
     _sw_is_gil_g   = _sw_ss_clean_g in {"食神","傷官","偏財","正財","偏印","正印","比肩"}
     _sw_kind_str = "용신 세운" if _sw_is_yong else ("기신 세운" if _sw_is_gi else "중성 세운")
