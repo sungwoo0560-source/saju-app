@@ -26950,6 +26950,10 @@ def menu_gaewoon(pils, name, birth_year, gender):
             _gis_gw = []
         # 오행 글자가 아닌 값 필터링
         _gis_gw = [g for g in _gis_gw if g in ["木","火","土","金","水"]]
+        # N2-b 커밋A: 처방(색상·방위·음식·소품·획수·직업) 10곳 전용 정확한 기신 오행.
+        # _gis_gw(구코드, "기신" 서술문 우연매칭)는 _bad_ilgans_gw(궁합, 별도판단)와
+        # _hsm_grade(등급판정, 커밋B)에서 그대로 참조하므로 여기서 바꾸지 않는다.
+        _gisin_ohs_gw = _ys_gw.get("종합_기신", []) if isinstance(_ys_gw.get("종합_기신",[]), list) else []
         _sw_gw       = get_yearly_luck(pils, get_saju_year())
         _sw_ss_gw    = _sw_gw.get("십성_천간", "")
         _sinsal_gw   = get_12sinsal(pils)
@@ -27119,8 +27123,8 @@ def menu_gaewoon(pils, name, birth_year, gender):
     _TOP5_GW = []
     if _sinsal_gw:
         _TOP5_GW.append(f"{_sinsal_gw[0].get('이름','신살')} 발동 중 -- 해당 비방을 즉시 실행하십시오")
-    if _gis_gw:
-        _TOP5_GW.append(f"기신 {'/'.join(_gis_gw)} 오행 강화 차단 -- 기신 색상·음식·방위 즉각 제거")
+    if _gisin_ohs_gw:
+        _TOP5_GW.append(f"기신 {'/'.join(_gisin_ohs_gw)} 오행 강화 차단 -- 기신 색상·음식·방위 즉각 제거")
     _TOP5_GW.append(f"용신 {'/'.join(_yong_gw[:3]) if _yong_gw else '미산출'} 오행 보강 -- 색상·음식·소품 생활 침투")
     _TOP5_GW.append("재물 기운 누수 차단 -- 지갑 정리·불필요한 지출 즉각 중단")
     _TOP5_GW.append("귀인 기운 활성화 -- 사람을 만나고 새로운 모임에 참여하라")
@@ -27145,7 +27149,7 @@ def menu_gaewoon(pils, name, birth_year, gender):
         "동짓날 팥죽·새해 대청소는 묵은 기운을 정리하는 세시풍속으로 전해진다",
     ]
     _NEVER_GW = [
-        f"기신 {'/'.join(_gis_gw) if _gis_gw else '흉'} 색상으로 집 전체를 도배하지 마라 -- 기운이 역류한다",
+        f"기신 {'/'.join(_gisin_ohs_gw) if _gisin_ohs_gw else '흉'} 색상으로 집 전체를 도배하지 마라 -- 기운이 역류한다",
         "보증·연대보증은 절대 서지 마라 -- 이 팔자에는 반드시 후회가 따른다",
         "대운·세운이 흉한 해에 큰 투자·사업 확장·이직은 금물이니라",
     ]
@@ -27319,9 +27323,9 @@ def menu_gaewoon(pils, name, birth_year, gender):
         ("부정적인 말버릇", "'안 돼' '못 해' '힘들어' — 말이 현실을 만든다"),
         ("늦게 자고 늦게 일어나는 습관", "새벽 용신 기운을 놓쳐 홍수맥이 막힌다"),
         ("조상 제사·성묘 소홀", "음덕이 끊기면 하늘 흐름도 끊긴다 — 3대 음덕이 운명을 바꾼다"),
-        ("기신 방위에 침대·책상 배치", f"기신 방위: {', '.join(_DIR_MAP_GW.get(g,'') for g in _gis_gw if g in _DIR_MAP_GW) or '없음'} — 즉시 재배치"),
+        ("기신 방위에 침대·책상 배치", f"기신 방위: {', '.join(_DIR_MAP_GW.get(g,'') for g in _gisin_ohs_gw if g in _DIR_MAP_GW) or '없음'} — 즉시 재배치"),
         ("어두운·지저분한 집안 환경", "빛과 청결이 없는 공간엔 기운도 들어오지 않는다"),
-        ("기신 색상의 지갑·옷·침구 사용", f"기신 색: {'·'.join(_OH_RX_GW.get(g,{}).get('색상','').split('·')[0] for g in _gis_gw if g in _OH_RX_GW) or '없음'} — 즉시 교체"),
+        ("기신 색상의 지갑·옷·침구 사용", f"기신 색: {'·'.join(_OH_RX_GW.get(g,{}).get('색상','').split('·')[0] for g in _gisin_ohs_gw if g in _OH_RX_GW) or '없음'} — 즉시 교체"),
         ("용신과 반대되는 직업 유지", "천명에 거스르는 일은 홍수맥을 역류시킨다"),
         ("집안 물 새는 곳 방치", "수도·배관 누수는 재물·기운 누수와 직결된다"),
         ("거울·유리 깨진 채 방치", "깨진 거울은 기운의 균열 — 즉시 교체 또는 처분"),
@@ -27476,7 +27480,7 @@ def menu_gaewoon(pils, name, birth_year, gender):
     _badge_gi = "".join(
         f'<span style="background:#7f8c8d;color:#fff;border-radius:20px;'
         f'padding:4px 14px;font-size:13px;font-weight:700;margin-right:6px;">기신 {o}</span>'
-        for o in _gis_gw
+        for o in _gisin_ohs_gw
     )
     st.markdown(f'<div style="margin-bottom:14px;">{_badge_yong}{_badge_gi}</div>', unsafe_allow_html=True)
     st.markdown(
@@ -27538,10 +27542,10 @@ def menu_gaewoon(pils, name, birth_year, gender):
                 + "</div>"
             )
             st.markdown(_body_s1, unsafe_allow_html=True)
-        if _gis_gw:
+        if _gisin_ohs_gw:
             _OH_KR_NAME = {"木":"木(나무)","火":"火(불)","土":"土(흙)","金":"金(쇠)","水":"水(물)"}
             _GI_HEX     = {"木":"#1e8449","火":"#c0392b","土":"#d4a017","金":"#7f8c8d","水":"#2980b9"}
-            for _goh_s1 in _gis_gw:
+            for _goh_s1 in _gisin_ohs_gw:
                 if _goh_s1 not in _GIS_RX:
                     continue
                 _grx_s1  = _GIS_RX[_goh_s1]
@@ -27607,7 +27611,7 @@ def menu_gaewoon(pils, name, birth_year, gender):
     # ── 섹션4: 풍수·이사 처방 ─────────────────────────────────────
     with st.expander("🏠 제4장 — 풍수·이사 처방", expanded=True):
         _yong_dirs_s4 = [_OH_RX_GW[o]["방위"] for o in _yong_gw if o in _OH_RX_GW]
-        _gis_dirs_s4  = [_OH_RX_GW[o]["방위"] for o in _gis_gw  if o in _OH_RX_GW]
+        _gis_dirs_s4  = [_OH_RX_GW[o]["방위"] for o in _gisin_ohs_gw  if o in _OH_RX_GW]
         _yong_cols_s4 = [_OH_RX_GW[o]["색상"] for o in _yong_gw if o in _OH_RX_GW]
         _yong_objs_s4 = [_OH_RX_GW[o]["물상"] for o in _yong_gw if o in _OH_RX_GW]
         _dir_html = (
@@ -27671,9 +27675,9 @@ def menu_gaewoon(pils, name, birth_year, gender):
                 + _row("추천 한자", _chars_s6)
             )
             _card(f"{_yoh_s6} 오행 개명 처방", _nm_html)
-        if _gis_gw:
+        if _gisin_ohs_gw:
             _gis_strokes_s6 = []
-            for _goh_s6 in _gis_gw:
+            for _goh_s6 in _gisin_ohs_gw:
                 _gis_strokes_s6.extend(_OH_STROKE_GW.get(_goh_s6,[])[:4])
             _card("개명 시 피해야 할 획수 (기신)",
                   _row("피할 획수", ', '.join(str(s) for s in _gis_strokes_s6[:10]) + "획", False))
@@ -27707,7 +27711,7 @@ def menu_gaewoon(pils, name, birth_year, gender):
         if _yong_gw:
             _y1_s8 = _yong_gw[0]
             _dir_str_s8, _dir_desc_s8 = _DIR_DETAIL_GW.get(_y1_s8, ("-","-"))
-            _bad_dirs_s8 = [_DIR_DETAIL_GW.get(g,("-",))[0] for g in _gis_gw if g in _DIR_DETAIL_GW]
+            _bad_dirs_s8 = [_DIR_DETAIL_GW.get(g,("-",))[0] for g in _gisin_ohs_gw if g in _DIR_DETAIL_GW]
             _move_mons_s8 = _MOVE_MON_GW.get(_y1_s8,[])
             _dir8_html = (
                 _row("이사 길한 방향", _dir_str_s8, True)
@@ -27758,9 +27762,9 @@ def menu_gaewoon(pils, name, birth_year, gender):
                 else:
                     st.warning(f"⚠️ 현재 직업 [{_occ_s9}] — 용신 직종으로 전환하거나 부업으로 병행하면 운이 올라갑니다.")
             # 피해야 할 직종 (기신 오행)
-            if _gis_gw:
+            if _gisin_ohs_gw:
                 _bad_job_html = "<b style='color:#c0392b;'>⚠ 피해야 할 직종 (기신 오행)</b><br>"
-                for _goh_s9 in _gis_gw:
+                for _goh_s9 in _gisin_ohs_gw:
                     if _goh_s9 in _BAD_JOB_GW:
                         _bad_job_html += (
                             f'<div style="padding:3px 0 3px 10px;color:#c0392b;">'
@@ -27873,9 +27877,9 @@ def menu_gaewoon(pils, name, birth_year, gender):
         _card("홍수맥 여는 처방", _rx12_html)
 
         # ── 기신 차단 요약 ────────────────────────────────────────
-        if _gis_gw:
-            _gi12_html = f"<b style='color:#c0392b;'>⛔ 기신 {' / '.join(_gis_gw)} 차단 핵심</b><br>"
-            for _goh12 in _gis_gw:
+        if _gisin_ohs_gw:
+            _gi12_html = f"<b style='color:#c0392b;'>⛔ 기신 {' / '.join(_gisin_ohs_gw)} 차단 핵심</b><br>"
+            for _goh12 in _gisin_ohs_gw:
                 if _goh12 in _GIS_RX:
                     _g12 = _GIS_RX[_goh12]
                     _gi12_html += (
