@@ -5962,7 +5962,7 @@ def build_saju_core_diagnosis(pils, name, birth_year, gender, current_year=None)
         try:
             _ys_b = get_yongshin(pils)
             if _ys_b:
-                _gishin_ohs = _ys_b.get("기신", [])
+                _gishin_ohs = _ys_b.get("종합_기신", [])
                 if isinstance(_gishin_ohs, list) and _gishin_ohs:
                     _cur_jj_oh = _OH_JJ.get(cur_jj, "")
                     _gishin_year = bool(_cur_jj_oh and _cur_jj_oh in _gishin_ohs)
