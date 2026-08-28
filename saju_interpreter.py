@@ -7880,6 +7880,11 @@ def get_yongshin(pils):
 
         kihwa = "인성/비겁 대운은 기신(忌神) - 더 강해져 흉작용"
 
+        # N2-a: 종합_기신(오행 리스트) — 신강은 인성+비겁이 기신.
+        # menu_current_situation L15430 fallback과 동일 공식(BIRTH_MAP_R 재사용), 계산 로직 무변경.
+        _kihwa_인 = BIRTH_MAP_R.get(ilgan_oh, "")
+        kihwa_ohs = [o for o in [_kihwa_인, ilgan_oh] if o]
+
     elif "신약" in sn:
         ok_인 = BIRTH_MAP_R.get(ilgan_oh, "")
 
@@ -7891,6 +7896,11 @@ def get_yongshin(pils):
 
         kihwa = "재성/관성 대운은 기신(忌神) - 약한 일간이 더 눌림"
 
+        # N2-a: 종합_기신 — 신약은 관성+재성이 기신. 동일 fallback 공식(CONTROL_MAP 재사용).
+        _kihwa_관 = next((k for k, v in CONTROL_MAP.items() if v == ilgan_oh), "")
+        _kihwa_재 = CONTROL_MAP.get(ilgan_oh, "")
+        kihwa_ohs = [o for o in [_kihwa_관, _kihwa_재] if o]
+
     else:
         eokbu_yong = []
 
@@ -7899,6 +7909,9 @@ def get_yongshin(pils):
         eokbu_desc = "오행이 균형 잡혀 특정 용신보다 전체 균형 유지가 중요합니다."
 
         kihwa = "어느 쪽으로도 과도하게 치우치는 운이 기신"
+
+        # N2-a: 중화는 특정 기신 오행 없음(fallback과 동일하게 빈 리스트 유지)
+        kihwa_ohs = []
 
     jokhu = YONGSHIN_JOKHU.get(wol_jj, {})
 
@@ -7981,6 +7994,7 @@ def get_yongshin(pils):
         "기신": kihwa,
         "희신": huisin,
         "종합_용신": all_yong,
+        "종합_기신": kihwa_ohs,
         "월지": wol_jj,
     }
 
