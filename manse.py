@@ -18592,7 +18592,7 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
         _cur_dw    = next((d for d in _daewoon if d["시작연도"] <= _cur_year <= d["종료연도"]), None)
         _cur_dw_ss = TEN_GODS_MATRIX.get(_ilgan, {}).get(_cur_dw["cg"], "-") if _cur_dw else "-"
         _sinsal    = get_12sinsal(pils) if pils else []
-        _gisin_ohs = _ys.get("기신", [])
+        _gisin_ohs = _ys.get("종합_기신", [])
         if not isinstance(_gisin_ohs, list): _gisin_ohs = []
 
         # 세운 십성 (한자만)
@@ -18657,8 +18657,9 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
         _sj = max(1, _sj)
 
         _sh = 7  # 건강
-        _gi_cnt8 = sum(1 for _p8 in pils if _p8.get("오행","") in _gisin_ohs)
-        if _gi_cnt8 >= 3: _sh = max(1, _sh - 2)
+        _pils_ohs8 = [OH.get(_p8.get("cg","")[:1],"") for _p8 in pils] + [_OH_JJ.get(_p8.get("jj",""),"") for _p8 in pils]
+        _gi_cnt8 = sum(1 for _oh8 in _pils_ohs8 if _oh8 in _gisin_ohs)
+        if _gi_cnt8 >= 6: _sh = max(1, _sh - 2)
         if _has_chung8: _sh = max(1, _sh - 2)
         if _has_baekho8: _sh = max(1, _sh - 3)
         _sh = min(10, _sh)
