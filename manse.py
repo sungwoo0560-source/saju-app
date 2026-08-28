@@ -18690,9 +18690,11 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
             else "편관 압박기 — 건강을 지키며 버티는 것 자체가 전략입니다." if "偏官" in _sw_ss_cg
             else "직업 기운 보통 — 현위치를 지키며 실력을 쌓는 시기입니다."
         )
+        _gi_oh_str8 = "·".join(_gisin_ohs[:2]) if _gisin_ohs else "해당"
         _health_1l = (
             "충+백호 겹침 — 수술·이동·신체 활동 시 평소보다 신경 쓰는 것이 좋습니다." if _has_chung8 and _has_baekho8
-            else "기신 오행 과다 — 해당 취약 장기(오행 기준)를 즉시 점검하십시오." if _gi_cnt8 >= 3
+            else "기신 오행 과다 — 해당 취약 장기(오행 기준)를 즉시 점검하십시오." if _gi_cnt8 >= 6
+            else f"원국에 기신 오행({_gi_oh_str8}) 기운이 일부 있습니다 — {_gi_oh_str8} 계열 장기가 상대적으로 약한 편입니다." if _gi_cnt8 >= 3
             else "충 발동 — 정기 검진과 과로 금지를 반드시 지키십시오." if _has_chung8
             else "건강 기운 양호 — 현재 생활 습관을 꾸준히 유지하십시오."
         )
