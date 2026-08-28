@@ -33430,7 +33430,7 @@ border-radius:14px;padding:16px 20px;margin:16px 0 6px">
         sc   = si_d.get("helper_score", 50)
         ys_d = get_yongshin(pils)
         yong_ohs = ys_d.get("종합_용신",[]) if isinstance(ys_d.get("종합_용신",[]),list) else yongshin
-        gi_ohs   = [o for o in ["木","火","土","金","水"] if o in str(ys_d.get("기신",""))]
+        gi_ohs   = ys_d.get("종합_기신",[]) if isinstance(ys_d.get("종합_기신",[]),list) else []
         gk  = get_gyeokguk(pils)
         gkn = gk["격국명"] if gk else "미정격"
         # _il_sinsal_names는 위에서 이미 정의됨
@@ -33593,7 +33593,7 @@ border-radius:14px;padding:16px 20px;margin:16px 0 6px">
     try:
         _ys7 = get_yongshin(pils)
         _yong7 = _ys7.get("종합_용신",[]) if isinstance(_ys7.get("종합_용신",[]),list) else []
-        _gi7   = [o for o in ["木","火","土","金","水"] if o in str(_ys7.get("기신",""))]
+        _gi7   = _ys7.get("종합_기신",[]) if isinstance(_ys7.get("종합_기신",[]),list) else []
 
         # 용신별 완전 비방 처방
         _BIHANG_FULL = {
@@ -33727,7 +33727,7 @@ border-radius:12px;padding:18px;margin-bottom:16px'>
         # 기신 차단 핵심만
         if _gi7:
             st.markdown(f"""<div style='background:#fff5f5;border:2px solid #e53935;border-radius:12px;padding:16px;margin-top:8px'>
-<div style='font-size:14px;font-weight:900;color:#c0392b;margin-bottom:10px'>🚫 기신({", ".join(_gi7)}) 완전 차단 처방 — 이것만 안 해도 손해가 반으로 준다</div>""",
+<div style='font-size:14px;font-weight:900;color:#c0392b;margin-bottom:10px'>🚫 기신({"·".join(_gi7)}) 완전 차단 처방 — 이것만 안 해도 손해가 반으로 준다</div>""",
                 unsafe_allow_html=True)
             _GI_BLOCK = {
                 "木": "초록색 인테리어·동쪽 방향 이사 피하기. 봄에 중요 계약·투자 금지. 나무 소품 집에 과도하게 두지 말 것.",
