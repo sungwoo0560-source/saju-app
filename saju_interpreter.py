@@ -7861,7 +7861,13 @@ def get_yongshin(pils):
 
     CONTROL_MAP = {"木": "土", "火": "金", "土": "水", "金": "木", "水": "火"}
 
-    if sn == "신강(身强)":
+    # N4-a: sn exact-match 버그 교정(manse.py L12813 전례와 동일 패턴) — get_ilgan_strength는
+    # 5단계("극신강(極身强)"/"신강(身强)"/"중화(中和)"/"신약(身弱)"/"극신약(極身弱)")를
+    # 반환하는데 기존엔 "신강(身强)"/"신약(身弱)"과 정확히 같을 때만 잡혀 극신강·극신약
+    # (합 39.16%)이 전부 else(중화 취급, 억부용신 없음)로 새고 있었다. "신강"/"신약"
+    # 부분일치로 바꾸면 극신강·극신약도 함께 잡히고, 중화는 어느 쪽도 아니라 그대로
+    # else로 남는다. 억부용신 계산식 자체는 무변경 — 분기 조건만 교정.
+    if "신강" in sn:
         ok_관 = next((k for k, v in CONTROL_MAP.items() if v == ilgan_oh), "")
 
         ok_재 = CONTROL_MAP.get(ilgan_oh, "")
@@ -7874,7 +7880,7 @@ def get_yongshin(pils):
 
         kihwa = "인성/비겁 대운은 기신(忌神) - 더 강해져 흉작용"
 
-    elif sn == "신약(身弱)":
+    elif "신약" in sn:
         ok_인 = BIRTH_MAP_R.get(ilgan_oh, "")
 
         eokbu_yong = [ok_인, ilgan_oh]
