@@ -25778,7 +25778,7 @@ def menu14_health(pils, name, birth_year, gender):
                         unsafe_allow_html=True)
             _oh_nm = {"木":"목(木)","火":"화(火)","土":"토(土)","金":"금(金)","水":"수(水)"}
             for _oh, _val in sorted(oh_strength.items(), key=lambda x: -x[1]):
-                if _val >= 30:
+                if _val >= 35:
                     _tag = f"🔴 {_oh_nm.get(_oh,_oh)} 과다({_val}%)"
                     _col = "#c0392b"
                 elif _val <= 10:
@@ -25794,9 +25794,14 @@ def menu14_health(pils, name, birth_year, gender):
                 )
 
         # 판단 기준: 과다 오행 + 부족 오행 + 세운 오행 교차
-        _target_oh = excess_oh if oh_strength[excess_oh] >= 30 else weak_oh
-        # NEW-5: 과다(>=30%) 시 EXCESS dict, 부족 시 기존 dict
-        _excess_mode = oh_strength.get(_target_oh, 0) >= 30
+        # 임계값 35로 통일(2026-08-29, ④): 임계30은 5,000표본(seed=42)의
+        # 92.94%가 과다 판정이라 사실상 상수였다(변별력 없음). 임계35는
+        # 76.58%로 변별력이 있고, 나머지 오행"과다" 판정 4곳(manse.py
+        # 7702/7748/9366/12728)이 이미 35를 쓰고 있어 여기만 30이면 같은
+        # 개념(오행 과다)이 함수마다 다르게 판정되는 불일치가 남는다.
+        _target_oh = excess_oh if oh_strength[excess_oh] >= 35 else weak_oh
+        # NEW-5: 과다(>=35%) 시 EXCESS dict, 부족 시 기존 dict
+        _excess_mode = oh_strength.get(_target_oh, 0) >= 35
         _oh_dict = _OH_DISEASE_EXCESS if _excess_mode else _OH_DISEASE
         _oh_data = _oh_dict.get(_target_oh, _OH_DISEASE["土"])
 
@@ -25859,7 +25864,7 @@ def menu14_health(pils, name, birth_year, gender):
             <div style='font-size:14px;font-weight:900;color:#1a5c2a;margin-bottom:10px'>
             🎯 집중 관리 장기: {_oh_rx["organ"]}</div>
             <div style='font-size:13px;color:#333;line-height:2.0;'>
-            {"🔺 " + _oh_rx["excess"] if oh_strength.get(_target_oh, 0) >= 30 else "🔻 " + _oh_rx["lack"]}<br><br>
+            {"🔺 " + _oh_rx["excess"] if oh_strength.get(_target_oh, 0) >= 35 else "🔻 " + _oh_rx["lack"]}<br><br>
             🍱 <b>추천 식품:</b> {_oh_rx["food"]}<br>
             🚫 <b>반드시 피할 것:</b> {_oh_rx["avoid"]}<br>
             🏥 <b>지금 바로 받아야 할 검사:</b> {_oh_rx["check"]}
