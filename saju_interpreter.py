@@ -7928,12 +7928,28 @@ def get_yongshin(pils):
         t2, v2 = oh_list[1]
 
         if v1 >= 35 and v2 >= 25:
-            if CONTROL_MAP.get(t1) == t2 or CONTROL_MAP.get(t2) == t1:
+            # 통관 방향 교정(#15, 2026-08-29): 통관은 "극하는 쪽"의 기운을
+            # 설(洩)해 극받는 쪽으로 흘려보내는 것이다 — 예: 土剋水면
+            # 土生金, 金生水로 이어지는 金이 통관오행이다(극하는 土가
+            # 생하는 오행). 기존엔 오행세력 순위(v1/v2, 1위=t1)만 보고
+            # 항상 gen_map[t1]을 썼는데, t2가 t1을 극하는 경우(세력은
+            # t1이 세도 상극방향은 t2->t1)에도 그대로 gen_map[t1]을 써서
+            # 극받는 쪽 기준으로 계산해 방향이 반대였다(발동표본의
+            # 48.85%가 이 경우, 5,000표본측정). 판정기준은 세력순위가
+            # 아니라 오행 상극관계(누가 극하는가)여야 한다.
+            if CONTROL_MAP.get(t1) == t2:
+                _geuk_ju, _geuk_bat = t1, t2  # t1이 t2를 극함
+            elif CONTROL_MAP.get(t2) == t1:
+                _geuk_ju, _geuk_bat = t2, t1  # t2가 t1을 극함
+            else:
+                _geuk_ju = None
+
+            if _geuk_ju:
                 gen_map = {"木": "火", "火": "土", "土": "金", "金": "水", "水": "木"}
 
-                tongkwan_yong = gen_map.get(t1, "")
+                tongkwan_yong = gen_map.get(_geuk_ju, "")
 
-                tongkwan_desc = f"{t1}({OHN.get(t1, '')})와 {t2}({OHN.get(t2, '')})가 충돌. {tongkwan_yong}({OHN.get(tongkwan_yong, '')}) 통관용신 필요."
+                tongkwan_desc = f"{_geuk_ju}({OHN.get(_geuk_ju, '')})이(가) {_geuk_bat}({OHN.get(_geuk_bat, '')})을(를) 극해 충돌. {tongkwan_yong}({OHN.get(tongkwan_yong, '')}) 통관용신으로 소통시켜야 합니다."
 
     # ── 1차 억부, 2차 조후 우선순위 로직 ──────────────────
     # 극열(巳午未) / 극한(亥子丑) 월은 조후가 억부보다 우선
