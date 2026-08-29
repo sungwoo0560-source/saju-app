@@ -23045,9 +23045,10 @@ def menu8_bihang(pils, name, birth_year, gender):
     if not isinstance(yongshin_ohs, list):
         yongshin_ohs = []
 
-    gishin_raw = ys.get("기신", "")
+    gishin_ohs = ys.get("종합_기신", [])
 
-    gishin_ohs = [o for o in ["木", "火", "土", "金", "水"] if o in str(gishin_raw)]
+    if not isinstance(gishin_ohs, list):
+        gishin_ohs = []
 
     ilgan_oh = OH.get(ilgan, "")
 
@@ -23703,7 +23704,7 @@ def menu8_bihang(pils, name, birth_year, gender):
     try:
         _ys3 = get_yongshin(pils)
         _yong3 = _ys3.get("종합_용신",[]) if isinstance(_ys3.get("종합_용신",[]),list) else []
-        _gi3 = [o for o in ["木","火","土","金","水"] if o in str(_ys3.get("기신",""))]
+        _gi3 = _ys3.get("종합_기신", []) if isinstance(_ys3.get("종합_기신",[]), list) else []
         _OH3 = _OH_CG
         _good_m, _bad_m = [], []
         for _m3 in range(1,13):
