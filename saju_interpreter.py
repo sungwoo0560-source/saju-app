@@ -8803,7 +8803,11 @@ def get_yongshin_multilayer(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0, 
     yong_list = ys.get("종합_용신", []) if isinstance(ys.get("종합_용신"), list) else []
     ilgan = pils[1]["cg"]
     ilgan_oh = OH.get(ilgan, "")
-    BIRTH = {"木": "火", "火": "土", "土": "金", "金": "水", "水": "木"}
+    # 희신 방향버그 교정(2026-08-29): 정방향(설기방향)이던 BIRTH를 역방향
+    # (용신을 생해주는 오행, _BIRTH_R과 동일값)으로 교체. manse.py 버전이
+    # from saju_interpreter import *로 shadow되어 실제 사용되지만, 두 곳
+    # 모두 동일하게 맞춰둔다.
+    BIRTH = {"木": "水", "火": "木", "土": "火", "金": "土", "水": "金"}
     CTRL  = {"木": "土", "火": "金", "土": "水", "金": "木", "水": "火"}
     base_yong = yong_list[0] if yong_list else ""
     hee_shin = BIRTH.get(base_yong, "")
