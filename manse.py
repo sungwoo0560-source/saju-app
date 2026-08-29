@@ -18476,7 +18476,7 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
         st.warning(f"Y-9-A 운명 코드 박스 로드 실패: {_e_y9a}")
 
     # ════════════════════════════════════════════
-    # JEOKJUNG-4 : 적중 박스 4종 (광고 진입자용)
+    # JEOKJUNG-4 : 적중 박스 7종 (광고 진입자용)
     # ════════════════════════════════════════════
     try:
         from saju_interpreter import (

@@ -13675,10 +13675,11 @@ def get_monthly_timing(pils, birth_year, gender, target_year=None, focus="재물
 
 
 # ════════════════════════════════════════════════════════════
-# JEOKJUNG-4 : 적중 박스 4종 (직장/건강/횡재/귀인)
+# JEOKJUNG-4 : 적중 박스 7종 (직장/건강/횡재/귀인/이성인연/결혼/자녀)
 # 광고 진입자 첫 화면 임팩트용 — 계산 결과만 읽어 텍스트 생성
 # ════════════════════════════════════════════════════════════
 
+# 톤 라운드 M-T1-d(2026-08-30) — 예측 단정 제거, 구조 서술 전환
 def get_jeokjung_job(yukjin_list, ilgan_strength, pils):
     """십성 분포 + 일간 강약으로 직장/사업 적중 박스 반환.
     반환: dict {title, line1, line2, line3}
@@ -13735,11 +13736,12 @@ def get_jeokjung_job(yukjin_list, ilgan_strength, pils):
         title = "💼 당신은 지금 — 자리 잡는 중입니다"
         line1 = "특정 십성이 압도하지 않는 균형 구조."
         line2 = "어디든 적응 가능하지만, 한 방향을 못 정해 흔들립니다."
-        line3 = "결단할 시기 — 미루면 30대 후반에 다시 흔들립니다."
+        line3 = "결단할 시기 — 미루면 다시 흔들립니다."
 
     return {"title": title, "line1": line1, "line2": line2, "line3": line3}
 
 
+# 톤 라운드 M-T1-d(2026-08-30) — 예측 단정 제거, 구조 서술 전환
 def get_jeokjung_health(oh_cnt, pils, sinsal_list):
     """오행 부족/과다 + 충형 + 백호/양인으로 신체 부위 적중 박스 반환.
     반환: dict {title, line1, line2, line3}
@@ -13789,15 +13791,16 @@ def get_jeokjung_health(oh_cnt, pils, sinsal_list):
         else:
             line2 = "큰 병 아닙니다. 그런데 — 신호는 계속 옵니다."
         if has_baekho:
-            line3 = "⚠️ 백호살까지 박혀있어 — 수술수·사고수 한 번은 옵니다. 검진 미루지 마세요."
+            line3 = "⚠️ 백호살까지 박혀있어 — 수술수·사고수 옵니다. 검진 미루지 마세요."
         elif has_yangin:
             line3 = "⚠️ 양인까지 박혀있어 — 칼·쇠·날 조심. 운전·작업 주의."
         else:
-            line3 = "검진 한 번 받으세요. 미루면 40대에 터집니다."
+            line3 = "검진 한 번 받으세요. 미루면 터집니다."
 
     return {"title": title, "line1": line1, "line2": line2, "line3": line3}
 
 
+# 톤 라운드 M-T1-d(2026-08-30) — 예측 단정 제거, 구조 서술 전환
 def get_jeokjung_windfall(yukjin_list, daeun_list, birth_year):
     """편재 유무 + 과거 대운 재성 시기로 목돈 적중 박스 반환.
     반환: dict {title, line1, line2, line3}
@@ -13839,13 +13842,13 @@ def get_jeokjung_windfall(yukjin_list, daeun_list, birth_year):
             yrs = ", ".join(str(y) for y in hit_years[:3])
             line2 = f"{yrs}년 즈음 — 목돈 들어왔거나 큰 거래 있었을 겁니다."
         else:
-            line2 = "30대 중후반 이후 — 첫 큰 돈이 들어옵니다."
+            line2 = "첫 큰 돈이 들어옵니다."
         line3 = "단, 지키는 능력이 약해 — 들어온 만큼 새기 쉽습니다. 부동산으로 묶으세요."
     elif jung_jae >= 1 or pyun_jae >= 1:
         title = "💰 당신은 — 꾸준히 모으는 타입입니다"
         line1 = "재성이 있긴 한데 — 한 방형은 아닙니다."
         line2 = "월급·계약·꾸준한 수입 — 이게 당신 길입니다."
-        line3 = "주식·코인·도박 — 손대면 다 잃습니다. 본인 그릇 알고 사세요."
+        line3 = "주식·코인·도박 — 손대면 잃습니다. 본인 그릇 알고 사세요."
     else:
         title = "💰 당신은 — 돈보다 사람이 따르는 사주입니다"
         line1 = "재성이 약하거나 없습니다. 직접 돈 좇으면 빠져나갑니다."
@@ -13965,6 +13968,7 @@ def get_jeokjung_guiin(ilgan, pils, yukjin_list, cur_year=None, gongmang=None):
     return {"title": title, "line1": line1, "line2": line2, "line3": line3}
 
 
+# 톤 라운드 M-T1-d(2026-08-30) — 예측 단정 제거, 구조 서술 전환
 def get_jeokjung_affair(gender, ilgan, yukjin_list, sinsal_list, pils, marriage_status="미혼"):
     """성별 기반 이성 인연 적중 박스 반환. pils는 [시주,일주,월주,년주] 리스트.
     반환: dict {title, line1, line2, line3}
@@ -14029,18 +14033,18 @@ def get_jeokjung_affair(gender, ilgan, yukjin_list, sinsal_list, pils, marriage_
         if honjap and (has_dohwa or has_hongyeom):
             title = "💔 당신은 — 이성 인연이 끊이지 않는 사주입니다"
             line1 = "정재 + 편재 혼잡(混雜)에 도화·홍염까지 박혔습니다."
-            line2 = "결혼해도 — 본인이 마음 단속 안 하면 한 번은 흔들립니다."
-            line3 = "스쳐가는 인연 많습니다. 한 번 사고 나면 가정 무너집니다."
+            line2 = "결혼해도 — 본인이 마음 단속 안 하면 흔들립니다."
+            line3 = "스쳐가는 인연 많습니다. 사고 나면 가정이 흔들립니다."
         elif honjap:
             title = "💔 당신은 — 여자 인연이 복잡한 사주입니다"
             line1 = "재성혼잡 — 본처 외에도 마음 가는 사람 생기는 구조."
             line2 = "한 사람에게 정착하기 어려운 사주입니다."
-            line3 = "조심하지 않으면 — 40대에 한 번 흔들립니다."
+            line3 = "재성혼잡 구조라 조심하지 않으면 흔들리는 시기가 옵니다."
         elif pyun_jae >= 2 and (has_dohwa or has_hongyeom):
             title = "💔 당신은 — 이성 인연이 끊이지 않는 사주입니다"
             line1 = "편재 多 + 도화/홍염. 인기와 흔들림이 모두 강한 구조."
-            line2 = "결혼 후에도 다른 여자가 계속 다가옵니다."
-            line3 = "마음 단속 안 하면 — 가정 위험. 본인이 가장 큰 변수."
+            line2 = "결혼 후에도 다른 여자가 다가오는 편입니다."
+            line3 = "마음 단속 안 하면 — 가정이 흔들립니다. 본인이 가장 큰 변수."
         elif jung_jae >= 2 and (has_dohwa or has_hongyeom):
             title = "💔 당신은 — 인기 많은 안정형 사주입니다"
             line1 = "정재 多 + 도화. 매력 강하지만 본인은 한 사람."
@@ -14055,17 +14059,17 @@ def get_jeokjung_affair(gender, ilgan, yukjin_list, sinsal_list, pils, marriage_
             title = "💔 당신은 — 이성에게 인기 많은 사주입니다"
             line1 = "도화·홍염 박힘 — 나이 들어도 매력 유지됩니다."
             line2 = "여자가 먼저 다가오는 케이스 많을 겁니다."
-            extra = " 특히 시지 도화 — 말년 마음 단속 필수." if sigi_dohwa else ""
+            extra = " 특히 시지 도화 — 말년 마음 단속이 중요합니다." if sigi_dohwa else ""
             line3 = "본인이 자제하면 그저 인기 많은 사람으로 끝납니다." + extra
         elif jae_total == 0:
             title = "💔 당신은 — 여자 인연이 약한 사주입니다"
             line1 = "무재(無財) 구조. 이성에 큰 욕심 없고 인연도 늦습니다."
             line2 = "결혼해도 — 정 표현이 서툴러 배우자가 답답해 합니다."
-            line3 = "오히려 외도 가능성은 낮습니다. 그게 본인 강점."
+            line3 = "오히려 무재(無財) 구조라 이성 문제로 흔들릴 일이 적은 편입니다. 그게 본인 강점."
         else:
             title = "💔 당신은 — 한 사람에게 충실한 사주입니다"
             line1 = "재성이 안정적 — 한 번 정한 사람 끝까지 가는 구조."
-            line2 = "외도 가능성 낮습니다."
+            line2 = "재성이 안정적이라 한눈파는 일이 적은 편입니다."
             line3 = "단, 표현 부족 — 배우자가 무관심으로 느낄 수 있음."
     else:
         gwan_total = pyun_gwan + jung_gwan
@@ -14075,17 +14079,17 @@ def get_jeokjung_affair(gender, ilgan, yukjin_list, sinsal_list, pils, marriage_
             title = "💔 당신은 — 이성 인연이 끊이지 않는 사주입니다"
             line1 = "정관 + 편관 혼잡에 도화·홍염까지. 인기와 갈등 둘 다 강함."
             line2 = "남자가 끊이지 않습니다. 단, 정착이 어려운 구조."
-            line3 = "결혼 전 신중하게 — 한 번 흔들리면 두 번 옵니다."
+            line3 = "결혼 전 신중하게 — 흔들리면 다시 옵니다."
         elif honjap:
             title = "💔 당신은 — 남자 인연이 복잡한 사주입니다"
             line1 = "관성혼잡 — 한 사람에게 정 붙이기 어렵습니다."
             line2 = "본남 외에도 마음 가는 사람 등장하는 구조."
-            line3 = "조심하지 않으면 — 40대에 한 번 흔들립니다."
+            line3 = "관성혼잡 구조라 조심하지 않으면 흔들리는 시기가 옵니다."
         elif pyun_gwan >= 2 and (has_dohwa or has_hongyeom):
             title = "💔 당신은 — 이성 인연이 끊이지 않는 사주입니다"
             line1 = "편관 多 + 도화/홍염. 매력 강한 만큼 흔들림도 많은 구조."
             line2 = "결혼 후에도 다른 인연이 계속 다가옵니다."
-            line3 = "본인 마음 단속 안 하면 — 한 번은 반드시 흔들립니다."
+            line3 = "본인 마음 단속 안 하면 — 한 번은 흔들립니다."
         elif jung_gwan >= 2 and (has_dohwa or has_hongyeom):
             title = "💔 당신은 — 인기 많은 안정형 사주입니다"
             line1 = "정관 多 + 도화. 매력 강하지만 본인은 한 사람 선택."
@@ -14099,7 +14103,7 @@ def get_jeokjung_affair(gender, ilgan, yukjin_list, sinsal_list, pils, marriage_
         elif jung_gwan >= 2 and pyun_gwan == 0:
             title = "💔 당신은 — 안정형 남편 만나는 사주입니다"
             line1 = "정관 多 — 책임감 있고 성실한 남자 인연."
-            line2 = "관계 안정적이고 외도 가능성 매우 낮음."
+            line2 = "정관이 안정적으로 자리 잡아 관계가 안정적인 편입니다."
             line3 = "단, 본인이 답답해 할 수 있음 — 표현이 무딘 남편."
         elif sik >= 3 and gwan_total <= 1:
             title = "💔 당신은 — 남편이 답답해할 사주입니다"
@@ -14115,23 +14119,23 @@ def get_jeokjung_affair(gender, ilgan, yukjin_list, sinsal_list, pils, marriage_
             title = "💔 당신은 — 남자에게 인기 많은 사주입니다"
             line1 = "도화·홍염 박힘 — 나이 들어도 매력 유지됩니다."
             line2 = "남자가 먼저 다가오는 케이스 많을 겁니다."
-            extra = " 특히 시지 도화 — 말년 마음 단속 필수." if sigi_dohwa else ""
+            extra = " 특히 시지 도화 — 말년 마음 단속이 중요합니다." if sigi_dohwa else ""
             line3 = "본인이 자제하면 그저 인기 많은 사람으로 끝납니다." + extra
         elif gwan_total == 0:
             if marriage_status in ("기혼", "재혼"):
                 title = "💔 당신은 — 남편엔 시들, 밖엔 약한 무관 사주입니다"
                 line1 = "무관(無官) 구조 — 남편한텐 점점 시들, 밖에서 끌리는 사람엔 약합니다."
                 line2 = "독립적·일 몰두형 — 외로움 느낄 때가 진짜 함정."
-                line3 = "🚨 가정 밖 인연에 빠지면 돈·마음 다 퍼주고 빈손. 끌릴수록 차단이 답."
+                line3 = "🚨 가정 밖 인연에 빠지면 돈·마음 퍼주고 손해만 남습니다. 끌릴수록 차단이 답."
             else:
                 title = "💔 당신은 — 남자 인연이 약한 사주입니다"
                 line1 = "무관(無官) 구조. 남자에 큰 미련 없고 결혼도 늦습니다."
                 line2 = "독립적이고 본인 일에 몰두 — 그게 당신의 길."
-                line3 = "외도 가능성 낮습니다. 결혼 자체를 신중히."
+                line3 = "무관(無官) 구조라 이성 문제로 흔들릴 일이 적은 편입니다. 결혼 자체를 신중히."
         else:
             title = "💔 당신은 — 한 사람에게 충실한 사주입니다"
             line1 = "관성이 안정적 — 한 번 선택한 사람 끝까지 갑니다."
-            line2 = "외도 가능성 낮습니다."
+            line2 = "관성이 안정적이라 마음이 흔들리는 일이 적은 편입니다."
             line3 = "단, 남편이 무관심해지면 — 정 표현 부족이 원인."
 
     return {"title": title, "line1": line1, "line2": line2, "line3": line3}
