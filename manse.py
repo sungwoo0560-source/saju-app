@@ -23288,19 +23288,19 @@ def menu8_bihang(pils, name, birth_year, gender):
     except Exception:
         sinsal_list = []
 
-    BUDONG_SINSAL = ["백호살", "겁살", "귀문관살", "망신살"]
+    BUDONG_SINSAL = ["백호대살", "겁살", "귀문관살", "망신살"]
     detected = [s for s in BUDONG_SINSAL if any(s in item for item in sinsal_list)]
 
     if detected:
-        with st.expander("🔥 부동명왕(不動明王) 비방 — 흉살 제압 특급 처방", expanded=False):
+        with st.expander("🔥 부동명왕(不動明王) 비방 — 흉살 대응 민속 처방", expanded=False):
             st.markdown(
                 f"""
 <div style="background:linear-gradient(135deg,#1a0000,#2e0000);border:2px solid #ff4444;border-radius:14px;padding:20px;margin-bottom:16px">
-<div style="color:#ffaa00;font-size:12px;letter-spacing:3px;margin-bottom:6px">⚠️ 흉살 감지 — 부동명왕 긴급 처방</div>
+<div style="color:#ffaa00;font-size:12px;letter-spacing:3px;margin-bottom:6px">⚠️ 흉살 감지 — 민속 대응법 안내</div>
 <div style="color:#fff;font-size:16px;font-weight:900;margin-bottom:10px">🔥 부동명왕(不動明王) 비방록</div>
 <div style="color:#ffcccc;font-size:13px;line-height:2">
 감지된 흉살: <b style="color:#ff6666">{"&nbsp;·&nbsp;".join(detected)}</b><br>
-이 살들이 겹치면 사고수·구설수·배신이 따른다. 부동명왕의 화염으로 제압하라.
+민속에서는 이런 흉살이 겹치면 사고수·구설수·배신을 조심해야 한다고 전해지며, 예부터 부동명왕에게 이를 다스려달라고 기원해 왔습니다.
 </div>
 </div>
 <div style="background:#fff8f0;border-left:4px solid #ff6600;padding:16px;border-radius:8px;margin-bottom:14px">
@@ -23315,12 +23315,11 @@ def menu8_bihang(pils, name, birth_year, gender):
 <div style="background:#fff0f0;border:1px solid #e53935;border-radius:8px;padding:16px;margin-bottom:14px">
 <div style="font-size:14px;font-weight:900;color:#b71c1c;margin-bottom:10px">🏛️ 전통 기도법 (참고)</div>
 <div style="font-size:13px;color:#222;line-height:2.1">
-① 새벽 3시~5시 사이, 남동쪽을 향해 앉아라.<br>
-② 붉은 초 1쌍을 켜고 향을 피워라.<br>
-③ "나무부동명왕(南無不動明王)"을 108번 외워라.<br>
-④ 외울 때마다 손가락을 꺾어 세고, 끝나면 절 3번.<br>
-⑤ 초가 다 탈 때까지 그 자리를 지켜라.<br>
-<span style="color:#b71c1c;font-weight:900">⑥ 이것을 7일 연속 행하면 흉살의 기운이 꺾이기 시작한다.</span>
+① 새벽 3시~5시 사이, 남동쪽을 향해 앉는 방식으로 전해진다.<br>
+② 붉은 초 한 쌍을 켜고 향을 피우는 것이 관례다.<br>
+③ "나무부동명왕(南無不動明王)"을 108번 외우는 방식이다.<br>
+④ 외울 때마다 손가락을 꺾어 세고, 끝나면 절을 세 번 올린다.<br>
+⑤ 초가 다 탈 때까지 그 자리를 지키는 것으로 마무리한다.
 </div>
 </div>
 <div style="background:#1a1a2e;color:#f7e695;padding:14px 18px;border-radius:10px;font-size:13px;line-height:2;border:1px solid #d4af37">
