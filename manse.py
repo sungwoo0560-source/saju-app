@@ -15427,32 +15427,20 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
         sn       = sn_info.get("신강신약", "중화")
         ys_info  = get_yongshin(pils)
         yong_ohs = ys_info.get("종합_용신", [])
-        _gi_raw  = ys_info.get("기신", [])
-        # 기신이 문자열로 반환되는 경우 리스트로 변환
-        if isinstance(_gi_raw, list):
-            gi_ohs = _gi_raw
-        elif isinstance(_gi_raw, str) and _gi_raw:
-            # "木·火" 형태면 분리, 아니면 빈 리스트
-            gi_ohs = [x.strip() for x in _gi_raw.replace("·", ",").split(",") if x.strip() in ["木","火","土","金","水"]]
-        else:
+        # 기신 필드 오소비 교정(N2-b 사각지대): get_yongshin()의 "기신"은
+        # 서술형 문자열이고 오행 리스트는 "종합_기신"이다(saju_interpreter.py
+        # L7994/7997). 기존엔 "기신"(서술문자열)을 받아 파싱 실패 후 sn 기반
+        # 역산으로 fallback했는데, 그 fallback 공식이 "종합_기신" 계산식과
+        # 우연히 동일해 값 자체는 맞았지만(오답필드->파싱실패->우연일치 경로),
+        # 정답 필드를 직접 참조하도록 교정한다.
+        gi_ohs   = ys_info.get("종합_기신", [])
+        if not isinstance(gi_ohs, list):
             gi_ohs = []
-        # 기신이 서술형 문자열(오행 없음)인 경우 → sn으로 역산
-        if not gi_ohs and isinstance(_gi_raw, str) and _gi_raw:
-            _ilgan_oh2 = _OH_CG.get(ilgan, "")
-            _BMRV2 = {"木":"水","火":"木","土":"火","金":"土","水":"金"}
-            _CTLV2 = {"木":"土","火":"金","土":"水","金":"木","水":"火"}
-            if "신강" in sn and _ilgan_oh2:
-                _ok_인2 = _BMRV2.get(_ilgan_oh2, "")
-                gi_ohs = [o for o in [_ok_인2, _ilgan_oh2] if o]
-            elif "신약" in sn and _ilgan_oh2:
-                _ok_관2 = next((k for k, v in _CTLV2.items() if v == _ilgan_oh2), "")
-                _ok_재2 = _CTLV2.get(_ilgan_oh2, "")
-                gi_ohs = [o for o in [_ok_관2, _ok_재2] if o]
-            # 중화(中和): 특정 기신 없음 → gi_ohs 빈 리스트 유지
         yong_str = "·".join(yong_ohs[:2]) if yong_ohs else ""
         gi_str   = "·".join(gi_ohs[:1]) if gi_ohs else ""
     except Exception:
         ilgan = "甲"; iljj = "子"; sn = "중화"; yong_str = ""; gi_str = ""
+        yong_ohs = []; gi_ohs = []
 
     # 용신보정: 세운 오행이 용신이면 sw_gil='길', 기신이면 '흉'
     # 신강/신약인데 용신·기신 어디에도 안 속하는 오행(주로 식상)은
@@ -16550,14 +16538,39 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                 # 실무서도 1~3년으로 유파차 큼). "교체가 가까울수록 체감이 크다"는 정성적으로
                 # 맞고 구간 분할로는 기능하므로 구조는 유지, 근거 없음만 기록해둔다.
                 if _years_left2 <= 3:
-                    _danger_signals.append((f"⚠️ 대운 교체 {_years_left2}년 전 — 지금이 가장 혼란스럽습니다",
-                        f"현재 대운이 {_years_left2}년 후면 바뀝니다. "
-                        f"다음 대운은 {_next_cg2}{_next_jj2} 대운입니다. "
-                        f"대운 교체 전후 1~3년은 사주에서 가장 불안정한 구간입니다. "
-                        f"직업·거주지·인간관계가 동시에 흔들리는 것처럼 느껴집니다. "
-                        f"이 시기에 충동적으로 내린 결정은 대부분 후회로 이어집니다. "
-                        f"대운이 완전히 바뀐 후 1~2년을 기다렸다가 새로운 결정을 내리십시오. "
-                        f"지금의 혼란은 새로운 10년을 준비하는 진통입니다.", "주의"))
+                    # #19: 다가올 대운의 용신/기신 여부에 따라 문구·태그를 분기한다
+                    # (get_yongshin() 기준, N2-b 통일 원칙에 맞춤). 용신·기신 오행이
+                    # 동시에 걸리는 표본(159건/10.75%, 종합_용신이 억부+조후+통관+병약
+                    # 합집합이라 오행을 최대 4개까지 담는 구조에서 발생)은 용신을
+                    # 우선한다. 여러 축 중 하나가 기신에도 겹친다는 건 "해롭다"가
+                    # 아니라 축마다 답이 갈린다는 뜻이고(조후로는 필요한데 억부로는
+                    # 과한 경우 등), 종합_용신은 그 축들을 종합해 "쓸 것"으로 뽑은
+                    # 결론인 반면 종합_기신은 그 반대편을 역산한 파생값이라 충돌 시
+                    # 결론(용신)을 따른다. "위험 신호를 놓치지 않는다"는 원칙은 이
+                    # 케이스에 맞지 않는다 — 놓치는 게 아니라 용신 대운이 오는 이
+                    # 159명에게 반대 방향(주의) 태그를 붙이는 것이 되고, 이 커밋의
+                    # 목적이 바로 그 반대 방향 태그를 없애는 것이기 때문이다.
+                    _next_oh2 = OH.get(_next_cg2, "")
+                    if _next_oh2 in yong_ohs:
+                        _danger_signals.append((f"🔵 대운 교체 {_years_left2}년 전 — 유리한 흐름으로의 전환이 다가옵니다",
+                            f"현재 대운이 {_years_left2}년 후면 바뀝니다. "
+                            f"다음 {_next_cg2}{_next_jj2} 대운은 지금 이 사주에 필요한 기운과 맞아떨어지는 흐름입니다. "
+                            f"교체 전후 1~2년은 새 흐름에 적응하는 시간이 필요하지만, 방향 자체는 나쁘지 않습니다. "
+                            f"지금부터 다음 대운에 맞춰 준비해두면 전환 이후를 훨씬 수월하게 맞이할 수 있습니다.", "참고"))
+                    elif _next_oh2 in gi_ohs:
+                        _danger_signals.append((f"⚠️ 대운 교체 {_years_left2}년 전 — 지금이 가장 혼란스러운 시기입니다",
+                            f"현재 대운이 {_years_left2}년 후면 바뀝니다. "
+                            f"다음 대운은 {_next_cg2}{_next_jj2} 대운으로, 지금의 기운과는 결이 다른 흐름입니다. "
+                            f"대운 교체 전후 1~3년은 사주에서 가장 불안정한 구간으로 여겨지며, "
+                            f"직업·거주지·인간관계가 동시에 흔들리는 것처럼 느껴질 수 있습니다. "
+                            f"이 시기의 충동적인 결정은 후회로 이어지기 쉬우니, "
+                            f"대운이 완전히 바뀐 후 1~2년을 기다렸다가 새로운 결정을 내리는 것이 좋습니다. "
+                            f"지금의 혼란은 새로운 10년을 준비하는 진통일 수 있습니다.", "주의"))
+                    else:
+                        _danger_signals.append((f"🔷 대운 교체 {_years_left2}년 전",
+                            f"현재 대운이 {_years_left2}년 후면 {_next_cg2}{_next_jj2} 대운으로 바뀝니다. "
+                            f"대운이 바뀌는 시기는 생활 전반의 흐름이 조금씩 달라지는 전환점입니다. "
+                            f"새로운 흐름에 맞춰 천천히 준비해두면 좋습니다.", "참고"))
                 elif _years_left2 <= 5:
                     _danger_signals.append((f"📅 대운 교체 {_years_left2}년 전 — 다음 10년을 준비하십시오",
                         f"{_years_left2}년 후 {_next_cg2}{_next_jj2} 대운으로 교체됩니다. "
@@ -33247,9 +33260,9 @@ border-radius:14px;padding:16px 20px;margin:16px 0 6px">
         # 원국 위험 요소 요약
         if _baekho_hits or _yangin_hits2 or _has_geop:
             _warn_items = []
-            if _baekho_hits: _warn_items.append(f"⚠️ 백호대살({', '.join(_baekho_hits)}) — 강한 에너지와 추진력의 기운이나, 충이 겹치는 해엔 사고·수술에 각별한 주의가 필요하다고 전해집니다")
-            if _yangin_hits2: _warn_items.append(f"⚠️ 양인살({_yangin_jj2}) — 칼을 든 듯한 강한 고집과 추진력의 기운. 편관 세운이 겹치는 시기엔 수술·사고에 각별한 주의가 필요합니다")
-            if _has_geop: _warn_items.append("⚠️ 겁살(원국) — 이동·변화가 잦은 기운. 겁재·편관 세운이 겹치는 시기엔 교통·이동 관련 사고에 주의가 필요합니다")
+            if _baekho_hits: _warn_items.append(f"백호대살({', '.join(_baekho_hits)}) — 강한 에너지와 추진력의 기운이나, 충이 겹치는 해엔 사고·수술에 각별한 주의가 필요하다고 전해집니다")
+            if _yangin_hits2: _warn_items.append(f"양인살({_yangin_jj2}) — 칼을 든 듯한 강한 고집과 추진력의 기운. 편관 세운이 겹치는 시기엔 수술·사고에 각별한 주의가 필요합니다")
+            if _has_geop: _warn_items.append("겁살(원국) — 이동·변화가 잦은 기운. 겁재·편관 세운이 겹치는 시기엔 교통·이동 관련 사고에 주의가 필요합니다")
             st.markdown(
                 "<div style='background:#fff0f0;border:1px solid #e53935;border-radius:8px;padding:12px;margin-top:8px'>"
                 "<div style='font-size:13px;font-weight:800;color:#c0392b;margin-bottom:6px'>🔴 원국에 새겨진 기질 — 다스리면 강점이 되는 패턴</div>"
