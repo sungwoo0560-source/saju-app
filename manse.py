@@ -28095,7 +28095,7 @@ def menu_gaewoon(pils, name, birth_year, gender):
         story.append(_sp(2))
         _OHN_PD = {"木":"목(木)","火":"화(火)","土":"토(土)","金":"금(金)","水":"수(水)"}
         story.append(Paragraph(_safe(f"용신(用神): {'·'.join([_OHN_PD.get(o,o) for o in _yong_gw]) if _yong_gw else '미산출'}"), _sSb))
-        story.append(Paragraph(_safe(f"기신(忌神): {'  '.join(_gis_gw) if _gis_gw else '없음'}"), _sSb))
+        story.append(Paragraph(_safe(f"기신(忌神): {'·'.join(_gisin_ohs_gw) if _gisin_ohs_gw else '없음'}"), _sSb))
         story.append(Paragraph(_safe(f"격국(格局): {_gkn_gw}"), _sSb))
         story.append(Paragraph(_safe(f"홍수맥 등급: {_hsm_grade} - {_hsm_text}"), _sSb))
         story.append(HRFlowable(width="100%", thickness=2.0, color=GOLD, spaceAfter=4*mm))
@@ -28118,9 +28118,9 @@ def menu_gaewoon(pils, name, birth_year, gender):
                 for _k in ["색상","방위","음식","보석","물상","시간","행동"]:
                     story.append(Paragraph(_safe(f"  {_k}: {_rx.get(_k,'')}"), _sI))
                 story.append(_sp(3))
-        if _gis_gw:
+        if _gisin_ohs_gw:
             story.append(Paragraph(_safe("[ 기신 오행 차단 처방 ]"), _sB))
-            for _goh in _gis_gw:
+            for _goh in _gisin_ohs_gw:
                 _grx_pdf = _GIS_RX.get(_goh)
                 if _grx_pdf:
                     story.append(Paragraph(_safe(f"  ▶ {_goh} 기신 차단"), _sWn))
@@ -28182,7 +28182,7 @@ def menu_gaewoon(pils, name, birth_year, gender):
         story.append(Paragraph(_safe("제4장  풍수·이사 처방 - 방위·집 배치법"), _sC))
         story.append(_hr())
         _yong_dirs_p = [_OH_RX_GW[o]["방위"] for o in _yong_gw if o in _OH_RX_GW]
-        _gis_dirs_p  = [_OH_RX_GW[o]["방위"] for o in _gis_gw  if o in _OH_RX_GW]
+        _gis_dirs_p  = [_OH_RX_GW[o]["방위"] for o in _gisin_ohs_gw  if o in _OH_RX_GW]
         _yong_cols_p = [_OH_RX_GW[o]["색상"] for o in _yong_gw if o in _OH_RX_GW]
         _yong_objs_p = [_OH_RX_GW[o]["물상"] for o in _yong_gw if o in _OH_RX_GW]
         story.append(Paragraph(_safe("[ 이사·사무실 방위 ]"), _sB))
@@ -28197,7 +28197,7 @@ def menu_gaewoon(pils, name, birth_year, gender):
         story.append(Paragraph(_safe(f"  - 현관: {', '.join(_yong_cols_p) or '용신 색상'} 계열 매트·소품 배치"), _sI))
         story.append(Paragraph(_safe(f"  - 거실: {', '.join(_yong_objs_p) or '용신 물상'} 소품으로 용신 기운 강화"), _sI))
         story.append(Paragraph(_safe(f"  - 침실: 머리를 {_yong_dirs_p[0] if _yong_dirs_p else '용신 방위'} 쪽으로 두고 취침"), _sI))
-        story.append(Paragraph(_safe(f"  - 기신 오행({', '.join(_gis_gw) or '없음'}) 색상 소품은 최소화하세요."), _sWn))
+        story.append(Paragraph(_safe(f"  - 기신 오행({'·'.join(_gisin_ohs_gw) or '없음'}) 색상 소품은 최소화하세요."), _sWn))
         story.append(Paragraph(_safe("  - 현관 양쪽 소금 단지 - 외부 나쁜 기운 차단 (매달 교체)"), _sI))
         story.append(Paragraph(_safe("  - 집 구석 참숯 배치 - 음기 정화 (3개월마다 교체)"), _sI))
         story.append(PageBreak())
@@ -28249,9 +28249,9 @@ def menu_gaewoon(pils, name, birth_year, gender):
                 story.append(Paragraph(_safe(f"  - 길한 획수: {'·'.join(str(s) for s in _strokes_6[:6])}획..."), _sI))
                 story.append(Paragraph(_safe(f"  - 추천 한자: {_chars_6}"), _sI))
                 story.append(_sp(3))
-        if _gis_gw:
+        if _gisin_ohs_gw:
             _gis_strokes_p = []
-            for _goh in _gis_gw:
+            for _goh in _gisin_ohs_gw:
                 _gis_strokes_p.extend(_OH_STROKE_GW.get(_goh,[])[:4])
             story.append(Paragraph(_safe("[ 개명 시 피해야 할 획수 - 기신 오행 ]"), _sB))
             story.append(Paragraph(_safe(f"  피할 획수: {', '.join(str(s) for s in _gis_strokes_p[:8])}획"), _sWn))
@@ -28285,7 +28285,7 @@ def menu_gaewoon(pils, name, birth_year, gender):
         if _yong_gw:
             _y1_dir = _yong_gw[0]
             _dir_str_8, _dir_desc_8 = _DIR_DETAIL_GW.get(_y1_dir,("-","-"))
-            _bad_dirs_8 = [_DIR_DETAIL_GW.get(g,("-",))[0] for g in _gis_gw if g in _DIR_DETAIL_GW]
+            _bad_dirs_8 = [_DIR_DETAIL_GW.get(g,("-",))[0] for g in _gisin_ohs_gw if g in _DIR_DETAIL_GW]
             _move_mons_8 = _MOVE_MON_GW.get(_y1_dir,[])
             story.append(Paragraph(_safe(f"[ {name}님 이사 처방전 ]"), _sB))
             story.append(Paragraph(_safe(f"  이사 길한 방향: {_dir_str_8}"), _sOk))
