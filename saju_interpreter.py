@@ -4646,8 +4646,20 @@ class LocalSajuNarrator:
         """격국·십성분포·신강신약 기반 사업/직장 적합도 점수화 (0~100) + 근거 문장.
         근거(_reasons_j)는 점수를 만드는 이 함수 안에서 함께 생성한다 — 점수와 근거가
         서로 다른 로직에서 나와 어긋나는 사고(C2.5 역전 786건)를 구조적으로 차단한다.
-        _gate_biz(C4, A안)는 점수 가산이 아니라 라벨 확정 단계에서만 쓰이는 플래그다:
-        식신생재+신강 이상이라도 인성이 식상을 억누르면(印剋食) 게이트를 걸지 않는다."""
+        _gate_biz(C4, A안)는 점수 가산이 아니라 라벨 확정 단계에서만 쓰이는 플래그다.
+        게이트 조건 3개(전부 AND, 2026-08-29 명문화 — gwanin_sangsaeng 제거 경위로
+        조건이 문서 밖에 방치되는 재발을 막기 위해 여기 전부 적는다):
+        1) sikshin_saengjae(식신생재, 월지통근/득령 포함) 성립
+        2) 신강(身强) 이상
+        3) 인성세력 < 식상세력(印剋食이 없음 — 인성이 식상을 억누르지 못해
+           식상이 재성으로 자유롭게 흐르는 구조)
+        예전엔 여기에 not gwanin_sangsaeng(관인상생 아님)도 AND로 걸려 있었으나
+        제거했다(2026-08-29) — 이 변수는 차단축으로 설계·검토된 적이 없고,
+        783cf06에서 삭제된 구 job_score 로직("관인상생=직장형+2점")의 잔존
+        계산식을 d4102d9가 A안 게이트를 만들 때 방치돼 있던 걸 그대로 끌어다
+        쓴 것이었다(조건3과 역할이 겹치지도 않는, 근거 없이 얹힌 조건). 명리적
+        으로도 정관+정인이 있다는 사실이 식신생재+신강인 사람의 사업 적성을
+        차단할 근거가 되지 않는다."""
         _biz_pts_j, _job_pts_j = 50, 50  # 기준 50점에서 시작
         _reasons_j = []
 
@@ -4656,10 +4668,32 @@ class LocalSajuNarrator:
         # 위해 쓰지 않고, 섹션2의 기존 조건식을 그대로 옮겨온다.
         _has_sik = any(s.get("cg_ss") in ["傷官(상관)","食神(식신)"] or s.get("jj_ss") in ["傷官(상관)","食神(식신)"] for s in ss_list)
         _has_jae = any(s.get("cg_ss") in ["偏財(편재)","正財(정재)"] or s.get("jj_ss") in ["偏財(편재)","正財(정재)"] for s in ss_list)
-        sikshin_saengjae = _has_sik and _has_jae
         _jg = any(s.get("cg_ss")=="正官(정관)" or s.get("jj_ss")=="正官(정관)" for s in ss_list)
         _ji = any(s.get("cg_ss")=="正印(정인)" or s.get("jj_ss")=="正印(정인)" for s in ss_list)
-        gwanin_sangsaeng = _jg and _ji
+
+        # 월지통근(득령) 조건 추가(saju-combo-precision, 2026-08-29): 십성이
+        # 힘을 쓰려면 월령을 얻어야 한다는 명리 근거로, "동시존재"만 보던
+        # 판정에 월지 지장간 통근 여부를 추가한다(3안 중 51%대로 가장 엄격히
+        # 걸러내고 라벨영향도 가장 큰 안 채택, 5,000표본seed=42 실측). 통근
+        # 판정은 기존 _has_ilgan_tonggeun(L13117)과 동일 로직을 월지 1곳으로
+        # 좁힌 것 — ss_list는 pils([시,일,월,년] 순서)를 calc_sipsung()이
+        # 그대로 순회해 만들므로 ss_list[2]["jj"]가 월지다(엔진 재계산 없음).
+        # 상관패인(C5)은 이미 세력비교를 하고 라벨에 미반영이라 이번 범위
+        # 밖. 인접(위치) 조건은 라벨영향 0.6%대로 리스크대비이득이 없어 보류.
+        _CG_OH_J = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
+                    "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
+        _CHILD_OH_J = {"木":"火","火":"土","土":"金","金":"水","水":"木"}  # 식상 오행
+        _GWAN_OH_J  = {"木":"金","火":"水","土":"木","金":"火","水":"土"}  # 관성 오행(일간을 극함)
+        _wolji_j = ss_list[2].get("jj", "") if len(ss_list) > 2 else ""
+        _wolji_jg_j = JIJANGGAN.get(_wolji_j, [])
+        _ilgan_oh_j = _CG_OH_J.get(ilgan, "")
+        _sik_oh_j = _CHILD_OH_J.get(_ilgan_oh_j, "")
+        _gwan_oh_j = _GWAN_OH_J.get(_ilgan_oh_j, "")
+        _sik_deukryeong = bool(_sik_oh_j) and any(OH.get(jg, "") == _sik_oh_j for jg in _wolji_jg_j)
+        _gwan_deukryeong = bool(_gwan_oh_j) and any(OH.get(jg, "") == _gwan_oh_j for jg in _wolji_jg_j)
+
+        sikshin_saengjae = _has_sik and _has_jae and _sik_deukryeong
+        gwanin_sangsaeng = _jg and _ji and _gwan_deukryeong
 
         # 격국 기반 보정 (⑧-3c A안: 建祿格은 가산 0으로 둔다 — 建祿格은 정의상
         # 월령 득세라 87.4%가 신강 계열이라 신강 보정(biz+10, 아래)을 이미 받는데
@@ -4715,7 +4749,7 @@ class LocalSajuNarrator:
         # (바로 아래)에만 쓰는 내부 변수다 — 조건식 자체는 이 함수 밖으로 절대
         # 내보내지 않는다(백로그①, SSOT 완성: 섹션2/11 중복 조건식 제거).
         _gate_biz = False
-        if not gwanin_sangsaeng and sikshin_saengjae and "신강" in sn:
+        if sikshin_saengjae and "신강" in sn:
             _CG_OH = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
                       "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
             _PARENT_OH = {"木":"水","火":"木","土":"火","金":"土","水":"金"}  # 인성 오행
