@@ -33247,12 +33247,12 @@ border-radius:14px;padding:16px 20px;margin:16px 0 6px">
         # 원국 위험 요소 요약
         if _baekho_hits or _yangin_hits2 or _has_geop:
             _warn_items = []
-            if _baekho_hits: _warn_items.append(f"⚠️ 백호대살({', '.join(_baekho_hits)}) — 원국에 사고·수술 기운 보유. 충 발동 해에 위험 2배")
-            if _yangin_hits2: _warn_items.append(f"⚠️ 양인살({_yangin_jj2}) — 원국에 칼날 기운. 편관 세운 겹치면 수술·사고 최고위험")
-            if _has_geop: _warn_items.append("⚠️ 겁살(원국) — 이동·교통 사고 기운 내재. 겁재·편관 세운에 주의")
+            if _baekho_hits: _warn_items.append(f"⚠️ 백호대살({', '.join(_baekho_hits)}) — 강한 에너지와 추진력의 기운이나, 충이 겹치는 해엔 사고·수술에 각별한 주의가 필요하다고 전해집니다")
+            if _yangin_hits2: _warn_items.append(f"⚠️ 양인살({_yangin_jj2}) — 칼을 든 듯한 강한 고집과 추진력의 기운. 편관 세운이 겹치는 시기엔 수술·사고에 각별한 주의가 필요합니다")
+            if _has_geop: _warn_items.append("⚠️ 겁살(원국) — 이동·변화가 잦은 기운. 겁재·편관 세운이 겹치는 시기엔 교통·이동 관련 사고에 주의가 필요합니다")
             st.markdown(
                 "<div style='background:#fff0f0;border:1px solid #e53935;border-radius:8px;padding:12px;margin-top:8px'>"
-                "<div style='font-size:13px;font-weight:800;color:#c0392b;margin-bottom:6px'>🔴 원국 위험 요소 (평생 조심해야 할 패턴)</div>"
+                "<div style='font-size:13px;font-weight:800;color:#c0392b;margin-bottom:6px'>🔴 원국에 새겨진 기질 — 다스리면 강점이 되는 패턴</div>"
                 + "".join(f"<div style='font-size:12px;color:#333;line-height:1.9'>{w}</div>" for w in _warn_items)
                 + "</div>",
                 unsafe_allow_html=True)
