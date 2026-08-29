@@ -8950,19 +8950,30 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
                         # ── 3. 격국·용신·기신 ────────────────────────────────
                         y = _sec("⚡ 3. 격국·용신·기신", y)
                         _jf_ys = get_yongshin(pils) or {}
-                        _jf_yn  = _jf_ys.get("종합_용신") or _jf_ys.get("용신") or []
-                        _jf_gi  = _jf_ys.get("종합_기신") or _jf_ys.get("기신") or []
+                        # or 단축평가 버그 교정(N2-b 사각지대): "종합_기신"이 정상적으로
+                        # 빈 리스트([])인 순수중화 표본에서 or가 falsy로 판단해 "기신"
+                        # (서술형 문자열, 예: "어느 쪽으로도 과도하게 치우치는 운이 기신")
+                        # 로 폴백돼 그 문장이 PDF에 그대로 노출됐다("용신" 키는 애초에
+                        # get_yongshin() 반환에 없어 무해했음). "종합_용신"/"종합_기신"만
+                        # isinstance로 안전하게 참조하고, 서술문 폴백을 제거한다.
+                        _jf_yn = _jf_ys.get("종합_용신")
+                        _jf_yn = _jf_yn if isinstance(_jf_yn, list) else []
+                        _jf_gi = _jf_ys.get("종합_기신")
+                        _jf_gi = _jf_gi if isinstance(_jf_gi, list) else []
                         from saju_interpreter import get_gyeokguk as _gk_jf
                         from saju_engine import get_ilgan_strength as _si_jf
                         _jf_gyeok = (_gk_jf(pils) or {}).get("격국명","")
                         _jf_shin  = (_si_jf(_jf_ilgan, pils) or {}).get("신강신약","")
-                        _jf_yns = "·".join(_jf_yn[:3]) if isinstance(_jf_yn, list) else str(_jf_yn)
-                        _jf_gis = "·".join(_jf_gi[:2]) if isinstance(_jf_gi, list) else str(_jf_gi)
-                        if not _jf_yns: _jf_yns = "水·木"
-                        if not _jf_gis: _jf_gis = "土·金"
                         y = _write(f"격국: {_jf_gyeok or '미분류'}  |  강약: {_jf_shin or '중화'}", y, size=10)
-                        y = _write(f"용신(用神): {_jf_yns} — 황금기를 여는 열쇠. 이 기운 대운에 전진하세요.", y, size=9)
-                        y = _write(f"기신(忌神): {_jf_gis} — 이 기운 강할 때 절대 무리 X.", y, size=9)
+                        # _jf_yns/_jf_gis(용신/기신 오행 표기 문자열)는 섹션13(행동지침)에서도
+                        # 재사용되므로 여기서 함께 만들어둔다. 빈 리스트면 빈 문자열 그대로 —
+                        # 폴백 문구를 만들지 않고, 소비처에서 조건부로 문장 자체를 스킵한다.
+                        _jf_yns = "·".join(_jf_yn[:3]) if _jf_yn else ""
+                        _jf_gis = "·".join(_jf_gi[:2]) if _jf_gi else ""
+                        if _jf_yn:
+                            y = _write(f"용신(用神): {_jf_yns} — 황금기를 여는 열쇠. 이 기운 대운에 전진하세요.", y, size=9)
+                        if _jf_gi:
+                            y = _write(f"기신(忌神): {_jf_gis} — 이 기운 강할 때 절대 무리 X.", y, size=9)
                         y -= 3*mm
 
                         # ── 4. 오행분포 ──────────────────────────────────────
@@ -9083,8 +9094,10 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
 
                         # ── 13. 행동지침 5가지 ───────────────────────────────
                         y = _sec("🎯 13. 지금 당장 해야 할 5가지", y)
-                        y = _write(f"① 용신 {_jf_yns} 매일 보강 — 색상·방향·음식 실천. 아는 것만으로는 바뀌지 않습니다.", y, size=10, color=(0.65,0.1,0.1))
-                        y = _write(f"② 기신 {_jf_gis} 강한 시기 — 보증·동업·투기·큰 지출 절대 X. 반드시 후회합니다.", y, size=10, color=(0.65,0.1,0.1))
+                        if _jf_yn:
+                            y = _write(f"① 용신 {_jf_yns} 매일 보강 — 색상·방향·음식 실천. 아는 것만으로는 바뀌지 않습니다.", y, size=10, color=(0.65,0.1,0.1))
+                        if _jf_gi:
+                            y = _write(f"② 기신 {_jf_gis} 강한 시기 — 보증·동업·투기·큰 지출 절대 X. 반드시 후회합니다.", y, size=10, color=(0.65,0.1,0.1))
                         y = _write(f"③ 길월에 중요 결정 집중 — 흉월에 큰 결정 내리면 100% 힘들어집니다.", y, size=10, color=(0.65,0.1,0.1))
                         y = _write(f"④ 용신 대운 황금기 — 이 10년을 놓치면 다음 황금기까지 기다려야 합니다.", y, size=10, color=(0.65,0.1,0.1))
                         y = _write(f"⑤ 위 분석을 출력해 매일 1번 읽으세요. 사주는 아는 것이 아닌 실천이 전부입니다.", y, size=10, color=(0.65,0.1,0.1))
@@ -25342,7 +25355,7 @@ def menu7_ai(pils, name, birth_year, gender):
 이름: {name} / 성별: {gender} / 생년: {birth_year}년
 일간: {_ilgan_e} / 격국: {_gy_e.get("격국명","?")} ({_gy_e.get("격의_등급","?") if _gy_e else "?"})
 신강신약: {_si_e.get("신강신약","?")} (점수: {_si_e.get("helper_score",50)})
-용신: {_ys_e.get("종합_용신",[])} / 기신: {_ys_e.get("기신",[])}
+용신: {_ys_e.get("종합_용신",[])} / 기신: {_ys_e.get("종합_기신",[])}
 현재 대운: {_cur_dw_e.get("str","?")} ({_cur_dw_e.get("시작연도","?")}~{_cur_dw_e.get("종료연도","?")})
 올해 세운: {_sw_e.get("세운","?")} [{_sw_e.get("십성_천간","?")}] {_sw_e.get("길흉","?")}
 사주 기둥: {" / ".join([f"{p.get('cg','?')}{p.get('jj','?')}" for p in pils])}
