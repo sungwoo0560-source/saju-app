@@ -14182,40 +14182,47 @@ def get_jeokjung_marriage(gender, ilgan, yukjin_list, sinsal_list, pils, marriag
 
     title = "💑 당신의 결혼 — 이런 사람·이런 시기입니다"
 
+    # 톤 라운드 M-T1-b(2026-08-29): 연령 단정("20대~40대", "초반/중반/후반/
+    # 중후반/초중반", "늦다/만혼", "적기") 전부 제거. 결혼운은 대운·세운의
+    # 관성/재성 흐름과 합·충으로 보는 것이지 원국 십성 개수로 연령을 산출
+    # 하지 않는다 — 원국은 인연의 성격·형태를 말할 뿐 시점을 특정하지
+    # 못한다. 시점 판단은 원국이 아니라 대운·세운 쪽으로 넘겼다. 횟수
+    # 단정("한 번")도 재혼·이혼 경험자와 어긋나 제거했다. 판정 조건식
+    # (혼잡/무재/무관 등)은 그대로 둔다.
     if is_male:
         honjap = (pyun_jae >= 1 and jung_jae >= 1)
         jae_total = pyun_jae + jung_jae
         if honjap:
             line1 = "재성혼잡 — 첫 결혼 후 변동 가능. 첫 결심 신중하게."
         elif jae_total == 0:
-            line1 = "무재(無財) — 결혼이 늦거나 만혼. 30대 후반 이후가 진짜 인연."
+            line1 = "무재(無財) — 결혼 인연이 서서히 찾아오는 기운입니다. 재성 대운·세운이 들어오는 시기에 인연이 뚜렷해집니다."
         elif jung_jae >= 2:
-            line1 = "정재 多 — 안정 추구형. 20대 후반~30대 초반 결혼 적기."
+            line1 = "정재 多 — 안정 추구형. 마음이 편안해지는 인연을 만나면 자연스럽게 결심하게 됩니다."
         elif pyun_jae >= 2:
-            line1 = "편재 多 — 자유연애·연상연하 다양. 30대 초중반 결혼 多."
+            line1 = "편재 多 — 자유연애·연상연하 등 다양한 인연이 따르는 기운입니다."
         elif pyun_jae == 1 and jung_jae == 0:
-            line1 = "편재 1개 — 큰 인연 한 번 또는 연상연하. 30대 중후반 결혼 가능."
+            line1 = "편재 1개 — 크게 다가오는 인연 또는 연상연하 인연이 있는 기운입니다."
         elif jung_jae == 1 and pyun_jae == 0:
-            line1 = "정재 1개 — 한 사람과 차근차근. 20대 후반~30대 초반 적기."
+            line1 = "정재 1개 — 한 사람과 차근차근 관계를 쌓아가는 기운입니다."
         else:
-            line1 = "재성 균형 — 본인이 결심하는 그 시기가 결혼 적기."
+            line1 = "재성 균형 — 본인이 마음을 정하는 순간이 곧 결혼의 때입니다."
     else:
         honjap = (pyun_gwan >= 1 and jung_gwan >= 1)
         gwan_total = pyun_gwan + jung_gwan
         if honjap:
             line1 = "관성혼잡 — 첫 결혼 후 변동 가능. 첫 결심 신중하게."
         elif gwan_total == 0:
-            line1 = "무관(無官) — 결혼이 늦거나 만혼. 30대 중반 이후가 진짜 인연."
+            line1 = "무관(無官) — 결혼 인연이 서서히 찾아오는 기운입니다. 관성 대운·세운이 들어오는 시기에 인연이 뚜렷해집니다."
         elif jung_gwan >= 2:
-            line1 = "정관 多 — 안정 추구형. 20대 후반~30대 초반 결혼 적기."
+            line1 = "정관 多 — 안정 추구형. 마음이 편안해지는 인연을 만나면 자연스럽게 결심하게 됩니다."
         elif pyun_gwan >= 2:
-            line1 = "편관 多 — 강렬한 인연·연상 또는 능력자. 30대 초중반 결혼 多."
+            line1 = "편관 多 — 강렬한 인연·연상 또는 능력자와의 인연이 따르는 기운입니다."
         elif pyun_gwan == 1 and jung_gwan == 0:
-            line1 = "편관 1개 — 강한 남자 한 번 만남. 30대 중반 결혼 가능."
+            line1 = "편관 1개 — 강한 인상의 상대를 만나는 기운입니다."
         elif jung_gwan == 1 and pyun_gwan == 0:
-            line1 = "정관 1개 — 안정형 남편. 20대 후반~30대 초반 적기."
+            line1 = "정관 1개 — 안정적인 상대와 관계를 맺는 기운입니다."
         else:
-            line1 = "관성 균형 — 본인이 결심하는 그 시기가 결혼 적기."
+            line1 = "관성 균형 — 본인이 마음을 정하는 순간이 곧 결혼의 때입니다."
 
     if ilji and ilji in JIJI_DDI:
         line2 = f"배우자 자리 = {ilji}({JIJI_DDI[ilji]}띠) — {spouse}."
@@ -14223,9 +14230,9 @@ def get_jeokjung_marriage(gender, ilgan, yukjin_list, sinsal_list, pils, marriag
         line2 = f"배우자 성향 — {spouse}."
 
     if is_male and pyun_jae >= 1 and jung_jae >= 1:
-        line3 = "한 번 흔들리면 두 번 옵니다. 첫 결정에 사활."
+        line3 = "관계가 흔들릴 수 있는 시기엔 첫 결정이 특히 중요합니다."
     elif (not is_male) and pyun_gwan >= 1 and jung_gwan >= 1:
-        line3 = "한 번 흔들리면 두 번 옵니다. 첫 결정에 사활."
+        line3 = "관계가 흔들릴 수 있는 시기엔 첫 결정이 특히 중요합니다."
     elif "재" in ilji_sipsin and is_male:
         line3 = "배우자 자리에 재성 — 결혼이 인생 안정의 핵심 변수."
     elif "관" in ilji_sipsin and not is_male:
