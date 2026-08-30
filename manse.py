@@ -18335,23 +18335,13 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
             _ys_p = get_yongshin(pils)
             if isinstance(_ys_p, dict):
                 _yong_pyong = _ys_p
-                _gl_p = _ys_p.get("기신", [])
+                _gl_p = _ys_p.get("종합_기신", [])
                 if isinstance(_gl_p, list) and _gl_p:
                     _gisin_pyong = _gl_p
             elif isinstance(_ys_p, list):
                 _yong_pyong = _ys_p
         except Exception:
             _yong_pyong = ["水", "木"]
-
-        if not _gisin_pyong:
-            _opp_p = {"水": "土", "木": "金", "火": "水", "土": "木", "金": "火"}
-            if isinstance(_yong_pyong, dict):
-                _yl_p = _yong_pyong.get("종합_용신") or _yong_pyong.get("용신") or ["水"]
-                _gisin_pyong = [_opp_p.get(y, "土") for y in (_yl_p if isinstance(_yl_p, list) else ["水"])[:2]]
-            elif isinstance(_yong_pyong, list) and _yong_pyong:
-                _gisin_pyong = [_opp_p.get(y, "土") for y in _yong_pyong[:2]]
-            else:
-                _gisin_pyong = ["土", "金"]
 
         _gyeok_p = ""
         try:
@@ -18865,7 +18855,7 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
         _strategy_txt = _ILGAN_STRATEGY.get(_ilgan_s, f"{_ilgan_s}일간의 기운으로 살아가고 있습니다.")
         _yong_str_s = " · ".join([_OHN_S.get(y,"") for y in _yong_s]) if _yong_s else "분석 중"
         # JONGHAP-FIX-6: 빈 문자열 fallback (saju_zhengtong L7428 패턴 통일)
-        _gisin_str_s = ("·".join([g for g in _gisin_s[:2] if isinstance(g, str)])) or "土·金"
+        _gisin_str_s = ("·".join([g for g in _gisin_s if isinstance(g, str)])) or "土·金"
 
         st.markdown("---")
         st.markdown(

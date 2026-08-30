@@ -7581,23 +7581,25 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
     def _jj_label(jj):
         return f"{jj}({JJ_KR.get(jj,'')})"
 
+    from saju_interpreter import format_yong_with_source
+
     yong_str = ""
     if yongshin:
         if isinstance(yongshin, dict):
             yl = yongshin.get("종합_용신") or yongshin.get("용신") or []
-            if isinstance(yl, list): yong_str = "·".join(str(y) for y in yl[:3])
+            if isinstance(yl, list): yong_str = format_yong_with_source(yl, yongshin.get("용신_출처", {}))
             elif isinstance(yl, str): yong_str = yl
         elif isinstance(yongshin, list):
-            yong_str = "·".join(str(y) for y in yongshin[:3])
+            yong_str = "·".join(str(y) for y in yongshin)
     if not yong_str: yong_str = "水·木"
 
     gisin_str = ""
     if gisin:
         if isinstance(gisin, list):
-            gisin_str = "·".join(str(g) for g in gisin[:2])
+            gisin_str = "·".join(str(g) for g in gisin)
         elif isinstance(gisin, dict):
             gl = gisin.get("종합_기신") or gisin.get("기신") or []
-            if isinstance(gl, list): gisin_str = "·".join(str(g) for g in gl[:2])
+            if isinstance(gl, list): gisin_str = "·".join(str(g) for g in gl)
     if not gisin_str: gisin_str = "土·金"
 
     ilju_info  = ILJU_60GAPJA.get(iljj_key, {})
