@@ -18488,12 +18488,15 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
             if _ss.get("jj_ss", "-") != "-":
                 _jk_yukjin.append({"관계": _ss["jj_ss"]})
 
-        # oh_cnt — pils의 오행 카운트
+        # oh_cnt — pils의 오행 카운트 (8글자 원문, OH 딕셔너리 재사용)
         _jk_oh = {"木": 0, "火": 0, "土": 0, "金": 0, "水": 0}
         for _p in pils:
-            _oh = _p.get("오행", "")
-            if _oh in _jk_oh:
-                _jk_oh[_oh] += 1
+            _cg_oh = OH.get(_p.get("cg", ""), "")
+            _jj_oh = OH.get(_p.get("jj", ""), "")
+            if _cg_oh in _jk_oh:
+                _jk_oh[_cg_oh] += 1
+            if _jj_oh in _jk_oh:
+                _jk_oh[_jj_oh] += 1
 
         # sinsal
         _jk_sinsal = []

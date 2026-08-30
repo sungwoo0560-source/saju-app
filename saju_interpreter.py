@@ -13820,12 +13820,15 @@ def get_jeokjung_health(oh_cnt, pils, sinsal_list):
     except Exception:
         m_ = h_ = t_ = g_ = s_ = 1
 
-    weak = []
-    if m_ <= 1: weak.append("木")
-    if h_ <= 1: weak.append("火")
-    if t_ <= 1: weak.append("土")
-    if g_ <= 1: weak.append("金")
-    if s_ <= 1: weak.append("水")
+    # 값 비교 없이 코드 작성 순서(木→火→土→金→水)로만 뽑던 것을, 실제 값
+    # 오름차순으로 정렬해 진짜 최약 오행이 main이 되도록 교정. <=1 필터는
+    # 그대로 유지(임계값 불변) — sorted()는 안정 정렬이라 동점 시 기존
+    # 木→火→土→金→水 순서가 tiebreak로 자동 유지된다.
+    _jk_vals = {"木": m_, "火": h_, "土": t_, "金": g_, "水": s_}
+    weak = sorted(
+        [oh for oh in ["木", "火", "土", "金", "水"] if _jk_vals[oh] <= 1],
+        key=lambda oh: _jk_vals[oh],
+    )
 
     sinsal_str = " ".join(str(x) for x in sinsal_list) if sinsal_list else ""
     has_baekho = "백호" in sinsal_str
