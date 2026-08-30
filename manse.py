@@ -887,7 +887,7 @@ def _local_saju_engine(pils, name, birth_year, gender, query):
         _is_yong  = _sw_oh in _yong_ohs
         _is_gisin = _sw_oh in _gisin
         _luck_signal = "🟢 황금기" if _is_yong else ("🔴 주의 기간" if _is_gisin else "🟡 중립")
-        _yong_str = "·".join(_yong_ohs[:2]) if _yong_ohs else "분석중"
+        _yong_str = "·".join(_yong_ohs) if _yong_ohs else "분석중"
     except Exception:
         _sn_val="중화"; _yong_ohs=[]; _gisin=[]; _sw_oh=""; _sw_ss=""; _sw_gh="평"
         _is_yong=False; _is_gisin=False; _luck_signal="🟡 중립"; _OHN_ai={}; _yong_str="분석중"
@@ -8804,7 +8804,7 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
                         }
                         if _cs_yong:
                             y = _sec("🌟 8. 개운 처방", y)
-                            for _oh in _cs_yong[:3]:
+                            for _oh in _cs_yong:
                                 y = _write(f"용신({_oh}): {_OH_RX2.get(_oh,'')}", y, size=9)
                         # 올해 인연 흐름 (홍염살·상대의도·돈흐름)
                         try:
@@ -14779,7 +14779,9 @@ def build_gangsa_block(pils, name, birth_year, gender, marriage_status=None):
             _cheobang4 = _ip4.get("처방", "")
             _yong_ohs4 = locals().get("yong_ohs") or []
             _gi_ohs4 = locals().get("gi_ohs") or []
-            _yong4 = "·".join(_yong_ohs4[:2])
+            # B(가), M-T3 라운드: 출처 라벨 포함(억부는 무라벨), 슬라이스 제거
+            _yong_source4 = (locals().get("ys_info") or {}).get("용신_출처", {})
+            _yong4 = format_yong_with_source(_yong_ohs4, _yong_source4)
             _gi4 = "·".join(_gi_ohs4[:2])
 
             _is_singang4 = "신강" in sn
@@ -15449,8 +15451,8 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
         gi_ohs   = ys_info.get("종합_기신", [])
         if not isinstance(gi_ohs, list):
             gi_ohs = []
-        yong_str = "·".join(yong_ohs[:2]) if yong_ohs else ""
-        gi_str   = "·".join(gi_ohs[:1]) if gi_ohs else ""
+        yong_str = "·".join(yong_ohs) if yong_ohs else ""
+        gi_str   = "·".join(gi_ohs) if gi_ohs else ""
     except Exception:
         ilgan = "甲"; iljj = "子"; sn = "중화"; yong_str = ""; gi_str = ""
         yong_ohs = []; gi_ohs = []
@@ -15893,7 +15895,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
             sn_cmt = v
             break
     yong_rx = ""
-    for _yoh in (yong_ohs[:2] if yong_ohs else []):
+    for _yoh in (yong_ohs if yong_ohs else []):
         _rx = _YONG_RX.get(_yoh, "")
         if _rx:
             yong_rx += _rx + "\n\n"
@@ -18040,7 +18042,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
 
     lines.append("---")
     _gi_display = gi_str2 if gi_str2 else ("없음(중화)" if "중화" in sn else "미산출")
-    _yong_str3 = "·".join(yong_ohs[:3]) if yong_ohs else ""
+    _yong_str3 = "·".join(yong_ohs) if yong_ohs else ""
     _data_note = f"일간 {ilgan}({iljj}) · 신강신약 {sn} · 용신 {(_yong_str3 or yong_str) or '미산출'} · 기신 {_gi_display} · 오행 {_oh_bar}"
     lines.append(f"*위 분석은 {_dw_label} × {_sw_label} 교차 + 원국 오행구성 + 일간·일지·나이 개인화 기반으로 생성됩니다.*")
     lines.append(f"*[ {_data_note} ]*")
@@ -18861,7 +18863,7 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
         }
 
         _strategy_txt = _ILGAN_STRATEGY.get(_ilgan_s, f"{_ilgan_s}일간의 기운으로 살아가고 있습니다.")
-        _yong_str_s = " · ".join([_OHN_S.get(y,"") for y in _yong_s[:3]]) if _yong_s else "분석 중"
+        _yong_str_s = " · ".join([_OHN_S.get(y,"") for y in _yong_s]) if _yong_s else "분석 중"
         # JONGHAP-FIX-6: 빈 문자열 fallback (saju_zhengtong L7428 패턴 통일)
         _gisin_str_s = ("·".join([g for g in _gisin_s[:2] if isinstance(g, str)])) or "土·金"
 
@@ -19110,7 +19112,7 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
 
     yong_list = ys.get("종합_용신", [])
 
-    yong_str = "/".join(yong_list[:3]) if isinstance(yong_list, list) else str(yong_list)
+    yong_str = "/".join(yong_list) if isinstance(yong_list, list) else str(yong_list)
 
     gk_name = gyeokguk.get("격국명", "-") if gyeokguk else "-"
 
@@ -19124,7 +19126,7 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
 
     # 용신 오행 한자 배지
     _yong_icon_html = ""
-    for _yc in (yong_list[:3] if isinstance(yong_list, list) else []):
+    for _yc in (yong_list if isinstance(yong_list, list) else []):
         _bg, _fg = get_ohang_color(_yc)
         _yong_icon_html += (
             f"<span style='background:{_bg};color:{_fg};"
@@ -20554,7 +20556,7 @@ def menu5_money(pils, birth_year, gender, name="내담자"):
                 _bowl_size, _bowl_desc = _sz, _dc
                 break
         _jaemul_profile = ilp.get("재물", "")
-        _yong_m5 = "·".join(yongshin_ohs[:2]) if yongshin_ohs else ""
+        _yong_m5 = "·".join(yongshin_ohs) if yongshin_ohs else ""
 
         _m5_verdict_now = locals().get("_m5_verdict", "")
         _m5_now_txt = locals().get("_m5_hm", "") or locals().get("_m5_bm", "")
@@ -21874,7 +21876,7 @@ def menu9_daily(pils, name, birth_year, gender):
             f"<div style='font-size:16px;font-weight:900;color:{_sig_tc};'>{_signal}</div>"
             f"<div style='font-size:13px;color:#ccc;margin-top:6px;'>{_sig_sub}</div>"
             f"<div style='font-size:11px;color:#888;margin-top:8px;'>"
-            f"용신: {' '.join(_yong_d[:3]) if _yong_d else '-'} | "
+            f"용신: {' '.join(_yong_d) if _yong_d else '-'} | "
             f"기신: {' '.join(_gisin_d[:2]) if _gisin_d else '-'} | "
             f"오늘 천간오행: {_cg_oh_d} / 지지오행: {_jj_oh_d}"
             f"</div></div>",
@@ -22165,7 +22167,7 @@ def menu10_monthly(pils, name, birth_year, gender):
             f"<div style='font-size:14px;color:#fff;margin-top:8px;font-weight:700;'>"
             f"{datetime.now().month}월 [{_ml_ss}] — {_mdesc}</div>"
             f"<div style='font-size:11px;color:#888;margin-top:8px;'>"
-            f"용신: {' '.join(_yong_m[:3]) if _yong_m else '-'} | "
+            f"용신: {' '.join(_yong_m) if _yong_m else '-'} | "
             f"이달 십성: {_ml_ss} | 오행: {_ml_oh}"
             f"</div></div>",
             unsafe_allow_html=True,
@@ -23220,7 +23222,7 @@ def menu8_bihang(pils, name, birth_year, gender):
 
     # 용신 강화 신탁
 
-    for yong_oh in yongshin_ohs[:2]:
+    for yong_oh in yongshin_ohs:
         bd = BIHANG_DB.get(yong_oh)
 
         if not bd:
@@ -25224,7 +25226,7 @@ def tab_ai_chat(pils, name, birth_year, gender):
                     )
                     out.append(f"{_sig_def}\n")
                     out.append(
-                        f"\n용신은 **{'·'.join(_yong_def[:3]) if _yong_def else '분석중'}** 오행입니다. "
+                        f"\n용신은 **{'·'.join(_yong_def) if _yong_def else '분석중'}** 오행입니다. "
                         f"이 기운을 강화하는 방향으로 행동하면 운이 열립니다.\n"
                     )
                     if _gisin_def:
@@ -26691,30 +26693,22 @@ def render_manse_grid(pils, birth_year, birth_month, birth_day, birth_hour, birt
     try:
         ys_data = get_yongshin(pils)
         yong_ohs = ys_data.get("종합_용신", []) if ys_data else []
-        _gi_raw  = ys_data.get("기신", []) if ys_data else []
-        gi_ohs   = _gi_raw if isinstance(_gi_raw, list) else [x.strip() for x in str(_gi_raw).replace("·",",").split(",") if x.strip() in ["木","火","土","金","水"]]
+        # 기신 필드 직접 참조 정리(M-T3 라운드, 항목4) — "기신"(서술형 문자열)이
+        # 아니라 "종합_기신"(오행 리스트)을 바로 읽는다. 예전엔 서술형 문자열이
+        # 파싱 실패해 sn 기반 재계산 폴백으로 항상 샜는데, 그 재계산 공식이
+        # 종합_기신 산출식과 동일해 결과값은 늘 일치했다(6개 회귀 fixture 실측
+        # 확인) — 정답 필드 직접 참조로 정리, 폴백 삭제.
+        gi_ohs = ys_data.get("종합_기신", []) if ys_data else []
+        if not isinstance(gi_ohs, list):
+            gi_ohs = []
+        _yong_source_gw = ys_data.get("용신_출처", {}) if ys_data else {}
     except Exception:
-        yong_ohs, gi_ohs = [], []
+        yong_ohs, gi_ohs, _yong_source_gw = [], [], {}
 
     try:
         strength_info = get_ilgan_strength(ilgan, pils)
     except Exception:
         strength_info = {"신강신약": "중화", "helper_score": 50}
-
-    # gi_ohs fallback — 서술형 기신 문자열이면 sn 기반 역산
-    if not gi_ohs:
-        try:
-            _sn_t = strength_info.get("신강신약", "")
-            _ilgan_oh_t = _OH_CG.get(ilgan, "")
-            _BMRV_T = {"木":"水","火":"木","土":"火","金":"土","水":"金"}
-            _CTLV_T = {"木":"土","火":"金","土":"水","金":"木","水":"火"}
-            if "신강" in _sn_t and _ilgan_oh_t:
-                gi_ohs = [o for o in [_BMRV_T.get(_ilgan_oh_t,""), _ilgan_oh_t] if o]
-            elif "신약" in _sn_t and _ilgan_oh_t:
-                _gk_t = next((k for k,v in _CTLV_T.items() if v == _ilgan_oh_t), "")
-                gi_ohs = [o for o in [_gk_t, _CTLV_T.get(_ilgan_oh_t,"")] if o]
-        except Exception:
-            pass
 
     try:
         dw_list = SajuCoreEngine.get_daewoon(
@@ -26928,9 +26922,9 @@ def render_manse_grid(pils, birth_year, birth_month, birth_day, birth_hour, birt
 </div>""",
                 unsafe_allow_html=True,
             )
-        # 용신/기신
-        yong_str = "·".join(yong_ohs[:3]) if yong_ohs else "-"
-        gi_str   = "·".join(gi_ohs[:2])   if gi_ohs   else "-"
+        # 용신/기신 — B(가), M-T3 라운드: 출처 라벨 포함(억부는 무라벨)
+        yong_str = format_yong_with_source(yong_ohs, _yong_source_gw) if yong_ohs else "-"
+        gi_str   = "·".join(gi_ohs)   if gi_ohs   else "-"
         st.markdown(
             f"""<div style="background:#f0fff4;border-radius:6px;padding:6px 10px;margin-top:6px;font-size:12px">
 <span style="color:#2d8a4e;font-weight:700">✦ 용신:</span> {yong_str}<br>
@@ -27157,7 +27151,7 @@ def menu_gaewoon(pils, name, birth_year, gender):
         _TOP5_GW.append(f"{_sinsal_gw[0].get('이름','신살')} 발동 중 -- 해당 비방을 즉시 실행하십시오")
     if _gisin_ohs_gw:
         _TOP5_GW.append(f"기신 {'/'.join(_gisin_ohs_gw)} 오행 강화 차단 -- 기신 색상·음식·방위 즉각 제거")
-    _TOP5_GW.append(f"용신 {'/'.join(_yong_gw[:3]) if _yong_gw else '미산출'} 오행 보강 -- 색상·음식·소품 생활 침투")
+    _TOP5_GW.append(f"용신 {'/'.join(_yong_gw) if _yong_gw else '미산출'} 오행 보강 -- 색상·음식·소품 생활 침투")
     _TOP5_GW.append("재물 기운 누수 차단 -- 지갑 정리·불필요한 지출 즉각 중단")
     _TOP5_GW.append("귀인 기운 활성화 -- 사람을 만나고 새로운 모임에 참여하라")
     _TODAY3_GW  = [
@@ -33597,7 +33591,7 @@ border-radius:14px;padding:16px 20px;margin:16px 0 6px">
             prescriptions.append(("✅ 이 팔자의 핵심 — 흐름을 타는 법",
                 f"격국 {gkn} · {sn}({sc}/100) — "
                 f"원국에 극단적 위험 패턴은 없다. 이건 좋은 소식이다. "
-                f"용신 오행({', '.join(yong_ohs[:2]) if yong_ohs else '분석중'})이 강한 해에 집중적으로 움직이고, "
+                f"용신 오행({', '.join(yong_ohs) if yong_ohs else '분석중'})이 강한 해에 집중적으로 움직이고, "
                 f"기신 해엔 절대 큰 결정 내리지 마라. 타이밍이 전부다."))
 
         # ── 출력 ──
@@ -33732,7 +33726,7 @@ border-radius:14px;padding:16px 20px;margin:16px 0 6px">
 
         # 용신 오행 비방 출력
         if _yong7:
-            for _yoh7 in _yong7[:2]:
+            for _yoh7 in _yong7:
                 _bh = _BIHANG_FULL.get(_yoh7)
                 if not _bh:
                     continue

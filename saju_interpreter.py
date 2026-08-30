@@ -1778,18 +1778,14 @@ class LocalSajuNarrator:
             yongshin_raw = ys_data.get("종합_용신", [])
             yongshin = list(yongshin_raw) if isinstance(yongshin_raw, list) else [o for o in ["木","火","土","金","水"] if o in str(yongshin_raw)]
 
-            gisin_raw = ys_data.get("기신", [])
-            gisin = list(gisin_raw) if isinstance(gisin_raw, list) else [o for o in ["木","火","土","金","水"] if o in str(gisin_raw)]
-            # 기신 보정 — kihwa 문자열에 오행한자 없어 gisin=[]인 경우 신강신약 기준으로 보완
-            if not gisin and sn:
-                _ob = {"木":"水","火":"木","土":"火","金":"土","水":"金"}
-                _oc = {"木":"土","火":"金","土":"水","金":"木","水":"火"}
-                _ih = OH.get(ilgan, "")
-                if "신강" in sn:
-                    gisin = list(dict.fromkeys(x for x in [_ob.get(_ih,""), _ih] if x))
-                elif "신약" in sn:
-                    _gw = next((k for k, v in _oc.items() if v == _ih), "")
-                    gisin = list(dict.fromkeys(x for x in [_gw, _oc.get(_ih,"")] if x))
+            # 기신 필드 직접 참조 정리(M-T3 라운드, 항목4): "기신"은 서술형 문자열이라
+            # 오행 한자가 없어 항상 파싱 실패 → sn 기반 재계산으로 새는 구조였다.
+            # 그 재계산 공식이 get_yongshin() 내부 종합_기신(kihwa_ohs) 산출식과 완전히
+            # 같아 결과값은 항상 일치했음(6개 회귀 fixture 실측 확인) — 정답 필드를
+            # 직접 읽도록 정리, 기본값 방어([])만 유지.
+            gisin = ys_data.get("종합_기신", [])
+            if not isinstance(gisin, list):
+                gisin = []
 
             ss_list = calc_sipsung(ilgan, pils) or []
             # 일주(idx==1) 천간은 일간 자신이라 십성 대상이 아님(항상 比肩으로
@@ -1902,6 +1898,7 @@ class LocalSajuNarrator:
                 조후_desc=ys_data.get("조후_desc", ""),
                 억부_용신=ys_data.get("억부_용신", []),
                 월지=ys_data.get("월지", ""),
+                용신_출처=ys_data.get("용신_출처", {}),
             )
 
         except Exception as e:
@@ -1942,7 +1939,7 @@ class LocalSajuNarrator:
         _gkn = b.get("gyeok_name","")
         _sn2 = b.get("sn","")
         _ys2 = b.get("yongshin",[])
-        _ys_str = "·".join(_ys2[:3]) if _ys2 else ""
+        _ys_str = "·".join(_ys2) if _ys2 else ""
 
         lines.append(f"# 🌟 {name}님의 사주 종합 리포트")
         lines.append(
@@ -2206,7 +2203,7 @@ class LocalSajuNarrator:
             lines.append(_SN_MAP[_sn_key])
 
         # 5) 용신 처방
-        _yong_rxs = [_YONG_RX[y] for y in _ys_diag[:3] if y in _YONG_RX]
+        _yong_rxs = [_YONG_RX[y] for y in _ys_diag if y in _YONG_RX]
         if _yong_rxs:
             lines.append("<b>💊 용신 처방:</b> " + "  \n".join(_yong_rxs))
 
@@ -2408,8 +2405,9 @@ class LocalSajuNarrator:
         _sn3  = b.get("sn","")
         _ys3  = b.get("yongshin",[])
         _gs3  = b.get("gisin",[])
-        _ys3_str = "·".join(_ys3[:3]) if _ys3 else ""
-        _gs3_str = "·".join(_gs3[:2]) if _gs3 else ""
+        _ys3_src = b.get("용신_출처", {})
+        _ys3_str = format_yong_with_source(_ys3, _ys3_src) if _ys3 else ""
+        _gs3_str = "·".join(_gs3) if _gs3 else ""
 
         _SN_PROSE = {
             "신강":  (f"{name}님의 사주는 <b>신강(身强)</b>으로, 일간의 힘이 강하고 주체적인 에너지가 넘칩니다. "
@@ -2870,14 +2868,14 @@ class LocalSajuNarrator:
         )
         lines.append(
             f"\n<b>[시기]</b> {name}님 평생 중 결정적 타이밍:\n"
-            f"- <b>황금기</b>: 용신({'/'.join(b.get('yongshin',[])[:3])}) 대운 — 확장·투자·도전\n"
-            f"- <b>수비기</b>: 기신({'/'.join(b.get('gisin',[])[:2]) if b.get('gisin') else '해당 없음'}) 대운 — 내실 다지기·보수적 운영\n"
+            f"- <b>황금기</b>: 용신({'/'.join(b.get('yongshin',[]))}) 대운 — 확장·투자·도전\n"
+            f"- <b>수비기</b>: 기신({'/'.join(b.get('gisin',[])) if b.get('gisin') else '해당 없음'}) 대운 — 내실 다지기·보수적 운영\n"
             f"- <b>위기</b>: 충(沖) 발동 해 — 큰 결정 회피·건강 점검 필수"
         )
         lines.append(
             f"\n<b>[행동]</b> 지금 당장 실천할 3가지:\n"
             f"1. 일간 {ilgan} 본질({_ip_fr.get('본질','').split('.')[0]}) — 매일 의식하고 강화\n"
-            f"2. 용신 오행 ({'/'.join(b.get('yongshin',[])[:3])}) 색상·음식·방향 일상 활용\n"
+            f"2. 용신 오행 ({'/'.join(b.get('yongshin',[]))}) 색상·음식·방향 일상 활용\n"
             f"3. 기신 오행 자극(술·담배·야간 과로) 의식적 절제"
         )
         lines.append(
@@ -5068,7 +5066,7 @@ class LocalSajuNarrator:
         lines.append(LocalSajuNarrator.OH_JOB.get(b.get("oh_max","木"), ""))
         if yongshin:
             lines.append(
-                f"특히 용신 오행 <b>{' · '.join(OHN.get(y,y) for y in yongshin[:3])}</b> "
+                f"특히 용신 오행 <b>{' · '.join(OHN.get(y,y) for y in yongshin)}</b> "
                 "관련 사업을 취급할 때 재물 운이 상승합니다."
             )
 
@@ -8065,6 +8063,22 @@ def get_yongshin(pils):
     _BIRTH_R = {"木": "水", "火": "木", "土": "火", "金": "土", "水": "金"}
     huisin = _BIRTH_R.get(all_yong[0], "") if all_yong else ""
 
+    # 용신_출처(M-T3 라운드): all_yong 각 오행이 억부/조후/통관/병약 중 어디서
+    # 처음 들어왔는지 표시용 라벨 — 새 판정 없이 위에서 이미 구한
+    # eokbu_yong/jokhu_oh/tongkwan_yong/byeong_yong을 all_yong 조립 순서(억부→
+    # 조후→통관→병약) 그대로 재조회할 뿐이다. 표시 쪽에서 "억부"는 무라벨,
+    # 나머지만 괄호로 노출하는 관례이므로 억부도 명시적으로 채워 넣는다.
+    yong_source = {}
+    for _oh in all_yong:
+        if _oh in eokbu_yong:
+            yong_source[_oh] = "억부"
+        elif _oh in jokhu_oh:
+            yong_source[_oh] = "조후"
+        elif _oh == tongkwan_yong:
+            yong_source[_oh] = "통관"
+        elif _oh == byeong_yong:
+            yong_source[_oh] = "병약"
+
     return {
         "억부_base": eokbu_base,
         "억부_desc": eokbu_desc,
@@ -8081,8 +8095,22 @@ def get_yongshin(pils):
         "희신": huisin,
         "종합_용신": all_yong,
         "종합_기신": kihwa_ohs,
+        "용신_출처": yong_source,
         "월지": wol_jj,
     }
+
+
+def format_yong_with_source(yong_list, yong_source):
+    """종합_용신 리스트를 출처 라벨과 함께 문자열로 포맷(M-T3 라운드, B(가)).
+    새 판정 없음 — get_yongshin()이 이미 계산한 "용신_출처"를 그대로 조회만 한다.
+    억부 출처는 무라벨(기본값 취급), 조후/통관/병약만 괄호로 노출한다."""
+    if not yong_list:
+        return ""
+    parts = []
+    for _oh in yong_list:
+        _src = (yong_source or {}).get(_oh, "")
+        parts.append(f"{_oh}({_src})" if _src and _src != "억부" else _oh)
+    return "·".join(parts)
 
 
 def build_saju_tongbyeon(pils, daewoon=None):
@@ -8400,6 +8428,43 @@ def build_saju_tongbyeon(pils, daewoon=None):
                 f"용신 혼자여도 힘을 쓰지만, 희신이 함께 밀어줄 때 그 힘이 더 오래, 더 안정적으로 갑니다."
             )
 
+        # ④-보강(B(나), M-T3 라운드): 종합_용신과 종합_기신에 같은 오행이 겹칠 때
+        # (조후는 필요하다는데 억부로는 기신인 경우 등) 이를 감추지 않고 한 문장으로
+        # 짚어준다. 새 판정 없음 — 이미 계산된 종합_용신·종합_기신·용신_출처를
+        # 대조만 한다. 겹침이 없으면 p_conflict는 빈 문자열로 남아 아무것도 출력 안 함.
+        p_conflict = ""
+        _gisin_ohs_tb = ys.get("종합_기신", []) or []
+        _overlap_tb = [o for o in yong_all if o in _gisin_ohs_tb]
+        if _overlap_tb:
+            _yong_source_tb = ys.get("용신_출처", {}) or {}
+            _REASON_LONG = {"조후": "이 계절의 온도를 맞추는 데", "통관": "서로 다른 두 기운을 소통시키는 데", "병약": "과한 기운을 다스리는 데"}
+            _REASON_SHORT = {"조후": "계절을 다스릴", "통관": "기운을 소통시킬", "병약": "과한 기운을 다스릴"}
+            if "신강" in sn_label:
+                _role_names, _role_fallback, _avoid_txt = ["인성", "비겁"], "인성·비겁", "누그러뜨릴"
+            else:
+                _role_names, _role_fallback, _avoid_txt = ["관성", "재성"], "관성·재성", "키울"
+            _role_map = {o: _role_names[i] for i, o in enumerate(_gisin_ohs_tb) if i < len(_role_names)}
+            _ov_labeled, _reasons_long, _reasons_short = [], [], []
+            for _oh in _overlap_tb:
+                _src = _yong_source_tb.get(_oh, "")
+                _ov_labeled.append(f"{OH_KR_TB.get(_oh, _oh)}({_src})" if _src and _src != "억부" else OH_KR_TB.get(_oh, _oh))
+                if _src in _REASON_LONG and _REASON_LONG[_src] not in _reasons_long:
+                    _reasons_long.append(_REASON_LONG[_src])
+                    _reasons_short.append(_REASON_SHORT[_src])
+            _role_txt = "·".join(dict.fromkeys(_role_map.get(o, _role_fallback) for o in _overlap_tb))
+            _reason_long_txt = "·".join(_reasons_long) if _reasons_long else "특정 목적에"
+            _reason_short_txt = "·".join(_reasons_short) if _reasons_short else "필요할"
+            # 조사(이/가) — 오행 한글 표기(목/화/토/금/수) 받침 유무로 선택. 마지막
+            # 나열 항목 기준(다중 겹침이어도 자연스러운 마무리 조사 하나만 필요).
+            _JOSA_I_GA = {"木": "이", "火": "가", "土": "가", "金": "이", "水": "가"}
+            _ov_josa = _JOSA_I_GA.get(_overlap_tb[-1], "가")
+            p_conflict = (
+                f"다만 {'·'.join(_ov_labeled)} 기운은 {_reason_long_txt} 꼭 필요하면서도, "
+                f"억부로는 {'이미 넘치는 일간을 더 키우는' if '신강' in sn_label else '이미 약한 일간의 힘을 한 번 더 빼가는'} {_role_txt} 기운이기도 합니다. "
+                f"판단이 서로 어긋난 게 아니라 {'·'.join(OH_KR_TB.get(o, o) for o in _overlap_tb)}{_ov_josa} 원래 이런 두 얼굴을 가진 기운이라는 뜻이니, "
+                f"{_reason_short_txt} 때는 쓰고 일간 자체를 {_avoid_txt} 때는 피하는 식으로 상황에 맞춰 가려 쓰는 지혜가 필요합니다."
+            )
+
         # ④-보강: 용신이 원국 8글자에 실재하는가 — 약이 곁에 있나/밖에 있나. 새 판정 아님 —
         # 이미 있는 yong_all(오행)과 pils 원문 cg/jj·OH·JIJANGGAN(둘 다 saju_data.py, ②·⑤에서
         # 이미 무import로 쓰던 재료)만으로 실재 여부만 사실 서술. 원국 전용 — 대운·세운·특정
@@ -8530,7 +8595,7 @@ def build_saju_tongbyeon(pils, daewoon=None):
                 f"오행의 균형을 스스로 맞춰가는 사람에게 유리하게 설계된 사주라 할 수 있습니다."
             )
 
-        paragraphs = [p for p in [p1, p2, p_sn, p_mul, p4, p5, p6] if p]
+        paragraphs = [p for p in [p1, p2, p_sn, p_mul, p4, p_conflict, p5, p6] if p]
         return "\n\n".join(paragraphs)
     except Exception:
         return ""
@@ -11708,7 +11773,7 @@ def _nar_intro_scene(ctx):
         mind_line   = _MIND.get(strong_role, "강한 기운을 실생활에서 전략적으로 쓸 것.")
         job_line    = _JOB_YONG.get(yong_role, _JOB_YONG.get(strong_role, "용신 오행이 드는 직군으로 방향을 잡을 것."))
         if yongshin_ohs:
-            yong_str    = "·".join([_OH_KR.get(o, o) for o in yongshin_ohs[:2]])
+            yong_str    = "·".join([_OH_KR.get(o, o) for o in yongshin_ohs])
             timing_line = (f"{yong_str} 운이 오는 시기에 벌이고, "
                            f"그 반대 운에는 내실을 다질 것. "
                            f"운의 방향을 알고 타이밍을 맞추는 것 — 이것이 이 사주를 살리는 마지막 열쇠다.")
