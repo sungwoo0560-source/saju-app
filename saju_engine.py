@@ -1461,9 +1461,17 @@ class SajuCoreEngine:
         — 절입은 태양 황경이 특정 각도에 도달하는 전지구적 순간(위치 무관)
         이라 KASI가 발표하는 KST 시각과 직접 비교해야 정합하고, 개인의
         진태양시 보정을 섞으면 오히려 다른 두 기준(개인화 지역시 vs
-        절대 KST)을 혼용하는 셈이 된다. 시주·일주는 지역의 실제 태양
-        위치(진태양시)가 그대로 의미 있는 계산이라 birth_*(보정된 값)를
-        그대로 쓴다."""
+        절대 KST)을 혼용하는 셈이 된다. 시주는 지역의 실제 태양 위치
+        (진태양시)가 그대로 의미 있는 계산이라 birth_*(보정된 값)를 그대로
+        쓴다.
+
+        ★일주 기준 분리(M-T2 라운드): 일주(날짜) 판정에는 진태양시 보정이
+        개입하지 않는다 — 조자시(00:00~00:59)는 당일 일주라는 원칙과 진태양시
+        보정이 자정을 역전시켜 전일로 미는 동작이 충돌했던 걸 분리한 것.
+        시주 계산용 day_cg 베이스라인(_hour_calc_day_p, 아래)은 기존과 동일하게
+        보정된 birth_*를 쓰고, 실제로 반환되는 공식 일주(day_p)만 term_*(원시각)
+        날짜를 쓴다. use_yaja_time=False(자정기준파)의 23시 +1 시프트도 같은
+        이유로 term_hour(원시각) 기준으로 통일한다."""
 
         if term_year is None:
             term_year, term_month, term_day, term_hour, term_minute = (
@@ -1478,8 +1486,20 @@ class SajuCoreEngine:
             calc_y, calc_m, calc_d = next_d.year, next_d.month, next_d.day
         year_p = SajuCoreEngine._get_year_pillar(term_year, term_month, term_day, term_hour, term_minute)
         month_p = SajuCoreEngine._get_month_pillar(term_year, term_month, term_day, term_hour, term_minute)
-        day_p = SajuCoreEngine._get_day_pillar(calc_y, calc_m, calc_d)
-        hour_p = SajuCoreEngine._get_hour_pillar(birth_hour, birth_minute, day_p["cg"], use_yaja_time=use_yaja_time)
+
+        # 시주 계산용 day_cg 베이스라인 — 기존 로직 그대로(무수정), 시주 결과 불변용
+        _hour_calc_day_p = SajuCoreEngine._get_day_pillar(calc_y, calc_m, calc_d)
+
+        # 공식 일주(반환값) — 원시각(term_*) 날짜 기준, 진태양시 보정 미개입
+        off_y, off_m, off_d = term_year, term_month, term_day
+        if not use_yaja_time and term_hour >= 23:
+            from datetime import date, timedelta
+
+            next_d = date(term_year, term_month, term_day) + timedelta(days=1)
+            off_y, off_m, off_d = next_d.year, next_d.month, next_d.day
+        day_p = SajuCoreEngine._get_day_pillar(off_y, off_m, off_d)
+
+        hour_p = SajuCoreEngine._get_hour_pillar(birth_hour, birth_minute, _hour_calc_day_p["cg"], use_yaja_time=use_yaja_time)
         return [hour_p, day_p, month_p, year_p]
 
     @staticmethod
