@@ -7062,9 +7062,10 @@ def detect_life_risk_signals(pils, saewoon_data=None, gender=None, marriage_stat
                   "己":"未","庚":"酉","辛":"戌","壬":"子","癸":"丑"}
     has_yangin = yangin_map.get(ilgan, "") in all_jj
 
-    # 백호살
+    # 백호살 (4주 전체 검사 — 리스트는 get_extra_sinsal 동일 목록과 일치,
+    # 비교 범위만 일주→4주로 확장)
     baekho_iljus = ["甲辰","乙未","丙戌","丁丑","戊辰","壬戌","癸丑"]
-    has_baekho = (ilgan + iljj) in baekho_iljus
+    has_baekho = any((p.get("cg", "") + p.get("jj", "")) in baekho_iljus for p in pils)
 
     # 활성 십성 조합
     activated_combos = detect_sipseong_combinations(pils)
