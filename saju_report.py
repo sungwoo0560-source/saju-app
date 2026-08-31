@@ -1088,7 +1088,7 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str="", dram
                     "중화(中和)": "일간(日干)의 기운이 균형을 이루고 있느니라. 꾸준함과 성실함이 가장 큰 무기인 팔자니라. 한 분야를 깊이 파고드는 전략이 가장 효과적이며, 급격한 변화보다 점진적인 성장이 이 팔자의 발복 패턴이니라.",
                 }
 
-                _sn_desc = _SN_NARR.get(
+                _sn_desc = STRENGTH_NARRATIVE.get(
                     _sn,
                     f"{_sn}의 기운을 가진 팔자니라. 용신 오행을 활용하여 균형을 잡는 것이 핵심이느니라.",
                 )
