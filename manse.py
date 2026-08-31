@@ -15405,7 +15405,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
 
     # X-4-I-3: 사주 핵심 종합 진단 헤더
     try:
-        _core_diag = build_saju_core_diagnosis(pils, name, birth_year, gender, current_year=get_saju_year())
+        _core_diag = build_saju_core_diagnosis(pils, name, birth_year, gender, current_year=get_saju_year(), part="tail")
         if _core_diag:
             st.markdown(_core_diag, unsafe_allow_html=True)
     except Exception:
@@ -18197,6 +18197,14 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
 
     # PDF 누적본 초기화 — 재실행마다 새로 채움 (없으면 무한 누적됨)
     st.session_state.setdefault("_pdf_blocks", {})["jonghap_full"] = []
+
+    # 핵심진단 head 블록 (현재상황탭에서 이설) — build_saju_core_diagnosis(part="head")
+    try:
+        _head_diag = build_saju_core_diagnosis(pils, name, birth_year, gender, current_year=get_saju_year(), part="head")
+        if _head_diag:
+            _pdf_cap(_head_diag)
+    except Exception:
+        pass
 
     # 강사식 13항목 골드박스 (현재상황탭에서 이설, build_gangsa_block() 재사용)
     try:
