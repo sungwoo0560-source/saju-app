@@ -5609,6 +5609,27 @@ def build_ilju_core_line(pils):
         return ""
 
 
+def calc_chung_active(pils, cur_year=None):
+    """원국 내부 충 + 세운 충 여부 판정 (build_saju_core_diagnosis 5640~5648에서 추출, 로직 동일)"""
+    try:
+        if cur_year is None:
+            cur_year = datetime.now().year
+        pjjs = [p.get("jj", "") for p in pils if p]
+        _GZ_SUNG = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"]
+        _CHUNG_MAP = {"子":"午","午":"子","丑":"未","未":"丑","寅":"申","申":"寅",
+                      "卯":"酉","酉":"卯","辰":"戌","戌":"辰","巳":"亥","亥":"巳"}
+        internal_chung = []
+        for i, j1 in enumerate(pjjs):
+            for j2 in pjjs[i+1:]:
+                if j1 and j2 and _CHUNG_MAP.get(j1, "") == j2:
+                    internal_chung.append(f"{j1}-{j2}")
+        cur_jj = _GZ_SUNG[(cur_year - 4) % 12]
+        cur_chung_targets = [j for j in pjjs if j and _CHUNG_MAP.get(cur_jj, "") == j]
+        return bool(internal_chung or cur_chung_targets)
+    except Exception:
+        return False
+
+
 def build_saju_core_diagnosis(pils, name, birth_year, gender, current_year=None, part="all"):
     """사주 핵심 진단 박스 — 양인+충 패턴 자동 감지, 모든 메뉴 헤더용"""
     try:
@@ -6135,7 +6156,7 @@ def build_saju_core_diagnosis(pils, name, birth_year, gender, current_year=None,
             "ilgan": pcgs[1] if len(pcgs) > 1 else "",
             "ilji":  pjjs[1] if len(pjjs) > 1 else "",
             "yangin_active": yangin_active, "yangin_pos": yangin_pos,
-            "chung_active": bool(internal_chung or cur_chung_targets),
+            "chung_active": calc_chung_active(pils, current_year),
             "cur_yangin_hit": cur_yangin_hit,
             "past_active": past_active, "future_active": future_active,
             "internal_chung": internal_chung, "cur_chung_targets": cur_chung_targets,
@@ -31386,7 +31407,7 @@ def main():
                         "ilgan": _pdf_ilgan,
                         "sewoon_sipsung": _pdf_ss_t,
                         "yangin_active": _pdf_ya, "yangin_pos": _pdf_ypos,
-                        "chung_active": False, "cur_yangin_hit": False,
+                        "chung_active": calc_chung_active(pils, get_saju_year()), "cur_yangin_hit": False,
                         "past_active": [], "future_active": [],
                         "bigyeop_jaengjae": (_pdf_bic >= 2 and _pdf_jae >= 1),
                         "siksang": _pdf_sik, "gwan": _pdf_gwan, "jae": _pdf_jae,
