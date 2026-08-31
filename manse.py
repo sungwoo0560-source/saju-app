@@ -5609,7 +5609,7 @@ def build_ilju_core_line(pils):
         return ""
 
 
-def build_saju_core_diagnosis(pils, name, birth_year, gender, current_year=None):
+def build_saju_core_diagnosis(pils, name, birth_year, gender, current_year=None, part="all"):
     """사주 핵심 진단 박스 — 양인+충 패턴 자동 감지, 모든 메뉴 헤더용"""
     try:
         if current_year is None:
@@ -6122,6 +6122,12 @@ def build_saju_core_diagnosis(pils, name, birth_year, gender, current_year=None)
         except Exception:
             pass
 
+        # part="head"/"tail" 분리용 절단 스냅샷 — 자녀 인연(바로 위)까지의 out을
+        # 여기서 길이로 기록해둔다. 이 지점부터 saju_data 패키징만 이어지고
+        # out.append는 다음 active_scenarios 분기(나타날 사람 등)까지 없다 —
+        # 계산 로직은 무변경, 반환 시 자르는 위치 표시일 뿐.
+        _head_cut = len(out)
+
         # === X-6-I: saju_data 패키징 ===
         _saju_data_6i = {
             "pils": pils, "name": name, "birth_year": birth_year,
@@ -6241,7 +6247,12 @@ def build_saju_core_diagnosis(pils, name, birth_year, gender, current_year=None)
         except Exception:
             pass
 
-        return "\n".join(out)
+        if part == "head":
+            return "\n".join(out[:_head_cut])
+        elif part == "tail":
+            return "\n".join(out[_head_cut:])
+        else:
+            return "\n".join(out)
     except Exception:
         return ""
 
