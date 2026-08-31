@@ -14103,7 +14103,7 @@ def get_jeokjung_affair(gender, ilgan, yukjin_list, sinsal_list, pils, marriage_
 
         if honjap and (has_dohwa or has_hongyeom):
             title = "💔 당신은 — 이성 인연이 끊이지 않는 사주입니다"
-            line1 = "정재 + 편재 혼잡(混雜)에 도화·홍염까지 박혔습니다."
+            line1 = "정재 + 편재 혼잡(混雜)에 도화나 홍염 같은 인기 기운까지 겹쳤습니다."
             line2 = "결혼해도 — 본인이 마음 단속 안 하면 흔들립니다."
             line3 = "스쳐가는 인연 많습니다. 사고 나면 가정이 흔들립니다."
         elif honjap:
@@ -14113,12 +14113,12 @@ def get_jeokjung_affair(gender, ilgan, yukjin_list, sinsal_list, pils, marriage_
             line3 = "재성혼잡 구조라 조심하지 않으면 흔들리는 시기가 옵니다."
         elif pyun_jae >= 2 and (has_dohwa or has_hongyeom):
             title = "💔 당신은 — 이성 인연이 끊이지 않는 사주입니다"
-            line1 = "편재 多 + 도화/홍염. 인기와 흔들림이 모두 강한 구조."
+            line1 = "편재 多 + 도화나 홍염. 인기와 흔들림이 모두 강한 구조."
             line2 = "결혼 후에도 다른 여자가 다가오는 편입니다."
             line3 = "마음 단속 안 하면 — 가정이 흔들립니다. 본인이 가장 큰 변수."
         elif jung_jae >= 2 and (has_dohwa or has_hongyeom):
             title = "💔 당신은 — 인기 많은 안정형 사주입니다"
-            line1 = "정재 多 + 도화. 매력 강하지만 본인은 한 사람."
+            line1 = "정재 多 + 도화나 홍염. 매력 강하지만 본인은 한 사람."
             line2 = "여자가 먼저 다가오는 케이스 多."
             line3 = "단, 시기 따라 마음 흔들릴 수 있음 — 절제가 답."
         elif has_yangin and jae_total >= 1:
@@ -14128,7 +14128,7 @@ def get_jeokjung_affair(gender, ilgan, yukjin_list, sinsal_list, pils, marriage_
             line3 = "결혼 후 외부 자극 차단 — 그게 본인 안전장치입니다."
         elif has_dohwa or has_hongyeom or sigi_dohwa:
             title = "💔 당신은 — 이성에게 인기 많은 사주입니다"
-            line1 = "도화·홍염 박힘 — 나이 들어도 매력 유지됩니다."
+            line1 = "도화나 홍염 — 나이 들어도 매력 유지됩니다."
             line2 = "여자가 먼저 다가오는 케이스 많을 겁니다."
             extra = " 특히 시지 도화 — 말년 마음 단속이 중요합니다." if sigi_dohwa else ""
             line3 = "본인이 자제하면 그저 인기 많은 사람으로 끝납니다." + extra
@@ -14148,7 +14148,7 @@ def get_jeokjung_affair(gender, ilgan, yukjin_list, sinsal_list, pils, marriage_
 
         if honjap and (has_dohwa or has_hongyeom):
             title = "💔 당신은 — 이성 인연이 끊이지 않는 사주입니다"
-            line1 = "정관 + 편관 혼잡에 도화·홍염까지. 인기와 갈등 둘 다 강함."
+            line1 = "정관 + 편관 혼잡에 도화나 홍염 같은 인기 기운까지 겹칩니다. 인기와 갈등 둘 다 강함."
             line2 = "남자가 끊이지 않습니다. 단, 정착이 어려운 구조."
             line3 = "결혼 전 신중하게 — 흔들리면 다시 옵니다."
         elif honjap:
@@ -14158,12 +14158,12 @@ def get_jeokjung_affair(gender, ilgan, yukjin_list, sinsal_list, pils, marriage_
             line3 = "관성혼잡 구조라 조심하지 않으면 흔들리는 시기가 옵니다."
         elif pyun_gwan >= 2 and (has_dohwa or has_hongyeom):
             title = "💔 당신은 — 이성 인연이 끊이지 않는 사주입니다"
-            line1 = "편관 多 + 도화/홍염. 매력 강한 만큼 흔들림도 많은 구조."
+            line1 = "편관 多 + 도화나 홍염. 매력 강한 만큼 흔들림도 많은 구조."
             line2 = "결혼 후에도 다른 인연이 계속 다가옵니다."
             line3 = "본인 마음 단속 안 하면 — 한 번은 흔들립니다."
         elif jung_gwan >= 2 and (has_dohwa or has_hongyeom):
             title = "💔 당신은 — 인기 많은 안정형 사주입니다"
-            line1 = "정관 多 + 도화. 매력 강하지만 본인은 한 사람 선택."
+            line1 = "정관 多 + 도화나 홍염. 매력 강하지만 본인은 한 사람 선택."
             line2 = "남자가 먼저 다가오는 케이스 多."
             line3 = "단, 시기 따라 마음 흔들릴 수 있음 — 절제가 답."
         elif pyun_gwan >= 2 and jung_gwan == 0:
@@ -14188,7 +14188,7 @@ def get_jeokjung_affair(gender, ilgan, yukjin_list, sinsal_list, pils, marriage_
             line3 = "결혼 상대는 — 책임감 있는 사람으로 골라야 합니다."
         elif has_dohwa or has_hongyeom or sigi_dohwa:
             title = "💔 당신은 — 남자에게 인기 많은 사주입니다"
-            line1 = "도화·홍염 박힘 — 나이 들어도 매력 유지됩니다."
+            line1 = "도화나 홍염 — 나이 들어도 매력 유지됩니다."
             line2 = "남자가 먼저 다가오는 케이스 많을 겁니다."
             extra = " 특히 시지 도화 — 말년 마음 단속이 중요합니다." if sigi_dohwa else ""
             line3 = "본인이 자제하면 그저 인기 많은 사람으로 끝납니다." + extra
