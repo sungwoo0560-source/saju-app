@@ -2852,7 +2852,7 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str="", dram
 
             _draw_footer(c)
             if y < 40 * mm:
-                new_page(c)
+                y = new_page(c)
             c.setFont(BASE_FONT, 8)
             c.setFillColorRGB(0.75, 0.1, 0.1)
             c.drawCentredString(W / 2, 30 * mm, "본 분석은 정통 명리학 원리에 기반한 참고 자료입니다.")
