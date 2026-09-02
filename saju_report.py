@@ -1075,9 +1075,17 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str="", dram
                     "겁재격": "겁재격(劫財格)은 강렬한 승부욕과 에너지를 가진 격국이니라. 영업·스포츠·투자·경쟁 분야에서 두각을 나타내지만, 재물이 들어오는 만큼 나가는 기운도 있으니 동업과 보증은 반드시 조심하게.",
                 }
 
-                _gk_desc = _GK_NARR.get(
-                    _gkname,
-                    f"{_gkname}은(는) 독특한 개성과 능력을 갖춘 격국이니라. 자신만의 방식으로 세상에 가치를 만들어내는 팔자니라.",
+                _gk_parts = []
+                if _gk and _gk.get("격국_해설"):
+                    _gk_parts.append(_gk["격국_해설"])
+                if _gk and _gk.get("적합_진로"):
+                    _gk_parts.append(f"적합 분야: {_gk['적합_진로']}")
+                if _gk and _gk.get("경계사항"):
+                    _gk_parts.append(f"경계사항: {_gk['경계사항']}")
+                if _gk and _gk.get("신급_판정"):
+                    _gk_parts.append(f"귀격 조건: {_gk['신급_판정']}")
+                _gk_desc = "\n".join(_gk_parts) if _gk_parts else (
+                    f"{_gkname}은(는) 독특한 개성과 능력을 갖춘 격국이니라. 자신만의 방식으로 세상에 가치를 만들어내는 팔자니라."
                 )
 
                 # 신강신약 서술
