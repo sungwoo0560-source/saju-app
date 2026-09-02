@@ -14861,3 +14861,737 @@ def calc_turning_point(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0, targe
         "score_change": diff,
         "triggers": triggers,
     }
+
+
+# ⚠️ manse.py:156~160과 중복 정의 — 언더스코어 이름이라 wildcard import 불가.
+#    한쪽만 수정 시 화면/PDF 합충 판정이 갈린다. 수정 시 양쪽 동시 반영 필수.
+_OH_CG  = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土","己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
+_OH_JJ  = {"子":"水","丑":"土","寅":"木","卯":"木","辰":"土","巳":"火","午":"火","未":"土","申":"金","酉":"金","戌":"土","亥":"水"}
+_TG_HAP_FS = [frozenset({"甲","己"}),frozenset({"乙","庚"}),frozenset({"丙","辛"}),frozenset({"丁","壬"}),frozenset({"戊","癸"})]
+
+
+def compute_gi_ohs(pils):
+    """기신(忌神) 오행 리스트 산출 — build_gangsa_block과 동일 규칙(신강=인성·비겁 / 신약=관성·재성).
+    get_yongshin()의 "기신"이 오행 리스트로 오면 그대로 쓰고, 없으면(서술형 문자열) 신강/신약 판정으로 역산한다."""
+    try:
+        ilgan = pils[1]["cg"]
+        sn = get_ilgan_strength(ilgan, pils).get("신강신약", "중화")
+        gi = get_yongshin(pils).get("기신", [])
+        if isinstance(gi, list) and gi:
+            return gi
+        oh = _OH_CG.get(ilgan, "")
+        birth = {"木": "水", "火": "木", "土": "火", "金": "土", "水": "金"}
+        ctrl = {"木": "土", "火": "金", "土": "水", "金": "木", "水": "火"}
+        if "신강" in sn:
+            return [o for o in (birth.get(oh), oh) if o]
+        if "신약" in sn:
+            gwan = next((k for k, v in ctrl.items() if v == oh), "")
+            return [o for o in (gwan, ctrl.get(oh)) if o]
+        return []
+    except Exception:
+        return []
+
+
+# @cache_data 제거 — session_state 내부 접근으로 캐시 불가
+def build_past_events(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0):
+    """
+
+    과거 사건 자동 생성 v2 — 천간충+지지충 동시 감지, 도메인 7개 세분화, 구체적 문구
+
+    정확도 향상 포인트:
+
+    · 천간충(甲(갑)-庚(경), 乙(을)-辛(신), 丙(병)-壬(임), 丁(정)-癸(계)) + 지지충 동시 발생 → 최고강도
+
+    · 육합(六合) 감지로 긍정 이벤트 추가
+
+    · 충 종류별 도메인 자동 매핑 (子(자)午(오)→건강, 丑(축)未(미)→재물손실, 寅(인)申(신)→사고 등)
+
+    · 나이: 만나이+1 = 한국 세는나이 일관 적용
+
+    """
+
+    ilgan = pils[1]["cg"]
+
+    orig_jjs = [p["jj"] for p in pils]
+
+    orig_cgs = [p["cg"] for p in pils]
+
+    current_year = get_saju_year()
+
+    gi_ohs = compute_gi_ohs(pils)  # 거병(去病) 보정용 기신 오행 — 루프 밖에서 1회만 산출
+
+    birth_month = max(1, min(12, int(bm)))
+
+    birth_day = max(1, min(31, int(bd)))
+
+    birth_hour = max(0, min(23, int(bh)))
+
+    birth_minute = max(0, min(59, int(bmi)))
+
+    daewoon = SajuCoreEngine.get_daewoon(
+        pils,
+        birth_year,
+        birth_month,
+        birth_day,
+        birth_hour,
+        birth_minute,
+        gender=gender,
+    )
+
+    # ① 천간충 쌍 (甲-庚, 乙-辛, 丙-壬, 丁-癸)
+
+    TG_CHUNG = [
+        frozenset(["甲", "庚"]),
+        frozenset(["乙", "辛"]),
+        frozenset(["丙", "壬"]),
+        frozenset(["丁", "癸"]),
+    ]
+
+    # ② 천간합 쌍
+
+    TG_HAP = _TG_HAP_FS
+
+    # ③ 육합(六合) — 대운×세운 지지가 합을 이루면 긍정 이벤트
+
+    YUK_HAP = [
+        frozenset(["子", "丑"]),
+        frozenset(["寅", "亥"]),
+        frozenset(["卯", "戌"]),
+        frozenset(["辰", "酉"]),
+        frozenset(["巳", "申"]),
+        frozenset(["午", "未"]),
+    ]
+
+    # ④ 지지충 → 도메인·설명 (사건 유형 고정)
+
+
+    # ⑤ 십성 → 세분화 도메인 (7개 카테고리)
+
+
+    # ⑥ 대운+세운 십성 조합 → (강도, 구체 설명)
+
+
+    events = []
+
+    def _adjust_for_youth(domain, desc, age):
+        """미성년자(20세 미만)에 맞게 도메인과 설명을 필터링/수정"""
+
+        if age >= 20:
+            return domain, desc
+
+        # 20세 미만 필터링 로직
+
+        if any(w in domain for w in ["재물", "직업", "결혼", "이직", "사업", "승진"]):
+            return None, None  # 미성년자에게 안 맞는 도메인은 통째로 스킵
+
+        if "관재" in domain or "소송" in desc or "법적" in desc:
+            domain = domain.replace("관재", "잔부상").replace("이별", "")
+
+            desc = "성장기의 크고 작은 부상이나 건강 상의 주의가 필요했던 시기일 수 있습니다."
+
+        if "강제이동" in domain or "이사" in desc:
+            domain = "가족이동/환경변화"
+
+            desc = "부모님의 환경 변화나 전학 등으로 거주지/학교 생활에 큰 변화가 있었을 가능성이 있습니다."
+
+        if "건강" in domain or "사고" in domain or "질병" in domain or "부상" in desc:
+            domain = "건강/잔병치레"
+
+            desc = "어릴 적 크게 앓았거나 다쳤을 가능성, 또는 잔병치레가 많았을 시기입니다."
+
+        return domain, desc
+
+    for dw in daewoon:
+        if dw["시작연도"] > current_year:
+            continue
+
+        dw_ss = TEN_GODS_MATRIX.get(ilgan, {}).get(dw["cg"], "-")
+
+        dw_domain = SS_DOMAIN.get(gender, SS_DOMAIN["남"]).get(dw_ss, "변화")
+
+        age_start = dw["시작나이"]
+
+        # A. 대운 천간이 원국 천간과 충하는지 (천간충)
+
+        dw_tg_chung = [ocg for ocg in orig_cgs if frozenset([dw["cg"], ocg]) in TG_CHUNG]
+
+        # B. 대운 지지가 원국 지지와 충하는지 (지지충)
+
+        dw_jj_chung = [(ojj, frozenset([dw["jj"], ojj])) for ojj in orig_jjs if frozenset([dw["jj"], ojj]) in CHUNG_MAP]
+
+        # C. 대운 천간이 원국 천간과 합하는지
+
+        dw_tg_hap = [list(pair - {dw["cg"]})[0] for pair in TG_HAP if dw["cg"] in pair and list(pair - {dw["cg"]})[0] in orig_cgs]
+
+        # 대운 진입 이벤트: 천간충+지지충 동시 → 최고강도
+
+        if dw_tg_chung and dw_jj_chung:
+            ojj, ck = dw_jj_chung[0]
+
+            # 거병(去病) 보정 — 충 맞는 원국 지지가 기신 오행이면 흉작용 완화(High→Mid)
+            _dw_intensity = "High"
+            _dw_gubyeong_note = ""
+            if _OH_JJ.get(ojj, "") in gi_ohs:
+                _dw_intensity = "Mid"
+                _dw_gubyeong_note = " 다만 충을 맞은 자리가 원래 힘이 약한 기신 자리라, 겉보기보다 충격은 크지 않았을 가능성이 있습니다."
+
+            domain, cdd = CHUNG_DOMAIN_DESC.get(ck, (dw_domain, "큰 변화가 왔다"))
+
+            adj_domain, adj_desc = _adjust_for_youth(domain, cdd, age_start)
+
+            if adj_domain:
+                events.append(
+                    {
+                        "age": f"{age_start}~{age_start + 2}세",
+                        "year": dw["시작연도"],
+                        "type": "대운 천간충+지지충",
+                        "domain": adj_domain,
+                        "desc": (
+                            f"【{age_start}세 대운 진입 · 천간충+지지충 동시】"
+                            f"천간({dw['cg']})과 지지({dw['jj']})가 동시에 원국을 강타."
+                            f" {adj_desc}. 이 시기 삶이 크게 뒤흔들렸을 가능성이 매우 높습니다." + _dw_gubyeong_note
+                        ),
+                        "intensity": _dw_intensity,
+                    }
+                )
+
+            ojj, ck = dw_jj_chung[0]
+
+            domain, cdd = CHUNG_DOMAIN_DESC.get(ck, (dw_domain, "큰 변화가 찾아왔다"))
+
+            adj_domain, adj_desc = _adjust_for_youth(domain, cdd, age_start)
+
+            if adj_domain:
+                events.append(
+                    {
+                        "age": f"{age_start}~{age_start + 2}세",
+                        "year": dw["시작연도"],
+                        "type": "대운 지지충",
+                        "domain": adj_domain,
+                        "desc": f"【{age_start}세 대운 진입 · 지지충】{adj_desc}." + _dw_gubyeong_note,
+                        "intensity": _dw_intensity,
+                    }
+                )
+
+        elif dw_tg_hap:
+            adj_domain, _ = _adjust_for_youth(dw_domain, "", age_start)
+
+            if adj_domain:
+                events.append(
+                    {
+                        "age": f"{age_start}세",
+                        "year": dw["시작연도"],
+                        "type": "대운 천간합",
+                        "domain": adj_domain,
+                        "desc": f"【{age_start}세 대운 진입 · 천간합】천간합(天干合) 성립 — {adj_domain} 영역에서 뜻밖의 인연이나 도움이 찾아온 시기입니다.",
+                        "intensity": "Mid",
+                    }
+                )
+
+        # 대운 내 세운별 교차 분석
+
+        for y in range(dw["시작연도"], min(dw["종료연도"] + 1, current_year)):
+            age = y - birth_year + 1
+
+            if age < 5:
+                continue
+
+            sw = get_yearly_luck(pils, y) or {}
+
+            sw_cg = sw.get("cg", "")
+
+            sw_ss = sw.get("십성_천간", "-")
+
+            sw_domain = SS_DOMAIN.get(gender, SS_DOMAIN["남"]).get(sw_ss, "변화")
+
+            # 세운 지지 → 원국 지지 충 감지
+
+            sw_jj_chung = [(ojj, frozenset([sw.get("jj",""), ojj])) for ojj in orig_jjs if frozenset([sw.get("jj",""), ojj]) in CHUNG_MAP]
+
+            # 세운 천간 → 원국 천간 충 감지
+
+            sw_tg_chung = [ocg for ocg in orig_cgs if frozenset([sw_cg, ocg]) in TG_CHUNG]
+
+            # 대운 지지 ↔ 세운 지지 충
+
+            dw_sw_jj_chung = frozenset([dw["jj"], sw.get("jj","")]) in CHUNG_MAP
+
+            # 십성 조합 체크 (정방향+역방향)
+
+            dw_sw_key = f"{dw_ss}+{sw_ss}"
+
+            sw_dw_key = f"{sw_ss}+{dw_ss}"
+
+            combo_hit = HIGH_IMPACT.get(dw_sw_key) or HIGH_IMPACT.get(sw_dw_key)
+
+            # 삼합 성립 여부
+
+            sam_hap_found = []
+
+            all_jj = set(orig_jjs + [dw["jj"], sw.get("jj","")])
+
+            for combo, (hname, hoh, hdesc) in SAM_HAP_MAP.items():
+                if combo.issubset(all_jj) and dw["jj"] in combo and sw.get("jj","") in combo:
+                    sam_hap_found.append(hname)
+
+            # 대운×세운 육합 (긍정 결합)
+
+            yuk_hap = frozenset([dw["jj"], sw.get("jj","")]) in YUK_HAP
+
+            # 이미 같은 연도 이벤트가 있으면 스킵
+
+            if any(e["year"] == y for e in events):
+                continue
+
+            # ── 우선순위 1: 천간충+지지충 동시 (세운 기준) ──
+
+            if sw_tg_chung and sw_jj_chung:
+                ojj, ck = sw_jj_chung[0]
+
+                domain, cdd = CHUNG_DOMAIN_DESC.get(ck, (sw_domain, "큰 변화"))
+
+                combo_desc = combo_hit[1] if combo_hit else ""
+
+                adj_domain, adj_cdd = _adjust_for_youth(domain, cdd, age)
+
+                _, adj_combo = _adjust_for_youth(domain, combo_desc, age)
+
+                if adj_domain:
+                    events.append(
+                        {
+                            "age": f"{age}세",
+                            "year": y,
+                            "type": f"{dw_ss}대운 x {sw_ss}세운 + 천간충+지지충",
+                            "domain": adj_domain,
+                            "desc": (f"【{y}년 · {age}세 · 최고강도】천간({sw_cg})과 지지({sw['jj']})가 동시에 원국을 충격하는 해. {adj_cdd}. {adj_combo or ''}"),
+                            "intensity": "High",
+                        }
+                    )
+
+            # ── 우선순위 2: 세운 지지충 발생 ──
+
+            elif sw_jj_chung:
+                ojj, ck = sw_jj_chung[0]
+
+                domain, cdd = CHUNG_DOMAIN_DESC.get(ck, (sw_domain, "큰 변화"))
+
+                intensity = "High"  # 충 발생 시 최소 High
+
+                # 거병(去病) 보정 — 충 맞는 원국 지지가 기신 오행이면 흉작용 완화(High→Mid)
+                _gubyeong_note = ""
+                if _OH_JJ.get(ojj, "") in gi_ohs:
+                    intensity = "Mid"
+                    _gubyeong_note = " 다만 충을 맞은 자리가 원래 힘이 약한 기신 자리라, 겉보기보다 충격은 크지 않았을 가능성이 있습니다."
+
+                adj_domain, adj_cdd = _adjust_for_youth(domain, cdd, age)
+
+                _, adj_combo = _adjust_for_youth(domain, combo_hit[1] if combo_hit else "", age)
+
+                if adj_domain:
+                    if combo_hit:
+                        full_desc = f"【{y}년 · {age}세】{adj_cdd}. {adj_combo}" + _gubyeong_note
+
+                    else:
+                        full_desc = f"【{y}년 · {age}세】{adj_cdd}." + _gubyeong_note
+
+                    events.append(
+                        {
+                            "age": f"{age}세",
+                            "year": y,
+                            "type": f"{dw_ss}대운 x {sw_ss}세운 + 원국충",
+                            "domain": adj_domain,
+                            "desc": full_desc,
+                            "intensity": intensity,
+                        }
+                    )
+
+            # ── 우선순위 3: 대운 지지 ↔ 세운 지지 충 + 십성조합 강도 High ──
+
+            elif dw_sw_jj_chung and combo_hit and combo_hit[0] == "High":
+                adj_domain, adj_combo = _adjust_for_youth(sw_domain, combo_hit[1], age)
+
+                if adj_domain:
+                    events.append(
+                        {
+                            "age": f"{age}세",
+                            "year": y,
+                            "type": f"{dw_ss}대운 x {sw_ss}세운 (대운지지-세운지지 충)",
+                            "domain": adj_domain,
+                            "desc": f"【{y}년 · {age}세】대운과 세운 지지가 서로 충돌하며 운의 방향이 급변. {adj_combo}",
+                            "intensity": "High",
+                        }
+                    )
+
+            # ── 우선순위 4: 삼합 성립 ──
+
+            elif sam_hap_found:
+                adj_domain, _ = _adjust_for_youth(sw_domain, "", age)
+
+                if adj_domain:
+                    events.append(
+                        {
+                            "age": f"{age}세",
+                            "year": y,
+                            "type": f"삼합 {sam_hap_found[0]}",
+                            "domain": adj_domain,
+                            "desc": f"【{y}년 · {age}세】대운·세운·원국 삼합({sam_hap_found[0]}) 성립 — {adj_domain} 영역에서 운의 집중 발복이 있었을 가능성이 높습니다.",
+                            "intensity": "Mid",
+                        }
+                    )
+
+            # ── 우선순위 5: 십성 조합 High/Mid ──
+
+            elif combo_hit:
+                intensity, combo_desc = combo_hit
+
+                if intensity in ("High", "Mid", "Low"):
+                    adj_domain, adj_combo = _adjust_for_youth(sw_domain, combo_desc, age)
+
+                    if adj_domain:
+                        events.append(
+                            {
+                                "age": f"{age}세",
+                                "year": y,
+                                "type": f"{dw_ss}대운 x {sw_ss}세운",
+                                "domain": adj_domain,
+                                "desc": f"【{y}년 · {age}세】{adj_combo}",
+                                "intensity": intensity,
+                            }
+                        )
+
+            # ── 우선순위 6: 대운×세운 육합 (긍정 결합) ──
+
+            elif yuk_hap and dw_ss in {"正財", "食神", "正官", "正印"} and sw_ss in {"正財", "食神", "正官", "正印"}:
+                adj_domain, _ = _adjust_for_youth(sw_domain, "", age)
+
+                if adj_domain:
+                    events.append(
+                        {
+                            "age": f"{age}세",
+                            "year": y,
+                            "type": f"{dw_ss}대운 x {sw_ss}세운 육합",
+                            "domain": adj_domain,
+                            "desc": f"【{y}년 · {age}세】대운·세운 지지가 육합(六合)을 이루며 기운이 모임. {adj_domain} 영역에서 좋은 결실이 있었을 가능성이 높습니다.",
+                            "intensity": "Low",
+                        }
+                    )
+
+    # 중요도 기준 정렬, 상위 15개 선별
+
+    priority = {"High": 0, "Mid": 1, "Low": 2, "None": 3}
+
+    events.sort(key=lambda e: (priority.get(e["intensity"], 3), e["year"]))
+
+    return events
+
+
+
+@st.cache_data
+def generate_engine_highlights(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0, target_year=None):
+    """
+
+    * 핵심 엔진 *
+
+    AI가 찾게 하지 말고 엔진이 먼저 뽑아낸다.
+
+    반환값:
+
+    {
+
+        "past_events": [{"age": "27~28세", "year": 2019, "domain": "직장", "desc": "...", "intensity": "🔴"}],
+
+        "personality": ["겉은 강해 보이나 속은...", "혼자 고민을 오래 끄는 성향"],
+
+        "money_peak": [{"age": 32, "year": 2024, "desc": "..."}],
+
+        "marriage_peak": [{"age": 31, "year": 2023, "desc": "..."}],
+
+        "danger_zones": [{"age": "29~30세", "desc": "..."}],
+
+        "wolji_chung": [{"age": "28세", "desc": "..."}]
+
+    }
+
+    """
+
+    ilgan = pils[1]["cg"]
+
+    ilgan_oh = OH.get(ilgan, "")
+
+    if target_year is None:
+        target_year = get_saju_year()
+    current_year = target_year
+
+    # TEN_GODS_MATRIX는 '偏財(편재)' 형식 반환 → 한글 부분만 추출하는 헬퍼
+    def _ss_k(s):
+        return s[s.find('(')+1:s.find(')')] if '(' in s else s
+
+    daewoon = SajuCoreEngine.get_daewoon(pils, birth_year, bm, bd, bh, bmi, gender=gender)
+
+    strength_info = get_ilgan_strength(ilgan, pils)
+
+    sn = strength_info["신강신약"]
+
+    oh_strength = strength_info["oh_strength"]
+
+    # -- 과거 사건 (기존 엔진 활용) -----------------------
+
+    past_events = build_past_events(pils, birth_year, gender, bm, bd, bh, bmi)
+
+    # -- 성향 - 조합 공식으로 생성 ------------------------
+
+    personality = build_personality_detail_v2(pils, gender, sn, oh_strength)
+
+    # -- 재물 피크 -----------------------------------------
+
+    money_peak = []
+
+    MONEY_SS = {"식신", "정재", "편재"}
+
+    for dw in daewoon:
+        dw_ss = _ss_k(TEN_GODS_MATRIX.get(ilgan, {}).get(dw["cg"], "-"))
+
+        age_c = birth_year + dw["시작나이"] - 1
+
+        if dw_ss in MONEY_SS:
+            money_peak.append(
+                {
+                    "age": f"{dw['시작나이']}~{dw['시작나이'] + 9}세",
+                    "year": f"{dw['시작연도']}~{dw['종료연도']}",
+                    "desc": f"{dw['str']}대운({dw_ss}) - 재물이 자연스럽게 따라오는 시기",
+                    "ss": dw_ss,
+                }
+            )
+
+        # 세운 중 재물 피크 (현재+5년)
+
+        if dw["시작연도"] <= current_year + 5 and dw["종료연도"] >= current_year - 2:
+            for y in range(
+                max(dw["시작연도"], current_year - 2),
+                min(dw["종료연도"] + 1, current_year + 6),
+            ):
+                sw = get_yearly_luck(pils, y) or {}
+                sw_ss = _ss_k(sw.get("십성_천간",""))
+
+                if sw_ss in MONEY_SS and dw_ss in MONEY_SS:
+                    age = y - birth_year + 1
+
+                    money_peak.append(
+                        {
+                            "age": f"{age}세",
+                            "year": str(y),
+                            "desc": f"{y}년 - 대운({dw_ss})×세운({sw_ss}) 재물 더블. 최고의 돈 기회",
+                            "ss": "더블",
+                        }
+                    )
+
+    # -- 혼인 피크 -----------------------------------------
+
+    MARRIAGE_SS = {"정재", "편재"} if gender == "남" else {"정관", "편관"}
+
+    marriage_peak = []
+
+    for dw in daewoon:
+        dw_ss = _ss_k(TEN_GODS_MATRIX.get(ilgan, {}).get(dw["cg"], "-"))
+
+        if dw_ss in MARRIAGE_SS:
+            # 대운 내에서 가장 강한 세운 탐색
+
+            for y in range(dw["시작연도"], min(dw["종료연도"] + 1, current_year + 10)):
+                sw = get_yearly_luck(pils, y) or {}
+                sw_ss = _ss_k(sw.get("십성_천간",""))
+
+                if sw_ss in MARRIAGE_SS:
+                    age = y - birth_year + 1
+
+                    marriage_peak.append(
+                        {
+                            "age": f"{age}세",
+                            "year": str(y),
+                            "desc": f"{y}년({age}세) - 대운/세운 모두 인연성. 배우자 인연이 오는 해",
+                        }
+                    )
+
+    # -- 위험 구간 -----------------------------------------
+
+    danger_zones = []
+
+    DANGER_SS = {"편관", "겁재"}
+
+    for dw in daewoon:
+        dw_ss = _ss_k(TEN_GODS_MATRIX.get(ilgan, {}).get(dw["cg"], "-"))
+
+        if dw_ss in DANGER_SS:
+            danger_zones.append(
+                {
+                    "age": f"{dw['시작나이']}~{dw['시작나이'] + 9}세",
+                    "year": f"{dw['시작연도']}~{dw['종료연도']}",
+                    "desc": f"{dw['str']}대운({dw_ss}) - {'직장/관재/건강 압박' if dw_ss == '편관' else '재물손실/경쟁/배신'} 주의",
+                }
+            )
+
+    # -- 월지 충 시점 --------------------------------------
+
+    wolji_chung = []
+
+    wol_jj = pils[2]["jj"] if len(pils) > 2 else ""
+
+    for dw in daewoon:
+        if dw["종료연도"] >= current_year:
+            continue
+
+        k = frozenset([dw["jj"], wol_jj])
+
+        if k in CHUNG_MAP:
+            name_c, _, desc = CHUNG_MAP[k]
+
+            age_start = dw["시작나이"]
+
+            suffix = "학업/거주환경 중 하나가 크게 흔들렸습니다." if age_start < 20 else "직업/가정 중 하나가 반드시 흔들렸습니다."
+
+            wolji_chung.append(
+                {
+                    "age": f"{age_start}~{age_start + 2}세",
+                    "desc": f"대운 진입시 월지 충({name_c}) - {desc}. 이 시기 {suffix}",
+                }
+            )
+
+        for y in range(dw["시작연도"], min(dw["종료연도"] + 1, current_year)):
+            sw = get_yearly_luck(pils, y) or {}
+
+            k2 = frozenset([sw.get("jj",""), wol_jj])
+
+            if k2 in CHUNG_MAP:
+                age = y - birth_year + 1
+
+                name_c2, _, desc2 = CHUNG_MAP[k2]
+
+                suffix = "학업/가정환경 중 하나가 흔들렸습니다." if age < 20 else "직업/가정 중 하나가 흔들렸습니다."
+
+                wolji_chung.append(
+                    {
+                        "age": f"{age}세",
+                        "desc": f"{y}년 세운이 월지를 충({name_c2}) - {desc2}. {suffix}",
+                    }
+                )
+
+    return {
+        "past_events": past_events,
+        "personality": personality,
+        "money_peak": money_peak,
+        "marriage_peak": marriage_peak,
+        "danger_zones": danger_zones,
+        "wolji_chung": wolji_chung,
+        "raw": {
+            "ilgan": ilgan,
+            "sn": sn,
+            "oh_strength": oh_strength,
+            "yongshin_ohs": (get_yongshin(pils) or {}).get("종합_용신", []),
+            "gyeok": get_gyeokguk(pils)["격국명"] if get_gyeokguk(pils) else "미정격",
+        },
+    }
+
+
+def build_personality_detail_v2(pils, gender, sn, oh_strength):
+    """
+
+    강화된 성향 DB - 조합 공식 기반
+
+    신약+관성강 / 비겁강 / 수과다 등 구체적 콤보
+
+    """
+
+    ilgan = pils[1]["cg"]
+
+    ilgan_oh = OH.get(ilgan, "")
+
+    traits = []
+
+    # 강한 십성 파악 (원국 내 2개 이상)
+
+    ss_count = {}
+
+    for p in pils:
+        jjg = JIJANGGAN.get(p["jj"], [])
+
+        jeongi = jjg[-1] if jjg else ""
+
+        for cg_check in [p["cg"], jeongi]:
+            ss = TEN_GODS_MATRIX.get(ilgan, {}).get(cg_check, "")
+
+            if ss and ss not in ("", "-"):
+                ss_count[ss] = ss_count.get(ss, 0) + 1
+
+    strong_ss = [ss for ss, cnt in ss_count.items() if cnt >= 2]
+
+    sn_key = "신강" if "신강" in sn else "신약"
+
+    # 조합 공식 적용
+
+    for ss in strong_ss:
+        combo_key = (sn_key, ss)
+
+        if combo_key in PERSONALITY_COMBO_DB:
+            traits.extend(PERSONALITY_COMBO_DB[combo_key])
+
+    # 기본 일간 심리 (조합이 없을 때 폴백)
+
+    if not traits:
+
+        base = OH_BASE.get(ilgan_oh, {}).get(sn_key, "")
+
+        if base:
+            traits.append(base)
+
+    # 일지 십성 심리
+
+    iljj_ss = "-"
+
+    try:
+        iljj_ss = calc_sipsung(ilgan, pils)[1].get("jj_ss", "-")
+
+    except Exception as e:
+        _saju_log.debug(str(e))
+
+    ILJJ_DEEP = {
+        "비견": "지기 싫어합니다. 지면 속으로 오래 끌고 갑니다. 표시는 안 내도 계속 생각합니다.",
+        "겁재": "승부욕이 강합니다. 가까운 사람에게도 지기 싫어합니다. 배신당한 경험이 있고, 이후로 조심합니다.",
+        "식신": "자기 방식이 있습니다. 간섭받는 것을 싫어하고, 자기 페이스로 하는 걸 좋아합니다.",
+        "상관": "말이 빠르고 재치 있습니다. 상대방의 단점이 눈에 먼저 보입니다. 때로는 그 솔직함이 문제가 됩니다.",
+        "편재": "활동적이고 사교적이지만, 한곳에 오래 머물기 싫어합니다. 새로운 자극을 계속 찾습니다.",
+        "정재": "현실적이고 꼼꼼합니다. 손해 보는 것을 굉장히 싫어합니다. 계산이 빠릅니다.",
+        "편관": "압박이 오면 오히려 더 버팁니다. 굴복하는 것을 본능적으로 거부합니다. 강인한 사람입니다.",
+        "정관": "체면과 원칙을 중시합니다. 남들 시선에 민감하고, 창피당하는 것을 극도로 싫어합니다.",
+        "편인": "설명하기 어렵지만 '그냥 아는' 경우가 많습니다. 직관이 매우 발달해 있습니다.",
+        "정인": "완전히 이해하기 전까지 결정을 미룹니다. 배움에 대한 욕구가 강합니다.",
+    }
+
+    iljj_t = ILJJ_DEEP.get(iljj_ss, "")
+
+    if iljj_t and iljj_t not in " ".join(traits):
+        traits.append(iljj_t)
+
+    # 오행 과다/부족 조합
+
+    over_ohs = [o for o, v in oh_strength.items() if v >= 35]
+
+    lack_ohs = [o for o, v in oh_strength.items() if v <= 5]
+
+    zero_ohs = [o for o, v in oh_strength.items() if v == 0]
+
+    for oh in over_ohs:
+        for t in OH_COMBO_DB.get(("over", oh), []):
+            traits.append(t)
+
+    for oh in lack_ohs:
+        for t in OH_COMBO_DB.get(("lack", oh), []):
+            traits.append(t)
+
+    if zero_ohs:
+        oh_names = "/".join([OHN.get(o, "") for o in zero_ohs])
+
+        traits.append(f"{oh_names} 기운이 완전히 없습니다. 이 분야가 들어올 때마다 당황하거나 흔들립니다.")
+
+    return traits[:8]  # 최대 8개 - 너무 많으면 희석됨
+
+
