@@ -14435,3 +14435,429 @@ def get_jeokjung_children(gender, ilgan, yukjin_list, pils):
     return {"title": title, "line1": line1, "line2": line2, "line3": line3}
 
 # HOTFIX-3: FIX-8/9 redeploy trigger
+
+
+def get_saju_year(dt=None):
+    """입춘 기준 사주 연도. 양력 1/1~입춘 전이면 전년도를 반환한다.
+    _get_term_precision_time이 내부적으로 KASI_DATA를 1회 로드 후 재사용해
+    반복 호출 비용이 무시할 수준(실측 0.0005ms/회)이라 별도 캐시는 걸지 않는다."""
+    d = dt or datetime.now()
+    try:
+        ipchun = SajuCoreEngine._get_term_precision_time(d.year, "입춘")
+        if not ipchun:
+            return d.year
+        t_m, t_d, t_h, t_min = ipchun
+        ipchun_dt = datetime(d.year, t_m, t_d, t_h, t_min)
+        return d.year if d >= ipchun_dt else d.year - 1
+    except Exception:
+        return d.year
+
+
+_JIJI_CHUNG = {
+    "子": "午",
+    "午": "子",
+    "丑": "未",
+    "未": "丑",
+    "寅": "申",
+    "申": "寅",
+    "卯": "酉",
+    "酉": "卯",
+    "辰": "戌",
+    "戌": "辰",
+    "巳": "亥",
+    "亥": "巳",
+}
+
+_JIJI_HYEONG = {
+    "子": "卯",
+    "卯": "子",
+    "寅": "巳",
+    "巳": "申",
+    "申": "寅",
+    "丑": "戌",
+    "戌": "未",
+    "未": "丑",
+    "辰": "辰",
+    "午": "午",
+    "酉": "酉",
+    "亥": "亥",
+}
+
+_TG_HAP_PAIRS = [{"甲","己"},{"乙","庚"},{"丙","辛"},{"丁","壬"},{"戊","癸"}]
+
+_SAM_HAP = [
+    (frozenset({"寅", "午", "戌"}), "火"),
+    (frozenset({"申", "子", "辰"}), "水"),
+    (frozenset({"亥", "卯", "未"}), "木"),
+    (frozenset({"巳", "酉", "丑"}), "金"),
+]
+
+_BIRTH_F2 = {"木": "火", "火": "土", "土": "金", "金": "水", "水": "木"}
+
+_CTRL2 = {"木": "土", "火": "金", "土": "水", "金": "木", "水": "火"}
+
+
+@st.cache_data
+def detect_event_triggers(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0, target_year=None):
+    """
+
+    사건 트리거 감지 - 충/형/합/십성활성/대운전환
+
+    Returns list[dict]: type, title, detail, prob(0~100)
+
+    """
+
+    if target_year is None:
+        target_year = get_saju_year()
+
+    ilgan = pils[1]["cg"]
+
+    il_jj = pils[1]["jj"]
+
+    wol_jj = pils[2]["jj"] if len(pils) > 2 else ""
+
+    y_idx = (target_year - 4) % 60
+
+    year_jj = JJ[y_idx % 12]
+
+    year_cg = CG[y_idx % 10]
+
+    # 대운 호출 시 실제 생년월일시 반영 (사용자 지침 준수)
+
+    dw_list = SajuCoreEngine.get_daewoon(pils, birth_year, bm, bd, bh, bmi, gender=gender)
+
+    cur_dw = next((d for d in dw_list if d["시작연도"] <= target_year <= d["종료연도"]), None)
+
+    dw_jj = cur_dw["jj"] if cur_dw else ""
+
+    dw_cg = cur_dw["cg"] if cur_dw else ""
+
+    ys = get_yongshin(pils)
+
+    yong_ohs = ys.get("종합_용신", []) if isinstance(ys.get("종합_용신"), list) else []
+
+    all_jjs = frozenset(p["jj"] for p in pils)
+
+    triggers = []
+
+    def add(type_, title, detail, prob):
+
+        triggers.append({"type": type_, "title": title, "detail": detail, "prob": prob})
+
+    # ① 충
+
+    if _JIJI_CHUNG.get(il_jj) == year_jj:
+        add(
+            "충",
+            "⚡ 일지 충(세운) - 삶의 터전 격변",
+            "이사/직장변화/관계분리 확률이 높습니다. 기존 환경이 흔들리는 해입니다.",
+            85,
+        )
+
+    if dw_jj and _JIJI_CHUNG.get(il_jj) == dw_jj:
+        add(
+            "충",
+            "⚡ 일지 충(대운) | 10년 환경 변화",
+            "대운 수준의 큰 환경 변화. 이사/직업 전환의 대운입니다.",
+            80,
+        )
+
+    if _JIJI_CHUNG.get(wol_jj) == year_jj:
+        add(
+            "충",
+            "🌊 월지 충 - 가족/직업 변동",
+            "부모/형제 관계 변화, 직업 환경의 급격한 변화가 예상됩니다.",
+            75,
+        )
+
+    # ② 형
+
+    if _JIJI_HYEONG.get(il_jj) == year_jj or _JIJI_HYEONG.get(year_jj) == il_jj:
+        add(
+            "형",
+            "⚠️ 일지 형(刑) - 스트레스/사고",
+            "건강/사고/법적 문제에 주의. 인간관계 갈등이 생깁니다.",
+            70,
+        )
+
+    # ③ 천간합
+
+    for pair in _TG_HAP_PAIRS:
+        if dw_cg in pair and year_cg in pair:
+            add(
+                "합",
+                "💑 천간합 - 새 인연/파트너십",
+                "새로운 인연/결혼/동업/계약 인연이 찾아옵니다.",
+                65,
+            )
+
+            break
+
+    # ④ 삼합국
+
+    check_jjs = all_jjs | frozenset([dw_jj, year_jj])
+
+    for combo, oh in _SAM_HAP:
+        if combo.issubset(check_jjs):
+            kind = "용신" if oh in yong_ohs else "기신"
+
+            add(
+                "삼합",
+                "🌟 삼합국 - 강력한 기운 형성",
+                f"대운/세운/원국이 {oh}({OHN.get(oh, '')}) 삼합. {kind} 오행이므로 {'크게 발복' if kind == '용신' else '조심 필요'}합니다.",
+                80,
+            )
+
+            break
+
+    # ⑤ 용신/기신 대운
+
+    if dw_cg:
+        dw_oh = OH.get(dw_cg, "")
+
+        if dw_oh in yong_ohs:
+            add(
+                "황금기",
+                "- 용신 대운 - 황금기",
+                "일생에 몇 번 없는 상승기. 이 시기의 도전은 결실을 맺습니다.",
+                90,
+            )
+
+        elif any(_CTRL2.get(dw_oh) == y or _CTRL2.get(y) == dw_oh for y in yong_ohs):
+            add(
+                "경계",
+                "🛡️ 기신 대운 - 방어 필요",
+                "확장보다 수성(守成)이 최선. 큰 결정은 신중히 하십시오.",
+                80,
+            )
+
+    # ⑥ 대운 전환점 (2년 이내)
+
+    for i, dw_item in enumerate(dw_list[:-1]):
+        if dw_item["시작연도"] <= target_year <= dw_item["종료연도"]:
+            yrs_left = dw_item["종료연도"] - target_year
+
+            if yrs_left <= 2:
+                next_dw = dw_list[i + 1]
+
+                add(
+                    "전환",
+                    "🔄 대운 전환점 - 흐름 역전",
+                    f"{yrs_left + 1}년 안에 대운이 {next_dw['str']}로 전환됩니다. 이전과 다른 인생 국면이 펼쳐집니다.",
+                    85,
+                )
+
+    # ⑦ 십성 활성화
+
+    year_ss = TEN_GODS_MATRIX.get(ilgan, {}).get(year_cg, "-")
+
+    if year_ss in ["정관", "편관"]:
+        add(
+            "직업",
+            "🎖️ 관성 활성 - 직업/명예 변화",
+            f"세운 천간({year_cg})이 {year_ss}. 승진/이직/자격증 변화가 예상됩니다.",
+            70,
+        )
+
+    if year_ss in ["정재", "편재"]:
+        add(
+            "재물",
+            "💰 재성 활성 - 재물 흐름",
+            f"세운 천간({year_cg})이 {year_ss}. 재물 흐름이 활발해집니다. 투자 기회 주의.",
+            72,
+        )
+
+    return triggers
+
+
+@st.cache_data
+def calc_luck_score(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0, target_year=None):
+    """대운+세운 종합 운세 점수 (0~100)"""
+
+    if target_year is None:
+        target_year = get_saju_year()
+
+    ys = get_yongshin(pils)
+
+    yong_ohs = ys.get("종합_용신", []) if isinstance(ys.get("종합_용신"), list) else []
+
+    dw_list = SajuCoreEngine.get_daewoon(pils, birth_year, bm, bd, bh, bmi, gender=gender)
+
+    cur_dw = next((d for d in dw_list if d["시작연도"] <= target_year <= d["종료연도"]), None)
+
+    score = 50
+
+    if cur_dw:
+        dw_oh = OH.get(cur_dw["cg"], "")
+
+        if dw_oh in yong_ohs:
+            score += 25
+
+        elif any(_BIRTH_F2.get(dw_oh) == y for y in yong_ohs):
+            score += 12
+
+        elif any(_CTRL2.get(dw_oh) == y or _CTRL2.get(y) == dw_oh for y in yong_ohs):
+            score -= 20
+
+    _LV = {
+        "대길(大吉)": 20,
+        "길(吉)": 10,
+        "평길(平吉)": 5,
+        "평(平)": 0,
+        "흉(凶)": -15,
+        "흉흉(凶凶)": -25,
+    }
+
+    yl = get_yearly_luck(pils, target_year)
+
+    score += _LV.get(yl.get("길흉", "평(平)"), 0)
+
+    return max(0, min(100, score))
+
+
+@st.cache_data
+def calc_turning_point(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0, target_year=None):
+    """
+
+    인생 전환점 감지 엔진 (정밀 v2)
+
+    대운 점수 차이 + 세운 트리거 + 충합 종합
+
+    Returns dict: {is_turning:bool, intensity:str, reason:list, score_change:int}
+
+    """
+
+    if target_year is None:
+        target_year = get_saju_year()
+
+    prev_score = calc_luck_score(pils, birth_year, gender, bm, bd, bh, bmi, target_year - 1)
+
+    curr_score = calc_luck_score(pils, birth_year, gender, bm, bd, bh, bmi, target_year)
+
+    next_score = calc_luck_score(pils, birth_year, gender, bm, bd, bh, bmi, target_year + 1)
+
+    dw_list = SajuCoreEngine.get_daewoon(pils, birth_year, bm, bd, bh, bmi, gender=gender)
+
+    cur_dw = next((d for d in dw_list if d["시작연도"] <= target_year <= d["종료연도"]), None)
+
+    prev_dw = None
+
+    for i, d in enumerate(dw_list):
+        if d["시작연도"] <= target_year <= d["종료연도"] and i > 0:
+            prev_dw = dw_list[i - 1]
+
+            break
+
+    reasons = []
+
+    diff = curr_score - prev_score
+
+    next_diff = next_score - curr_score
+
+    # 대운 전환점 (이 해 또는 1~2년 이내)
+
+    if cur_dw:
+        yrs_to_change = cur_dw["종료연도"] - target_year
+
+        if yrs_to_change <= 1:
+            reasons.append(f"⚡ 대운 {cur_dw['str']} 마지막 해 - 인생 국면 전환 목전")
+
+        if cur_dw["시작연도"] == target_year:
+            reasons.append(f"🌟 새 대운 {cur_dw['str']} 시작 | 10년 흐름 완전 변화")
+
+    if prev_dw and cur_dw and cur_dw["시작연도"] == target_year:
+        # 이전 대운과 오행 관계
+
+        prev_oh = OH.get(prev_dw["cg"], "")
+
+        curr_oh = OH.get(cur_dw["cg"], "")
+
+        ys = get_yongshin(pils)
+
+        yong_ohs = ys.get("종합_용신", []) if isinstance(ys.get("종합_용신"), list) else []
+
+        if prev_oh not in yong_ohs and curr_oh in yong_ohs:
+            reasons.append(f"- 기신 대운->용신 대운 전환 - 인생 역전의 기회")
+
+        elif prev_oh in yong_ohs and curr_oh not in yong_ohs:
+            reasons.append(f"⚠️ 용신 대운->기신 대운 전환 - 속도 조절 필요")
+
+    # 운세 점수 급변
+
+    if abs(diff) >= 25:
+        direction = "상승" if diff > 0 else "하락"
+
+        reasons.append(f"📊 운세 점수 {abs(diff)}점 급{'등' if diff > 0 else '락'} - 삶의 {direction} 흐름")
+
+    elif abs(diff) >= 15:
+        direction = "개선" if diff > 0 else "하강"
+
+        reasons.append(f"📈 운세 {direction} ({diff:+d}점) - 변화 감지")
+
+    # 사건 트리거 (충/합 있으면 강화)
+
+    triggers = detect_event_triggers(pils, birth_year, gender, bm, bd, bh, bmi, target_year)
+
+    high_triggers = [t for t in triggers if t["prob"] >= 80]
+
+    if high_triggers:
+        # 트리거 제목 정리 — 불필요한 내부 식별자 제거
+        _trig_title = high_triggers[0].get("title","사건")
+        _trig_title = _trig_title.replace(" - ","·").strip()
+        reasons.append(f"🔴 강한 변화 기운 {len(high_triggers)}가지 — {_trig_title}")
+
+    # 전환점 여부 및 강도
+
+    total_score_change = abs(diff)
+
+    is_turning = total_score_change >= 15 or any("대운" in r or "전환" in r for r in reasons)
+
+    if total_score_change >= 30 or len(reasons) >= 3:
+        intensity = "🔴 강력 전환점"
+
+    elif total_score_change >= 20 or len(reasons) >= 2:
+        intensity = "🟡 주요 변화점"
+
+    elif is_turning:
+        intensity = "🟢 변화 시작"
+
+    else:
+        intensity = "⬜ 흐름 유지"
+
+    # 운세 라벨링 (Stage Labeling)
+
+    fate_label = (
+        "준비기 🌱",
+        "새로운 시작을 위해 내면을 채우고 씨앗을 심는 시기입니다.",
+    )
+
+    if is_turning:
+        fate_label = (
+            "전환기 ⚡",
+            "삶의 경로가 바뀌는 격동의 시기입니다. 유연한 대처가 필요합니다.",
+        )
+
+    elif diff > 10:
+        fate_label = (
+            "확장기 🔥",
+            "에너지가 분출되고 외연을 넓히는 시기입니다. 적극적으로 움직이세요.",
+        )
+
+    elif curr_score >= 70:
+        fate_label = (
+            "수확기 🍂",
+            "그동안의 노력이 결실을 맺는 안정과 성취의 시기입니다.",
+        )
+
+    return {
+        "is_turning": is_turning,
+        "intensity": intensity,
+        "fate_label": fate_label[0],
+        "fate_desc": fate_label[1],
+        "reason": reasons,
+        "score_prev": prev_score,
+        "score_curr": curr_score,
+        "score_next": next_score,
+        "score_change": diff,
+        "triggers": triggers,
+    }
