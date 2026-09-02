@@ -653,6 +653,8 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str="", dram
                 for ln in lines:
                     if y < BOT:
                         y = new_page(c)
+                        c.setFont(font, size)
+                        c.setFillColorRGB(*color)
 
                     c.drawString(MARGIN + indent, y, ln)
 
