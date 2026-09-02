@@ -6693,7 +6693,7 @@ def is_byeong_gu(pils):
 
 
 # @cache_data 제거 — session_state 내부 접근으로 캐시 불가
-def build_past_events(pils, birth_year, gender):
+def build_past_events(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0):
     """
 
     과거 사건 자동 생성 v2 — 천간충+지지충 동시 감지, 도메인 7개 세분화, 구체적 문구
@@ -6720,13 +6720,13 @@ def build_past_events(pils, birth_year, gender):
 
     gi_ohs = compute_gi_ohs(pils)  # 거병(去病) 보정용 기신 오행 — 루프 밖에서 1회만 산출
 
-    birth_month = max(1, min(12, int(st.session_state.get("birth_month") or 1)))
+    birth_month = max(1, min(12, int(bm)))
 
-    birth_day = max(1, min(31, int(st.session_state.get("birth_day") or 1)))
+    birth_day = max(1, min(31, int(bd)))
 
-    birth_hour = max(0, min(23, int(st.session_state.get("birth_hour") or 12)))
+    birth_hour = max(0, min(23, int(bh)))
 
-    birth_minute = max(0, min(59, int(st.session_state.get("birth_minute") or 0)))
+    birth_minute = max(0, min(59, int(bmi)))
 
     daewoon = SajuCoreEngine.get_daewoon(
         pils,
@@ -7494,7 +7494,7 @@ def generate_engine_highlights(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=
 
     # -- 과거 사건 (기존 엔진 활용) -----------------------
 
-    past_events = build_past_events(pils, birth_year, gender)
+    past_events = build_past_events(pils, birth_year, gender, bm, bd, bh, bmi)
 
     # -- 성향 - 조합 공식으로 생성 ------------------------
 
@@ -7993,7 +7993,7 @@ def get_cached_ai_interpretation(
     # -- 엔진 하이라이트 계산 (핵심) -------------------
 
     try:
-        hl = generate_engine_highlights(pils, birth_year, gender, target_year=get_saju_year())
+        hl = generate_engine_highlights(pils, birth_year, gender, birth_month, birth_day, birth_hour, birth_minute, target_year=get_saju_year())
     except Exception:
         hl = []
 
@@ -12814,6 +12814,8 @@ def tab_past_events(pils, birth_year, gender, name=""):
     _today = datetime.now()
     _bm  = max(1, min(12, int(st.session_state.get("birth_month") or 1)))
     _bd2 = max(1, min(31, int(st.session_state.get("birth_day")   or 1)))
+    _bh  = max(0, min(23, int(st.session_state.get("birth_hour") or 12)))
+    _bmi = max(0, min(59, int(st.session_state.get("birth_minute") or 0)))
     _man_age = _today.year - birth_year
     if (_today.month, _today.day) < (_bm, _bd2):
         _man_age -= 1
@@ -12823,7 +12825,7 @@ def tab_past_events(pils, birth_year, gender, name=""):
     # ── 데이터 계산
     with st.spinner("과거 사건 계산 중..."):
         try:
-            hl = generate_engine_highlights(pils, birth_year, gender, target_year=get_saju_year())
+            hl = generate_engine_highlights(pils, birth_year, gender, _bm, _bd2, _bh, _bmi, target_year=get_saju_year())
         except Exception:
             hl = []
 
