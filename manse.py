@@ -201,6 +201,9 @@ except (NameError, AttributeError):
 
 from saju_sinsal import *
 from saju_interpreter import *
+# 언더스코어로 시작하는 이름은 `import *`로 재수출되지 않으므로 명시적으로 가져온다
+# (8631653에서 saju_interpreter.py로 이동한 상수 중 manse.py가 여전히 참조하는 2개)
+from saju_interpreter import _JIJI_CHUNG, _TG_HAP_PAIRS
 from saju_report import *
 
 # ==========================================================
