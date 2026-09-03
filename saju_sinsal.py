@@ -1095,7 +1095,7 @@ def get_geunmyo_hwasil(pils):
     """
     ilgan = pils[1].get("cg", "") if len(pils) > 1 and pils[1] else ""
     pillar_order = [
-        ("근(根)", 0), ("묘(苗)", 2), ("화(花)", 1), ("실(實)", 3)
+        ("근(根)", 3), ("묘(苗)", 2), ("화(花)", 1), ("실(實)", 0)
     ]
     result = []
     for gung, idx in pillar_order:
