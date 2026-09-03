@@ -1320,15 +1320,23 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str="", dram
                     else:
                         # 2순위: engine highlights + 대운×세운 교차로 상세 서술 생성
 
+                        _hl_err = None
                         try:
                             _hl = generate_engine_highlights(pils, birth_year, gender)
-                        except Exception:
-                            _hl = []
+                        except Exception as _hle:
+                            _hl = {}
+                            import traceback as _tb_hl
+                            _hl_frames = _tb_hl.extract_tb(_hle.__traceback__)
+                            _hl_loc = f"{os.path.basename(_hl_frames[-1].filename)}:{_hl_frames[-1].lineno}" if _hl_frames else "?"
+                            _hl_err = f"{type(_hle).__name__} @ {_hl_loc}"
 
                         _pevs = sorted(
                             _hl.get("past_events", []),
                             key=lambda e: {"🔴": 0, "🟡": 1, "🟢": 2}.get(e.get("intensity", "🟢"), 3),
                         )
+
+                        if _hl_err:
+                            y = write(c, f"  (과거 사건 계산 불가: {_hl_err})", y, size=11)
 
                         _current_y = _dt.now().year
 
@@ -1674,10 +1682,15 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str="", dram
 
                     _sw_n2 = get_yearly_luck(pils, _cy + 2)
 
+                    _tp_err = None
                     try:
                         _tp = calc_turning_point(pils, birth_year, gender, _cy)
-                    except Exception:
+                    except Exception as _tpe:
                         _tp = {}
+                        import traceback as _tb_tp
+                        _tp_frames = _tb_tp.extract_tb(_tpe.__traceback__)
+                        _tp_loc = f"{os.path.basename(_tp_frames[-1].filename)}:{_tp_frames[-1].lineno}" if _tp_frames else "?"
+                        _tp_err = f"{type(_tpe).__name__} @ {_tp_loc}"
 
                     _ys_c = get_yongshin(pils)
 
@@ -1813,6 +1826,9 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str="", dram
                     if _tp_reasons:
                         for _r in _tp_reasons[:4]:
                             y = write(c, f"  ◦ {_r}", y, size=12, line_h=7.5)
+
+                    if _tp_err:
+                        y = write(c, f"  (전환점 계산 불가: {_tp_err})", y, size=11)
 
                     y -= 3 * mm
 
