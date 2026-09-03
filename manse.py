@@ -7309,7 +7309,7 @@ def get_cached_ai_interpretation(
 
     _yl = get_yearly_luck(pils, current_year)
 
-    _ys = get_yongshin_multilayer(pils, birth_year, gender, current_year)
+    _ys = get_yongshin_multilayer(pils, birth_year, gender, birth_month, birth_day, birth_hour, birth_minute, target_year=current_year)
 
     _tp_label = _tp.get("fate_label", "분석중") if _tp else "분석중"
 
@@ -7346,7 +7346,7 @@ def get_cached_ai_interpretation(
 
     _yukjin_str = "\n".join([f"  {y['관계']}: {y['위치']} - {y['desc']}" for y in _yukjin])
 
-    _ys_ml = get_yongshin_multilayer(pils, birth_year, gender, current_year)
+    _ys_ml = get_yongshin_multilayer(pils, birth_year, gender, birth_month, birth_day, birth_hour, birth_minute, target_year=current_year)
 
     _gyeokguk_str = f"{gname} ({gyeokguk.get('격의_등급', '') if gyeokguk else '-'})"
 
@@ -10018,7 +10018,7 @@ def build_rich_ai_context(pils, birth_year, gender, target_year=None, focus="종
 
     strength_info = get_ilgan_strength(ilgan, pils)
 
-    ys_multi = get_yongshin_multilayer(pils, birth_year, gender, target_year)
+    ys_multi = get_yongshin_multilayer(pils, birth_year, gender, target_year=target_year)
 
     turning = calc_turning_point(pils, birth_year, gender, target_year)
 

@@ -1038,7 +1038,7 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str="", dram
 
                 _gk = get_gyeokguk(pils)
 
-                _ys_ml = get_yongshin_multilayer(pils, birth_year, gender, _dt.now().year)
+                _ys_ml = get_yongshin_multilayer(pils, birth_year, gender, birth_month, birth_day, birth_hour, birth_minute, target_year=_dt.now().year)
 
                 _si = get_ilgan_strength(ilgan, pils)
 
@@ -2186,7 +2186,7 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str="", dram
 
                     _adv_sw_ss = _adv_sw.get("십성_천간", "-")
 
-                    _adv_ys_ml = get_yongshin_multilayer(pils, birth_year, gender, _dt.now().year)
+                    _adv_ys_ml = get_yongshin_multilayer(pils, birth_year, gender, birth_month, birth_day, birth_hour, birth_minute, target_year=_dt.now().year)
 
                     y = write(
                         c,
