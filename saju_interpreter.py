@@ -11858,10 +11858,9 @@ def _nar_report(ctx):
     except Exception:
         this_year_flow = {}
 
-    daewoons = SajuCoreEngine.get_daewoon(pils, birth_year, 1, 1, 12, 0, gender=gender)
-    current_dw = next((dw for dw in daewoons if dw["시작연도"] <= cur_year <= dw["종료연도"]), None)
+    cur_dw = ctx.get("cur_dw", {}) or {}
 
-    cur_dw_str = current_dw["str"] if current_dw else "알 수 없는"
+    cur_dw_str = cur_dw.get("str", "?")
     sw_now_str = this_year_flow.get("세운", "") if this_year_flow else "알 수 없는"
     # 세운 해석은 천간 기준 십성을 사용 (지지 기준이 아님)
     sw_now_ss = clean_hanja(this_year_flow.get("십성_천간", "") or "알 수 없는 기운")
