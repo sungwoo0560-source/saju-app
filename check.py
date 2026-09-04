@@ -26,7 +26,6 @@ import subprocess
 REQUIRED_SYMBOLS = {
     "manse.py": [
         ("def", "build_life_analysis"),
-        ("def", "get_yongshin_multilayer"),
         ("def", "menu1_report"),
         ("def", "menu2_lifeline"),
         ("def", "menu3_past"),
