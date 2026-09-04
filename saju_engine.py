@@ -1277,13 +1277,23 @@ class SajuCoreEngine:
 
         from datetime import datetime as py_datetime
 
-        # ✅ 입력값 방어̀처리 — month/day/hour/minute 0/None 차단
+        # ✅ 입력값 방어처리 — month/day/hour/minute 0/None 차단, 범위 밖은 예외로 표면화
         try:
-            month  = max(1, min(12, int(month)  if month  else 1))
-            day    = max(1, min(31, int(day)    if day    else 1))
-            hour   = max(0, min(23, int(hour)   if hour   else 12))
-            minute = max(0, min(59, int(minute) if minute else 0))
-            year   = int(year) if year else 1990
+            month = int(month) if month else 1
+            if not (1 <= month <= 12):
+                raise ValueError(f"birth_month must be 1..12, got {month}")
+            day = int(day) if day else 1
+            if not (1 <= day <= 31):
+                raise ValueError(f"birth_day must be 1..31, got {day}")
+            hour = int(hour) if hour else 12
+            if not (0 <= hour <= 23):
+                raise ValueError(f"birth_hour must be 0..23, got {hour}")
+            minute = int(minute) if minute else 0
+            if not (0 <= minute <= 59):
+                raise ValueError(f"birth_minute must be 0..59, got {minute}")
+            year = int(year) if year else 1990
+        except ValueError:
+            raise
         except Exception:
             month, day, hour, minute, year = 1, 1, 12, 0, 1990
         birth_dt = py_datetime(year, month, day, hour, minute)
