@@ -28769,9 +28769,19 @@ def main():
             try:
                 _ss["in_solar_date"] = date(int(_qp["by"]), int(_qp.get("bm", 1)), int(_qp.get("bd", 1)))
 
-                _ss["birth_hour"] = int(_qp.get("bh", 12))
+                # URL은 신뢰할 수 없는 입력 — 엔진 도달 전에 범위 보장
+                try:
+                    _bh_qp = int(_qp.get("bh", 12))
+                    _ss["birth_hour"] = _bh_qp if 0 <= _bh_qp <= 23 else 12
+                except Exception:
+                    _ss["birth_hour"] = 12
 
-                _ss["birth_minute"] = int(_qp.get("bmin", 0))
+                # URL은 신뢰할 수 없는 입력 — 엔진 도달 전에 범위 보장
+                try:
+                    _bmin_qp = int(_qp.get("bmin", 0))
+                    _ss["birth_minute"] = _bmin_qp if 0 <= _bmin_qp <= 59 else 0
+                except Exception:
+                    _ss["birth_minute"] = 0
 
                 _ss["in_gender"] = "여" if _qp.get("g") == "f" else "남"
 
