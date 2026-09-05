@@ -6960,65 +6960,6 @@ def _gk_career(gname):
         "avoid": ["단순 반복직"]
     }))
 
-def build_life_analysis(pils, gender):
-    """
-
-    * 십성 2-조합으로 인생 전체를 읽는 핵심 엔진 *
-
-    성향 / 재물 / 직업 / 연애 / 주의사항 5가지 출력
-
-    """
-    if not pils or len(pils) < 2: return {}
-
-    ilgan = pils[1]["cg"]
-
-    # 원국 전체 십성 수집
-
-    ss_count = {}
-
-    for p in pils:
-        cg_ss = TEN_GODS_MATRIX.get(ilgan, {}).get(p["cg"], "")
-
-        jjg = JIJANGGAN.get(p["jj"], [])
-
-        jj_ss = TEN_GODS_MATRIX.get(ilgan, {}).get(jjg[-1] if jjg else "", "")
-
-        for ss in [cg_ss, jj_ss]:
-            if ss and ss not in ("-", ""):
-                ss_count[ss] = ss_count.get(ss, 0) + 1
-
-    # 많이 나온 순으로 정렬
-
-    top_ss = sorted(ss_count, key=ss_count.get, reverse=True)
-
-    # 조합 매칭 (상위 4개 십성 내에서)
-
-    matched = []
-
-    checked = set()
-
-    for i, a in enumerate(top_ss[:5]):
-        for b in top_ss[i + 1 : 5]:
-            k = frozenset([a, b])
-
-            if k in SIPSUNG_COMBO_LIFE and k not in checked:
-                matched.append((k, SIPSUNG_COMBO_LIFE[k]))
-
-                checked.add(k)
-
-    strength_info = get_ilgan_strength(ilgan, pils)
-
-    sn = strength_info["신강신약"]
-
-    return {
-        "조합_결과": matched[:2],  # 상위 2개 조합
-        "전체_십성": ss_count,
-        "주요_십성": top_ss[:4],
-        "신강신약": sn,
-        "일간": ilgan,
-    }
-
-
 # ==================================================================
 
 #  엔진 하이라이트 - AI가 아닌 엔진이 먼저 뽑아내는 핵심 적중 데이터

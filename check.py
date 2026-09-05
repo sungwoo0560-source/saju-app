@@ -25,7 +25,6 @@ import subprocess
 # 실제 grep으로 확인된 위치 기준 (2026-07-02). 파일별로 "그 파일에 실제 정의된" 심볼만 검사한다.
 REQUIRED_SYMBOLS = {
     "manse.py": [
-        ("def", "build_life_analysis"),
         ("def", "menu1_report"),
         ("def", "menu2_lifeline"),
         ("def", "menu3_past"),
