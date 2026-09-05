@@ -3303,7 +3303,7 @@ def quick_consult_bar(pils, name, birth_year, gender):
             # 5. 전환점 감지
 
             try:
-                luck_score = calc_luck_score(pils, birth_year, gender, current_year)
+                luck_score = calc_luck_score(pils, birth_year, gender, target_year=current_year)
 
                 pivot_info = ChangeRadarEngine.detect_pivot(name, luck_score)
 
@@ -7246,7 +7246,7 @@ def get_cached_ai_interpretation(
     ctx_data = build_rich_ai_context(pils, birth_year, gender, current_year)
 
 
-    _tp = calc_turning_point(pils, birth_year, gender, current_year) if "calc_turning_point" in dir() else {}
+    _tp = calc_turning_point(pils, birth_year, gender, target_year=current_year) if "calc_turning_point" in dir() else {}
 
     _yl = get_yearly_luck(pils, current_year)
 
@@ -9854,7 +9854,7 @@ def build_rich_ai_context(pils, birth_year, gender, target_year=None, focus="종
 
     ys_multi = get_yongshin_multilayer(pils, birth_year, gender, target_year=target_year)
 
-    turning = calc_turning_point(pils, birth_year, gender, target_year)
+    turning = calc_turning_point(pils, birth_year, gender, target_year=target_year)
 
     pillars_str = " ".join([p["str"] for p in pils])
 
@@ -9922,11 +9922,11 @@ def goosebump_engine(pils, birth_year, gender, target_year=None):
 
     yong_ohs = ys.get("종합_용신", []) if isinstance(ys.get("종합_용신"), list) else []
 
-    luck_s = calc_luck_score(pils, birth_year, gender, target_year)
+    luck_s = calc_luck_score(pils, birth_year, gender, target_year=target_year)
 
-    triggers = detect_event_triggers(pils, birth_year, gender, target_year)
+    triggers = detect_event_triggers(pils, birth_year, gender, target_year=target_year)
 
-    turning = calc_turning_point(pils, birth_year, gender, target_year)
+    turning = calc_turning_point(pils, birth_year, gender, target_year=target_year)
 
     # ① 과거 적중 문장 - 사주 패턴 -> 이미 겪은 일
 
@@ -9993,7 +9993,7 @@ def goosebump_engine(pils, birth_year, gender, target_year=None):
 
     present_sentences = []
 
-    prev_luck = calc_luck_score(pils, birth_year, gender, target_year - 1)
+    prev_luck = calc_luck_score(pils, birth_year, gender, target_year=target_year - 1)
 
     diff = luck_s - prev_luck
 
@@ -11068,7 +11068,7 @@ def get_daily_luck_score(pils, birth_year, gender, target_date=None) -> dict:
 
     d = target_date.day
 
-    base = calc_luck_score(pils, birth_year, gender, y)
+    base = calc_luck_score(pils, birth_year, gender, target_year=y)
 
     yearly = get_yearly_luck(pils, y)
 
@@ -11181,7 +11181,7 @@ def get_turning_countdown(pils, birth_year, gender) -> dict:
     for delta in range(1, 366):
         future = today + timedelta(days=delta)
 
-        t = calc_turning_point(pils, birth_year, gender, future.year)
+        t = calc_turning_point(pils, birth_year, gender, target_year=future.year)
 
         if t["is_turning"] and abs(t["score_change"]) >= 15:
             # 대운 전환 시점 더 정확히
@@ -29700,7 +29700,7 @@ def main():
                 )
 
                 if cur_dw:
-                    turning = calc_turning_point(pils, birth_year, gender, cur_year)
+                    turning = calc_turning_point(pils, birth_year, gender, target_year=cur_year)
 
                     stage = turning.get("intensity", "안정기") if turning and turning.get("is_turning") else "안정기"
 
