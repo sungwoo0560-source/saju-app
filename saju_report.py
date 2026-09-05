@@ -1684,7 +1684,7 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str="", dram
 
                     _tp_err = None
                     try:
-                        _tp = calc_turning_point(pils, birth_year, gender, _cy)
+                        _tp = calc_turning_point(pils, birth_year, gender, target_year=_cy)
                     except Exception as _tpe:
                         _tp = {}
                         import traceback as _tb_tp
