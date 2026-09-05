@@ -674,7 +674,7 @@ def get_12sinsal(pils):
                 "이름": "상문살(喪門殺)",
                 "name": "상문살",
                 "icon": "⚰️",
-                "위치": _lbl,
+                "위치": [_lbl],
                 "pos": _lbl,
                 "desc": (
                     "상문살(喪門殺)이 있습니다. "
@@ -699,7 +699,7 @@ def get_12sinsal(pils):
                 "이름": "조객살(弔客殺)",
                 "name": "조객살",
                 "icon": "🪦",
-                "위치": _lbl,
+                "위치": [_lbl],
                 "pos": _lbl,
                 "desc": (
                     "조객살(弔客殺)이 있습니다. "
@@ -738,7 +738,7 @@ def get_12sinsal(pils):
                 "이름": "관재수(官災數)",
                 "name": "관재수",
                 "icon": "⚖️",
-                "위치": _lbl,
+                "위치": [_lbl],
                 "pos": _lbl,
                 "desc": (
                     "관재수(官災數)가 있습니다. "
@@ -995,7 +995,7 @@ def get_extra_sinsal(pils):
             _jj_pos_map.setdefault(_jpv, []).append(_plbl[_pi])
     for _star in stars:
         if "위치" not in _star:
-            _star["위치"] = "원국"
+            _star["위치"] = ["원국"]
 
     return stars
 
