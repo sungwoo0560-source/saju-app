@@ -516,13 +516,9 @@ class SajuMemory:
     @staticmethod
     def get_personalized_intro(name: str, pils: list = None) -> str:
 
-        mem = SajuMemory.get_memory(name)
-
-        conv = mem.get("conversation", [])
-
-        if conv:
-            return f"{name}님 다시 오셨네요. 지난번 '{conv[-1]['topic']}' 상담 이후 어떻게 지내셨나요? 명리학 관점에서 분석해 드리겠습니다. 어떤 부분이 궁금하신가요?"
-
+        # G-3: 이전 상담 내역(conv) 기반 개인화 인트로 비활성화 — history_memory.json이
+        # 이름(name) 문자열만으로 조회되어(세션/신원 구분 없음), 동명이인이 접속하면
+        # 남의 이전 상담 주제가 그대로 노출되는 세션 간 누출 버그였다(실측 재현 확인).
         if pils:
             profile = PersonalityProfiler.analyze(pils)
 
@@ -28475,8 +28471,11 @@ def main():
     )
 
     if "_save_loaded" not in st.session_state:
-        load_saju_state()
-
+        # G-2: load_saju_state() 자동 복원 비활성화 — saju_save.json이 전체
+        # 사용자가 공유하는 단일 파일이라, 새 세션마다 직전 제출자의 생년월일시
+        # 등 개인정보가 그대로 노출되는 세션 간 누출 버그였다(실측 재현 확인).
+        # save_saju_state() 자체는 그대로 두되(파일 갱신은 계속됨), 이 파일을
+        # 세션 복원에 다시 쓰지 않는다.
         st.session_state["_save_loaded"] = True
 
     _ss = st.session_state
