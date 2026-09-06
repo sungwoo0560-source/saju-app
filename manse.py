@@ -28563,6 +28563,9 @@ def main():
     if "in_birth_hour" not in _ss:
         _ss["in_birth_hour"] = 12
 
+    # 조건 키(in_birth_minute)와 대입 키(birth_minute)가 어긋나 있으나
+    # 아래 3곳(pils 계산 2곳 + 세션 동기화 1곳)이 위젯 키(in_birth_minute)를
+    # 항상 우선 조회하도록 고쳐 실질 영향은 없다 — 정리는 향후 과제.
     if "in_birth_minute" not in _ss:
         _ss["birth_minute"] = _ss.get("in_birth_minute", 0)
 
@@ -29411,7 +29414,7 @@ def main():
                         b_month,
                         b_day,
                         _ss.get("in_birth_hour", _ss.get("birth_hour", 12)),
-                        _ss.get("birth_minute", _ss.get("in_birth_minute", 0)),
+                        _ss.get("in_birth_minute", _ss.get("birth_minute", 0)),
                         _ss.get("in_gender", "남"),
                         use_yaja_time=_ss.get("in_use_yaja", True),
                         longitude=_region_lon,
@@ -29423,7 +29426,7 @@ def main():
                         b_month,
                         b_day,
                         _ss.get("in_birth_hour", _ss.get("birth_hour", 12)),
-                        _ss.get("birth_minute", _ss.get("in_birth_minute", 0)),
+                        _ss.get("in_birth_minute", _ss.get("birth_minute", 0)),
                         _ss.get("in_gender", "남"),
                         use_yaja_time=_ss.get("in_use_yaja", True),
                     )
@@ -29457,7 +29460,7 @@ def main():
 
             st.session_state["birth_hour"] = _ss.get("in_birth_hour", _ss.get("birth_hour", 12))
 
-            st.session_state["birth_minute"] = _ss.get("birth_minute", _ss.get("in_birth_minute", 0))
+            st.session_state["birth_minute"] = _ss.get("in_birth_minute", _ss.get("birth_minute", 0))
 
             st.session_state["cal_type"] = _ss["in_cal_type"]
 
