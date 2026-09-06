@@ -7977,6 +7977,7 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
                             for _s2 in _cs_all_s:
                                 _sn2 = _s2.get("이름") or _s2.get("name") or ""
                                 _sp2 = _s2.get("위치","")
+                                if isinstance(_sp2, list): _sp2 = ", ".join(str(x) for x in _sp2)
                                 _sm2 = _s2.get("결과") or _s2.get("의미") or _s2.get("desc","")
                                 _sw2 = _s2.get("주의","")
                                 _sg2 = _s2.get("등급","")
