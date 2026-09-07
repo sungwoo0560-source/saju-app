@@ -3011,7 +3011,11 @@ def _local_saju_engine(pils, name, birth_year, gender, query):
                 "편재격":"사업 활동을 노년에도 유지하는 것이 맞는 팔자니라. 완전 은퇴보다 규모를 줄여 계속 활동하게.",
             }
             out.append(f"**{name}의 노후·말년운 완전 분석**\n황혼의 기운을 신안으로 살펴보겠습니다.\n")
-            out.append(f"\n**[시주(時柱) 말년 기운]** {sijju_jj}\n{_SIJ_LATE.get(sijju_jj, f'시지 {sijju_jj}의 기운이 말년을 이끌어 갑니다.')}\n")
+            out.append(
+                "\n**[시주(時柱) 말년 기운]** 생시를 모르면 이 항목은 판정 근거가 없어 생략합니다. 나머지 노후 분석은 아래에서 이어집니다.\n"
+                if not sijju_jj else
+                f"\n**[시주(時柱) 말년 기운]** {sijju_jj}\n{_SIJ_LATE.get(sijju_jj, f'시지 {sijju_jj}의 기운이 말년을 이끌어 갑니다.')}\n"
+            )
             out.append(f"\n**[격국별 노후 전략]** {_GK_LATE.get(gkn_el, '용신 기운을 유지하면서 즐겁게 활동하는 것이 최고의 노후니라.')}\n")
             if "신강" in sn_el:
                 out.append("\n신강 팔자 노후: 에너지가 넘치니 사회 활동을 유지하는 것이 건강에 필요합니다. 완전 은퇴는 오히려 건강을 해칩니다.\n")
