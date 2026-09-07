@@ -2491,7 +2491,7 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str="", dram
                     y = write(c, "6. 용신 기반 개운법 — 실천 처방전", y, size=11, color=(0.05,0.05,0.05))
                     _ys_pdf = get_yongshin(pils)
                     _ys_ohs = _ys_pdf.get("종합_용신", []) if isinstance(_ys_pdf.get("종합_용신",[]), list) else []
-                    _gi_ohs = _ys_pdf.get("기신", "")
+                    _gi_ohs = _ys_pdf.get("종합_기신", [])
                     if not isinstance(_gi_ohs, list): _gi_ohs = []
                     _OH_REMEDY_FULL = {
                         "木": {
@@ -2771,7 +2771,7 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str="", dram
                     from saju_interpreter import get_ilgan_strength as _gis_hap
                     _ys_hap   = _gys_hap(pils)
                     _yong_hap = _ys_hap.get("종합_용신", []) if _ys_hap else []
-                    _gi_hap_raw = _ys_hap.get("기신", [])    if _ys_hap else []
+                    _gi_hap_raw = _ys_hap.get("종합_기신", [])    if _ys_hap else []
                     if isinstance(_gi_hap_raw, list):
                         _gi_hap = _gi_hap_raw
                     elif isinstance(_gi_hap_raw, str) and _gi_hap_raw:
@@ -2779,7 +2779,9 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str="", dram
                                    if x.strip() in ["木","火","土","金","水"]]
                     else:
                         _gi_hap = []
-                    # 기신 빈 경우 manse.py L14640~14650과 동일한 신강/신약 역산
+                    # L-2a: 위에서 "종합_기신"을 직접 읽게 되어 이 블록은 현재 미도달
+                    # 경로(제거는 회귀 확인 후 별도 건) — 기신 빈 경우 manse.py L14640~14650과
+                    # 동일한 신강/신약 역산
                     if not _gi_hap and _ys_hap:
                         _sn_hap  = (_gis_hap(pils[1]["cg"], pils) or {}).get("신강신약", "중화")
                         _iloh_hap = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",

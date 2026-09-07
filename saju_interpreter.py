@@ -13529,14 +13529,16 @@ def build_rich_narrative(pils, birth_year, gender, name, section="report"):
 
         # gisin 안전 초기화 — ys(get_yongshin 결과)에서 직접 추출
         try:
-            _gisin_raw = ys.get("기신", [])
+            _gisin_raw = ys.get("종합_기신", [])
             if isinstance(_gisin_raw, list):
                 _gisin_safe = _gisin_raw
             elif isinstance(_gisin_raw, str):
                 _gisin_safe = [o for o in ["木","火","土","金","水"] if o in _gisin_raw]
             else:
                 _gisin_safe = []
-            # 기신이 서술형 문자열(오행 없음)인 경우 → sn으로 역산 (manse.py menu_current_situation 폴백과 동일 로직)
+            # L-2a: 위에서 "종합_기신"을 직접 읽게 되어 이 블록은 현재 미도달 경로(제거는
+            # 회귀 확인 후 별도 건) — 기신이 서술형 문자열(오행 없음)인 경우 → sn으로 역산
+            # (manse.py menu_current_situation 폴백과 동일 로직)
             if not _gisin_safe and sn:
                 _BMRV3 = {"木":"水","火":"木","土":"火","金":"土","水":"金"}
                 _CTLV3 = {"木":"土","火":"金","土":"水","金":"木","水":"火"}
@@ -13630,7 +13632,7 @@ def get_monthly_timing(pils, birth_year, gender, target_year=None, focus="재물
         # 용신/기신 확인
         ys = get_yongshin(pils) or {}
         yong_ohs = ys.get("종합_용신", [])
-        gisin_ohs = ys.get("기신", [])
+        gisin_ohs = ys.get("종합_기신", [])
         if not isinstance(yong_ohs, list): yong_ohs = []
         if not isinstance(gisin_ohs, list): gisin_ohs = []
 
@@ -14875,9 +14877,12 @@ def compute_gi_ohs(pils):
     try:
         ilgan = pils[1]["cg"]
         sn = get_ilgan_strength(ilgan, pils).get("신강신약", "중화")
-        gi = get_yongshin(pils).get("기신", [])
+        gi = get_yongshin(pils).get("종합_기신", [])
         if isinstance(gi, list) and gi:
             return gi
+        # L-2a: 위에서 "종합_기신"을 직접 읽게 되어 신강/신약 케이스에서는 이 아래가
+        # 미도달 경로(제거는 회귀 확인 후 별도 건) — 중화(中和)에서만 여전히 도달하며
+        # 결과는 동일하게 빈 리스트
         oh = _OH_CG.get(ilgan, "")
         birth = {"木": "水", "火": "木", "土": "火", "金": "土", "水": "金"}
         ctrl = {"木": "土", "火": "金", "土": "水", "金": "木", "水": "火"}

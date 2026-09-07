@@ -13424,7 +13424,7 @@ def build_gangsa_block(pils, name, birth_year, gender, marriage_status=None):
             sn       = sn_info.get("신강신약", "중화")
             ys_info  = get_yongshin(pils)
             yong_ohs = ys_info.get("종합_용신", [])
-            _gi_raw  = ys_info.get("기신", [])
+            _gi_raw  = ys_info.get("종합_기신", [])
             # 기신이 문자열로 반환되는 경우 리스트로 변환
             if isinstance(_gi_raw, list):
                 gi_ohs = _gi_raw
@@ -13433,7 +13433,8 @@ def build_gangsa_block(pils, name, birth_year, gender, marriage_status=None):
                 gi_ohs = [x.strip() for x in _gi_raw.replace("·", ",").split(",") if x.strip() in ["木","火","土","金","水"]]
             else:
                 gi_ohs = []
-            # 기신이 서술형 문자열(오행 없음)인 경우 → sn으로 역산
+            # L-2a: 위에서 "종합_기신"을 직접 읽게 되어 이 블록은 현재 미도달 경로(제거는
+            # 회귀 확인 후 별도 건) — 기신이 서술형 문자열(오행 없음)인 경우 → sn으로 역산
             if not gi_ohs and isinstance(_gi_raw, str) and _gi_raw:
                 _ilgan_oh2 = _OH_CG.get(ilgan, "")
                 _BMRV2 = {"木":"水","火":"木","土":"火","金":"土","水":"金"}
