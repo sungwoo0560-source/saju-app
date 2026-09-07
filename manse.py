@@ -28600,53 +28600,9 @@ def main():
     if "favorites" not in _ss:
         _ss["favorites"] = []
 
-    # URL 파라미터 자동 로딩 (첫 방문 시 한 번만)
-
-    if "_qp_loaded" not in _ss:
-        _ss["_qp_loaded"] = True
-
-        _qp = st.query_params
-
-        if "by" in _qp:
-            try:
-                _ss["in_solar_date"] = date(int(_qp["by"]), int(_qp.get("bm", 1)), int(_qp.get("bd", 1)))
-
-                # URL은 신뢰할 수 없는 입력 — 엔진 도달 전에 범위 보장
-                try:
-                    _bh_qp = int(_qp.get("bh", 12))
-                    _ss["birth_hour"] = _bh_qp if 0 <= _bh_qp <= 23 else 12
-                except Exception:
-                    _ss["birth_hour"] = 12
-
-                # URL은 신뢰할 수 없는 입력 — 엔진 도달 전에 범위 보장
-                try:
-                    _bmin_qp = int(_qp.get("bmin", 0))
-                    _ss["birth_minute"] = _bmin_qp if 0 <= _bmin_qp <= 59 else 0
-                except Exception:
-                    _ss["birth_minute"] = 0
-
-                _ss["in_gender"] = "여" if _qp.get("g") == "f" else "남"
-
-                if "n" in _qp:
-                    _ss["in_name"] = str(_qp["n"])
-
-                if _qp.get("cal") == "l":
-                    _ss["in_cal_type"] = "음력"
-
-                if "mar" in _qp:
-                    _ss["in_marriage"] = _qp["mar"]
-
-                if "occ" in _qp:
-                    _ss["in_occupation"] = _qp["occ"]
-
-                _ss["in_unknown_time"] = _qp.get("ut") == "1"
-
-                _ss["in_is_leap"] = _qp.get("leap") == "1"
-
-                _ss["_auto_submit"] = True
-
-            except Exception as _e:
-                st.warning(f"⚠️ 오류: {str(_e)[:80]}")
+    # URL 시각·개인정보 자동입력 제거(개인정보 보호) — 기존 링크 방문자 안내만 표시
+    if "by" in st.query_params:
+        st.info("이 링크는 더 이상 자동 입력을 지원하지 않습니다. 아래에 직접 입력해 주세요.")
 
     has_pils = _ss["saju_pils"] is not None
 
@@ -28966,7 +28922,7 @@ def main():
 2. **저장** → 입력 폼 하단 ⭐ 버튼으로 즐겨찾기 추가
 3. **메뉴 선택** → 위에서 종합운세·대운·과거·일일운세 등 선택
 
-🔗 같은 사주를 공유하려면 **정보 수정** 아래 입력 폼 안 **이 사주 공유하기**에서 링크 복사.
+📄 사주 결과를 공유하려면 각 메뉴의 PDF 다운로드 버튼으로 저장한 뒤 파일을 첨부해 보내세요.
         """)
 
     # -- 섀도우 키 저장 콜백 (양력/음력 전환 시 입력값 보존) --
@@ -29310,50 +29266,6 @@ def main():
             unsafe_allow_html=True,
         )
 
-        # ── 사주 공유 URL 복사 버튼 ──────────────────────────
-        try:
-            _sd = _ss.get("in_solar_date")
-            if _sd and _ss.get("saju_pils"):
-                _by = _sd.year if hasattr(_sd,"year") else birth_year
-                _bm = _sd.month if hasattr(_sd,"month") else 1
-                _bd = _sd.day if hasattr(_sd,"day") else 1
-                _bh  = _ss.get("birth_hour", 12)
-                _bmi = _ss.get("birth_minute", 0)
-                _gen = "f" if _ss.get("in_gender","남") == "여" else "m"
-                _nm  = _ss.get("in_name","")
-                _mar = _ss.get("in_marriage","")
-                _cal = "l" if _ss.get("in_cal_type","양력") == "음력" else "s"
-                _base_url = "https://saju-manse.streamlit.app"
-                _share_url = (
-                    f"{_base_url}/?by={_by}&bm={_bm}&bd={_bd}"
-                    f"&bh={_bh}&bmin={_bmi}&g={_gen}"
-                )
-                if _nm:
-                    _share_url += f"&n={_nm}"
-                if _mar:
-                    _share_url += f"&mar={_mar}"
-                if _cal == "l":
-                    _share_url += "&cal=l"
-
-                st.markdown("**🔗 사주 공유**")
-                st.code(_share_url, language=None)
-                st.markdown(
-                    f"""
-<button onclick="navigator.clipboard.writeText('{_share_url}').then(()=>{{
-    this.textContent='✅ 복사됐습니다!';
-    setTimeout(()=>this.textContent='📋 링크 복사',1500);
-}})" style="
-    background:#1a1a2e;border:1.5px solid #d4af37;border-radius:10px;
-    color:#d4af37;font-size:13px;font-weight:700;padding:8px 20px;
-    cursor:pointer;width:100%;margin-top:4px;
-">📋 링크 복사</button>
-""",
-                    unsafe_allow_html=True,
-                )
-                st.caption("링크를 카톡/문자로 보내면 상대방이 클릭 시 바로 사주가 열립니다")
-        except Exception:
-            pass
-
         fav_c1, fav_c2 = st.columns([3, 1])
 
         with fav_c1:
@@ -29519,59 +29431,13 @@ def main():
 
         name = st.session_state.get("saju_name", "내담자")
 
-        # -- 🔗 공유 링크 --
+        # -- 🔗 앱 공유 --
 
         if pils:
             import urllib.parse as _upl
 
-            _sy = st.session_state.get("birth_year", 1990)
-
-            _sm = st.session_state.get("birth_month", 1)
-
-            _sd = st.session_state.get("birth_day", 1)
-
-            _sh = st.session_state.get("birth_hour", 12)
-
-            _smin = st.session_state.get("birth_minute", 0)
-
-            _sg = "f" if st.session_state.get("gender", "남") == "여" else "m"
-
-            _sn = _upl.quote(st.session_state.get("saju_name", ""), safe="")
-
-            _scal = "l" if st.session_state.get("cal_type", "양력") == "음력" else "s"
-
-            _smar = _upl.quote(st.session_state.get("marriage_status", "미혼"), safe="")
-
-            _socc = _upl.quote(st.session_state.get("occupation", "선택 안 함"), safe="")
-
-            _sut = "1" if st.session_state.get("in_unknown_time", False) else "0"
-
-            _sleap = "1" if st.session_state.get("in_is_leap", False) else "0"
-
-            _qstr = f"by={_sy}&bm={_sm}&bd={_sd}&bh={_sh}&bmin={_smin}&g={_sg}&n={_sn}&cal={_scal}&mar={_smar}&occ={_socc}&ut={_sut}&leap={_sleap}"
-
-            with st.expander("🔗 이 사주 공유하기", expanded=False):
-                st.caption("링크를 열면 같은 사주가 자동으로 불러집니다 (이름·생년월일·성별·결혼·직업 포함)")
-
-                _share_html = (
-                    f'<button id="saju-cp-btn" onclick="(function(){{'
-                    f'var url=window.location.origin+window.location.pathname+\'?{_qstr}\';'
-                    f'if(navigator.clipboard&&navigator.clipboard.writeText){{'
-                    f'navigator.clipboard.writeText(url).then(function(){{'
-                    f'var b=document.getElementById(\'saju-cp-btn\');'
-                    f'b.textContent=\'✅ 복사 완료!\';'
-                    f'setTimeout(function(){{b.textContent=\'📋 링크 복사\';}},2000);'
-                    f'}}).catch(function(){{var t=document.getElementById(\'saju-url-ta\');t.style.display=\'block\';t.select();}});'
-                    f'}}else{{var t=document.getElementById(\'saju-url-ta\');t.style.display=\'block\';t.select();document.execCommand(\'copy\');}}'
-                    f'}})()" style="background:linear-gradient(135deg,#d4af37,#b8960a);color:#000;border:none;'
-                    f'border-radius:8px;padding:9px 0;font-size:14px;font-weight:700;'
-                    f'cursor:pointer;width:100%;margin-bottom:8px">📋 링크 복사</button>'
-                    f'<textarea id="saju-url-ta" readonly onclick="this.select()" '
-                    f'style="display:none;width:100%;font-size:10px;color:#aaa;background:#111;'
-                    f'border:1px solid #333;padding:6px 8px;border-radius:5px;'
-                    f'resize:none;height:44px;font-family:monospace">?{_qstr}</textarea>'
-                )
-                st.markdown(_share_html, unsafe_allow_html=True)
+            with st.expander("친구에게 앱 추천하기", expanded=False):
+                st.caption("내 사주 결과를 보내려면 PDF로 저장한 뒤 파일을 첨부해 보내세요.")
 
                 # 공유 버튼 3종 (카카오톡·문자·트위터)
                 try:
