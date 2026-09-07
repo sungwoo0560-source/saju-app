@@ -29442,7 +29442,7 @@ def main():
                 # 공유 버튼 3종 (카카오톡·문자·트위터)
                 try:
                     _app_url_sh   = "https://saju-manse.streamlit.app"
-                    _share_text_sh = f"{name}님의 사주풀이 | 만세력 사주 천명풀이\n{_app_url_sh}"
+                    _share_text_sh = f"사주 만세력 — 진태양시 기준 정밀 명식\n{_app_url_sh}"
                     _enc_sh       = _upl.quote(_share_text_sh)
                     _share_btns_html = (
                         f'<a href="kakaotalk://msg/send?text={_enc_sh}" '
