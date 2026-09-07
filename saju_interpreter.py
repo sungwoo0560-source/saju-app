@@ -14089,14 +14089,6 @@ def get_jeokjung_affair(gender, ilgan, yukjin_list, sinsal_list, pils, marriage_
     except Exception:
         pass
 
-    # 시지 도화 체크 (시주 = pils[0])
-    DOHWA_BR = {"자", "오", "묘", "유"}
-    try:
-        hour_b = (pils[0].get("jj", "") if isinstance(pils, list) and pils else "")[:1]
-    except Exception:
-        hour_b = ""
-    sigi_dohwa = hour_b in DOHWA_BR
-
     g = (gender or "")[:1]
     is_male = g in ["남", "M", "m"]
 
@@ -14129,12 +14121,11 @@ def get_jeokjung_affair(gender, ilgan, yukjin_list, sinsal_list, pils, marriage_
             line1 = "양인 + 재성. 평소엔 무덤덤한데 한 번 빠지면 끝까지."
             line2 = "본인이 가장 위험한 줄 — 본인만 모릅니다."
             line3 = "결혼 후 외부 자극 차단 — 그게 본인 안전장치입니다."
-        elif has_dohwa or has_hongyeom or sigi_dohwa:
+        elif has_dohwa or has_hongyeom:
             title = "💔 당신은 — 이성에게 인기 많은 사주입니다"
             line1 = "도화나 홍염 — 나이 들어도 매력 유지됩니다."
             line2 = "여자가 먼저 다가오는 케이스 많을 겁니다."
-            extra = " 특히 시지 도화 — 말년 마음 단속이 중요합니다." if sigi_dohwa else ""
-            line3 = "본인이 자제하면 그저 인기 많은 사람으로 끝납니다." + extra
+            line3 = "본인이 자제하면 그저 인기 많은 사람으로 끝납니다."
         elif jae_total == 0:
             title = "💔 당신은 — 여자 인연이 약한 사주입니다"
             line1 = "무재(無財) 구조. 이성에 큰 욕심 없고 인연도 늦습니다."
@@ -14189,12 +14180,11 @@ def get_jeokjung_affair(gender, ilgan, yukjin_list, sinsal_list, pils, marriage_
             line1 = "비겁 강 — 남편이 다른 여자에게 흔들릴 수 있는 구조."
             line2 = "본인보다 배우자 쪽 이성 관계에 변동수가 있으니, 관계 관리가 핵심입니다."
             line3 = "결혼 상대는 — 책임감 있는 사람으로 골라야 합니다."
-        elif has_dohwa or has_hongyeom or sigi_dohwa:
+        elif has_dohwa or has_hongyeom:
             title = "💔 당신은 — 남자에게 인기 많은 사주입니다"
             line1 = "도화나 홍염 — 나이 들어도 매력 유지됩니다."
             line2 = "남자가 먼저 다가오는 케이스 많을 겁니다."
-            extra = " 특히 시지 도화 — 말년 마음 단속이 중요합니다." if sigi_dohwa else ""
-            line3 = "본인이 자제하면 그저 인기 많은 사람으로 끝납니다." + extra
+            line3 = "본인이 자제하면 그저 인기 많은 사람으로 끝납니다."
         elif gwan_total == 0:
             if marriage_status in ("기혼", "재혼"):
                 title = "💔 당신은 — 남편엔 시들, 밖엔 약한 무관 사주입니다"
