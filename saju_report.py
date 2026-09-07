@@ -2332,27 +2332,14 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str="", dram
                     y = write(c, f"  ★ {_yy_tip}", y, size=9)
                     y -= 4*mm
 
-                    # ── 오행 분포 ──
+                    # ── 오행 분포 ── (calc_ohaeng_strength v3 정밀 엔진 — 화면과 동일 소스, K-2)
                     y = write(c, "2. 오행(五行) 분포 분석", y, size=11, color=(0.05,0.05,0.05))
                     _OH_KR = {"木":"목(木)","火":"화(火)","土":"토(土)","金":"금(金)","水":"수(水)"}
-                    _OH_CG = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
-                               "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
-                    _OH_CG2 = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
-                                "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
-                    _oh_cnt = {"木":0,"火":0,"土":0,"金":0,"水":0}
-                    from saju_engine import JIJANGGAN as _JJG2
-                    for _p in pils:
-                        _o = _OH_CG2.get(_p.get("cg",""),"")
-                        if _o: _oh_cnt[_o] += 0.5
-                        _jjg2 = _JJG2.get(_p.get("jj",""),[])
-                        for _g in _jjg2:
-                            _o2 = _OH_CG2.get(_g,"")
-                            if _o2: _oh_cnt[_o2] += 0.25
-                    _oh_total_base = sum(_oh_cnt.values()) or 1
-                    for _oh, _cnt in sorted(_oh_cnt.items(), key=lambda x:-x[1]):
-                        _pct_b = int(_cnt / _oh_total_base * 100)
+                    _oh_v3 = calc_ohaeng_strength(_ilgan_m, pils)
+                    for _oh, _pct_f in sorted(_oh_v3.items(), key=lambda x:-x[1]):
+                        _pct_b = round(_pct_f)
                         _bar_b = "|" * (_pct_b // 3)
-                        _status_b = "[강]" if _pct_b >= 28 else ("[약]" if _pct_b <= 12 else "[보통]")
+                        _status_b = "[강]" if _pct_f >= 28 else ("[약]" if _pct_f <= 12 else "[보통]")
                         y = write(c, f"  {_OH_KR.get(_oh,_oh):7s} {_bar_b:<15s} {_pct_b:2d}% {_status_b}", y, size=9)
                     y -= 3*mm
 
@@ -2375,6 +2362,26 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str="", dram
                                 ("辛","未"):["路旁土","토(土)"],("己","酉"):["大驛土","토(土)"],
                                 ("丁","亥"):["屋上土","토(土)"],
                             }
+                        # K-2: NABJIN_MAP 실제 키는 "한자(한글)" 표기 간지 문자열 2-튜플이라
+                        # 원본 한 글자 (cg,jj) 튜플로는 조회가 항상 실패하던 버그 — manse.py
+                        # _get_napeum()과 동일한 변환 방식으로 맞춘다.
+                        _CG_KR_FULL_N = {
+                            "甲":"甲(갑)","乙":"乙(을)","丙":"丙(병)","丁":"丁(정)","戊":"戊(무)",
+                            "己":"己(기)","庚":"庚(경)","辛":"辛(신)","壬":"壬(임)","癸":"癸(계)",
+                        }
+                        _JJ_KR_FULL_N = {
+                            "子":"子(자)","丑":"丑(축)","寅":"寅(인)","卯":"卯(묘)","辰":"辰(진)",
+                            "巳":"巳(사)","午":"午(오)","未":"未(미)","申":"申(신)","酉":"酉(유)",
+                            "戌":"戌(술)","亥":"亥(해)",
+                        }
+
+                        def _get_napeum_pdf(cg, jj):
+                            key = f"{_CG_KR_FULL_N.get(cg, cg)}{_JJ_KR_FULL_N.get(jj, jj)}"
+                            for _k, _v in _NM.items():
+                                if isinstance(_k, tuple) and key in _k:
+                                    return _v
+                            return None
+
                         _pil_keys = [
                             ("시주", pils[0].get("cg",""), pils[0].get("jj","")),
                             ("일주", pils[1].get("cg",""), pils[1].get("jj","")),
@@ -2389,14 +2396,15 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str="", dram
                             "水": "내면에 물의 기운이 흐릅니다. 지혜·유연·직관이 본질입니다.",
                         }
                         for _pl, _cg, _jj in _pil_keys:
-                            _nv = _NM.get((_cg,_jj), _NM.get((_jj,_cg), None))
+                            _nv = _get_napeum_pdf(_cg, _jj)
                             if _nv:
                                 _nv_oh = _nv[1][:1] if len(_nv)>1 else ""
                                 _nv_desc = _NABJIN_OH_DESC.get(_nv_oh,"")
-                                y = write(c, f"  {_pl}({_cg}{_jj}): {_nv[0] if isinstance(_nv,list) else _nv}", y, size=9)
+                                y = write(c, f"  {_pl}({_cg}{_jj}): {_nv[0] if isinstance(_nv,(list,tuple)) else _nv}", y, size=9)
                                 if _nv_desc and _pl == "일주":
                                     y = write(c, f"    ★ 일주 납음: {_nv_desc}", y, size=9)
-                    except Exception:
+                    except Exception as _napeum_err:
+                        _saju_log.warning("[납음오행] 조회 실패: %s", _napeum_err)
                         y = write(c, "  (납음 데이터 로딩 중)", y, size=9)
                     y -= 4*mm
 
