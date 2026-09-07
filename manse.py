@@ -28571,7 +28571,7 @@ def main():
     # 아래 3곳(pils 계산 2곳 + 세션 동기화 1곳)이 위젯 키(in_birth_minute)를
     # 항상 우선 조회하도록 고쳐 실질 영향은 없다 — 정리는 향후 과제.
     if "in_birth_minute" not in _ss:
-        _ss["birth_minute"] = _ss.get("in_birth_minute", 0)
+        _ss["in_birth_minute"] = 0
 
     if "in_unknown_time" not in _ss:
         _ss["in_unknown_time"] = False
