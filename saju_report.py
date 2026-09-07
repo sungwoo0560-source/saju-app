@@ -2748,7 +2748,7 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str="", dram
                     from saju_engine import get_yearly_luck as _gyl_c2
                     _ys_c2 = _gys_c2(pils)
                     _yong_c2 = _ys_c2.get("종합_용신",[]) if _ys_c2 else []
-                    _gisin_c2 = _ys_c2.get("기신",[]) if (_ys_c2 and isinstance(_ys_c2.get("기신"),list)) else []
+                    _gisin_c2 = _ys_c2.get("종합_기신",[]) if (_ys_c2 and isinstance(_ys_c2.get("종합_기신"),list)) else []
                     _cy_c2 = _dt.now().year
                     _sw_c2 = _gyl_c2(pils, _cy_c2) or {}
                     _OH_C2 = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
