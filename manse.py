@@ -16287,7 +16287,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
             if len(set(_현침_cg + _현침_jj)) >= 2:
                 _danger_signals.append((
                     "💉 현침살(懸針殺) — 의료·바늘 관련 기운",
-                    f"현침살 글자({', '.join(set(_현침_cg + _현침_jj))})가 원국에 있습니다. "
+                    f"현침살 글자({', '.join(sorted(set(_현침_cg + _현침_jj)))})가 원국에 있습니다. "
                     f"현침살은 바늘처럼 날카로운 기운으로 "
                     f"의사·한의사·침술사·재봉사·예술가로 대성하는 살입니다. "
                     f"단, 수술·주사·사고로 피를 보는 수도 있습니다.",
