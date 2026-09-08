@@ -5907,7 +5907,7 @@ class LocalSajuNarrator:
         lines.append("\n<h3>⚠️ 이성 위기 직격 분석</h3>")
 
         _all_jj = [p.get("jj","") for p in pils if p.get("jj")]
-        _yr_jj  = pils[0].get("jj","") if pils else ""
+        _yr_jj  = pils[3].get("jj","") if len(pils) > 3 else ""
         _doha_map = {"子":["酉","午","卯"],"午":["卯","子","酉"],
                      "卯":["子","午","酉"],"酉":["午","卯","子"]}
         _doha_trigger = _doha_map.get(_yr_jj, [])
@@ -6538,7 +6538,7 @@ class LocalSajuNarrator:
         _il_jj = pils[1].get("jj", "") if len(pils) > 1 else ""
         _doha_map = {"子": ["酉", "午", "卯"], "午": ["卯", "子", "酉"],
                      "卯": ["子", "午", "酉"], "酉": ["午", "卯", "子"]}
-        _yr_jj = pils[0].get("jj", "") if pils else ""
+        _yr_jj = pils[3].get("jj", "") if len(pils) > 3 else ""
         _doha_trigger = _doha_map.get(_yr_jj, [])
         _has_doha = any(j in _doha_trigger for j in _all_jj)
 
