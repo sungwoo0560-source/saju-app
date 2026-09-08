@@ -14194,28 +14194,43 @@ def get_jeokjung_marriage(gender, ilgan, yukjin_list, sinsal_list, pils, marriag
     """결혼 시기 + 배우자 성향 적중 박스 반환. pils = [시주,일주,월주,년주].
     반환: dict {title, line1, line2, line3}
     """
+    # 한글/한자 불일치 버그 수정(관계운 R 라운드, 사전 존재 결함) — 원래는
+    # yukjin_list(get_yukjin, saju_interpreter.py:8654-)의 "관계" 필드에서
+    # 한글 "정재"/"편재"/"정관"/"편관" 부분일치를 검사했는데, 그 필드는
+    # "아내(正財)"처럼 한자로만 라벨링돼 있어 단 한 번도 매칭되지 않았다
+    # (jae_total·gwan_total 영구 0 고정 → 혼잡/정재1개/편재1개/정재多/편재多
+    # 5갈래가 전부 죽은 코드, "무재/무관"만 100% 발동). 더 근본적으로
+    # yukjin_list는 가족 역할별 1개 고정 라벨(예: "아내(正財)")이라 실제
+    # 개수(2개·3개…)를 애초에 셀 수 없는 구조였다("정재多" 조건은 논리상
+    # 도달 불가). ilgan·pils로 직접 재계산해(get_gamdang_pattern과 동일
+    # TEN_GODS_MATRIX+JIJANGGAN 방식) 정재/편재/정관/편관 실제 개수를 센다.
     pyun_jae = jung_jae = pyun_gwan = jung_gwan = 0
     try:
-        for item in yukjin_list:
-            k = item.get("관계", "")
-            if "편재" in k: pyun_jae += 1
-            if "정재" in k: jung_jae += 1
-            if "편관" in k: pyun_gwan += 1
-            if "정관" in k: jung_gwan += 1
+        for p in pils:
+            cg_ss = TEN_GODS_MATRIX.get(ilgan, {}).get(p.get("cg", ""), "")
+            jjg = JIJANGGAN.get(p.get("jj", ""), [])
+            jj_ss = TEN_GODS_MATRIX.get(ilgan, {}).get(jjg[-1] if jjg else "", "")
+            for ss in (cg_ss, jj_ss):
+                if ss == "偏財(편재)": pyun_jae += 1
+                elif ss == "正財(정재)": jung_jae += 1
+                elif ss == "偏官(편관)": pyun_gwan += 1
+                elif ss == "正官(정관)": jung_gwan += 1
     except Exception:
         pass
 
     g = (gender or "")[:1]
     is_male = g in ["남", "M", "m"]
 
-    # 일지 십성 (배우자 자리) — 위치에 "일지" 포함된 항목
+    # 일지 십성(배우자 자리) — 기존엔 yukjin_list의 "위치" 필드에서 "일지"를
+    # 찾았는데 그 필드는 "일주(壬午)"처럼 "일주"로만 표기돼 "일지"와 매칭된
+    # 적이 없었다(한글/한자 불일치와는 다른 별개의 키워드 불일치, 같이 발견돼
+    # 함께 교정). get_relationship_reading(saju_interpreter.py:9129-9131)과
+    # 동일하게 일지 지장간 정기로 직접 계산한다.
     ilji_sipsin = ""
     try:
-        for item in yukjin_list:
-            pos = str(item.get("위치", ""))
-            if "일지" in pos or "day_branch" in pos:
-                ilji_sipsin = item.get("관계", "")
-                break
+        _iljj_gjg = pils[1].get("jj", "") if isinstance(pils, list) and len(pils) > 1 else ""
+        _iljj_main_gan = JIJANGGAN.get(_iljj_gjg, [""])[-1] if JIJANGGAN.get(_iljj_gjg) else _iljj_gjg
+        ilji_sipsin = TEN_GODS_MATRIX.get(ilgan, {}).get(_iljj_main_gan, "")
     except Exception:
         pass
 
