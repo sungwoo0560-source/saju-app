@@ -7313,12 +7313,32 @@ def detect_life_risk_signals(pils, saewoon_data=None, gender=None, marriage_stat
     if has_cheonueul:
         gyeolhon_score += 25
         gyeolhon_reasons.append("천을귀인 — 좋은 배우자 인연")
-    if jeongjae >= 1 and _is_male:
-        gyeolhon_score += 20
-        gyeolhon_reasons.append("남자 + 정재 — 안정적 배우자")
-    if jeonggwan >= 1 and not _is_male:
-        gyeolhon_score += 20
-        gyeolhon_reasons.append("여자 + 정관 — 듬직한 배우자")
+
+    # 배우자성 감당력 축(관계운 R 라운드) — get_gamdang_pattern 단일 판정층
+    # 재사용. 기존엔 정재/정관만 세어(편재/편관 제외) 신강신약 무관 +20
+    # 고정이었다 — 배우자 그릇의 크기는 재성/관성 전체(정편 합산)라는 확정
+    # 근거로 jaeseong/gwanseong(정편 합산, 위에서 이미 계산됨)으로 교체하고,
+    # 신약+배우자성왕(≥3)+무근("약왕무근")만 감당력 부담으로 절반 감액한다
+    # — 인연 자체는 있으므로 0으로 지우지 않는다. 나머지 패턴(통근 있는
+    # 약왕유근 포함)은 기존 +20을 그대로 유지한다("약왕" 계열을 나쁨으로
+    # 단정하지 않는다는 톤 원칙).
+    from saju_interpreter import get_gamdang_pattern as _get_gamdang_zt
+    _gp_marriage = _get_gamdang_zt(ilgan, pils, gender, "배우자성")
+    if _is_male and jaeseong >= 1:
+        if _gp_marriage["패턴"] == "약왕무근":
+            gyeolhon_score += 10
+            gyeolhon_reasons.append("남자 + 재성 왕(무근) — 인연은 강하나 감당력 관건")
+        else:
+            gyeolhon_score += 20
+            gyeolhon_reasons.append("남자 + 재성 — 안정적 배우자")
+    if (not _is_male) and gwanseong >= 1:
+        if _gp_marriage["패턴"] == "약왕무근":
+            gyeolhon_score += 10
+            gyeolhon_reasons.append("여자 + 관성 왕(무근) — 인연은 강하나 감당력 관건")
+        else:
+            gyeolhon_score += 20
+            gyeolhon_reasons.append("여자 + 관성 — 듬직한 배우자")
+
     if "관인상생" in activated_combos:
         gyeolhon_score += 15
         gyeolhon_reasons.append("관인상생 — 격있는 배우자 인연")

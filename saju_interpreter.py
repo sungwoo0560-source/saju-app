@@ -5775,6 +5775,9 @@ class LocalSajuNarrator:
                     lines.append("- 偏官(편관): 카리스마·결단력 강한 남성에게 끌림. 드라마틱 연애 반복 주의.")
                 if any(s.get("cg_ss") == "正官(정관)" for s in gwan):
                     lines.append("- 正官(정관): 책임감·안정감 있는 남성과 인연. 짜릿함보다 신뢰가 지속 관건.")
+                _gp_r3a = get_gamdang_pattern(ilgan, pils, gender, "배우자성")
+                if _gp_r3a["패턴"] in ("약왕유근", "약왕무근"):
+                    lines.append(f"- {_SPOUSE_GAMDANG_TEXT[_gp_r3a['패턴']]['설명']}")
             else:
                 lines.append(f"\n<b>[결과]</b> 관성(남편성)이 원국에 강하게 드러나지 않는 구조입니다.")
                 lines.append("→ 조건보다 '마음이 통하는 사람'이 맞음. 커리어·성장에 집중할 때 인연이 자연히 따라옵니다.")
@@ -5786,6 +5789,9 @@ class LocalSajuNarrator:
                     lines.append("- 偏財(편재): 활발하고 개성 강한 여성에게 끌림. 이성 인기 있으나 한 곳에 정착이 과제.")
                 if any(s.get("cg_ss") == "正財(정재)" for s in jae):
                     lines.append("- 正財(정재): 현실적·가정적 여성과 인연. 내조형 배우자 만나 안정적 가정 가능.")
+                _gp_r3a = get_gamdang_pattern(ilgan, pils, gender, "배우자성")
+                if _gp_r3a["패턴"] in ("약왕유근", "약왕무근"):
+                    lines.append(f"- {_SPOUSE_GAMDANG_TEXT[_gp_r3a['패턴']]['설명']}")
             else:
                 lines.append(f"\n<b>[결과]</b> 재성(아내성)이 원국에 강하게 드러나지 않는 구조입니다.")
                 lines.append("→ 억지로 이성을 찾기보다 일·취미에 집중할 때 자연스럽게 인연이 따라옵니다.")
@@ -13276,6 +13282,105 @@ def _is_jongjae_candidate(ilgan, pils, jaeseong_count, siksang_count):
     return (not _has_ilgan_tonggeun(ilgan, pils)) and jaeseong_count >= 3 and siksang_count >= 1
 
 
+def get_gamdang_pattern(ilgan, pils, gender, target):
+    """감당력(堪當力) 판정층 단일 소스(관계운 R 라운드) — build_life_analysis
+    (13307-13375)의 재물운 신강신약×재성 축을 target 인자로 일반화한다.
+    "계산은 하나, 프레임은 둘" 원칙: 이 함수는 패턴 코드만 반환하고,
+    직업 텍스트(manse.py:14898-14966)와 배우자 텍스트(_SPOUSE_GAMDANG_TEXT,
+    아래)는 각자 그 코드로 룩업한다 — 판정 로직 자체는 여기 하나뿐이다.
+
+    target: "재성"(정재+편재) | "관성"(정관+편관) | "배우자성"(성별 자동분기:
+    남=재성, 여=관성). 재물운(build_life_analysis)과 달리 정재/정관만이
+    아니라 정편 합산으로 센다 — 배우자 그릇의 크기는 재성/관성 전체라는
+    관계운 R 라운드 확정 근거(혼잡=정편 동시 판정은 이 함수와 무관한
+    별개 로직이므로 그대로 둔다).
+
+    반환: {"패턴": <str|None>, "신강신약": sn, "통근": bool, "개수": int}
+    패턴 6종(재물운 4종과 동형 + 무성 2종):
+      신약 + 개수≥3 + 통근있음 → "약왕유근"(인연은 강하나 감당력 관건, 상대적 안정)
+      신약 + 개수≥3 + 통근없음 → "약왕무근"(인연은 강하나 감당력 관건, 무근이라 부담 큼)
+      신강 + 개수 1~2         → "강성균"(균형)
+      신강 + 개수≥2           → "강성왕"
+      신강 + 개수==0           → "강성무"
+      신약 + 개수==0           → "약성무"
+      그 외(중화·신약1~2 등)   → None
+    """
+    if not pils or len(pils) < 2 or not ilgan:
+        return {"패턴": None, "신강신약": "", "통근": False, "개수": 0}
+
+    _target = target
+    if _target == "배우자성":
+        _target = "재성" if (gender or "")[:1] == "남" else "관성"
+
+    ss_count = {}
+    for p in pils:
+        cg_ss = TEN_GODS_MATRIX.get(ilgan, {}).get(p.get("cg", ""), "")
+        jjg = JIJANGGAN.get(p.get("jj", ""), [])
+        jj_ss = TEN_GODS_MATRIX.get(ilgan, {}).get(jjg[-1] if jjg else "", "")
+        for ss in [cg_ss, jj_ss]:
+            if ss and ss not in ("-", ""):
+                ss_count[ss] = ss_count.get(ss, 0) + 1
+
+    if _target == "재성":
+        cnt = ss_count.get("正財(정재)", 0) + ss_count.get("偏財(편재)", 0)
+    elif _target == "관성":
+        cnt = ss_count.get("正官(정관)", 0) + ss_count.get("偏官(편관)", 0)
+    else:
+        cnt = 0
+
+    strength_info = get_ilgan_strength(ilgan, pils) or {}
+    sn = strength_info.get("신강신약", "")
+    tonggeun = _has_ilgan_tonggeun(ilgan, pils)
+
+    pattern = None
+    if "신약" in sn:
+        if cnt >= 3:
+            pattern = "약왕유근" if tonggeun else "약왕무근"
+        elif cnt == 0:
+            pattern = "약성무"
+    elif "신강" in sn:
+        if cnt == 0:
+            pattern = "강성무"
+        elif cnt >= 2:
+            pattern = "강성왕"
+        else:
+            pattern = "강성균"
+
+    return {"패턴": pattern, "신강신약": sn, "통근": tonggeun, "개수": cnt}
+
+
+# 배우자 텍스트(관계운 R 라운드, get_gamdang_pattern 6종 룩업 전용) — "약왕"
+# 계열을 나쁨으로 단정하지 않는다. 재다신약은 불행이 아니라 "감당할 힘이
+# 관건"이라는 관점(형 톤 원칙: 단독 나열 금지·맥락 조건화). 무근("약왕무근")은
+# 유근보다 톤을 한 단계 올리되 경고가 아니라 "준비가 필요하다" 방향으로 쓴다.
+_SPOUSE_GAMDANG_TEXT = {
+    "약왕유근": {
+        "설명": "배우자 인연이 강하게 들어오는 구조입니다. 일간에 뿌리가 있어 그 인연을 받쳐낼 여력은 있는 편이니, 비겁·인성 운에 관계가 한층 안정됩니다.",
+        "이유": "배우자성 왕(통근) — 인연은 강하나 감당력이 관건",
+    },
+    "약왕무근": {
+        "설명": "배우자 인연이 강하게 들어오는데 아직 그것을 받쳐낼 뿌리가 부족한 구조입니다. 관계 자체보다 스스로를 채우는 시간(비겁·인성 운)이 먼저 준비되면, 그 인연을 훨씬 편안하게 누릴 수 있습니다.",
+        "이유": "배우자성 왕(무근) — 감당력을 먼저 채울 준비가 관건",
+    },
+    "강성균": {
+        "설명": "일간의 힘과 배우자성이 균형 잡힌 구조입니다. 배우자 인연을 무리 없이 받아들이고 이어갈 수 있는 안정적인 조합입니다.",
+        "이유": "일간·배우자성 균형 — 안정적 인연",
+    },
+    "강성왕": {
+        "설명": "일간도 강하고 배우자성도 왕성한, 배우자 인연을 감당하고 가꿔나갈 이상적인 구조입니다.",
+        "이유": "일간강·배우자성왕 — 감당력과 인연 모두 갖춤",
+    },
+    "강성무": {
+        "설명": "일간은 강한데 배우자성이 원국에 보이지 않는 구조입니다. 인연이 없다는 뜻이 아니라 대운·세운에서 배우자성이 들어오는 시기에 인연이 뚜렷해지는 타입입니다.",
+        "이유": "배우자성 부재 — 대운·세운 시기에 인연 뚜렷",
+    },
+    "약성무": {
+        "설명": "일간이 약한데 배우자성마저 원국에 보이지 않는 구조입니다. 스스로를 먼저 채우는 시기를 지나면, 배우자성 운이 들어올 때 인연이 자연스럽게 자리잡습니다.",
+        "이유": "배우자성 부재(신약) — 자기 안정이 먼저",
+    },
+}
+
+
 # 신약재왕·신강재약·신강재왕·종재격후보 — SIPSEONG_COMBINATIONS(saju_zhengtong.py)
 # 20패턴에 없는 4종 재물 서술 텍스트(F-재물운 라운드2 신규 작성). 비겁쟁재·
 # 재다신약은 트리거 조건만 위 함수들로 교정하고 텍스트는 SIPSEONG_COMBINATIONS를
@@ -14275,9 +14380,17 @@ def get_jeokjung_marriage(gender, ilgan, yukjin_list, sinsal_list, pils, marriag
         elif jae_total == 0:
             line1 = "무재(無財) — 결혼 인연이 서서히 찾아오는 기운입니다. 재성 대운·세운이 들어오는 시기에 인연이 뚜렷해집니다."
         elif jung_jae >= 2:
-            line1 = "정재 多 — 안정 추구형. 마음이 편안해지는 인연을 만나면 자연스럽게 결심하게 됩니다."
+            _gp_jm = get_gamdang_pattern(ilgan, pils, gender, "배우자성")
+            if _gp_jm["패턴"] in ("약왕유근", "약왕무근"):
+                line1 = f"정재 多 — {_SPOUSE_GAMDANG_TEXT[_gp_jm['패턴']]['설명']}"
+            else:
+                line1 = "정재 多 — 안정 추구형. 마음이 편안해지는 인연을 만나면 자연스럽게 결심하게 됩니다."
         elif pyun_jae >= 2:
-            line1 = "편재 多 — 자유연애·연상연하 등 다양한 인연이 따르는 기운입니다."
+            _gp_jm = get_gamdang_pattern(ilgan, pils, gender, "배우자성")
+            if _gp_jm["패턴"] in ("약왕유근", "약왕무근"):
+                line1 = f"편재 多 — {_SPOUSE_GAMDANG_TEXT[_gp_jm['패턴']]['설명']}"
+            else:
+                line1 = "편재 多 — 자유연애·연상연하 등 다양한 인연이 따르는 기운입니다."
         elif pyun_jae == 1 and jung_jae == 0:
             line1 = "편재 1개 — 크게 다가오는 인연 또는 연상연하 인연이 있는 기운입니다."
         elif jung_jae == 1 and pyun_jae == 0:
@@ -14292,9 +14405,17 @@ def get_jeokjung_marriage(gender, ilgan, yukjin_list, sinsal_list, pils, marriag
         elif gwan_total == 0:
             line1 = "무관(無官) — 결혼 인연이 서서히 찾아오는 기운입니다. 관성 대운·세운이 들어오는 시기에 인연이 뚜렷해집니다."
         elif jung_gwan >= 2:
-            line1 = "정관 多 — 안정 추구형. 마음이 편안해지는 인연을 만나면 자연스럽게 결심하게 됩니다."
+            _gp_jm = get_gamdang_pattern(ilgan, pils, gender, "배우자성")
+            if _gp_jm["패턴"] in ("약왕유근", "약왕무근"):
+                line1 = f"정관 多 — {_SPOUSE_GAMDANG_TEXT[_gp_jm['패턴']]['설명']}"
+            else:
+                line1 = "정관 多 — 안정 추구형. 마음이 편안해지는 인연을 만나면 자연스럽게 결심하게 됩니다."
         elif pyun_gwan >= 2:
-            line1 = "편관 多 — 강렬한 인연·연상 또는 능력자와의 인연이 따르는 기운입니다."
+            _gp_jm = get_gamdang_pattern(ilgan, pils, gender, "배우자성")
+            if _gp_jm["패턴"] in ("약왕유근", "약왕무근"):
+                line1 = f"편관 多 — {_SPOUSE_GAMDANG_TEXT[_gp_jm['패턴']]['설명']}"
+            else:
+                line1 = "편관 多 — 강렬한 인연·연상 또는 능력자와의 인연이 따르는 기운입니다."
         elif pyun_gwan == 1 and jung_gwan == 0:
             line1 = "편관 1개 — 강한 인상의 상대를 만나는 기운입니다."
         elif jung_gwan == 1 and pyun_gwan == 0:
