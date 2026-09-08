@@ -7058,10 +7058,9 @@ def detect_life_risk_signals(pils, saewoon_data=None, gender=None, marriage_stat
     hap_pairs = [("子","丑"),("寅","亥"),("卯","戌"),("辰","酉"),("巳","申"),("午","未")]
     hap_count = sum(1 for a, b in hap_pairs if a in all_jj and b in all_jj)
 
-    # 양인살
-    yangin_map = {"甲":"卯","乙":"辰","丙":"午","丁":"未","戊":"午",
-                  "己":"未","庚":"酉","辛":"戌","壬":"子","癸":"丑"}
-    has_yangin = yangin_map.get(ilgan, "") in all_jj
+    # 양인살 — YANGIN_MAP 단일 소스(H1-b/H1-c와 동일 패턴), 정통 양간 5개 전용
+    from saju_sinsal import YANGIN_MAP
+    has_yangin = YANGIN_MAP.get(ilgan, "") in all_jj
 
     # 백호살 (4주 전체 검사 — 리스트는 get_extra_sinsal 동일 목록과 일치,
     # 비교 범위만 일주→4주로 확장)
