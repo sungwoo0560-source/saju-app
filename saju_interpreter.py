@@ -5906,7 +5906,8 @@ class LocalSajuNarrator:
         # ── 5. 이성 위기 직격 분석 ──────────────────────────────
         lines.append("\n<h3>⚠️ 이성 위기 직격 분석</h3>")
 
-        _has_doha = get_dohwa(pils)["존재"]
+        _dohwa_info = get_dohwa(pils)
+        _has_doha = _dohwa_info["존재"]
 
         _peon_gwan_cnt = sum(
             1 for s in ss_list
@@ -5922,7 +5923,12 @@ class LocalSajuNarrator:
         )
 
         _danger_msgs = []
-        if _has_doha:
+        if _has_doha and _dohwa_info["구분"] == "장내":
+            _danger_msgs.append(
+                "🌹 <b>도화살(墻內) 활성</b>: 타고난 매력과 인기가 두드러지는 기운입니다. "
+                "예술·서비스·대인관계 분야에서 그 매력이 자연스럽게 빛을 발합니다."
+            )
+        elif _has_doha:
             _danger_msgs.append(
                 "🌹 <b>도화살 활성</b>: 타고난 매력으로 이성이 끊임없이 주변을 맴돕니다. "
                 "기혼이라면 이성과의 경계를 명확히 유지하고, 배우자와의 신뢰 관계를 더욱 돈독히 하십시오."
@@ -6529,7 +6535,8 @@ class LocalSajuNarrator:
         lines.append("\n<h3>⚠️ 이성 위기 직격 분석</h3>")
 
         # 도화살 확인 — get_dohwa 단일 소스(년지·일지 앵커, 관법 통일)
-        _has_doha = get_dohwa(pils)["존재"]
+        _dohwa_info = get_dohwa(pils)
+        _has_doha = _dohwa_info["존재"]
 
         # 편관 과다 = 나쁜 남자 인연 / 여자 문제
         _peon_gwan_cnt = sum(
@@ -6549,7 +6556,12 @@ class LocalSajuNarrator:
 
         _danger_msgs = []
 
-        if _has_doha:
+        if _has_doha and _dohwa_info["구분"] == "장내":
+            _danger_msgs.append(
+                "🌹 <b>도화살(墻內) 활성</b>: 타고난 매력과 인기가 두드러지는 기운입니다. "
+                "예술·서비스·대인관계 분야에서 그 매력이 자연스럽게 빛을 발합니다."
+            )
+        elif _has_doha:
             _danger_msgs.append(
                 "🌹 <b>도화살(桃花殺) 활성</b>: 타고난 매력으로 이성이 끊임없이 주변을 맴돕니다. "
                 "기혼이라면 배우자 외의 이성 접촉을 극도로 조심해야 합니다. "
@@ -8826,15 +8838,25 @@ def get_special_stars(pils):
     if wol_jj and yeokma.get(wol_jj, "") in pil_jjs:
         result.append({"name": "역마살(驛馬殺)", "desc": "평생 이동/여행/해외와 인연이 깊습니다."})
 
-    # 도화살 — 월지 앵커 폐기, get_dohwa 단일 소스(년지·일지 앵커, 관법 통일)로 교체
-
-    if get_dohwa(pils)["존재"]:
-        result.append(
-            {
-                "name": "도화살(桃花殺)",
-                "desc": "이성의 인기를 한몸에 받는 매력의 신살입니다.",
-            }
-        )
+    # 도화살 — 월지 앵커 폐기, get_dohwa 단일 소스(년지·일지 앵커, 관법 통일)로 교체.
+    # 장내(년지·월지)는 이성 문제로 다루지 않고 매력·인기 서술만, 장외(일지·시지)는
+    # 기존 이성 관계 맥락 유지(양쪽 다 있으면 장외 기준).
+    _dohwa_gss = get_dohwa(pils)
+    if _dohwa_gss["존재"]:
+        if _dohwa_gss["구분"] == "장내":
+            result.append(
+                {
+                    "name": "도화살(桃花殺)",
+                    "desc": "매력과 인기가 돋보이는 신살입니다.",
+                }
+            )
+        else:
+            result.append(
+                {
+                    "name": "도화살(桃花殺)",
+                    "desc": "이성의 인기를 한몸에 받는 매력의 신살입니다.",
+                }
+            )
 
     # 문창귀인(文昌貴人) — 일간 기준 학문·총명의 귀인
     mc_jj = MUNCHANG_MAP.get(ilgan, "")
@@ -14038,6 +14060,9 @@ def get_jeokjung_affair(gender, ilgan, yukjin_list, sinsal_list, pils, marriage_
     has_dohwa    = "도화" in sinsal_str
     has_hongyeom = "홍염" in sinsal_str
     has_yangin   = "양인" in sinsal_str or "羊刃" in sinsal_str
+    # 도화 장내(墻內)는 이성 문제로 다루지 않음(관법 통일 2단계) — 홍염이
+    # 함께 없을 때만(순수 장내 도화 단독 케이스만) 문구를 덜어낸다.
+    _dohwa_janggne_only = has_dohwa and not has_hongyeom and get_dohwa(pils).get("구분") == "장내"
 
     g = (gender or "")[:1]
     is_male = g in ["남", "M", "m"]
@@ -14071,6 +14096,11 @@ def get_jeokjung_affair(gender, ilgan, yukjin_list, sinsal_list, pils, marriage_
             line1 = "양인 + 재성. 평소엔 무덤덤한데 한 번 빠지면 끝까지."
             line2 = "본인이 가장 위험한 줄 — 본인만 모릅니다."
             line3 = "결혼 후 외부 자극 차단 — 그게 본인 안전장치입니다."
+        elif _dohwa_janggne_only:
+            title = "💔 당신은 — 매력과 인기가 돋보이는 사주입니다"
+            line1 = "도화(墻內) — 예술·대인관계 방면에서 매력이 자연스럽게 드러납니다."
+            line2 = "나이 들어도 그 매력이 유지되는 편입니다."
+            line3 = "이 매력을 재능으로 살리면 좋은 결과로 이어집니다."
         elif has_dohwa or has_hongyeom:
             title = "💔 당신은 — 이성에게 인기 많은 사주입니다"
             line1 = "도화나 홍염 — 나이 들어도 매력 유지됩니다."
@@ -14130,6 +14160,11 @@ def get_jeokjung_affair(gender, ilgan, yukjin_list, sinsal_list, pils, marriage_
             line1 = "비겁 강 — 남편이 다른 여자에게 흔들릴 수 있는 구조."
             line2 = "본인보다 배우자 쪽 이성 관계에 변동수가 있으니, 관계 관리가 핵심입니다."
             line3 = "결혼 상대는 — 책임감 있는 사람으로 골라야 합니다."
+        elif _dohwa_janggne_only:
+            title = "💔 당신은 — 매력과 인기가 돋보이는 사주입니다"
+            line1 = "도화(墻內) — 예술·대인관계 방면에서 매력이 자연스럽게 드러납니다."
+            line2 = "나이 들어도 그 매력이 유지되는 편입니다."
+            line3 = "이 매력을 재능으로 살리면 좋은 결과로 이어집니다."
         elif has_dohwa or has_hongyeom:
             title = "💔 당신은 — 남자에게 인기 많은 사주입니다"
             line1 = "도화나 홍염 — 나이 들어도 매력 유지됩니다."

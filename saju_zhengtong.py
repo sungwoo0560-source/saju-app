@@ -7036,7 +7036,8 @@ def detect_life_risk_signals(pils, saewoon_data=None, gender=None, marriage_stat
 
     # 도화살 — get_dohwa 단일 소스(년지·일지 앵커, 관법 통일)
     from saju_sinsal import get_dohwa as _get_dohwa_zt
-    dohwa_count = len(_get_dohwa_zt(pils)["위치"])
+    _dohwa_info_zt = _get_dohwa_zt(pils)
+    dohwa_count = len(_dohwa_info_zt["위치"])
 
     # 충(沖)
     chung_pairs = [("子","午"),("丑","未"),("寅","申"),("卯","酉"),("辰","戌"),("巳","亥")]
@@ -7093,7 +7094,10 @@ def detect_life_risk_signals(pils, saewoon_data=None, gender=None, marriage_stat
     baram_reasons = []
     if dohwa_count >= 2:
         baram_score += 30
-        baram_reasons.append(f"도화살 {dohwa_count}개 — 이성 끌림 강함")
+        if _dohwa_info_zt["구분"] == "장내":
+            baram_reasons.append(f"도화살 {dohwa_count}개 — 매력·인기 기운 강함")
+        else:
+            baram_reasons.append(f"도화살 {dohwa_count}개 — 이성 끌림 강함")
     if hap_count >= 2:
         baram_score += 25
         baram_reasons.append(f"지지합 {hap_count}개 — 새로운 인연 다발")
@@ -7132,7 +7136,11 @@ def detect_life_risk_signals(pils, saewoon_data=None, gender=None, marriage_stat
         for _grp, _dh in _DOHWA_GRP.items():
             if (iljj in _grp or _nyeonjj7125 in _grp) and _sw_jj == _dh:
                 baram_score += 25
-                baram_reasons.append("일지 도화살 + 세운 도화 — 인연 폭발")
+                # 장외(일지) 매치 시 이성 관계 톤 유지, 장내(년지만) 매치 시 매력 톤으로
+                if iljj in _grp:
+                    baram_reasons.append("일지 도화살 + 세운 도화 — 인연 폭발")
+                else:
+                    baram_reasons.append("년지 도화살 + 세운 도화 — 매력·인기 상승")
                 break
 
         # 조건 3: 일지-세운 충 + 양인 동시

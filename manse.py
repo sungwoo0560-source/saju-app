@@ -20382,6 +20382,7 @@ def menu6_relations(pils, name, birth_year, gender, marriage_status="미혼"):
         return any(_s.get("name", "").startswith(_name_prefix) for _s in get_extra_sinsal(pils))
 
     _dohwa = _has_sinsal_r3("도화살")
+    _dohwa_gubun_r3 = get_dohwa(pils).get("구분", "")
     _hongran = _has_sinsal_r3("홍염살")
     _yang_in = _has_sinsal_r3("양인살")
     _has_dohwa = _dohwa
@@ -20440,6 +20441,15 @@ def menu6_relations(pils, name, birth_year, gender, marriage_status="미혼"):
     )
     _love_key_r3 = (_dohwa, _hongran, _sang2, _yang_in)
     _love_type, _love_desc, _love_warn = _LOVE_COMBO_R3.get(_love_key_r3, _LOVE_COMBO_DEFAULT_R3)
+
+    # 도화 장내(墻內)는 이성 문제로 다루지 않고 매력·인기로 본다(관법 통일 2단계).
+    # 순애형(도화 단독)만 순수 도화 기반 라벨이라 이 경우에 한해 문구를 덜어낸다.
+    if _dohwa and _dohwa_gubun_r3 == "장내" and _love_type == "💕 순애형":
+        _love_desc = (
+            "도화살(墻內) — 매력과 인기가 자연스럽게 따르는 기운이다. "
+            "예술·대인관계 분야에서 그 매력이 자주 드러난다."
+        )
+        _love_warn = "매력을 재능으로 살리면 좋은 인연도 자연스럽게 따라온다."
 
     # ── 강사식 4박자 (①전체구조 ②근거 ③그래서지금 ④대비책) — 궁합 맥락, 신규계산 0 ──
     _is_married6 = marriage_status in ("기혼", "재혼")

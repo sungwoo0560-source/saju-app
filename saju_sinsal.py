@@ -478,12 +478,28 @@ def get_dohwa(pils):
 
     found = [["시주", "일주", "월주", "년주"][i] for i, p in enumerate(pils) if p["jj"] in targets]
 
+    # 장내(墻內)/장외(墻外) 분류 — 년주·월주=장내, 시주·일주=장외.
+    # 양쪽 다 있으면 장외 기준을 따른다(강한 쪽 우선). 이 분류는 위의
+    # "존재"·"위치"·"목표지지"(판정 자체, 활성률 38.64%)를 전혀 바꾸지
+    # 않는 순수 부가 필드다.
+    _janggne = any(p in found for p in ("년주", "월주"))
+    _jangoe = any(p in found for p in ("시주", "일주"))
+    if not found:
+        _gubun = ""
+    elif _jangoe:
+        _gubun = "장외"
+    else:
+        _gubun = "장내"
+
     return {
         "존재": bool(found),
         "위치": found,
         "목표지지": sorted(targets),
         "년지_목표": target_y,
         "일지_목표": target_i,
+        "구분": _gubun,
+        "장내": _janggne,
+        "장외": _jangoe,
     }
 
 
