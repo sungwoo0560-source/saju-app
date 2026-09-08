@@ -14065,30 +14065,6 @@ def get_jeokjung_affair(gender, ilgan, yukjin_list, sinsal_list, pils, marriage_
     has_hongyeom = "홍염" in sinsal_str
     has_yangin   = "양인" in sinsal_str or "羊刃" in sinsal_str
 
-    # JONGHAP-FIX-3: 신살 리스트 누락 대응 - 일지·일간 직접 검출
-    try:
-        _DOHWA_BR_ALL = {"자", "오", "묘", "유"}
-        _HONGYEOM_MAP = {
-            "갑": "오", "을": "신", "병": "인", "정": "미", "무": "진",
-            "기": "진", "경": "술", "신": "유", "임": "자", "계": "신",
-        }
-        _h2h_fix3 = {"甲": "갑", "乙": "을", "丙": "병", "丁": "정", "戊": "무",
-                     "己": "기", "庚": "경", "辛": "신", "壬": "임", "癸": "계"}
-        _ig_fix3 = _h2h_fix3.get((ilgan or "")[:1], (ilgan or "")[:1])
-        _all_branches = set()
-        for _p in (pils or []):
-            _jj = _p.get("jj", "")
-            if _jj:
-                _all_branches.add(_jj[:1])
-        if not has_dohwa and (_all_branches & _DOHWA_BR_ALL):
-            has_dohwa = True
-        if not has_hongyeom:
-            _hy = _HONGYEOM_MAP.get(_ig_fix3, "")
-            if _hy and _hy in _all_branches:
-                has_hongyeom = True
-    except Exception:
-        pass
-
     g = (gender or "")[:1]
     is_male = g in ["남", "M", "m"]
 
