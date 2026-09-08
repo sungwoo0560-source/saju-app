@@ -13273,6 +13273,126 @@ def _has_ilgan_tonggeun(ilgan, pils):
     return False
 
 
+def get_sipseong_relation(ilgan, pils, from_ss, to_ss, *,
+                           adjacency="same_or_adjacent", tonggeun_of="to"):
+    """십성 생극 위치·통근 판정 공용 함수(조합 정밀도 T 라운드 신설) —
+    "A가 B를 실제로 생하거나 극하는 위치인가"를 조합마다 따로 구현하지
+    않도록 단일 소스화한다(get_dohwa·YANGIN_MAP과 동일 패턴 — 계산은
+    하나, 판단은 소비처). 이 함수는 원시 위치·거리·통근 정보만 반환하고
+    "그래서 이 조합이 성립한다"는 결론은 내리지 않는다 — 식신생재/
+    상관생재/상관패인/효신탈식 등 각 조합이 이 반환값을 조합해 스스로
+    판단한다. ★이번 라운드는 신설만 — 기존 20개 조합 판정(detect_
+    sipseong_combinations, saju_zhengtong.py:6172)에는 아직 연결하지
+    않는다.
+
+    from_ss / to_ss: {"식신"} 같은 순한글 십성 이름 집합 — 실제 소비처
+    (detect_sipseong_combinations)와 동일하게 TEN_GODS_MATRIX 값
+    ("食神(식신)")에서 괄호 안 한글만 비교한다.
+
+    adjacency(T3 라운드 실측 후 확정 — 5,000표본, 식신생재 기준
+    39.70%→30.00%로 정밀화, "년간 식신+시지 재성"류 거리3 케이스
+    13.2% 제외): 생·극은 붙어야 작용한다는 근거로 기본값을 "같은 기둥
+    + 바로 옆 기둥"으로 확정했다.
+      - "same_pillar": 같은 기둥(pillar index 동일)만
+      - "same_or_adjacent": 같은 기둥 + 바로 옆 기둥(|i-j|<=1) — 기본값
+      - "same_type_adjacent": 천간은 천간끼리, 지지는 지지끼리만 |i-j|<=1
+
+    tonggeun_of(T4 라운드 실측 후 확정 — "from"|"to"|"both"|None):
+    정기(지장간 마지막 원소, JIJANGGAN[-1])만 통근으로 인정한다.
+    ★_has_ilgan_tonggeun(13261-13273, 재물운·감당력 축)은 일간 자신의
+    통근이라 지장간 전체(정기·중기·여기)를 보지만, 이 함수는 재성·
+    인성 등 "객체" 십성이 실질적인 힘을 가졌는지를 보는 것이라 여기·
+    중기(잔여 기운)는 제외하고 정기(본기)만 본다 — 주체와 객체의
+    기준 차이이며 두 함수가 서로 불일치하는 게 아니다. 후보2(전체
+    지장간)로 재보면 재성 존재 케이스의 94.34%가 통근으로 잡혀
+    변별력이 거의 없다는 게 실측으로 확인됐다.
+
+    반환: {"성립": bool, "from_위치": [(pillar_idx, "cg"|"jj"), ...],
+           "to_위치": [...], "인접": bool, "최소거리": int|None,
+           "from_통근": bool, "to_통근": bool}
+    """
+    def _ss_kr(full):
+        return full.split("(")[-1].rstrip(")") if "(" in full else full
+
+    def _positions(ss_set):
+        out = []
+        for i, p in enumerate(pils):
+            cg = p.get("cg", "")
+            if not (i == 1 and cg == ilgan):
+                cg_ss = _ss_kr(TEN_GODS_MATRIX.get(ilgan, {}).get(cg, ""))
+                if cg_ss in ss_set:
+                    out.append((i, "cg"))
+            jj = p.get("jj", "")
+            jjg = JIJANGGAN.get(jj, [])
+            jj_ss = _ss_kr(TEN_GODS_MATRIX.get(ilgan, {}).get(jjg[-1] if jjg else "", ""))
+            if jj_ss in ss_set:
+                out.append((i, "jj"))
+        return out
+
+    _GEN     = {"木": "火", "火": "土", "土": "金", "金": "水", "水": "木"}  # 내가 생함(식상)
+    _BIRTH   = {"木": "水", "火": "木", "土": "火", "金": "土", "水": "金"}  # 나를 생함(인성)
+    _CTRL    = {"木": "土", "火": "金", "土": "水", "金": "木", "水": "火"}  # 내가 극함(재성)
+    _CTRL_R  = {"木": "金", "火": "水", "土": "木", "金": "火", "水": "土"}  # 나를 극함(관성)
+
+    def _oh_of_ss_set(ss_set):
+        ilgan_oh = OH.get(ilgan, "")
+        mapping = {
+            "식신": _GEN.get(ilgan_oh, ""), "상관": _GEN.get(ilgan_oh, ""),
+            "정재": _CTRL.get(ilgan_oh, ""), "편재": _CTRL.get(ilgan_oh, ""),
+            "정관": _CTRL_R.get(ilgan_oh, ""), "편관": _CTRL_R.get(ilgan_oh, ""),
+            "정인": _BIRTH.get(ilgan_oh, ""), "편인": _BIRTH.get(ilgan_oh, ""),
+            "비견": ilgan_oh, "겁재": ilgan_oh,
+        }
+        for name in ss_set:
+            oh = mapping.get(name, "")
+            if oh:
+                return oh
+        return ""
+
+    def _tonggeun_jeonggi(ss_set):
+        target_oh = _oh_of_ss_set(ss_set)
+        if not target_oh:
+            return False
+        for p in pils:
+            jjg = JIJANGGAN.get(p.get("jj", ""), [])
+            if jjg and OH.get(jjg[-1], "") == target_oh:
+                return True
+        return False
+
+    from_pos = _positions(from_ss)
+    to_pos = _positions(to_ss)
+    성립 = bool(from_pos) and bool(to_pos)
+
+    인접 = False
+    최소거리 = None
+    if 성립:
+        dists = []
+        for fi, fslot in from_pos:
+            for ti, tslot in to_pos:
+                if adjacency == "same_pillar":
+                    ok = (fi == ti)
+                elif adjacency == "same_type_adjacent":
+                    ok = (fslot == tslot) and abs(fi - ti) <= 1
+                else:  # "same_or_adjacent"(기본값)
+                    ok = abs(fi - ti) <= 1
+                if ok:
+                    인접 = True
+                dists.append(abs(fi - ti))
+        최소거리 = min(dists) if dists else None
+
+    # 통근은 "관계 성립"(양쪽 존재)이 아니라 그 대상 십성 자체의 존재
+    # 여부로만 계산한다 — 성립에 종속시키면 "이 재성이 통근했는가"가
+    # 식신 존재 여부에 좌우되는 부수 판단이 섞여 원시 정보가 아니게 된다.
+    from_통근 = _tonggeun_jeonggi(from_ss) if bool(from_pos) and tonggeun_of in ("from", "both") else False
+    to_통근 = _tonggeun_jeonggi(to_ss) if bool(to_pos) and tonggeun_of in ("to", "both") else False
+
+    return {
+        "성립": 성립, "from_위치": from_pos, "to_위치": to_pos,
+        "인접": 인접, "최소거리": 최소거리,
+        "from_통근": from_통근, "to_통근": to_통근,
+    }
+
+
 def _is_jongjae_candidate(ilgan, pils, jaeseong_count, siksang_count):
     """종재격(從財格) 후보(F-재물운 라운드1 확정) — 일간 무근 + 재성
     압도(3개 이상) + 식상 존재(식상이 재성을 더 강화하는 조건)일 때
