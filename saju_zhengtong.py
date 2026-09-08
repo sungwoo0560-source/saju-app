@@ -7093,11 +7093,13 @@ def detect_life_risk_signals(pils, saewoon_data=None, gender=None, marriage_stat
     baram_score = 0
     baram_reasons = []
     if dohwa_count >= 2:
-        baram_score += 30
-        if _dohwa_info_zt["구분"] == "장내":
-            baram_reasons.append(f"도화살 {dohwa_count}개 — 매력·인기 기운 강함")
-        else:
+        # 장내/장외는 강도 차가 아니라 성질 차 — 장외(일지·시지) 포함 시만 가산,
+        # 장내(년지·월지)만이면 가산 0(관법 통일 3단계)
+        if _dohwa_info_zt["장외"]:
+            baram_score += 30
             baram_reasons.append(f"도화살 {dohwa_count}개 — 이성 끌림 강함")
+        else:
+            baram_reasons.append(f"도화살 {dohwa_count}개 — 매력·인기 기운 강함")
     if hap_count >= 2:
         baram_score += 25
         baram_reasons.append(f"지지합 {hap_count}개 — 새로운 인연 다발")
@@ -7135,9 +7137,9 @@ def detect_life_risk_signals(pils, saewoon_data=None, gender=None, marriage_stat
         _nyeonjj7125 = pils[3].get("jj", "") if len(pils) > 3 else ""
         for _grp, _dh in _DOHWA_GRP.items():
             if (iljj in _grp or _nyeonjj7125 in _grp) and _sw_jj == _dh:
-                baram_score += 25
-                # 장외(일지) 매치 시 이성 관계 톤 유지, 장내(년지만) 매치 시 매력 톤으로
+                # 감액이 아니라 앵커별 분기 — 일지 매치(장외)만 가산, 년지 매치(장내)는 가산 0
                 if iljj in _grp:
+                    baram_score += 25
                     baram_reasons.append("일지 도화살 + 세운 도화 — 인연 폭발")
                 else:
                     baram_reasons.append("년지 도화살 + 세운 도화 — 매력·인기 상승")
@@ -7249,8 +7251,14 @@ def detect_life_risk_signals(pils, saewoon_data=None, gender=None, marriage_stat
         ihon_score += 20
         ihon_reasons.append("비겁쟁재 + 편재 — 배우자 빼앗김 신호")
     if dohwa_count >= 3:
-        ihon_score += 15
-        ihon_reasons.append("도화 과다 — 이성 관계 복잡")
+        # 다도화(3개 이상)는 왕지 과다로 위치 무관하게 기운이 넘친다는 별개 논리라
+        # 장내에도 일부 인정 — 장외 포함 시 +15 유지, 장내만이면 +5로 감액(완전 0은 과함)
+        if _dohwa_info_zt["장외"]:
+            ihon_score += 15
+            ihon_reasons.append("도화 과다 — 이성 관계 복잡")
+        else:
+            ihon_score += 5
+            ihon_reasons.append("도화 과다(墻內) — 기운 과다로 인한 산만함")
     if gwanseong == 0 and _is_male:
         ihon_score += 10
         ihon_reasons.append("관성 부재(남자) — 자녀·책임 약함")
@@ -7811,6 +7819,12 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
         _key = next((k for k in SINSAL_EXPLAIN if k in _sn), None)
         if _key:
             _meaning, _advice = SINSAL_EXPLAIN[_key]
+            # 도화살 장내(墻內)는 이성 문제로 다루지 않음(관법 통일 3단계) —
+            # 이성 경고부("→ 이성 구설수...") 제거, 매력·직업 서술만 유지
+            if _key == "도화살":
+                from saju_sinsal import get_dohwa as _get_dohwa_expl
+                if _get_dohwa_expl(pils).get("구분") == "장내":
+                    _advice = "연예·방송·서비스 분야에서 빛납니다."
             sinsal_rows += (
                 '<div style="margin-bottom:10px;padding:10px 14px;background:#fff8e1;'
                 'border-left:3px solid #f9a825;border-radius:6px;">'
