@@ -7322,8 +7322,14 @@ def detect_life_risk_signals(pils, saewoon_data=None, gender=None, marriage_stat
     # — 인연 자체는 있으므로 0으로 지우지 않는다. 나머지 패턴(통근 있는
     # 약왕유근 포함)은 기존 +20을 그대로 유지한다("약왕" 계열을 나쁨으로
     # 단정하지 않는다는 톤 원칙).
+    # ★raw gender가 아니라 _is_male(위에서 이미 None-안전하게 계산됨,
+    # gender=None 호출 시 기본 True)로 정규화한 문자열을 넘긴다 — raw
+    # gender를 그대로 넘기면 gender=None인 호출(예: render_jonghap_pyongron,
+    # saju_zhengtong.py:7641)에서 get_gamdang_pattern이 "관성"으로 잘못
+    # 분기해(빈 문자열은 "남"이 아니므로) _is_male=True 분기와 패턴 축이
+    # 서로 다른 성별을 보는 불일치가 생긴다(발견: 실앱 검증 중).
     from saju_interpreter import get_gamdang_pattern as _get_gamdang_zt
-    _gp_marriage = _get_gamdang_zt(ilgan, pils, gender, "배우자성")
+    _gp_marriage = _get_gamdang_zt(ilgan, pils, "남" if _is_male else "여", "배우자성")
     if _is_male and jaeseong >= 1:
         if _gp_marriage["패턴"] == "약왕무근":
             gyeolhon_score += 10
