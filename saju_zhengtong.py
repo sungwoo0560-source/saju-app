@@ -7034,15 +7034,9 @@ def detect_life_risk_signals(pils, saewoon_data=None, gender=None, marriage_stat
     all_cg = [p.get("cg", "") for p in pils]
     all_jj = [p.get("jj", "") for p in pils]
 
-    # 도화살 — 일지 기준
-    iljj_dohwa_map = {
-        "申":"酉","子":"酉","辰":"酉",
-        "寅":"卯","午":"卯","戌":"卯",
-        "亥":"子","卯":"子","未":"子",
-        "巳":"午","酉":"午","丑":"午",
-    }
-    iljj_dohwa = iljj_dohwa_map.get(iljj, "")
-    dohwa_count = sum(1 for jj in all_jj if jj == iljj_dohwa)
+    # 도화살 — get_dohwa 단일 소스(년지·일지 앵커, 관법 통일)
+    from saju_sinsal import get_dohwa as _get_dohwa_zt
+    dohwa_count = len(_get_dohwa_zt(pils)["위치"])
 
     # 충(沖)
     chung_pairs = [("子","午"),("丑","未"),("寅","申"),("卯","酉"),("辰","戌"),("巳","亥")]
@@ -7127,15 +7121,16 @@ def detect_life_risk_signals(pils, saewoon_data=None, gender=None, marriage_stat
             baram_score += 30
             baram_reasons.append("홍염살 발동 — 이성 매력 폭발")
 
-        # 조건 2: 일지 도화살 + 세운 도화 (삼합 도화법)
+        # 조건 2: 년지·일지 도화살 + 세운 도화 (삼합 도화법, 관법 통일 — 앵커만 년지 추가, 세운 비교는 무변경)
         _DOHWA_GRP = {
             ("寅","午","戌"): "卯",
             ("申","子","辰"): "酉",
             ("巳","酉","丑"): "午",
             ("亥","卯","未"): "子",
         }
+        _nyeonjj7125 = pils[3].get("jj", "") if len(pils) > 3 else ""
         for _grp, _dh in _DOHWA_GRP.items():
-            if iljj in _grp and _sw_jj == _dh:
+            if (iljj in _grp or _nyeonjj7125 in _grp) and _sw_jj == _dh:
                 baram_score += 25
                 baram_reasons.append("일지 도화살 + 세운 도화 — 인연 폭발")
                 break

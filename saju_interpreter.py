@@ -5906,12 +5906,7 @@ class LocalSajuNarrator:
         # ── 5. 이성 위기 직격 분석 ──────────────────────────────
         lines.append("\n<h3>⚠️ 이성 위기 직격 분석</h3>")
 
-        _all_jj = [p.get("jj","") for p in pils if p.get("jj")]
-        _yr_jj  = pils[3].get("jj","") if len(pils) > 3 else ""
-        _doha_map = {"子":["酉","午","卯"],"午":["卯","子","酉"],
-                     "卯":["子","午","酉"],"酉":["午","卯","子"]}
-        _doha_trigger = _doha_map.get(_yr_jj, [])
-        _has_doha = any(j in _doha_trigger for j in _all_jj)
+        _has_doha = get_dohwa(pils)["존재"]
 
         _peon_gwan_cnt = sum(
             1 for s in ss_list
@@ -6533,14 +6528,8 @@ class LocalSajuNarrator:
         # ── 이성 문제·외도·이별 직격 경고 ──────────────────────────
         lines.append("\n<h3>⚠️ 이성 위기 직격 분석</h3>")
 
-        # 도화살 확인
-        _all_jj = [p.get("jj", "") for p in pils if p.get("jj")]
-        _il_jj = pils[1].get("jj", "") if len(pils) > 1 else ""
-        _doha_map = {"子": ["酉", "午", "卯"], "午": ["卯", "子", "酉"],
-                     "卯": ["子", "午", "酉"], "酉": ["午", "卯", "子"]}
-        _yr_jj = pils[3].get("jj", "") if len(pils) > 3 else ""
-        _doha_trigger = _doha_map.get(_yr_jj, [])
-        _has_doha = any(j in _doha_trigger for j in _all_jj)
+        # 도화살 확인 — get_dohwa 단일 소스(년지·일지 앵커, 관법 통일)
+        _has_doha = get_dohwa(pils)["존재"]
 
         # 편관 과다 = 나쁜 남자 인연 / 여자 문제
         _peon_gwan_cnt = sum(
@@ -8837,24 +8826,9 @@ def get_special_stars(pils):
     if wol_jj and yeokma.get(wol_jj, "") in pil_jjs:
         result.append({"name": "역마살(驛馬殺)", "desc": "평생 이동/여행/해외와 인연이 깊습니다."})
 
-    # 도화살
+    # 도화살 — 월지 앵커 폐기, get_dohwa 단일 소스(년지·일지 앵커, 관법 통일)로 교체
 
-    dohwa = {
-        "寅": "卯",
-        "午": "卯",
-        "戌": "卯",
-        "申": "酉",
-        "子": "酉",
-        "辰": "酉",
-        "亥": "子",
-        "卯": "子",
-        "未": "子",
-        "巳": "午",
-        "酉": "午",
-        "丑": "午",
-    }
-
-    if wol_jj and dohwa.get(wol_jj, "") in pil_jjs:
+    if get_dohwa(pils)["존재"]:
         result.append(
             {
                 "name": "도화살(桃花殺)",

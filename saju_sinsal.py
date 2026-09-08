@@ -456,6 +456,37 @@ def get_yangin(pils):
     }
 
 
+# 도화살(桃花殺) 단일 소스 — 앵커 년지·일지, 삼합국 목욕지(정통 통설).
+# 申子辰→酉, 寅午戌→卯, 巳酉丑→午, 亥卯未→子. 프로젝트 내 도화 판정
+# 지점 전부가 이 상수·함수를 참조하도록 통일한다(YANGIN_MAP과 동일 패턴).
+DOHWA_MAP = {"子":"酉","丑":"午","寅":"卯","卯":"子","辰":"酉","巳":"午",
+             "午":"卯","未":"子","申":"酉","酉":"午","戌":"卯","亥":"子"}
+
+
+@st.cache_data(hash_funcs=_PILS_HF)
+def get_dohwa(pils):
+
+    nyeon_jj = pils[3]["jj"]
+
+    ilji_jj = pils[1]["jj"]
+
+    target_y = DOHWA_MAP.get(nyeon_jj, "")
+
+    target_i = DOHWA_MAP.get(ilji_jj, "")
+
+    targets = {t for t in (target_y, target_i) if t}
+
+    found = [["시주", "일주", "월주", "년주"][i] for i, p in enumerate(pils) if p["jj"] in targets]
+
+    return {
+        "존재": bool(found),
+        "위치": found,
+        "목표지지": sorted(targets),
+        "년지_목표": target_y,
+        "일지_목표": target_i,
+    }
+
+
 @st.cache_data(hash_funcs=_PILS_HF)
 def get_oigyeok(pils):
 
@@ -589,6 +620,14 @@ def get_12sinsal(pils):
         "亥(해)卯(묘)未(미)",
     ]
 
+    # 도화 관법 통일(get_dohwa, 년지·일지 앵커) 대상에서 이 함수는 제외한다.
+    # SINSAL_12_TABLE은 겁살·재살·천살·지살·年殺(도화)·월살·망신살·장성살·
+    # 반안살·역마살·육해살·화개살 12종이 모두 년지 삼합군 하나를 공유하는
+    # 구조라, 年殺 한 종류만 일지 앵커를 추가하면 나머지 11종과 계산
+    # 기반이 갈라진다. 年殺(도화)의 일지 앵커분은 get_extra_sinsal의
+    # 도화살(get_dohwa 경유)이 이미 담당하며, 둘을 함께 소비하는 지점
+    # (예: get_jeokjung_affair의 sinsal_list)에서 합쳐져 년지·일지가
+    # 모두 커버된다.
     my_group = next((g for g in san_groups if nyon_jj in g), "寅(인)午(오)戌(술)")
 
     result = []
@@ -932,10 +971,8 @@ def get_extra_sinsal(pils):
         stars.append({"name":"홍염살(紅艶煞)",
                       "desc":"타고난 이성 흡인력 — 매력·인기·연예·예술 운 강함. 이성 관계 구설 주의"})
 
-    # 도화살(桃花煞) — 년지 기준 (매력·인기)
-    _DOWHWA = {"子":"酉","丑":"午","寅":"卯","卯":"子","辰":"酉","巳":"午",
-               "午":"卯","未":"子","申":"酉","酉":"午","戌":"卯","亥":"子"}
-    if nyeon_jj and _DOWHWA.get(nyeon_jj) in all_jjs:
+    # 도화살(桃花煞) — 년지·일지 앵커, 삼합국 목욕지(get_dohwa 단일 소스, 관법 통일)
+    if get_dohwa(pils)["존재"]:
         stars.append({"name":"도화살(桃花煞)",
                       "desc":"매력·인기 기운 강함 — 예능·서비스·이성 운에서 빛남. 합 운에 이성 구설 주의"})
 

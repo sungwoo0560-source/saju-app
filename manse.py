@@ -1463,15 +1463,7 @@ def _local_saju_engine(pils, name, birth_year, gender, query):
             # 5. 도화살 확인
 
             try:
-                sinsal = get_special_stars(pils)
-
-                dohwa_found = [s for s in sinsal if "도화" in s.get("name", "")]
-
-                ss12 = get_12sinsal(pils)
-
-                dohwa12 = [s for s in ss12 if "도화" in s.get("이름", "") or "년살" in s.get("이름", "")]
-
-                if dohwa_found or dohwa12:
+                if get_dohwa(pils)["존재"]:
                     out.append(
                         "\n**[신살 — 도화살(桃花殺)]** 도화살이 사주에 있습니다!\n이성의 인기를 한몸에 받는 매력의 기운입니다. 이성이 먼저 다가오는 팔자이나, 감정에 휩쓸려 경솔한 선택을 하지 않도록 명심하게.\n"
                     )
@@ -2303,9 +2295,7 @@ def _local_saju_engine(pils, name, birth_year, gender, query):
             sang_cnt   = pjjs_ss.count("傷官(상관)")
             peon_g_cnt = pjjs_ss.count("偏官(편관)")
 
-            doha_jjs  = {"子":["卯","午","酉"],"午":["卯","子","酉"],
-                         "卯":["子","午","酉"],"酉":["子","午","卯"]}
-            has_doha  = any(j in doha_jjs.get(iljj,[]) for j in _pjjs)
+            has_doha  = get_dohwa(pils)["존재"]
             yr_chung  = [j for j in _pjjs if _CIF.get(sw_jj,"") == j]
 
             # 용신/기신 여부
@@ -5197,8 +5187,6 @@ def build_yearly_relationship_story(pils, name, gender, current_year):
                  frozenset({"巳","酉"}),frozenset({"酉","丑"})]
         _HY  = {"甲":"午","乙":"申","丙":"寅","丁":"未",
                 "戊":"辰","己":"辰","庚":"戌","辛":"酉","壬":"子","癸":"申"}
-        _DM  = {"寅":"卯","午":"卯","戌":"卯","申":"酉","子":"酉","辰":"酉",
-                "巳":"午","酉":"午","丑":"午","亥":"子","卯":"子","未":"子"}
         _HYUNG = [{"寅","巳","申"},{"丑","戌","未"},{"子","卯"}]
         _AUTO_H = {"辰","午","酉","亥"}
 
@@ -5206,7 +5194,9 @@ def build_yearly_relationship_story(pils, name, gender, current_year):
         chung    = _CM6.get(ilji,"") == sw_jj
         banhap   = (not hap) and any(frozenset({ilji, sw_jj}) == b for b in _BH)
         hongyeom = _HY.get(ilgan,"") == sw_jj
-        dohwa    = _DM.get(ilji,"") == sw_jj
+        # 도화 관법 통일 — 앵커 년지·일지(DOHWA_MAP 단일 소스), 세운 비교 로직은 무변경
+        _nyeonji5200 = pils[3].get("jj","") if len(pils) > 3 else ""
+        dohwa    = DOHWA_MAP.get(ilji,"") == sw_jj or DOHWA_MAP.get(_nyeonji5200,"") == sw_jj
 
         # 패턴 탐지 (우선순위 순)
         _active_pattern = None
@@ -5788,17 +5778,10 @@ def build_saju_core_diagnosis(pils, name, birth_year, gender, current_year=None,
         except Exception:
             pass
 
-        # 도화살 (년지/일지 기준 직접 계산)
-        _DOHWA_MAP = {"寅":"卯","午":"卯","戌":"卯","申":"酉","子":"酉","辰":"酉",
-                      "巳":"午","酉":"午","丑":"午","亥":"子","卯":"子","未":"子"}
+        # 도화살 (년지/일지 기준, get_dohwa 단일 소스로 소스만 교체 — 값 동일)
         _dohwa_active = False
         try:
-            _neonji = pjjs[3] if len(pjjs) > 3 else ""
-            _ilji_d  = pjjs[1] if len(pjjs) > 1 else ""
-            for _anchor in [_neonji, _ilji_d]:
-                if _DOHWA_MAP.get(_anchor, "") in pjjs:
-                    _dohwa_active = True
-                    break
+            _dohwa_active = get_dohwa(pils)["존재"]
         except Exception:
             pass
 
@@ -11646,8 +11629,8 @@ def get_career_analysis(pils, gender="남"):
         if "역마" in s["이름"]:
             sinsal_jobs.append("이동/무역/해외 관련 직종 유리")
 
-        if "도화" in s["이름"] or "년살" in s["이름"]:
-            sinsal_jobs.append("연예/서비스/대인 방면 유리")
+    if get_dohwa(pils)["존재"]:
+        sinsal_jobs.append("연예/서비스/대인 방면 유리")
 
     yin = get_yangin(pils)
 
@@ -23351,15 +23334,7 @@ def tab_ai_chat(pils, name, birth_year, gender):
                     # 5. 도화살 확인
 
                     try:
-                        sinsal_l = get_special_stars(pils)
-
-                        dohwa_l = [s for s in sinsal_l if "도화" in s.get("name", "")]
-
-                        ss12_l = get_12sinsal(pils)
-
-                        dohwa12_l = [s for s in ss12_l if "도화" in s.get("이름", "") or "년살" in s.get("이름", "")]
-
-                        if dohwa_l or dohwa12_l:
+                        if get_dohwa(pils)["존재"]:
                             out.append("\n**[신살 — 도화살(桃花殺)]** 도화살이 사주에 있습니다!\n이성의 인기를 한몸에 받는 매력의 기운입니다. 감정에 휩쓸려 경솔한 선택을 하지 않도록 명심하게.\n")
 
                         else:
