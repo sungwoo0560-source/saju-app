@@ -326,6 +326,12 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str="", dram
             # -- 폰트 등록: 한글/한자 지원 우선순위 --
 
             _FONT_CANDIDATES = [
+                # 레포 내 NotoSansKR 최우선(manse.py 3곳과 동일 패턴) — 아래
+                # NanumGothic 계열(시스템·레포 전부)은 한자 글리프가 0개라
+                # "정관(正官)" 같은 한자가 공백으로 깨진다(fontTools 확인,
+                # 11,827자 전부 한글·기호). NotoSansKR-Regular.ttf는 23,174자로
+                # 한자를 전부 지원한다.
+                ("NotoSansKR",  os.path.join(os.path.dirname(__file__), "fonts", "NotoSansKR-Regular.ttf"), None),
                 # Windows
                 ("Malgun",      "C:/Windows/Fonts/malgun.ttf",    None),
                 ("Batang",      "C:/Windows/Fonts/batang.ttc",     0),
