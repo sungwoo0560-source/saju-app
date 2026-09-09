@@ -6219,7 +6219,18 @@ def detect_sipseong_combinations(pils: list) -> list:
         activated.append("살인상생")
     if siksang >= 1 and pyeongwan >= 1:
         activated.append("식상제살")
-    if sanggan >= 1 and inseong >= 1:
+    # 상관패인(傷官佩印) 정밀화(관계운 T 라운드) — 기존엔 상관>=1 and
+    # 인성>=1로 단순 공존만 봤다. "다스린다"는 격이 성립하려면 인성이
+    # 뿌리(통근)로 힘이 있어야 하고 상관에 닿는 자리(인접)에 있어야
+    # 하는데, 뜬 인성·먼 인성은 왕한 상관을 못 누른다. get_sipseong_
+    # relation(saju_interpreter.py:13285-)으로 교체 — to_통근(다스리는
+    # 쪽인 인성의 통근)만 본다, from(상관, 다스려지는 쪽)의 통근은 이
+    # 격의 성립 요건이 아니라서 안 봄. 5,000표본 실측: 현행 36.9%→
+    # 통근만 34.6%/인접만 28.2%/둘다 26.7%.
+    from saju_interpreter import get_sipseong_relation as _get_ss_rel_sgpi
+    _sgpi = _get_ss_rel_sgpi(ilgan, pils, {"상관"}, {"정인", "편인"},
+                               adjacency="same_or_adjacent", tonggeun_of="to")
+    if _sgpi["성립"] and _sgpi["인접"] and _sgpi["to_통근"]:
         activated.append("상관패인")
     if jeonggwan >= 1 and pyeongwan >= 1:
         activated.append("관살혼잡")
