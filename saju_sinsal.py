@@ -503,6 +503,42 @@ def get_dohwa(pils):
     }
 
 
+# 고신살(孤辰殺)·과숙살(寡宿殺) 단일 소스 — 앵커 년지 단독, 방합(계절) 4국
+# 기준(정통 연지법, 관계운 U 라운드 확정). 도화(삼합 목욕지)와 계산 체계가
+# 다르다 — 혼동 주의. 亥子丑→고신寅·과숙戌, 寅卯辰→고신巳·과숙丑,
+# 巳午未→고신申·과숙辰, 申酉戌→고신亥·과숙未. 판정은 성별 무관(둘 다
+# 계산), 서술만 소비처에서 성별별로 프레임을 나눈다.
+GOSIN_MAP = {"亥":"寅","子":"寅","丑":"寅",
+             "寅":"巳","卯":"巳","辰":"巳",
+             "巳":"申","午":"申","未":"申",
+             "申":"亥","酉":"亥","戌":"亥"}
+GWASUK_MAP = {"亥":"戌","子":"戌","丑":"戌",
+              "寅":"丑","卯":"丑","辰":"丑",
+              "巳":"辰","午":"辰","未":"辰",
+              "申":"未","酉":"未","戌":"未"}
+
+
+@st.cache_data(hash_funcs=_PILS_HF)
+def get_gosin_gwasuk(pils):
+
+    nyeon_jj = pils[3]["jj"]
+
+    gosin_target = GOSIN_MAP.get(nyeon_jj, "")
+    gwasuk_target = GWASUK_MAP.get(nyeon_jj, "")
+
+    gosin_found = [["시주", "일주", "월주", "년주"][i] for i, p in enumerate(pils) if p["jj"] == gosin_target]
+    gwasuk_found = [["시주", "일주", "월주", "년주"][i] for i, p in enumerate(pils) if p["jj"] == gwasuk_target]
+
+    return {
+        "고신_존재": bool(gosin_found),
+        "고신_위치": gosin_found,
+        "고신_목표지지": gosin_target,
+        "과숙_존재": bool(gwasuk_found),
+        "과숙_위치": gwasuk_found,
+        "과숙_목표지지": gwasuk_target,
+    }
+
+
 @st.cache_data(hash_funcs=_PILS_HF)
 def get_oigyeok(pils):
 
@@ -991,6 +1027,17 @@ def get_extra_sinsal(pils):
     if get_dohwa(pils)["존재"]:
         stars.append({"name":"도화살(桃花煞)",
                       "desc":"매력·인기 기운 강함 — 예능·서비스·이성 운에서 빛남. 합 운에 이성 구설 주의"})
+
+    # 고신살(孤辰殺)·과숙살(寡宿殺) — 년지 앵커, 방합 4국 기준(get_gosin_
+    # gwasuk 단일 소스, 관계운 U 라운드 신설). 판정은 성별 무관으로 둘 다
+    # 계산 — 성별별 서술 프레임은 소비처(relations())에서 나눈다.
+    _gosin_gwasuk = get_gosin_gwasuk(pils)
+    if _gosin_gwasuk["고신_존재"]:
+        stars.append({"name":"고신살(孤辰殺)",
+                      "desc":"혼자만의 시간과 공간이 필요한 기운 — 독립적 생활력이 강함. 곁을 오래 두는 노력이 관건"})
+    if _gosin_gwasuk["과숙_존재"]:
+        stars.append({"name":"과숙살(寡宿殺)",
+                      "desc":"혼자만의 시간과 공간이 필요한 기운 — 독립적 생활력이 강함. 곁을 오래 두는 노력이 관건"})
 
     # 양인살(羊刃煞) — 일간 기준 양인 지지 (추진력) — YANGIN_MAP 단일 소스, H1-c
     if YANGIN_MAP.get(ilgan) in all_jjs:

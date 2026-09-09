@@ -5939,6 +5939,38 @@ class LocalSajuNarrator:
                 "🌹 <b>도화살 활성</b>: 타고난 매력으로 이성이 끊임없이 주변을 맴돕니다. "
                 "기혼이라면 이성과의 경계를 명확히 유지하고, 배우자와의 신뢰 관계를 더욱 돈독히 하십시오."
             )
+
+        # 고신살(孤辰殺)·과숙살(寡宿殺) — 년지 앵커, 방합 4국 기준(get_gosin_
+        # gwasuk 단일 소스, 관계운 U 라운드 신설). 판정은 성별 무관이지만
+        # 서술 프레임은 남명=고신 위주·여명=과숙 위주로 나누고, 반대쪽만
+        # 걸리면 톤을 완화한다. "인연이 박하다"를 그대로 쓰지 않고 양인·
+        # 백호처럼 조건부 승화 톤으로 서술(형 톤 원칙).
+        _gg_info = get_gosin_gwasuk(pils)
+        _is_married_rel = marriage in ("기혼", "재혼", "유부남", "유부녀")
+        _sal_main = _gg_info["고신_존재"] if gender == "남" else _gg_info["과숙_존재"]
+        _sal_sub = _gg_info["과숙_존재"] if gender == "남" else _gg_info["고신_존재"]
+        _sal_label_main = "고신살(孤辰殺)" if gender == "남" else "과숙살(寡宿殺)"
+        _sal_label_sub = "과숙살(寡宿殺)" if gender == "남" else "고신살(孤辰殺)"
+        if _sal_main and _has_doha:
+            _danger_msgs.append(
+                f"🌙 <b>{_sal_label_main} 활성</b>: 끌림은 강한데 곁에 오래 두기는 어려운 구조입니다. "
+                "매력으로 인연이 시작돼도, 정작 깊어질 때는 혼자만의 공간을 더 원하게 되는 흐름입니다."
+            )
+        elif _sal_main and _is_married_rel:
+            _danger_msgs.append(
+                f"🌙 <b>{_sal_label_main} 활성</b>: 혼자만의 시간과 공간이 필요한 기운입니다. "
+                "배우자와 함께 있어도 각자의 시간을 존중받을 때 관계가 더 편안해지는 구조입니다."
+            )
+        elif _sal_main:
+            _danger_msgs.append(
+                f"🌙 <b>{_sal_label_main} 활성</b>: 혼자만의 시간과 공간이 필요한 기운입니다. "
+                "독립적 생활력은 강점이지만, 인연 앞에서 의식적으로 곁에 시간을 내는 노력이 관건입니다."
+            )
+        elif _sal_sub:
+            _danger_msgs.append(
+                f"🌙 <b>{_sal_label_sub} 약하게 발동</b>: 혼자만의 시간을 원하는 기운이 옅게 있습니다. 큰 영향은 아니니 참고만 하십시오."
+            )
+
         if gender == "여" and _peon_gwan_cnt >= 2:
             _danger_msgs.append(
                 f"⚡ <b>偏官(편관) 과다({_peon_gwan_cnt}개)</b>: 강한 카리스마와 추진력의 남성에게 끌리는 경향이 있습니다. "
@@ -6572,6 +6604,36 @@ class LocalSajuNarrator:
                 "🌹 <b>도화살(桃花殺) 활성</b>: 타고난 매력으로 이성이 끊임없이 주변을 맴돕니다. "
                 "기혼이라면 배우자 외의 이성 접촉을 극도로 조심해야 합니다. "
                 "연애 중이라면 상대방의 바람기를 의심해볼 필요가 있습니다."
+            )
+
+        # 고신살(孤辰殺)·과숙살(寡宿殺) — 년지 앵커, 방합 4국 기준(get_gosin_
+        # gwasuk 단일 소스, 관계운 U 라운드 신설). 위 블록(5915-)과 동일
+        # 로직 — 판정은 성별 무관, 서술 프레임은 남명=고신·여명=과숙
+        # 위주로 나누고 반대쪽만 걸리면 톤을 완화한다.
+        _gg_info = get_gosin_gwasuk(pils)
+        _is_married_rel = marriage in ("기혼", "재혼", "유부남", "유부녀")
+        _sal_main = _gg_info["고신_존재"] if gender == "남" else _gg_info["과숙_존재"]
+        _sal_sub = _gg_info["과숙_존재"] if gender == "남" else _gg_info["고신_존재"]
+        _sal_label_main = "고신살(孤辰殺)" if gender == "남" else "과숙살(寡宿殺)"
+        _sal_label_sub = "과숙살(寡宿殺)" if gender == "남" else "고신살(孤辰殺)"
+        if _sal_main and _has_doha:
+            _danger_msgs.append(
+                f"🌙 <b>{_sal_label_main} 활성</b>: 끌림은 강한데 곁에 오래 두기는 어려운 구조입니다. "
+                "매력으로 인연이 시작돼도, 정작 깊어질 때는 혼자만의 공간을 더 원하게 되는 흐름입니다."
+            )
+        elif _sal_main and _is_married_rel:
+            _danger_msgs.append(
+                f"🌙 <b>{_sal_label_main} 활성</b>: 혼자만의 시간과 공간이 필요한 기운입니다. "
+                "배우자와 함께 있어도 각자의 시간을 존중받을 때 관계가 더 편안해지는 구조입니다."
+            )
+        elif _sal_main:
+            _danger_msgs.append(
+                f"🌙 <b>{_sal_label_main} 활성</b>: 혼자만의 시간과 공간이 필요한 기운입니다. "
+                "독립적 생활력은 강점이지만, 인연 앞에서 의식적으로 곁에 시간을 내는 노력이 관건입니다."
+            )
+        elif _sal_sub:
+            _danger_msgs.append(
+                f"🌙 <b>{_sal_label_sub} 약하게 발동</b>: 혼자만의 시간을 원하는 기운이 옅게 있습니다. 큰 영향은 아니니 참고만 하십시오."
             )
 
         if gender == "여" and _peon_gwan_cnt >= 2:
