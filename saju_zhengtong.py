@@ -6211,7 +6211,23 @@ def detect_sipseong_combinations(pils: list) -> list:
 
     if gwanseong >= 1 and inseong >= 1:
         activated.append("관인상생")
-    if sikshin >= 1 and jaeseong >= 1:
+    # 식신생재(食神生財) 정밀화(관계운 T 라운드, 조합 정밀화 트랙 마지막)
+    # — 두 조건을 함께 적용. ①인접: 식신이 재를 실제로 생하는 자리여야
+    # 성립(년간 식신·시지 재성처럼 떨어지면 불성립, 상관생재·상관패인과
+    # 동일 원리). ②효신탈식(梟神奪食): 인성이 식신을 극하면 그 흐름이
+    # 끊긴다 — 형 확정 "중간 강도"(9/9): 인성이 식신과 인접하고
+    # 통근했을 때만 불성립시킨다(존재만으로 불성립시키는 엄격안, 서술
+    # 반영만 하는 느슨안 둘 다 불채택). ★_hyo의 tonggeun_of="from" —
+    # 극하는 쪽(인성)의 통근을 본다. 상관패인에서 to_통근(인성이
+    # 다스리는 쪽인 상관을 to로 둠)을 본 것과 방향이 반대이므로 혼동
+    # 주의 — 여기선 인성이 from(극하는 주체), 식신이 to(극당하는 대상)
+    # 이다. 5,000표본 실측: 현행 39.70%→인접만 30.00%.
+    from saju_interpreter import get_sipseong_relation as _get_ss_rel_sikjae
+    _ssj = _get_ss_rel_sikjae(ilgan, pils, {"식신"}, {"정재", "편재"},
+                               adjacency="same_or_adjacent")
+    _hyo = _get_ss_rel_sikjae(ilgan, pils, {"정인", "편인"}, {"식신"},
+                               adjacency="same_or_adjacent", tonggeun_of="from")
+    if _ssj["성립"] and _ssj["인접"] and not (_hyo["성립"] and _hyo["인접"] and _hyo["from_통근"]):
         activated.append("식신생재")
     if jaeseong >= 1 and gwanseong >= 1 and "관인상생" not in activated:
         activated.append("재생관")
