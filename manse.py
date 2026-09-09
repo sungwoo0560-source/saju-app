@@ -15219,8 +15219,13 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                     f"귀인을 먼저 알아보는 사람이 귀인복을 제대로 씁니다.", "참고"))
             elif _guiin_in_chart:
                 _guiin_pos = "·".join(_guiin_in_chart)
+                # [FIX] 정의표 전체(_guiin)가 아니라 원국에 실제 존재하는 천을귀인 지지만 표기
+                _guiin_hits = list(dict.fromkeys(
+                    pils[_i].get("jj", "") for _i in [3, 2, 1, 0]
+                    if _i < len(pils) and pils[_i].get("jj", "") in _guiin
+                ))
                 _danger_signals.append(("⭐ 천을귀인 보유 — 위기마다 구원자가 나타납니다",
-                    f"원국 {_guiin_pos}에 천을귀인({_guiin[0]}·{_guiin[1]})이 있습니다. "
+                    f"원국 {_guiin_pos}에 천을귀인({'·'.join(_guiin_hits) or '·'.join(_guiin)})이 있습니다. "
                     f"살면서 막다른 순간마다 반드시 누군가 손을 내밀어 줬을 겁니다. "
                     f"이것이 타고난 귀인복입니다. "
                     f"인간관계를 절대 소홀히 하지 마십시오. "
@@ -16689,7 +16694,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
             _gaeun_items.append(("💑 부부관계 개운법",
                 f"<b>소통:</b> 주 1회 이상 단둘이 식사하는 시간을 만드십시오.\n\n"
                 f"<b>공간:</b> 침실에 핑크·빨강 계열 소품을 두면 부부 기운이 살아납니다.\n\n"
-                f"<b>방위:</b> 부부 침실을 집의 서남쪽(坤)에 두면 필요합니다.\n\n"
+                f"<b>방위:</b> 부부 침실을 집의 서남쪽(坤)에 두면 부부 화합에 도움이 됩니다.\n\n"
                 f"<b>금기:</b> 외부 이성과 단둘이 만나는 자리를 만들지 마십시오."))
         else:
             _gaeun_items.append(("💑 연애·결혼 개운법",
