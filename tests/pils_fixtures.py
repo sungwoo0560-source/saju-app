@@ -23,6 +23,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from saju_engine import SajuPrecisionEngine, get_ilgan_strength
 from saju_interpreter import get_yongshin, get_gyeokguk
 from saju_sinsal import get_gongmang, get_yangin
+from saju_zhengtong import render_jonghap_pyongron, render_four_pillars_card
 
 
 # pils 순서: [시주, 일주, 월주, 년주] (SajuPrecisionEngine.get_pillars 반환 그대로)
@@ -719,6 +720,13 @@ YANGIN_UNKNOWN_TIME_EXPECT = {
     "양간대조_시간미상_丙": (True, ["일주", "년주"]),
 }
 
+# render_jonghap_pyongron·render_four_pillars_card의 "시주 빈 괄호 ()" 회귀(2026-09-11).
+# 기존 픽스처 재사용 — 시간미상 1건 + 시간확정 대조군 1건.
+SIJU_DISPLAY_EXPECT = {
+    "박후규_1969_계사일_시간미상": True,   # 시간미상 — "시간 미상" 문구, () 미노출 기대
+    "박후규": False,                        # 시간확정 대조군 — 실제 간지 노출, "시간 미상" 미노출 기대
+}
+
 # TODO 윤미연: 1967년 甲戌 일주, 女.
 # 후보 6개 — 1967-01-10 / 03-11 / 05-10 /
 #            07-09 / 09-07 / 11-06
@@ -825,6 +833,50 @@ def check_yangin_unknown_time(name):
     return False
 
 
+def check_siju_unknown_display(name, expect_unknown):
+    """render_jonghap_pyongron·render_four_pillars_card의 시주 표시 회귀(2026-09-11).
+    시간미상이면 '시간 미상' 문구가 나오고 빈 괄호 '()'가 남지 않아야 하며,
+    시간확정 대조군은 실제 간지가 그대로 나오고 '시간 미상'이 섞이면 안 된다."""
+    case = CASES[name]
+    pils = get_pils(name)
+    if expect_unknown:
+        pils = [dict(p) for p in pils]
+        pils[0] = {"cg": "", "jj": "", "str": ""}
+
+    birth_year = case["birth"][0]
+    gender = case["gender"]
+
+    html1 = render_jonghap_pyongron(pils, name, birth_year, gender, marriage_status="미혼", cur_year=2026)
+    html2 = render_four_pillars_card(pils, name)
+
+    ok = True
+    if expect_unknown:
+        if "()" in html1 or "()" in html2:
+            print(f"[FAIL] {name} 시주표시(시간미상): 빈 괄호 '()' 잔존")
+            ok = False
+        if "시간 미상" not in html1 or "시간 미상" not in html2:
+            print(f"[FAIL] {name} 시주표시(시간미상): '시간 미상' 문구 누락")
+            ok = False
+    else:
+        siju_str = pils[0]["str"]
+        siju_cg, siju_jj = pils[0]["cg"], pils[0]["jj"]
+        # html1(년/월/일/시 인접 텍스트)은 문자열 그대로, html2(카드)는
+        # cg/jj 사이에 <span> 태그가 끼어 "간지" 연속 문자열이 안 나오므로 개별 확인.
+        if siju_str not in html1:
+            print(f"[FAIL] {name} 시주표시(시간확정): render_jonghap_pyongron에 실제 간지({siju_str}) 미노출")
+            ok = False
+        if siju_cg not in html2 or siju_jj not in html2:
+            print(f"[FAIL] {name} 시주표시(시간확정): render_four_pillars_card에 실제 간지({siju_cg}{siju_jj}) 미노출")
+            ok = False
+        if "시간 미상" in html1 or "시간 미상" in html2:
+            print(f"[FAIL] {name} 시주표시(시간확정): '시간 미상' 과잉 노출")
+            ok = False
+
+    if ok:
+        print(f"[OK] {name} 시주표시 정상 (시간미상={expect_unknown})")
+    return ok
+
+
 def main():
     print("=== tests/pils_fixtures.py ===")
     all_pillars_ok = True
@@ -841,6 +893,14 @@ def main():
         all_yangin_ok = all_yangin_ok and ok
     print()
     all_pillars_ok = all_pillars_ok and all_yangin_ok
+
+    print("=== 시주 빈 괄호 회귀(render_jonghap_pyongron·render_four_pillars_card) ===")
+    all_siju_disp_ok = True
+    for name, expect_unknown in SIJU_DISPLAY_EXPECT.items():
+        ok = check_siju_unknown_display(name, expect_unknown)
+        all_siju_disp_ok = all_siju_disp_ok and ok
+    print()
+    all_pillars_ok = all_pillars_ok and all_siju_disp_ok
 
     if all_pillars_ok:
         print("[OK] 결과 요약: 전체 픽스처 8글자 일치")

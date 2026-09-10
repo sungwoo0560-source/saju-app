@@ -6397,6 +6397,15 @@ def render_four_pillars_card(pils: list, name: str = "내담자") -> str:
         unsung = _calc_unsung(ilgan, jj) if ilgan else "-"
         ss_display = "일간(나)" if pd["idx"] == 1 else cg_ss
 
+        # 시간미상(cg/jj 둘 다 공백) 시 "시간 미상" — render_manse_grid의
+        # "📋 사주 명식" 카드와 동일 표기로 통일. 헤더 라벨("시주(時柱)"/
+        # "자녀·말년·노년운"/"자녀궁")은 명식표와 일관되게 유지하고 값 줄만 대체.
+        _meta_line = (
+            '<span style="color:#999;">시간 미상</span>'
+            if not (cg and jj) else
+            f"{cg_kr}({cg_oh}{oh_emoji.get(cg_oh,'')}) · {jj_kr}({jj_oh}{oh_emoji.get(jj_oh,'')})"
+        )
+
         cards_html += f"""
 <div style="flex:1 1 22%;min-width:155px;max-width:200px;
             background:#fff;border:2px solid {pd['border']};border-radius:14px;
@@ -6410,7 +6419,7 @@ def render_four_pillars_card(pils: list, name: str = "내담자") -> str:
       {cg}<span style="font-size:28px;">{jj}</span>
     </div>
     <div style="font-size:13px;color:#555;margin-top:4px;">
-      {cg_kr}({cg_oh}{oh_emoji.get(cg_oh,'')}) · {jj_kr}({jj_oh}{oh_emoji.get(jj_oh,'')})
+      {_meta_line}
     </div>
     <div style="margin-top:10px;border-top:1px solid #f0f0f0;padding-top:10px;">
       <div style="font-size:12px;color:#666;line-height:1.8;">
@@ -8188,6 +8197,15 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
             f'→ 이 시기를 망설이다 보내면, 다음 기회는 10년 뒤입니다.'
         )
 
+    # 시간미상(tj_cg/tj_jj 둘 다 공백) 시 "시주(時柱) 미상" — render_manse_grid의
+    # "📋 사주 명식" 카드와 동일한 표기(라벨 유지 + 값 자리만 "시간 미상")로 통일.
+    # 년·월·일주 3곳의 출력 형식은 무수정.
+    _tj_disp = (
+        f'<b>시주(時柱)</b> <span style="color:#999;">시간 미상</span>'
+        if not (tj_cg and tj_jj) else
+        f'<b>시주(時柱)</b> {tj_cg}{tj_jj} <span style="color:#8b6914;">({CG_KR.get(tj_cg,"")}{JJ_KR.get(tj_jj,"")})</span>'
+    )
+
     html = f"""
 <div style="background:linear-gradient(180deg,#fdfcf7 0%,#fff 100%);
             border:3px solid #6b4423;border-radius:20px;
@@ -8209,7 +8227,7 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
       <b>년주(年柱)</b> {sj_cg}{sj_jj} <span style="color:#8b6914;">({CG_KR.get(sj_cg,'')}{JJ_KR.get(sj_jj,'')})</span>&nbsp;&nbsp;
       <b>월주(月柱)</b> {wj_cg}{wj_jj} <span style="color:#8b6914;">({CG_KR.get(wj_cg,'')}{JJ_KR.get(wj_jj,'')})</span>&nbsp;&nbsp;
       <b>일주(日柱)</b> <span style="color:#c62828;font-weight:900;">{iz_cg}{iz_jj}({ilgan_kr}{iljj_kr})</span> ← 본인&nbsp;&nbsp;
-      <b>시주(時柱)</b> {tj_cg}{tj_jj} <span style="color:#8b6914;">({CG_KR.get(tj_cg,'')}{JJ_KR.get(tj_jj,'')})</span>
+      {_tj_disp}
       <br>
       <b>일간(日干):</b> {ilgan}({ilgan_kr}) {ilgan_ohaeng}({OHAENG_KR.get(ilgan_ohaeng,'')})&nbsp;
       <b>격국:</b> {gyeok_label}&nbsp;
