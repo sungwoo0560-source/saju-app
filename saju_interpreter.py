@@ -3951,9 +3951,9 @@ class LocalSajuNarrator:
         dw_ss_key = dw_ss[:dw_ss.find('(')] if '(' in dw_ss else dw_ss
         dw_ss_j_key = dw_ss_j[:dw_ss_j.find('(')] if '(' in dw_ss_j else dw_ss_j
 
-        age_s = dw.get("시작나이", dw_start - birth_year)
+        age_s = dw_age_counting(dw, birth_year)
 
-        age_e = age_s + 9
+        age_e = dw_age_counting_end(dw, birth_year)
 
         is_cur = dw_start <= cur_year <= dw_end
 
@@ -6400,7 +6400,7 @@ class LocalSajuNarrator:
         for _dw_k in _adult_dws_k[:6]:
             _dw_cg_k   = _dw_k.get("cg", "")
             _dw_jj_k   = _dw_k.get("jj", "")
-            _dw_age_k  = _dw_k.get("시작나이", "?")
+            _dw_age_k  = dw_age_counting(_dw_k, birth_year)
             _dw_oh_cg_k = _KIGAN_OH_K.get(_dw_cg_k, "")
             _dw_oh_jj_k = _JIJI_OH_K.get(_dw_jj_k, "")
 
@@ -8184,7 +8184,7 @@ def format_yong_with_source(yong_list, yong_source):
     return "·".join(parts)
 
 
-def build_saju_tongbyeon(pils, daewoon=None):
+def build_saju_tongbyeon(pils, daewoon=None, birth_year=None):
     """원국(原局) 통변(通辯) — 격국·성격/파격·신강신약·오행분포·용신·희신·기신을 인생
     서술 한 편으로 엮는다. ★새 판단 로직이 아니다 — get_gyeokguk·get_gyeokguk_status·
     get_yongshin·get_ilgan_strength를 pils로 그대로 호출해 그 반환값만 문장으로 조합할
@@ -8599,13 +8599,13 @@ def build_saju_tongbyeon(pils, daewoon=None):
                         key=lambda d: d.get("시작연도", 0), default=None,
                     )
                     if _now_dw:
-                        _sa = _now_dw.get("시작나이", 0)
+                        _sa = dw_age_counting(_now_dw, birth_year)
                         p4 += (
                             f" 지금 지나는 {_sa}세~{_sa + 9}세 대운이 바로 그 시기 — "
                             f"1순위 용신 {_oh_join([_first_oh])} 기운이 천간에 드러나 크게 쓰는 구간입니다."
                         )
                     if _future_dw:
-                        _fa, _fy = _future_dw.get("시작나이", 0), _future_dw.get("시작연도", "")
+                        _fa, _fy = dw_age_counting(_future_dw, birth_year), _future_dw.get("시작연도", "")
                         if _first_state in ("천간투출", "지지본기"):
                             p4 += f" {_fa}세({_fy}년)부터 오는 대운에 그 약이 천간으로 강하게 들어옵니다."
                         else:
@@ -8616,7 +8616,7 @@ def build_saju_tongbyeon(pils, daewoon=None):
                             key=lambda d: d.get("종료연도", 0), default=None,
                         )
                         if _past_dw:
-                            _pa = _past_dw.get("시작나이", 0)
+                            _pa = dw_age_counting(_past_dw, birth_year)
                             p4 += f" 이미 지난 {_pa}세~{_pa + 9}세가 그 약이 천간에 드러났던 구간입니다."
 
         # ⑤ 기신 주의 — get_yongshin()의 '기신'(서술형)·'조후_avoid' 값 그대로 서술 +
@@ -9167,10 +9167,9 @@ def get_crossing_interpretation(pils, cur_year, birth_year=None, birth_month=Non
         _dw_age_s = cur_dw.get("시작나이", "")
         _dw_age_e = (_dw_age_s + 9) if isinstance(_dw_age_s, (int, float)) else ""
 
-        # 세는나이(한국 나이) 환산 — 시작연도 - birth_year + 1. 표시 전용, 판정 로직 무관.
-        _dw_start_year = cur_dw.get("시작연도", 0)
-        _dw_age_s_counting = (_dw_start_year - _by + 1) if (_dw_start_year and _by) else ""
-        _dw_age_e_counting = (_dw_age_s_counting + 9) if isinstance(_dw_age_s_counting, (int, float)) else ""
+        # 세는나이(한국 나이) 환산 — saju_engine.dw_age_counting() 단일 소스(표시 전용).
+        _dw_age_s_counting = dw_age_counting(cur_dw, _by)
+        _dw_age_e_counting = dw_age_counting_end(cur_dw, _by)
 
         return {
             "dw_ss": dw_ss, "sw_ss": sw_ss, "sw_gil": sw_gil,
@@ -9579,7 +9578,7 @@ def _nar_ch3_gyeokguk(ctx):
     try:
         pils = ctx.get("pils", [])
         display_name = ctx.get("display_name", "내담자")
-        body = build_saju_tongbyeon(pils, daewoon=ctx.get("daewoon", []))
+        body = build_saju_tongbyeon(pils, daewoon=ctx.get("daewoon", []), birth_year=ctx.get("birth_year"))
         if not body:
             return ""
         lines = [
@@ -9635,6 +9634,7 @@ def _nar_ch6_daewoon(ctx):
         ilgan    = ctx.get("ilgan", "")
         cur_year = ctx.get("current_year", 2026)
         name     = ctx.get("display_name", "내담자")
+        birth_year = ctx.get("birth_year", 1980)
 
         if not daewoon or not ilgan:
             return ""
@@ -9696,8 +9696,8 @@ def _nar_ch6_daewoon(ctx):
             return _SS_KR.get(hanja, raw)
 
         def age_range(d):
-            s = d.get("시작나이", "?")
-            e = (s + 9) if isinstance(s, int) else "?"
+            s = dw_age_counting(d, birth_year)
+            e = dw_age_counting_end(d, birth_year)
             return s, e
 
         def dw_label(d):
@@ -12176,7 +12176,7 @@ def _nar_future(ctx):
             result.append(
                 "\n".join(
                     [
-                        f"-> {dw['시작나이']}세 ~ {dw['시작나이'] + 9}세 | {dw['str']} 大運 ({dw_ss}){cur_mark}",
+                        f"-> {dw_age_counting(dw, birth_year)}세 ~ {dw_age_counting_end(dw, birth_year)}세 | {dw['str']} 大運 ({dw_ss}){cur_mark}",
                         f"({dw['시작연도']}년 ~ {dw['종료연도']}년)",
                         f"{'* 用神 大運 - 인생의 황금기' if is_yong else ''}",
                         f"{desc}",
@@ -12252,7 +12252,7 @@ def _nar_future(ctx):
                     [
                         "",
                         "",
-                        f"-> {dw['시작나이']}~{dw['시작나이'] + 9}세 {dw['str']} ({dw_ss}大運){cur_mark} | {d_label}",
+                        f"-> {dw_age_counting(dw, birth_year)}~{dw_age_counting_end(dw, birth_year)}세 {dw['str']} ({dw_ss}大運){cur_mark} | {d_label}",
                     ]
                     + lines_out
                     + ["", ""]
@@ -12260,7 +12260,7 @@ def _nar_future(ctx):
             )
 
         golden = [
-            (dw["시작나이"], dw["str"])
+            (dw_age_counting(dw, birth_year), dw["str"])
             for dw in daewoon
             if _get_yongshin_match(
                 TEN_GODS_MATRIX.get(ilgan, {}).get(dw["cg"], "-"),
@@ -12271,7 +12271,7 @@ def _nar_future(ctx):
         ]
 
         crisis = [
-            (dw["시작나이"], dw["str"])
+            (dw_age_counting(dw, birth_year), dw["str"])
             for dw in daewoon
             if TEN_GODS_MATRIX.get(ilgan, {}).get(dw["cg"], "-") in ["偏官(편관)", "劫財(겁재)"]
             and _get_yongshin_match(
@@ -12804,7 +12804,7 @@ def _nar_wealth(ctx):
 
                 year_mid = birth_year + age_mid - 1
 
-                peak_years.append(f"* {dw['시작나이']}~{dw['시작나이'] + 9}세 ({dw['시작연도']}~{dw['종료연도']}년): {dw['str']} 용신 대운 | 이 10년이 {display_name}님의 재물 황금기입니다")
+                peak_years.append(f"* {dw_age_counting(dw, birth_year)}~{dw_age_counting_end(dw, birth_year)}세 ({dw['시작연도']}~{dw['종료연도']}년): {dw['str']} 용신 대운 | 이 10년이 {display_name}님의 재물 황금기입니다")
 
         result.append("\n".join(peak_years[:3]) if peak_years else "* 꾸준한 노력이 재물 황금기를 만듭니다")
 
@@ -12889,7 +12889,7 @@ def _nar_wealth(ctx):
 
             # 표시: "정관/정재: 명예와 재물이 함께 오는 대운" 형태
             ss_display = f"{_kr_cg}/{_kr_jj}" if _kr_jj and _kr_jj != "-" else _kr_cg
-            result.append(f"  {dw['시작나이']}~{dw['시작나이'] + 9}세 ({ss_display}): {money_advice}{yong_mark}\n")
+            result.append(f"  {dw_age_counting(dw, birth_year)}~{dw_age_counting_end(dw, birth_year)}세 ({ss_display}): {money_advice}{yong_mark}\n")
 
         result.append(
             "\n".join(
@@ -13263,7 +13263,7 @@ def _nar_past(ctx):
             for _dw in daewoon:
                 if _dw.get("시작연도", 9999) >= _now_year:
                     continue
-                _dw_age = _dw.get("시작나이", 0)
+                _dw_age = dw_age_counting(_dw, birth_year)
                 _dw_ss_raw = TEN_GODS_MATRIX.get(ilgan, {}).get(_dw.get("cg", ""), "-")
                 # "傷官(상관)" → "傷官" 한자만 추출
                 _dw_ss_hj = _dw_ss_raw.split("(")[0] if "(" in _dw_ss_raw else _dw_ss_raw
@@ -15307,6 +15307,8 @@ def build_past_events(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0):
         dw_domain = SS_DOMAIN.get(gender, SS_DOMAIN["남"]).get(dw_ss, "변화")
 
         age_start = dw["시작나이"]
+        # 표시 전용(세는나이) — age_start(대운수, 판정용) 그대로 두고 표시에만 별도 변수 사용
+        age_start_disp = dw_age_counting(dw, birth_year)
 
         # A. 대운 천간이 원국 천간과 충하는지 (천간충)
 
@@ -15339,12 +15341,12 @@ def build_past_events(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0):
             if adj_domain:
                 events.append(
                     {
-                        "age": f"{age_start}~{age_start + 2}세",
+                        "age": f"{age_start_disp}~{age_start_disp + 2}세",
                         "year": dw["시작연도"],
                         "type": "대운 천간충+지지충",
                         "domain": adj_domain,
                         "desc": (
-                            f"【{age_start}세 대운 진입 · 천간충+지지충 동시】"
+                            f"【{age_start_disp}세 대운 진입 · 천간충+지지충 동시】"
                             f"천간({dw['cg']})과 지지({dw['jj']})가 동시에 원국을 강타."
                             f" {adj_desc}. 이 시기 삶이 크게 뒤흔들렸을 가능성이 매우 높습니다." + _dw_gubyeong_note
                         ),
@@ -15361,11 +15363,11 @@ def build_past_events(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0):
             if adj_domain:
                 events.append(
                     {
-                        "age": f"{age_start}~{age_start + 2}세",
+                        "age": f"{age_start_disp}~{age_start_disp + 2}세",
                         "year": dw["시작연도"],
                         "type": "대운 지지충",
                         "domain": adj_domain,
-                        "desc": f"【{age_start}세 대운 진입 · 지지충】{adj_desc}." + _dw_gubyeong_note,
+                        "desc": f"【{age_start_disp}세 대운 진입 · 지지충】{adj_desc}." + _dw_gubyeong_note,
                         "intensity": _dw_intensity,
                     }
                 )
@@ -15376,11 +15378,11 @@ def build_past_events(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0):
             if adj_domain:
                 events.append(
                     {
-                        "age": f"{age_start}세",
+                        "age": f"{age_start_disp}세",
                         "year": dw["시작연도"],
                         "type": "대운 천간합",
                         "domain": adj_domain,
-                        "desc": f"【{age_start}세 대운 진입 · 천간합】천간합(天干合) 성립 — {adj_domain} 영역에서 뜻밖의 인연이나 도움이 찾아온 시기입니다.",
+                        "desc": f"【{age_start_disp}세 대운 진입 · 천간합】천간합(天干合) 성립 — {adj_domain} 영역에서 뜻밖의 인연이나 도움이 찾아온 시기입니다.",
                         "intensity": "Mid",
                     }
                 )
@@ -15653,7 +15655,7 @@ def generate_engine_highlights(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=
         if dw_ss in MONEY_SS:
             money_peak.append(
                 {
-                    "age": f"{dw['시작나이']}~{dw['시작나이'] + 9}세",
+                    "age": f"{dw_age_counting(dw, birth_year)}~{dw_age_counting_end(dw, birth_year)}세",
                     "year": f"{dw['시작연도']}~{dw['종료연도']}",
                     "desc": f"{dw['str']}대운({dw_ss}) - 재물이 자연스럽게 따라오는 시기",
                     "ss": dw_ss,
@@ -15721,7 +15723,7 @@ def generate_engine_highlights(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=
         if dw_ss in DANGER_SS:
             danger_zones.append(
                 {
-                    "age": f"{dw['시작나이']}~{dw['시작나이'] + 9}세",
+                    "age": f"{dw_age_counting(dw, birth_year)}~{dw_age_counting_end(dw, birth_year)}세",
                     "year": f"{dw['시작연도']}~{dw['종료연도']}",
                     "desc": f"{dw['str']}대운({dw_ss}) - {'직장/관재/건강 압박' if dw_ss == '편관' else '재물손실/경쟁/배신'} 주의",
                 }
@@ -15743,12 +15745,13 @@ def generate_engine_highlights(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=
             name_c, _, desc = CHUNG_MAP[k]
 
             age_start = dw["시작나이"]
+            age_start_disp = dw_age_counting(dw, birth_year)
 
             suffix = "학업/거주환경 중 하나가 크게 흔들렸습니다." if age_start < 20 else "직업/가정 중 하나가 반드시 흔들렸습니다."
 
             wolji_chung.append(
                 {
-                    "age": f"{age_start}~{age_start + 2}세",
+                    "age": f"{age_start_disp}~{age_start_disp + 2}세",
                     "desc": f"대운 진입시 월지 충({name_c}) - {desc}. 이 시기 {suffix}",
                 }
             )

@@ -1308,7 +1308,7 @@ def _local_saju_engine(pils, name, birth_year, gender, query):
                         out.append(f"\n⚠️ 지금 **{gdw['str']} {gdw_ss}** 기신 대운 진행 중! {gdw['종료연도'] - current_year}년 더 이어지습니다. 대형 투자·보증 자제가 최선입니다.\n")
 
                     else:
-                        out.append(f"\n⚠️ {gdw['시작연도']}년({gdw['시작나이']}세)부터 **{gdw['str']} {gdw_ss}** 기신 대운이 옵니다. 미리 안전 자산 확보를 서두르게!\n")
+                        out.append(f"\n⚠️ {gdw['시작연도']}년({dw_age_counting(gdw, birth_year)}세)부터 **{gdw['str']} {gdw_ss}** 기신 대운이 옵니다. 미리 안전 자산 확보를 서두르게!\n")
 
             except Exception as _e:
                 _saju_log.debug("[silent except] %s", _e)
@@ -1428,7 +1428,7 @@ def _local_saju_engine(pils, name, birth_year, gender, query):
                         out.append(f"\n**[대운 인연 시기]** 지금 **{cdw['str']} {cdw_ss}** 대운 진행 중! {cdw['종료연도'] - current_year}년 남았으니 이 기간을 놓치지 말게!\n")
 
                     else:
-                        out.append(f"\n**[대운 인연 시기]** {cdw['시작연도']}년({cdw['시작나이']}세)부터 **{cdw['str']} {cdw_ss}** 대운이 열립니다. 그때가 인연의 문이 활짝 열리는 시기니라.\n")
+                        out.append(f"\n**[대운 인연 시기]** {cdw['시작연도']}년({dw_age_counting(cdw, birth_year)}세)부터 **{cdw['str']} {cdw_ss}** 대운이 열립니다. 그때가 인연의 문이 활짝 열리는 시기니라.\n")
 
             except Exception as _e:
                 _saju_log.debug("[silent except] %s", _e)
@@ -1496,7 +1496,7 @@ def _local_saju_engine(pils, name, birth_year, gender, query):
                         out.append(f"지금 **{bd2['str']} {bd2_ss}** 대운 중! **{current_year}~{bd2['종료연도']}년**이 최적 결혼 시기니라. 망설이지 말게!\n")
 
                     else:
-                        out.append(f"**{bd2['시작연도']}년({bd2['시작나이']}세)**부터 {bd2['str']} **{bd2_ss}** 대운이 열립니다. 그 무렵 결혼 결실이 맺어질 가능성이 높습니다.\n")
+                        out.append(f"**{bd2['시작연도']}년({dw_age_counting(bd2, birth_year)}세)**부터 {bd2['str']} **{bd2_ss}** 대운이 열립니다. 그 무렵 결혼 결실이 맺어질 가능성이 높습니다.\n")
 
                 else:
                     for yr in range(current_year, current_year + 10):
@@ -1746,7 +1746,7 @@ def _local_saju_engine(pils, name, birth_year, gender, query):
 
                 out.append(f"현재 대운: **{cdw['str']}** ({cdw_ss}) — **{grade}**\n")
 
-                out.append(f"{cdw['시작연도']}~{cdw['종료연도']}년 ({cdw['시작나이']}~{cdw['시작나이'] + 9}세), **{cdw['종료연도'] - current_year}년** 더 이어지습니다.\n")
+                out.append(f"{cdw['시작연도']}~{cdw['종료연도']}년 ({dw_age_counting(cdw, birth_year)}~{dw_age_counting_end(cdw, birth_year)}세), **{cdw['종료연도'] - current_year}년** 더 이어지습니다.\n")
 
                 out.append(DAEWOON_PRESCRIPTION.get(cdw_ss, "꾸준한 노력으로 안정을 유지하게.") + "\n")
 
@@ -1772,7 +1772,7 @@ def _local_saju_engine(pils, name, birth_year, gender, query):
 
                 ndw_grade = "🌟 황금기" if ndw_oh in yong_ohs_dw else "⚠️ 주의기" if ndw_oh in gisin_dw else "⬜ 보통"
 
-                out.append(f"\n**[다음 대운 미리보기]** {ndw['시작연도']}년({ndw['시작나이']}세)부터 **{ndw['str']} {ndw_ss}** ({ndw_grade}) 대운이 열립니다.\n")
+                out.append(f"\n**[다음 대운 미리보기]** {ndw['시작연도']}년({dw_age_counting(ndw, birth_year)}세)부터 **{ndw['str']} {ndw_ss}** ({ndw_grade}) 대운이 열립니다.\n")
 
                 out.append(DAEWOON_PRESCRIPTION.get(ndw_ss, "새 대운을 준비하게.") + "\n")
 
@@ -1787,7 +1787,7 @@ def _local_saju_engine(pils, name, birth_year, gender, query):
 
                 cur_m = " ◀현재" if dw["시작연도"] <= current_year <= dw["종료연도"] else ""
 
-                out.append(f"* {dw['시작나이']}~{dw['시작나이'] + 9}세: {dw['str']} ({dw_ss}) {dw_grade}{cur_m}\n")
+                out.append(f"* {dw_age_counting(dw, birth_year)}~{dw_age_counting_end(dw, birth_year)}세: {dw['str']} ({dw_ss}) {dw_grade}{cur_m}\n")
 
         elif is_past:
             try:
@@ -7159,7 +7159,7 @@ def get_cached_ai_interpretation(
         if dw["종료연도"] < current_year:
             dw_ss = TEN_GODS_MATRIX.get(ilgan, {}).get(dw["cg"], "-")
 
-            past_dw_summary.append(f"  {dw['시작나이']}~{dw['시작나이'] + 9}세({dw['시작연도']}~{dw['종료연도']}): {dw['str']} [{dw_ss}]")
+            past_dw_summary.append(f"  {dw_age_counting(dw, birth_year)}~{dw_age_counting_end(dw, birth_year)}세({dw['시작연도']}~{dw['종료연도']}): {dw['str']} [{dw_ss}]")
 
     # 미래 3년 세운
 
@@ -7179,7 +7179,7 @@ def get_cached_ai_interpretation(
             dw_ss = TEN_GODS_MATRIX.get(ilgan, {}).get(dw["cg"], "-")
 
             if dw_ss in ["식신", "정재", "편재", "정관"]:
-                money_peaks.append(f"  {dw['시작나이']}~{dw['시작나이'] + 9}세 {dw['str']}대운({dw_ss}) 주목")
+                money_peaks.append(f"  {dw_age_counting(dw, birth_year)}~{dw_age_counting_end(dw, birth_year)}세 {dw['str']}대운({dw_ss}) 주목")
 
     # 혼인 분석 데이터
 
@@ -7191,7 +7191,7 @@ def get_cached_ai_interpretation(
         dw_ss = TEN_GODS_MATRIX.get(ilgan, {}).get(dw["cg"], "-")
 
         if dw_ss in marriage_ss.get(gender, []):
-            marry_hint.append(f"  {dw['시작나이']}~{dw['시작나이'] + 9}세 {dw['str']}대운")
+            marry_hint.append(f"  {dw_age_counting(dw, birth_year)}~{dw_age_counting_end(dw, birth_year)}세 {dw['str']}대운")
 
     # -- 엔진 하이라이트 계산 (핵심) -------------------
 
@@ -8757,7 +8757,7 @@ def generate_saju_summary(pils, name, birth_year, gender):
     if current_dw:
         dw_ss = TEN_GODS_MATRIX.get(ilgan, {}).get(current_dw["cg"], "-")
 
-        lines.append(f"【현재 대운】 {current_dw['str']} ({current_dw['시작나이']}~{current_dw['시작나이'] + 9}세, {current_dw['시작연도']}~{current_dw['종료연도']}년)")
+        lines.append(f"【현재 대운】 {current_dw['str']} ({dw_age_counting(current_dw, birth_year)}~{dw_age_counting_end(current_dw, birth_year)}세, {current_dw['시작연도']}~{current_dw['종료연도']}년)")
 
         lines.append(f"  천간 {dw_ss}의 기운 - " + get_daewoon_narrative(dw_ss, "", current_dw["str"], current_dw["시작나이"])[2][:60] + "...")
 
@@ -9510,7 +9510,7 @@ def tab_daewoon(pils, birth_year, gender):
         _dw_str = dw["str"]
         _dw_kr = "".join(_GZ_KR.get(c, c) for c in _dw_str)
 
-        _age_label = f'{_counting_age(dw, birth_year)}세'
+        _age_label = f'{dw_age_counting(dw, birth_year)}세'
         tl += f'<div style="background:{bg};color:{tc};{bdr}border-radius:10px;padding:8px 12px;text-align:center;min-width:68px"><div style="font-size:10px;opacity:.8">{_age_label}</div><div style="font-size:15px;font-weight:800">{_dw_str}</div><div style="font-size:10px;opacity:.75">({_dw_kr})</div><div style="font-size:10px">{d_ss}</div>{"<div style=font-size:10px;color:#ffe;font-weight:700>🌟용신</div>" if is_yong else ""}{"<div style=font-size:10px;color:#ff6b00;font-weight:800>◀현재</div>" if is_cur else ""}</div>'
 
     tl += "</div>"
@@ -9590,7 +9590,7 @@ def tab_daewoon(pils, birth_year, gender):
             ]
         )
 
-        render_daewoon_card(dw, oh_cg, d_ss_cg, oh_jj, d_ss_jj, title, icon, narrative, prescription, alert_html, bdr, bg2, badge, OHE)
+        render_daewoon_card(dw, oh_cg, d_ss_cg, oh_jj, d_ss_jj, title, icon, narrative, prescription, alert_html, bdr, bg2, badge, OHE, birth_year=birth_year)
 
         # ── 직격 처방 블록 (결론 먼저 / 해야 할 것 / 하면 망하는 것) ──
         _dd = DAEWOON_DIRECT.get(d_ss_cg, {})
@@ -11518,7 +11518,7 @@ def get_jaemul_analysis(pils, birth_year, gender="남"):
     peaks = [
         {
             "대운": d["str"],
-            "나이": f"{d['시작나이']}~{d['시작나이'] + 9}세",
+            "나이": f"{dw_age_counting(d, birth_year)}~{dw_age_counting_end(d, birth_year)}세",
             "연도": f"{d['시작연도']}~{d['종료연도']}",
             "십성": TEN_GODS_MATRIX.get(ilgan, {}).get(d["cg"], "-"),
         }
@@ -13356,14 +13356,6 @@ def render_worry_inference(pils, birth_year, gender, marital_status=None):
         pass
 
 
-def _counting_age(dw, birth_year):
-    """대운 시작 나이를 세는나이(한국 나이)로 환산. 시작연도 없거나 0이면 0 반환."""
-    _sy = dw.get("시작연도", 0) if dw else 0
-    if not _sy or not birth_year:
-        return 0
-    return _sy - birth_year + 1
-
-
 def build_gangsa_block(pils, name, birth_year, gender, marriage_status=None):
     """강사식 13항목 HTML 문자열을 반환. 실패 시 빈 문자열.
     발동 룰의 rule_id는 st.session_state["_gangsa_rule_hits"]에 함께 기록한다(피드백 루프 2단계)."""
@@ -13547,7 +13539,7 @@ def build_gangsa_block(pils, name, birth_year, gender, marriage_status=None):
                     _cg_d = d.get("cg", "")
                     _jj_d = d.get("jj", "")
                     _str_d = d.get("str", "")
-                    _a_s = _counting_age(d, birth_year)
+                    _a_s = dw_age_counting(d, birth_year)
                     _ck = _core_interp4(DAEWOON_INTERP.get(_cg_d, ""), _cg_d)
                     _jk = _core_interp4(DAEWOON_INTERP.get(_jj_d, ""), _jj_d)
                     # 천간·지지 핵심 합치기 (빈값 가드)
@@ -13767,7 +13759,7 @@ def build_gangsa_block(pils, name, birth_year, gender, marriage_status=None):
                     _dhj4 = _dss4.split("(")[0] if _dss4 else ""
                     _g4 = _EVENT_GOOD4.get(_dhj4, "")
                     if _g4:
-                        _ev_good4 = f"다만 {_counting_age(_d4, birth_year)}세 무렵 {_d4.get('str','')} 대운은 용신이 힘을 받아 {_g4} 시기였습니다. 그때 쌓은 것이 지금 당신을 버티게 하는 밑천입니다."
+                        _ev_good4 = f"다만 {dw_age_counting(_d4, birth_year)}세 무렵 {_d4.get('str','')} 대운은 용신이 힘을 받아 {_g4} 시기였습니다. 그때 쌓은 것이 지금 당신을 버티게 하는 밑천입니다."
                         if _dhj4 in EVENT_GOOD_RULES:
                             st.session_state["_gangsa_rule_hits"].append({
                                 "rule_id": EVENT_GOOD_RULES[_dhj4]["rule_id"],
@@ -13930,7 +13922,7 @@ def build_gangsa_block(pils, name, birth_year, gender, marriage_status=None):
             # 등은 이미 "" 처리하므로 여기선 결과 유무만 본다.
             _gyeok_status_l = ""
             try:
-                _tb_text4 = build_saju_tongbyeon(pils, daewoon=_dw_all4)
+                _tb_text4 = build_saju_tongbyeon(pils, daewoon=_dw_all4, birth_year=birth_year)
                 if _tb_text4:
                     _gyeok_status_l = "<b>【격국과 용신】</b> " + "<br>".join(_tb_text4.split("\n\n"))
                     st.session_state["_gangsa_rule_hits"].append({
@@ -18485,7 +18477,7 @@ def menu2_lifeline(pils, birth_year, gender, name="내담자"):
                 "戌":"戌土 — 가을의 수확 기운. 마무리·결실·저장에 유리.",
                 "亥":"亥水 — 깊고 조용한 기운. 준비·내면 성장·연구에 유리.",
             }
-            _age_s2 = _counting_age(cur_dw, birth_year)
+            _age_s2 = dw_age_counting(cur_dw, birth_year)
             _age_e2 = _age_s2 + 9
             _dw2_oh_cg = OH.get(_dw_cg2, "")
             _dw2_oh_jj = OH.get(_dw_jj2, "")
@@ -18575,7 +18567,7 @@ def menu3_past(pils, birth_year, gender, name=""):
                 _bg3 = "#1a3d1a" if _is_y3 else "#3d1a1a" if _is_g3 else "#2a2a2a"
                 _tc3 = "#7fff7f" if _is_y3 else "#ffaaaa" if _is_g3 else "#aaaaaa"
                 _lbl3 = "🌟황금기" if _is_y3 else "⚠️수비기" if _is_g3 else "일반"
-                _age3 = _dw3.get("시작나이",0)
+                _age3 = dw_age_counting(_dw3, birth_year)
                 _yr3s = _dw3.get("시작연도",0)
                 _yr3e = _dw3.get("종료연도",0)
                 _tl3 += (
@@ -23241,7 +23233,7 @@ def tab_ai_chat(pils, name, birth_year, gender):
                                 out.append(f"\n⚠️ 지금 **{gdw2['str']} {gdw2_ss}** 기신 대운 진행 중! {gdw2['종료연도'] - current_year}년 더 이어지습니다. 대형 투자·보증 자제가 최선입니다.\n")
 
                             else:
-                                out.append(f"\n⚠️ {gdw2['시작연도']}년({gdw2['시작나이']}세)부터 **{gdw2['str']} {gdw2_ss}** 기신 대운이 옵니다. 미리 안전 자산 확보를 서두르게!\n")
+                                out.append(f"\n⚠️ {gdw2['시작연도']}년({dw_age_counting(gdw2, birth_year)}세)부터 **{gdw2['str']} {gdw2_ss}** 기신 대운이 옵니다. 미리 안전 자산 확보를 서두르게!\n")
 
                     except Exception as _e:
                         st.warning(f"⚠️ 오류: {str(_e)[:80]}")
@@ -23313,7 +23305,7 @@ def tab_ai_chat(pils, name, birth_year, gender):
 
                             else:
                                 out.append(
-                                    f"\n**[대운 인연 시기]** {cdw_l['시작연도']}년({cdw_l['시작나이']}세)부터 **{cdw_l['str']} {cdw_ss_l}** 대운이 열립니다. 그때가 인연의 문이 활짝 열리는 시기니라.\n"
+                                    f"\n**[대운 인연 시기]** {cdw_l['시작연도']}년({dw_age_counting(cdw_l, birth_year)}세)부터 **{cdw_l['str']} {cdw_ss_l}** 대운이 열립니다. 그때가 인연의 문이 활짝 열리는 시기니라.\n"
                                 )
 
                     except Exception as _e:
@@ -23380,7 +23372,7 @@ def tab_ai_chat(pils, name, birth_year, gender):
                                 out.append(f"지금 **{bd2_l['str']} {bd2_ss_l}** 대운 중! **{current_year}~{bd2_l['종료연도']}년**이 최적 결혼 시기니라. 망설이지 말게!\n")
 
                             else:
-                                out.append(f"**{bd2_l['시작연도']}년({bd2_l['시작나이']}세)**부터 {bd2_l['str']} **{bd2_ss_l}** 대운이 열립니다. 그 무렵 결혼 결실이 맺어집니다.\n")
+                                out.append(f"**{bd2_l['시작연도']}년({dw_age_counting(bd2_l, birth_year)}세)**부터 {bd2_l['str']} **{bd2_ss_l}** 대운이 열립니다. 그 무렵 결혼 결실이 맺어집니다.\n")
 
                         else:
                             for _yr2_l in range(current_year, current_year + 10):
@@ -23525,7 +23517,7 @@ def tab_ai_chat(pils, name, birth_year, gender):
 
                         out.append(f"현재 대운: **{cdw['str']}** ({cdw_ss}) — **{grade2}**\n")
 
-                        out.append(f"{cdw['시작연도']}~{cdw['종료연도']}년 ({cdw['시작나이']}~{cdw['시작나이'] + 9}세), **{cdw['종료연도'] - current_year}년** 더 이어지습니다.\n")
+                        out.append(f"{cdw['시작연도']}~{cdw['종료연도']}년 ({dw_age_counting(cdw, birth_year)}~{dw_age_counting_end(cdw, birth_year)}세), **{cdw['종료연도'] - current_year}년** 더 이어지습니다.\n")
 
                         out.append(DAEWOON_PRESCRIPTION.get(cdw_ss, "꾸준한 노력으로 안정을 유지하게.") + "\n")
 
@@ -23551,7 +23543,7 @@ def tab_ai_chat(pils, name, birth_year, gender):
 
                         ndw2_grade = "🌟 황금기" if ndw2_oh in yong_ohs_dw2 else "⚠️ 주의기" if ndw2_oh in gisin_dw2 else "⬜ 보통"
 
-                        out.append(f"\n**[다음 대운 미리보기]** {ndw2['시작연도']}년({ndw2['시작나이']}세)부터 **{ndw2['str']} {ndw2_ss}** ({ndw2_grade}) 대운이 열립니다.\n")
+                        out.append(f"\n**[다음 대운 미리보기]** {ndw2['시작연도']}년({dw_age_counting(ndw2, birth_year)}세)부터 **{ndw2['str']} {ndw2_ss}** ({ndw2_grade}) 대운이 열립니다.\n")
 
                         out.append(DAEWOON_PRESCRIPTION.get(ndw2_ss, "새 대운을 준비하게.") + "\n")
 
@@ -23566,7 +23558,7 @@ def tab_ai_chat(pils, name, birth_year, gender):
 
                         cur_m = " ◀현재" if dw["시작연도"] <= current_year <= dw["종료연도"] else ""
 
-                        out.append(f"* {dw['시작나이']}~{dw['시작나이'] + 9}세: {dw['str']} ({dw_ss}) {dw_grade2}{cur_m}\n")
+                        out.append(f"* {dw_age_counting(dw, birth_year)}~{dw_age_counting_end(dw, birth_year)}세: {dw['str']} ({dw_ss}) {dw_grade2}{cur_m}\n")
 
                 elif is_past:
                     try:
@@ -25557,7 +25549,7 @@ def render_manse_grid(pils, birth_year, birth_month, birth_day, birth_hour, birt
                 dw_html += f"<span style='background:{b};color:{f};border-radius:3px;padding:0 4px;font-weight:900'>{ch}</span>"
             st.markdown(
                 f"""<div style="background:#fafafa;{border_s}border-radius:6px;padding:6px 10px;margin-bottom:4px;font-size:12px">
-{dw_html}<span style="color:#555;font-size:11px;margin-left:4px">{dw.get('시작나이','')}세 ({dw.get('시작연도','')}~{dw.get('종료연도','')}){cur_badge}</span>
+{dw_html}<span style="color:#555;font-size:11px;margin-left:4px">{dw_age_counting(dw, birth_year)}세 ({dw.get('시작연도','')}~{dw.get('종료연도','')}){cur_badge}</span>
 </div>""",
                 unsafe_allow_html=True,
             )

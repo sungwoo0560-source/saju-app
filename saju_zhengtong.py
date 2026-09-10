@@ -8423,6 +8423,7 @@ def render_manse_board(pils, name="내담자", birth_year=1969, gender="男",
         return ""
 
     from datetime import datetime as _dt
+    from saju_engine import dw_age_counting
 
     CG_KR = {"甲":"갑","乙":"을","丙":"병","丁":"정","戊":"무",
               "己":"기","庚":"경","辛":"신","壬":"임","癸":"계"}
@@ -8576,7 +8577,7 @@ def render_manse_board(pils, name="내담자", birth_year=1969, gender="男",
         if dw_items:
             r_age = r_dss = r_dcg = r_djj = r_dus = ""
             for dw in dw_items:
-                age  = dw.get("시작나이", "?")
+                age  = dw_age_counting(dw, birth_year)
                 dcg  = dw.get("cg", "")
                 djj  = dw.get("jj", "")
                 hl   = bool(dw.get("is_current", False))

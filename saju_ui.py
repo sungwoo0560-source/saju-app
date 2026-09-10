@@ -5,6 +5,7 @@ manse.py에서 from saju_ui import * 로 사용
 """
 
 import streamlit as st
+from saju_engine import dw_age_counting
 
 
 def get_ohang_color(char):
@@ -427,6 +428,7 @@ def render_daewoon_card(
     bg2: str,
     badge: str,
     OHE: dict,
+    birth_year=None,
 ):
     """대운 상세 카드 렌더링"""
     emoji_cg = OHE.get(oh_cg, "")
@@ -434,7 +436,9 @@ def render_daewoon_card(
 
     start_year = dw.get("시작연도", "")
     end_year = dw.get("종료연도", "")
-    start_age = dw.get("시작나이", "")
+    # 세는나이 표시(saju_engine.dw_age_counting 단일 소스) — birth_year 미전달 시
+    # dw["시작나이"](대운수)+1로 폴백(dw_age_counting 자체 폴백과 동일 규칙)
+    start_age = dw_age_counting(dw, birth_year)
     dw_str = dw.get("str", "")
 
     # 오행 색상 배지 생성

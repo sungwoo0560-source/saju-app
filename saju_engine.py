@@ -1668,6 +1668,45 @@ class SajuCoreEngine:
 
 # ==================================================
 
+#  나이 표시(세는나이) 헬퍼 — 표시 전용, 판정·필터에 쓰지 말 것
+
+# ==================================================
+
+# ★원천은 SajuCoreEngine.get_daewoon()의 dw["시작나이"](대운수, 절입거리 기반)다.
+# 대운수 계산 자체는 정확하며 무수정 대상 — 아래 함수들은 그 값을 "세는나이
+# (출생연도를 1세로 세는 한국식)" 표시 문자열로 환산만 할 뿐, 대운 구간 판정
+# (시작연도<=연도<=종료연도, 전부 연도 비교)이나 나이단계 임계값 분기(20/60/80세
+# 등 필터·컷오프)에는 쓰지 않는다 — 그런 내부 판정은 원본 dw["시작나이"]를
+# 그대로 쓰는 것이 설계 의도다.
+
+
+def dw_age_counting(dw, birth_year):
+    """대운 시작 나이의 세는나이 표시값(시작연도-출생연도+1). 표시 전용.
+    시작연도·출생연도가 없으면 dw["시작나이"](대운수)+1로 폴백, 그것도 없으면 ""."""
+    sy = dw.get("시작연도") if dw else None
+    if sy and birth_year:
+        return sy - birth_year + 1
+    s = dw.get("시작나이") if dw else None
+    if isinstance(s, (int, float)):
+        return s + 1
+    return ""
+
+
+def dw_age_counting_end(dw, birth_year):
+    """대운 종료 나이의 세는나이 표시값(시작 세는나이+9). 표시 전용."""
+    s = dw_age_counting(dw, birth_year)
+    return (s + 9) if isinstance(s, (int, float)) else ""
+
+
+def cur_age_counting(cur_year, birth_year):
+    """특정 연도 기준 세는나이 표시값(연도-출생연도+1). 표시 전용."""
+    if cur_year and birth_year:
+        return cur_year - birth_year + 1
+    return ""
+
+
+# ==================================================
+
 #  십성(十星) 및 12운성 계산 (Bug 5 Fix)
 
 # ==================================================

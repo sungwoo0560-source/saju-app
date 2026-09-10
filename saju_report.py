@@ -1533,7 +1533,7 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str="", dram
 
                     y = write(
                         c,
-                        f"  {dw['시작나이']}~{dw['시작나이'] + 9}세  {dw['str']} ({dw_ss}){cur_mark}{yong_mark}",
+                        f"  {dw_age_counting(dw, birth_year)}~{dw_age_counting_end(dw, birth_year)}세  {dw['str']} ({dw_ss}){cur_mark}{yong_mark}",
                         y,
                         size=10,
                     )
@@ -1604,7 +1604,7 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str="", dram
                     c.drawString(
                         MARGIN,
                         _by - _bh1 + 1.5 * mm,
-                        f"{_dw['시작나이']}세 {_dw['str']} {_dss}",
+                        f"{dw_age_counting(_dw, birth_year)}세 {_dw['str']} {_dss}",
                     )
 
                     _bl = _gw * _sc / 100
