@@ -1674,9 +1674,11 @@
     },
     "대한": {
       "month": 1,
-      "day": 21,
+      "day": 20,
       "hour": 19,
-      "minute": 18
+      "minute": 18,
+      "src": "computed-ephem",
+      "note": "원본(1/21 19:18) 손상 추정 — 2026-09-10 bebeyam/uncle.tools(NASA DE441)/ephem/astropy 4자 일치로 1/20 19:18 교정"
     },
     "입춘": {
       "month": 2,
@@ -1789,8 +1791,10 @@
     "입동": {
       "month": 11,
       "day": 8,
-      "hour": 9,
-      "minute": 26
+      "hour": 3,
+      "minute": 34,
+      "src": "computed-ephem",
+      "note": "원본(09:26) 손상 추정 — 2026-09-10 bebeyam/uncle.tools(NASA DE441)/ephem/astropy 4자 일치로 03:34 교정"
     },
     "소설": {
       "month": 11,
@@ -2320,7 +2324,9 @@
       "month": 6,
       "day": 22,
       "hour": 1,
-      "minute": 58
+      "minute": 38,
+      "src": "computed-ephem",
+      "note": "원본(01:58) 손상 추정(자릿수 오기 5↔3) — 2026-09-10 uncle.tools(NASA DE441)/ephem/astropy 3자 일치로 01:38 교정"
     },
     "소서": {
       "month": 7,
@@ -2844,7 +2850,9 @@
       "month": 1,
       "day": 20,
       "hour": 17,
-      "minute": 60
+      "minute": 59,
+      "src": "computed-ephem",
+      "note": "원본(17:60, 범위위반) 손상 확정 — 2026-09-10 bebeyam/uncle.tools(NASA DE441)/ephem/astropy 4자 일치로 17:59 교정"
     },
     "입춘": {
       "month": 2,
