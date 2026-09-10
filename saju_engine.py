@@ -949,19 +949,26 @@ class TimeCorrection:
 
     # 서머타임(DST) 시행 이력
 
+    # ★2026-09-10 tzdata(zoneinfo "Asia/Seoul") 정밀 대조로 정정 — 시작 시각은
+    # 전부 gap(그 시각 자체가 존재하지 않음, 예: 1948~60은 00:00~00:59가 없고
+    # 전일 23:59:59 다음이 당일 01:00:00), 종료 시각은 fold(그 시각이 중복
+    # 발생, 예: 1987-88은 02:00~02:59가 두 번). 위키백과 서술(1987 시작
+    # "02:00")도 tzdata와 달라 tzdata를 채택했다(IANA는 정부 고시 추적 표준).
+    # 비교는 아래 _normalize_local_clock에서 시작 inclusive·종료 exclusive로
+    # 처리한다(모호 시각은 "DST 유지"로 일관 판정).
     DST_PERIODS = [
-        (datetime(1948, 6, 1), datetime(1948, 9, 13)),
-        (datetime(1949, 4, 3), datetime(1949, 9, 11)),
-        (datetime(1950, 4, 1), datetime(1950, 9, 10)),
-        (datetime(1951, 5, 6), datetime(1951, 9, 9)),
-        (datetime(1955, 5, 5), datetime(1955, 9, 9)),
-        (datetime(1956, 5, 20), datetime(1956, 9, 30)),
-        (datetime(1957, 5, 5), datetime(1957, 9, 22)),
-        (datetime(1958, 5, 4), datetime(1958, 9, 21)),
-        (datetime(1959, 5, 3), datetime(1959, 9, 20)),
-        (datetime(1960, 5, 1), datetime(1960, 9, 18)),
-        (datetime(1987, 5, 10), datetime(1987, 10, 11)),
-        (datetime(1988, 5, 8), datetime(1988, 10, 9)),
+        (datetime(1948, 6, 1, 1, 0), datetime(1948, 9, 13, 0, 0)),
+        (datetime(1949, 4, 3, 1, 0), datetime(1949, 9, 11, 0, 0)),
+        (datetime(1950, 4, 1, 1, 0), datetime(1950, 9, 10, 0, 0)),
+        (datetime(1951, 5, 6, 1, 0), datetime(1951, 9, 9, 0, 0)),
+        (datetime(1955, 5, 5, 1, 0), datetime(1955, 9, 9, 0, 0)),
+        (datetime(1956, 5, 20, 1, 0), datetime(1956, 9, 30, 0, 0)),
+        (datetime(1957, 5, 5, 1, 0), datetime(1957, 9, 22, 0, 0)),
+        (datetime(1958, 5, 4, 1, 0), datetime(1958, 9, 21, 0, 0)),
+        (datetime(1959, 5, 3, 1, 0), datetime(1959, 9, 20, 0, 0)),
+        (datetime(1960, 5, 1, 1, 0), datetime(1960, 9, 18, 0, 0)),
+        (datetime(1987, 5, 10, 3, 0), datetime(1987, 10, 11, 3, 0)),
+        (datetime(1988, 5, 8, 3, 0), datetime(1988, 10, 9, 3, 0)),
     ]
 
     # ─ 지역별 경도 테이블 (동경도, KST 기준 135° 대비 오프셋 계산용) ─
@@ -1011,8 +1018,61 @@ class TimeCorrection:
     }
 
     @staticmethod
+    def _normalize_local_clock(year, month, day, hour, minute):
+        """그 시절 한국 시계 표시값을 절대시각(오늘날 KST/GMT+9) 기준으로
+        정규화한다. 대상 구간은 DST 전 구간(1948~1951, 1955~1960, 1987~1988)
+        + GMT+8:30 표준시 구간(1954-03-21~1961-08-09) — 이 둘은 서로 조건이
+        독립적이다(DST는 GMT+8:30 여부와 무관하게 그 자체로 항상 판정).
+        SajuPrecisionEngine.get_pillars 최상단에서 원본 입력에 선적용되며,
+        그 결과가 get_corrected_time()과 term_*(월주·연주·일주가 보는
+        원시각) 양쪽에 동일하게 쓰인다 — 4주 공통 정규화.
+
+        처리 순서(현행 유지): ①DST 판정 시 -1시간(TimeCorrection.DST_PERIODS
+        전 구간 대상, GMT+8:30과 결합하지 않음) → ②1954-03-21~1961-08-09
+        (GMT+8:30 구간)이면 +30분. 둘 다 해당 안 되면 완전 무변경으로 반환.
+
+        ★부호 근거: 1954.03.21~1961.08.09 한국 표준시는 GMT+8.5(127.5도)
+        였다. 그 시절 시계는 오늘날 GMT+9(135도) 기준보다 30분 "느리게"
+        갔으므로, 그 시절 시계값을 오늘날 KST로 환산하려면 +30분 해야
+        한다 — 예: 1955-02-04 23:30(그 시절 시계, UTC+8:30) = UTC 15:00
+        = 오늘날 KST 1955-02-05 00:00, 즉 +30분(예전 코드 주석의 "-30분"은
+        부호가 반대로 틀렸었다). DST 겹침(1955~1960 여름) 기간은 순서상
+        -1h(DST 되돌림) 후 +30분(표준시 환산)이 적용돼 최종 -30분이 되며,
+        이는 그 시절 시계값 자체가 "GMT+8:30+DST(1h 당김)=GMT+9:30"이었기
+        때문에 정합된다.
+
+        반환: (year, month, day, hour, minute) 정규화된 튜플. timedelta로
+        계산하므로 날짜·월·연도 롤오버(예: 1961-08-09 23:50 -> 1961-08-10
+        00:20)가 정확히 반영된다. DST_PERIODS·경계 상수는 여기서만 정의
+        (값 복제 없음)."""
+
+        dt = datetime(year, month, day, hour, minute)
+
+        # ★시작(gap) inclusive, 종료(fold) exclusive — 존재하지 않는 시작
+        # 시각이 입력되면 "이미 DST"로, 중복 발생하는 종료 시각은 "아직
+        # DST 유지"로 일관 처리한다(2026-09-10 tzdata 정밀 대조 근거).
+        for start, end in TimeCorrection.DST_PERIODS:
+            if start <= dt < end:
+                dt -= timedelta(hours=1)
+                break
+
+        # ★GMT+8:30 종료도 fold 구간(1961-08-10 00:00~00:29는 그 시각이
+        # 존재하지 않음 — tzdata 기준 gap) — exclusive 상한을 00:30으로 정정
+        # (기존 23:59 상한은 30분 부족했다).
+        if datetime(1954, 3, 21) <= dt < datetime(1961, 8, 10, 0, 30):
+            dt += timedelta(minutes=30)
+
+        return dt.year, dt.month, dt.day, dt.hour, dt.minute
+
+    @staticmethod
     def get_corrected_time(year, month, day, hour, minute, longitude=127.0):
         """입력된 시간을 '진태양시'로 보정 (경도 + 균시차 반영)
+
+        ★입력은 이미 표준시·서머타임이 정규화된 값을 받는다
+        (TimeCorrection._normalize_local_clock이 SajuPrecisionEngine.get_pillars
+        최상단에서 선적용) — 이 함수는 그 이후의 개인 위치 보정(경도+
+        균시차)만 담당한다. DST·1954~1961 GMT+8:30 표준시 보정 로직은
+        여기 없다(이중적용 방지, 단일 소스는 _normalize_local_clock).
 
         ★균시차(均時差, Equation of Time) 반영 — 진태양시는 경도보정과
         균시차 두 요소로 이뤄지는데, 기존엔 경도보정만 하고 있었다.
@@ -1024,35 +1084,13 @@ class TimeCorrection:
 
         dt = datetime(year, month, day, hour, minute)
 
-        # 1. 서머타임 보정 (-1시간)
-
-        is_dst = False
-
-        for start, end in TimeCorrection.DST_PERIODS:
-            if start <= dt <= end:
-                is_dst = True
-
-                break
-
-        if is_dst:
-            dt -= timedelta(hours=1)
-
-        # 2. 표준시 보정
-
-        # 1954.03.21 ~ 1961.08.09 기간은 GMT+8.5 (135도 기준 -30분)
-
-        if datetime(1954, 3, 21) <= dt <= datetime(1961, 8, 9, 23, 59):
-            # 보통 사주에서는 135도(GMT+9)를 기준으로 역산함.
-
-            pass
-
-        # 3. 경도 보정: KST 기준 135°, 1° = 4분
+        # 경도 보정: KST 기준 135°, 1° = 4분
         # longitude < 135 → 음수 오프셋 (지역 태양이 KST보다 늦게 뜸)
 
         lon_offset_min = round((longitude - 135.0) * 4.0)
         dt += timedelta(minutes=lon_offset_min)
 
-        # 4. 균시차(均時差, Equation of Time) 보정 — 클래스 docstring 참고
+        # 균시차(均時差, Equation of Time) 보정 — 클래스 docstring 참고
         n = dt.timetuple().tm_yday
         b = 2 * math.pi * (n - 81) / 365
         eot_min = 9.87 * math.sin(2 * b) - 7.53 * math.cos(b) - 1.5 * math.sin(b)
@@ -1083,11 +1121,19 @@ class SajuPrecisionEngine:
     def get_pillars(year, month, day, hour, minute, gender="남", use_yaja_time=True, longitude=126.98):
         """정밀 보정된 사주팔자 계산 (경도+균시차 기반 진태양시 반영)
 
+        ★4주 공통 표준시·DST 정규화(최상단 선적용) — 원본 입력을
+        TimeCorrection._normalize_local_clock()에 먼저 통과시켜 표준시·
+        서머타임을 오늘날 KST로 환산한다. 그 정규화 결과를 get_corrected_time()
+        입력과 term_*(아래) 양쪽에 동일하게 쓴다 — 어느 한쪽만 원본을 쓰면
+        4주가 서로 다른 시간대 기준을 섞어 쓰게 되므로 반드시 동일 값이어야 한다.
+
         ★절입 기준 분리(월주·연주 라운드2 확정): 진태양시 보정(경도+균시차)은
         시주·일주 계산에만 쓰고, 월주·연주(절입 비교)는 보정 전 원시각(KST)
         을 SajuCoreEngine.get_pillars의 term_*로 따로 넘긴다 — 절입은 위치와
         무관한 전지구적 순간이라 KASI 발표 KST 시각과 직접 비교해야 한다
         (자세한 근거는 SajuCoreEngine.get_pillars 클래스 docstring 참고)."""
+
+        year, month, day, hour, minute = TimeCorrection._normalize_local_clock(year, month, day, hour, minute)
 
         corrected_dt = TimeCorrection.get_corrected_time(year, month, day, hour, minute, longitude=longitude)
 
