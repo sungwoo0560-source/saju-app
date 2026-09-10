@@ -227,9 +227,19 @@ class KasiAPI:
 class AstroEngine:
     """
 
-    고정밀 천문 계산 엔진 (1940-2040 범위 보정)
+    ★2026-09-10 docstring 정정 — 기존 "Jean Meeus 알고리즘 기반 태양 황도
+    계산"이라는 설명은 사실과 다르다. 실제로는 2000년 KASI 실측 기준시각에
+    회귀년 평균길이(365.24219일)×연도차를 더하는 선형 외삽식이고,
+    TERM_LONGITUDES(태양황경표)·t_idx는 계산에 전혀 쓰이지 않는 죽은
+    변수다(이번 라운드에서 별건으로 분리, 미수정).
 
-    Jean Meeus 알고리즘 기반의 태양 황도 계산 보조
+    2000~2027년 KASI 실측 672건 대비 실측 오차: 평균 13.13분, 중앙값
+    9.00분, 최대 1439분(2011년 대한 — 이 건은 이후 KASI 데이터 자체의
+    손상으로 판명돼 교정됨). "오차 1~2분" 주장은 근거 없음.
+
+    kasi_24terms.json이 1940~2040 전 구간을 커버하게 된 뒤로는 이 클래스가
+    실사용되는 범위는 1939년 이하·2041년 이상(JSON 밖)뿐이다 — 삭제하지
+    않고 최후 폴백으로 유지.
 
     """
 
@@ -237,9 +247,8 @@ class AstroEngine:
     def get_solar_term_precision(year, month, day, term_name):
         """
 
-        KASI 데이터가 없는 경우(1940-1999, 2028-2040) 사용하는 정밀 계산식
-
-        오차 범위: 약 1~2분 이내
+        kasi_24terms.json 범위(1940~2040) 밖에서만 도달하는 선형 외삽
+        폴백. 2000년 KASI 기준시각 + (연도-2000)×365.24219일.
 
         """
 
@@ -1155,13 +1164,19 @@ class SajuCoreEngine:
 
     @staticmethod
     def _get_term_precision_time(year, term_name):
-        """특정 연도/절기의 정밀 시각(시, 분)을 반환 (KASI -> AstroEngine Fallback)"""
+        """특정 연도/절기의 정밀 시각(시, 분)을 반환.
+
+        ★2026-09-10부로 kasi_24terms.json이 1940~2040 전 구간을 커버한다
+        (2000~2027=KASI 실측 원본, 나머지=ephem 기반 정밀 계산 — src 필드로
+        구분, tools/gen_solar_terms_ephem.py 참고). AstroEngine 선형 외삽
+        폴백은 이제 이 함수 안에서 1939년 이하·2041년 이상(JSON 범위 밖)일
+        때만 실제로 호출된다 — 로드 경로·시그니처·반환 타입은 무변경."""
 
         SajuCoreEngine._load_kasi_data()
 
         y_str = str(year)
 
-        # 1. KASI JSON 확인 (2000-2027 우선)
+        # 1. KASI JSON 확인 (1940~2040 전 구간 — 실측/정밀계산 우선)
 
         if y_str in SajuCoreEngine.KASI_DATA:
             term_info = SajuCoreEngine.KASI_DATA[y_str].get(term_name)
@@ -1174,7 +1189,7 @@ class SajuCoreEngine:
                     term_info["minute"],
                 )
 
-        # 2. AstroEngine 정밀 계산 (1940-2040 전구간 정밀 보정)
+        # 2. AstroEngine 선형 외삽 폴백 — 1939년 이하·2041년 이상(JSON 범위 밖)에서만 도달
 
         return AstroEngine.get_solar_term_precision(year, 1, 1, term_name)
 
