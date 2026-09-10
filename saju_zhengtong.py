@@ -7112,8 +7112,12 @@ def detect_life_risk_signals(pils, saewoon_data=None, gender=None, marriage_stat
     hap_count = sum(1 for a, b in hap_pairs if a in all_jj and b in all_jj)
 
     # 양인살 — YANGIN_MAP 단일 소스(H1-b/H1-c와 동일 패턴), 정통 양간 5개 전용
+    # ★빈 문자열은 "양인 지지 없음"(음간 일간)과 "시간미상이라 시주 데이터 없음"
+    # 양쪽 모두의 sentinel이라, 값이 있을 때만 all_jj 소속을 검사해야 한다
+    # (get_yangin()의 별도 인스턴스이므로 이 파일에서도 따로 가드).
     from saju_sinsal import YANGIN_MAP
-    has_yangin = YANGIN_MAP.get(ilgan, "") in all_jj
+    _yangin_jj_zt = YANGIN_MAP.get(ilgan, "")
+    has_yangin = bool(_yangin_jj_zt) and _yangin_jj_zt in all_jj
 
     # 백호살 (4주 전체 검사 — 리스트는 get_extra_sinsal 동일 목록과 일치,
     # 비교 범위만 일주→4주로 확장)

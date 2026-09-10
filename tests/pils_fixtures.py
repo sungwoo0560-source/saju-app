@@ -22,7 +22,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from saju_engine import SajuPrecisionEngine, get_ilgan_strength
 from saju_interpreter import get_yongshin, get_gyeokguk
-from saju_sinsal import get_gongmang
+from saju_sinsal import get_gongmang, get_yangin
 
 
 # pils 순서: [시주, 일주, 월주, 년주] (SajuPrecisionEngine.get_pillars 반환 그대로)
@@ -648,6 +648,75 @@ CASES = {
             "공망": "戌亥",
         },
     },
+    # ── 양인 sentinel 충돌 회귀(2026-09-10) ──────────────────────────────
+    # get_yangin()/detect_life_risk_signals()가 "양인 없음"(음간 일간)과
+    # "시간미상이라 시주 없음"(manse.py:29345-29346)을 둘 다 빈 문자열로
+    # 표시해 서로 매칭되던 결함의 고정 기준선. birth의 시(時)는 임의값(12:00)
+    # — 아래 check_yangin_unknown_time()이 pils[0]을 직접 블랭크 처리해
+    # manse.py의 시간미상 분기를 재현하므로 실제로는 쓰이지 않는다.
+    "박후규_1969_계사일_시간미상": {
+        "birth": (1969, 11, 14, 12, 0),
+        "gender": "남",
+        "longitude": 126.98,
+        "use_yaja_time": True,
+        "expect_pillars": ["戊午", "癸巳", "乙亥", "己酉"],
+    },
+    "음간양인_시간미상_乙": {
+        "birth": (1990, 1, 10, 12, 0),
+        "gender": "남",
+        "longitude": 126.98,
+        "use_yaja_time": True,
+        "expect_pillars": ["壬午", "乙亥", "丁丑", "己巳"],
+    },
+    "음간양인_시간미상_丁": {
+        "birth": (1990, 1, 2, 12, 0),
+        "gender": "남",
+        "longitude": 126.98,
+        "use_yaja_time": True,
+        "expect_pillars": ["丙午", "丁卯", "丙子", "己巳"],
+    },
+    "음간양인_시간미상_己": {
+        "birth": (1990, 1, 4, 12, 0),
+        "gender": "남",
+        "longitude": 126.98,
+        "use_yaja_time": True,
+        "expect_pillars": ["庚午", "己巳", "丙子", "己巳"],
+    },
+    "음간양인_시간미상_辛": {
+        "birth": (1990, 1, 6, 12, 0),
+        "gender": "남",
+        "longitude": 126.98,
+        "use_yaja_time": True,
+        "expect_pillars": ["甲午", "辛未", "丁丑", "己巳"],
+    },
+    "음간양인_시간미상_癸": {
+        "birth": (1990, 1, 8, 12, 0),
+        "gender": "남",
+        "longitude": 126.98,
+        "use_yaja_time": True,
+        "expect_pillars": ["戊午", "癸酉", "丁丑", "己巳"],
+    },
+    # 양간 대조군 — 일지·년지(시주와 무관한 자리)에 양인이 실재해, 시간미상
+    # 처리로 시주가 블랭크돼도 존재=True가 유지돼야 한다(과교정 방지 확인용).
+    "양간대조_시간미상_丙": {
+        "birth": (1990, 2, 10, 12, 0),
+        "gender": "남",
+        "longitude": 126.98,
+        "use_yaja_time": True,
+        "expect_pillars": ["甲午", "丙午", "戊寅", "庚午"],
+    },
+}
+
+# 위 "시간미상" 픽스처들의 get_yangin() 기대값 — (존재 여부, 위치 목록).
+# 위치는 blanking 후 pils 순서([시주,일주,월주,년주]) 기준 라벨.
+YANGIN_UNKNOWN_TIME_EXPECT = {
+    "박후규_1969_계사일_시간미상": (False, []),
+    "음간양인_시간미상_乙": (False, []),
+    "음간양인_시간미상_丁": (False, []),
+    "음간양인_시간미상_己": (False, []),
+    "음간양인_시간미상_辛": (False, []),
+    "음간양인_시간미상_癸": (False, []),
+    "양간대조_시간미상_丙": (True, ["일주", "년주"]),
 }
 
 # TODO 윤미연: 1967년 甲戌 일주, 女.
@@ -735,6 +804,27 @@ def check_baseline(name):
             print(f"[WARN] {name} 공망 불일치 — 기대:{expected} 실제:{actual}")
 
 
+def check_yangin_unknown_time(name):
+    """manse.py:29345-29346의 '시간미상 시 pils[0] 블랭크' 분기를 재현해
+    get_yangin()의 sentinel 충돌 회귀를 고정한다. [FAIL] 시 False 반환."""
+    expected_exists, expected_loc = YANGIN_UNKNOWN_TIME_EXPECT[name]
+    pils = get_pils(name)
+    pils_unknown = [dict(p) for p in pils]
+    pils_unknown[0] = {"cg": "", "jj": "", "str": ""}
+
+    result = get_yangin(pils_unknown)
+    actual_exists = result.get("존재", False)
+    actual_loc = result.get("위치", [])
+
+    if actual_exists == expected_exists and actual_loc == expected_loc:
+        print(f"[OK] {name} 양인(시간미상) 존재={actual_exists} 위치={actual_loc}")
+        return True
+    print(f"[FAIL] {name} 양인(시간미상) 불일치")
+    print(f"    기대: 존재={expected_exists} 위치={expected_loc}")
+    print(f"    실제: 존재={actual_exists} 위치={actual_loc}")
+    return False
+
+
 def main():
     print("=== tests/pils_fixtures.py ===")
     all_pillars_ok = True
@@ -743,6 +833,14 @@ def main():
         all_pillars_ok = all_pillars_ok and ok
         check_baseline(name)
         print()
+
+    print("=== 양인 sentinel 충돌 회귀(시간미상) ===")
+    all_yangin_ok = True
+    for name in YANGIN_UNKNOWN_TIME_EXPECT:
+        ok = check_yangin_unknown_time(name)
+        all_yangin_ok = all_yangin_ok and ok
+    print()
+    all_pillars_ok = all_pillars_ok and all_yangin_ok
 
     if all_pillars_ok:
         print("[OK] 결과 요약: 전체 픽스처 8글자 일치")

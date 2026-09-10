@@ -445,7 +445,10 @@ def get_yangin(pils):
 
     yangin_jj = YANGIN_MAP.get(ilgan, "")
 
-    found = [["시주", "일주", "월주", "년주"][i] for i, p in enumerate(pils) if p["jj"] == yangin_jj]
+    # ★빈 문자열은 "양인 지지 없음"(음간 일간)과 "시간미상이라 시주 데이터 없음"
+    # 양쪽 모두의 sentinel이라, yangin_jj truthy 가드 없이 비교하면 두 "없음"이
+    # 서로를 매칭으로 오인한다(예: 癸 일간 + 시간미상 → 시주에 양인 오탐).
+    found = [["시주", "일주", "월주", "년주"][i] for i, p in enumerate(pils) if yangin_jj and p["jj"] == yangin_jj]
 
     return {
         "일간": ilgan,
