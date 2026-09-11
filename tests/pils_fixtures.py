@@ -20,8 +20,8 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from saju_engine import SajuPrecisionEngine, get_ilgan_strength
-from saju_interpreter import get_yongshin, get_gyeokguk
+from saju_engine import SajuPrecisionEngine, get_ilgan_strength, get_pillars_12beol, format_12beol_display
+from saju_interpreter import get_yongshin, get_gyeokguk, build_saju_tongbyeon
 from saju_sinsal import get_gongmang, get_yangin
 from saju_zhengtong import render_jonghap_pyongron, render_four_pillars_card
 
@@ -706,6 +706,31 @@ CASES = {
         "use_yaja_time": True,
         "expect_pillars": ["甲午", "丙午", "戊寅", "庚午"],
     },
+    # 12벌 수렴도 표시 회귀(2026-09-11) — 수렴 높음/중간/낮음 3단계.
+    # birth의 시(時)는 임의값(12:00) — check_12beol_convergence()가 pils[0]을
+    # 직접 블랭크하고 get_pillars_12beol()로 12벌을 따로 산출하므로 실제로는
+    # 안 쓰인다(다른 시간미상 픽스처들과 동일 관례).
+    "12벌_수렴높음_박후규": {
+        "birth": (1960, 11, 14, 12, 0),
+        "gender": "남",
+        "longitude": 126.98,
+        "use_yaja_time": True,
+        "expect_pillars": ["甲午", "丙午", "丁亥", "庚子"],
+    },
+    "12벌_수렴중간_19301020": {
+        "birth": (1930, 10, 20, 12, 0),
+        "gender": "여",
+        "longitude": 126.98,
+        "use_yaja_time": True,
+        "expect_pillars": ["戊午", "癸卯", "丙戌", "庚午"],
+    },
+    "12벌_수렴낮음_19301009": {
+        "birth": (1930, 10, 9, 12, 0),
+        "gender": "남",
+        "longitude": 126.98,
+        "use_yaja_time": True,
+        "expect_pillars": ["丙午", "壬辰", "丙戌", "庚午"],
+    },
 }
 
 # 위 "시간미상" 픽스처들의 get_yangin() 기대값 — (존재 여부, 위치 목록).
@@ -725,6 +750,32 @@ YANGIN_UNKNOWN_TIME_EXPECT = {
 SIJU_DISPLAY_EXPECT = {
     "박후규_1969_계사일_시간미상": True,   # 시간미상 — "시간 미상" 문구, () 미노출 기대
     "박후규": False,                        # 시간확정 대조군 — 실제 간지 노출, "시간 미상" 미노출 기대
+}
+
+# 12벌 수렴도 표시 회귀(2026-09-11) — saju_engine.get_pillars_12beol() +
+# format_12beol_display()의 실제 산출값을 고정한다. "격국"/"주용신"은
+# item_type="general", "신강약"은 엄격 기준, "대운수"는 원시 오프셋(대운수)
+# 기준(get_crossing_interpretation의 "현재 대운 블록 보정"은 이 픽스처의
+# 범위 밖 — build_saju_tongbyeon/get_pillars_12beol 자체의 회귀만 고정).
+TWELVE_BEOL_EXPECT = {
+    "12벌_수렴높음_박후규": {
+        "격국": "偏官(편관)格 (시간 미상 — 12벌 중 10벌 기준)",
+        "신강약": "신약 또는 중화",
+        "주용신": "木 (시간 미상 — 12벌 중 11벌 기준)",
+        "대운수": "7세",
+    },
+    "12벌_수렴중간_19301020": {
+        "격국": "正官(정관)格 (시간 미상 — 12벌 중 10벌 기준)",
+        "신강약": "극신약(極身弱) 또는 신약(身弱)",
+        "주용신": "金",
+        "대운수": "3세",
+    },
+    "12벌_수렴낮음_19301009": {
+        "격국": "偏官(편관)格 또는 偏印(편인)格",
+        "신강약": "신약 또는 중화",
+        "주용신": "⚠️ 金 (7/12 — 시간에 따라 달라질 수 있음)",
+        "대운수": "1세 (시간에 따라 3가지)",
+    },
 }
 
 # TODO 윤미연: 1967년 甲戌 일주, 女.
@@ -877,6 +928,50 @@ def check_siju_unknown_display(name, expect_unknown):
     return ok
 
 
+def check_12beol_convergence(name):
+    """12벌 수렴도 표시 회귀(2026-09-11). get_pillars_12beol() + format_12beol_display()
+    실제 산출값을 고정하고, build_saju_tongbyeon()이 twelve_beol을 받아도
+    크래시 없이 본문을 만드는지(형식 유지) 함께 확인한다."""
+    case = CASES[name]
+    y, m, d, _h, _mi = case["birth"]
+    gender = case["gender"]
+    expect = TWELVE_BEOL_EXPECT[name]
+
+    twelve_beol = get_pillars_12beol(y, m, d, gender, case["longitude"], case["use_yaja_time"])
+
+    actual = {
+        "격국": format_12beol_display([v["격국"] for v in twelve_beol], "general"),
+        "신강약": format_12beol_display([v["신강약"] for v in twelve_beol], "신강약"),
+        "주용신": format_12beol_display([v["주용신"] for v in twelve_beol], "general"),
+        "대운수": format_12beol_display([v["대운수"] for v in twelve_beol], "대운시작나이"),
+    }
+
+    ok = True
+    for key in expect:
+        if actual[key] != expect[key]:
+            print(f"[FAIL] {name} 12벌표시[{key}] 불일치 — 기대:{expect[key]!r} 실제:{actual[key]!r}")
+            ok = False
+
+    # 통합 스모크 — twelve_beol을 실제로 넘겨도 build_saju_tongbyeon이 크래시 없이
+    # 비어있지 않은 본문을 만드는지만 확인(문장 전문은 위 값 4개로 이미 고정됨).
+    pils = get_pils(name)
+    pils = [dict(p) for p in pils]
+    pils[0] = {"cg": "", "jj": "", "str": ""}
+    try:
+        body = build_saju_tongbyeon(pils, daewoon=None, birth_year=y, twelve_beol=twelve_beol)
+    except Exception as e:
+        print(f"[FAIL] {name} build_saju_tongbyeon 크래시: {type(e).__name__}:{e}")
+        ok = False
+        body = ""
+    if not body:
+        print(f"[FAIL] {name} build_saju_tongbyeon이 시간미상+twelve_beol에서 빈 본문 반환")
+        ok = False
+
+    if ok:
+        print(f"[OK] {name} 12벌표시 정상 — {actual}")
+    return ok
+
+
 def main():
     print("=== tests/pils_fixtures.py ===")
     all_pillars_ok = True
@@ -901,6 +996,14 @@ def main():
         all_siju_disp_ok = all_siju_disp_ok and ok
     print()
     all_pillars_ok = all_pillars_ok and all_siju_disp_ok
+
+    print("=== 12벌 수렴도 표시 회귀(주용신·격국·신강약·대운수) ===")
+    all_12beol_ok = True
+    for name in TWELVE_BEOL_EXPECT:
+        ok = check_12beol_convergence(name)
+        all_12beol_ok = all_12beol_ok and ok
+    print()
+    all_pillars_ok = all_pillars_ok and all_12beol_ok
 
     if all_pillars_ok:
         print("[OK] 결과 요약: 전체 픽스처 8글자 일치")

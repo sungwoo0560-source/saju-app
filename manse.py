@@ -13395,6 +13395,7 @@ def build_gangsa_block(pils, name, birth_year, gender, marriage_status=None):
         sw_gil = _re.sub(r'\([^)]+\)', '', str(sw_gil)).strip()
         dw_age_s = cross.get("dw_start_age_counting", "")
         dw_age_e = cross.get("dw_end_age_counting", "")
+        dw_age_disp = cross.get("dw_age_display", "")  # 시간미상 12벌 수렴도(표시 전용)
 
         try:
             ilgan   = pils[1]["cg"]
@@ -13463,7 +13464,12 @@ def build_gangsa_block(pils, name, birth_year, gender, marriage_status=None):
         try:
             _dw_label4  = f"{dw_kr} 대운" if dw_kr else "대운 미산출"
             _sw_label4  = f"{sw_kr} 세운" if sw_kr else f"{cur_year}년 세운"
-            _age_range4 = f" ({dw_age_s}~{dw_age_e}세)" if dw_age_s and dw_age_e else ""
+            # 시간확정(dw_age_disp="")은 기존과 완전히 동일. 시간미상이면 12벌
+            # 수렴도 문자열(예: "57~58세"/"58세(...)")을 그대로 괄호 안에 쓴다.
+            if dw_age_disp:
+                _age_range4 = f" ({dw_age_disp})"
+            else:
+                _age_range4 = f" ({dw_age_s}~{dw_age_e}세)" if dw_age_s and dw_age_e else ""
 
             _gk4 = get_gyeokguk(pils) or {}
             # get_gyeokguk()이 실제로 정한 "격국명"(투출 우선순위 반영)을 그대로 쓴다.
@@ -13922,7 +13928,10 @@ def build_gangsa_block(pils, name, birth_year, gender, marriage_status=None):
             # 등은 이미 "" 처리하므로 여기선 결과 유무만 본다.
             _gyeok_status_l = ""
             try:
-                _tb_text4 = build_saju_tongbyeon(pils, daewoon=_dw_all4, birth_year=birth_year)
+                _tb_text4 = build_saju_tongbyeon(
+                    pils, daewoon=_dw_all4, birth_year=birth_year,
+                    twelve_beol=st.session_state.get("saju_pils_12beol"),
+                )
                 if _tb_text4:
                     _gyeok_status_l = "<b>【격국과 용신】</b> " + "<br>".join(_tb_text4.split("\n\n"))
                     st.session_state["_gangsa_rule_hits"].append({
@@ -14132,6 +14141,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
     sw_gil = _re.sub(r'\([^)]+\)', '', str(sw_gil)).strip()
     dw_age_s = cross.get("dw_start_age_counting", "")
     dw_age_e = cross.get("dw_end_age_counting", "")
+    dw_age_disp = cross.get("dw_age_display", "")  # 시간미상 12벌 수렴도(표시 전용)
 
     try:
         ilgan   = pils[1]["cg"]
@@ -16395,7 +16405,12 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
     lines = []
     _dw_label = f"{dw_kr} 대운" if dw_kr else "대운 미산출"
     _sw_label = f"{sw_kr} 세운" if sw_kr else f"{cur_year}년 세운"
-    _age_range = f" ({dw_age_s}~{dw_age_e}세)" if dw_age_s and dw_age_e else ""
+    # 시간확정(dw_age_disp="")은 기존과 완전히 동일. 시간미상이면 12벌
+    # 수렴도 문자열을 그대로 괄호 안에 쓴다.
+    if dw_age_disp:
+        _age_range = f" ({dw_age_disp})"
+    else:
+        _age_range = f" ({dw_age_s}~{dw_age_e}세)" if dw_age_s and dw_age_e else ""
     lines.append(f"## 🎯 {name}님, 지금 무엇 때문에 힘드신가요?")
     lines.append(f"*{cur_year}년 · {cur_age}세 · {_dw_label}{_age_range} · {_sw_label}*")
     lines.append("")
@@ -29336,6 +29351,20 @@ def main():
             # 시간 미상 시 시주(pils[0])를 계산에서 배제 — 용신/격국/오행강약 오염 차단
             if _ss.get("in_unknown_time"):
                 pils[0] = {"cg": "", "jj": "", "str": ""}
+                # 12벌 캐시 — 계산 시점(폼 제출 1회)에만 산출해 세션에 저장.
+                # 탭·항목마다 재호출하면 12벌×N회가 되므로, saju_pils와 같은
+                # 생명주기(재계산 전까지 유지)로 여기 1곳에만 둔다.
+                try:
+                    st.session_state["saju_pils_12beol"] = get_pillars_12beol(
+                        b_year, b_month, b_day,
+                        _ss.get("in_gender", "남"), _region_lon,
+                        _ss.get("in_use_yaja", True),
+                    )
+                except Exception as _12beol_err:
+                    _saju_log.warning("[12벌] 산출 오류: %s", str(_12beol_err)[:120])
+                    st.session_state["saju_pils_12beol"] = None
+            else:
+                st.session_state["saju_pils_12beol"] = None
 
             # 세션 스테이트에 최종 반영 (Key Binding 영구화)
 

@@ -1815,6 +1815,82 @@ def summarize_12beol(values):
     return None, max_count, candidates
 
 
+# 신강신약 5단계 -> 방향 3분류(신강/중화/신약). summarize_12beol과 함께
+# 신강약 전용 엄격 기준(아래 format_12beol_display)에서만 쓴다. 방향 후보
+# 병기 문구가 "신약 또는 중화"처럼 자연스럽게 나오도록 "계열" 접미사 없이
+# 둔다(5단계 세분라벨의 "신약(身弱)" 등과는 다른 문자열이라 혼동 없음).
+_SN_DIRECTION_12BEOL = {
+    "극신강(極身强)": "신강", "신강(身强)": "신강",
+    "중화(中和)": "중화",
+    "신약(身弱)": "신약", "극신약(極身弱)": "신약",
+}
+
+
+def format_12beol_display(values, item_type):
+    """12벌 값 리스트 -> 시간미상 표시 문자열. ★표시 전용 — 이 함수의 반환값을
+    판정·필터·내부 계산에 쓰지 말 것(최빈값을 판정에 주입하지 않는다).
+
+    item_type:
+      "general"      — 주용신·격국·시지 신살 등. 임계:
+                        12/12 확정 / 9~11 "최빈값(시간 미상 — 12벌 중 N벌 기준)" /
+                        6~8 "⚠️ 최빈값(N/12 — 시간에 따라 달라질 수 있음)" /
+                        5 이하 "A 또는 B"(최빈값 단독 미사용)
+      "신강약"        — 억부용신의 뿌리라 더 엄격: 12/12 확정 / 11/12 "최빈값(...)" /
+                        10/12 이하 후보 병기(최빈값 단독 금지) — 이때 12벌의 방향
+                        (신강계열/중화/신약계열) 자체가 갈리면 세분라벨은 버리고
+                        방향 후보만 병기("신약 또는 중화"), 방향은 수렴하는데 세분
+                        라벨만 갈리면 세분라벨 후보를 병기한다.
+      "대운시작나이" — 몇 가지 값(distinct)인지로 판단(최빈개수 기준 아님):
+                        1가지 "58세" / 2가지 "57~58세"(범위) /
+                        3가지 이상 "최빈값세(시간에 따라 N가지)".
+    """
+    from collections import Counter
+    if not values:
+        return ""
+
+    if item_type == "대운시작나이":
+        c = Counter(values)
+        distinct = sorted(c.keys())
+        if len(distinct) == 1:
+            return f"{distinct[0]}세"
+        if len(distinct) == 2:
+            return f"{distinct[0]}~{distinct[1]}세"
+        top, _cnt, _cands = summarize_12beol(values)
+        n = len(distinct)
+        if top is None:
+            return f"시간에 따라 {n}가지"
+        return f"{top}세 (시간에 따라 {n}가지)"
+
+    if item_type == "신강약":
+        label_top, label_cnt, _label_cands = summarize_12beol(values)
+        if label_top is not None and label_cnt == 12:
+            return f"{label_top}"
+        if label_top is not None and label_cnt == 11:
+            return f"{label_top} (시간 미상 — 12벌 중 11벌 기준)"
+        # 10/12 이하 -> 후보 병기, 최빈값 단독 표기 금지
+        directions = [_SN_DIRECTION_12BEOL.get(v, v) for v in values]
+        _dir_top, dir_cnt, _dir_cands = summarize_12beol(directions)
+        if dir_cnt < 12:
+            # 방향 자체가 갈림 -> 세분라벨 버리고 방향 후보만 병기
+            top2 = [v for v, _n in Counter(directions).most_common(2)]
+        else:
+            # 방향은 수렴, 세분라벨만 갈림 -> 세분라벨 후보 병기
+            top2 = [v for v, _n in Counter(values).most_common(2)]
+        return " 또는 ".join(top2)
+
+    # item_type == "general" (주용신·격국·시지 신살 등)
+    top, cnt, _cands = summarize_12beol(values)
+    if top is not None and cnt == 12:
+        return f"{top}"
+    if top is not None and 9 <= cnt <= 11:
+        return f"{top} (시간 미상 — 12벌 중 {cnt}벌 기준)"
+    if top is not None and 6 <= cnt <= 8:
+        return f"⚠️ {top} ({cnt}/12 — 시간에 따라 달라질 수 있음)"
+    # 5/12 이하 또는 최빈값 동률 -> 최빈값 단독 미사용, 후보 병기
+    top2 = [v for v, _n in Counter(values).most_common(2)]
+    return " 또는 ".join(top2)
+
+
 # ==================================================
 
 #  십성(十星) 및 12운성 계산 (Bug 5 Fix)

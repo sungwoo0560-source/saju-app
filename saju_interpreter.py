@@ -8184,7 +8184,7 @@ def format_yong_with_source(yong_list, yong_source):
     return "·".join(parts)
 
 
-def build_saju_tongbyeon(pils, daewoon=None, birth_year=None):
+def build_saju_tongbyeon(pils, daewoon=None, birth_year=None, twelve_beol=None):
     """원국(原局) 통변(通辯) — 격국·성격/파격·신강신약·오행분포·용신·희신·기신을 인생
     서술 한 편으로 엮는다. ★새 판단 로직이 아니다 — get_gyeokguk·get_gyeokguk_status·
     get_yongshin·get_ilgan_strength를 pils로 그대로 호출해 그 반환값만 문장으로 조합할
@@ -8194,6 +8194,10 @@ def build_saju_tongbyeon(pils, daewoon=None, birth_year=None):
     오프닝(①)과 마무리(⑥) 두 곳에서만, 오직 같은 gs_stat 하나로 통일해서 말한다.
     ★대운·세운 운로는 다음 단계 — 이 함수는 원국만 다룬다(신강신약·오행분포도 원국
     재료이지 운로가 아니다).
+    ★twelve_beol(2026-09-11): 시간미상일 때만 호출부가 saju_engine.get_pillars_12beol()
+    결과를 넘긴다. 넘어오면 격국명·신강신약·1순위 용신 표시만 saju_engine.
+    format_12beol_display()로 감싸 수렴도를 덧붙인다 — 판정값(gk/ys/si 자체)은
+    그대로, 표시 문자열만 바뀐다. None이면(시간 확정) 기존과 완전히 동일하다.
     반환: 완성된 통변 문단(str). 격 판정 불가 시 "" ."""
     try:
         if not pils or len(pils) < 4:
@@ -8241,8 +8245,13 @@ def build_saju_tongbyeon(pils, daewoon=None, birth_year=None):
         _flavor = " ".join(_flavor_paras[:2])
         _career_list = [c.strip() for c in (gk.get("적합_진로", "") or "").split(",") if c.strip()][:3]
         _career_txt = f" 이 기운이 특히 빛나는 자리는 {'·'.join(_career_list)} 같은 분야입니다." if _career_list else ""
+        # 시간미상(twelve_beol 있음) — 격국명 표시만 12벌 수렴도로 감싼다. gname
+        # 자체(판정값)는 무변경, gname_disp만 문장에 쓴다.
+        gname_disp = gname
+        if twelve_beol:
+            gname_disp = format_12beol_display([v["격국"] for v in twelve_beol], "general")
         p1 = (
-            f"{ilgan_kr}({ilgan}) 일간에 월지 {wolji} 자리, <b>{gname}</b>을(를) 그릇으로 타고났습니다. "
+            f"{ilgan_kr}({ilgan}) 일간에 월지 {wolji} 자리, <b>{gname_disp}</b>을(를) 그릇으로 타고났습니다. "
             f"{grade} {_flavor}{_career_txt}"
         ).strip()
 
@@ -8357,8 +8366,13 @@ def build_saju_tongbyeon(pils, daewoon=None, birth_year=None):
                 )
             else:
                 _bal_txt = "오행 다섯 기운이 어느 한쪽으로 크게 치우치지 않고 고르게 퍼져 있어, 그 자체로 안정적인 밑그림입니다."
+            # 시간미상 — 신강신약은 억부용신의 뿌리라 엄격 기준(신강약 전용
+            # 임계)을 쓴다. sn_label(판정값)은 무변경, sn_label_disp만 문장에 쓴다.
+            sn_label_disp = sn_label
+            if twelve_beol:
+                sn_label_disp = format_12beol_display([v["신강약"] for v in twelve_beol], "신강약")
             p_sn = (
-                f"숫자로 짚어보면 일간의 힘은 {il_score:.0f}점, <b>{sn_label}</b>입니다 — 원국 여덟 글자를 "
+                f"숫자로 짚어보면 일간의 힘은 {il_score:.0f}점, <b>{sn_label_disp}</b>입니다 — 원국 여덟 글자를 "
                 f"오행별로 나누면 {_dist_txt}의 분포입니다. {_bal_txt} 이 균형(또는 쏠림)이 앞서 말한 격국과, "
                 f"뒤에 이어질 용신이 실제로 힘을 받을 수 있느냐를 결정하는 바탕입니다."
             )
@@ -8478,6 +8492,11 @@ def build_saju_tongbyeon(pils, daewoon=None, birth_year=None):
             p4 = f"{p4_body} 이를 종합하면 <b>{_oh_join(yong_all)}</b> 순서로 용신을 삼습니다.".strip()
         else:
             p4 = f"{p4_body} 특정 오행에 치우치기보다 전체 균형을 유지하는 것 자체가 용신입니다.".strip()
+        # 시간미상 — 1순위 용신(주용신)만 12벌 수렴도를 덧붙인다. yong_all(종합_용신
+        # 전체 순서, 판정값)은 무변경 — 이 문장은 추가 문구일 뿐 위 문장을 바꾸지 않는다.
+        if twelve_beol and yong_all:
+            _ju_yong_disp = format_12beol_display([v["주용신"] for v in twelve_beol], "general")
+            p4 += f" (생시를 몰라 1순위 용신은 {_ju_yong_disp}입니다.)"
 
         if "신강" in sn_label:
             _yong_stake = (
@@ -9171,12 +9190,26 @@ def get_crossing_interpretation(pils, cur_year, birth_year=None, birth_month=Non
         _dw_age_s_counting = dw_age_counting(cur_dw, _by)
         _dw_age_e_counting = dw_age_counting_end(cur_dw, _by)
 
+        # 시간미상 — 대운 시작나이(세는나이) 12벌 수렴도 표시 문자열. 판정값
+        # (_dw_age_s_counting 등)은 무변경 — 이 필드는 표시 전용 추가값이다.
+        # 판정(어느 대운인지)은 연도 비교라 시각 무관이므로, 12벌 각 후보의
+        # 대운수(base offset)에 "현재 대운이 몇 번째 10년 블록인지"(i)만
+        # 그대로 적용해 후보별 시작나이를 얻는다.
+        _dw_age_display = ""
+        _tb_12beol = st.session_state.get("saju_pils_12beol")
+        if _tb_12beol and daewoon and isinstance(_dw_age_s, (int, float)):
+            _base_default = daewoon[0].get("시작나이", 0)
+            _block_i = round((_dw_age_s - _base_default) / 10) if isinstance(_base_default, (int, float)) else 0
+            _dw_counting_vals = [v["대운수"] + 1 + 10 * _block_i for v in _tb_12beol]
+            _dw_age_display = format_12beol_display(_dw_counting_vals, "대운시작나이")
+
         return {
             "dw_ss": dw_ss, "sw_ss": sw_ss, "sw_gil": sw_gil,
             "summary": summary, "finance": finance,
             "career": career, "health": health, "relation": relation,
             "dw_start_age": _dw_age_s, "dw_end_age": _dw_age_e,
             "dw_start_age_counting": _dw_age_s_counting, "dw_end_age_counting": _dw_age_e_counting,
+            "dw_age_display": _dw_age_display,
         }
     except Exception as _e:
         _saju_log.debug("[crossing_interp] %s", _e)
@@ -9578,7 +9611,10 @@ def _nar_ch3_gyeokguk(ctx):
     try:
         pils = ctx.get("pils", [])
         display_name = ctx.get("display_name", "내담자")
-        body = build_saju_tongbyeon(pils, daewoon=ctx.get("daewoon", []), birth_year=ctx.get("birth_year"))
+        body = build_saju_tongbyeon(
+            pils, daewoon=ctx.get("daewoon", []), birth_year=ctx.get("birth_year"),
+            twelve_beol=st.session_state.get("saju_pils_12beol"),
+        )
         if not body:
             return ""
         lines = [
