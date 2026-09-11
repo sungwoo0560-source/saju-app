@@ -16483,6 +16483,11 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                 _sin_items28 += '<div style="font-size:12px;color:#a5d6a7;font-weight:700;margin:10px 0 4px;">👼 타고난 복 (귀인)</div>'
                 for _s28 in _gil28:
                     _sin_items28 += _card28(_s28)
+                if st.session_state.get("in_unknown_time"):
+                    _sin_items28 += (
+                        '<div style="font-size:11px;color:#c5cae9;margin:4px 0 2px;">'
+                        '※ 생시 미입력 — 시주 기준 항목은 판정에서 제외됐습니다.</div>'
+                    )
             if _hyung28:
                 _sin_items28 += '<div style="font-size:12px;color:#ef9a9a;font-weight:700;margin:10px 0 4px;">⚠️ 주의할 기운</div>'
                 for _s28 in _hyung28:
