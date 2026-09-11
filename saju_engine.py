@@ -1707,6 +1707,116 @@ def cur_age_counting(cur_year, birth_year):
 
 # ==================================================
 
+#  시간미상 12벌 산출 헬퍼 — 산출 전용, 렌더·판정에 쓰지 말 것
+
+# ==================================================
+
+# ★생시를 모를 때 12지지 대표 시각으로 시주·대운수·격국·용신·신강신약을
+# 각각 독립 계산해 12벌을 만든다. 기존 판정 경로(SajuPrecisionEngine.
+# get_pillars 단일 호출, get_daewoon 등)는 한 줄도 바꾸지 않는다 — 이
+# 헬퍼는 그 경로들을 12번씩 호출만 할 뿐, 새 판정 로직이 아니다.
+
+_JJ12_START_HOUR = {
+    "子": 23, "丑": 1, "寅": 3, "卯": 5, "辰": 7, "巳": 9,
+    "午": 11, "未": 13, "申": 15, "酉": 17, "戌": 19, "亥": 21,
+}
+# ★각 지지 구간의 시작 시각(정각)을 대표값으로 쓴다. 子시만 23시로 잡아
+# 0시를 피하는 이유: _get_days_to_term()의 "hour = int(hour) if hour
+# else 12"(hour=0이 falsy라 12로 치환되는 기존 로직, 무수정 대상)가
+# 0시 후보를 정오로 둔갑시켜버린다 — 23시(子시 구간 안, 값은 정확)를
+# 쓰면 그 경로 자체를 타지 않는다.
+
+
+def get_pillars_12beol(year, month, day, gender="남", longitude=126.98, use_yaja_time=True):
+    """생시 미상일 때 12지지 대표 시각으로 12벌을 산출한다(산출 전용).
+
+    입력은 정규화 전 원본(그 시절 달력 그대로의) 생년월일이다 — 시각을
+    임의로 가정하지 않고 12개 후보를 전부 만든 뒤 각각 계산한다.
+
+    ★필수 처리 3가지(2026-09-11 진단 결론 반영):
+    (a) 후보마다 SajuPrecisionEngine.get_pillars()를 독립 호출한다 — 그
+        함수 최상단이 해당 1건에만 TimeCorrection._normalize_local_clock()
+        을 적용하므로, 12번 호출하면 12개 후보가 각자 개별적으로 정규화를
+        통과한다(공유 델타를 가정하지 않음 — 1954~61 GMT+8:30·DST 구간
+        출생자도 후보별로 정확).
+    (b) 시주 글자(_get_hour_pillar)와 대운수(_get_days_to_term)는 서로
+        다른 함수라 이 함수 안에서 각각 독립적으로 12회씩 호출한다.
+    (c) 정규화로 날짜가 밀리는 후보(자시대 등)의 day_cg는 매 후보마다
+        SajuPrecisionEngine.get_pillars() 내부에서 그 후보 전용으로
+        새로 계산된다 — 후보 간 재사용이 구조적으로 불가능하다(각 호출이
+        완전히 독립적이므로).
+
+    반환: 12개 벌의 리스트. 각 벌 = {시지, pils, 대운수, 신강약, 주용신, 격국}.
+    """
+    from saju_interpreter import get_yongshin, get_gyeokguk
+
+    results = []
+    for jj_label, raw_hour in _JJ12_START_HOUR.items():
+        # (a) — SajuPrecisionEngine.get_pillars가 이 후보 1건만
+        # _normalize_local_clock에 통과시킨다(다른 후보와 공유 없음).
+        pils = SajuPrecisionEngine.get_pillars(
+            year, month, day, raw_hour, 0, gender,
+            use_yaja_time=use_yaja_time, longitude=longitude,
+        )
+
+        # (b) 대운수 — get_daewoon()과 별개인 _get_days_to_term을 이
+        # 후보 전용으로 직접 호출한다. _get_days_to_term 자체는 정규화를
+        # 하지 않으므로(원본 코드에 없음), 이 후보의 정규화 결과를 직접
+        # 넘긴다 — get_pillars 쪽 정규화와는 별개 경로이므로 이중적용이
+        # 아니라 "두 경로가 각자 한 번씩" 정규화를 거치는 것이다.
+        ny, nm, nd, nh, nmin = TimeCorrection._normalize_local_clock(year, month, day, raw_hour, 0)
+        year_cg = pils[3]["cg"]
+        is_yang = CG.index(year_cg) % 2 == 0
+        if (gender == "남" and is_yang) or (gender == "여" and not is_yang):
+            direction = 1
+        else:
+            direction = -1
+        days_to_term = SajuCoreEngine._get_days_to_term(ny, nm, nd, nh, nmin, direction)
+        total_months = max(1, round(days_to_term * 4.0))
+        start_age = total_months // 12
+        if start_age == 0:
+            start_age = 1
+
+        ilgan = pils[1]["cg"]
+        si = get_ilgan_strength(ilgan, pils) or {}
+        ys = get_yongshin(pils) or {}
+        gk = get_gyeokguk(pils) or {}
+        yong_list = ys.get("종합_용신", [])
+        if not isinstance(yong_list, list):
+            yong_list = []
+
+        results.append({
+            "시지": jj_label,
+            "pils": pils,
+            "대운수": start_age,
+            "신강약": si.get("신강신약", "?"),
+            "주용신": yong_list[0] if yong_list else "",
+            "격국": gk.get("격국명", "?"),
+        })
+    return results
+
+
+def summarize_12beol(values):
+    """12개 값 리스트 -> (최빈값, 최빈개수, 후보목록). 표시 전용 집계 헬퍼.
+
+    ★동률 처리: 최빈개수를 공유하는 값이 2개 이상이면(예: 6:6) 최빈값은
+    단일값이 아니라 None을 반환하고, 후보목록에 동률 값 전부를
+    [(값, 개수), ...] 형태로 담는다 — "단순 최빈"으로 하나만 고르지 않는다.
+    최빈값이 하나로 정해지는 정상 케이스는 후보목록이 그 값 하나짜리
+    [(값, 개수)]가 된다."""
+    from collections import Counter
+    c = Counter(values)
+    if not c:
+        return None, 0, []
+    max_count = max(c.values())
+    candidates = [(v, n) for v, n in c.items() if n == max_count]
+    if len(candidates) == 1:
+        return candidates[0][0], max_count, candidates
+    return None, max_count, candidates
+
+
+# ==================================================
+
 #  십성(十星) 및 12운성 계산 (Bug 5 Fix)
 
 # ==================================================
