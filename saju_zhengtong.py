@@ -7242,15 +7242,15 @@ def detect_life_risk_signals(pils, saewoon_data=None, gender=None, marriage_stat
         pass
 
     if baram_score >= 81:
-        baram_level, baram_msg = "🔴 매우 높음", "外桃花 강력 발동. 평생 이성 관계 주의.\n→ 합·충 운에 외도 위험 최대. 의식적 자기 통제 필수."
+        baram_level, baram_msg = "🔴 매우 높음", "이성 인연이 매우 강하게 자극되는 구조입니다.\n→ 합·충 운에 특히 흔들리기 쉽습니다. 의식적 자기 통제가 필요합니다."
     elif baram_score >= 61:
         baram_level, baram_msg = "⚠️ 높음", "이성 인연이 강하게 자극되는 구조입니다.\n→ 이 시기 외도·충동 인연에 각별히 조심하십시오."
     elif baram_score >= 41:
-        baram_level, baram_msg = "💡 보통", "도화·합 강함. 합 운에 외도 위험. 자기 통제 필수.\n→ 한 사람에 집중하지 않으면 반드시 갈등이 생깁니다."
+        baram_level, baram_msg = "💡 보통", "이성 인연이 자극되는 구조입니다 — 합 운에 특히 그렇습니다. 자기 통제가 필요합니다.\n→ 한 사람에 집중하지 않으면 갈등으로 이어지기 쉽습니다."
     elif baram_score >= 21:
-        baram_level, baram_msg = "🟢 낮음", "🟢 평소 안전 — 단, 도화 운 만나면 흔들립니다. 충동 인연 주의."
+        baram_level, baram_msg = "🟢 낮음", "🟢 평소에는 안정적입니다 — 단, 도화 운 만나면 흔들립니다. 충동 인연 주의."
     else:
-        baram_level, baram_msg = "✅ 매우 낮음", "✅ 천성이 외도 안 합니다 — 의리형.\n→ 단, 도화 운(합 발동 해) 들어오면 이성 인연 자주.\n→ 기혼자는 의식적으로 자기 통제."
+        baram_level, baram_msg = "✅ 매우 낮음", "✅ 관계에 무게를 두는 성향입니다 — 의리형.\n→ 단, 도화 운(합 발동 해) 들어오면 이성 인연 자주.\n→ 기혼자는 의식적으로 자기 통제."
     results["바람기"] = {"점수": min(baram_score,100), "등급": baram_level, "이유": baram_reasons, "메시지": baram_msg, "아이콘": "💔"}
 
     # 2. 사고수
@@ -7272,13 +7272,13 @@ def detect_life_risk_signals(pils, saewoon_data=None, gender=None, marriage_stat
         sago_score += 15
         sago_reasons.append("편관 과다 — 외부 충격 잦음")
     if sago_score >= 60:
-        sago_level, sago_msg = "🔴 매우 높음", "양인 + 충 + 칠살 — 사고수 강함. 보험·안전 필수.\n→ 안전·운전·정기 검진은 선택이 아닌 필수입니다."
+        sago_level, sago_msg = "🔴 매우 높음", "발동 요인이 겹쳐 사고·부상 확률이 크게 올라간 구간입니다. 보험·안전 필수.\n→ 안전·운전·정기 검진은 선택이 아닌 필수입니다."
     elif sago_score >= 40:
-        sago_level, sago_msg = "🟡 보통", "양인 발동. 충(沖) 운 해 — 운전·이동·수술 절대 조심.\n→ 이 해에 무리하면 반드시 후회합니다. 두 배 더 안전하게 사세요."
+        sago_level, sago_msg = "🟡 보통", "사고·부상 요인이 뚜렷하게 작용합니다 — 운전·이동·수술 조심.\n→ 이 해에 무리하면 탈이 나기 쉽습니다. 평소보다 안전하게 움직이세요."
     elif sago_score >= 20:
-        sago_level, sago_msg = "🟢 낮음", "⚔️ 양인살 박힌 사주 — 충 운 해에 사고·수술수가 강하게 발동합니다.\n→ 운전·과로·격투 절대 X. 보험 미리 챙기세요."
+        sago_level, sago_msg = "🟢 낮음", "⚔️ 사고·부상 요인이 가볍게 작용합니다 — 충 운 해에는 주의가 필요합니다.\n→ 운전·과로·격한 운동은 피하고, 보험을 미리 점검하세요."
     else:
-        sago_level, sago_msg = "✅ 매우 낮음", "건강 운 타고남. 사고 기운 매우 약함."
+        sago_level, sago_msg = "✅ 매우 낮음", "사고 기운이 매우 약한 구조입니다."
     results["사고수"] = {"점수": min(sago_score,100), "등급": sago_level, "이유": sago_reasons, "메시지": sago_msg, "아이콘": "⚠️"}
 
     # 3. 횡재수
