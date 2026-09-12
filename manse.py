@@ -4678,8 +4678,7 @@ def classify_narrative_pattern(saju_data, gender, marital_status):
         gwansal_mix = saju_data.get("gwansal_mix", False)
         ilgan_weak  = saju_data.get("ilgan_weak", False)
         cur_year    = saju_data.get("current_year", datetime.now().year)
-        _HY   = {"甲":"午","乙":"申","丙":"寅","丁":"未","戊":"辰","己":"辰",
-                 "庚":"戌","辛":"酉","壬":"子","癸":"申"}
+        from saju_sinsal import HONGYEOM_MAP as _HY
         _JJ12 = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"]
         sw_jj    = _JJ12[(cur_year - 4) % 12]
         hongyeom = _HY.get(ilgan, "") == sw_jj
@@ -4861,8 +4860,7 @@ def get_scenario_timing(key, saju_data):
     # 바람기·혼외 인연 — 홍염살 발동 연도 기준 (충/양인 기반 past_active 대신)
     if key in ("two_lives", "extramarital"):
         _ilgan_tl = saju_data.get("ilgan", "")
-        _HONGYEOM_TL = {"甲":"午","乙":"申","丙":"寅","丁":"未",
-                        "戊":"辰","己":"辰","庚":"戌","辛":"酉","壬":"子","癸":"申"}
+        from saju_sinsal import HONGYEOM_MAP as _HONGYEOM_TL
         _hy_jj = _HONGYEOM_TL.get(_ilgan_tl, "")
         _JJ12_TL = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"]
         if _hy_jj:
@@ -5117,7 +5115,7 @@ RELATIONSHIP_INTENT_MATRIX = {
         "의도": "매력적 인연에 돈까지 얽힙니다.",
         "돈흐름": "선물·데이트비 다 본인. 상대는 받기만.",
         "결말": "퍼줄 땐 좋은 사람, 현실 따질 땐 사라짐.",
-        "경고": "⚠️ 퍼주기 + 돈 = 다 잃는 구조. 선 지키기.",
+        "경고": "지출이 한쪽으로 쏠리기 쉬운 흐름입니다. 균형을 의식적으로 챙기면 무리 없이 지나갑니다.",
     },
     ("홍염살_직격","편재"): {
         "의도": "이 사람은 매력으로 다가와서 본인 마음을 흔듭니다.",
@@ -5129,7 +5127,7 @@ RELATIONSHIP_INTENT_MATRIX = {
         "의도": "친구 같은 매력으로 옴 + 본인 자원 끌어갑니다.",
         "돈흐름": "친밀 관계 만든 후 동업·투자·돈 거래 요청.",
         "결말": "표면 친밀 → 깊은 손실.",
-        "경고": "🔴 매혹에 속지 마세요.",
+        "경고": "끌림이 강할수록 상대를 조금 더 신중히 살펴보는 것이 좋습니다.",
     },
     ("재다신약_여_미혼","편재"): {
         "의도": "받는 데 익숙하고 본인이 더 많이 주는 구조로 흐르기 쉽습니다.",
@@ -5185,8 +5183,7 @@ def build_yearly_relationship_story(pils, name, gender, current_year):
                  frozenset({"亥","卯"}),frozenset({"卯","未"}),
                  frozenset({"寅","午"}),frozenset({"午","戌"}),
                  frozenset({"巳","酉"}),frozenset({"酉","丑"})]
-        _HY  = {"甲":"午","乙":"申","丙":"寅","丁":"未",
-                "戊":"辰","己":"辰","庚":"戌","辛":"酉","壬":"子","癸":"申"}
+        from saju_sinsal import HONGYEOM_MAP as _HY
         _HYUNG = [{"寅","巳","申"},{"丑","戌","未"},{"子","卯"}]
         _AUTO_H = {"辰","午","酉","亥"}
 
@@ -16342,12 +16339,8 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                     "주의"
                 ))
 
-            # 홍염살(紅艶殺) — 일간 기준
-            _HONGYUM = {
-                "甲":"午","乙":"申","丙":"寅","丁":"未",
-                "戊":"辰","己":"辰","庚":"戌","辛":"酉",
-                "壬":"子","癸":"申",
-            }
+            # 홍염살(紅艶殺) — 일간 기준 (SSOT: saju_sinsal.HONGYEOM_MAP)
+            from saju_sinsal import HONGYEOM_MAP as _HONGYUM
             _hongyum_jj = _HONGYUM.get(ilgan,"")
 
             if _hongyum_jj:
@@ -16363,15 +16356,9 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                 if _hongyum_sw and _hongyum_in_chart:
                     _danger_signals.append((
                         "💋 홍염살 최강 발동 — 이성 문제 극도 주의",
-                        f"{ilgan}일간의 홍염살은 {_hongyum_jj}입니다. "
-                        f"원국 {'·'.join(_hongyum_in_chart)}에도 있고 "
-                        f"올해 세운({_세운_jj_s})까지 홍염살이 겹쳤습니다. "
-                        f"홍염살은 이성을 강하게 끌어당기는 색정(色情)의 기운입니다. "
-                        f"올해 이성 문제로 인한 스캔들·불륜·치정 사건이 "
-                        f"실제로 일어날 수 있습니다. "
-                        f"기혼자는 배우자 외 이성과의 접촉을 철저히 자제하십시오. "
-                        f"미혼자도 상대의 신상을 반드시 확인하십시오. "
-                        f"홍염살이 강할수록 이성에게 치명적으로 끌리는 유혹이 강해집니다.",
+                        "올해는 이성에게 유난히 매력이 발산되는 시기입니다. "
+                        "뜻하지 않게 강하게 끌리는 상대가 나타날 수 있으니, "
+                        "관계의 선을 미리 정해두면 무리 없이 지나갑니다.",
                         "위험"
                     ))
                 elif _hongyum_sw:
@@ -16381,7 +16368,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                         f"올해 특별히 이성에게 강하게 끌리거나 "
                         f"이성이 강하게 접근하는 상황이 생깁니다. "
                         f"이 유혹은 매우 달콤하게 느껴지지만 "
-                        f"결말은 대부분 상처로 끝납니다. "
+                        f"결말까지 이어지는 경우는 드뭅니다. "
                         f"기혼자는 올해 이성 관계에서 선을 분명히 그으십시오.",
                         "위험"
                     ))

@@ -22,8 +22,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from saju_engine import SajuPrecisionEngine, get_ilgan_strength, get_pillars_12beol, format_12beol_display
 from saju_interpreter import get_yongshin, get_gyeokguk, build_saju_tongbyeon
-from saju_sinsal import get_gongmang, get_yangin
-from saju_zhengtong import render_jonghap_pyongron, render_four_pillars_card
+from saju_sinsal import get_gongmang, get_yangin, get_extra_sinsal, HONGYEOM_MAP
+from saju_zhengtong import render_jonghap_pyongron, render_four_pillars_card, calc_all_sinsal_extended
 
 
 # pils 순서: [시주, 일주, 월주, 년주] (SajuPrecisionEngine.get_pillars 반환 그대로)
@@ -731,6 +731,25 @@ CASES = {
         "use_yaja_time": True,
         "expect_pillars": ["丙午", "壬辰", "丙戌", "庚午"],
     },
+    # 홍염살 SSOT 통일 회귀(2026-09-12) — 乙일간은 기존 saju_sinsal(申)과
+    # zhengtong(午)이 갈리던 유일한 간이었다. HONGYEOM_MAP 통일 후 甲과
+    # 같은 午로 확정 — 이 픽스처는 乙일간+午 실보유 케이스로 두 함수의
+    # 판정 일치(회귀 방지)를 고정한다.
+    "홍염_乙일간_午보유": {
+        "birth": (1997, 4, 13, 12, 0),
+        "gender": "여",
+        "longitude": 126.98,
+        "use_yaja_time": True,
+        "expect_pillars": ["壬午", "乙酉", "甲辰", "丁丑"],
+    },
+    # 대조군 — 乙일간이지만 원국에 午가 없어 홍염살이 뜨면 안 되는 케이스.
+    "홍염_乙일간_午미보유": {
+        "birth": (1973, 2, 18, 22, 0),
+        "gender": "남",
+        "longitude": 126.98,
+        "use_yaja_time": True,
+        "expect_pillars": ["丁亥", "乙酉", "甲寅", "癸丑"],
+    },
 }
 
 # 위 "시간미상" 픽스처들의 get_yangin() 기대값 — (존재 여부, 위치 목록).
@@ -972,6 +991,37 @@ def check_12beol_convergence(name):
     return ok
 
 
+# 홍염살 SSOT 통일 회귀(2026-09-12) — get_extra_sinsal(saju_sinsal)과
+# calc_all_sinsal_extended(zhengtong)이 같은 HONGYEOM_MAP을 참조해
+# 판정이 항상 일치해야 한다(과거 乙에서만 갈렸음).
+HONGYEOM_EXPECT = {
+    "홍염_乙일간_午보유": True,
+    "홍염_乙일간_午미보유": False,
+}
+
+
+def check_hongyeom_ssot(name):
+    """saju_sinsal.get_extra_sinsal와 saju_zhengtong.calc_all_sinsal_extended의
+    홍염살 판정이 HONGYEOM_MAP 단일 소스로 일치하는지 고정한다."""
+    expect_fire = HONGYEOM_EXPECT[name]
+    pils = get_pils(name)
+    ilgan = pils[1]["cg"]
+
+    fires_sinsal = any(s.get("name", "").startswith("홍염살") for s in get_extra_sinsal(pils))
+    fires_zt = any(s.get("이름", "").startswith("홍염살") for s in calc_all_sinsal_extended(pils))
+
+    ok = True
+    if fires_sinsal != fires_zt:
+        print(f"[FAIL] {name} 홍염살 두 함수 불일치 — get_extra_sinsal={fires_sinsal} / calc_all_sinsal_extended={fires_zt}")
+        ok = False
+    if fires_sinsal != expect_fire:
+        print(f"[FAIL] {name} 홍염살 발동 기대 불일치 — 기대:{expect_fire} 실제:{fires_sinsal} (일간:{ilgan}, HONGYEOM_MAP:{HONGYEOM_MAP.get(ilgan)})")
+        ok = False
+    if ok:
+        print(f"[OK] {name} 홍염살 SSOT 일치 — 발동={fires_sinsal} (일간:{ilgan})")
+    return ok
+
+
 def main():
     print("=== tests/pils_fixtures.py ===")
     all_pillars_ok = True
@@ -1004,6 +1054,14 @@ def main():
         all_12beol_ok = all_12beol_ok and ok
     print()
     all_pillars_ok = all_pillars_ok and all_12beol_ok
+
+    print("=== 홍염살 SSOT 통일 회귀(get_extra_sinsal vs calc_all_sinsal_extended) ===")
+    all_hongyeom_ok = True
+    for name in HONGYEOM_EXPECT:
+        ok = check_hongyeom_ssot(name)
+        all_hongyeom_ok = all_hongyeom_ok and ok
+    print()
+    all_pillars_ok = all_pillars_ok and all_hongyeom_ok
 
     if all_pillars_ok:
         print("[OK] 결과 요약: 전체 픽스처 8글자 일치")

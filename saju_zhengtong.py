@@ -8721,12 +8721,9 @@ def calc_all_sinsal_extended(pils):
 
     results = []
 
-    # 1. 홍염살(紅艶煞) — 매력·이성 인연
-    HONGYEOM = {
-        "甲":"午","乙":"午","丙":"寅","丁":"未",
-        "戊":"辰","己":"辰","庚":"戌","辛":"酉","壬":"子","癸":"申",
-    }
-    _hy = HONGYEOM.get(ilgan)
+    # 1. 홍염살(紅艶煞) — 매력·이성 인연 (SSOT: saju_sinsal.HONGYEOM_MAP)
+    from saju_sinsal import HONGYEOM_MAP
+    _hy = HONGYEOM_MAP.get(ilgan)
     if _hy and _hy in jjs:
         _pos = ["시","일","월","년"][jjs.index(_hy)]
         results.append({"이름":"홍염살(紅艶煞)","위치":f"{_pos}지({_hy})",
