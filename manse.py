@@ -2625,8 +2625,9 @@ def _local_saju_engine(pils, name, birth_year, gender, query):
             gk_f  = get_gyeokguk(pils)
             gkn_f = gk_f["격국명"] if gk_f else "미정격"
             ys_f  = get_yongshin_multilayer(pils, birth_year, gender, bm, bd, bh, bmn, current_year)
-            gisin_f  = set(ys_f.get("기신",[]))
-            yong_f   = set(ys_f.get("용신",[]))
+            _OH_ORDER_F = ["木","火","土","金","水"]
+            gisin_f  = sorted(set(ys_f.get("기신",[])), key=_OH_ORDER_F.index)
+            yong_f   = sorted(set(ys_f.get("용신",[])), key=_OH_ORDER_F.index)
             oh_sw_f  = OH.get(sw.get("세운","")[:1],"")
             is_gs_yr = oh_sw_f in gisin_f
             is_ys_yr = oh_sw_f in yong_f
@@ -15324,7 +15325,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                 ({"丑","戌","未"}, "丑戌未 삼형살", "은혜를 원수로 갚는 배신"),
                 ({"子","卯"},      "子卯 형살",     "무례·예절 없는 충돌"),
             ]
-            _HYUNG_SELF = {"辰","午","酉","亥"}
+            _HYUNG_SELF = ("辰","午","酉","亥")  # 12지지 표준 순서(子丑寅卯辰巳午未申酉戌亥) — set이 아닌 tuple로 순회 순서 고정
             _hyung_found = []
             for _hset14, _hname14, _hdesc14 in _HYUNG_3:
                 _matched14 = _hset14 & _all_jj14_set

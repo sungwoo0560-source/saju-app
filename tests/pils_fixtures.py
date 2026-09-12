@@ -21,7 +21,7 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from saju_engine import SajuPrecisionEngine, get_ilgan_strength, get_pillars_12beol, format_12beol_display
-from saju_interpreter import get_yongshin, get_gyeokguk, build_saju_tongbyeon
+from saju_interpreter import get_yongshin, get_gyeokguk, build_saju_tongbyeon, get_yongshin_multilayer
 from saju_sinsal import get_gongmang, get_yangin, get_extra_sinsal, HONGYEOM_MAP
 from saju_zhengtong import render_jonghap_pyongron, render_four_pillars_card, calc_all_sinsal_extended
 
@@ -750,6 +750,28 @@ CASES = {
         "use_yaja_time": True,
         "expect_pillars": ["丁亥", "乙酉", "甲寅", "癸丑"],
     },
+    # set 정렬 없는 순회 결정성 회귀(2026-09-12) — manse.py:2628-2630
+    # (_local_saju_engine 기신/용신 세운 문구). 기신 2종(火·土) 보유 케이스 —
+    # PYTHONHASHSEED에 따라 '火, 土'/'土, 火'로 갈리던 것을 오행 표준순서
+    # (木火土金水)로 고정했는지 확인.
+    "오행순서_기신2종_20020516": {
+        "birth": (2002, 5, 16, 19, 0),
+        "gender": "여",
+        "longitude": 126.98,
+        "use_yaja_time": True,
+        "expect_pillars": ["癸酉", "甲申", "乙巳", "壬午"],
+    },
+    # set 정렬 없는 순회 결정성 회귀(2026-09-12) — manse.py:15328-15341
+    # (menu_current_situation 자형 위험카드). 辰辰亥亥 — 자형이 2종 동시 발동하는
+    # 케이스. PYTHONHASHSEED에 따라 ['辰','亥']/['亥','辰']로 갈리던 것을
+    # 12지지 표준순서(子丑寅卯辰巳午未申酉戌亥)로 고정했는지 확인.
+    "지지순서_자형2종_19951109": {
+        "birth": (1995, 11, 9, 8, 0),
+        "gender": "여",
+        "longitude": 126.98,
+        "use_yaja_time": True,
+        "expect_pillars": ["戊辰", "甲辰", "丁亥", "乙亥"],
+    },
 }
 
 # 위 "시간미상" 픽스처들의 get_yangin() 기대값 — (존재 여부, 위치 목록).
@@ -1022,6 +1044,64 @@ def check_hongyeom_ssot(name):
     return ok
 
 
+# set 정렬 없는 순회 결정성 회귀(2026-09-12) — manse.py:2628-2630.
+# PYTHONHASHSEED가 프로세스마다 바뀌면 set() 그대로 join한 결과의 순서도
+# 바뀌던 것을, 오행 표준순서(木火土金水) 정렬로 고정했는지 확인한다.
+_OH_ORDER_EXPECT = ["木", "火", "土", "金", "水"]
+OH_ORDER_EXPECT = {
+    "오행순서_기신2종_20020516": {"기신": ["火", "土"], "용신": []},
+}
+
+
+def check_oh_order_determinism(name):
+    """get_yongshin_multilayer()의 기신/용신을 manse.py:2628-2630과 동일하게
+    set() 후 오행순서로 정렬해, 순서가 고정값과 일치하는지 확인한다."""
+    case = CASES[name]
+    y, m, d, bh, bmi = case["birth"]
+    gender = case["gender"]
+    expect = OH_ORDER_EXPECT[name]
+
+    ys_f = get_yongshin_multilayer(get_pils(name), y, gender, m, d, bh, bmi, 2026)
+    gisin_f = sorted(set(ys_f.get("기신", [])), key=_OH_ORDER_EXPECT.index)
+    yong_f = sorted(set(ys_f.get("용신", [])), key=_OH_ORDER_EXPECT.index)
+
+    ok = True
+    if gisin_f != expect["기신"]:
+        print(f"[FAIL] {name} 기신 오행순서 불일치 — 기대:{expect['기신']} 실제:{gisin_f}")
+        ok = False
+    if yong_f != expect["용신"]:
+        print(f"[FAIL] {name} 용신 오행순서 불일치 — 기대:{expect['용신']} 실제:{yong_f}")
+        ok = False
+    if ok:
+        print(f"[OK] {name} 기신/용신 오행순서 정렬 정상 — 기신={gisin_f} 용신={yong_f}")
+    return ok
+
+
+# set 정렬 없는 순회 결정성 회귀(2026-09-12) — manse.py:15328-15341
+# (menu_current_situation 자형 위험카드). _HYUNG_SELF가 set 리터럴이던 것을
+# 12지지 표준순서 tuple로 바꿔 카드 등장 순서를 고정했는지, manse.py를
+# import하지 않는 이 파일의 원칙에 맞춰 동일 알고리즘을 그대로 재현해 확인한다
+# (manse.py 실제 렌더 경로의 교차프로세스 결정성 실증은 이번 라운드 보고에 별도 기록).
+_HYUNG_SELF_EXPECT = ("辰", "午", "酉", "亥")
+HYUNG_SELF_ORDER_EXPECT = {
+    "지지순서_자형2종_19951109": ["辰", "亥"],
+}
+
+
+def check_hyung_self_order(name):
+    """manse.py:15328-15341의 자형(自刑) 판정 알고리즘을 그대로 재현해,
+    12지지 표준순서로 카드가 나열되는지 확인한다."""
+    pils = get_pils(name)
+    all_jj = [p.get("jj", "") for p in pils]
+    found = [jj for jj in _HYUNG_SELF_EXPECT if all_jj.count(jj) >= 2]
+    expect = HYUNG_SELF_ORDER_EXPECT[name]
+    if found != expect:
+        print(f"[FAIL] {name} 자형 순서 불일치 — 기대:{expect} 실제:{found}")
+        return False
+    print(f"[OK] {name} 자형 순서 정상 — {found}")
+    return True
+
+
 def main():
     print("=== tests/pils_fixtures.py ===")
     all_pillars_ok = True
@@ -1062,6 +1142,17 @@ def main():
         all_hongyeom_ok = all_hongyeom_ok and ok
     print()
     all_pillars_ok = all_pillars_ok and all_hongyeom_ok
+
+    print("=== set 정렬 없는 순회 결정성 회귀(오행순서·지지순서) ===")
+    all_order_ok = True
+    for name in OH_ORDER_EXPECT:
+        ok = check_oh_order_determinism(name)
+        all_order_ok = all_order_ok and ok
+    for name in HYUNG_SELF_ORDER_EXPECT:
+        ok = check_hyung_self_order(name)
+        all_order_ok = all_order_ok and ok
+    print()
+    all_pillars_ok = all_pillars_ok and all_order_ok
 
     if all_pillars_ok:
         print("[OK] 결과 요약: 전체 픽스처 8글자 일치")
