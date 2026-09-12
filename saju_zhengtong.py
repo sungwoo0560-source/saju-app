@@ -7431,9 +7431,9 @@ def detect_life_risk_signals(pils, saewoon_data=None, gender=None, marriage_stat
     else:
         _spouse = "부인" if _is_male else "남편"
         if gyeolhon_score >= 60:
-            gyeolhon_level, gyeolhon_msg = "🌟 최상급 인연", f"💎 60갑자 중 상위 5% — 평생 단 한 번 그 {_spouse} 인연이 옵니다.\n→ 천을귀인 활성월({_gi_mon}) — 사람 만나는 자리 의무로 가세요.\n→ 이 시기 못 잡으면 평생 후회입니다."
+            gyeolhon_level, gyeolhon_msg = "🌟 최상급 인연", f"💎 60갑자 중 상위 5% — 인연의 질이 높은 대신 기회가 자주 오지는 않는 구조입니다.\n→ 천을귀인 활성월({_gi_mon}) — 사람 만나는 자리에 나가보십시오. 이 시기가 가장 유리합니다.\n→ 이 시기를 놓쳐도 인연이 끊기는 것은 아닙니다. 다만 다음 흐름까지는 시간이 걸립니다."
         elif gyeolhon_score >= 40:
-            gyeolhon_level, gyeolhon_msg = "✨ 좋음", f"✨ 좋은 {_spouse} 인연 옵니다 — 정재/정관 운에서."
+            gyeolhon_level, gyeolhon_msg = "✨ 좋음", f"✨ 좋은 인연이 들어오기 쉬운 흐름입니다 — 정재/정관 운에서."
         elif gyeolhon_score >= 20:
             gyeolhon_level, gyeolhon_msg = "💡 보통", "평범한 인연. 자연스러운 흐름.\n→ 노력해야 옵니다. 가만히 있으면 안 옵니다."
         else:
@@ -7790,7 +7790,7 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
     else:
         # 스펙 [4]: 미혼 — 이혼 위험 낮음 메시지를 인연 맥락으로
         if _ihon_score < 20:
-            risks.setdefault("이혼·이별", {})["메시지"] = "✅ 만나면 결혼 안정 — 끝까지 가는 인연 만날 운입니다."
+            risks.setdefault("이혼·이별", {})["메시지"] = "✅ 관계 안정형 — 한번 맺으면 오래 가는 인연에 가깝습니다."
 
     cur_year = cur_year if cur_year is not None else datetime.now().year
     cur_age  = cur_year - birth_year
