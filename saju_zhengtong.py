@@ -8779,9 +8779,8 @@ def calc_all_sinsal_extended(pils):
             "아이콘":"💔","등급":"발동"})
 
     # 6. 효신살(梟神煞) — 일주 기준 (편인 일지)
-    HYOSHIN = ["甲子","乙亥","丙寅","丁卯","戊午",
-               "己巳","庚辰","庚戌","辛丑","辛未","壬申","癸酉"]
-    if iz_key in HYOSHIN:
+    from saju_sinsal import HYOSIN_SET
+    if iz_key in HYOSIN_SET:
         results.append({"이름":"효신살(梟神煞)","위치":f"일주({iz_key})",
             "의미":"편인이 일지에 — 어머니·인성 갈등",
             "발동":f"일주 {iz_key} — 일지에 편인",
