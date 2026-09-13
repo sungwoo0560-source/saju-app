@@ -16441,7 +16441,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
         if _all28:
             # Y-16: 길신/흉살 그룹 분리
             _gil28, _hyung28 = [], []
-            for _s28 in _all28[:20]:
+            for _s28 in _all28:
                 _nm28_g = _s28.get("이름", _s28.get("name", ""))
                 _GILSIN = ("귀인","암록","천덕","월덕","천을","문창","학당","금여","천의")
                 if _s28.get("type") == "길" or any(_g in _nm28_g for _g in _GILSIN):
@@ -16466,6 +16466,12 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                     f'</div>'
                 )
 
+            # W4: cap 을 그룹 분리 뒤로 옮김. 분리 전에 걸면 목록 순서상
+            # 뒤쪽(calc_all_sinsal_extended 항목)이 통째로 잘려 길신/흉살
+            # 어느 한쪽만 남을 수 있다. 그룹별로 잘라 양쪽을 보장한다.
+            _CAP28 = 12
+            _gil28, _hyung28 = _gil28[:_CAP28], _hyung28[:_CAP28]
+            _shown28 = len(_gil28) + len(_hyung28)
             _sin_items28 = ""
             if _gil28:
                 _sin_items28 += '<div style="font-size:12px;color:#a5d6a7;font-weight:700;margin:10px 0 4px;">👼 타고난 복 (귀인)</div>'
@@ -16484,7 +16490,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                 f'<div style="background:linear-gradient(135deg,#3e2723 0%,#5d4037 100%);'
                 f'border-radius:14px;padding:clamp(16px,4vw,24px);margin:20px 0;color:#fff;">'
                 f'<div style="font-size:13px;color:#ffd54f;letter-spacing:3px;font-weight:700;">⭐ {name}님 사주 발동 신살 풀세트</div>'
-                f'<div style="font-size:18px;font-weight:900;margin:8px 0;">발동 신살 {len(_all28)}개 — 인생 운명 신호</div>'
+                f'<div style="font-size:18px;font-weight:900;margin:8px 0;">발동 신살 {_shown28}개 — 인생 운명 신호</div>'
                 f'{_sin_items28}'
                 f'<div style="font-size:11px;margin-top:12px;color:#ffd54f;padding-top:10px;'
                 f'border-top:1px dashed rgba(255,255,255,0.2);">⚖️ 정통 명리학 신살 계산 기반 분석입니다.</div>'
