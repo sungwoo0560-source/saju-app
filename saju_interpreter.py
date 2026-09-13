@@ -8922,8 +8922,15 @@ def get_special_stars(pils):
 
     wol_jj = pils[2]["jj"] if len(pils) > 2 else ""
 
-    if wol_jj and yeokma.get(wol_jj, "") in pil_jjs:
-        result.append({"name": "역마살(驛馬殺)", "desc": "평생 이동/여행/해외와 인연이 깊습니다."})
+    # 역마살 — 12신살은 년지 삼합군이 기준(saju_sinsal.get_12sinsal 과 동일 관법).
+    # 월지는 계절·격국을 보는 자리라 12신살 앵커가 아니다. 같은 함수의
+    # 12종이 하나의 삼합군 표를 공유하므로 일지 앵커를 더하면 그 표가 갈라진다.
+    _ym_nj = pils[3]["jj"] if len(pils) > 3 else ""
+    _ym_jj = yeokma.get(_ym_nj, "")
+    _ym_found = [_ym_jj] if (_ym_jj and _ym_jj in pil_jjs) else []
+    if _ym_found:
+        result.append({"name": "역마살(驛馬殺) [%s]" % ",".join(_ym_found),
+                       "desc": "평생 이동/여행/해외와 인연이 깊습니다."})
 
     # 도화살 — 월지 앵커 폐기, get_dohwa 단일 소스(년지·일지 앵커, 관법 통일)로 교체.
     # 장내(년지·월지)는 이성 문제로 다루지 않고 매력·인기 서술만, 장외(일지·시지)는
