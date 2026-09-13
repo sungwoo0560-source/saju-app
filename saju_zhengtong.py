@@ -8887,14 +8887,8 @@ def calc_all_sinsal_extended(pils):
         })
 
     # 14. 문창귀인(文昌貴人) — 일간 기준
-    MUNCHANG = {
-        "甲": "巳", "乙": "午",
-        "丙": "申", "丁": "酉",
-        "戊": "申", "己": "酉",
-        "庚": "亥", "辛": "子",
-        "壬": "寅", "癸": "卯",
-    }
-    _mc = MUNCHANG.get(ilgan)
+    from saju_data import MUNCHANG_MAP  # SSOT
+    _mc = MUNCHANG_MAP.get(ilgan)
     if _mc and _mc in jjs:
         _mc_pos = ["시","일","월","년"][jjs.index(_mc)]
         results.append({

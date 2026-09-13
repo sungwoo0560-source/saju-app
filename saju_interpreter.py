@@ -8880,21 +8880,9 @@ def get_special_stars(pils):
 
     # 천을귀인
 
-    chunl = {
-        "甲": ["丑", "未"],
-        "乙": ["子", "申"],
-        "丙": ["亥", "酉"],
-        "丁": ["亥", "酉"],
-        "戊": ["丑", "未"],
-        "己": ["子", "申"],
-        "庚": ["丑", "未"],
-        "辛": ["寅", "午"],
-        "壬": ["卯", "巳"],
-        "癸": ["卯", "巳"],
-    }
 
-    if any(jj in chunl.get(ilgan, []) for jj in pil_jjs):
-        found = [jj for jj in pil_jjs if jj in chunl.get(ilgan, [])]
+    if any(jj in CHEONEUL_MAP.get(ilgan, []) for jj in pil_jjs):
+        found = [jj for jj in pil_jjs if jj in CHEONEUL_MAP.get(ilgan, [])]
 
         result.append(
             {
