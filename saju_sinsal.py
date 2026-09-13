@@ -1040,13 +1040,17 @@ def get_extra_sinsal(pils):
             break
 
     # 천을귀인 - 2개 지지 전부 확인 (SSOT: CHEONEUL_MAP)
-    if any(_ce in all_jjs for _ce in CHEONEUL_MAP.get(ilgan, [])):
-        stars.append(
-            {
-                "name": "천을귀인(天乙貴人)",
-                "desc": "인생의 위기에서 돕는 귀인이 상주하는 최고의 길성",
-            }
+    _ce_hits = [_ce for _ce in CHEONEUL_MAP.get(ilgan, []) if _ce in all_jjs]
+    if _ce_hits:
+        _CE_POS = ["시", "일", "월", "년"]
+        _ce_where = ", ".join(
+            "%s지(%s)" % (_CE_POS[all_jjs.index(_c)], _c) for _c in _ce_hits
         )
+        stars.append({
+            "name": "천을귀인(天乙貴人)",
+            "위치": _ce_where,
+            "desc": "인생의 위기에서 돕는 귀인이 상주하는 최고의 길성 — " + _ce_where,
+        })
 
     # 학당귀인(學堂貴人) – 일간의 장생지가 사주 지지에 있는지
     hakdang_jj = HAKDANG_GWIIN.get(ilgan)
