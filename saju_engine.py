@@ -1165,17 +1165,17 @@ class SajuCoreEngine:
     def _get_term_precision_time(year, term_name):
         """특정 연도/절기의 정밀 시각(시, 분)을 반환.
 
-        ★2026-09-10부로 kasi_24terms.json이 1940~2040 전 구간을 커버한다
+        ★2026-09-13부로 kasi_24terms.json이 1900~2060 전 구간을 커버한다
         (2000~2027=KASI 실측 원본, 나머지=ephem 기반 정밀 계산 — src 필드로
         구분, tools/gen_solar_terms_ephem.py 참고). AstroEngine 선형 외삽
-        폴백은 이제 이 함수 안에서 1939년 이하·2041년 이상(JSON 범위 밖)일
+        폴백은 이제 이 함수 안에서 1899년 이하·2061년 이상(JSON 범위 밖)일
         때만 실제로 호출된다 — 로드 경로·시그니처·반환 타입은 무변경."""
 
         SajuCoreEngine._load_kasi_data()
 
         y_str = str(year)
 
-        # 1. KASI JSON 확인 (1940~2040 전 구간 — 실측/정밀계산 우선)
+        # 1. KASI JSON 확인 (1900~2060 전 구간 — 실측/정밀계산 우선)
 
         if y_str in SajuCoreEngine.KASI_DATA:
             term_info = SajuCoreEngine.KASI_DATA[y_str].get(term_name)
@@ -1188,8 +1188,9 @@ class SajuCoreEngine:
                     term_info["minute"],
                 )
 
-        # 2. AstroEngine 선형 외삽 폴백 — 1939년 이하·2041년 이상(JSON 범위 밖)에서만 도달
+        # 2. AstroEngine 선형 외삽 폴백 — 1899년 이하·2061년 이상(JSON 범위 밖)에서만 도달
 
+        _saju_log.warning("[_get_term_precision_time] %s년 %s: kasi_24terms.json 범위 밖(1900~2060) — AstroEngine 선형 외삽 근사값 사용", year, term_name)
         return AstroEngine.get_solar_term_precision(year, 1, 1, term_name)
 
     @staticmethod
