@@ -8987,7 +8987,7 @@ def get_special_stars(pils):
 
     # 화개살(華蓋殺) — 예술·종교·고독의 기운 (HWAGAE_MAP 기준 보강)
     _hg_found = []
-    for _ref_jj in [_nyon_jj, _il_jj, wol_jj]:
+    for _ref_jj in [_nyon_jj]:
         _hg_jj = HWAGAE_MAP.get(_ref_jj, "")
         if _hg_jj and _hg_jj in pil_jjs and _hg_jj not in _hg_found:
             _hg_found.append(_hg_jj)
