@@ -508,6 +508,28 @@ HYOSIN_SET = {"甲子","乙亥","丙寅","丁卯","戊午","己巳",
               "庚辰","庚戌","辛丑","辛未","壬申","癸酉"}
 
 
+# 곡각살(曲脚煞) 단일 소스 - 획이 굽은 글자 乙己巳丑.
+# 전통적으로 글자가 중첩될수록 중(重)하게 보므로 개수로 경중을 나눈다.
+# 3자 이상 발동(17.2%), 2자 참고, 1자 이하 미발동.
+GOKGAK_CG = {"乙", "己"}
+GOKGAK_JJ = {"巳", "丑"}
+GOKGAK_TH_BALDONG = 3
+GOKGAK_TH_CHAMGO = 2
+
+
+def count_gokgak(pils):
+    """원국 8자 중 곡각 글자(乙己巳丑) 개수."""
+    n = 0
+    for p in (pils or []):
+        if not isinstance(p, dict):
+            continue
+        if p.get("cg", "") in GOKGAK_CG:
+            n += 1
+        if p.get("jj", "") in GOKGAK_JJ:
+            n += 1
+    return n
+
+
 @st.cache_data(hash_funcs=_PILS_HF)
 def get_dohwa(pils):
 
@@ -1087,11 +1109,13 @@ def get_extra_sinsal(pils):
         stars.append({"name":"양인살(羊刃煞)",
                       "desc":"강렬한 추진력·결단력 — 군·경·외과·스포츠에서 능력 발휘. 충 운에 사고수 주의"})
 
-    # 곡각살(曲脚煞) — 특정 일주 (골절·관절 주의)
-    _GOKGAK = {"辛丑","辛未","癸丑","癸未","己丑","己未"}
-    if ilju_str in _GOKGAK:
+    # 곡각살(曲脚煞) - 곡각 글자 개수 (SSOT: GOKGAK_CG/GOKGAK_JJ)
+    _gg_n = count_gokgak(pils)
+    if _gg_n >= GOKGAK_TH_CHAMGO:
         stars.append({"name":"곡각살(曲脚煞)",
-                      "desc":"골절·관절 부상 주의 — 이동·등산·스포츠 시 안전 최우선. 보험 필수"})
+                      "desc":("골절·관절 부상 주의 - 이동·등산·스포츠 시 안전 최우선. 보험 필수"
+                              if _gg_n >= GOKGAK_TH_BALDONG else
+                              "곡각 글자가 일부 있는 구조 - 관절·발목에 무리 가지 않게 관리하는 정도")})
 
     # 음양차착살(陰陽差錯煞) — 특정 일주 (결혼 지연)
     _CHACHAEK = {"丙子","丁丑","戊寅","辛卯","壬辰","癸巳",

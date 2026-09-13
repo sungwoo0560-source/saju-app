@@ -8756,15 +8756,18 @@ def calc_all_sinsal_extended(pils):
             "활용":"리더·법조·군경·정치 — 정상권 가능.",
             "아이콘":"👑","등급":"강력발동"})
 
-    # 4. 곡각살(曲脚煞) — 천간+지지 결합
-    if any(c in ["乙","己"] for c in cgs) and any(j in ["巳","丑"] for j in jjs):
+    # 4. 곡각살(曲脚煞) - 곡각 글자 개수 (SSOT: saju_sinsal.GOKGAK_CG/JJ)
+    from saju_sinsal import count_gokgak, GOKGAK_TH_BALDONG, GOKGAK_TH_CHAMGO
+    _gg_n = count_gokgak(pils)
+    _gg_on = _gg_n >= GOKGAK_TH_BALDONG
+    if _gg_n >= GOKGAK_TH_CHAMGO:
         results.append({"이름":"곡각살(曲脚煞)","위치":"원국",
             "의미":"뼈·관절·다리 약함 신살",
-            "발동":"천간 乙·己 + 지지 巳·丑 결합",
-            "결과":"골절·관절·다리 부상 잦음.",
-            "주의":"운동·계단·등산 주의. 골다공증 검진.",
+            "발동":f"곡각 글자(乙己巳丑) {_gg_n}자",
+            "결과":"골절·관절·다리 부상이 잦은 편." if _gg_on else "관절·발목이 약한 편.",
+            "주의":"운동·계단·등산 주의. 골다공증 검진." if _gg_on else "무리한 운동·급한 이동만 조심.",
             "활용":"스트레칭·근력 운동 꾸준히.",
-            "아이콘":"🦵","등급":"발동"})
+            "아이콘":"🦵","등급":"발동" if _gg_on else "참고"})
 
     # 5. 음양차착살(陰陽差錯) — 일주 기준
     CHACHAK = ["丙子","丁丑","戊寅","辛卯","壬辰","癸巳",
