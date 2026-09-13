@@ -8791,9 +8791,8 @@ def calc_all_sinsal_extended(pils):
             "아이콘":"🦉","등급":"발동"})
 
     # 7. 복성귀인(福星貴人) — 일간+지지
-    BOKSEONG = {"甲":"寅","乙":"丑","丙":"子","丁":"酉",
-                "戊":"申","己":"未","庚":"午","辛":"巳","壬":"辰","癸":"卯"}
-    _bk = BOKSEONG.get(ilgan)
+    from saju_sinsal import BOKSEONG_MAP
+    _bk = BOKSEONG_MAP.get(ilgan)
     if _bk and _bk in jjs:
         _pos = ["시","일","월","년"][jjs.index(_bk)]
         results.append({"이름":"복성귀인(福星貴人)","위치":f"{_pos}지({_bk})",
