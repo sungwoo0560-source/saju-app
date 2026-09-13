@@ -1028,16 +1028,16 @@ def get_extra_sinsal(pils):
 
     baekho = ["甲辰","乙未","丙戌","丁丑","戊辰","壬戌","癸丑"]
 
-    for p in pils:
-        if (p["cg"] + p["jj"]) in baekho:
-            stars.append(
-                {
-                    "name": "백호대살(白虎)",
-                    "desc": "강한 추진력과 전문성, 압도적인 에너지",
-                }
-            )
+    _bh_found = [p["cg"] + p["jj"] for p in pils if (p["cg"] + p["jj"]) in baekho]
 
-            break
+    if _bh_found:
+        stars.append(
+            {
+                "name": "백호대살(白虎)",
+                "위치": _bh_found,
+                "desc": "강한 추진력과 전문성, 압도적인 에너지",
+            }
+        )
 
     # 천을귀인 - 2개 지지 전부 확인 (SSOT: CHEONEUL_MAP)
     _ce_hits = [_ce for _ce in CHEONEUL_MAP.get(ilgan, []) if _ce in all_jjs]
