@@ -16504,5 +16504,10205 @@
       "minute": 32,
       "src": "computed-ephem"
     }
+  },
+  "1900": {
+    "소한": {
+      "month": 1,
+      "day": 6,
+      "hour": 3,
+      "minute": 3,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 20,
+      "hour": 20,
+      "minute": 32,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 4,
+      "hour": 14,
+      "minute": 51,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 19,
+      "hour": 11,
+      "minute": 1,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 6,
+      "hour": 9,
+      "minute": 21,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 21,
+      "hour": 10,
+      "minute": 39,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 5,
+      "hour": 14,
+      "minute": 52,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 20,
+      "hour": 22,
+      "minute": 27,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 6,
+      "hour": 8,
+      "minute": 55,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 21,
+      "hour": 22,
+      "minute": 17,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 6,
+      "hour": 13,
+      "minute": 39,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 22,
+      "hour": 6,
+      "minute": 40,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 8,
+      "hour": 0,
+      "minute": 10,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 23,
+      "hour": 17,
+      "minute": 36,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 8,
+      "hour": 9,
+      "minute": 50,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 24,
+      "hour": 0,
+      "minute": 20,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 8,
+      "hour": 12,
+      "minute": 16,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 23,
+      "hour": 21,
+      "minute": 20,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 9,
+      "hour": 3,
+      "minute": 13,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 24,
+      "hour": 5,
+      "minute": 55,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 8,
+      "hour": 5,
+      "minute": 39,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 23,
+      "hour": 2,
+      "minute": 47,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 7,
+      "hour": 21,
+      "minute": 55,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 22,
+      "hour": 15,
+      "minute": 41,
+      "src": "computed-ephem"
+    }
+  },
+  "1901": {
+    "소한": {
+      "month": 1,
+      "day": 6,
+      "hour": 8,
+      "minute": 53,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 21,
+      "hour": 2,
+      "minute": 16,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 4,
+      "hour": 20,
+      "minute": 39,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 19,
+      "hour": 16,
+      "minute": 44,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 6,
+      "hour": 15,
+      "minute": 10,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 21,
+      "hour": 16,
+      "minute": 23,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 5,
+      "hour": 20,
+      "minute": 44,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 21,
+      "hour": 4,
+      "minute": 13,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 6,
+      "hour": 14,
+      "minute": 50,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 22,
+      "hour": 4,
+      "minute": 4,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 6,
+      "hour": 19,
+      "minute": 36,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 22,
+      "hour": 12,
+      "minute": 28,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 8,
+      "hour": 6,
+      "minute": 7,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 23,
+      "hour": 23,
+      "minute": 24,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 8,
+      "hour": 15,
+      "minute": 46,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 24,
+      "hour": 6,
+      "minute": 7,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 8,
+      "hour": 18,
+      "minute": 10,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 24,
+      "hour": 3,
+      "minute": 9,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 9,
+      "hour": 9,
+      "minute": 6,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 24,
+      "hour": 11,
+      "minute": 46,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 8,
+      "hour": 11,
+      "minute": 34,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 23,
+      "hour": 8,
+      "minute": 41,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 8,
+      "hour": 3,
+      "minute": 52,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 22,
+      "hour": 21,
+      "minute": 36,
+      "src": "computed-ephem"
+    }
+  },
+  "1902": {
+    "소한": {
+      "month": 1,
+      "day": 6,
+      "hour": 14,
+      "minute": 51,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 21,
+      "hour": 8,
+      "minute": 11,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 5,
+      "hour": 2,
+      "minute": 38,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 19,
+      "hour": 22,
+      "minute": 39,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 6,
+      "hour": 21,
+      "minute": 7,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 21,
+      "hour": 22,
+      "minute": 16,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 6,
+      "hour": 2,
+      "minute": 37,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 21,
+      "hour": 10,
+      "minute": 4,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 6,
+      "hour": 20,
+      "minute": 38,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 22,
+      "hour": 9,
+      "minute": 53,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 7,
+      "hour": 1,
+      "minute": 20,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 22,
+      "hour": 18,
+      "minute": 15,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 8,
+      "hour": 11,
+      "minute": 46,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 24,
+      "hour": 5,
+      "minute": 10,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 8,
+      "hour": 21,
+      "minute": 22,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 24,
+      "hour": 11,
+      "minute": 53,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 8,
+      "hour": 23,
+      "minute": 46,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 24,
+      "hour": 8,
+      "minute": 55,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 9,
+      "hour": 14,
+      "minute": 45,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 24,
+      "hour": 17,
+      "minute": 35,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 8,
+      "hour": 17,
+      "minute": 17,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 23,
+      "hour": 14,
+      "minute": 35,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 8,
+      "hour": 9,
+      "minute": 40,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 23,
+      "hour": 3,
+      "minute": 35,
+      "src": "computed-ephem"
+    }
+  },
+  "1903": {
+    "소한": {
+      "month": 1,
+      "day": 6,
+      "hour": 20,
+      "minute": 43,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 21,
+      "hour": 14,
+      "minute": 13,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 5,
+      "hour": 8,
+      "minute": 31,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 20,
+      "hour": 4,
+      "minute": 40,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 7,
+      "hour": 2,
+      "minute": 58,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 22,
+      "hour": 4,
+      "minute": 14,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 6,
+      "hour": 8,
+      "minute": 26,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 21,
+      "hour": 15,
+      "minute": 58,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 7,
+      "hour": 2,
+      "minute": 25,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 22,
+      "hour": 15,
+      "minute": 45,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 7,
+      "hour": 7,
+      "minute": 7,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 23,
+      "hour": 0,
+      "minute": 5,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 8,
+      "hour": 17,
+      "minute": 36,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 24,
+      "hour": 10,
+      "minute": 58,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 9,
+      "hour": 3,
+      "minute": 16,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 24,
+      "hour": 17,
+      "minute": 41,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 9,
+      "hour": 5,
+      "minute": 42,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 24,
+      "hour": 14,
+      "minute": 43,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 9,
+      "hour": 20,
+      "minute": 41,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 24,
+      "hour": 23,
+      "minute": 23,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 8,
+      "hour": 23,
+      "minute": 13,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 23,
+      "hour": 20,
+      "minute": 21,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 8,
+      "hour": 15,
+      "minute": 35,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 23,
+      "hour": 9,
+      "minute": 20,
+      "src": "computed-ephem"
+    }
+  },
+  "1904": {
+    "소한": {
+      "month": 1,
+      "day": 7,
+      "hour": 2,
+      "minute": 36,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 21,
+      "hour": 19,
+      "minute": 57,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 5,
+      "hour": 14,
+      "minute": 24,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 20,
+      "hour": 10,
+      "minute": 24,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 6,
+      "hour": 8,
+      "minute": 51,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 21,
+      "hour": 9,
+      "minute": 58,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 5,
+      "hour": 14,
+      "minute": 18,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 20,
+      "hour": 21,
+      "minute": 42,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 6,
+      "hour": 8,
+      "minute": 18,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 21,
+      "hour": 21,
+      "minute": 29,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 6,
+      "hour": 13,
+      "minute": 1,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 22,
+      "hour": 5,
+      "minute": 51,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 7,
+      "hour": 23,
+      "minute": 31,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 23,
+      "hour": 16,
+      "minute": 49,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 8,
+      "hour": 9,
+      "minute": 12,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 23,
+      "hour": 23,
+      "minute": 36,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 8,
+      "hour": 11,
+      "minute": 38,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 23,
+      "hour": 20,
+      "minute": 40,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 9,
+      "hour": 2,
+      "minute": 35,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 24,
+      "hour": 5,
+      "minute": 19,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 8,
+      "hour": 5,
+      "minute": 4,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 23,
+      "hour": 2,
+      "minute": 15,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 7,
+      "hour": 21,
+      "minute": 25,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 22,
+      "hour": 15,
+      "minute": 13,
+      "src": "computed-ephem"
+    }
+  },
+  "1905": {
+    "소한": {
+      "month": 1,
+      "day": 6,
+      "hour": 8,
+      "minute": 27,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 21,
+      "hour": 1,
+      "minute": 51,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 4,
+      "hour": 20,
+      "minute": 15,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 19,
+      "hour": 16,
+      "minute": 20,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 6,
+      "hour": 14,
+      "minute": 45,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 21,
+      "hour": 15,
+      "minute": 57,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 5,
+      "hour": 20,
+      "minute": 14,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 21,
+      "hour": 3,
+      "minute": 43,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 6,
+      "hour": 14,
+      "minute": 14,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 22,
+      "hour": 3,
+      "minute": 31,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 6,
+      "hour": 18,
+      "minute": 53,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 22,
+      "hour": 11,
+      "minute": 51,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 8,
+      "hour": 5,
+      "minute": 20,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 23,
+      "hour": 22,
+      "minute": 45,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 8,
+      "hour": 14,
+      "minute": 57,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 24,
+      "hour": 5,
+      "minute": 28,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 8,
+      "hour": 17,
+      "minute": 21,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 24,
+      "hour": 2,
+      "minute": 30,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 9,
+      "hour": 8,
+      "minute": 19,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 24,
+      "hour": 11,
+      "minute": 7,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 8,
+      "hour": 10,
+      "minute": 49,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 23,
+      "hour": 8,
+      "minute": 4,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 8,
+      "hour": 3,
+      "minute": 10,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 22,
+      "hour": 21,
+      "minute": 3,
+      "src": "computed-ephem"
+    }
+  },
+  "1906": {
+    "소한": {
+      "month": 1,
+      "day": 6,
+      "hour": 14,
+      "minute": 13,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 21,
+      "hour": 7,
+      "minute": 43,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 5,
+      "hour": 2,
+      "minute": 3,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 19,
+      "hour": 22,
+      "minute": 14,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 6,
+      "hour": 20,
+      "minute": 36,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 21,
+      "hour": 21,
+      "minute": 52,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 6,
+      "hour": 2,
+      "minute": 7,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 21,
+      "hour": 9,
+      "minute": 39,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 6,
+      "hour": 20,
+      "minute": 8,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 22,
+      "hour": 9,
+      "minute": 25,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 7,
+      "hour": 0,
+      "minute": 49,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 22,
+      "hour": 17,
+      "minute": 42,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 8,
+      "hour": 11,
+      "minute": 15,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 24,
+      "hour": 4,
+      "minute": 32,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 8,
+      "hour": 20,
+      "minute": 51,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 24,
+      "hour": 11,
+      "minute": 13,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 8,
+      "hour": 23,
+      "minute": 16,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 24,
+      "hour": 8,
+      "minute": 15,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 9,
+      "hour": 14,
+      "minute": 14,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 24,
+      "hour": 16,
+      "minute": 54,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 8,
+      "hour": 16,
+      "minute": 46,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 23,
+      "hour": 13,
+      "minute": 53,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 8,
+      "hour": 9,
+      "minute": 9,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 23,
+      "hour": 2,
+      "minute": 53,
+      "src": "computed-ephem"
+    }
+  },
+  "1907": {
+    "소한": {
+      "month": 1,
+      "day": 6,
+      "hour": 20,
+      "minute": 11,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 21,
+      "hour": 13,
+      "minute": 30,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 5,
+      "hour": 7,
+      "minute": 58,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 20,
+      "hour": 3,
+      "minute": 58,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 7,
+      "hour": 2,
+      "minute": 27,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 22,
+      "hour": 3,
+      "minute": 33,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 6,
+      "hour": 7,
+      "minute": 54,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 21,
+      "hour": 15,
+      "minute": 17,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 7,
+      "hour": 1,
+      "minute": 53,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 22,
+      "hour": 15,
+      "minute": 3,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 7,
+      "hour": 6,
+      "minute": 33,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 22,
+      "hour": 23,
+      "minute": 23,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 8,
+      "hour": 16,
+      "minute": 59,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 24,
+      "hour": 10,
+      "minute": 18,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 9,
+      "hour": 2,
+      "minute": 36,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 24,
+      "hour": 17,
+      "minute": 3,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 9,
+      "hour": 5,
+      "minute": 2,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 24,
+      "hour": 14,
+      "minute": 8,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 9,
+      "hour": 20,
+      "minute": 2,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 24,
+      "hour": 22,
+      "minute": 51,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 8,
+      "hour": 22,
+      "minute": 36,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 23,
+      "hour": 19,
+      "minute": 52,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 8,
+      "hour": 14,
+      "minute": 59,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 23,
+      "hour": 8,
+      "minute": 51,
+      "src": "computed-ephem"
+    }
+  },
+  "1908": {
+    "소한": {
+      "month": 1,
+      "day": 7,
+      "hour": 2,
+      "minute": 1,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 21,
+      "hour": 19,
+      "minute": 28,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 5,
+      "hour": 13,
+      "minute": 47,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 20,
+      "hour": 9,
+      "minute": 53,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 6,
+      "hour": 8,
+      "minute": 13,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 21,
+      "hour": 9,
+      "minute": 27,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 5,
+      "hour": 13,
+      "minute": 39,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 20,
+      "hour": 21,
+      "minute": 11,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 6,
+      "hour": 7,
+      "minute": 38,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 21,
+      "hour": 20,
+      "minute": 58,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 6,
+      "hour": 12,
+      "minute": 19,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 22,
+      "hour": 5,
+      "minute": 19,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 7,
+      "hour": 22,
+      "minute": 48,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 23,
+      "hour": 16,
+      "minute": 14,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 8,
+      "hour": 8,
+      "minute": 26,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 23,
+      "hour": 22,
+      "minute": 57,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 8,
+      "hour": 10,
+      "minute": 52,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 23,
+      "hour": 19,
+      "minute": 58,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 9,
+      "hour": 1,
+      "minute": 50,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 24,
+      "hour": 4,
+      "minute": 36,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 8,
+      "hour": 4,
+      "minute": 22,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 23,
+      "hour": 1,
+      "minute": 34,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 7,
+      "hour": 20,
+      "minute": 43,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 22,
+      "hour": 14,
+      "minute": 33,
+      "src": "computed-ephem"
+    }
+  },
+  "1909": {
+    "소한": {
+      "month": 1,
+      "day": 6,
+      "hour": 7,
+      "minute": 45,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 21,
+      "hour": 1,
+      "minute": 10,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 4,
+      "hour": 19,
+      "minute": 32,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 19,
+      "hour": 15,
+      "minute": 38,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 6,
+      "hour": 14,
+      "minute": 0,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 21,
+      "hour": 15,
+      "minute": 13,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 5,
+      "hour": 19,
+      "minute": 29,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 21,
+      "hour": 2,
+      "minute": 57,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 6,
+      "hour": 13,
+      "minute": 30,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 22,
+      "hour": 2,
+      "minute": 45,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 6,
+      "hour": 18,
+      "minute": 14,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 22,
+      "hour": 11,
+      "minute": 5,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 8,
+      "hour": 4,
+      "minute": 44,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 23,
+      "hour": 22,
+      "minute": 0,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 8,
+      "hour": 14,
+      "minute": 22,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 24,
+      "hour": 4,
+      "minute": 43,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 8,
+      "hour": 16,
+      "minute": 46,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 24,
+      "hour": 1,
+      "minute": 44,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 9,
+      "hour": 7,
+      "minute": 43,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 24,
+      "hour": 10,
+      "minute": 22,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 8,
+      "hour": 10,
+      "minute": 13,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 23,
+      "hour": 7,
+      "minute": 20,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 8,
+      "hour": 2,
+      "minute": 34,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 22,
+      "hour": 20,
+      "minute": 19,
+      "src": "computed-ephem"
+    }
+  },
+  "1910": {
+    "소한": {
+      "month": 1,
+      "day": 6,
+      "hour": 13,
+      "minute": 37,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 21,
+      "hour": 6,
+      "minute": 58,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 5,
+      "hour": 1,
+      "minute": 27,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 19,
+      "hour": 21,
+      "minute": 28,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 6,
+      "hour": 19,
+      "minute": 56,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 21,
+      "hour": 21,
+      "minute": 2,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 6,
+      "hour": 1,
+      "minute": 23,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 21,
+      "hour": 8,
+      "minute": 45,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 6,
+      "hour": 19,
+      "minute": 19,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 22,
+      "hour": 8,
+      "minute": 30,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 6,
+      "hour": 23,
+      "minute": 56,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 22,
+      "hour": 16,
+      "minute": 48,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 8,
+      "hour": 10,
+      "minute": 21,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 24,
+      "hour": 3,
+      "minute": 43,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 8,
+      "hour": 19,
+      "minute": 57,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 24,
+      "hour": 10,
+      "minute": 27,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 8,
+      "hour": 22,
+      "minute": 22,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 24,
+      "hour": 7,
+      "minute": 30,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 9,
+      "hour": 13,
+      "minute": 21,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 24,
+      "hour": 16,
+      "minute": 11,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 8,
+      "hour": 15,
+      "minute": 53,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 23,
+      "hour": 13,
+      "minute": 10,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 8,
+      "hour": 8,
+      "minute": 16,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 23,
+      "hour": 2,
+      "minute": 11,
+      "src": "computed-ephem"
+    }
+  },
+  "1911": {
+    "소한": {
+      "month": 1,
+      "day": 6,
+      "hour": 19,
+      "minute": 20,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 21,
+      "hour": 12,
+      "minute": 51,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 5,
+      "hour": 7,
+      "minute": 10,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 20,
+      "hour": 3,
+      "minute": 20,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 7,
+      "hour": 1,
+      "minute": 38,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 22,
+      "hour": 2,
+      "minute": 54,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 6,
+      "hour": 7,
+      "minute": 4,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 21,
+      "hour": 14,
+      "minute": 36,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 7,
+      "hour": 1,
+      "minute": 0,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 22,
+      "hour": 14,
+      "minute": 18,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 7,
+      "hour": 5,
+      "minute": 38,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 22,
+      "hour": 22,
+      "minute": 35,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 8,
+      "hour": 16,
+      "minute": 5,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 24,
+      "hour": 9,
+      "minute": 28,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 9,
+      "hour": 1,
+      "minute": 44,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 24,
+      "hour": 16,
+      "minute": 13,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 9,
+      "hour": 4,
+      "minute": 13,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 24,
+      "hour": 13,
+      "minute": 17,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 9,
+      "hour": 19,
+      "minute": 14,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 24,
+      "hour": 21,
+      "minute": 58,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 8,
+      "hour": 21,
+      "minute": 47,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 23,
+      "hour": 18,
+      "minute": 55,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 8,
+      "hour": 14,
+      "minute": 7,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 23,
+      "hour": 7,
+      "minute": 53,
+      "src": "computed-ephem"
+    }
+  },
+  "1912": {
+    "소한": {
+      "month": 1,
+      "day": 7,
+      "hour": 1,
+      "minute": 7,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 21,
+      "hour": 18,
+      "minute": 29,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 5,
+      "hour": 12,
+      "minute": 53,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 20,
+      "hour": 8,
+      "minute": 55,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 6,
+      "hour": 7,
+      "minute": 21,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 21,
+      "hour": 8,
+      "minute": 29,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 5,
+      "hour": 12,
+      "minute": 48,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 20,
+      "hour": 20,
+      "minute": 12,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 6,
+      "hour": 6,
+      "minute": 47,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 21,
+      "hour": 19,
+      "minute": 57,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 6,
+      "hour": 11,
+      "minute": 27,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 22,
+      "hour": 4,
+      "minute": 17,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 7,
+      "hour": 21,
+      "minute": 56,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 23,
+      "hour": 15,
+      "minute": 13,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 8,
+      "hour": 7,
+      "minute": 37,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 23,
+      "hour": 22,
+      "minute": 1,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 8,
+      "hour": 10,
+      "minute": 5,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 23,
+      "hour": 19,
+      "minute": 8,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 9,
+      "hour": 1,
+      "minute": 6,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 24,
+      "hour": 3,
+      "minute": 50,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 8,
+      "hour": 3,
+      "minute": 38,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 23,
+      "hour": 0,
+      "minute": 48,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 7,
+      "hour": 19,
+      "minute": 58,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 22,
+      "hour": 13,
+      "minute": 44,
+      "src": "computed-ephem"
+    }
+  },
+  "1913": {
+    "소한": {
+      "month": 1,
+      "day": 6,
+      "hour": 6,
+      "minute": 57,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 21,
+      "hour": 0,
+      "minute": 19,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 4,
+      "hour": 18,
+      "minute": 42,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 19,
+      "hour": 14,
+      "minute": 44,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 6,
+      "hour": 13,
+      "minute": 8,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 21,
+      "hour": 14,
+      "minute": 17,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 5,
+      "hour": 18,
+      "minute": 35,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 21,
+      "hour": 2,
+      "minute": 3,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 6,
+      "hour": 12,
+      "minute": 34,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 22,
+      "hour": 1,
+      "minute": 50,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 6,
+      "hour": 17,
+      "minute": 13,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 22,
+      "hour": 10,
+      "minute": 9,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 8,
+      "hour": 3,
+      "minute": 39,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 23,
+      "hour": 21,
+      "minute": 3,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 8,
+      "hour": 13,
+      "minute": 16,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 24,
+      "hour": 3,
+      "minute": 48,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 8,
+      "hour": 15,
+      "minute": 42,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 24,
+      "hour": 0,
+      "minute": 52,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 9,
+      "hour": 6,
+      "minute": 43,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 24,
+      "hour": 9,
+      "minute": 34,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 8,
+      "hour": 9,
+      "minute": 17,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 23,
+      "hour": 6,
+      "minute": 35,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 8,
+      "hour": 1,
+      "minute": 40,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 22,
+      "hour": 19,
+      "minute": 34,
+      "src": "computed-ephem"
+    }
+  },
+  "1914": {
+    "소한": {
+      "month": 1,
+      "day": 6,
+      "hour": 12,
+      "minute": 42,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 21,
+      "hour": 6,
+      "minute": 11,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 5,
+      "hour": 0,
+      "minute": 29,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 19,
+      "hour": 20,
+      "minute": 37,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 6,
+      "hour": 18,
+      "minute": 55,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 21,
+      "hour": 20,
+      "minute": 10,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 6,
+      "hour": 0,
+      "minute": 21,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 21,
+      "hour": 7,
+      "minute": 53,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 6,
+      "hour": 18,
+      "minute": 20,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 22,
+      "hour": 7,
+      "minute": 37,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 6,
+      "hour": 23,
+      "minute": 0,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 22,
+      "hour": 15,
+      "minute": 55,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 8,
+      "hour": 9,
+      "minute": 27,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 24,
+      "hour": 2,
+      "minute": 47,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 8,
+      "hour": 19,
+      "minute": 5,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 24,
+      "hour": 9,
+      "minute": 29,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 8,
+      "hour": 21,
+      "minute": 32,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 24,
+      "hour": 6,
+      "minute": 33,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 9,
+      "hour": 12,
+      "minute": 34,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 24,
+      "hour": 15,
+      "minute": 17,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 8,
+      "hour": 15,
+      "minute": 11,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 23,
+      "hour": 12,
+      "minute": 20,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 8,
+      "hour": 7,
+      "minute": 37,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 23,
+      "hour": 1,
+      "minute": 22,
+      "src": "computed-ephem"
+    }
+  },
+  "1915": {
+    "소한": {
+      "month": 1,
+      "day": 6,
+      "hour": 18,
+      "minute": 40,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 21,
+      "hour": 11,
+      "minute": 59,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 5,
+      "hour": 6,
+      "minute": 25,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 20,
+      "hour": 2,
+      "minute": 23,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 7,
+      "hour": 0,
+      "minute": 48,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 22,
+      "hour": 1,
+      "minute": 51,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 6,
+      "hour": 6,
+      "minute": 9,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 21,
+      "hour": 13,
+      "minute": 28,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 7,
+      "hour": 0,
+      "minute": 2,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 22,
+      "hour": 13,
+      "minute": 10,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 7,
+      "hour": 4,
+      "minute": 40,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 22,
+      "hour": 21,
+      "minute": 29,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 8,
+      "hour": 15,
+      "minute": 7,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 24,
+      "hour": 8,
+      "minute": 26,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 9,
+      "hour": 0,
+      "minute": 47,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 24,
+      "hour": 15,
+      "minute": 15,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 9,
+      "hour": 3,
+      "minute": 17,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 24,
+      "hour": 12,
+      "minute": 23,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 9,
+      "hour": 18,
+      "minute": 20,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 24,
+      "hour": 21,
+      "minute": 9,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 8,
+      "hour": 20,
+      "minute": 57,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 23,
+      "hour": 18,
+      "minute": 13,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 8,
+      "hour": 13,
+      "minute": 23,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 23,
+      "hour": 7,
+      "minute": 15,
+      "src": "computed-ephem"
+    }
+  },
+  "1916": {
+    "소한": {
+      "month": 1,
+      "day": 7,
+      "hour": 0,
+      "minute": 27,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 21,
+      "hour": 17,
+      "minute": 53,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 5,
+      "hour": 12,
+      "minute": 13,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 20,
+      "hour": 8,
+      "minute": 17,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 6,
+      "hour": 6,
+      "minute": 37,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 21,
+      "hour": 7,
+      "minute": 46,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 5,
+      "hour": 11,
+      "minute": 57,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 20,
+      "hour": 19,
+      "minute": 24,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 6,
+      "hour": 5,
+      "minute": 49,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 21,
+      "hour": 19,
+      "minute": 6,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 6,
+      "hour": 10,
+      "minute": 25,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 22,
+      "hour": 3,
+      "minute": 24,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 7,
+      "hour": 20,
+      "minute": 53,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 23,
+      "hour": 14,
+      "minute": 21,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 8,
+      "hour": 6,
+      "minute": 35,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 23,
+      "hour": 21,
+      "minute": 8,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 8,
+      "hour": 9,
+      "minute": 5,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 23,
+      "hour": 18,
+      "minute": 14,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 9,
+      "hour": 0,
+      "minute": 7,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 24,
+      "hour": 2,
+      "minute": 57,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 8,
+      "hour": 2,
+      "minute": 42,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 22,
+      "hour": 23,
+      "minute": 57,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 7,
+      "hour": 19,
+      "minute": 6,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 22,
+      "hour": 12,
+      "minute": 58,
+      "src": "computed-ephem"
+    }
+  },
+  "1917": {
+    "소한": {
+      "month": 1,
+      "day": 6,
+      "hour": 6,
+      "minute": 9,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 20,
+      "hour": 23,
+      "minute": 37,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 4,
+      "hour": 17,
+      "minute": 57,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 19,
+      "hour": 14,
+      "minute": 4,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 6,
+      "hour": 12,
+      "minute": 24,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 21,
+      "hour": 13,
+      "minute": 37,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 5,
+      "hour": 17,
+      "minute": 49,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 21,
+      "hour": 1,
+      "minute": 17,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 6,
+      "hour": 11,
+      "minute": 45,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 22,
+      "hour": 0,
+      "minute": 58,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 6,
+      "hour": 16,
+      "minute": 23,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 22,
+      "hour": 9,
+      "minute": 14,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 8,
+      "hour": 2,
+      "minute": 50,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 23,
+      "hour": 20,
+      "minute": 7,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 8,
+      "hour": 12,
+      "minute": 30,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 24,
+      "hour": 2,
+      "minute": 53,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 8,
+      "hour": 14,
+      "minute": 59,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 24,
+      "hour": 0,
+      "minute": 0,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 9,
+      "hour": 6,
+      "minute": 2,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 24,
+      "hour": 8,
+      "minute": 43,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 8,
+      "hour": 8,
+      "minute": 36,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 23,
+      "hour": 5,
+      "minute": 44,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 8,
+      "hour": 1,
+      "minute": 0,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 22,
+      "hour": 18,
+      "minute": 45,
+      "src": "computed-ephem"
+    }
+  },
+  "1918": {
+    "소한": {
+      "month": 1,
+      "day": 6,
+      "hour": 12,
+      "minute": 4,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 21,
+      "hour": 5,
+      "minute": 24,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 4,
+      "hour": 23,
+      "minute": 53,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 19,
+      "hour": 19,
+      "minute": 52,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 6,
+      "hour": 18,
+      "minute": 20,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 21,
+      "hour": 19,
+      "minute": 25,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 5,
+      "hour": 23,
+      "minute": 45,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 21,
+      "hour": 7,
+      "minute": 5,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 6,
+      "hour": 17,
+      "minute": 38,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 22,
+      "hour": 6,
+      "minute": 45,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 6,
+      "hour": 22,
+      "minute": 11,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 22,
+      "hour": 14,
+      "minute": 59,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 8,
+      "hour": 8,
+      "minute": 32,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 24,
+      "hour": 1,
+      "minute": 51,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 8,
+      "hour": 18,
+      "minute": 7,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 24,
+      "hour": 8,
+      "minute": 37,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 8,
+      "hour": 20,
+      "minute": 35,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 24,
+      "hour": 5,
+      "minute": 45,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 9,
+      "hour": 11,
+      "minute": 40,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 24,
+      "hour": 14,
+      "minute": 32,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 8,
+      "hour": 14,
+      "minute": 18,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 23,
+      "hour": 11,
+      "minute": 38,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 8,
+      "hour": 6,
+      "minute": 46,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 23,
+      "hour": 0,
+      "minute": 41,
+      "src": "computed-ephem"
+    }
+  },
+  "1919": {
+    "소한": {
+      "month": 1,
+      "day": 6,
+      "hour": 17,
+      "minute": 51,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 21,
+      "hour": 11,
+      "minute": 20,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 5,
+      "hour": 5,
+      "minute": 39,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 20,
+      "hour": 1,
+      "minute": 47,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 7,
+      "hour": 0,
+      "minute": 5,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 22,
+      "hour": 1,
+      "minute": 19,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 6,
+      "hour": 5,
+      "minute": 28,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 21,
+      "hour": 12,
+      "minute": 58,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 6,
+      "hour": 23,
+      "minute": 22,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 22,
+      "hour": 12,
+      "minute": 39,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 7,
+      "hour": 3,
+      "minute": 56,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 22,
+      "hour": 20,
+      "minute": 53,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 8,
+      "hour": 14,
+      "minute": 20,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 24,
+      "hour": 7,
+      "minute": 44,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 8,
+      "hour": 23,
+      "minute": 58,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 24,
+      "hour": 14,
+      "minute": 28,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 9,
+      "hour": 2,
+      "minute": 27,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 24,
+      "hour": 11,
+      "minute": 35,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 9,
+      "hour": 17,
+      "minute": 33,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 24,
+      "hour": 20,
+      "minute": 21,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 8,
+      "hour": 20,
+      "minute": 11,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 23,
+      "hour": 17,
+      "minute": 25,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 8,
+      "hour": 12,
+      "minute": 37,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 23,
+      "hour": 6,
+      "minute": 26,
+      "src": "computed-ephem"
+    }
+  },
+  "1920": {
+    "소한": {
+      "month": 1,
+      "day": 6,
+      "hour": 23,
+      "minute": 40,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 21,
+      "hour": 17,
+      "minute": 4,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 5,
+      "hour": 11,
+      "minute": 26,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 20,
+      "hour": 7,
+      "minute": 28,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 6,
+      "hour": 5,
+      "minute": 51,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 21,
+      "hour": 6,
+      "minute": 59,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 5,
+      "hour": 11,
+      "minute": 15,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 20,
+      "hour": 18,
+      "minute": 39,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 6,
+      "hour": 5,
+      "minute": 11,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 21,
+      "hour": 18,
+      "minute": 21,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 6,
+      "hour": 9,
+      "minute": 50,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 22,
+      "hour": 2,
+      "minute": 40,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 7,
+      "hour": 20,
+      "minute": 18,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 23,
+      "hour": 13,
+      "minute": 35,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 8,
+      "hour": 5,
+      "minute": 58,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 23,
+      "hour": 20,
+      "minute": 21,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 8,
+      "hour": 8,
+      "minute": 26,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 23,
+      "hour": 17,
+      "minute": 28,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 8,
+      "hour": 23,
+      "minute": 29,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 24,
+      "hour": 2,
+      "minute": 12,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 8,
+      "hour": 2,
+      "minute": 4,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 22,
+      "hour": 23,
+      "minute": 15,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 7,
+      "hour": 18,
+      "minute": 30,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 22,
+      "hour": 12,
+      "minute": 16,
+      "src": "computed-ephem"
+    }
+  },
+  "1921": {
+    "소한": {
+      "month": 1,
+      "day": 6,
+      "hour": 5,
+      "minute": 33,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 20,
+      "hour": 22,
+      "minute": 54,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 4,
+      "hour": 17,
+      "minute": 20,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 19,
+      "hour": 13,
+      "minute": 19,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 6,
+      "hour": 11,
+      "minute": 45,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 21,
+      "hour": 12,
+      "minute": 51,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 5,
+      "hour": 17,
+      "minute": 8,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 21,
+      "hour": 0,
+      "minute": 32,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 6,
+      "hour": 11,
+      "minute": 4,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 22,
+      "hour": 0,
+      "minute": 16,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 6,
+      "hour": 15,
+      "minute": 41,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 22,
+      "hour": 8,
+      "minute": 35,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 8,
+      "hour": 2,
+      "minute": 6,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 23,
+      "hour": 19,
+      "minute": 30,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 8,
+      "hour": 11,
+      "minute": 43,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 24,
+      "hour": 2,
+      "minute": 15,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 8,
+      "hour": 14,
+      "minute": 9,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 23,
+      "hour": 23,
+      "minute": 19,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 9,
+      "hour": 5,
+      "minute": 10,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 24,
+      "hour": 8,
+      "minute": 2,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 8,
+      "hour": 7,
+      "minute": 45,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 23,
+      "hour": 5,
+      "minute": 4,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 8,
+      "hour": 0,
+      "minute": 11,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 22,
+      "hour": 18,
+      "minute": 7,
+      "src": "computed-ephem"
+    }
+  },
+  "1922": {
+    "소한": {
+      "month": 1,
+      "day": 6,
+      "hour": 11,
+      "minute": 16,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 21,
+      "hour": 4,
+      "minute": 47,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 4,
+      "hour": 23,
+      "minute": 6,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 19,
+      "hour": 19,
+      "minute": 16,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 6,
+      "hour": 17,
+      "minute": 33,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 21,
+      "hour": 18,
+      "minute": 48,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 5,
+      "hour": 22,
+      "minute": 58,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 21,
+      "hour": 6,
+      "minute": 28,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 6,
+      "hour": 16,
+      "minute": 53,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 22,
+      "hour": 6,
+      "minute": 10,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 6,
+      "hour": 21,
+      "minute": 30,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 22,
+      "hour": 14,
+      "minute": 26,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 8,
+      "hour": 7,
+      "minute": 57,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 24,
+      "hour": 1,
+      "minute": 19,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 8,
+      "hour": 17,
+      "minute": 37,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 24,
+      "hour": 8,
+      "minute": 4,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 8,
+      "hour": 20,
+      "minute": 6,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 24,
+      "hour": 5,
+      "minute": 9,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 9,
+      "hour": 11,
+      "minute": 9,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 24,
+      "hour": 13,
+      "minute": 52,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 8,
+      "hour": 13,
+      "minute": 45,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 23,
+      "hour": 10,
+      "minute": 55,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 8,
+      "hour": 6,
+      "minute": 10,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 22,
+      "hour": 23,
+      "minute": 56,
+      "src": "computed-ephem"
+    }
+  },
+  "1923": {
+    "소한": {
+      "month": 1,
+      "day": 6,
+      "hour": 17,
+      "minute": 13,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 21,
+      "hour": 10,
+      "minute": 34,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 5,
+      "hour": 5,
+      "minute": 0,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 20,
+      "hour": 0,
+      "minute": 59,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 6,
+      "hour": 23,
+      "minute": 24,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 22,
+      "hour": 0,
+      "minute": 28,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 6,
+      "hour": 4,
+      "minute": 45,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 21,
+      "hour": 12,
+      "minute": 5,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 6,
+      "hour": 22,
+      "minute": 38,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 22,
+      "hour": 11,
+      "minute": 45,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 7,
+      "hour": 3,
+      "minute": 14,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 22,
+      "hour": 20,
+      "minute": 2,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 8,
+      "hour": 13,
+      "minute": 42,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 24,
+      "hour": 7,
+      "minute": 0,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 8,
+      "hour": 23,
+      "minute": 24,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 24,
+      "hour": 13,
+      "minute": 51,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 9,
+      "hour": 1,
+      "minute": 57,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 24,
+      "hour": 11,
+      "minute": 3,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 9,
+      "hour": 17,
+      "minute": 3,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 24,
+      "hour": 19,
+      "minute": 50,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 8,
+      "hour": 19,
+      "minute": 40,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 23,
+      "hour": 16,
+      "minute": 53,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 8,
+      "hour": 12,
+      "minute": 4,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 23,
+      "hour": 5,
+      "minute": 53,
+      "src": "computed-ephem"
+    }
+  },
+  "1924": {
+    "소한": {
+      "month": 1,
+      "day": 6,
+      "hour": 23,
+      "minute": 5,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 21,
+      "hour": 16,
+      "minute": 28,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 5,
+      "hour": 10,
+      "minute": 49,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 20,
+      "hour": 6,
+      "minute": 51,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 6,
+      "hour": 5,
+      "minute": 12,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 21,
+      "hour": 6,
+      "minute": 20,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 5,
+      "hour": 10,
+      "minute": 33,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 20,
+      "hour": 17,
+      "minute": 58,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 6,
+      "hour": 4,
+      "minute": 25,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 21,
+      "hour": 17,
+      "minute": 40,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 6,
+      "hour": 9,
+      "minute": 1,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 22,
+      "hour": 1,
+      "minute": 59,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 7,
+      "hour": 19,
+      "minute": 29,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 23,
+      "hour": 12,
+      "minute": 57,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 8,
+      "hour": 5,
+      "minute": 12,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 23,
+      "hour": 19,
+      "minute": 48,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 8,
+      "hour": 7,
+      "minute": 45,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 23,
+      "hour": 16,
+      "minute": 58,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 8,
+      "hour": 22,
+      "minute": 52,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 24,
+      "hour": 1,
+      "minute": 44,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 8,
+      "hour": 1,
+      "minute": 29,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 22,
+      "hour": 22,
+      "minute": 46,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 7,
+      "hour": 17,
+      "minute": 52,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 22,
+      "hour": 11,
+      "minute": 45,
+      "src": "computed-ephem"
+    }
+  },
+  "1925": {
+    "소한": {
+      "month": 1,
+      "day": 6,
+      "hour": 4,
+      "minute": 53,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 20,
+      "hour": 22,
+      "minute": 20,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 4,
+      "hour": 16,
+      "minute": 36,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 19,
+      "hour": 12,
+      "minute": 42,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 6,
+      "hour": 10,
+      "minute": 59,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 21,
+      "hour": 12,
+      "minute": 12,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 5,
+      "hour": 16,
+      "minute": 22,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 20,
+      "hour": 23,
+      "minute": 51,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 6,
+      "hour": 10,
+      "minute": 18,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 21,
+      "hour": 23,
+      "minute": 33,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 6,
+      "hour": 14,
+      "minute": 56,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 22,
+      "hour": 7,
+      "minute": 50,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 8,
+      "hour": 1,
+      "minute": 25,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 23,
+      "hour": 18,
+      "minute": 45,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 8,
+      "hour": 11,
+      "minute": 7,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 24,
+      "hour": 1,
+      "minute": 33,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 8,
+      "hour": 13,
+      "minute": 40,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 23,
+      "hour": 22,
+      "minute": 43,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 9,
+      "hour": 4,
+      "minute": 47,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 24,
+      "hour": 7,
+      "minute": 31,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 8,
+      "hour": 7,
+      "minute": 26,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 23,
+      "hour": 4,
+      "minute": 35,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 7,
+      "hour": 23,
+      "minute": 52,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 22,
+      "hour": 17,
+      "minute": 36,
+      "src": "computed-ephem"
+    }
+  },
+  "1926": {
+    "소한": {
+      "month": 1,
+      "day": 6,
+      "hour": 10,
+      "minute": 54,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 21,
+      "hour": 4,
+      "minute": 12,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 4,
+      "hour": 22,
+      "minute": 38,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 19,
+      "hour": 18,
+      "minute": 34,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 6,
+      "hour": 16,
+      "minute": 59,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 21,
+      "hour": 18,
+      "minute": 1,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 5,
+      "hour": 22,
+      "minute": 18,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 21,
+      "hour": 5,
+      "minute": 36,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 6,
+      "hour": 16,
+      "minute": 8,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 22,
+      "hour": 5,
+      "minute": 14,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 6,
+      "hour": 20,
+      "minute": 41,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 22,
+      "hour": 13,
+      "minute": 30,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 8,
+      "hour": 7,
+      "minute": 5,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 24,
+      "hour": 0,
+      "minute": 24,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 8,
+      "hour": 16,
+      "minute": 44,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 24,
+      "hour": 7,
+      "minute": 14,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 8,
+      "hour": 19,
+      "minute": 16,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 24,
+      "hour": 4,
+      "minute": 26,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 9,
+      "hour": 10,
+      "minute": 24,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 24,
+      "hour": 13,
+      "minute": 18,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 8,
+      "hour": 13,
+      "minute": 7,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 23,
+      "hour": 10,
+      "minute": 27,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 8,
+      "hour": 5,
+      "minute": 38,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 22,
+      "hour": 23,
+      "minute": 33,
+      "src": "computed-ephem"
+    }
+  },
+  "1927": {
+    "소한": {
+      "month": 1,
+      "day": 6,
+      "hour": 16,
+      "minute": 44,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 21,
+      "hour": 10,
+      "minute": 11,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 5,
+      "hour": 4,
+      "minute": 29,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 20,
+      "hour": 0,
+      "minute": 34,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 6,
+      "hour": 22,
+      "minute": 50,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 21,
+      "hour": 23,
+      "minute": 59,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 6,
+      "hour": 4,
+      "minute": 6,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 21,
+      "hour": 11,
+      "minute": 31,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 6,
+      "hour": 21,
+      "minute": 53,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 22,
+      "hour": 11,
+      "minute": 7,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 7,
+      "hour": 2,
+      "minute": 24,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 22,
+      "hour": 19,
+      "minute": 22,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 8,
+      "hour": 12,
+      "minute": 50,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 24,
+      "hour": 6,
+      "minute": 16,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 8,
+      "hour": 22,
+      "minute": 31,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 24,
+      "hour": 13,
+      "minute": 5,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 9,
+      "hour": 1,
+      "minute": 5,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 24,
+      "hour": 10,
+      "minute": 16,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 9,
+      "hour": 16,
+      "minute": 15,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 24,
+      "hour": 19,
+      "minute": 6,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 8,
+      "hour": 18,
+      "minute": 56,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 23,
+      "hour": 16,
+      "minute": 13,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 8,
+      "hour": 11,
+      "minute": 26,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 23,
+      "hour": 5,
+      "minute": 18,
+      "src": "computed-ephem"
+    }
+  },
+  "1928": {
+    "소한": {
+      "month": 1,
+      "day": 6,
+      "hour": 22,
+      "minute": 31,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 21,
+      "hour": 15,
+      "minute": 56,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 5,
+      "hour": 10,
+      "minute": 16,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 20,
+      "hour": 6,
+      "minute": 19,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 6,
+      "hour": 4,
+      "minute": 37,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 21,
+      "hour": 5,
+      "minute": 44,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 5,
+      "hour": 9,
+      "minute": 54,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 20,
+      "hour": 17,
+      "minute": 16,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 6,
+      "hour": 3,
+      "minute": 43,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 21,
+      "hour": 16,
+      "minute": 52,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 6,
+      "hour": 8,
+      "minute": 17,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 22,
+      "hour": 1,
+      "minute": 6,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 7,
+      "hour": 18,
+      "minute": 44,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 23,
+      "hour": 12,
+      "minute": 2,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 8,
+      "hour": 4,
+      "minute": 27,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 23,
+      "hour": 18,
+      "minute": 53,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 8,
+      "hour": 7,
+      "minute": 1,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 23,
+      "hour": 16,
+      "minute": 5,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 8,
+      "hour": 22,
+      "minute": 9,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 24,
+      "hour": 0,
+      "minute": 54,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 8,
+      "hour": 0,
+      "minute": 49,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 22,
+      "hour": 22,
+      "minute": 0,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 7,
+      "hour": 17,
+      "minute": 17,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 22,
+      "hour": 11,
+      "minute": 3,
+      "src": "computed-ephem"
+    }
+  },
+  "1929": {
+    "소한": {
+      "month": 1,
+      "day": 6,
+      "hour": 4,
+      "minute": 21,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 20,
+      "hour": 21,
+      "minute": 42,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 4,
+      "hour": 16,
+      "minute": 8,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 19,
+      "hour": 12,
+      "minute": 6,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 6,
+      "hour": 10,
+      "minute": 31,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 21,
+      "hour": 11,
+      "minute": 34,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 5,
+      "hour": 15,
+      "minute": 51,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 20,
+      "hour": 23,
+      "minute": 10,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 6,
+      "hour": 9,
+      "minute": 40,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 21,
+      "hour": 22,
+      "minute": 47,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 6,
+      "hour": 14,
+      "minute": 11,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 22,
+      "hour": 7,
+      "minute": 0,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 8,
+      "hour": 0,
+      "minute": 31,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 23,
+      "hour": 17,
+      "minute": 53,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 8,
+      "hour": 10,
+      "minute": 8,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 24,
+      "hour": 0,
+      "minute": 41,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 8,
+      "hour": 12,
+      "minute": 39,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 23,
+      "hour": 21,
+      "minute": 52,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 9,
+      "hour": 3,
+      "minute": 47,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 24,
+      "hour": 6,
+      "minute": 41,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 8,
+      "hour": 6,
+      "minute": 27,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 23,
+      "hour": 3,
+      "minute": 47,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 7,
+      "hour": 22,
+      "minute": 56,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 22,
+      "hour": 16,
+      "minute": 52,
+      "src": "computed-ephem"
+    }
+  },
+  "1930": {
+    "소한": {
+      "month": 1,
+      "day": 6,
+      "hour": 10,
+      "minute": 2,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 21,
+      "hour": 3,
+      "minute": 32,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 4,
+      "hour": 21,
+      "minute": 51,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 19,
+      "hour": 17,
+      "minute": 59,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 6,
+      "hour": 16,
+      "minute": 16,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 21,
+      "hour": 17,
+      "minute": 29,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 5,
+      "hour": 21,
+      "minute": 37,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 21,
+      "hour": 5,
+      "minute": 5,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 6,
+      "hour": 15,
+      "minute": 27,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 22,
+      "hour": 4,
+      "minute": 42,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 6,
+      "hour": 19,
+      "minute": 58,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 22,
+      "hour": 12,
+      "minute": 53,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 8,
+      "hour": 6,
+      "minute": 19,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 23,
+      "hour": 23,
+      "minute": 42,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 8,
+      "hour": 15,
+      "minute": 57,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 24,
+      "hour": 6,
+      "minute": 26,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 8,
+      "hour": 18,
+      "minute": 28,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 24,
+      "hour": 3,
+      "minute": 35,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 9,
+      "hour": 9,
+      "minute": 37,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 24,
+      "hour": 12,
+      "minute": 25,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 8,
+      "hour": 12,
+      "minute": 20,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 23,
+      "hour": 9,
+      "minute": 34,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 8,
+      "hour": 4,
+      "minute": 50,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 22,
+      "hour": 22,
+      "minute": 39,
+      "src": "computed-ephem"
+    }
+  },
+  "1931": {
+    "소한": {
+      "month": 1,
+      "day": 6,
+      "hour": 15,
+      "minute": 55,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 21,
+      "hour": 9,
+      "minute": 17,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 5,
+      "hour": 3,
+      "minute": 40,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 19,
+      "hour": 23,
+      "minute": 40,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 6,
+      "hour": 22,
+      "minute": 2,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 21,
+      "hour": 23,
+      "minute": 6,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 6,
+      "hour": 3,
+      "minute": 20,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 21,
+      "hour": 10,
+      "minute": 39,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 6,
+      "hour": 21,
+      "minute": 9,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 22,
+      "hour": 10,
+      "minute": 15,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 7,
+      "hour": 1,
+      "minute": 41,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 22,
+      "hour": 18,
+      "minute": 28,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 8,
+      "hour": 12,
+      "minute": 5,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 24,
+      "hour": 5,
+      "minute": 21,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 8,
+      "hour": 21,
+      "minute": 45,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 24,
+      "hour": 12,
+      "minute": 10,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 9,
+      "hour": 0,
+      "minute": 17,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 24,
+      "hour": 9,
+      "minute": 23,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 9,
+      "hour": 15,
+      "minute": 26,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 24,
+      "hour": 18,
+      "minute": 15,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 8,
+      "hour": 18,
+      "minute": 9,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 23,
+      "hour": 15,
+      "minute": 24,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 8,
+      "hour": 10,
+      "minute": 40,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 23,
+      "hour": 4,
+      "minute": 29,
+      "src": "computed-ephem"
+    }
+  },
+  "1932": {
+    "소한": {
+      "month": 1,
+      "day": 6,
+      "hour": 21,
+      "minute": 44,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 21,
+      "hour": 15,
+      "minute": 6,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 5,
+      "hour": 9,
+      "minute": 29,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 20,
+      "hour": 5,
+      "minute": 28,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 6,
+      "hour": 3,
+      "minute": 49,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 21,
+      "hour": 4,
+      "minute": 53,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 5,
+      "hour": 9,
+      "minute": 6,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 20,
+      "hour": 16,
+      "minute": 28,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 6,
+      "hour": 2,
+      "minute": 55,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 21,
+      "hour": 16,
+      "minute": 6,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 6,
+      "hour": 7,
+      "minute": 27,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 22,
+      "hour": 0,
+      "minute": 22,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 7,
+      "hour": 17,
+      "minute": 52,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 23,
+      "hour": 11,
+      "minute": 18,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 8,
+      "hour": 3,
+      "minute": 32,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 23,
+      "hour": 18,
+      "minute": 6,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 8,
+      "hour": 6,
+      "minute": 2,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 23,
+      "hour": 15,
+      "minute": 15,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 8,
+      "hour": 21,
+      "minute": 9,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 24,
+      "hour": 0,
+      "minute": 3,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 7,
+      "hour": 23,
+      "minute": 49,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 22,
+      "hour": 21,
+      "minute": 10,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 7,
+      "hour": 16,
+      "minute": 18,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 22,
+      "hour": 10,
+      "minute": 14,
+      "src": "computed-ephem"
+    }
+  },
+  "1933": {
+    "소한": {
+      "month": 1,
+      "day": 6,
+      "hour": 3,
+      "minute": 23,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 20,
+      "hour": 20,
+      "minute": 52,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 4,
+      "hour": 15,
+      "minute": 9,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 19,
+      "hour": 11,
+      "minute": 16,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 6,
+      "hour": 9,
+      "minute": 31,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 21,
+      "hour": 10,
+      "minute": 43,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 5,
+      "hour": 14,
+      "minute": 50,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 20,
+      "hour": 22,
+      "minute": 18,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 6,
+      "hour": 8,
+      "minute": 41,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 21,
+      "hour": 21,
+      "minute": 56,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 6,
+      "hour": 13,
+      "minute": 17,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 22,
+      "hour": 6,
+      "minute": 11,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 7,
+      "hour": 23,
+      "minute": 44,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 23,
+      "hour": 17,
+      "minute": 5,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 8,
+      "hour": 9,
+      "minute": 25,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 23,
+      "hour": 23,
+      "minute": 52,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 8,
+      "hour": 11,
+      "minute": 57,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 23,
+      "hour": 21,
+      "minute": 1,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 9,
+      "hour": 3,
+      "minute": 3,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 24,
+      "hour": 5,
+      "minute": 48,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 8,
+      "hour": 5,
+      "minute": 42,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 23,
+      "hour": 2,
+      "minute": 53,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 7,
+      "hour": 22,
+      "minute": 11,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 22,
+      "hour": 15,
+      "minute": 57,
+      "src": "computed-ephem"
+    }
+  },
+  "1934": {
+    "소한": {
+      "month": 1,
+      "day": 6,
+      "hour": 9,
+      "minute": 16,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 21,
+      "hour": 2,
+      "minute": 36,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 4,
+      "hour": 21,
+      "minute": 3,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 19,
+      "hour": 17,
+      "minute": 1,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 6,
+      "hour": 15,
+      "minute": 26,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 21,
+      "hour": 16,
+      "minute": 27,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 5,
+      "hour": 20,
+      "minute": 43,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 21,
+      "hour": 4,
+      "minute": 0,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 6,
+      "hour": 14,
+      "minute": 30,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 22,
+      "hour": 3,
+      "minute": 35,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 6,
+      "hour": 19,
+      "minute": 1,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 22,
+      "hour": 11,
+      "minute": 48,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 8,
+      "hour": 5,
+      "minute": 24,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 23,
+      "hour": 22,
+      "minute": 42,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 8,
+      "hour": 15,
+      "minute": 3,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 24,
+      "hour": 5,
+      "minute": 32,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 8,
+      "hour": 17,
+      "minute": 36,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 24,
+      "hour": 2,
+      "minute": 45,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 9,
+      "hour": 8,
+      "minute": 45,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 24,
+      "hour": 11,
+      "minute": 36,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 8,
+      "hour": 11,
+      "minute": 26,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 23,
+      "hour": 8,
+      "minute": 44,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 8,
+      "hour": 3,
+      "minute": 56,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 22,
+      "hour": 21,
+      "minute": 49,
+      "src": "computed-ephem"
+    }
+  },
+  "1935": {
+    "소한": {
+      "month": 1,
+      "day": 6,
+      "hour": 15,
+      "minute": 2,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 21,
+      "hour": 8,
+      "minute": 28,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 5,
+      "hour": 2,
+      "minute": 48,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 19,
+      "hour": 22,
+      "minute": 51,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 6,
+      "hour": 21,
+      "minute": 10,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 21,
+      "hour": 22,
+      "minute": 17,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 6,
+      "hour": 2,
+      "minute": 26,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 21,
+      "hour": 9,
+      "minute": 50,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 6,
+      "hour": 20,
+      "minute": 12,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 22,
+      "hour": 9,
+      "minute": 24,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 7,
+      "hour": 0,
+      "minute": 41,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 22,
+      "hour": 17,
+      "minute": 38,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 8,
+      "hour": 11,
+      "minute": 5,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 24,
+      "hour": 4,
+      "minute": 33,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 8,
+      "hour": 20,
+      "minute": 48,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 24,
+      "hour": 11,
+      "minute": 24,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 8,
+      "hour": 23,
+      "minute": 24,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 24,
+      "hour": 8,
+      "minute": 38,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 9,
+      "hour": 14,
+      "minute": 35,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 24,
+      "hour": 17,
+      "minute": 29,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 8,
+      "hour": 17,
+      "minute": 17,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 23,
+      "hour": 14,
+      "minute": 35,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 8,
+      "hour": 9,
+      "minute": 44,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 23,
+      "hour": 3,
+      "minute": 36,
+      "src": "computed-ephem"
+    }
+  },
+  "1936": {
+    "소한": {
+      "month": 1,
+      "day": 6,
+      "hour": 20,
+      "minute": 46,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 21,
+      "hour": 14,
+      "minute": 12,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 5,
+      "hour": 8,
+      "minute": 29,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 20,
+      "hour": 4,
+      "minute": 32,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 6,
+      "hour": 2,
+      "minute": 49,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 21,
+      "hour": 3,
+      "minute": 57,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 5,
+      "hour": 8,
+      "minute": 6,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 20,
+      "hour": 15,
+      "minute": 31,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 6,
+      "hour": 1,
+      "minute": 56,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 21,
+      "hour": 15,
+      "minute": 7,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 6,
+      "hour": 6,
+      "minute": 30,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 21,
+      "hour": 23,
+      "minute": 21,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 7,
+      "hour": 16,
+      "minute": 58,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 23,
+      "hour": 10,
+      "minute": 18,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 8,
+      "hour": 2,
+      "minute": 43,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 23,
+      "hour": 17,
+      "minute": 10,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 8,
+      "hour": 5,
+      "minute": 20,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 23,
+      "hour": 14,
+      "minute": 26,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 8,
+      "hour": 20,
+      "minute": 32,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 23,
+      "hour": 23,
+      "minute": 18,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 7,
+      "hour": 23,
+      "minute": 14,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 22,
+      "hour": 20,
+      "minute": 24,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 7,
+      "hour": 15,
+      "minute": 42,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 22,
+      "hour": 9,
+      "minute": 26,
+      "src": "computed-ephem"
+    }
+  },
+  "1937": {
+    "소한": {
+      "month": 1,
+      "day": 6,
+      "hour": 2,
+      "minute": 43,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 20,
+      "hour": 20,
+      "minute": 0,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 4,
+      "hour": 14,
+      "minute": 25,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 19,
+      "hour": 10,
+      "minute": 20,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 6,
+      "hour": 8,
+      "minute": 44,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 21,
+      "hour": 9,
+      "minute": 45,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 5,
+      "hour": 14,
+      "minute": 1,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 20,
+      "hour": 21,
+      "minute": 19,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 6,
+      "hour": 7,
+      "minute": 50,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 21,
+      "hour": 20,
+      "minute": 57,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 6,
+      "hour": 12,
+      "minute": 23,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 22,
+      "hour": 5,
+      "minute": 12,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 7,
+      "hour": 22,
+      "minute": 46,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 23,
+      "hour": 16,
+      "minute": 7,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 8,
+      "hour": 8,
+      "minute": 25,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 23,
+      "hour": 22,
+      "minute": 57,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 8,
+      "hour": 10,
+      "minute": 59,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 23,
+      "hour": 20,
+      "minute": 12,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 9,
+      "hour": 2,
+      "minute": 10,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 24,
+      "hour": 5,
+      "minute": 6,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 8,
+      "hour": 4,
+      "minute": 55,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 23,
+      "hour": 2,
+      "minute": 16,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 7,
+      "hour": 21,
+      "minute": 26,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 22,
+      "hour": 15,
+      "minute": 21,
+      "src": "computed-ephem"
+    }
+  },
+  "1938": {
+    "소한": {
+      "month": 1,
+      "day": 6,
+      "hour": 8,
+      "minute": 31,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 21,
+      "hour": 1,
+      "minute": 58,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 4,
+      "hour": 20,
+      "minute": 14,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 19,
+      "hour": 16,
+      "minute": 19,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 6,
+      "hour": 14,
+      "minute": 33,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 21,
+      "hour": 15,
+      "minute": 43,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 5,
+      "hour": 19,
+      "minute": 48,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 21,
+      "hour": 3,
+      "minute": 14,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 6,
+      "hour": 13,
+      "minute": 35,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 22,
+      "hour": 2,
+      "minute": 50,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 6,
+      "hour": 18,
+      "minute": 6,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 22,
+      "hour": 11,
+      "minute": 3,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 8,
+      "hour": 4,
+      "minute": 31,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 23,
+      "hour": 21,
+      "minute": 57,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 8,
+      "hour": 14,
+      "minute": 12,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 24,
+      "hour": 4,
+      "minute": 45,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 8,
+      "hour": 16,
+      "minute": 48,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 24,
+      "hour": 1,
+      "minute": 59,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 9,
+      "hour": 8,
+      "minute": 1,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 24,
+      "hour": 10,
+      "minute": 53,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 8,
+      "hour": 10,
+      "minute": 48,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 23,
+      "hour": 8,
+      "minute": 6,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 8,
+      "hour": 3,
+      "minute": 21,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 22,
+      "hour": 21,
+      "minute": 13,
+      "src": "computed-ephem"
+    }
+  },
+  "1939": {
+    "소한": {
+      "month": 1,
+      "day": 6,
+      "hour": 14,
+      "minute": 27,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 21,
+      "hour": 7,
+      "minute": 50,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 5,
+      "hour": 2,
+      "minute": 10,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 19,
+      "hour": 22,
+      "minute": 9,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 6,
+      "hour": 20,
+      "minute": 26,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 21,
+      "hour": 21,
+      "minute": 28,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 6,
+      "hour": 1,
+      "minute": 37,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 21,
+      "hour": 8,
+      "minute": 55,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 6,
+      "hour": 19,
+      "minute": 21,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 22,
+      "hour": 8,
+      "minute": 26,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 6,
+      "hour": 23,
+      "minute": 51,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 22,
+      "hour": 16,
+      "minute": 39,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 8,
+      "hour": 10,
+      "minute": 18,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 24,
+      "hour": 3,
+      "minute": 36,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 8,
+      "hour": 20,
+      "minute": 3,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 24,
+      "hour": 10,
+      "minute": 31,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 8,
+      "hour": 22,
+      "minute": 42,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 24,
+      "hour": 7,
+      "minute": 49,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 9,
+      "hour": 13,
+      "minute": 56,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 24,
+      "hour": 16,
+      "minute": 45,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 8,
+      "hour": 16,
+      "minute": 43,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 23,
+      "hour": 13,
+      "minute": 58,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 8,
+      "hour": 9,
+      "minute": 16,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 23,
+      "hour": 3,
+      "minute": 5,
+      "src": "computed-ephem"
+    }
+  },
+  "2041": {
+    "소한": {
+      "month": 1,
+      "day": 5,
+      "hour": 8,
+      "minute": 47,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 20,
+      "hour": 2,
+      "minute": 12,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 3,
+      "hour": 20,
+      "minute": 24,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 18,
+      "hour": 16,
+      "minute": 16,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 5,
+      "hour": 14,
+      "minute": 17,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 20,
+      "hour": 15,
+      "minute": 6,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 4,
+      "hour": 18,
+      "minute": 52,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 20,
+      "hour": 1,
+      "minute": 54,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 5,
+      "hour": 11,
+      "minute": 54,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 21,
+      "hour": 0,
+      "minute": 48,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 5,
+      "hour": 15,
+      "minute": 49,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 21,
+      "hour": 8,
+      "minute": 35,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 7,
+      "hour": 1,
+      "minute": 58,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 22,
+      "hour": 19,
+      "minute": 26,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 7,
+      "hour": 11,
+      "minute": 48,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 23,
+      "hour": 2,
+      "minute": 35,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 7,
+      "hour": 14,
+      "minute": 53,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 23,
+      "hour": 0,
+      "minute": 26,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 8,
+      "hour": 6,
+      "minute": 46,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 23,
+      "hour": 10,
+      "minute": 1,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 7,
+      "hour": 10,
+      "minute": 12,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 22,
+      "hour": 7,
+      "minute": 48,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 7,
+      "hour": 3,
+      "minute": 15,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 21,
+      "hour": 21,
+      "minute": 17,
+      "src": "computed-ephem"
+    }
+  },
+  "2042": {
+    "소한": {
+      "month": 1,
+      "day": 5,
+      "hour": 14,
+      "minute": 34,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 20,
+      "hour": 7,
+      "minute": 59,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 4,
+      "hour": 2,
+      "minute": 12,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 18,
+      "hour": 22,
+      "minute": 3,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 5,
+      "hour": 20,
+      "minute": 5,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 20,
+      "hour": 20,
+      "minute": 52,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 5,
+      "hour": 0,
+      "minute": 40,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 20,
+      "hour": 7,
+      "minute": 39,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 5,
+      "hour": 17,
+      "minute": 42,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 21,
+      "hour": 6,
+      "minute": 30,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 5,
+      "hour": 21,
+      "minute": 37,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 21,
+      "hour": 14,
+      "minute": 15,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 7,
+      "hour": 7,
+      "minute": 47,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 23,
+      "hour": 1,
+      "minute": 6,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 7,
+      "hour": 17,
+      "minute": 38,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 23,
+      "hour": 8,
+      "minute": 17,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 7,
+      "hour": 20,
+      "minute": 45,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 23,
+      "hour": 6,
+      "minute": 11,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 8,
+      "hour": 12,
+      "minute": 40,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 23,
+      "hour": 15,
+      "minute": 49,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 7,
+      "hour": 16,
+      "minute": 7,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 22,
+      "hour": 13,
+      "minute": 36,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 7,
+      "hour": 9,
+      "minute": 8,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 22,
+      "hour": 3,
+      "minute": 3,
+      "src": "computed-ephem"
+    }
+  },
+  "2043": {
+    "소한": {
+      "month": 1,
+      "day": 5,
+      "hour": 20,
+      "minute": 24,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 20,
+      "hour": 13,
+      "minute": 41,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 4,
+      "hour": 7,
+      "minute": 58,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 19,
+      "hour": 3,
+      "minute": 41,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 6,
+      "hour": 1,
+      "minute": 47,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 21,
+      "hour": 2,
+      "minute": 27,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 5,
+      "hour": 6,
+      "minute": 19,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 20,
+      "hour": 13,
+      "minute": 14,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 5,
+      "hour": 23,
+      "minute": 21,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 21,
+      "hour": 12,
+      "minute": 8,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 6,
+      "hour": 3,
+      "minute": 17,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 21,
+      "hour": 19,
+      "minute": 58,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 7,
+      "hour": 13,
+      "minute": 27,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 23,
+      "hour": 6,
+      "minute": 53,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 7,
+      "hour": 23,
+      "minute": 20,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 23,
+      "hour": 14,
+      "minute": 9,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 8,
+      "hour": 2,
+      "minute": 29,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 23,
+      "hour": 12,
+      "minute": 6,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 8,
+      "hour": 18,
+      "minute": 27,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 23,
+      "hour": 21,
+      "minute": 46,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 7,
+      "hour": 21,
+      "minute": 55,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 22,
+      "hour": 19,
+      "minute": 34,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 7,
+      "hour": 14,
+      "minute": 56,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 22,
+      "hour": 9,
+      "minute": 0,
+      "src": "computed-ephem"
+    }
+  },
+  "2044": {
+    "소한": {
+      "month": 1,
+      "day": 6,
+      "hour": 2,
+      "minute": 11,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 20,
+      "hour": 19,
+      "minute": 36,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 4,
+      "hour": 13,
+      "minute": 43,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 19,
+      "hour": 9,
+      "minute": 35,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 5,
+      "hour": 7,
+      "minute": 31,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 20,
+      "hour": 8,
+      "minute": 20,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 4,
+      "hour": 12,
+      "minute": 2,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 19,
+      "hour": 19,
+      "minute": 6,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 5,
+      "hour": 5,
+      "minute": 5,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 20,
+      "hour": 18,
+      "minute": 1,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 5,
+      "hour": 9,
+      "minute": 3,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 21,
+      "hour": 1,
+      "minute": 50,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 6,
+      "hour": 19,
+      "minute": 15,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 22,
+      "hour": 12,
+      "minute": 43,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 7,
+      "hour": 5,
+      "minute": 8,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 22,
+      "hour": 19,
+      "minute": 54,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 7,
+      "hour": 8,
+      "minute": 16,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 22,
+      "hour": 17,
+      "minute": 47,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 8,
+      "hour": 0,
+      "minute": 12,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 23,
+      "hour": 3,
+      "minute": 25,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 7,
+      "hour": 3,
+      "minute": 41,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 22,
+      "hour": 1,
+      "minute": 14,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 6,
+      "hour": 20,
+      "minute": 44,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 21,
+      "hour": 14,
+      "minute": 43,
+      "src": "computed-ephem"
+    }
+  },
+  "2045": {
+    "소한": {
+      "month": 1,
+      "day": 5,
+      "hour": 8,
+      "minute": 1,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 20,
+      "hour": 1,
+      "minute": 21,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 3,
+      "hour": 19,
+      "minute": 35,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 18,
+      "hour": 15,
+      "minute": 21,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 5,
+      "hour": 13,
+      "minute": 24,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 20,
+      "hour": 14,
+      "minute": 7,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 4,
+      "hour": 17,
+      "minute": 56,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 20,
+      "hour": 0,
+      "minute": 52,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 5,
+      "hour": 10,
+      "minute": 59,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 20,
+      "hour": 23,
+      "minute": 45,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 5,
+      "hour": 14,
+      "minute": 56,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 21,
+      "hour": 7,
+      "minute": 33,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 7,
+      "hour": 1,
+      "minute": 7,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 22,
+      "hour": 18,
+      "minute": 26,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 7,
+      "hour": 10,
+      "minute": 59,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 23,
+      "hour": 1,
+      "minute": 38,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 7,
+      "hour": 14,
+      "minute": 5,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 22,
+      "hour": 23,
+      "minute": 32,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 8,
+      "hour": 6,
+      "minute": 0,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 23,
+      "hour": 9,
+      "minute": 11,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 7,
+      "hour": 9,
+      "minute": 29,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 22,
+      "hour": 7,
+      "minute": 3,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 7,
+      "hour": 2,
+      "minute": 34,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 21,
+      "hour": 20,
+      "minute": 34,
+      "src": "computed-ephem"
+    }
+  },
+  "2046": {
+    "소한": {
+      "month": 1,
+      "day": 5,
+      "hour": 13,
+      "minute": 55,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 20,
+      "hour": 7,
+      "minute": 15,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 4,
+      "hour": 1,
+      "minute": 30,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 18,
+      "hour": 21,
+      "minute": 15,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 5,
+      "hour": 19,
+      "minute": 17,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 20,
+      "hour": 19,
+      "minute": 57,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 4,
+      "hour": 23,
+      "minute": 44,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 20,
+      "hour": 6,
+      "minute": 38,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 5,
+      "hour": 16,
+      "minute": 40,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 21,
+      "hour": 5,
+      "minute": 28,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 5,
+      "hour": 20,
+      "minute": 31,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 21,
+      "hour": 13,
+      "minute": 14,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 7,
+      "hour": 6,
+      "minute": 39,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 23,
+      "hour": 0,
+      "minute": 8,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 7,
+      "hour": 16,
+      "minute": 32,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 23,
+      "hour": 7,
+      "minute": 24,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 7,
+      "hour": 19,
+      "minute": 42,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 23,
+      "hour": 5,
+      "minute": 21,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 8,
+      "hour": 11,
+      "minute": 41,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 23,
+      "hour": 15,
+      "minute": 3,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 7,
+      "hour": 15,
+      "minute": 13,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 22,
+      "hour": 12,
+      "minute": 55,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 7,
+      "hour": 8,
+      "minute": 20,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 22,
+      "hour": 2,
+      "minute": 27,
+      "src": "computed-ephem"
+    }
+  },
+  "2047": {
+    "소한": {
+      "month": 1,
+      "day": 5,
+      "hour": 19,
+      "minute": 41,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 20,
+      "hour": 13,
+      "minute": 9,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 4,
+      "hour": 7,
+      "minute": 17,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 19,
+      "hour": 3,
+      "minute": 9,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 6,
+      "hour": 1,
+      "minute": 4,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 21,
+      "hour": 1,
+      "minute": 52,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 5,
+      "hour": 5,
+      "minute": 32,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 20,
+      "hour": 12,
+      "minute": 32,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 5,
+      "hour": 22,
+      "minute": 28,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 21,
+      "hour": 11,
+      "minute": 19,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 6,
+      "hour": 2,
+      "minute": 20,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 21,
+      "hour": 19,
+      "minute": 3,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 7,
+      "hour": 12,
+      "minute": 30,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 23,
+      "hour": 5,
+      "minute": 55,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 7,
+      "hour": 22,
+      "minute": 25,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 23,
+      "hour": 13,
+      "minute": 10,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 8,
+      "hour": 1,
+      "minute": 37,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 23,
+      "hour": 11,
+      "minute": 7,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 8,
+      "hour": 17,
+      "minute": 37,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 23,
+      "hour": 20,
+      "minute": 47,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 7,
+      "hour": 21,
+      "minute": 6,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 22,
+      "hour": 18,
+      "minute": 37,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 7,
+      "hour": 14,
+      "minute": 10,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 22,
+      "hour": 8,
+      "minute": 6,
+      "src": "computed-ephem"
+    }
+  },
+  "2048": {
+    "소한": {
+      "month": 1,
+      "day": 6,
+      "hour": 1,
+      "minute": 28,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 20,
+      "hour": 18,
+      "minute": 46,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 4,
+      "hour": 13,
+      "minute": 3,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 19,
+      "hour": 8,
+      "minute": 47,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 5,
+      "hour": 6,
+      "minute": 53,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 20,
+      "hour": 7,
+      "minute": 33,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 4,
+      "hour": 11,
+      "minute": 24,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 19,
+      "hour": 18,
+      "minute": 16,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 5,
+      "hour": 4,
+      "minute": 24,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 20,
+      "hour": 17,
+      "minute": 7,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 5,
+      "hour": 8,
+      "minute": 17,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 21,
+      "hour": 0,
+      "minute": 53,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 6,
+      "hour": 18,
+      "minute": 26,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 22,
+      "hour": 11,
+      "minute": 46,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 7,
+      "hour": 4,
+      "minute": 18,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 22,
+      "hour": 19,
+      "minute": 2,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 7,
+      "hour": 7,
+      "minute": 27,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 22,
+      "hour": 17,
+      "minute": 0,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 7,
+      "hour": 23,
+      "minute": 26,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 23,
+      "hour": 2,
+      "minute": 42,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 7,
+      "hour": 2,
+      "minute": 56,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 22,
+      "hour": 0,
+      "minute": 32,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 6,
+      "hour": 20,
+      "minute": 0,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 21,
+      "hour": 14,
+      "minute": 1,
+      "src": "computed-ephem"
+    }
+  },
+  "2049": {
+    "소한": {
+      "month": 1,
+      "day": 5,
+      "hour": 7,
+      "minute": 18,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 20,
+      "hour": 0,
+      "minute": 40,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 3,
+      "hour": 18,
+      "minute": 52,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 18,
+      "hour": 14,
+      "minute": 41,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 5,
+      "hour": 12,
+      "minute": 42,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 20,
+      "hour": 13,
+      "minute": 28,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 4,
+      "hour": 17,
+      "minute": 13,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 20,
+      "hour": 0,
+      "minute": 12,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 5,
+      "hour": 10,
+      "minute": 12,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 20,
+      "hour": 23,
+      "minute": 3,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 5,
+      "hour": 14,
+      "minute": 3,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 21,
+      "hour": 6,
+      "minute": 46,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 7,
+      "hour": 0,
+      "minute": 8,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 22,
+      "hour": 17,
+      "minute": 35,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 7,
+      "hour": 9,
+      "minute": 57,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 23,
+      "hour": 0,
+      "minute": 46,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 7,
+      "hour": 13,
+      "minute": 5,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 22,
+      "hour": 22,
+      "minute": 42,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 8,
+      "hour": 5,
+      "minute": 4,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 23,
+      "hour": 8,
+      "minute": 24,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 7,
+      "hour": 8,
+      "minute": 37,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 22,
+      "hour": 6,
+      "minute": 18,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 7,
+      "hour": 1,
+      "minute": 45,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 21,
+      "hour": 19,
+      "minute": 51,
+      "src": "computed-ephem"
+    }
+  },
+  "2050": {
+    "소한": {
+      "month": 1,
+      "day": 5,
+      "hour": 13,
+      "minute": 7,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 20,
+      "hour": 6,
+      "minute": 33,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 4,
+      "hour": 0,
+      "minute": 43,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 18,
+      "hour": 20,
+      "minute": 34,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 5,
+      "hour": 18,
+      "minute": 32,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 20,
+      "hour": 19,
+      "minute": 19,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 4,
+      "hour": 23,
+      "minute": 2,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 20,
+      "hour": 6,
+      "minute": 1,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 5,
+      "hour": 16,
+      "minute": 1,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 21,
+      "hour": 4,
+      "minute": 50,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 5,
+      "hour": 19,
+      "minute": 54,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 21,
+      "hour": 12,
+      "minute": 32,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 7,
+      "hour": 6,
+      "minute": 1,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 22,
+      "hour": 23,
+      "minute": 20,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 7,
+      "hour": 15,
+      "minute": 52,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 23,
+      "hour": 6,
+      "minute": 32,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 7,
+      "hour": 19,
+      "minute": 0,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 23,
+      "hour": 4,
+      "minute": 28,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 8,
+      "hour": 10,
+      "minute": 59,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 23,
+      "hour": 14,
+      "minute": 11,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 7,
+      "hour": 14,
+      "minute": 33,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 22,
+      "hour": 12,
+      "minute": 5,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 7,
+      "hour": 7,
+      "minute": 41,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 22,
+      "hour": 1,
+      "minute": 38,
+      "src": "computed-ephem"
+    }
+  },
+  "2051": {
+    "소한": {
+      "month": 1,
+      "day": 5,
+      "hour": 19,
+      "minute": 1,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 20,
+      "hour": 12,
+      "minute": 18,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 4,
+      "hour": 6,
+      "minute": 35,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 19,
+      "hour": 2,
+      "minute": 16,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 6,
+      "hour": 0,
+      "minute": 21,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 21,
+      "hour": 0,
+      "minute": 58,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 5,
+      "hour": 4,
+      "minute": 49,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 20,
+      "hour": 11,
+      "minute": 40,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 5,
+      "hour": 21,
+      "minute": 46,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 21,
+      "hour": 10,
+      "minute": 30,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 6,
+      "hour": 1,
+      "minute": 40,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 21,
+      "hour": 18,
+      "minute": 18,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 7,
+      "hour": 11,
+      "minute": 49,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 23,
+      "hour": 5,
+      "minute": 12,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 7,
+      "hour": 21,
+      "minute": 41,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 23,
+      "hour": 12,
+      "minute": 28,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 8,
+      "hour": 0,
+      "minute": 50,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 23,
+      "hour": 10,
+      "minute": 26,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 8,
+      "hour": 16,
+      "minute": 49,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 23,
+      "hour": 20,
+      "minute": 9,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 7,
+      "hour": 20,
+      "minute": 21,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 22,
+      "hour": 18,
+      "minute": 2,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 7,
+      "hour": 13,
+      "minute": 27,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 22,
+      "hour": 7,
+      "minute": 33,
+      "src": "computed-ephem"
+    }
+  },
+  "2052": {
+    "소한": {
+      "month": 1,
+      "day": 6,
+      "hour": 0,
+      "minute": 47,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 20,
+      "hour": 18,
+      "minute": 13,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 4,
+      "hour": 12,
+      "minute": 22,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 19,
+      "hour": 8,
+      "minute": 12,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 5,
+      "hour": 6,
+      "minute": 8,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 20,
+      "hour": 6,
+      "minute": 55,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 4,
+      "hour": 10,
+      "minute": 36,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 19,
+      "hour": 17,
+      "minute": 37,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 5,
+      "hour": 3,
+      "minute": 34,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 20,
+      "hour": 16,
+      "minute": 28,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 5,
+      "hour": 7,
+      "minute": 29,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 21,
+      "hour": 0,
+      "minute": 15,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 6,
+      "hour": 17,
+      "minute": 39,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 22,
+      "hour": 11,
+      "minute": 8,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 7,
+      "hour": 3,
+      "minute": 32,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 22,
+      "hour": 18,
+      "minute": 21,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 7,
+      "hour": 6,
+      "minute": 41,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 22,
+      "hour": 16,
+      "minute": 15,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 7,
+      "hour": 22,
+      "minute": 39,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 23,
+      "hour": 1,
+      "minute": 54,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 7,
+      "hour": 2,
+      "minute": 9,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 21,
+      "hour": 23,
+      "minute": 45,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 6,
+      "hour": 19,
+      "minute": 14,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 21,
+      "hour": 13,
+      "minute": 16,
+      "src": "computed-ephem"
+    }
+  },
+  "2053": {
+    "소한": {
+      "month": 1,
+      "day": 5,
+      "hour": 6,
+      "minute": 35,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 19,
+      "hour": 23,
+      "minute": 58,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 3,
+      "hour": 18,
+      "minute": 12,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 18,
+      "hour": 14,
+      "minute": 1,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 5,
+      "hour": 12,
+      "minute": 2,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 20,
+      "hour": 12,
+      "minute": 46,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 4,
+      "hour": 16,
+      "minute": 33,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 19,
+      "hour": 23,
+      "minute": 29,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 5,
+      "hour": 9,
+      "minute": 33,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 20,
+      "hour": 22,
+      "minute": 19,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 5,
+      "hour": 13,
+      "minute": 27,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 21,
+      "hour": 6,
+      "minute": 3,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 6,
+      "hour": 23,
+      "minute": 36,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 22,
+      "hour": 16,
+      "minute": 55,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 7,
+      "hour": 9,
+      "minute": 29,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 23,
+      "hour": 0,
+      "minute": 9,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 7,
+      "hour": 12,
+      "minute": 38,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 22,
+      "hour": 22,
+      "minute": 5,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 8,
+      "hour": 4,
+      "minute": 35,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 23,
+      "hour": 7,
+      "minute": 46,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 7,
+      "hour": 8,
+      "minute": 5,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 22,
+      "hour": 5,
+      "minute": 38,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 7,
+      "hour": 1,
+      "minute": 11,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 21,
+      "hour": 19,
+      "minute": 9,
+      "src": "computed-ephem"
+    }
+  },
+  "2054": {
+    "소한": {
+      "month": 1,
+      "day": 5,
+      "hour": 12,
+      "minute": 31,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 20,
+      "hour": 5,
+      "minute": 50,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 4,
+      "hour": 0,
+      "minute": 7,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 18,
+      "hour": 19,
+      "minute": 50,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 5,
+      "hour": 17,
+      "minute": 54,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 20,
+      "hour": 18,
+      "minute": 33,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 4,
+      "hour": 22,
+      "minute": 22,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 20,
+      "hour": 5,
+      "minute": 14,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 5,
+      "hour": 15,
+      "minute": 17,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 21,
+      "hour": 4,
+      "minute": 2,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 5,
+      "hour": 19,
+      "minute": 7,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 21,
+      "hour": 11,
+      "minute": 46,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 7,
+      "hour": 5,
+      "minute": 13,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 22,
+      "hour": 22,
+      "minute": 40,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 7,
+      "hour": 15,
+      "minute": 6,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 23,
+      "hour": 5,
+      "minute": 57,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 7,
+      "hour": 18,
+      "minute": 19,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 23,
+      "hour": 3,
+      "minute": 58,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 8,
+      "hour": 10,
+      "minute": 21,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 23,
+      "hour": 13,
+      "minute": 44,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 7,
+      "hour": 13,
+      "minute": 55,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 22,
+      "hour": 11,
+      "minute": 38,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 7,
+      "hour": 7,
+      "minute": 2,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 22,
+      "hour": 1,
+      "minute": 9,
+      "src": "computed-ephem"
+    }
+  },
+  "2055": {
+    "소한": {
+      "month": 1,
+      "day": 5,
+      "hour": 18,
+      "minute": 21,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 20,
+      "hour": 11,
+      "minute": 48,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 4,
+      "hour": 5,
+      "minute": 55,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 19,
+      "hour": 1,
+      "minute": 46,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 5,
+      "hour": 23,
+      "minute": 40,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 21,
+      "hour": 0,
+      "minute": 28,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 5,
+      "hour": 4,
+      "minute": 7,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 20,
+      "hour": 11,
+      "minute": 7,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 5,
+      "hour": 21,
+      "minute": 3,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 21,
+      "hour": 9,
+      "minute": 55,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 6,
+      "hour": 0,
+      "minute": 55,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 21,
+      "hour": 17,
+      "minute": 39,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 7,
+      "hour": 11,
+      "minute": 4,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 23,
+      "hour": 4,
+      "minute": 31,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 7,
+      "hour": 21,
+      "minute": 0,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 23,
+      "hour": 11,
+      "minute": 48,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 8,
+      "hour": 0,
+      "minute": 15,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 23,
+      "hour": 9,
+      "minute": 48,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 8,
+      "hour": 16,
+      "minute": 18,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 23,
+      "hour": 19,
+      "minute": 32,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 7,
+      "hour": 19,
+      "minute": 52,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 22,
+      "hour": 17,
+      "minute": 25,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 7,
+      "hour": 12,
+      "minute": 57,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 22,
+      "hour": 6,
+      "minute": 54,
+      "src": "computed-ephem"
+    }
+  },
+  "2056": {
+    "소한": {
+      "month": 1,
+      "day": 6,
+      "hour": 0,
+      "minute": 14,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 20,
+      "hour": 17,
+      "minute": 32,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 4,
+      "hour": 11,
+      "minute": 46,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 19,
+      "hour": 7,
+      "minute": 29,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 5,
+      "hour": 5,
+      "minute": 31,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 20,
+      "hour": 6,
+      "minute": 10,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 4,
+      "hour": 9,
+      "minute": 59,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 19,
+      "hour": 16,
+      "minute": 51,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 5,
+      "hour": 2,
+      "minute": 57,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 20,
+      "hour": 15,
+      "minute": 41,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 5,
+      "hour": 6,
+      "minute": 51,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 20,
+      "hour": 23,
+      "minute": 27,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 6,
+      "hour": 17,
+      "minute": 1,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 22,
+      "hour": 10,
+      "minute": 21,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 7,
+      "hour": 2,
+      "minute": 55,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 22,
+      "hour": 17,
+      "minute": 38,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 7,
+      "hour": 6,
+      "minute": 6,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 22,
+      "hour": 15,
+      "minute": 38,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 7,
+      "hour": 22,
+      "minute": 8,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 23,
+      "hour": 1,
+      "minute": 24,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 7,
+      "hour": 1,
+      "minute": 42,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 21,
+      "hour": 23,
+      "minute": 19,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 6,
+      "hour": 18,
+      "minute": 50,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 21,
+      "hour": 12,
+      "minute": 50,
+      "src": "computed-ephem"
+    }
+  },
+  "2057": {
+    "소한": {
+      "month": 1,
+      "day": 5,
+      "hour": 6,
+      "minute": 9,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 19,
+      "hour": 23,
+      "minute": 29,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 3,
+      "hour": 17,
+      "minute": 41,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 18,
+      "hour": 13,
+      "minute": 26,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 5,
+      "hour": 11,
+      "minute": 26,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 20,
+      "hour": 12,
+      "minute": 7,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 4,
+      "hour": 15,
+      "minute": 52,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 19,
+      "hour": 22,
+      "minute": 46,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 5,
+      "hour": 8,
+      "minute": 46,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 20,
+      "hour": 21,
+      "minute": 34,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 5,
+      "hour": 12,
+      "minute": 35,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 21,
+      "hour": 5,
+      "minute": 18,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 6,
+      "hour": 22,
+      "minute": 41,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 22,
+      "hour": 16,
+      "minute": 10,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 7,
+      "hour": 8,
+      "minute": 33,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 22,
+      "hour": 23,
+      "minute": 24,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 7,
+      "hour": 11,
+      "minute": 43,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 22,
+      "hour": 21,
+      "minute": 22,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 8,
+      "hour": 3,
+      "minute": 45,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 23,
+      "hour": 7,
+      "minute": 8,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 7,
+      "hour": 7,
+      "minute": 22,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 22,
+      "hour": 5,
+      "minute": 6,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 7,
+      "hour": 0,
+      "minute": 33,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 21,
+      "hour": 18,
+      "minute": 42,
+      "src": "computed-ephem"
+    }
+  },
+  "2058": {
+    "소한": {
+      "month": 1,
+      "day": 5,
+      "hour": 11,
+      "minute": 57,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 20,
+      "hour": 5,
+      "minute": 25,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 3,
+      "hour": 23,
+      "minute": 33,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 18,
+      "hour": 19,
+      "minute": 24,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 5,
+      "hour": 17,
+      "minute": 19,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 20,
+      "hour": 18,
+      "minute": 4,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 4,
+      "hour": 21,
+      "minute": 43,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 20,
+      "hour": 4,
+      "minute": 40,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 5,
+      "hour": 14,
+      "minute": 35,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 21,
+      "hour": 3,
+      "minute": 23,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 5,
+      "hour": 18,
+      "minute": 24,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 21,
+      "hour": 11,
+      "minute": 3,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 7,
+      "hour": 4,
+      "minute": 31,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 22,
+      "hour": 21,
+      "minute": 53,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 7,
+      "hour": 14,
+      "minute": 24,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 23,
+      "hour": 5,
+      "minute": 8,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 7,
+      "hour": 17,
+      "minute": 37,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 23,
+      "hour": 3,
+      "minute": 7,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 8,
+      "hour": 9,
+      "minute": 40,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 23,
+      "hour": 12,
+      "minute": 53,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 7,
+      "hour": 13,
+      "minute": 16,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 22,
+      "hour": 10,
+      "minute": 50,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 7,
+      "hour": 6,
+      "minute": 26,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 22,
+      "hour": 0,
+      "minute": 24,
+      "src": "computed-ephem"
+    }
+  },
+  "2059": {
+    "소한": {
+      "month": 1,
+      "day": 5,
+      "hour": 17,
+      "minute": 48,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 20,
+      "hour": 11,
+      "minute": 5,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 4,
+      "hour": 5,
+      "minute": 23,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 19,
+      "hour": 1,
+      "minute": 4,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 5,
+      "hour": 23,
+      "minute": 8,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 20,
+      "hour": 23,
+      "minute": 43,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 5,
+      "hour": 3,
+      "minute": 31,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 20,
+      "hour": 10,
+      "minute": 19,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 5,
+      "hour": 20,
+      "minute": 23,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 21,
+      "hour": 9,
+      "minute": 4,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 6,
+      "hour": 0,
+      "minute": 11,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 21,
+      "hour": 16,
+      "minute": 46,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 7,
+      "hour": 10,
+      "minute": 18,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 23,
+      "hour": 3,
+      "minute": 40,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 7,
+      "hour": 20,
+      "minute": 12,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 23,
+      "hour": 10,
+      "minute": 59,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 7,
+      "hour": 23,
+      "minute": 26,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 23,
+      "hour": 9,
+      "minute": 2,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 8,
+      "hour": 15,
+      "minute": 30,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 23,
+      "hour": 18,
+      "minute": 50,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 7,
+      "hour": 19,
+      "minute": 4,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 22,
+      "hour": 16,
+      "minute": 45,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 7,
+      "hour": 12,
+      "minute": 12,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 22,
+      "hour": 6,
+      "minute": 17,
+      "src": "computed-ephem"
+    }
+  },
+  "2060": {
+    "소한": {
+      "month": 1,
+      "day": 5,
+      "hour": 23,
+      "minute": 33,
+      "src": "computed-ephem"
+    },
+    "대한": {
+      "month": 1,
+      "day": 20,
+      "hour": 16,
+      "minute": 57,
+      "src": "computed-ephem"
+    },
+    "입춘": {
+      "month": 2,
+      "day": 4,
+      "hour": 11,
+      "minute": 7,
+      "src": "computed-ephem"
+    },
+    "우수": {
+      "month": 2,
+      "day": 19,
+      "hour": 6,
+      "minute": 56,
+      "src": "computed-ephem"
+    },
+    "경칩": {
+      "month": 3,
+      "day": 5,
+      "hour": 4,
+      "minute": 53,
+      "src": "computed-ephem"
+    },
+    "춘분": {
+      "month": 3,
+      "day": 20,
+      "hour": 5,
+      "minute": 37,
+      "src": "computed-ephem"
+    },
+    "청명": {
+      "month": 4,
+      "day": 4,
+      "hour": 9,
+      "minute": 19,
+      "src": "computed-ephem"
+    },
+    "곡우": {
+      "month": 4,
+      "day": 19,
+      "hour": 16,
+      "minute": 16,
+      "src": "computed-ephem"
+    },
+    "입하": {
+      "month": 5,
+      "day": 5,
+      "hour": 2,
+      "minute": 12,
+      "src": "computed-ephem"
+    },
+    "소만": {
+      "month": 5,
+      "day": 20,
+      "hour": 15,
+      "minute": 3,
+      "src": "computed-ephem"
+    },
+    "망종": {
+      "month": 6,
+      "day": 5,
+      "hour": 6,
+      "minute": 1,
+      "src": "computed-ephem"
+    },
+    "하지": {
+      "month": 6,
+      "day": 20,
+      "hour": 22,
+      "minute": 45,
+      "src": "computed-ephem"
+    },
+    "소서": {
+      "month": 7,
+      "day": 6,
+      "hour": 16,
+      "minute": 6,
+      "src": "computed-ephem"
+    },
+    "대서": {
+      "month": 7,
+      "day": 22,
+      "hour": 9,
+      "minute": 35,
+      "src": "computed-ephem"
+    },
+    "입추": {
+      "month": 8,
+      "day": 7,
+      "hour": 1,
+      "minute": 58,
+      "src": "computed-ephem"
+    },
+    "처서": {
+      "month": 8,
+      "day": 22,
+      "hour": 16,
+      "minute": 49,
+      "src": "computed-ephem"
+    },
+    "백로": {
+      "month": 9,
+      "day": 7,
+      "hour": 5,
+      "minute": 10,
+      "src": "computed-ephem"
+    },
+    "추분": {
+      "month": 9,
+      "day": 22,
+      "hour": 14,
+      "minute": 47,
+      "src": "computed-ephem"
+    },
+    "한로": {
+      "month": 10,
+      "day": 7,
+      "hour": 21,
+      "minute": 12,
+      "src": "computed-ephem"
+    },
+    "상강": {
+      "month": 10,
+      "day": 23,
+      "hour": 0,
+      "minute": 32,
+      "src": "computed-ephem"
+    },
+    "입동": {
+      "month": 11,
+      "day": 7,
+      "hour": 0,
+      "minute": 48,
+      "src": "computed-ephem"
+    },
+    "소설": {
+      "month": 11,
+      "day": 21,
+      "hour": 22,
+      "minute": 27,
+      "src": "computed-ephem"
+    },
+    "대설": {
+      "month": 12,
+      "day": 6,
+      "hour": 17,
+      "minute": 56,
+      "src": "computed-ephem"
+    },
+    "동지": {
+      "month": 12,
+      "day": 21,
+      "hour": 12,
+      "minute": 0,
+      "src": "computed-ephem"
+    }
   }
 }
