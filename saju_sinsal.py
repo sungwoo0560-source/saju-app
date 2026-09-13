@@ -2,7 +2,7 @@
 """
 saju_sinsal.py - 신살(神殺) 계산 모듈
 get_sam_hap, get_chung_hyung, get_gongmang, get_nabjin,
-_get_extra_sinsal_v1, get_waryeong, get_yangin, get_oigyeok,
+get_waryeong, get_yangin, get_oigyeok,
 get_12sinsal, get_extra_sinsal, get_pahae, get_geunmyo_hwasil 포함
 """
 import streamlit as st
@@ -253,120 +253,6 @@ def get_nabjin(cg, jj):
 # ==================================================
 
 
-@st.cache_data(hash_funcs=_PILS_HF)
-def _get_extra_sinsal_v1(pils):
-    """기본 신살 감지 (원진/귀문/백호/양인/화개) - 내부용. 전체버전은 get_extra_sinsal() 사용"""
-
-    ilgan = pils[1]["cg"]
-
-    jjs = [p["jj"] for p in pils]
-
-    jj_set = set(jjs)
-
-    result = []
-
-    pairs_jj = [(jjs[i], jjs[j]) for i in range(len(jjs)) for j in range(i + 1, len(jjs))]
-
-    for a, b in pairs_jj:
-        if (a, b) in EXTRA_SINSAL_DATA["원진"]["pairs"] or (b, a) in EXTRA_SINSAL_DATA["원진"]["pairs"]:
-            d = EXTRA_SINSAL_DATA["원진"]
-
-            result.append(
-                {
-                    "name": d["name"],
-                    "icon": d["icon"],
-                    "desc": d["desc"],
-                    "remedy": d["remedy"],
-                    "found": f"{a}/{b}",
-                }
-            )
-
-            break
-
-    for a, b in pairs_jj:
-        if (a, b) in EXTRA_SINSAL_DATA["귀문"]["pairs"] or (b, a) in EXTRA_SINSAL_DATA["귀문"]["pairs"]:
-            d = EXTRA_SINSAL_DATA["귀문"]
-
-            result.append(
-                {
-                    "name": d["name"],
-                    "icon": d["icon"],
-                    "desc": d["desc"],
-                    "remedy": d["remedy"],
-                    "found": f"{a}/{b}",
-                }
-            )
-
-            break
-
-    for i, p in enumerate(pils):
-        if p["cg"] + p["jj"] in EXTRA_SINSAL_DATA["백호"]["combos"]:
-            d = EXTRA_SINSAL_DATA["백호"]
-
-            label = ["시주", "일주", "월주", "년주"][i]
-
-            result.append(
-                {
-                    "name": f"{d['name']} [{label}]",
-                    "icon": d["icon"],
-                    "desc": d["desc"],
-                    "remedy": d["remedy"],
-                    "found": p["str"],
-                }
-            )
-
-    yang_jj = EXTRA_SINSAL_DATA["양인"]["jjs"].get(ilgan, "")
-
-    if yang_jj and yang_jj in jj_set:
-        d = EXTRA_SINSAL_DATA["양인"]
-
-        result.append(
-            {
-                "name": f"{d['name']} [{yang_jj}]",
-                "icon": d["icon"],
-                "desc": d["desc"],
-                "remedy": d["remedy"],
-                "found": yang_jj,
-            }
-        )
-
-    for combo, hg_jj in EXTRA_SINSAL_DATA["화개"]["map"].items():
-        if hg_jj in jj_set and any(jj in combo for jj in jj_set):
-            d = EXTRA_SINSAL_DATA["화개"]
-
-            result.append(
-                {
-                    "name": f"{d['name']} [{hg_jj}]",
-                    "icon": d["icon"],
-                    "desc": d["desc"],
-                    "remedy": d["remedy"],
-                    "found": hg_jj,
-                }
-            )
-
-            break
-
-    return result
-
-
-# ==================================================
-
-#  🗓️ 만세력 엔진 (ManseCalendarEngine)
-
-#  일진 / 절기 / 길일흉일 계산
-
-# ==================================================
-
-# 24절기 기본 날짜 (연도별 미세 차이는 A단계 라이브러리로 정밀화)
-
-
-# 길일/흉일 기준 - 일진의 천간 기준 간단 판별
-
-_GIL_CG = {"甲", "丙", "戊", "庚", "壬"}  # 양간 = 기본 길일
-
-_HYUNG_JJ = {"丑", "戌", "巳", "申", "寅"}  # 삼형살 지지
-
-_GIL_JJ = {"子", "卯", "午", "酉", "亥", "寅"}  # 귀인 지지 포함
 
 
 @st.cache_data(hash_funcs=_PILS_HF)
