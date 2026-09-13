@@ -8963,7 +8963,7 @@ def get_special_stars(pils):
     # 겁살(劫殺) — 년지/일지 기준 삼합국 → 겁살지지가 사주에 있는지
     _nyon_jj = pils[3]["jj"] if len(pils) > 3 else ""
     _il_jj = pils[1]["jj"] if len(pils) > 1 else ""
-    for _ref_jj in [_nyon_jj, _il_jj]:
+    for _ref_jj in [_nyon_jj]:
         _geop_jj = GEOP_MAP.get(_ref_jj, "")
         if _geop_jj and _geop_jj in pil_jjs:
             result.append({
@@ -8975,7 +8975,7 @@ def get_special_stars(pils):
     # 망신살(亡身殺) — 구설·배신·체면 손상 (SINSAL_12_TABLE 정본 직접 참조,
     # MANGSHIN_MAP은 실제로는 驛馬殺 값과 동일했던 오사용 테이블이라 폐기)
     _SAMHAP_GROUPS = ["寅(인)午(오)戌(술)", "申(신)子(자)辰(진)", "巳(사)酉(유)丑(축)", "亥(해)卯(묘)未(미)"]
-    for _ref_jj in [_nyon_jj, _il_jj]:
+    for _ref_jj in [_nyon_jj]:
         _grp = next((g for g in _SAMHAP_GROUPS if _ref_jj in g), None)
         _ms_jj = SINSAL_12_TABLE.get("亡身殺", {}).get(_grp, "") if _grp else ""
         if _ms_jj and _ms_jj in pil_jjs:
