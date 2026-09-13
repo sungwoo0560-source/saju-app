@@ -5,6 +5,8 @@ __pycache__/
 .Python
 *.env
 .env
+*.db
+.streamlit/secrets.toml
 *.log
 saju_save.json
 history_memory.json
