@@ -4522,6 +4522,7 @@ CATEGORY_MAX = {"accident": 2, "love": 2, "wealth": 2, "family": 1, "power": 1}
 # ─── X-6-P: 막장 드라마 소설 스토리텔링 ─────────────────────────────────────────
 PATTERN_NARRATIVE_TYPE = {
     "식상태왕_홍염활성":    "외부 새 인연 등장형",
+    "식상태왕_홍염세운한정": "올해 한정 인기운형",
     "무관_상관세운_기혼여": "기존 남편 충돌형",
     "비겁쟁재_비견세운":    "친구 배신·동업 함정형",
     "관살혼잡_정관세운":    "양다리·선택 시기형",
@@ -4555,6 +4556,14 @@ NARRATIVE_TEMPLATES = {
         "가을이 되면 {partner}가 멀어지고 소진만 남을 수 있습니다.\n\n"
         "이건 식상태왕 + 홍염살에서 오기 쉬운 흐름입니다.\n"
         "끌릴수록 지출과 에너지 소진을 경계하세요. 거리를 두고 에너지를 다른 곳에 쓰면 피해갈 수 있습니다."
+    ),
+    "식상태왕_홍염세운한정": (
+        "{year}년 봄, {name}님 주변에 인기 운이 잠깐 스칩니다.\n"
+        "{zodiac} / {person}\n\n"
+        "다만 이 기운은 원국이 아니라 {year}년 세운에만 닿아 있어,\n"
+        "타고난 성향이 아니라 올해 한 해 스치는 흐름입니다.\n\n"
+        "이건 식상태왕 + {year}년 세운 홍염에서 오기 쉬운 흐름입니다.\n"
+        "해가 바뀌면 자연히 지나가는 흐름이라 별도 대비가 필요하지 않습니다."
     ),
     "비겁쟁재_비견세운": (
         "{year}년 봄, {name}님 앞에 친구 한 명이 다가옵니다.\n"
@@ -4664,7 +4673,7 @@ def infer_partner_pattern(my_ilgan, sewoon_cg, sewoon_jj):
     return traits, sipsung
 
 
-def classify_narrative_pattern(saju_data, gender, marital_status):
+def classify_narrative_pattern(saju_data, gender, marital_status, pils=None):
     """본인 사주 패턴 자동 분류 (우선순위 순)"""
     try:
         sw_ss       = saju_data.get("sewoon_sipsung", "")
@@ -4682,10 +4691,15 @@ def classify_narrative_pattern(saju_data, gender, marital_status):
         _JJ12 = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"]
         sw_jj    = _JJ12[(cur_year - 4) % 12]
         hongyeom = _HY.get(ilgan, "") == sw_jj
+        # 원국 홍염 — SSOT(saju_sinsal.HONGYEOM_MAP) 그대로 재사용, 새 판정 없음.
+        # 5183/6055 지점과 동일한 방식(일간의 홍염 지지가 4주 지지에 실제 있는지)이나
+        # 계산은 이 함수 안에서 따로 수행한다(공유 헬퍼로 통일돼 있지 않음).
+        hongyeom_won = bool(pils) and (_HY.get(ilgan, "") in {p.get("jj", "") for p in pils})
         is_married = marital_status in ("기혼","재혼")
         is_female  = gender in ("여","女")
 
-        if siksang >= 2 and hongyeom:                                       return "식상태왕_홍염활성"
+        if siksang >= 2 and hongyeom:
+            return "식상태왕_홍염활성" if hongyeom_won else "식상태왕_홍염세운한정"
         if gwan == 0 and sw_ss == "상관" and is_female and is_married:      return "무관_상관세운_기혼여"
         if bigyeop_jae and sw_ss == "비견":                                 return "비겁쟁재_비견세운"
         if gwansal_mix and sw_ss == "정관":                                  return "관살혼잡_정관세운"
@@ -4755,7 +4769,7 @@ def build_dramatic_narrative(pils, name, gender, marital_status, saju_data):
     """사주 패턴 자동 분류 후 소설 스토리텔링 박스 생성"""
     try:
         cur_year = saju_data.get("current_year", datetime.now().year)
-        pattern  = classify_narrative_pattern(saju_data, gender, marital_status)
+        pattern  = classify_narrative_pattern(saju_data, gender, marital_status, pils)
         p_type   = PATTERN_NARRATIVE_TYPE.get(pattern, "")
         _CG10 = ["甲","乙","丙","丁","戊","己","庚","辛","壬","癸"]
         _JJ12 = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"]
