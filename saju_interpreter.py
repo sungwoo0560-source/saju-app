@@ -7802,7 +7802,26 @@ def get_gyeokguk(pils):
     # 격국 판정(정통 자평 원칙): 월지 지장간 중 "천간에 실제 투출된 것" 우선.
     # jijang[::-1] = [정기, 중기, 여기] 순으로(2글자 지지는 [정기, 여기]) 원국 4천간에
     # 있는 첫 글자를 찾아 그 십성으로 격을 정한다. 아무것도 투출 안 되면 정기로 폴백(暗格).
-    _tou_gan = next((g for g in jijang[::-1] if g in cgs_all), None)
+    # ★2026-09-15 비겁 스킵 수정: 정기는 비겁이어도 즉시 채택(建祿格/月劫格 성립
+    # 유지). 중기·여기가 비겁이면 격의 대상이 아니므로 건너뛰고 다음 후보(중기→
+    # 여기 순)를 계속 찾는다 — 시주 천간이 우연히 월지의 비겁 지장간과 겹쳐
+    # "미정격"으로 잘못 떨어지던 문제(월지 자체 조건은 그대로인데 시주만 바뀌어도
+    # 격이 갈리던 현상)의 원인. 매치된 후보가 전부 비겁이면 그때만 미정격, 아무
+    # 것도 매치 안 되면(완전 미투출) 기존과 동일하게 暗格로 정기 폴백한다.
+    _bigyeop_skip = []
+    _tou_gan = None
+    for _g in jijang[::-1]:
+        if _g not in cgs_all:
+            continue
+        if _g == jeongi:
+            _tou_gan = _g
+            break
+        _ss_g = TEN_GODS_MATRIX.get(ilgan, {}).get(_g, "")
+        if "比肩" in _ss_g or "劫財" in _ss_g:
+            _bigyeop_skip.append(_g)
+            continue
+        _tou_gan = _g
+        break
 
     if _tou_gan is not None:
         gyeok_gan = _tou_gan
@@ -7815,6 +7834,14 @@ def get_gyeokguk(pils):
             grade = "雜格 - 중기/여기가 투출, 격이 복잡하나 쓸모가 있다."
 
             grade_score = 70
+    elif _bigyeop_skip:
+        # 매치된 후보가 있었으나 전부 비겁이라 격을 확정하지 못한 경우
+        gyeok_gan = _bigyeop_skip[0]
+        is_toucht = True
+
+        grade = "雜格 - 투출간이 비겁뿐이라 격을 확정하지 못한다."
+
+        grade_score = 40
     else:
         gyeok_gan = jeongi
         is_toucht = False
