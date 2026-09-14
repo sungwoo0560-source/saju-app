@@ -10237,7 +10237,6 @@ _RETENTION_FILE = "saju_retention.json"
 
 _USER_PROFILE_FILE = "saju_user_profile.json"
 
-SAJU_SAVE_FILE = "saju_save.json"
 
 # ==============================================================
 
@@ -10260,99 +10259,6 @@ def _load_user_profile() -> dict:
         st.warning(f"⚠️ 오류: {str(_e)[:80]}")
 
     return {}
-
-
-def save_saju_state():
-    """사주 입력값 및 계산 결과를 JSON 파일로 영구 저장"""
-
-    _ss = st.session_state
-
-    solar = _ss.get("in_solar_date")
-
-    data = {
-        # -- 입력값 --
-        "in_name": _ss.get("in_name", ""),
-        "in_gender": _ss.get("in_gender", "남"),
-        "in_cal_type": _ss.get("in_cal_type", "양력"),
-        "in_solar_date": solar.isoformat() if solar else "1990-01-01",
-        "in_lunar_year": _ss.get("in_lunar_year", 1990),
-        "in_lunar_month": _ss.get("in_lunar_month", 1),
-        "in_lunar_day": _ss.get("in_lunar_day", 1),
-        "in_is_leap": _ss.get("in_is_leap", False),
-        "in_birth_hour": _ss.get("in_birth_hour", 12),
-        "in_birth_minute": _ss.get("in_birth_minute", 0),
-        "in_unknown_time": _ss.get("in_unknown_time", False),
-        "in_marriage": _ss.get("in_marriage", "미혼"),
-        "in_occupation": _ss.get("in_occupation", "선택 안 함"),
-        "in_premium_correction": _ss.get("in_premium_correction", True),
-        "in_birth_region": _ss.get("in_birth_region", "서울"),
-        # -- 계산 결과 --
-        "saju_pils": _ss.get("saju_pils"),
-        "birth_year": _ss.get("birth_year"),
-        "birth_month": _ss.get("birth_month"),
-        "birth_day": _ss.get("birth_day"),
-        "birth_hour": _ss.get("birth_hour"),
-        "birth_minute": _ss.get("birth_minute"),
-        "gender": _ss.get("gender"),
-        "saju_name": _ss.get("saju_name"),
-        "marriage_status": _ss.get("marriage_status"),
-        "occupation": _ss.get("occupation"),
-        "cal_type": _ss.get("cal_type"),
-        "lunar_info": _ss.get("lunar_info", ""),
-        # -- 기억 구조 --
-        "saju_memory": _ss.get("saju_memory", {}),
-        # -- 즐겨찾기 --
-        "favorites": _ss.get("favorites", []),
-    }
-
-    try:
-        with open(SAJU_SAVE_FILE, "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False, indent=2, default=str)
-
-    except Exception as _e:
-        st.warning(f"⚠️ 오류: {str(_e)[:80]}")
-
-
-def load_saju_state():
-    """saju_save.json에서 상태를 읽어 session_state에 복원"""
-
-    if not os.path.exists(SAJU_SAVE_FILE):
-        return
-
-    try:
-        with open(SAJU_SAVE_FILE, "r", encoding="utf-8") as f:
-            data = json.load(f)
-
-    except Exception:
-        return
-
-    _ss = st.session_state
-
-    # 단순 키 복원 (입력값 + 계산 결과)
-
-
-    for key in simple_keys:
-        if key in data:
-            _ss[key] = data[key]
-
-    # date 객체 복원
-
-    if "in_solar_date" in data:
-        try:
-            _ss["in_solar_date"] = date.fromisoformat(data["in_solar_date"])
-
-        except Exception as _e:
-            st.warning(f"⚠️ 오류: {str(_e)[:80]}")
-
-    # 기억 구조 복원
-
-    if "saju_memory" in data:
-        _ss["saju_memory"] = data["saju_memory"]
-
-    # 즐겨찾기 복원
-
-    if "favorites" in data:
-        _ss["favorites"] = data["favorites"]
 
 
 def save_to_favorites(label: str):
@@ -28264,13 +28170,6 @@ def main():
         "건강 이상 시 의사, 법률·재무 문제는 해당 분야 전문가와 상담하십시오."
     )
 
-    if "_save_loaded" not in st.session_state:
-        # G-2: load_saju_state() 자동 복원 비활성화 — saju_save.json이 전체
-        # 사용자가 공유하는 단일 파일이라, 새 세션마다 직전 제출자의 생년월일시
-        # 등 개인정보가 그대로 노출되는 세션 간 누출 버그였다(실측 재현 확인).
-        # save_saju_state() 자체는 그대로 두되(파일 갱신은 계속됨), 이 파일을
-        # 세션 복원에 다시 쓰지 않는다.
-        st.session_state["_save_loaded"] = True
 
     _ss = st.session_state
 
@@ -29189,9 +29088,6 @@ def main():
             else:
                 st.session_state["lunar_info"] = ""
 
-            # 영구 저장
-
-            save_saju_state()
 
             # * 초기 매트릭스 수치 도출 (Saju 기반)
 
