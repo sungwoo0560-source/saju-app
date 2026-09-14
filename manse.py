@@ -4523,6 +4523,7 @@ CATEGORY_MAX = {"accident": 2, "love": 2, "wealth": 2, "family": 1, "power": 1}
 PATTERN_NARRATIVE_TYPE = {
     "식상태왕_홍염활성":    "외부 새 인연 등장형",
     "식상태왕_홍염세운한정": "올해 한정 인기운형",
+    "식상태왕_홍염원국형":  "타고난 매력형",
     "무관_상관세운_기혼여": "기존 남편 충돌형",
     "비겁쟁재_비견세운":    "친구 배신·동업 함정형",
     "관살혼잡_정관세운":    "양다리·선택 시기형",
@@ -4564,6 +4565,14 @@ NARRATIVE_TEMPLATES = {
         "타고난 성향이 아니라 올해 한 해 스치는 흐름입니다.\n\n"
         "이건 식상태왕 + {year}년 세운 홍염에서 오기 쉬운 흐름입니다.\n"
         "해가 바뀌면 자연히 지나가는 흐름이라 별도 대비가 필요하지 않습니다."
+    ),
+    "식상태왕_홍염원국형": (
+        "{name}님은 원국에 홍염살을 타고났습니다.\n"
+        "가만있어도 이성의 시선이 따라붙고, 먼저 다가오는 인연이 많은 편입니다.\n\n"
+        "{year}년 세운은 이 기운을 특별히 자극하는 해는 아니라,\n"
+        "평소의 매력이 자연스럽게 드러나는 정도입니다.\n\n"
+        "이건 원국 홍염살에서 오는 타고난 기질입니다.\n"
+        "선을 분명히 하면 매력이 독이 아니라 복이 되는 구조입니다."
     ),
     "비겁쟁재_비견세운": (
         "{year}년 봄, {name}님 앞에 친구 한 명이 다가옵니다.\n"
@@ -4698,8 +4707,15 @@ def classify_narrative_pattern(saju_data, gender, marital_status, pils=None):
         is_married = marital_status in ("기혼","재혼")
         is_female  = gender in ("여","女")
 
-        if siksang >= 2 and hongyeom:
-            return "식상태왕_홍염활성" if hongyeom_won else "식상태왕_홍염세운한정"
+        # 3분기(9de9b42와 동일 구조): 원국O+세운O=경고 유지, 원국X+세운O=올해 한정
+        # 서술(경고 톤 제거), 원국O+세운X=기질 서술만(신규, 경고·시기 한정 없음).
+        if siksang >= 2 and (hongyeom or hongyeom_won):
+            if hongyeom and hongyeom_won:
+                return "식상태왕_홍염활성"
+            elif hongyeom_won:
+                return "식상태왕_홍염원국형"
+            else:
+                return "식상태왕_홍염세운한정"
         if gwan == 0 and sw_ss == "상관" and is_female and is_married:      return "무관_상관세운_기혼여"
         if bigyeop_jae and sw_ss == "비견":                                 return "비겁쟁재_비견세운"
         if gwansal_mix and sw_ss == "정관":                                  return "관살혼잡_정관세운"
@@ -16125,20 +16141,20 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                 if _hongyum_sw and _hongyum_in_chart:
                     _danger_signals.append((
                         "💋 홍염살 최강 발동 — 이성 문제 극도 주의",
-                        "올해는 이성에게 유난히 매력이 발산되는 시기입니다. "
-                        "뜻하지 않게 강하게 끌리는 상대가 나타날 수 있으니, "
-                        "관계의 선을 미리 정해두면 무리 없이 지나갑니다.",
+                        f"{cur_year}년은 이성에게 유난히 매력이 발산되는 시기입니다. "
+                        f"뜻하지 않게 강하게 끌리는 상대가 나타날 수 있으니, "
+                        f"관계의 선을 미리 정해두면 무리 없이 지나갑니다.",
                         "위험"
                     ))
                 elif _hongyum_sw:
                     _danger_signals.append((
                         "💋 올해 홍염살 발동 — 이성 유혹 극도 주의",
-                        f"올해 세운지지({_세운_jj_s})가 {ilgan}일간의 홍염살입니다. "
-                        f"올해 특별히 이성에게 강하게 끌리거나 "
+                        f"{cur_year}년 세운지지({_세운_jj_s})가 {ilgan}일간의 홍염살입니다. "
+                        f"{cur_year}년 특별히 이성에게 강하게 끌리거나 "
                         f"이성이 강하게 접근하는 상황이 생깁니다. "
                         f"이 유혹은 매우 달콤하게 느껴지지만 "
                         f"결말까지 이어지는 경우는 드뭅니다. "
-                        f"기혼자는 올해 이성 관계에서 선을 분명히 그으십시오.",
+                        f"기혼자는 {cur_year}년 이성 관계에서 선을 분명히 그으십시오.",
                         "위험"
                     ))
                 elif _hongyum_in_chart:
