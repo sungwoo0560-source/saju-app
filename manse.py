@@ -10355,29 +10355,6 @@ def load_saju_state():
         _ss["favorites"] = data["favorites"]
 
 
-def _write_favorites_to_file(favorites: list):
-    """saju_save.json의 favorites 키만 업데이트"""
-
-    existing = {}
-
-    if os.path.exists(SAJU_SAVE_FILE):
-        try:
-            with open(SAJU_SAVE_FILE, "r", encoding="utf-8") as f:
-                existing = json.load(f)
-
-        except Exception as _e:
-            st.warning(f"⚠️ 오류: {str(_e)[:80]}")
-
-    existing["favorites"] = favorites
-
-    try:
-        with open(SAJU_SAVE_FILE, "w", encoding="utf-8") as f:
-            json.dump(existing, f, ensure_ascii=False, indent=2, default=str)
-
-    except Exception as _e:
-        st.warning(f"⚠️ 오류: {str(_e)[:80]}")
-
-
 def save_to_favorites(label: str):
     """현재 상태를 즐겨찾기에 저장 (같은 label이면 덮어쓰기)"""
 
@@ -10434,7 +10411,6 @@ def save_to_favorites(label: str):
 
     _ss["favorites"] = favorites
 
-    _write_favorites_to_file(favorites)
 
 
 def load_from_favorite(idx: int):
@@ -10508,7 +10484,6 @@ def load_from_favorite(idx: int):
     if 0 <= idx < len(favorites):
         favorites[idx]["last_viewed"] = datetime.now().isoformat(timespec="seconds")
         _ss["favorites"] = favorites
-        _write_favorites_to_file(favorites)
 
 
 def delete_favorite(idx: int):
@@ -10521,7 +10496,6 @@ def delete_favorite(idx: int):
 
         st.session_state["favorites"] = favorites
 
-        _write_favorites_to_file(favorites)
 
 
 def get_user_profile(saju_key: str) -> dict:
@@ -28629,7 +28603,6 @@ def main():
                             _existing_labels.add(_imp_fav.get("label"))
                             _added += 1
                     _ss["favorites"] = favorites
-                    _write_favorites_to_file(favorites)
                     st.success(f"✅ {_added}개 항목을 불러왔습니다.")
                 else:
                     st.error("올바른 즐겨찾기 JSON 파일이 아닙니다.")
@@ -28709,7 +28682,6 @@ def main():
                         if _new_star != _star_val:
                             favorites[_orig_i]["star"] = _new_star
                             _ss["favorites"] = favorites
-                            _write_favorites_to_file(favorites)
                             st.rerun()
                     with _fc3:
                         # 삭제 확인 팝업 (세션 상태 토글 방식)
