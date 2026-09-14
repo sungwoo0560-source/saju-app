@@ -6406,6 +6406,13 @@ def render_four_pillars_card(pils: list, name: str = "내담자") -> str:
             f"{cg_kr}({cg_oh}{oh_emoji.get(cg_oh,'')}) · {jj_kr}({jj_oh}{oh_emoji.get(jj_oh,'')})"
         )
 
+        # 큰 글자 표시(간지)도 빈 값이면 "시간 미상"으로 — _meta_line과 표기 통일.
+        _big_display = (
+            f'{cg}<span style="font-size:28px;">{jj}</span>'
+            if (cg and jj) else
+            '<span style="font-size:16px;color:#999;">시간 미상</span>'
+        )
+
         cards_html += f"""
 <div style="flex:1 1 22%;min-width:155px;max-width:200px;
             background:#fff;border:2px solid {pd['border']};border-radius:14px;
@@ -6416,7 +6423,7 @@ def render_four_pillars_card(pils: list, name: str = "내담자") -> str:
   </div>
   <div style="padding:14px 12px;text-align:center;">
     <div style="font-size:40px;font-weight:900;color:{pd['border']};line-height:1.1;">
-      {cg}<span style="font-size:28px;">{jj}</span>
+      {_big_display}
     </div>
     <div style="font-size:13px;color:#555;margin-top:4px;">
       {_meta_line}
