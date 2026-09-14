@@ -10262,17 +10262,6 @@ def _load_user_profile() -> dict:
     return {}
 
 
-def _save_user_profile(data: dict):
-    """사용자 프로필 저장"""
-
-    try:
-        with open(_USER_PROFILE_FILE, "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False, indent=2)
-
-    except Exception as _e:
-        st.warning(f"⚠️ 오류: {str(_e)[:80]}")
-
-
 def save_saju_state():
     """사주 입력값 및 계산 결과를 JSON 파일로 영구 저장"""
 
@@ -10560,61 +10549,6 @@ def get_user_profile(saju_key: str) -> dict:
     return profile
 
 
-def update_user_profile(saju_key: str, **kwargs) -> dict:
-    """사용자 프로필 업데이트"""
-
-    all_profiles = _load_user_profile()
-
-    profile = get_user_profile(saju_key)
-
-    today = datetime.now().strftime("%Y-%m-%d")
-
-    # 자동 업데이트
-
-    if not profile.get("first_visit"):
-        profile["first_visit"] = today
-
-    profile["last_visit"] = today
-
-    profile["visit_count"] = profile.get("visit_count", 0) + 1
-
-    # kwargs 반영
-
-    for k, v in kwargs.items():
-        if k == "concern" and v:
-            # 관심사 이력 관리
-
-            if profile.get("main_concern") and profile["main_concern"] != v:
-                hist = profile.get("past_concerns", [])
-
-                hist.append({"concern": profile["main_concern"], "date": today})
-
-                profile["past_concerns"] = hist[-5:]  # 최근 5개만 유지
-
-            profile["main_concern"] = v
-
-        elif k == "prediction" and v:
-            hist = profile.get("prediction_history", [])
-
-            hist.append({"text": v[:100], "date": today})
-
-            profile["prediction_history"] = hist[-10:]
-
-            profile["last_prediction"] = v[:100]
-
-        elif k == "belief_delta" and isinstance(v, (int, float)):
-            profile["belief_level"] = max(0.0, min(1.0, profile.get("belief_level", 0.5) + v))
-
-        else:
-            profile[k] = v
-
-    all_profiles[saju_key] = profile
-
-    _save_user_profile(all_profiles)
-
-    return profile
-
-
 def build_memory_context(saju_key: str) -> str:
     """AI 프롬프트에 삽입할 사용자 기억 컨텍스트 생성"""
 
@@ -10659,121 +10593,6 @@ def build_memory_context(saju_key: str) -> str:
         return "\n".join(lines) + "\n"
 
     return ""
-
-
-def render_user_memory_badge(saju_key: str):
-    """사용자 기억 상태 배지 렌더링"""
-
-    profile = get_user_profile(saju_key)
-
-    vc = profile.get("visit_count", 0)
-
-    if vc < 2:
-        return
-
-    bl = profile.get("belief_level", 0.5)
-
-    bl_pct = int(bl * 100)
-
-    bl_color = "#4caf50" if bl >= 0.7 else "#ff9800" if bl >= 0.4 else "#f44336"
-
-    bl_label = "높음" if bl >= 0.7 else "보통" if bl >= 0.4 else "형성중"
-
-    mc = profile.get("main_concern", "")
-
-    lp = profile.get("last_prediction", "")
-
-    mc_html = f"<div>(관심): <b>{mc}</b></div>" if mc else ""
-
-    lp_html = f"<div>(이전): <span style='color:#666'>{lp[:40]}...</span></div>" if lp else ""
-
-    html = "<div style='background:linear-gradient(135deg,#f0f0ff,#e8e8ff);border:1px solid #b8a8ee;border-radius:12px;padding:12px 14px;margin:8px 0'>"
-
-    html += f"<div style='font-size:11px;color:#7b5ea7;font-weight:700;margin-bottom:6px'>AI 기억 시스템 - {vc}회 상담 이력</div>"
-
-    html += "<div style='display:flex;gap:12px;flex-wrap:wrap;align-items:center'>"
-
-    html += "<div style='text-align:center'>"
-
-    html += "<div style='font-size:10px;color:#888'>신뢰도</div>"
-
-    html += f"<div style='font-size:16px;font-weight:900;color:{bl_color}'>{bl_pct}%</div>"
-
-    html += f"<div style='font-size:9px;color:{bl_color}'>{bl_label}</div>"
-
-    html += "</div>"
-
-    html += "<div style='flex:1;font-size:11px;color:#000000;line-height:1.8'>"
-
-    html += mc_html + lp_html
-
-    html += "</div></div></div>"
-
-    st.markdown(html, unsafe_allow_html=True)
-
-
-def render_ai_opening_ment(saju_key: str, name: str):
-    """사용자 상태에 따른 맞춤형 오프닝 멘트 (Retention)"""
-
-    profile = get_user_profile(saju_key)
-
-    vc = profile.get("visit_count", 0)
-
-    concern = profile.get("main_concern", "")
-
-    persona = profile.get("persona", "balanced_type")
-
-    _, p_label, _ = get_persona_label(persona)
-
-    # 멘트 템플릿
-
-    if vc <= 1:
-        ment = f"반갑습니다, {name}님. 당신의 천명을 풀이하러 온 {p_label} 마스터입니다. 오늘 어떤 고민이 당신의 마음을 흔들고 있나요?"
-
-    else:
-        visit_text = f"벌써 {vc}번째 방문이시네요."
-
-        if concern:
-            ment = f"어서 오세요, {name}님. {visit_text} 지난번에 '<b>{concern}</b>' 관련해 고민하셨던 흐름이 지금은 어떻게 바뀌었을까요? 다시 한번 정밀하게 짚어드리겠습니다."
-
-        else:
-            ment = f"다시 뵙게 되어 기쁩니다, {name}님. {visit_text} 오늘 당신의 운기 흐름에서 가장 먼저 짚어드려야 할 곳이 어디인지 선택해 주세요."
-
-    html = "<div style='background:linear-gradient(135deg,#f8f5ff,#ffffff);border-left:5px solid #7b5ea7;border-radius:0 12px 12px 0;padding:20px 18px;margin:15px 0;box-shadow:0 3px 10px rgba(0,0,0,0.05)'>"
-
-    html += f"<div style='font-size:15px;color:#2c1a4d;line-height:1.7;white-space:normal;word-break:break-all;font-weight:600'>{ment}</div>"
-
-    html += "</div>"
-
-    st.markdown(html, unsafe_allow_html=True)
-
-
-# ==============================================================
-
-#  📊 STATISTICAL CORRECTION ENGINE - 통계 보정 시스템
-
-#  사주 패턴 x 실제 데이터 -> 확률 기반 해석
-
-# ==============================================================
-
-# 패턴별 확률 데이터 (실증 기반 추정값)
-
-_STATISTICAL_PATTERNS = {
-    # (신강신약, 오행과다) -> (주제, 확률, 해석)
-    ("신약", "金"): (
-        "직장 스트레스",
-        76,
-        "금기 과다 + 신약 -> 책임 부담, 직장 압박 패턴",
-    ),
-    ("신약", "水"): ("과잉 사고", 71, "수기 과다 + 신약 -> 걱정/불안/수면 불안정"),
-    ("신강", "火"): ("감정 폭발", 68, "화기 과다 + 신강 -> 충동적 표현, 인간관계 갈등"),
-    ("신강", "木"): ("고집/충돌", 65, "목기 과다 + 신강 -> 타협 어려움, 독선적 결정"),
-    ("중화", "土"): ("변화 저항", 62, "토기 균형 + 중화 -> 안정 선호, 새로움 회피"),
-    ("신약", "火"): ("소진/번아웃", 74, "화기 과다 + 신약 -> 에너지 고갈, 소진 패턴"),
-    ("신강", "金"): ("재물 집착", 66, "금기 과다 + 신강 -> 물질 중시, 절약 강박"),
-    ("극신약", "土"): ("건강 취약", 79, "토기 과다 + 극신약 -> 소화기 계통 주의"),
-    ("극신강", "木"): ("인간관계 마찰", 72, "목기 극강 -> 자기중심적, 협력 어려움"),
-}
 
 
 def get_statistical_insights(pils, strength_info) -> list:
