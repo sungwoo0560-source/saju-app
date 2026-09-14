@@ -8272,14 +8272,38 @@ def build_saju_tongbyeon(pils, daewoon=None, birth_year=None, twelve_beol=None):
         _flavor = " ".join(_flavor_paras[:2])
         _career_list = [c.strip() for c in (gk.get("적합_진로", "") or "").split(",") if c.strip()][:3]
         _career_txt = f" 이 기운이 특히 빛나는 자리는 {'·'.join(_career_list)} 같은 분야입니다." if _career_list else ""
+        # ★2026-09-15 등급 어조 교체(형 승인): grade(격의_등급) 원문에 박혀 있던
+        # 기술적 설명("純格 - 월지 정기가 천간에 투출하여...")을 확신도가 드러나는
+        # 서술 어조로 바꾼다. 판정값(gk/격의_순수도 자체)은 무변경, 라벨(純格/雜格/
+        # 暗格)은 그대로 유지하고 뒤 설명만 교체 — 純格은 단정, 雜格은 단정+조건
+        # 병기, 暗格은 완곡한 "은은히 작용" 톤. 비겁뿐(40점, gname=미정격)은 격
+        # 단정 문구 자체를 생략하고 곧장 _flavor(GYEOKGUK_DESC["미정격"].summary —
+        # 이미 "격의 이름표보다 신강신약·오행균형으로 읽어야 한다"는 회피 톤)로
+        # 이어간다. 外格(종강격 88/종살격 85)은 純/雜/暗 4단계 체계 밖이라 현행
+        # grade 원문 그대로 유지.
+        _grade_label = grade.split(" - ")[0] if " - " in grade else grade
+        _grade_score_tb = gk.get("격의_순수도")
+        _GRADE_TONE = {
+            95: "이 격이 뚜렷하게 살아 있어, 타고난 그릇의 색깔이 분명합니다.",
+            70: "격이 살아 있긴 하나 순정하지는 않아, 상황에 따라 그 색이 짙어지거나 옅어질 수 있습니다.",
+            50: "이 격이 겉으로 뚜렷하게 드러나기보다, 드러나지 않게 은은히 작용하는 자리입니다.",
+        }
+        if _grade_score_tb in _GRADE_TONE:
+            _grade_txt = f"{_grade_label} - {_GRADE_TONE[_grade_score_tb]}"
+        elif _grade_score_tb == 40:
+            _grade_txt = ""
+        else:
+            _grade_txt = grade
         # 시간미상(twelve_beol 있음) — 격국명 표시만 12벌 수렴도로 감싼다. gname
         # 자체(판정값)는 무변경, gname_disp만 문장에 쓴다.
         gname_disp = gname
         if twelve_beol:
             gname_disp = format_12beol_display([v["격국"] for v in twelve_beol], "general")
         p1 = (
-            f"{ilgan_kr}({ilgan}) 일간에 월지 {wolji} 자리, <b>{gname_disp}</b>을(를) 그릇으로 타고났습니다. "
-            f"{grade} {_flavor}{_career_txt}"
+            f"{ilgan_kr}({ilgan}) 일간에 월지 {wolji} 자리, <b>{gname_disp}</b>을(를) 그릇으로 타고났습니다."
+            + (f" {_grade_txt}" if _grade_txt else "")
+            + (f" {_flavor}" if _flavor else "")
+            + _career_txt
         ).strip()
 
         # ② 격의 성패 — get_gyeokguk_status() 값 그대로 서술, 상신·기신이 실제로 어떻게
