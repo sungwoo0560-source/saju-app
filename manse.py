@@ -25166,11 +25166,23 @@ def render_manse_grid(pils, birth_year, birth_month, birth_day, birth_hour, birt
         _unk_time = st.session_state.get("in_unknown_time", False)
         for ci, (lb, p, ss) in enumerate(zip(pil_labels, pils, ss_list)):
             if _unk_time and lb == "시주":
+                # est_hour_pillar(정오 12시 기준 추정치)가 있으면 회색+"(?)"로 표시,
+                # 판정 무반영 안내 병기 — saju_zhengtong.render_four_pillars_card와
+                # 동일 형식. 값이 없으면 기존처럼 "시간 미상"만 표시.
+                _est = st.session_state.get("_est_hour_pillar") or {}
+                _est_cg, _est_jj = _est.get("cg", ""), _est.get("jj", "")
+                if _est_cg and _est_jj:
+                    _est_html = (
+                        f'<div style="font-size:15px;color:#999;padding:6px 0 2px">{_est_cg}{_est_jj}(?)</div>'
+                        '<div style="font-size:10px;color:#999;padding:0 4px 8px">시간 미입력 — 정오 기준 추정치, 판정 미반영</div>'
+                    )
+                else:
+                    _est_html = '<div style="font-size:13px;color:#999;padding:14px 0">시간 미상</div>'
                 with pcols[ci]:
                     st.markdown(
-                        """<div style="text-align:center;background:#fafaf5;border:1px solid #ddd;border-radius:8px;padding:6px 2px">
+                        f"""<div style="text-align:center;background:#fafaf5;border:1px solid #ddd;border-radius:8px;padding:6px 2px">
 <div style="font-size:10px;color:#888;margin-bottom:2px">시주</div>
-<div style="font-size:13px;color:#999;padding:14px 0">시간 미상</div>
+{_est_html}
 </div>""",
                         unsafe_allow_html=True,
                     )
