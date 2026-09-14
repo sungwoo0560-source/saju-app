@@ -16853,6 +16853,8 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
             _kw_pyong["month_footnote"] = _month_footnote
         if "cur_year" in _sig_pyong.parameters:
             _kw_pyong["cur_year"] = _cy_pyong
+        if "est_hour_pillar" in _sig_pyong.parameters:
+            _kw_pyong["est_hour_pillar"] = st.session_state.get("_est_hour_pillar")
 
         _pdf_cap(
             render_jonghap_pyongron(pils, name or "내담자", birth_year, gender or "男", **_kw_pyong)
@@ -17659,7 +17661,7 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
         _name_y4 = name or "내담자"
 
         # ① 4기둥 통합 박스 (무지개 그라데이션)
-        _pdf_cap(render_four_pillars_card(pils, _name_y4))
+        _pdf_cap(render_four_pillars_card(pils, _name_y4, st.session_state.get("_est_hour_pillar")))
 
         # ② 십성 조합 감지 박스 (다이아몬드 테마)
         _sipseong_html = render_sipseong_combinations_card(pils, _name_y4)
@@ -29028,6 +29030,12 @@ def main():
 
             # 시간 미상 시 시주(pils[0])를 계산에서 배제 — 용신/격국/오행강약 오염 차단
             if _ss.get("in_unknown_time"):
+                # 비우기 직전의 정오(12:00) 추정 간지를 표시 전용으로 보관.
+                # 판정 경로(pils[0] 비우기)는 그대로 — 이 값은 화면 표시에만 쓴다.
+                st.session_state["_est_hour_pillar"] = {
+                    "cg": pils[0].get("cg", ""),
+                    "jj": pils[0].get("jj", ""),
+                }
                 pils[0] = {"cg": "", "jj": "", "str": ""}
                 # 12벌 캐시 — 계산 시점(폼 제출 1회)에만 산출해 세션에 저장.
                 # 탭·항목마다 재호출하면 12벌×N회가 되므로, saju_pils와 같은

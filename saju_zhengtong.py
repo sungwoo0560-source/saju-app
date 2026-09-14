@@ -6363,7 +6363,7 @@ def generate_four_pillars_synthesis(pils: list) -> str:
     return " ".join(parts)
 
 
-def render_four_pillars_card(pils: list, name: str = "내담자") -> str:
+def render_four_pillars_card(pils: list, name: str = "내담자", est_hour_pillar: dict = None) -> str:
     """년/월/일/시 4기둥 통합 분석 박스"""
     if not pils or len(pils) < 4:
         return ""
@@ -6397,21 +6397,29 @@ def render_four_pillars_card(pils: list, name: str = "내담자") -> str:
         unsung = _calc_unsung(ilgan, jj) if ilgan else "-"
         ss_display = "일간(나)" if pd["idx"] == 1 else cg_ss
 
-        # 시간미상(cg/jj 둘 다 공백) 시 "시간 미상" — render_manse_grid의
-        # "📋 사주 명식" 카드와 동일 표기로 통일. 헤더 라벨("시주(時柱)"/
-        # "자녀·말년·노년운"/"자녀궁")은 명식표와 일관되게 유지하고 값 줄만 대체.
-        _meta_line = (
-            '<span style="color:#999;">시간 미상</span>'
-            if not (cg and jj) else
-            f"{cg_kr}({cg_oh}{oh_emoji.get(cg_oh,'')}) · {jj_kr}({jj_oh}{oh_emoji.get(jj_oh,'')})"
-        )
+        # 시간미상(cg/jj 둘 다 공백) — 시주(idx==0)에 한해 정오(12:00) 추정 간지가
+        # 넘어오면(est_hour_pillar) 회색+"(?)"로 표시, 판정에는 쓰지 않는다는 안내를
+        # 병기한다. 추정값이 없으면 기존처럼 "시간 미상"으로 폴백.
+        _est_cg = _est_jj = ""
+        if pd["idx"] == 0 and not (cg and jj) and est_hour_pillar:
+            _est_cg = est_hour_pillar.get("cg", "")
+            _est_jj = est_hour_pillar.get("jj", "")
 
-        # 큰 글자 표시(간지)도 빈 값이면 "시간 미상"으로 — _meta_line과 표기 통일.
-        _big_display = (
-            f'{cg}<span style="font-size:28px;">{jj}</span>'
-            if (cg and jj) else
-            '<span style="font-size:16px;color:#999;">시간 미상</span>'
-        )
+        if cg and jj:
+            _meta_line = f"{cg_kr}({cg_oh}{oh_emoji.get(cg_oh,'')}) · {jj_kr}({jj_oh}{oh_emoji.get(jj_oh,'')})"
+            _big_display = f'{cg}<span style="font-size:28px;">{jj}</span>'
+        elif _est_cg and _est_jj:
+            _meta_line = (
+                '<span style="color:#999;">시간 미입력 — 정오 기준 추정치, '
+                '판정에는 반영되지 않음</span>'
+            )
+            _big_display = (
+                f'<span style="color:#999;">{_est_cg}'
+                f'<span style="font-size:28px;">{_est_jj}</span>(?)</span>'
+            )
+        else:
+            _meta_line = '<span style="color:#999;">시간 미상</span>'
+            _big_display = '<span style="font-size:16px;color:#999;">시간 미상</span>'
 
         cards_html += f"""
 <div style="flex:1 1 22%;min-width:155px;max-width:200px;
@@ -7664,7 +7672,8 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
                              gilwol_list=None, hyungwol_list=None,
                              gilwol_top=None, gilwol_sub=None,
                              hyungwol_top=None, hyungwol_sub=None,
-                             month_footnote=None, cur_year=None):
+                             month_footnote=None, cur_year=None,
+                             est_hour_pillar=None):
     """종합 사주 평론서 — 12개 섹션 통합. 원국 사실 기반 + 친절 직설 톤."""
     if not pils or len(pils) < 4:
         return ""
@@ -8204,14 +8213,23 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
             f'→ 이 시기를 망설이다 보내면, 다음 기회는 10년 뒤입니다.'
         )
 
-    # 시간미상(tj_cg/tj_jj 둘 다 공백) 시 "시주(時柱) 미상" — render_manse_grid의
-    # "📋 사주 명식" 카드와 동일한 표기(라벨 유지 + 값 자리만 "시간 미상")로 통일.
+    # 시간미상(tj_cg/tj_jj 둘 다 공백) — est_hour_pillar(정오 추정치)가 넘어오면
+    # 회색+"(?)"로 추정 간지 표시, 판정 무반영 안내 병기. 없으면 기존 "시간 미상".
     # 년·월·일주 3곳의 출력 형식은 무수정.
-    _tj_disp = (
-        f'<b>시주(時柱)</b> <span style="color:#999;">시간 미상</span>'
-        if not (tj_cg and tj_jj) else
-        f'<b>시주(時柱)</b> {tj_cg}{tj_jj} <span style="color:#8b6914;">({CG_KR.get(tj_cg,"")}{JJ_KR.get(tj_jj,"")})</span>'
-    )
+    _est_tj = est_hour_pillar or {}
+    _est_tj_cg, _est_tj_jj = _est_tj.get("cg", ""), _est_tj.get("jj", "")
+    if tj_cg and tj_jj:
+        _tj_disp = (
+            f'<b>시주(時柱)</b> {tj_cg}{tj_jj} '
+            f'<span style="color:#8b6914;">({CG_KR.get(tj_cg,"")}{JJ_KR.get(tj_jj,"")})</span>'
+        )
+    elif _est_tj_cg and _est_tj_jj:
+        _tj_disp = (
+            f'<b>시주(時柱)</b> <span style="color:#999;">{_est_tj_cg}{_est_tj_jj}(?) '
+            f'— 시간 미입력, 정오 기준 추정치(판정 미반영)</span>'
+        )
+    else:
+        _tj_disp = f'<b>시주(時柱)</b> <span style="color:#999;">시간 미상</span>'
 
     html = f"""
 <div style="background:linear-gradient(180deg,#fdfcf7 0%,#fff 100%);
