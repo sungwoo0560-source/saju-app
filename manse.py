@@ -220,11 +220,11 @@ class SajuMemory:
 
     만신(萬神) 영속 기억 시스템 (E-Version)
 
-    파일 기반 저장소 (history_memory.json)를 통해 브라우저 종료 후에도 상담 맥락을 유지합니다.
+    세션 전용 기억 시스템(E-Version). 프로세스 메모리(st.session_state)에만
+    유지되며, 브라우저 세션이 끝나면 사라진다(파일 영속화 없음 — 개인정보 미보관 원칙).
 
     """
 
-    MEMORY_FILE = "history_memory.json"
 
     @staticmethod
     def build_context_prompt() -> str:
@@ -236,26 +236,15 @@ class SajuMemory:
 
     @staticmethod
     def _load_all() -> dict:
+        """세션 전용 저장소 반환 — 프로세스/사용자 간 공유되지 않는다."""
 
-        if not os.path.exists(SajuMemory.MEMORY_FILE):
-            return {}
-
-        try:
-            with open(SajuMemory.MEMORY_FILE, "r", encoding="utf-8") as f:
-                return json.load(f)
-
-        except Exception:
-            return {}
+        return st.session_state.setdefault("_saju_memory_store", {})
 
     @staticmethod
     def _save_all(data: dict):
+        """세션 상태에 이미 반영된 참조이므로 명시적으로 한 번 더 대입만 한다."""
 
-        try:
-            with open(SajuMemory.MEMORY_FILE, "w", encoding="utf-8") as f:
-                json.dump(data, f, ensure_ascii=False, indent=2)
-
-        except Exception as _e:
-            _saju_log.warning("[SajuMemory.save_memory] 파일 저장 실패: %s", _e)
+        st.session_state["_saju_memory_store"] = data
 
     @staticmethod
     def get_memory(name: str) -> dict:
