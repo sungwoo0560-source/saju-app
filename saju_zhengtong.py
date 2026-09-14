@@ -6401,16 +6401,18 @@ def render_four_pillars_card(pils: list, name: str = "내담자", est_hour_pilla
         # 넘어오면(est_hour_pillar) 회색+"(?)"로 표시, 판정에는 쓰지 않는다는 안내를
         # 병기한다. 추정값이 없으면 기존처럼 "시간 미상"으로 폴백.
         _est_cg = _est_jj = ""
+        _est_note = "정오 기준"
         if pd["idx"] == 0 and not (cg and jj) and est_hour_pillar:
             _est_cg = est_hour_pillar.get("cg", "")
             _est_jj = est_hour_pillar.get("jj", "")
+            _est_note = est_hour_pillar.get("note", "정오 기준")
 
         if cg and jj:
             _meta_line = f"{cg_kr}({cg_oh}{oh_emoji.get(cg_oh,'')}) · {jj_kr}({jj_oh}{oh_emoji.get(jj_oh,'')})"
             _big_display = f'{cg}<span style="font-size:28px;">{jj}</span>'
         elif _est_cg and _est_jj:
             _meta_line = (
-                '<span style="color:#999;">시간 미입력 — 정오 기준 추정치, '
+                f'<span style="color:#999;">시간 미입력 — {_est_note} 추정치, '
                 '판정에는 반영되지 않음</span>'
             )
             _big_display = (
@@ -8218,6 +8220,7 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
     # 년·월·일주 3곳의 출력 형식은 무수정.
     _est_tj = est_hour_pillar or {}
     _est_tj_cg, _est_tj_jj = _est_tj.get("cg", ""), _est_tj.get("jj", "")
+    _est_tj_note = _est_tj.get("note", "정오 기준")
     if tj_cg and tj_jj:
         _tj_disp = (
             f'<b>시주(時柱)</b> {tj_cg}{tj_jj} '
@@ -8226,7 +8229,7 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
     elif _est_tj_cg and _est_tj_jj:
         _tj_disp = (
             f'<b>시주(時柱)</b> <span style="color:#999;">{_est_tj_cg}{_est_tj_jj}(?) '
-            f'— 시간 미입력, 정오 기준 추정치(판정 미반영)</span>'
+            f'— 시간 미입력, {_est_tj_note} 추정치(판정 미반영)</span>'
         )
     else:
         _tj_disp = f'<b>시주(時柱)</b> <span style="color:#999;">시간 미상</span>'

@@ -1797,10 +1797,17 @@ def format_12beol_display(values, item_type):
       "대운시작나이" — 몇 가지 값(distinct)인지로 판단(최빈개수 기준 아님):
                         1가지 "58세" / 2가지 "57~58세"(범위) /
                         3가지 이상 "최빈값세(시간에 따라 N가지)".
+
+    ★입력 3단계(5구간) 지원: len(values)가 12가 아니면(=구간 필터링된
+    2~3벌) 아래 N-기반 축약 임계를 쓴다. 12벌 경로(len==12)는 위 원본
+    임계표를 한 글자도 바꾸지 않는다 — 완전 미상(12벌) 표시가 이 확장과
+    무관하게 기존과 100% 동일해야 하기 때문이다.
     """
     from collections import Counter
     if not values:
         return ""
+
+    N = len(values)
 
     if item_type == "대운시작나이":
         c = Counter(values)
@@ -1816,6 +1823,20 @@ def format_12beol_display(values, item_type):
         return f"{top}세 (시간에 따라 {n}가지)"
 
     if item_type == "신강약":
+        if N != 12:
+            # 5구간(2~3벌) 전용 — 전원일치만 확정, 하나라도 다르면 곧장
+            # 후보 병기(12벌의 "11/12 최빈값" 같은 부분일치 허용 단계를
+            # 두지 않는다 — 표본이 작을수록 과신뢰 위험이 커지므로).
+            label_top, label_cnt, _label_cands = summarize_12beol(values)
+            if label_top is not None and label_cnt == N:
+                return f"{label_top}"
+            directions = [_SN_DIRECTION_12BEOL.get(v, v) for v in values]
+            _dir_top, dir_cnt, _dir_cands = summarize_12beol(directions)
+            if dir_cnt < N:
+                top2 = [v for v, _n in Counter(directions).most_common(2)]
+            else:
+                top2 = [v for v, _n in Counter(values).most_common(2)]
+            return " 또는 ".join(top2)
         label_top, label_cnt, _label_cands = summarize_12beol(values)
         if label_top is not None and label_cnt == 12:
             return f"{label_top}"
@@ -1833,6 +1854,16 @@ def format_12beol_display(values, item_type):
         return " 또는 ".join(top2)
 
     # item_type == "general" (주용신·격국·시지 신살 등)
+    if N != 12:
+        # 5구간(2~3벌) 전용 3단계 — N/N 확정 / 부분일치 ⚠️최빈값(N벌 기준) /
+        # 전부 갈림 "A 또는 B" (12벌의 4단계를 압축한 축약판).
+        top, cnt, _cands = summarize_12beol(values)
+        if top is not None and cnt == N:
+            return f"{top}"
+        if top is not None and cnt >= 2:
+            return f"⚠️ {top} ({cnt}/{N} — 시간에 따라 달라질 수 있음)"
+        top2 = [v for v, _n in Counter(values).most_common(2)]
+        return " 또는 ".join(top2)
     top, cnt, _cands = summarize_12beol(values)
     if top is not None and cnt == 12:
         return f"{top}"

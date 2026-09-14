@@ -25267,10 +25267,11 @@ def render_manse_grid(pils, birth_year, birth_month, birth_day, birth_hour, birt
                 # 동일 형식. 값이 없으면 기존처럼 "시간 미상"만 표시.
                 _est = st.session_state.get("_est_hour_pillar") or {}
                 _est_cg, _est_jj = _est.get("cg", ""), _est.get("jj", "")
+                _est_note = _est.get("note", "정오 기준")
                 if _est_cg and _est_jj:
                     _est_html = (
                         f'<div style="font-size:15px;color:#999;padding:6px 0 2px">{_est_cg}{_est_jj}(?)</div>'
-                        '<div style="font-size:10px;color:#999;padding:0 4px 8px">시간 미입력 — 정오 기준 추정치, 판정 미반영</div>'
+                        f'<div style="font-size:10px;color:#999;padding:0 4px 8px">시간 미입력 — {_est_note} 추정치, 판정 미반영</div>'
                     )
                 else:
                     _est_html = '<div style="font-size:13px;color:#999;padding:14px 0">시간 미상</div>'
@@ -28991,6 +28992,38 @@ def main():
 
             st.checkbox("시간 모름", key="in_unknown_time")
 
+        # 입력 3단계(5구간) — "시간 모름" 체크 시에만 노출되는 하위 라디오.
+        # in_time_band 기본값은 None(=전혀 모름, 기존 동작 그대로)이며, 매
+        # 렌더마다 아래에서 명시적으로 다시 계산한다 — 위젯이 이번 실행에
+        # 렌더되지 않으면 st.session_state 값이 이전 값을 그대로 들고 있는
+        # Streamlit 특성 때문에, 체크 해제·"전혀 모른다" 선택 시 반드시
+        # None으로 되돌아가도록 매번 명시적으로 써준다(판정 경로 무영향 —
+        # 이 값은 saju_pils_12beol 필터링과 표시 전용 추정치에만 쓰인다).
+        if st.session_state.get("in_unknown_time"):
+            st.radio(
+                "시간을 모르신다면 대략적인 때는 기억나시나요?",
+                ["전혀 모른다", "대략적인 때는 안다"],
+                key="in_time_band_choice",
+                horizontal=True,
+            )
+            if st.session_state.get("in_time_band_choice") == "대략적인 때는 안다":
+                _TIME_BAND_HOUR_LABEL = {
+                    "새벽": "23시~05시", "아침": "05시~09시", "낮": "09시~15시",
+                    "저녁": "15시~19시", "밤": "19시~23시",
+                }
+                st.radio(
+                    "대략적인 때",
+                    ["새벽", "아침", "낮", "저녁", "밤"],
+                    format_func=lambda b: f"{b}({_TIME_BAND_HOUR_LABEL[b]})",
+                    key="in_time_band_ui",
+                    horizontal=True,
+                )
+                st.session_state["in_time_band"] = st.session_state.get("in_time_band_ui")
+            else:
+                st.session_state["in_time_band"] = None
+        else:
+            st.session_state["in_time_band"] = None
+
         info_col1, info_col2 = st.columns(2)
         with info_col1:
             st.selectbox(
@@ -29149,11 +29182,34 @@ def main():
                 # 탭·항목마다 재호출하면 12벌×N회가 되므로, saju_pils와 같은
                 # 생명주기(재계산 전까지 유지)로 여기 1곳에만 둔다.
                 try:
-                    st.session_state["saju_pils_12beol"] = get_pillars_12beol(
+                    _full12beol = get_pillars_12beol(
                         b_year, b_month, b_day,
                         _ss.get("in_gender", "남"), _region_lon,
                         _ss.get("in_use_yaja", True),
                     )
+                    _time_band = _ss.get("in_time_band")
+                    if _time_band:
+                        # 입력 3단계(5구간) — get_pillars_12beol 자체는 무수정,
+                        # 결과만 선택 구간의 지지로 필터링한다(산출 전용 헬퍼
+                        # 재사용, 새 계산 로직 없음).
+                        _band_jjs = TIME_BAND_MAP.get(_time_band, [])
+                        _filtered12 = [b for b in _full12beol if b.get("시지") in _band_jjs]
+                        st.session_state["saju_pils_12beol"] = _filtered12
+                        # 시간미상 추정 표시도 정오 고정 대신 구간 후보 중
+                        # 하나(중간 인덱스)의 실제 계산값으로 교체 — 표시
+                        # 전용(judgment 무영향), get_pillars_12beol이 이미
+                        # 산출해둔 값을 재사용할 뿐 추가 계산은 없다.
+                        if _filtered12:
+                            _mid_beol = _filtered12[len(_filtered12) // 2]
+                            _mid_pils = _mid_beol.get("pils") or []
+                            if _mid_pils:
+                                st.session_state["_est_hour_pillar"] = {
+                                    "cg": _mid_pils[0].get("cg", ""),
+                                    "jj": _mid_pils[0].get("jj", ""),
+                                    "note": f"{_time_band} 구간({_mid_beol.get('시지','')}시 대표)",
+                                }
+                    else:
+                        st.session_state["saju_pils_12beol"] = _full12beol
                 except Exception as _12beol_err:
                     _saju_log.warning("[12벌] 산출 오류: %s", str(_12beol_err)[:120])
                     st.session_state["saju_pils_12beol"] = None
