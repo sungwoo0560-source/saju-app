@@ -7852,17 +7852,22 @@ def get_gyeokguk(pils):
 
     sipsung = TEN_GODS_MATRIX.get(ilgan, {}).get(gyeok_gan, "기타")
 
-    # ⑧-3a: 정기 기준(純格+暗格, gyeok_gan==jeongi)으로 비겁이 격을 결정한
-    # 경우만 建祿格/月劫格으로 별도 명명한다.
-    # ⑧-3b: 중기·여기 투출(gyeok_gan!=jeongi)로 걸린 비겁은 정통 명분(建祿/月劫)이
-    # 없는 잡기(⑧-2 조사 확정, 比肩498+劫財129=627건)이므로 "미정격"으로 돌린다.
-    # "미정격"은 manse.py 전역에서 gk가 None일 때 쓰던 기존 폴백 문구와 동일한
-    # 값을 그대로 재사용한다 — gk 자체는 항상 완전한 dict를 반환하되 "격국명"
-    # 필드만 이 값을 갖게 해서, "dict는 비어있지 않은데 값만 빈 문자열"이라는
-    # 위험 패턴(⑧-3a-verify에서 지적됨)을 원천적으로 만들지 않는다.
-    if gyeok_gan == jeongi and "比肩" in sipsung:
+    # ★2026-09-15 건록/월겁 성립 조건 수정(형 승인): 월지 정기가 비겁이면
+    # 그 자체로 월지가 일간의 건록(比肩) 또는 제왕/양인(劫財) 자리라는
+    # 뜻이므로, 정기가 실제로 4주 천간에 투출했는지와 무관하게 建祿格/
+    # 月劫格이 성립한다(정통 명리 기준 — 자평진전은 "정기 불투 시 暗格"을
+    # 엄격 적용하지만, 건록/월겁은 격국이 아니라 월지 자체의 12운성
+    # 위치이므로 투출 요건에서 예외로 본다). 청탁(純格/雜格/暗格/비겁뿐,
+    # grade·grade_score)은 위에서 계산된 투출 여부를 그대로 쓴다 — 격명
+    # 확정과 청탁 판단은 별개 축이다.
+    # 정기가 비겁이 아닌데 매치된 후보(gyeok_gan)가 비겁인 경우(=중기·
+    # 여기가 전부 비겁뿐이라 _bigyeop_skip으로 떨어진 경우)만 "미정격"으로
+    # 남는다 — 이때는 월지 자체가 건록/제왕이 아니므로 建祿/月劫 명분이
+    # 없다.
+    jeongi_ss = TEN_GODS_MATRIX.get(ilgan, {}).get(jeongi, "")
+    if "比肩" in jeongi_ss:
         gyeok_name = "建祿格"
-    elif gyeok_gan == jeongi and "劫財" in sipsung:
+    elif "劫財" in jeongi_ss:
         gyeok_name = "月劫格"
     elif "比肩" in sipsung or "劫財" in sipsung:
         gyeok_name = "미정격"
