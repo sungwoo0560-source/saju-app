@@ -6141,11 +6141,14 @@ def build_saju_core_diagnosis(pils, name, birth_year, gender, current_year=None,
 
         # [X-6-R] 혼외 가능성 패턴 (식상태왕+홍염+시주도화)
         try:
-            _HY_R = {"甲":"午","乙":"申","丙":"寅","丁":"未","戊":"辰","己":"辰",
-                     "庚":"戌","辛":"酉","壬":"子","癸":"申"}
+            # ★2026-09-17 로컬 _HY_R 하드코딩 제거(형 승인): 乙만 申으로 되어 있어
+            # SSOT(saju_sinsal.HONGYEOM_MAP, 乙=午)와 불일치했다(saju_sinsal.py:331-337의
+            # "5곳 전부 교체" 대상에서 이 지점만 누락된 것으로 보임). 4699/5256과
+            # 동일하게 SSOT를 직접 import해 재사용한다.
+            from saju_sinsal import HONGYEOM_MAP as _HY_R
             _ilgan_r = pcgs[1] if len(pcgs) > 1 else ""
             _hongyeom_r = _HY_R.get(_ilgan_r,"") == cur_jj
-            # 원국 홍염 — SSOT(saju_sinsal.HONGYEOM_MAP과 동일 값의 _HY_R) 재사용,
+            # 원국 홍염 — SSOT(saju_sinsal.HONGYEOM_MAP) 그대로 재사용,
             # 세운(_hongyeom_r)과 별개로 4주 지지에 실제 있는지만 확인(새 판정 없음).
             _hongyeom_r_won = _HY_R.get(_ilgan_r,"") in pjjs if pjjs else False
             _STRONG_R = {"甲":{"寅","卯","亥"},"乙":{"卯","寅"},"丙":{"午","巳","寅"},
