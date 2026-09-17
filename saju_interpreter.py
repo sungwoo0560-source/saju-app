@@ -9117,8 +9117,15 @@ def get_ohang_health_info(ilgan, pils):
     return results
 
 
-def get_yongshin_multilayer(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0, target_year=None):
-    """다층 용신 분석 (1순위~3순위 + 희신 + 기신 + 대운별 용신)"""
+def get_yongshin_multilayer(pils, birth_year, gender, bm, bd, bh, bmi, target_year=None):
+    """다층 용신 분석 (1순위~3순위 + 희신 + 기신 + 대운별 용신)
+
+    ★2026-09-18 bm/bd/bh/bmi 필수 인자화(형 승인): 기본값(1,1,12,0)이 있으면
+    호출부가 실제 생일을 빠뜨려도 조용히 1월1일생 취급해 대운을 잘못 계산한다
+    (build_rich_ai_context 결함, N=1000 실측 40.20% 불일치로 확인됨). 이 함수의
+    모든 실사용 호출부(30여 곳)가 이미 명시적으로 생일을 전달하고 있어 기본값을
+    없애도 안전하다 — 앞으로 생일을 빠뜨리는 새 호출부가 생기면 조용히 틀리는
+    대신 즉시 TypeError로 드러난다."""
     if target_year is None:
         target_year = _cur_saju_year()
     if not pils or len(pils) < 2:
