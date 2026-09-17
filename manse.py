@@ -7312,7 +7312,9 @@ def get_cached_ai_interpretation(
 
     wolji_block = "\n".join([f"  {w['age']} - {w['desc']}" for w in hl["wolji_chung"]]) or "  (없음)"
 
-    ctx_data = build_rich_ai_context(pils, birth_year, gender, current_year)
+    ctx_data = build_rich_ai_context(pils, birth_year, gender, current_year,
+                                      birth_month=birth_month, birth_day=birth_day,
+                                      birth_hour=birth_hour, birth_minute=birth_minute)
 
 
     _tp = calc_turning_point(pils, birth_year, gender, target_year=current_year) if "calc_turning_point" in dir() else {}
@@ -9759,7 +9761,8 @@ JJ_MONTH_SEASON = {
 # ==================================================
 
 
-def build_rich_ai_context(pils, birth_year, gender, target_year=None, focus="종합"):
+def build_rich_ai_context(pils, birth_year, gender, target_year=None, focus="종합",
+                           birth_month=None, birth_day=None, birth_hour=None, birth_minute=None):
     """
 
     AI에게 전달할 풍부한 계산 데이터 JSON 빌더 (Skill 2 & 3: Structuring & Analysis)
@@ -9777,7 +9780,19 @@ def build_rich_ai_context(pils, birth_year, gender, target_year=None, focus="종
 
     strength_info = get_ilgan_strength(ilgan, pils)
 
-    ys_multi = get_yongshin_multilayer(pils, birth_year, gender, target_year=target_year)
+    # ★2026-09-18 인자 누락 수정(형 승인): birth_month/day/hour/minute를 안 넘기면
+    # get_yongshin_multilayer가 자기 기본값(1,1,12,0)으로 대운을 계산해 실제 생일과
+    # 무관하게 틀린 "현재 대운"이 AI 컨텍스트에 들어간다(N=1000 실측 40.20% 불일치).
+    # 이 함수의 유일한 실사용 호출부(get_cached_ai_interpretation, manse.py 7315행
+    # 부근)가 이미 session_state에서 읽어둔 실제 생일 지역변수를 그대로 넘기게 한다.
+    ys_multi = get_yongshin_multilayer(
+        pils, birth_year, gender,
+        birth_month if birth_month is not None else 1,
+        birth_day if birth_day is not None else 1,
+        birth_hour if birth_hour is not None else 12,
+        birth_minute if birth_minute is not None else 0,
+        target_year=target_year,
+    )
 
     turning = calc_turning_point(pils, birth_year, gender, target_year=target_year)
 
