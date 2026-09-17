@@ -3283,7 +3283,11 @@ def quick_consult_bar(pils, name, birth_year, gender):
             # 5. 전환점 감지
 
             try:
-                luck_score = calc_luck_score(pils, birth_year, gender, target_year=current_year)
+                _qc_bm = max(1, min(12, int(st.session_state.get("birth_month") or 1)))
+                _qc_bd = max(1, min(31, int(st.session_state.get("birth_day") or 1)))
+                _qc_bh = max(0, min(23, int(st.session_state.get("birth_hour") or 12)))
+                _qc_bmi = max(0, min(59, int(st.session_state.get("birth_minute") or 0)))
+                luck_score = calc_luck_score(pils, birth_year, gender, _qc_bm, _qc_bd, _qc_bh, _qc_bmi, target_year=current_year)
 
                 pivot_info = ChangeRadarEngine.detect_pivot(name, luck_score)
 
@@ -3690,7 +3694,8 @@ class BatchSimulationEngine:
 
             stats["ilgan_dist"][ilgan] = stats["ilgan_dist"].get(ilgan, 0) + 1
 
-            luck_s = calc_luck_score(pils, u["year"], "남" if u["gender"] == "남성" else "여", 2026)
+            luck_s = calc_luck_score(pils, u["year"], "남" if u["gender"] == "남성" else "여",
+                                      u["month"], u["day"], u["hour"], 0, target_year=2026)
 
             stats["luck_scores"].append(luck_s)
 
@@ -7317,7 +7322,7 @@ def get_cached_ai_interpretation(
                                       birth_hour=birth_hour, birth_minute=birth_minute)
 
 
-    _tp = calc_turning_point(pils, birth_year, gender, target_year=current_year) if "calc_turning_point" in dir() else {}
+    _tp = calc_turning_point(pils, birth_year, gender, birth_month, birth_day, birth_hour, birth_minute, target_year=current_year) if "calc_turning_point" in dir() else {}
 
     _yl = get_yearly_luck(pils, current_year)
 
@@ -9794,7 +9799,14 @@ def build_rich_ai_context(pils, birth_year, gender, target_year=None, focus="종
         target_year=target_year,
     )
 
-    turning = calc_turning_point(pils, birth_year, gender, target_year=target_year)
+    turning = calc_turning_point(
+        pils, birth_year, gender,
+        birth_month if birth_month is not None else 1,
+        birth_day if birth_day is not None else 1,
+        birth_hour if birth_hour is not None else 12,
+        birth_minute if birth_minute is not None else 0,
+        target_year=target_year,
+    )
 
     pillars_str = " ".join([p["str"] for p in pils])
 

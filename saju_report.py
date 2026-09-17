@@ -1328,7 +1328,7 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str="", dram
 
                         _hl_err = None
                         try:
-                            _hl = generate_engine_highlights(pils, birth_year, gender)
+                            _hl = generate_engine_highlights(pils, birth_year, gender, birth_month, birth_day, birth_hour, birth_minute)
                         except Exception as _hle:
                             _hl = {}
                             import traceback as _tb_hl
@@ -1690,7 +1690,7 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str="", dram
 
                     _tp_err = None
                     try:
-                        _tp = calc_turning_point(pils, birth_year, gender, target_year=_cy)
+                        _tp = calc_turning_point(pils, birth_year, gender, birth_month, birth_day, birth_hour, birth_minute, target_year=_cy)
                     except Exception as _tpe:
                         _tp = {}
                         import traceback as _tb_tp
