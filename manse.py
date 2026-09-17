@@ -9846,6 +9846,9 @@ def goosebump_engine(pils, birth_year, gender, target_year=None):
     Returns: dict
 
     """
+    # [DEAD] 현재 도달 경로 없음(유일 호출부 menu7_ai 23784행 부근이 결과를
+    # if False:로 영구 비활성화). 재활성화 시 생일 인자 누락 선수정 필요 —
+    # 기본값 1/1 사용 중, 실측 영향 calc_luck_score 9.8% / is_turning 7.6% / D-day 5.0%
 
     if target_year is None:
         target_year = datetime.now().year
@@ -10709,6 +10712,9 @@ def get_daily_luck_score(pils, birth_year, gender, target_date=None) -> dict:
     Returns: {score: int, trend: str, label: str}
 
     """
+    # [DEAD] 현재 도달 경로 없음(호출부 get_7day_luck_graph → render_retention_widget,
+    # 그런데 render_retention_widget 자체가 호출부 0곳). 재활성화 시 생일 인자 누락
+    # 선수정 필요 — 기본값 1/1 사용 중, 실측 영향 calc_luck_score 9.8%
 
     if target_date is None:
         target_date = datetime.now()
@@ -10824,6 +10830,9 @@ def get_turning_countdown(pils, birth_year, gender) -> dict:
     Returns: {days_left: int, date: str, description: str}
 
     """
+    # [DEAD] 현재 도달 경로 없음(유일 호출부 render_retention_widget이 호출부 0곳).
+    # 재활성화 시 생일 인자 누락 선수정 필요 — 기본값 1/1 사용 중,
+    # 실측 영향 D-day 5.0%(그 중 전환점 있음/없음 자체가 뒤집히는 경우 2/5건)
 
     today = datetime.now()
 
@@ -10879,6 +10888,7 @@ def get_turning_countdown(pils, birth_year, gender) -> dict:
 
 def render_retention_widget(pils, birth_year, gender):
     """중독 유발 핵심 위젯 (Main Addiction Engine)"""
+    # [DEAD] 호출부 0곳
 
     streak_info = update_streak()
 
