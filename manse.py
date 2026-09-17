@@ -9836,7 +9836,7 @@ def build_rich_ai_context(pils, birth_year, gender, target_year=None, focus="종
 # --------------------------------------------------------------
 
 
-def goosebump_engine(pils, birth_year, gender, target_year=None):
+def goosebump_engine(pils, birth_year, gender, bm, bd, bh, bmi, target_year=None):
     """
 
     [Engine] Goosebump Engine
@@ -9847,8 +9847,12 @@ def goosebump_engine(pils, birth_year, gender, target_year=None):
 
     """
     # [DEAD] 현재 도달 경로 없음(유일 호출부 menu7_ai 23784행 부근이 결과를
-    # if False:로 영구 비활성화). 재활성화 시 생일 인자 누락 선수정 필요 —
-    # 기본값 1/1 사용 중, 실측 영향 calc_luck_score 9.8% / is_turning 7.6% / D-day 5.0%
+    # if False:로 영구 비활성화). 켜지 않은 채 생일 인자 선수정만 완료
+    # (2026-09-18) — bm/bd/bh/bmi를 필수 인자로 받아 내부의 4개 하위호출
+    # (calc_luck_score×2·detect_event_triggers·calc_turning_point)과
+    # 아래 past_dw 계산이 전부 동일한 생일을 쓰도록 통일했다(기존엔 이 4개는
+    # 1월1일 기본값, past_dw만 session_state 실제 생일을 따로 써서 한 함수
+    # 안에서 서로 다른 생일을 쓰는 상태였다).
 
     if target_year is None:
         target_year = datetime.now().year
@@ -9877,11 +9881,11 @@ def goosebump_engine(pils, birth_year, gender, target_year=None):
 
     yong_ohs = ys.get("종합_용신", []) if isinstance(ys.get("종합_용신"), list) else []
 
-    luck_s = calc_luck_score(pils, birth_year, gender, target_year=target_year)
+    luck_s = calc_luck_score(pils, birth_year, gender, bm, bd, bh, bmi, target_year=target_year)
 
-    triggers = detect_event_triggers(pils, birth_year, gender, target_year=target_year)
+    triggers = detect_event_triggers(pils, birth_year, gender, bm, bd, bh, bmi, target_year=target_year)
 
-    turning = calc_turning_point(pils, birth_year, gender, target_year=target_year)
+    turning = calc_turning_point(pils, birth_year, gender, bm, bd, bh, bmi, target_year=target_year)
 
     # ① 과거 적중 문장 - 사주 패턴 -> 이미 겪은 일
 
@@ -9910,23 +9914,17 @@ def goosebump_engine(pils, birth_year, gender, target_year=None):
 
     # 일지 충 (과거)
 
-    # 대운 호출 시 실제 생년월일시 반영 (사용자 지침 준수)
-
-    birth_month = max(1, min(12, int(st.session_state.get("birth_month") or 1)))
-
-    birth_day = max(1, min(31, int(st.session_state.get("birth_day") or 1)))
-
-    birth_hour = max(0, min(23, int(st.session_state.get("birth_hour") or 12)))
-
-    birth_minute = max(0, min(59, int(st.session_state.get("birth_minute") or 0)))
+    # 대운 호출 시 실제 생년월일시 반영 — 함수 인자로 받은 bm/bd/bh/bmi 재사용
+    # (이전엔 여기만 session_state를 따로 읽어 위 luck_s/triggers/turning과
+    # 다른 생일을 썼다).
 
     past_dw = SajuCoreEngine.get_daewoon(
         pils,
         birth_year,
-        birth_month,
-        birth_day,
-        birth_hour,
-        birth_minute,
+        bm,
+        bd,
+        bh,
+        bmi,
         gender=gender,
     )
 
@@ -9948,7 +9946,7 @@ def goosebump_engine(pils, birth_year, gender, target_year=None):
 
     present_sentences = []
 
-    prev_luck = calc_luck_score(pils, birth_year, gender, target_year=target_year - 1)
+    prev_luck = calc_luck_score(pils, birth_year, gender, bm, bd, bh, bmi, target_year=target_year - 1)
 
     diff = luck_s - prev_luck
 
@@ -10704,7 +10702,7 @@ def update_streak() -> dict:
     }
 
 
-def get_daily_luck_score(pils, birth_year, gender, target_date=None) -> dict:
+def get_daily_luck_score(pils, birth_year, gender, bm, bd, bh, bmi, target_date=None) -> dict:
     """
 
     일별 운세 점수 (기본운 * 대운 * 세운 * 월운 합산)
@@ -10713,8 +10711,9 @@ def get_daily_luck_score(pils, birth_year, gender, target_date=None) -> dict:
 
     """
     # [DEAD] 현재 도달 경로 없음(호출부 get_7day_luck_graph → render_retention_widget,
-    # 그런데 render_retention_widget 자체가 호출부 0곳). 재활성화 시 생일 인자 누락
-    # 선수정 필요 — 기본값 1/1 사용 중, 실측 영향 calc_luck_score 9.8%
+    # 그런데 render_retention_widget 자체가 호출부 0곳). 켜지 않은 채 생일 인자
+    # 선수정만 완료(2026-09-18) — bm/bd/bh/bmi를 필수 인자로 받아 calc_luck_score에
+    # 전달한다(기존엔 1월1일 기본값).
 
     if target_date is None:
         target_date = datetime.now()
@@ -10725,7 +10724,7 @@ def get_daily_luck_score(pils, birth_year, gender, target_date=None) -> dict:
 
     d = target_date.day
 
-    base = calc_luck_score(pils, birth_year, gender, target_year=y)
+    base = calc_luck_score(pils, birth_year, gender, bm, bd, bh, bmi, target_year=y)
 
     yearly = get_yearly_luck(pils, y)
 
@@ -10797,7 +10796,7 @@ def get_daily_luck_score(pils, birth_year, gender, target_date=None) -> dict:
     }
 
 
-def get_7day_luck_graph(pils, birth_year, gender) -> list:
+def get_7day_luck_graph(pils, birth_year, gender, bm, bd, bh, bmi) -> list:
     """7일 운세 점수 그래프 데이터"""
 
     today = datetime.now()
@@ -10807,7 +10806,7 @@ def get_7day_luck_graph(pils, birth_year, gender) -> list:
     for delta in range(-3, 4):
         d = today + timedelta(days=delta)
 
-        s = get_daily_luck_score(pils, birth_year, gender, d)
+        s = get_daily_luck_score(pils, birth_year, gender, bm, bd, bh, bmi, target_date=d)
 
         result.append(
             {
@@ -10822,7 +10821,7 @@ def get_7day_luck_graph(pils, birth_year, gender) -> list:
     return result
 
 
-def get_turning_countdown(pils, birth_year, gender) -> dict:
+def get_turning_countdown(pils, birth_year, gender, bm, bd, bh, bmi) -> dict:
     """
 
     다음 인생 전환점까지 남은 날짜 계산
@@ -10831,8 +10830,10 @@ def get_turning_countdown(pils, birth_year, gender) -> dict:
 
     """
     # [DEAD] 현재 도달 경로 없음(유일 호출부 render_retention_widget이 호출부 0곳).
-    # 재활성화 시 생일 인자 누락 선수정 필요 — 기본값 1/1 사용 중,
-    # 실측 영향 D-day 5.0%(그 중 전환점 있음/없음 자체가 뒤집히는 경우 2/5건)
+    # 켜지 않은 채 생일 인자 선수정만 완료(2026-09-18) — bm/bd/bh/bmi를 필수
+    # 인자로 받아 calc_turning_point와 아래 get_daewoon이 동일한 생일을 쓰도록
+    # 통일했다(기존엔 calc_turning_point만 1월1일 기본값, get_daewoon은
+    # session_state 실제 생일을 따로 써서 한 함수 안에서 서로 달랐다).
 
     today = datetime.now()
 
@@ -10841,22 +10842,12 @@ def get_turning_countdown(pils, birth_year, gender) -> dict:
     for delta in range(1, 366):
         future = today + timedelta(days=delta)
 
-        t = calc_turning_point(pils, birth_year, gender, target_year=future.year)
+        t = calc_turning_point(pils, birth_year, gender, bm, bd, bh, bmi, target_year=future.year)
 
         if t["is_turning"] and abs(t["score_change"]) >= 15:
-            # 대운 전환 시점 더 정확히
+            # 대운 전환 시점 더 정확히 — 위 calc_turning_point와 동일한 생일 재사용
 
-            # 대운 호출 시 실제 생년월일시 반영
-
-            _bm = st.session_state.get("birth_month", 1)
-
-            _bd = st.session_state.get("birth_day", 1)
-
-            _bh = st.session_state.get("birth_hour", 12)
-
-            _bmi = st.session_state.get("birth_minute", 0)
-
-            dw_list = SajuCoreEngine.get_daewoon(pils, birth_year, _bm, _bd, _bh, _bmi, gender)
+            dw_list = SajuCoreEngine.get_daewoon(pils, birth_year, bm, bd, bh, bmi, gender)
 
             for dw in dw_list:
                 if dw["시작연도"] == future.year:
@@ -10886,15 +10877,16 @@ def get_turning_countdown(pils, birth_year, gender) -> dict:
     }
 
 
-def render_retention_widget(pils, birth_year, gender):
+def render_retention_widget(pils, birth_year, gender, bm, bd, bh, bmi):
     """중독 유발 핵심 위젯 (Main Addiction Engine)"""
-    # [DEAD] 호출부 0곳
+    # [DEAD] 호출부 0곳. 생일 인자 선수정만 완료(2026-09-18) — bm/bd/bh/bmi를
+    # 필수 인자로 받아 하위 두 함수에 그대로 전달한다.
 
     streak_info = update_streak()
 
-    graph_data = get_7day_luck_graph(pils, birth_year, gender)
+    graph_data = get_7day_luck_graph(pils, birth_year, gender, bm, bd, bh, bmi)
 
-    countdown = get_turning_countdown(pils, birth_year, gender)
+    countdown = get_turning_countdown(pils, birth_year, gender, bm, bd, bh, bmi)
 
     today_score = next((d for d in graph_data if d["is_today"]), {})
 
@@ -23791,7 +23783,11 @@ def menu7_ai(pils, name, birth_year, gender):
     # -- 소름 엔진 (과거 적중 미리보기) --
 
     try:
-        gb = goosebump_engine(pils, birth_year, gender)
+        _gb_bm = max(1, min(12, int(st.session_state.get("birth_month") or 1)))
+        _gb_bd = max(1, min(31, int(st.session_state.get("birth_day") or 1)))
+        _gb_bh = max(0, min(23, int(st.session_state.get("birth_hour") or 12)))
+        _gb_bmi = max(0, min(59, int(st.session_state.get("birth_minute") or 0)))
+        gb = goosebump_engine(pils, birth_year, gender, _gb_bm, _gb_bd, _gb_bh, _gb_bmi)
 
         if gb["past"]:
             if False:  # UI-2: 과거사건 expander 비활성화
