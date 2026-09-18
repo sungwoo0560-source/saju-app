@@ -8216,21 +8216,23 @@ def get_yongshin(pils):
         elif _oh == byeong_yong:
             yong_source[_oh] = "병약"
 
-    # ★2026-09-18 용신·기신 교집합 제거(안1, 형 승인): kihwa_ohs(종합_기신)는
-    # 신강/신약 분기에서만 독립적으로 정해지고 all_yong(종합_용신)과 대조하는
-    # 절차가 이전엔 전혀 없었다 — 조후/통관/병약이 억부와 반대 축의 오행을
-    # 종합_용신에 얹으면 그 오행이 종합_기신에도 그대로 남아 "용신이자 동시에
-    # 기신"이 되는 모순이 났다(N=1000 실측 44.8%). 확정된 용신(all_yong)과
-    # 희신(huisin) — 둘 다 "쓸 것"으로 뽑힌 결론이므로 — 에 있는 오행은
-    # 기신에서 제외한다. 그 오행이 조후 출처였다면 "왜 기신인데 용신으로
-    # 쓰이는지"가 드러나도록 용신_출처 라벨을 "조후"→"조후용"으로 바꿔
-    # 단서를 남긴다(그 외 조후 출처는 원래 라벨 "조후" 그대로 — 전부
-    # "조후용"으로 바꾸면 이 오행이 기신과 겹쳤었다는 신호가 사라진다).
-    _kihwa_before_filter = kihwa_ohs
-    kihwa_ohs = [o for o in kihwa_ohs if o not in all_yong and o != huisin]
-    for _oh in _kihwa_before_filter:
-        if _oh in all_yong and yong_source.get(_oh) == "조후":
-            yong_source[_oh] = "조후용"
+    # ★2026-09-19 안1(교집합 제거) 되돌리고 단서표기안으로 교체(형 승인):
+    # kihwa_ohs(종합_기신)에서 종합_용신·희신과 겹치는 오행을 제외하면
+    # menu_gaewoon 등 기신 회피 소비처의 콘텐츠가 통째로 사라지는 케이스가
+    # 37.6%까지 나왔다(안1 실측). 리스트 자체는 다시 원본(신강/신약 분기
+    # 산출값 그대로)으로 복원하고, 대신 겹치는 오행에는 "왜 용신이자
+    # 기신인지" 설명을 "기신_단서"에 담아 모순을 숨기지 않고 드러낸다.
+    # "조후"→"조후용" 라벨 교체는 유지(용신_출처 표시 규칙은 그대로).
+    gisin_clue = {}
+    _CLUE_SRC_LABEL = {"억부": "억부상", "조후": "조후상", "조후용": "조후상", "통관": "통관상", "병약": "병약상"}
+    for _oh in kihwa_ohs:
+        if _oh in all_yong:
+            if yong_source.get(_oh) == "조후":
+                yong_source[_oh] = "조후용"
+            _label = _CLUE_SRC_LABEL.get(yong_source.get(_oh, ""), "용신상")
+            gisin_clue[_oh] = f"{_oh} — {_label} 필요하나 과하면 해로움"
+        elif _oh == huisin:
+            gisin_clue[_oh] = f"{_oh} — 희신(용신을 돕는 오행)과 겹침, 과하면 해로움"
 
     return {
         "억부_base": eokbu_base,
@@ -8249,6 +8251,7 @@ def get_yongshin(pils):
         "종합_용신": all_yong,
         "종합_기신": kihwa_ohs,
         "용신_출처": yong_source,
+        "기신_단서": gisin_clue,
         "월지": wol_jj,
     }
 
