@@ -7347,7 +7347,7 @@ def get_cached_ai_interpretation(
 
     _sinsal_12 = get_12sinsal(pils)
 
-    _sinsal_detail = "\n".join([f"  - {s['이름']}({s['icon']}): {s['desc']} (주의: {s['caution']})" for s in _sinsal_12]) or "  없음"
+    _sinsal_detail = "\n".join([f"  - {s['이름']}({s['icon']}): {s['desc']} (주의: {s.get('caution', '')})" for s in _sinsal_12]) or "  없음"
 
     _sinsal_str = ", ".join([f"{s['이름']}({s['icon']})" for s in _sinsal_12]) or "없음"
 
@@ -9783,7 +9783,24 @@ def build_rich_ai_context(pils, birth_year, gender, target_year=None, focus="종
     pillars_str = " ".join([p["str"] for p in pils])
 
     # 순수 데이터 구조화 (Skill 2: Structuring)
-
+    # ★2026-09-19 미정의 변수 반환 수정(형 승인): context 자체가 어디서도
+    # 할당되지 않아 항상 NameError였다(focus 값과 무관하게 100% 재현).
+    # 이 함수의 유일한 호출부(get_cached_ai_interpretation)가 실제로는
+    # 호출부 자체가 0곳이라 죽은 경로였음을 별도 확인·보고했다 — 그래도
+    # 함수 자체는 정상 반환하도록, 이 함수가 이미 계산해둔 값들(일간·
+    # 원국·신강약·용신 다층 분석·전환점)만 그대로 묶어 되돌려준다. 새
+    # 판정 없음 — docstring이 말하는 "감정적 해석 배제, 순수 명리 수치만
+    # 전달"에 맞게 위에서 이미 계산된 결과만 재조합한다.
+    context = {
+        "pillars": pillars_str,
+        "ilgan": ilgan,
+        "birth_year": birth_year,
+        "gender": gender,
+        "target_year": target_year,
+        "strength": strength_info,
+        "yongshin": ys_multi,
+        "turning_point": turning,
+    }
 
     # 분야별 정밀 가중치 데이터 (Skill 3: Analysis)
 
