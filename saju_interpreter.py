@@ -8216,6 +8216,22 @@ def get_yongshin(pils):
         elif _oh == byeong_yong:
             yong_source[_oh] = "병약"
 
+    # ★2026-09-18 용신·기신 교집합 제거(안1, 형 승인): kihwa_ohs(종합_기신)는
+    # 신강/신약 분기에서만 독립적으로 정해지고 all_yong(종합_용신)과 대조하는
+    # 절차가 이전엔 전혀 없었다 — 조후/통관/병약이 억부와 반대 축의 오행을
+    # 종합_용신에 얹으면 그 오행이 종합_기신에도 그대로 남아 "용신이자 동시에
+    # 기신"이 되는 모순이 났다(N=1000 실측 44.8%). 확정된 용신(all_yong)과
+    # 희신(huisin) — 둘 다 "쓸 것"으로 뽑힌 결론이므로 — 에 있는 오행은
+    # 기신에서 제외한다. 그 오행이 조후 출처였다면 "왜 기신인데 용신으로
+    # 쓰이는지"가 드러나도록 용신_출처 라벨을 "조후"→"조후용"으로 바꿔
+    # 단서를 남긴다(그 외 조후 출처는 원래 라벨 "조후" 그대로 — 전부
+    # "조후용"으로 바꾸면 이 오행이 기신과 겹쳤었다는 신호가 사라진다).
+    _kihwa_before_filter = kihwa_ohs
+    kihwa_ohs = [o for o in kihwa_ohs if o not in all_yong and o != huisin]
+    for _oh in _kihwa_before_filter:
+        if _oh in all_yong and yong_source.get(_oh) == "조후":
+            yong_source[_oh] = "조후용"
+
     return {
         "억부_base": eokbu_base,
         "억부_desc": eokbu_desc,
