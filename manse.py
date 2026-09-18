@@ -7408,34 +7408,6 @@ def get_cached_ai_interpretation(
 
 
 
-    prompt = prompts.get(prompt_type, prompts["general"])
-
-    # * Brain 3: Prompt Optimizer - 학습 패턴 자동 주입
-
-    optimizer_suffix = b3_build_optimized_prompt_suffix()
-
-    # * Adaptive Engine - 페르소나 스타일 자동 주입
-
-    try:
-        persona = infer_persona()
-
-        persona_style = get_persona_prompt_style(persona)
-
-        adaptive_suffix = f"\n\n[사용자 성향 분석]\n{persona_style}"
-
-    except Exception:
-        adaptive_suffix = ""
-
-    # * User Memory Context - 사용자 기억 주입
-
-    try:
-        memory_ctx = build_memory_context(pils_to_cache_key(pils))
-
-        memory_suffix = f"\n\n{memory_ctx}" if memory_ctx else ""
-
-    except Exception:
-        memory_suffix = ""
-
     # [로컬 전용] API 미사용. 캐시 미스 시 로컬 엔진(build_rich_narrative)으로 즉시 생성
     _section_map = {
         "prophet": "report",
