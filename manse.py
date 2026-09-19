@@ -9386,7 +9386,9 @@ def tab_daewoon(pils, birth_year, gender):
     yongshin_ohs = ys["종합_용신"]
     if not isinstance(yongshin_ohs, list):
         yongshin_ohs = []
-    _dw_gisin_ohs = [oh for oh in ["木","火","土","金","水"] if oh not in yongshin_ohs]
+    _dw_gisin_ohs = ys.get("종합_기신", [])
+    if not isinstance(_dw_gisin_ohs, list):
+        _dw_gisin_ohs = []
 
     # -- 타임라인 요약 바 --------------------------------
 
@@ -17499,7 +17501,9 @@ def menu2_lifeline(pils, birth_year, gender, name="내담자"):
         _cdw_ss  = TEN_GODS_MATRIX.get(ilgan, {}).get(cur_dw["cg"], "-")
         _cdw_oh  = OH.get(cur_dw["cg"], "")
         _cdw_jj_oh = OH.get(cur_dw.get("jj",""), "")
-        _gisin_ohs = [oh for oh in ["木","火","土","金","水"] if oh not in yongshin_ohs]
+        _gisin_ohs = ys.get("종합_기신", [])
+        if not isinstance(_gisin_ohs, list):
+            _gisin_ohs = []
         # 4단계 황금기 판별 (천간+지지 오행 모두 체크)
         if _cdw_oh in yongshin_ohs and _cdw_jj_oh in yongshin_ohs:
             _grade = "🌟 황금기 대운"; _gbg = "#1a3d1a"; _gc = "#7fff7f"
@@ -17711,7 +17715,9 @@ def menu2_lifeline(pils, birth_year, gender, name="내담자"):
             _dw2_oh_jj = OH.get(_dw_jj2, "")
             _dw2_is_yong = _dw2_oh_cg in yongshin_ohs and _dw2_oh_jj in yongshin_ohs
             _dw2_is_half = (_dw2_oh_cg in yongshin_ohs) ^ (_dw2_oh_jj in yongshin_ohs)
-            _gisin2 = [o for o in ["木","火","土","金","水"] if o not in yongshin_ohs]
+            _gisin2 = ys.get("종합_기신", [])
+            if not isinstance(_gisin2, list):
+                _gisin2 = []
             _dw2_is_bad  = _dw2_oh_cg in _gisin2 and _dw2_oh_jj in _gisin2
             if _dw2_is_yong:
                 _dw2_verdict = f"<b>지금이 인생 황금기 대운입니다.</b> 망설이지 마세요 — 이 시기에 한 결정들이 10년을 결정합니다."

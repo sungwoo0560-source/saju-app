@@ -61,6 +61,52 @@ CASES = {
             "공망": "寅卯",
         },
     },
+    # ★2026-09-19 한신 보유 픽스처 — 여집합형 기신 조립 회귀 감지용(9389/17504/17718).
+    # manse.py의 tab_daewoon(9389 _dw_gisin_ohs)·menu2_lifeline(17504 _gisin_ohs·
+    # 17718 _gisin2) 세 곳이 예전엔 "5행 - 종합_용신" 여집합으로 기신을 자체 조립해,
+    # 종합_용신·종합_기신 둘 다 아닌 "한신" 오행이 대운에 오면 실제로는 무해한데도
+    # "⚠️ 주의 대운"/"수비기 대운"으로 과잉 경고했다(N=5000 실측 44.8%가 이 패턴,
+    # 그중 530건은 2026년 현재 대운 기준으로 실제 등급이 뒤집힘). get_yongshin()의
+    # "종합_기신"을 직접 참조하도록 고친 뒤에는 이 두 픽스처의 2026년 현재 대운이
+    # tab_daewoon="중립"/menu2_lifeline="혼재"/수비기블록(_gisin2)="중립"으로 나와야
+    # 정상이다(고치기 전 여집합 기준으로는 셋 다 "주의"/"수비기"로 잘못 나왔었음).
+    # 이 파일은 manse.py를 import하지 않으므로(8행 원칙) 위 세 등급 자체는
+    # apptest_33(lifeline 메뉴, baseline.json)이 회귀를 잡아준다 — 여기서는
+    # get_yongshin()이 만드는 원본 데이터(종합_용신·종합_기신)만 baseline으로 고정한다.
+    "한신보유A_20010914": {
+        "birth": (2001, 9, 14, 5, 48),
+        "gender": "여",
+        "longitude": 126.98,
+        "use_yaja_time": True,
+        "expect_pillars": ["己卯", "庚辰", "丁酉", "辛巳"],
+        "baseline": {
+            "신강신약": "극신강",
+            "격국명": "羊刃格",
+            "종합_용신": ["火", "木"],
+            "종합_기신": ["土", "金"],
+            "공망": "申酉",
+        },
+        # 참고(직접 assert 대상 아님, apptest_33 baseline.json이 회귀 감지):
+        # 2026년 현재 대운 己亥(천간오행土/지지오행水, 2019~2028년) —
+        # tab_daewoon="중립", menu2_lifeline="혼재", 수비기블록(_gisin2)="중립".
+    },
+    "한신보유B_20060728": {
+        "birth": (2006, 7, 28, 15, 5),
+        "gender": "남",
+        "longitude": 126.98,
+        "use_yaja_time": True,
+        "expect_pillars": ["己未", "戊午", "乙未", "丙戌"],
+        "baseline": {
+            "신강신약": "극신강",
+            "격국명": "羊刃格",
+            "종합_용신": ["水", "木"],
+            "종합_기신": ["火", "土"],
+            "공망": "子丑",
+        },
+        # 참고(직접 assert 대상 아님, apptest_33 baseline.json이 회귀 감지):
+        # 2026년 현재 대운 丁酉(천간오행火/지지오행金, 2019~2028년) —
+        # tab_daewoon="중립", menu2_lifeline="혼재", 수비기블록(_gisin2)="중립".
+    },
     # 균시차(EoT) 경계 픽스처(F-EoT 라운드2) — 10/31(EoT 최댓값 +16.5분 근접)
     # 01:20생, 경도만 보정하면 자시(丙子)인데 균시차까지 더하면 축시(丁丑)로
     # 시주 자체가 바뀐다(일·월·년주는 불변) — 균시차 편입이 실제로 8글자를
@@ -927,6 +973,15 @@ def check_baseline(name):
             print(f"[OK] {name} 용신: {actual}")
         else:
             print(f"[WARN] {name} 용신 불일치 — 기대:{expected} 실제:{actual}")
+
+    if "종합_기신" in baseline:
+        ys = get_yongshin(pils) or {}
+        actual = ys.get("종합_기신", [])
+        expected = baseline["종합_기신"]
+        if actual == expected:
+            print(f"[OK] {name} 기신: {actual}")
+        else:
+            print(f"[WARN] {name} 기신 불일치 — 기대:{expected} 실제:{actual}")
 
     if "공망" in baseline:
         gm = get_gongmang(pils) or {}
