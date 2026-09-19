@@ -14788,13 +14788,17 @@ def get_jeokjung_children(gender, ilgan, yukjin_list, pils):
     """자녀 수 + 첫째 성별 + 노후 자녀 덕 적중 박스 반환.
     반환: dict {title, line1, line2, line3}
     """
+    # 자녀성 축 성별 분기(calc_children_count_precise:saju_zhengtong.py:7583과 동일 기준):
+    # 여="여","女"만 식상(食傷)축, 그 외(남)는 관성(官星)축.
+    _is_female_jk = gender in ("여", "女")
     sik_count = 0
     sik_sigan = False
     try:
         for item in yukjin_list:
             k = item.get("관계", "")
             pos = str(item.get("위치", "")).lower()
-            if "식신" in k or "상관" in k:
+            _is_jasik_ss = ("식신" in k or "상관" in k) if _is_female_jk else ("편관" in k or "정관" in k)
+            if _is_jasik_ss:
                 sik_count += 1
                 # JONGHAP-FIX-1: 시주 위치 매칭 광범위화
                 if any(x in pos for x in ["시", "hour", "시간", "시지", "시주"]):
@@ -14810,13 +14814,21 @@ def get_jeokjung_children(gender, ilgan, yukjin_list, pils):
             "경": {"임", "계"}, "신": {"계", "임"},
             "임": {"갑", "을"}, "계": {"을", "갑"},
         }
+        _GWAN_STEMS = {
+            "갑": {"경", "신"}, "을": {"신", "경"},
+            "병": {"임", "계"}, "정": {"계", "임"},
+            "무": {"갑", "을"}, "기": {"을", "갑"},
+            "경": {"병", "정"}, "신": {"정", "병"},
+            "임": {"무", "기"}, "계": {"기", "무"},
+        }
+        _stems_jk = _SIK_STEMS if _is_female_jk else _GWAN_STEMS
         _h2h = {"甲":"갑","乙":"을","丙":"병","丁":"정","戊":"무",
                 "己":"기","庚":"경","辛":"신","壬":"임","癸":"계"}
         _ig = (ilgan or "").strip()[:1]
         _ig = _h2h.get(_ig, _ig)
         _sig_cg = (pils[0].get("cg", "") if isinstance(pils, list) and len(pils) > 0 else "")[:1]
         _sig_cg = _h2h.get(_sig_cg, _sig_cg)
-        if _sig_cg in _SIK_STEMS.get(_ig, set()):
+        if _sig_cg in _stems_jk.get(_ig, set()):
             sik_sigan = True
             if sik_count == 0:
                 sik_count = 1
@@ -14855,17 +14867,20 @@ def get_jeokjung_children(gender, ilgan, yukjin_list, pils):
     # first_child 계산)은 그대로 두고 문구 조립만 성향 서술로 바꾼다.
     title = "👶 자녀와의 인연 — 이런 결이 있습니다"
 
+    _label_full_jk  = "식상(食傷)" if _is_female_jk else "관성(官星)"
+    _label_short_jk = "식상" if _is_female_jk else "관성"
+
     if sik_count >= 3:
-        line1 = f"식상(食傷) {sik_count}개 — 자녀에게 마음과 에너지를 넉넉히 쏟는 기운입니다. 본인의 에너지도 함께 챙기는 균형이 필요합니다."
+        line1 = f"{_label_full_jk} {sik_count}개 — 자녀에게 마음과 에너지를 넉넉히 쏟는 기운입니다. 본인의 에너지도 함께 챙기는 균형이 필요합니다."
     elif sik_count == 2:
-        line1 = "식상 2개 — 자녀에게 마음을 고르게 나눠 쏟는 기운입니다."
+        line1 = f"{_label_short_jk} 2개 — 자녀에게 마음을 고르게 나눠 쏟는 기운입니다."
     elif sik_count == 1:
-        line1 = "식상 1개 — 한 사람 한 사람에게 마음을 깊이 쏟는 기운입니다."
+        line1 = f"{_label_short_jk} 1개 — 한 사람 한 사람에게 마음을 깊이 쏟는 기운입니다."
     else:
-        line1 = "식상이 약한 편 — 본인의 성취와 내면에서 에너지를 찾는 기운입니다."
+        line1 = f"{_label_short_jk}이 약한 편 — 본인의 성취와 내면에서 에너지를 찾는 기운입니다."
 
     if sik_sigan:
-        line2 = "시주에 식상 — 자녀와 가까이 지내는 기운. 노후에도 교류가 잦은 편입니다."
+        line2 = f"시주에 {_label_short_jk} — 자녀와 가까이 지내는 기운. 노후에도 교류가 잦은 편입니다."
     elif sik_count >= 1:
         line2 = "자녀와 거리감이 생길 수 있는 기운 — 본인이 먼저 다가가는 노력이 도움이 됩니다."
     else:

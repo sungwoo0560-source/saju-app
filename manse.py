@@ -16475,7 +16475,7 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
         if "marriage_status" in _sig_marr.parameters:
             _kw_marr["marriage_status"] = st.session_state.get("marriage_status", "미혼")
         jk_mar = get_jeokjung_marriage(gender, _jk_ilgan, _jk_yukjin, _jk_sinsal, pils, **_kw_marr)
-        jk_kid = get_jeokjung_children(gender, _jk_ilgan, _jk_yukjin, pils)
+        jk_kid = get_jeokjung_children(gender=gender, ilgan=_jk_ilgan, yukjin_list=_jk_yukjin, pils=pils)
 
         st.markdown("---")
         st.markdown(
