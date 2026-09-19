@@ -217,6 +217,63 @@ def get_gongmang(pils):
     return result
 
 
+def get_haegong(pils, sewoon_jj="", daewoon_jj=""):
+    """공망 해공(填實/沖空/合空) 강도 판정 — 계산만, 길흉 해석 없음.
+
+    ★대상은 "공망 쌍 전체"가 아니라 "원국의 시지·월지·년지 중 실제로
+    공망 글자인 것"으로 한정한다(일지 제외 — get_gongmang과 동일 관법).
+    공망 쌍의 나머지 한 글자가 원국에 없으면 그 글자는 판정 대상이
+    아니다 — 세운·대운이 그 글자 자체이거나 그 글자를 충/합해도 무관
+    처리한다(그건 "세운 공망(허)" 로직의 영역이지 해공이 아니다).
+
+    각 대상 글자에 대해(대상 글자 기준으로만 판정, 공망 쌍 전체 기준 금지):
+      전실(3, 강): 운 지지 == 대상 글자
+      충공(2, 중): 운 지지 == 대상 글자의 沖
+      합공(1, 약): 운 지지 == 대상 글자의 육합, 단 운 지지가 공망 쌍
+                   멤버 자체가 아닐 때만 — 甲申순(午未)·甲寅순(子丑)은
+                   공망 두 글자끼리 서로 육합이라, 이 방어가 없으면
+                   전실이 합공으로 겹쳐 오판정된다.
+    대상 글자가 둘이면(원국에 공망 두 글자가 모두 있는 경우) 그중 더
+    높은 등급을 채택한다. 세운·대운이 모두 등급>0이면(겹침) 종합 등급을
+    한 단계 상향한다(상한 3).
+    """
+    gm = get_gongmang(pils)
+    gm_jjs = gm.get("공망_지지", ("", ""))
+    if not (isinstance(gm_jjs, (tuple, list)) and len(gm_jjs) == 2 and gm_jjs[0]):
+        gm_jjs = ("", "")
+
+    # 대상 = 원국 시지·월지·년지 중 실제로 공망 글자인 것(일지 제외)
+    targets = [c["지지"] for c in gm.get("해당_기둥", []) if c.get("기둥") != "일주"]
+
+    LEVEL_NAME = {0: "", 1: "합공(合空)", 2: "충공(沖空)", 3: "전실(填實)"}
+
+    def _grade(run_jj):
+        if not run_jj or not targets:
+            return 0
+        best = 0
+        for t in targets:
+            if run_jj == t:
+                best = max(best, 3)
+            elif frozenset([run_jj, t]) in CHUNG_MAP:
+                best = max(best, 2)
+            elif run_jj not in gm_jjs and HAP_MAP.get(t) == run_jj:
+                best = max(best, 1)
+        return best
+
+    sw_level = _grade(sewoon_jj)
+    dw_level = _grade(daewoon_jj)
+    overlap = sw_level > 0 and dw_level > 0
+    final_level = min(3, max(sw_level, dw_level) + 1) if overlap else max(sw_level, dw_level)
+
+    return {
+        "공망_지지": tuple(gm_jjs),
+        "대상_글자": targets,
+        "세운_판정": {"지지": sewoon_jj, "등급": sw_level, "이름": LEVEL_NAME.get(sw_level, "")},
+        "대운_판정": {"지지": daewoon_jj, "등급": dw_level, "이름": LEVEL_NAME.get(dw_level, "")},
+        "종합": {"등급": final_level, "이름": LEVEL_NAME.get(final_level, ""), "겹침": overlap},
+    }
+
+
 # ==================================================
 
 #  일주론(日柱論) | 60갑자
