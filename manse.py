@@ -18004,16 +18004,10 @@ def menu4_future3(
     if not isinstance(yongshin_ohs, list):
         yongshin_ohs = []
 
-    # 기신 오행 리스트 (신강신약 기반, 용신보정에 사용)
+    # 기신 오행 리스트 (get_yongshin의 종합_기신 참조, 용신보정에 사용)
     _m4_sn = (get_ilgan_strength(ilgan, pils) or {}).get("신강신약", "")
-    _m4_oh = OH.get(ilgan, "")
-    _m4_ob = {"木":"水","火":"木","土":"火","金":"土","水":"金"}
-    _m4_oc = {"木":"土","火":"金","土":"水","金":"木","水":"火"}
-    if "신강" in _m4_sn:
-        gisin_ohs = [_m4_ob.get(_m4_oh,""), _m4_oh]
-    elif "신약" in _m4_sn:
-        gisin_ohs = [next((k for k,v in _m4_oc.items() if v==_m4_oh),""), _m4_oc.get(_m4_oh,"")]
-    else:
+    gisin_ohs = ys.get("종합_기신", [])
+    if not isinstance(gisin_ohs, list):
         gisin_ohs = []
     gisin_ohs = [g for g in gisin_ohs if g]
 
@@ -19776,7 +19770,7 @@ def menu9_daily(pils, name, birth_year, gender):
     try:
         _ys_d = get_yongshin(pils)
         _yong_d  = _ys_d.get("종합_용신",[])
-        _gisin_d = _ys_d.get("기신",[]) if isinstance(_ys_d.get("기신"),list) else []
+        _gisin_d = _ys_d.get("종합_기신",[]) if isinstance(_ys_d.get("종합_기신"),list) else []
         if not _gisin_d:
             try:
                 from saju_engine import get_ilgan_strength as _gis_fn
