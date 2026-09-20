@@ -14238,11 +14238,57 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                         _dir_ = _DIR_ETC
                     return _cond + " " + _dir_
 
+                # 대운 공급(옵션 2) — tab_daewoon(9357-9375)과 동일한 인자 구성 재사용.
+                # 키 누락·생시 미상·예외 시 _dw_jj=None으로 두고 세운만 처리(예외 전파 금지).
+                _dw_jj, _dw_cur = None, None
+                try:
+                    _bm_dw  = max(1, min(12, int(st.session_state.get("birth_month") or 1)))
+                    _bd_dw  = max(1, min(31, int(st.session_state.get("birth_day") or 1)))
+                    _bh_dw  = max(0, min(23, int(st.session_state.get("birth_hour") or 12)))
+                    _bmi_dw = max(0, min(59, int(st.session_state.get("birth_minute") or 0)))
+                    _dw_list_gm = SajuCoreEngine.get_daewoon(
+                        pils=pils, birth_year=birth_year, birth_month=_bm_dw,
+                        birth_day=_bd_dw, birth_hour=_bh_dw, birth_minute=_bmi_dw,
+                        gender=gender,
+                    )
+                    _dw_cur = next((d for d in _dw_list_gm if d["시작연도"] <= cur_year <= d["종료연도"]), None)
+                    if _dw_cur:
+                        _dw_jj = _dw_cur.get("jj", "")
+                except Exception:
+                    _dw_jj, _dw_cur = None, None
+
                 # 해공(填實·沖空·合空) 판정 — get_haegong(대상 글자 기준) 참조로 교체.
-                # 대운은 이 스코프에서 얻을 방법이 없어 연결하지 않는다(신규 get_daewoon 호출 금지).
-                _hg = get_haegong(pils, sewoon_jj=_jj_cur, daewoon_jj=None)
+                _hg = get_haegong(pils, sewoon_jj=_jj_cur, daewoon_jj=_dw_jj)
                 _hg_level = _hg.get("세운_판정", {}).get("등급", 0)
                 _sw_gongmang = _jj_cur in _gongmang
+
+                # 대운 배경 문장 — 세운 판정과 별개로 대운 자체의 조건(전실/충공/합공)을 본다.
+                # 세운·대운이 모두 해공이면(겹침) 세운 쪽 본문에 이미 방향 문장이 있으므로
+                # 방향 문장을 중복 추가하지 않고 겹침 문장만 붙인다.
+                _dw_extra = ""
+                _dw_level = _hg.get("대운_판정", {}).get("등급", 0)
+                if _dw_level > 0 and _dw_cur:
+                    _dw_pn, _dw_t = _hg_which(_dw_jj, _dw_level)
+                    _dw_pos_kr = _POS_LABEL.get(_dw_pn, _dw_pn or "")
+                    _DW_BG = {
+                        3: "지금 {dw} 대운({sy}~{ey}) 동안 비어 있던 {pos}가 채워지는 흐름이 깔려 있습니다.",
+                        2: "지금 {dw} 대운({sy}~{ey}) 동안 {pos}를 계속 흔들어 깨우는 흐름이 깔려 있습니다.",
+                        1: "지금 {dw} 대운({sy}~{ey}) 동안 {pos}가 사람과 인연을 통해 서서히 깨어나는 흐름이 깔려 있습니다.",
+                    }
+                    _dw_extra = " " + _DW_BG.get(_dw_level, "").format(
+                        dw=_dw_cur.get("str",""), sy=_dw_cur.get("시작연도",""),
+                        ey=_dw_cur.get("종료연도",""), pos=_dw_pos_kr,
+                    )
+                    if _hg.get("종합", {}).get("겹침"):
+                        _dw_extra += " 올해는 세운까지 겹쳐 그 작용이 가장 강하게 드러나는 해입니다."
+                    else:
+                        _dw_oh = _JJ_OH3.get(_dw_t, "")
+                        if _dw_oh in (yong_ohs or []):
+                            _dw_extra += " " + _DIR_YONG
+                        elif _dw_oh in (gi_ohs or []):
+                            _dw_extra += " " + _DIR_GI
+                        else:
+                            _dw_extra += " " + _DIR_ETC
 
                 if _hg_level > 0:
                     # (a) 해공 발동 — 제목 아이콘은 조건(전실/충공/합공)이 아니라 방향(용신/기신/기타)만 본다
@@ -14258,7 +14304,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                         _icon = "🔄"
                     _danger_signals.append((
                         f"{_icon} 공망 해공({_lvl_name}) — {_pos_kr}",
-                        _hg_body(_hg_level, _pos_kr, _t),
+                        _hg_body(_hg_level, _pos_kr, _t) + _dw_extra,
                         "참고"
                     ))
                 elif _sw_gongmang:
@@ -14267,7 +14313,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                         f"올해 세운 지지({_jj_cur})가 일주 공망({_gongmang[0]}·{_gongmang[1]})에 해당합니다. "
                         f"공망 발동 해는 눈에 보이는 성과는 더디지만, 내면을 다지고 방향을 재정비하기 좋은 시기입니다. "
                         f"새로운 시작보다 기존 것을 정리하고 내실을 다지는 해입니다. "
-                        f"큰 결과를 무리하게 밀어붙이기보다, 공부·정리·관계 회복 같은 비물질적 영역에 힘을 쓰면 다음 시기에 빛을 봅니다.", "주의"))
+                        f"큰 결과를 무리하게 밀어붙이기보다, 공부·정리·관계 회복 같은 비물질적 영역에 힘을 쓰면 다음 시기에 빛을 봅니다." + _dw_extra, "주의"))
                 elif _gm_positions:
                     # (c) 둘 다 아님 — 기존 원국 공망 위치 문구 그대로
                     _gm_pos_str = "·".join(_gm_positions)
@@ -14284,7 +14330,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                             + " ".join(_gm_detail) + ". "
                             f"공망 자리의 육친에서 기대 이상을 바라면 실망합니다. "
                             f"그러나 공망은 정신적·종교적·예술적 분야에서 오히려 탁월한 능력을 줍니다. "
-                            f"물질보다 정신적 가치를 추구하면 공망이 오히려 강점이 됩니다.", "참고"))
+                            f"물질보다 정신적 가치를 추구하면 공망이 오히려 강점이 됩니다." + _dw_extra, "참고"))
 
                 # 향후 공망 해소 연도 알려주기 — get_haegong(세운만)으로 12년 탐색.
                 # 미래 간지는 60갑자 순환이 결정론적이라(10간·12지 각각 매년 +1 순환)
