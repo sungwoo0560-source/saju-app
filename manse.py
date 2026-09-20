@@ -30706,12 +30706,32 @@ padding:16px;margin:10px 0">
             "시주": ("시주(時柱) 공망", "자녀와의 인연이 얇거나 노후 준비가 필요한 구조입니다. 자녀보다 자신의 노후를 미리 준비하는 것이 현명합니다.",
                      "자녀에게 의존하는 노후 계획보다 독립적인 노후 재원을 준비하십시오. 말년에 종교·철학·봉사가 도움됩니다.", "#2e7d32"),
         }
-        _GM_TIMING = {
-            "년주": "공망 해소: 생년 지지와 삼합이 되는 세운에 일시 해소됩니다.",
-            "월주": "공망 해소: 월지와 합이 되는 세운·대운에 완화됩니다.",
-            "일주": "공망 해소: 일지와 삼합·육합이 되는 해에 인연이 옵니다.",
-            "시주": "공망 해소: 시지와 합이 되는 대운에 자녀·말년 운이 열립니다.",
-        }
+        # 공망 해소 타이밍 — 고정 서술 대신 해당 기둥의 실제 공망 글자(X) 기준으로 계산.
+        # 전실=X 자체, 충공=saju_data.CHUNG_MAP 기준 X의 충, 합공=saju_data.HAP_MAP
+        # 기준 X의 육합(단, 그 합 글자가 공망 쌍 멤버면 문장 생략 — A안, get_haegong과 동일 원칙).
+        def _gm_ddi(_x):
+            try:
+                return JJ_AN[JJ.index(_x)]
+            except Exception:
+                return ""
+
+        def _gm_chung_of(_x):
+            for _k_cm in CHUNG_MAP:
+                if _x in _k_cm:
+                    _others_cm = [c for c in _k_cm if c != _x]
+                    return _others_cm[0] if _others_cm else ""
+            return ""
+
+        def _gm_timing_text(_x):
+            _chung_x = _gm_chung_of(_x)
+            if not (_x and _chung_x):
+                return ""
+            _txt = f"이 자리는 {_x}년({_gm_ddi(_x)}띠 해)이 오면 채워지고, {_chung_x}년({_gm_ddi(_chung_x)}띠 해)에는 흔들리며 깨어납니다."
+            _hap_x = HAP_MAP.get(_x, "")
+            if _hap_x and _hap_x not in _gm_jjs2:
+                _txt += f" {_hap_x}년({_gm_ddi(_hap_x)}띠 해)에는 사람과 인연을 통해 서서히 깨어납니다."
+            return _txt
+
         _has_gm = False
         for _gp2 in _gm_pils2:
             _gpk = _gp2.get("기둥","") if isinstance(_gp2, dict) else str(_gp2)
@@ -30719,6 +30739,7 @@ padding:16px;margin:10px 0">
             if _gd2:
                 _has_gm = True
                 _tt, _dd, _aa, _cc = _gd2
+                _gm_x2 = _gp2.get("지지","") if isinstance(_gp2, dict) else ""
                 st.markdown(f"""
 <div style="background:#f9f5ff;border:2px solid {_cc};border-radius:12px;padding:16px;margin:8px 0">
 <div style="font-size:14px;font-weight:900;color:{_cc};margin-bottom:8px">⬜ {_tt}</div>
@@ -30726,7 +30747,7 @@ padding:16px;margin:10px 0">
 <div style="background:#fff;border-left:4px solid {_cc};padding:10px 12px;border-radius:0 8px 8px 0;margin-bottom:6px">
 <div style="font-size:12px;font-weight:700;color:{_cc}">✅ 실천 조언</div>
 <div style="font-size:13px;color:#333;margin-top:4px">{_aa}</div></div>
-<div style="font-size:11px;color:#888;font-style:italic">{_GM_TIMING.get(_gpk,"")}</div>
+<div style="font-size:11px;color:#888;font-style:italic">{_gm_timing_text(_gm_x2)}</div>
 </div>""", unsafe_allow_html=True)
         if not _has_gm:
             st.markdown("""<div style="background:#f0fff4;border:1px solid #66bb6a;border-radius:10px;
