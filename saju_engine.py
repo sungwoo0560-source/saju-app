@@ -2381,7 +2381,10 @@ def get_10year_luck_table(pils, birth_year, gender="남"):
 
     birth_month  = max(1, min(12, int(st.session_state.get("birth_month",  1) or 1)))
     birth_day    = max(1, min(31, int(st.session_state.get("birth_day",    1) or 1)))
-    birth_hour   = max(0, min(23, int(st.session_state.get("birth_hour",  12) or 12)))
+    # 0시 출생이 "or" 폴백에 걸려 정오로 바뀌지 않도록 None·빈 문자열만 12로 폴백한다
+    # (0은 유효값 — _get_days_to_term의 hour 조건과 같은 규칙, c8d3660과 같은 유형).
+    _bh_raw = st.session_state.get("birth_hour", 12)
+    birth_hour   = max(0, min(23, int(_bh_raw) if _bh_raw is not None and _bh_raw != "" else 12))
     birth_minute = max(0, min(59, int(st.session_state.get("birth_minute", 0) or 0)))
 
     daewoon = SajuCoreEngine.get_daewoon(
@@ -2429,7 +2432,9 @@ def get_daewoon_sewoon_cross(pils, birth_year, gender, target_year=None):
 
     _bm  = max(1, min(12, int(st.session_state.get("birth_month",  1) or 1)))
     _bd  = max(1, min(31, int(st.session_state.get("birth_day",    1) or 1)))
-    _bh  = max(0, min(23, int(st.session_state.get("birth_hour",  12) or 12)))
+    # 0시 출생이 "or" 폴백에 걸려 정오로 바뀌지 않도록 None·빈 문자열만 12로 폴백한다(위와 같은 규칙).
+    _bh_raw = st.session_state.get("birth_hour", 12)
+    _bh  = max(0, min(23, int(_bh_raw) if _bh_raw is not None and _bh_raw != "" else 12))
     _bmi = max(0, min(59, int(st.session_state.get("birth_minute", 0) or 0)))
 
     daewoon_list = SajuCoreEngine.get_daewoon(pils, birth_year, _bm, _bd, _bh, _bmi, gender)
