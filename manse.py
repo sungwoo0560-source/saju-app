@@ -102,6 +102,20 @@ def clean_hanja(text):
     return re.sub(r"\(.*?\)", "", text).strip()
 
 
+def resolve_birth_hour(*candidates, default=12):
+    """여러 후보 중 None/빈 문자열이 아닌 첫 값을 int로 변환해 0~23으로 clamp.
+    0은 유효한 값으로 취급한다(과거 `X or 12` 폴백이 0시를 정오로 잘못
+    바꾸던 문제 수정용) — 후보가 전부 없으면 default(기본 12)를 반환."""
+    for _c in candidates:
+        if _c is None or _c == "":
+            continue
+        try:
+            return max(0, min(23, int(_c)))
+        except (TypeError, ValueError):
+            continue
+    return default
+
+
 _saju_log = _logging.getLogger("saju")
 
 try:
@@ -795,7 +809,7 @@ def _local_saju_engine(pils, name, birth_year, gender, query):
 
     bd = max(1, min(31, int(_ss.get("birth_day") or 1)))
 
-    bh = max(0, min(23, int(_ss.get("birth_hour") or 12)))
+    bh = resolve_birth_hour(_ss.get("birth_hour"))
 
     bmn = max(0, min(59, int(_ss.get("birth_minute") or 0)))
 
@@ -3285,7 +3299,7 @@ def quick_consult_bar(pils, name, birth_year, gender):
             try:
                 _qc_bm = max(1, min(12, int(st.session_state.get("birth_month") or 1)))
                 _qc_bd = max(1, min(31, int(st.session_state.get("birth_day") or 1)))
-                _qc_bh = max(0, min(23, int(st.session_state.get("birth_hour") or 12)))
+                _qc_bh = resolve_birth_hour(st.session_state.get("birth_hour"))
                 _qc_bmi = max(0, min(59, int(st.session_state.get("birth_minute") or 0)))
                 luck_score = calc_luck_score(pils, birth_year, gender, _qc_bm, _qc_bd, _qc_bh, _qc_bmi, target_year=current_year)
 
@@ -6768,7 +6782,7 @@ def build_life_event_timeline(pils, birth_year, gender, start_year=None, end_yea
 
     birth_day = max(1, min(31, int(st.session_state.get("birth_day") or 1)))
 
-    birth_hour = max(0, min(23, int(st.session_state.get("birth_hour") or 12)))
+    birth_hour = resolve_birth_hour(st.session_state.get("birth_hour"))
 
     birth_minute = max(0, min(59, int(st.session_state.get("birth_minute") or 0)))
 
@@ -7220,7 +7234,7 @@ def get_cached_ai_interpretation(
 
     birth_day = max(1, min(31, int(st.session_state.get("birth_day") or 1)))
 
-    birth_hour = max(0, min(23, int(st.session_state.get("birth_hour") or 12)))
+    birth_hour = resolve_birth_hour(st.session_state.get("birth_hour"))
 
     birth_minute = max(0, min(59, int(st.session_state.get("birth_minute") or 0)))
 
@@ -9360,7 +9374,7 @@ def tab_daewoon(pils, birth_year, gender):
 
     birth_day = max(1, min(31, int(st.session_state.get("birth_day") or 1)))
 
-    birth_hour = max(0, min(23, int(st.session_state.get("birth_hour") or 12)))
+    birth_hour = resolve_birth_hour(st.session_state.get("birth_hour"))
 
     birth_minute = max(0, min(59, int(st.session_state.get("birth_minute") or 0)))
 
@@ -10713,7 +10727,7 @@ def get_jaemul_analysis(pils, birth_year, gender="남"):
 
     birth_day = max(1, min(31, int(st.session_state.get("birth_day") or 1)))
 
-    birth_hour = max(0, min(23, int(st.session_state.get("birth_hour") or 12)))
+    birth_hour = resolve_birth_hour(st.session_state.get("birth_hour"))
 
     birth_minute = max(0, min(59, int(st.session_state.get("birth_minute") or 0)))
 
@@ -11123,7 +11137,7 @@ def tab_past_events(pils, birth_year, gender, name=""):
     _today = datetime.now()
     _bm  = max(1, min(12, int(st.session_state.get("birth_month") or 1)))
     _bd2 = max(1, min(31, int(st.session_state.get("birth_day")   or 1)))
-    _bh  = max(0, min(23, int(st.session_state.get("birth_hour") or 12)))
+    _bh  = resolve_birth_hour(st.session_state.get("birth_hour"))
     _bmi = max(0, min(59, int(st.session_state.get("birth_minute") or 0)))
     _man_age = _today.year - birth_year
     if (_today.month, _today.day) < (_bm, _bd2):
@@ -14244,7 +14258,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                 try:
                     _bm_dw  = max(1, min(12, int(st.session_state.get("birth_month") or 1)))
                     _bd_dw  = max(1, min(31, int(st.session_state.get("birth_day") or 1)))
-                    _bh_dw  = max(0, min(23, int(st.session_state.get("birth_hour") or 12)))
+                    _bh_dw  = resolve_birth_hour(st.session_state.get("birth_hour"))
                     _bmi_dw = max(0, min(59, int(st.session_state.get("birth_minute") or 0)))
                     _dw_list_gm = SajuCoreEngine.get_daewoon(
                         pils=pils, birth_year=birth_year, birth_month=_bm_dw,
@@ -17814,7 +17828,7 @@ def menu3_past(pils, birth_year, gender, name=""):
 
         _bm3 = max(1,min(12,int(st.session_state.get("birth_month") or 1)))
         _bd3 = max(1,min(31,int(st.session_state.get("birth_day") or 1)))
-        _bh3 = max(0,min(23,int(st.session_state.get("birth_hour") or 12)))
+        _bh3 = resolve_birth_hour(st.session_state.get("birth_hour"))
         _bmi3= max(0,min(59,int(st.session_state.get("birth_minute") or 0)))
 
         _dws3 = SajuCoreEngine.get_daewoon(pils,birth_year,_bm3,_bd3,_bh3,_bmi3,gender=gender)
@@ -18071,7 +18085,7 @@ def menu4_future3(
 
         birth_day = max(1, min(31, int(st.session_state.get("birth_day") or 1)))
 
-        birth_hour = max(0, min(23, int(st.session_state.get("birth_hour") or 12)))
+        birth_hour = resolve_birth_hour(st.session_state.get("birth_hour"))
 
         birth_minute = max(0, min(59, int(st.session_state.get("birth_minute") or 0)))
 
@@ -21663,7 +21677,7 @@ def menu8_bihang(pils, name, birth_year, gender):
         _ss2 = st.session_state
         _bm2  = max(1, min(12, int(_ss2.get("birth_month")  or _ss2.get("in_birth_month",  1)  or 1)))
         _bd3  = max(1, min(31, int(_ss2.get("birth_day")    or _ss2.get("in_birth_day",    1)  or 1)))
-        _bh3  = max(0, min(23, int(_ss2.get("birth_hour")   or _ss2.get("in_birth_hour",  12) or 12)))
+        _bh3  = resolve_birth_hour(_ss2.get("birth_hour"), _ss2.get("in_birth_hour"))
         _bmn3 = max(0, min(59, int(_ss2.get("birth_minute") or _ss2.get("in_birth_minute", 0)  or 0)))
         _dw_list3 = SajuCoreEngine.get_daewoon(pils, birth_year, _bm2, _bd3, _bh3, _bmn3, gender) or []
         _cur_dw3 = next((d for d in _dw_list3 if d.get("시작연도",0) <= current_year <= d.get("종료연도",9999)), None)
@@ -22245,7 +22259,7 @@ def tab_ai_chat(pils, name, birth_year, gender):
             pils, birth_year, gender,
             bm=max(1, min(12, int(st.session_state.get("birth_month") or 1))),
             bd=max(1, min(31, int(st.session_state.get("birth_day") or 1))),
-            bh=max(0, min(23, int(st.session_state.get("birth_hour") or 12))),
+            bh=resolve_birth_hour(st.session_state.get("birth_hour")),
             bmi=max(0, min(59, int(st.session_state.get("birth_minute") or 0))),
             target_year=current_year,
         )
@@ -22308,7 +22322,7 @@ def tab_ai_chat(pils, name, birth_year, gender):
             bm = max(1, min(12, int(_ss.get("birth_month") or 1)))
             bd = max(1, min(31, int(_ss.get("birth_day") or 1)))
 
-            bh = max(0, min(23, int(_ss.get("birth_hour") or 12)))
+            bh = resolve_birth_hour(_ss.get("birth_hour"))
             bmn = max(0, min(59, int(_ss.get("birth_minute") or 0)))
 
             is_today = bool(_re_loc.search(r"오늘|일진|내일|이번주", q))
@@ -23312,7 +23326,7 @@ def menu7_ai(pils, name, birth_year, gender):
                     _sw_e     = get_yearly_luck(pils, get_saju_year()) or {}
                     _bm_e     = max(1, min(12, int(st.session_state.get("birth_month") or 1)))
                     _bd_e     = max(1, min(31, int(st.session_state.get("birth_day") or 1)))
-                    _bh_e     = max(0, min(23, int(st.session_state.get("birth_hour") or 12)))
+                    _bh_e     = resolve_birth_hour(st.session_state.get("birth_hour"))
                     _bmn_e    = max(0, min(59, int(st.session_state.get("birth_minute") or 0)))
                     _dw_e     = SajuCoreEngine.get_daewoon(
                         pils, birth_year, _bm_e, _bd_e, _bh_e, _bmn_e, gender=gender
@@ -23359,7 +23373,7 @@ def menu7_ai(pils, name, birth_year, gender):
     try:
         _gb_bm = max(1, min(12, int(st.session_state.get("birth_month") or 1)))
         _gb_bd = max(1, min(31, int(st.session_state.get("birth_day") or 1)))
-        _gb_bh = max(0, min(23, int(st.session_state.get("birth_hour") or 12)))
+        _gb_bh = resolve_birth_hour(st.session_state.get("birth_hour"))
         _gb_bmi = max(0, min(59, int(st.session_state.get("birth_minute") or 0)))
         gb = goosebump_engine(pils, birth_year, gender, _gb_bm, _gb_bd, _gb_bh, _gb_bmi)
 
@@ -25187,7 +25201,7 @@ def menu_gaewoon(pils, name, birth_year, gender):
     try:
         _bm_gw  = max(1, min(12, int(st.session_state.get("birth_month",  1) or 1)))
         _bd_gw  = max(1, min(31, int(st.session_state.get("birth_day",    1) or 1)))
-        _bh_gw  = max(0, min(23, int(st.session_state.get("birth_hour",  12) or 12)))
+        _bh_gw  = resolve_birth_hour(st.session_state.get("birth_hour"))
         _bmi_gw = max(0, min(59, int(st.session_state.get("birth_minute", 0) or 0)))
         _dw_list_gw = SajuCoreEngine.get_daewoon(pils, birth_year, _bm_gw, _bd_gw, _bh_gw, _bmi_gw, gender)
         _cur_dw_gw  = next((d for d in _dw_list_gw if d["시작연도"] <= _cur_yr_gw <= d["종료연도"]), None)
