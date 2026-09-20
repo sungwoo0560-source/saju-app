@@ -1305,7 +1305,7 @@ class SajuCoreEngine:
             day = int(day) if day else 1
             if not (1 <= day <= 31):
                 raise ValueError(f"birth_day must be 1..31, got {day}")
-            hour = int(hour) if hour else 12
+            hour = int(hour) if hour is not None and hour != "" else 12
             if not (0 <= hour <= 23):
                 raise ValueError(f"birth_hour must be 0..23, got {hour}")
             minute = int(minute) if minute else 0
