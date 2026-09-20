@@ -14188,24 +14188,88 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
             _gm_raw = get_gongmang(pils).get("공망_지지")
             _gongmang = tuple(_gm_raw) if isinstance(_gm_raw, (tuple, list)) and len(_gm_raw) == 2 else ("", "")
 
+            _gm_positions = []
+            _hg_level = 0
             if _gongmang[0]:
-                # 원국 공망 체크 (년/월/시주 지지)
+                # 원국 공망 체크 (년/월/시주 지지) — 궁위 라벨과 실제 공망 글자를 함께 보관
+                # (get_haegong은 최고 등급만 반환하므로, 어느 궁위가 그 등급을 만들었는지
+                # 노출 문구용으로 여기서 별도 확인해야 한다)
                 _gm_positions = []
+                _gm_pos_jj = {}
                 for _pi, _pn in zip([0, 2, 3], ["시지", "월지", "년지"]):
                     if _pi < len(pils) and pils[_pi].get("jj","") in _gongmang:
                         _gm_positions.append(_pn)
+                        _gm_pos_jj[_pn] = pils[_pi].get("jj","")
 
-                # 세운 공망 발동 체크
+                _POS_LABEL = {"년지": "뿌리·윗대 자리", "월지": "직장·집·부모 자리", "시지": "자녀·아랫사람 자리"}
+                _JJ_OH3 = {
+                    "子":"水","丑":"土","寅":"木","卯":"木","辰":"土",
+                    "巳":"火","午":"火","未":"土","申":"金","酉":"金",
+                    "戌":"土","亥":"水"
+                }
+                _COND_SENT = {
+                    3: "비어 있던 {pos}가 올해 채워집니다.",
+                    2: "비어 있던 {pos}가 올해 흔들리며 깨어납니다.",
+                    1: "비어 있던 {pos}가 사람과 인연을 통해 서서히 깨어납니다.",
+                }
+                _FUTURE_DESC = {3: "채워집니다", 2: "흔들리며 깨어납니다", 1: "인연을 통해 깨어납니다"}
+                _DIR_YONG = "막혀 있던 좋은 기운이 움직이기 시작하는 때입니다. 미뤄둔 일을 꺼내기 좋습니다."
+                _DIR_GI   = "잠잠하던 부담스러운 기운이 드러나는 때입니다. 묻어둔 문제가 표면으로 올라올 수 있으니 서두르지 말고 정리부터 하세요."
+                _DIR_ETC  = "조용하던 영역에 변화가 생기는 때입니다. 흐름을 지켜보며 움직이세요."
+
+                def _hg_which(_run_jj, _level):
+                    for _pn2, _t2 in _gm_pos_jj.items():
+                        if _level == 3 and _run_jj == _t2:
+                            return _pn2, _t2
+                        if _level == 2 and frozenset([_run_jj, _t2]) in CHUNG_MAP:
+                            return _pn2, _t2
+                        if _level == 1 and _run_jj not in _gongmang and HAP_MAP.get(_t2) == _run_jj:
+                            return _pn2, _t2
+                    return None, None
+
+                def _hg_body(_level, _pos_kr, _t):
+                    _cond = _COND_SENT.get(_level, "").format(pos=_pos_kr)
+                    _oh = _JJ_OH3.get(_t, "")
+                    if _oh in (yong_ohs or []):
+                        _dir_ = _DIR_YONG
+                    elif _oh in (gi_ohs or []):
+                        _dir_ = _DIR_GI
+                    else:
+                        _dir_ = _DIR_ETC
+                    return _cond + " " + _dir_
+
+                # 해공(填實·沖空·合空) 판정 — get_haegong(대상 글자 기준) 참조로 교체.
+                # 대운은 이 스코프에서 얻을 방법이 없어 연결하지 않는다(신규 get_daewoon 호출 금지).
+                _hg = get_haegong(pils, sewoon_jj=_jj_cur, daewoon_jj=None)
+                _hg_level = _hg.get("세운_판정", {}).get("등급", 0)
                 _sw_gongmang = _jj_cur in _gongmang
 
-                if _sw_gongmang:
+                if _hg_level > 0:
+                    # (a) 해공 발동 — 제목 아이콘은 조건(전실/충공/합공)이 아니라 방향(용신/기신/기타)만 본다
+                    _pn, _t = _hg_which(_jj_cur, _hg_level)
+                    _pos_kr = _POS_LABEL.get(_pn, _pn or "")
+                    _lvl_name = {3: "填實", 2: "沖空", 1: "合空"}.get(_hg_level, "")
+                    _hg_oh = _JJ_OH3.get(_t, "")
+                    if _hg_oh in (yong_ohs or []):
+                        _icon = "🌟"
+                    elif _hg_oh in (gi_ohs or []):
+                        _icon = "⚠️"
+                    else:
+                        _icon = "🔄"
+                    _danger_signals.append((
+                        f"{_icon} 공망 해공({_lvl_name}) — {_pos_kr}",
+                        _hg_body(_hg_level, _pos_kr, _t),
+                        "참고"
+                    ))
+                elif _sw_gongmang:
+                    # (b) 해공은 아니나 세운 지지가 공망 쌍 자체 — 기존 "올해 공망 발동(허)" 문구 그대로
                     _danger_signals.append(("🌑 올해 공망(空亡) 발동 — 결실보다 비움·정리의 기운",
                         f"올해 세운 지지({_jj_cur})가 일주 공망({_gongmang[0]}·{_gongmang[1]})에 해당합니다. "
                         f"공망 발동 해는 눈에 보이는 성과는 더디지만, 내면을 다지고 방향을 재정비하기 좋은 시기입니다. "
                         f"새로운 시작보다 기존 것을 정리하고 내실을 다지는 해입니다. "
                         f"큰 결과를 무리하게 밀어붙이기보다, 공부·정리·관계 회복 같은 비물질적 영역에 힘을 쓰면 다음 시기에 빛을 봅니다.", "주의"))
-
-                if _gm_positions and not _sw_gongmang:
+                elif _gm_positions:
+                    # (c) 둘 다 아님 — 기존 원국 공망 위치 문구 그대로
                     _gm_pos_str = "·".join(_gm_positions)
                     _gm_detail = []
                     if "년지" in _gm_positions:
@@ -14222,82 +14286,30 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                             f"그러나 공망은 정신적·종교적·예술적 분야에서 오히려 탁월한 능력을 줍니다. "
                             f"물질보다 정신적 가치를 추구하면 공망이 오히려 강점이 됩니다.", "참고"))
 
-            # 공망 충 해소 체크
-            _CHUNG_MAP2 = {
-                "子":"午","午":"子","丑":"未","未":"丑",
-                "寅":"申","申":"寅","卯":"酉","酉":"卯",
-                "辰":"戌","戌":"辰","巳":"亥","亥":"巳"
-            }
-            _gm1_해소 = _CHUNG_MAP2.get(_gongmang[0],"")
-            _gm2_해소 = _CHUNG_MAP2.get(_gongmang[1],"")
-
-            _gm_해소_발동 = False
-            if _jj_cur in (_gm1_해소, _gm2_해소):
-                _gm_해소_발동 = True
-                _어떤_공망 = _gongmang[0] if _jj_cur == _gm1_해소 else _gongmang[1]
-
-                _JJ_OH3 = {
-                    "子":"水","丑":"土","寅":"木","卯":"木","辰":"土",
-                    "巳":"火","午":"火","未":"土","申":"金","酉":"金",
-                    "戌":"土","亥":"水"
-                }
-                _gm_oh = _JJ_OH3.get(_어떤_공망,"")
-                _is_yong = _gm_oh in (yong_ohs or [])
-                _is_gi = _gm_oh in (gi_ohs or [])
-
-                if _is_yong:
-                    _danger_signals.append((
-                        "🌟 공망 해소 — 막혔던 용신이 터집니다",
-                        f"올해 세운지지({_jj_cur})가 공망({_어떤_공망})을 충(沖)으로 깨줍니다. "
-                        f"공망된 {_어떤_공망}은 용신 오행({_gm_oh})입니다. "
-                        f"막혔던 좋은 기운이 올해 한꺼번에 터져 나옵니다. "
-                        f"정체됐던 일이 갑자기 풀리고 "
-                        f"오랫동안 안 되던 것이 이루어지는 해입니다. "
-                        f"단, 변화가 매우 급격하게 옵니다. "
-                        f"이직·이사·새로운 인연 등 큰 변화가 갑자기 찾아올 수 있습니다. "
-                        f"기회가 왔을 때 망설이지 말고 잡으십시오.",
-                        "참고"
-                    ))
-                elif _is_gi:
-                    _danger_signals.append((
-                        "✅ 공망 해소 — 나쁜 기운이 사라집니다",
-                        f"올해 세운지지({_jj_cur})가 공망({_어떤_공망})을 충으로 깨줍니다. "
-                        f"공망된 {_어떤_공망}은 기신 오행({_gm_oh})이었습니다. "
-                        f"그동안 발목을 잡던 나쁜 기운이 올해 해소됩니다. "
-                        f"오래된 문제가 해결되고 묵은 짐이 내려지는 해입니다. "
-                        f"새로운 출발을 하기 좋은 타이밍입니다.",
-                        "참고"
-                    ))
-                else:
-                    _danger_signals.append((
-                        "⚡ 공망 해소 — 급격한 변화가 옵니다",
-                        f"올해 세운지지({_jj_cur})가 공망({_어떤_공망})을 충으로 깨줍니다. "
-                        f"공망이 깨지면 억눌렸던 기운이 한꺼번에 터집니다. "
-                        f"갑작스러운 이직·이사·관계 변화가 올 수 있습니다. "
-                        f"변화를 두려워하지 말고 흐름을 타십시오.",
-                        "참고"
-                    ))
-
-            # 향후 공망 해소 연도 알려주기
-            if not _gm_해소_발동 and _gongmang[0]:
-                _해소_지지 = [_gm1_해소, _gm2_해소]
-                _해소_연도 = []
-                _JJ_CYCLE = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"]
-                _cur_jj_idx = _JJ_CYCLE.index(_jj_cur) if _jj_cur in _JJ_CYCLE else 0
-                for _offset in range(1, 13):
-                    _future_jj = _JJ_CYCLE[(_cur_jj_idx + _offset) % 12]
-                    if _future_jj in _해소_지지:
-                        _해소_연도.append(cur_year + _offset)
-                if _해소_연도:
-                    _danger_signals.append((
-                        f"📅 공망 해소 예정 — {_해소_연도[0]}년에 막힌 것이 풀립니다",
-                        f"현재 공망({_gongmang[0]}·{_gongmang[1]})이 발동 중입니다. "
-                        f"공망을 깨주는 충 운은 <b>{_해소_연도[0]}년</b>에 옵니다. "
-                        f"{'그 다음은 ' + str(_해소_연도[1]) + '년입니다.' if len(_해소_연도) > 1 else ''} "
-                        f"지금은 버티면서 그 해를 준비하는 것이 최선입니다. "
-                        f"공망 중에는 무리하게 밀어붙이지 말고 실력을 쌓으십시오.",
-                        "참고"
-                    ))
+                # 향후 공망 해소 연도 알려주기 — get_haegong(세운만)으로 12년 탐색.
+                # 미래 간지는 60갑자 순환이 결정론적이라(10간·12지 각각 매년 +1 순환)
+                # 이미 계산해 둔 올해 세운(_yl)의 cg/jj를 기준으로 산출한다(신규 조회 없음).
+                if _hg_level == 0 and _gm_positions:
+                    _CG_CYCLE = ["甲","乙","丙","丁","戊","己","庚","辛","壬","癸"]
+                    _JJ_CYCLE = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"]
+                    _cg_cur = _yl.get("cg", "")
+                    _cur_cg_idx = _CG_CYCLE.index(_cg_cur) if _cg_cur in _CG_CYCLE else 0
+                    _cur_jj_idx = _JJ_CYCLE.index(_jj_cur) if _jj_cur in _JJ_CYCLE else 0
+                    for _offset in range(1, 13):
+                        _fy = cur_year + _offset
+                        _fy_jj = _JJ_CYCLE[(_cur_jj_idx + _offset) % 12]
+                        _fy_ganzhi = _CG_CYCLE[(_cur_cg_idx + _offset) % 10] + _fy_jj
+                        _f_hg = get_haegong(pils, sewoon_jj=_fy_jj, daewoon_jj=None)
+                        _f_level = _f_hg.get("세운_판정", {}).get("등급", 0)
+                        if _f_level > 0:
+                            _fpn, _ft = _hg_which(_fy_jj, _f_level)
+                            _fpos_kr = _POS_LABEL.get(_fpn, _fpn or "")
+                            _danger_signals.append((
+                                f"📅 공망 해소 예정 — {_fy}년",
+                                f"📅 {_fy}년({_fy_ganzhi}) — 비어 있던 {_fpos_kr}가 {_FUTURE_DESC.get(_f_level,'')}.",
+                                "참고"
+                            ))
+                            break
         except Exception:
             pass
 
