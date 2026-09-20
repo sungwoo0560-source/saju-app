@@ -14362,7 +14362,7 @@ def get_jeokjung_windfall(yukjin_list, daeun_list, birth_year):
     return {"title": title, "line1": line1, "line2": line2, "line3": line3}
 
 
-def get_jeokjung_guiin(ilgan, pils, yukjin_list, cur_year=None, gongmang=None):
+def get_jeokjung_guiin(ilgan, pils, yukjin_list, cur_year=None, gongmang=None, gi_ohs=None):
     """천을귀인 띠 변환 + 십성별 귀인 유형 적중 박스 반환.
     반환: dict {title, line1, line2, line3}
     """
@@ -14447,26 +14447,63 @@ def get_jeokjung_guiin(ilgan, pils, yukjin_list, cur_year=None, gongmang=None):
     else:
         line2 = f"외부에서 옵니다. → {person_type} 형태로, {direction}."
     # 천을귀인 지지가 세운으로 실제 들어오는 해를 계산 (향후 10년)
-    # 공망에 걸린 귀인은 봉인 상태로 보아 연도를 단정하지 않음
-    _gm = tuple(gongmang) if gongmang else ()
+    # 판정은 get_haegong(원국 실재 대상 기준)으로 한다 — 공망 쌍 전체 기준(_gm) 판정 제거.
+    # 세운 지지가 공망 쌍에 속하면서 원국에 실재하는 대상 글자를 전실로 채우면 발동,
+    # 공망 쌍 멤버이지만 원국에 없는 글자면 봉인, 공망과 무관하면 일반 발동.
+    # get_yongshin은 캐시가 없어 여기서 새로 호출하지 않는다 — 호출부(manse.py)가 이미
+    # 갖고 있는 종합_기신을 gi_ohs로 받는다.
     _base_y = cur_year if cur_year else datetime.now().year
-    _hit, _sealed = [], []
+    _hit, _hit_jeonsil, _sealed = [], [], []
     for _y in range(_base_y, _base_y + 10):
         try:
-            _sw_jj = get_yearly_luck(pils, _y).get("jj", "")
+            _yl_guiin = get_yearly_luck(pils, _y)
+            _sw_jj = _yl_guiin.get("jj", "")
+            _sw_ganzhi = _yl_guiin.get("세운", "")
         except Exception:
             continue
-        if _sw_jj and _sw_jj in guiin_ji:
-            if _sw_jj in _gm:
-                if _sw_jj not in _sealed:
-                    _sealed.append(_sw_jj)
-            else:
-                _hit.append((_y, _sw_jj))
+        if not (_sw_jj and _sw_jj in guiin_ji):
+            continue
+        _hg_y = get_haegong(pils, sewoon_jj=_sw_jj, daewoon_jj=None)
+        _hg_gm = _hg_y.get("공망_지지", ("", ""))
+        if _sw_jj in _hg_gm:
+            # 전실 여부는 "종합" 등급 숫자가 아니라, 이 대상 글자가 실제로 세운_판정에서
+            # 전실(填實)로 판정됐는지 이름으로 확인한다(대운 연결 시 충공+전실 겹침이
+            # 종합 등급을 3으로 올려도, 세운 자체가 전실이 아니면 오판되지 않도록).
+            _sw_grade = _hg_y.get("세운_판정", {})
+            if _sw_jj in _hg_y.get("대상_글자", []) and _sw_grade.get("이름") == "전실(填實)":
+                _hit_jeonsil.append((_y, _sw_jj, _sw_ganzhi))
+            elif _sw_jj not in _sealed:
+                _sealed.append(_sw_jj)
+        else:
+            _hit.append((_y, _sw_jj))
+
+    # 일반 발동 + 전실 발동을 연도 오름차순으로 합쳐 출력(전실은 개별 문장,
+    # 일반은 인접한 것끼리 기존 방식대로 "・"로 묶는다)
+    _timeline = [(_y, "general", _j, None) for _y, _j in _hit]
+    _timeline += [(_y, "jeonsil", _j, _gz) for _y, _j, _gz in _hit_jeonsil]
+    _timeline.sort(key=lambda x: x[0])
+
     _parts = []
-    if _hit:
-        _parts.append("・".join(f"{_y}년({_jj_lab(_j)})" for _y, _j in _hit) + " — 천을귀인이 세운으로 들어옵니다. 이때 만난 사람 놓치지 마세요.")
+    _general_buf = []
+
+    def _flush_general():
+        if _general_buf:
+            _parts.append("・".join(f"{yy}년({_jj_lab(jj)})" for yy, jj in _general_buf) + " — 천을귀인이 세운으로 들어옵니다. 이때 만난 사람 놓치지 마세요.")
+            _general_buf.clear()
+
+    for _y, _kind, _j, _gz in _timeline:
+        if _kind == "general":
+            _general_buf.append((_y, _j))
+        else:
+            _flush_general()
+            _sent = f"{_y}년({_gz}) — 잠들어 있던 {_jj_lab(_j)} 귀인이 채워지며 깨어나는 해입니다. 이때 만난 사람을 놓치지 마세요."
+            if _OH_JJ.get(_j, "") in (gi_ohs or []):
+                _sent += f" 다만 {_jj_lab(_j)}는 부담스러운 기운이기도 하니, 사람은 잡되 문서·부동산 결정은 한 번 더 따져보세요."
+            _parts.append(_sent)
+    _flush_general()
+
     if _sealed:
-        _parts.append("단, " + "・".join(_jj_lab(g) for g in _sealed) + " 귀인은 공망에 들어 봉인 상태입니다(塡實·沖 시 발동).")
+        _parts.append("단, " + "・".join(_jj_lab(g) for g in _sealed) + " 귀인은 이 해에 공망에 걸려 힘이 약하게 들어옵니다.")
     line3 = " ".join(_parts) if _parts else "향후 10년 내 천을귀인이 세운으로 드는 해는 없습니다."
 
     return {"title": title, "line1": line1, "line2": line2, "line3": line3}
