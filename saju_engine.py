@@ -1566,7 +1566,22 @@ class SajuCoreEngine:
         # 절입일 찾기 및 대운 시작 나이 계산
 
         try:
-            days_to_term = SajuCoreEngine._get_days_to_term(birth_year, birth_month, birth_day, birth_hour, birth_minute, direction)
+            # ★절입 거리(대운수)도 명식(연주·월주)과 같은 기준으로 비교한다 — 절입은 UTC+9 고정값이므로
+            # 그 시절 시계값(1954~61 GMT+8:30·서머타임)을 오늘날 UTC+9로 정규화한 뒤 넘긴다
+            # (SajuPrecisionEngine.get_pillars가 term_*에 쓰는 것과 같은 _normalize_local_clock).
+            # 경도·균시차는 절입 비교와 무관하므로 넣지 않는다.
+            # 정규화할 수 없는 입력(None·범위 밖 등)은 원본 그대로 넘겨, _get_days_to_term의
+            # 기존 방어·예외 경로가 이전과 똑같이 처리하게 한다.
+            try:
+                _nh_in = 12 if birth_hour is None or birth_hour == "" else int(birth_hour)
+                _nmin_in = int(birth_minute) if birth_minute else 0
+                _ny, _nm, _nd, _nh, _nmin = TimeCorrection._normalize_local_clock(
+                    int(birth_year), int(birth_month), int(birth_day), _nh_in, _nmin_in
+                )
+            except (TypeError, ValueError):
+                _ny, _nm, _nd, _nh, _nmin = birth_year, birth_month, birth_day, birth_hour, birth_minute
+
+            days_to_term = SajuCoreEngine._get_days_to_term(_ny, _nm, _nd, _nh, _nmin, direction)
 
             # 3일 = 1년, 1일 = 4개월 → 총 개월수로 정밀 계산
 

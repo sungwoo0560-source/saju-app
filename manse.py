@@ -19230,8 +19230,19 @@ def menu6_relations(pils, name, birth_year, gender, marriage_status="미혼"):
     if st.button("💑 두 사주 궁합 분석", use_container_width=True,
                  type="primary", key="partner_calc_btn"):
         try:
-            _p_pils = SajuCoreEngine.get_pillars(
-                _p_year, _p_month, _p_day, _p_hour, 0, _p_gender
+            # 본 화면(main의 SajuPrecisionEngine.get_pillars)과 같은 엔진 — 그 시절 시계값(1954~61
+            # GMT+8:30·서머타임)을 UTC+9로 정규화해 절입과 같은 기준으로 비교한다.
+            # 상대방은 출생지를 받지 않으므로 경도는 본 화면의 기본값(서울)을 쓴다.
+            _p_lon = getattr(TimeCorrection, "REGION_LONGITUDE", {}).get("서울", 126.98)
+            _p_pils = SajuPrecisionEngine.get_pillars(
+                year=_p_year,
+                month=_p_month,
+                day=_p_day,
+                hour=_p_hour,
+                minute=0,
+                gender=_p_gender,
+                use_yaja_time=st.session_state.get("in_use_yaja", True),
+                longitude=_p_lon,
             )
             st.session_state["partner_pils"]   = _p_pils
             st.session_state["partner_year"]   = _p_year

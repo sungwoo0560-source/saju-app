@@ -20,7 +20,7 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from saju_engine import SajuPrecisionEngine, get_ilgan_strength, get_pillars_12beol, format_12beol_display
+from saju_engine import SajuPrecisionEngine, SajuCoreEngine, get_ilgan_strength, get_pillars_12beol, format_12beol_display
 from saju_interpreter import get_yongshin, get_gyeokguk, build_saju_tongbyeon, get_yongshin_multilayer
 from saju_sinsal import get_gongmang, get_yangin, get_extra_sinsal, HONGYEOM_MAP
 from saju_zhengtong import render_jonghap_pyongron, render_four_pillars_card, calc_all_sinsal_extended
@@ -881,6 +881,53 @@ CASES = {
             "공망": "申酉",
         },
     },
+    # ★2026-09-20 대운수 정규화 회귀 픽스처 2건 — get_daewoon이 그 시절 시계값을 정규화하지 않고
+    # UTC+9 고정 절입값과 직접 비교하던 결함(saju_engine.py get_daewoon, 명식은 이미 정규화 경로라
+    # 8글자는 이번과 무관) 회귀 감지용. 대운수는 baseline 스키마에 없어 expect_daewoon으로 직접
+    # assert한다(assert_daewoon). 기대값은 전부 UTC 절대시각 직접 비교 독립 판정(별도 스크립트,
+    # 앱 코드 미사용, 연·월·일주도 독립 판정과 일치 확인) — 엔진 출력을 베낀 값이 아니다.
+    "대운수_서머타임_19510708_소서직전": {
+        # 출생: 1951-07-08 08:51(남). 그 시절 시계 = 서머타임 UTC+10:00 → UTC 07-07 22:51 = UTC+9 07:51.
+        # 절입: 소서 원값(월,일,시,분)=(7,8,7,54) UTC+9(computed-ephem, ephem 07:54:03)
+        #       → 출생은 절입 3분 전(아직 甲午월). 시계값 그대로 비교하면 08:51 > 07:54라 소서 이후로 오판.
+        # 방향=역행(년간 辛=음간, 남명) → 직전 절(망종)까지 31.43일 → 대운수 10세 6개월(시작연도 1961).
+        # 수정 전 오답: 시작나이=1, 개월=0(시작연도 1952) — 소서 이후로 오판해 절입 거리 0.04일이 됨.
+        # 같은 화면에서 월주(정규화 경로)는 소서 이전으로, 대운수(원시 시계)는 소서 이후로 판정하던 모순 사례.
+        "birth": (1951, 7, 8, 8, 51),
+        "gender": "남",
+        "longitude": 126.98,
+        "use_yaja_time": True,
+        "expect_pillars": ["戊辰", "己酉", "甲午", "辛卯"],
+        "expect_daewoon": {"시작나이": 10, "시작나이_월": 6, "시작연도": 1961, "간지": "癸巳"},
+        "baseline": {
+            "신강신약": "신강",
+            "격국명": "미정격",
+            "종합_용신": ["水", "金", "木"],
+            "공망": "寅卯",
+        },
+    },
+    "대운수_UTC0830_19570405_청명직후15분": {
+        # 출생: 1957-04-05 10:03(남). 그 시절 시계 = 표준시 UTC+8:30(서머타임 아님, 1957 서머타임은
+        #       5월 시작) → UTC 04-05 01:33 = UTC+9 10:33.
+        # 절입: 청명 원값(월,일,시,분)=(4,5,10,18) UTC+9(computed-ephem, ephem 10:18:50)
+        #       → 출생은 절입 15분 후(甲辰월). 절입까지 분 차이 = +15분(ephem 초 기준으로도 14분 이상 여유).
+        #       시계값 그대로 비교하면 10:03 < 10:18이라 청명 이전으로 오판(시계-UTC+9 차 −30분).
+        # 방향=역행(년간 丁=음간, 남명) → 직전 절(청명)까지 0.0104일 → 대운수 1세 0개월(시작연도 1958).
+        # 수정 전 오답: 시작나이=10, 개월=1(시작연도 1967) — 청명 이전으로 오판해 한 절 앞(경칩)까지 30.20일을 씀.
+        # 절입 시각 정밀도(수십 초) 안쪽 경계가 아니라 15분 여유가 있는 케이스라 데이터 갱신에 안정적이다.
+        "birth": (1957, 4, 5, 10, 3),
+        "gender": "남",
+        "longitude": 126.98,
+        "use_yaja_time": True,
+        "expect_pillars": ["乙巳", "丁未", "甲辰", "丁酉"],
+        "expect_daewoon": {"시작나이": 1, "시작나이_월": 0, "시작연도": 1958, "간지": "癸卯"},
+        "baseline": {
+            "신강신약": "중화",
+            "격국명": "偏印(편인)格",
+            "종합_용신": ["木", "火", "水"],
+            "공망": "寅卯",
+        },
+    },
 }
 
 # 위 "시간미상" 픽스처들의 get_yangin() 기대값 — (존재 여부, 위치 목록).
@@ -957,6 +1004,27 @@ def assert_pillars(name):
         print(f"[OK] {name} 8글자 일치: {actual}")
         return True
     print(f"[FAIL] {name} 8글자 불일치")
+    print(f"    기대: {expected}")
+    print(f"    실제: {actual}")
+    return False
+
+
+def assert_daewoon(name):
+    """expect_daewoon이 있는 케이스만 첫 대운(시작나이·개월·시작연도·간지)을 대조한다.
+    UI와 같은 호출(pils + 원시 출생 시계값 → SajuCoreEngine.get_daewoon). 키가 없으면 조용히 통과."""
+    case = CASES[name]
+    expected = case.get("expect_daewoon")
+    if not expected:
+        return True
+    y, m, d, h, mi = case["birth"]
+    dw = SajuCoreEngine.get_daewoon(get_pils(name), y, m, d, h, mi, case["gender"])
+    first = dw[0] if dw else {}
+    actual = {"시작나이": first.get("시작나이"), "시작나이_월": first.get("시작나이_월"),
+              "시작연도": first.get("시작연도"), "간지": first.get("str")}
+    if actual == expected:
+        print(f"[OK] {name} 대운수 일치: {actual}")
+        return True
+    print(f"[FAIL] {name} 대운수 불일치")
     print(f"    기대: {expected}")
     print(f"    실제: {actual}")
     return False
@@ -1225,6 +1293,8 @@ def main():
     all_pillars_ok = True
     for name in CASES:
         ok = assert_pillars(name)
+        all_pillars_ok = all_pillars_ok and ok
+        ok = assert_daewoon(name)
         all_pillars_ok = all_pillars_ok and ok
         check_baseline(name)
         print()
