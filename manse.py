@@ -105,7 +105,14 @@ def clean_hanja(text):
 def resolve_birth_hour(*candidates, default=12):
     """여러 후보 중 None/빈 문자열이 아닌 첫 값을 int로 변환해 0~23으로 clamp.
     0은 유효한 값으로 취급한다(과거 `X or 12` 폴백이 0시를 정오로 잘못
-    바꾸던 문제 수정용) — 후보가 전부 없으면 default(기본 12)를 반환."""
+    바꾸던 문제 수정용) — 후보가 전부 없으면 default(기본 12)를 반환.
+    "시간 모름"(in_unknown_time) 체크 시에는 후보 값과 무관하게 항상 12를
+    반환한다 — 명식(연주·월주)과 대운 계산의 가정 시각을 정오로 통일한다."""
+    try:
+        if st.session_state.get("in_unknown_time"):
+            return 12
+    except Exception:
+        pass
     for _c in candidates:
         if _c is None or _c == "":
             continue
@@ -28619,6 +28626,11 @@ def main():
                 _ss.get("in_birth_region", "서울"), 126.98
             )
 
+            # 시간 모름이면 명식·대운 모두 정오(12:00) 기준으로 통일한다(가정 시각 불일치 방지).
+            # resolve_birth_hour가 in_unknown_time을 최우선으로 확인해 12를 반환한다.
+            _pils_hour = resolve_birth_hour(_ss.get("in_birth_hour"), _ss.get("birth_hour"))
+            _pils_minute = 0 if _ss.get("in_unknown_time") else _ss.get("in_birth_minute", _ss.get("birth_minute", 0))
+
             try:
                 if _ss.get("in_premium_correction", True):
                     # 정밀 보정 엔진 사용 (진태양시 + 지방시 반영)
@@ -28626,8 +28638,8 @@ def main():
                         b_year,
                         b_month,
                         b_day,
-                        _ss.get("in_birth_hour", _ss.get("birth_hour", 12)),
-                        _ss.get("in_birth_minute", _ss.get("birth_minute", 0)),
+                        _pils_hour,
+                        _pils_minute,
                         _ss.get("in_gender", "남"),
                         use_yaja_time=_ss.get("in_use_yaja", True),
                         longitude=_region_lon,
@@ -28638,8 +28650,8 @@ def main():
                         b_year,
                         b_month,
                         b_day,
-                        _ss.get("in_birth_hour", _ss.get("birth_hour", 12)),
-                        _ss.get("in_birth_minute", _ss.get("birth_minute", 0)),
+                        _pils_hour,
+                        _pils_minute,
                         _ss.get("in_gender", "남"),
                         use_yaja_time=_ss.get("in_use_yaja", True),
                     )

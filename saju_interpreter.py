@@ -1839,8 +1839,9 @@ class LocalSajuNarrator:
             # 0시 출생이 "or" 폴백에 걸려 정오로 바뀌지 않도록 후보를 None/빈 문자열
             # 기준으로만 판별한다(0은 유효값) — manse.resolve_birth_hour와 동일 규칙,
             # 이 파일에서 manse를 import하지 않으므로 인라인으로 재현.
-            _bh_raw = _ss.get("birth_hour")
-            if _bh_raw is None or _bh_raw == "":
+            # 시간 모름이면 명식·대운 가정 시각을 정오로 통일(manse.py 명식 계산과 동일 규칙).
+            _bh_raw = 12 if _ss.get("in_unknown_time") else _ss.get("birth_hour")
+            if not _ss.get("in_unknown_time") and (_bh_raw is None or _bh_raw == ""):
                 _bh_raw = _ss.get("in_birth_hour")
             bh = max(0, min(23, int(_bh_raw))) if _bh_raw not in (None, "") else 12   # 키 통일
             bmi = max(0, min(59, int(_ss.get("birth_minute") or _ss.get("in_birth_minute") or 0))) # 키 통일
