@@ -9143,6 +9143,73 @@ def get_ohang_health_info(ilgan, pils):
     return results
 
 
+# ══════════════════════════════════════════════════════════════════
+#  건강 관리 포인트 SSOT — get_health_focus (R1-b-1)
+#  ★계산만 한다(문장 생성 없음). 소비처(화면·PDF·서술)에는 아직 연결하지 않았다.
+#  기준: saju_engine.calc_ohaeng_strength(ilgan, pils) 오행 강도(%, 합 100).
+#  기존 화면들이 각자 쓰는 인라인 임계값(≥35/≤5, ≤8, ≤10, ≥40 등)은 건드리지 않는다.
+# ══════════════════════════════════════════════════════════════════
+HEALTH_OVER_PCT = 40   # 과다: 최대 오행 비율이 이 값 이상
+HEALTH_WEAK_PCT = 15   # 피극 조건: 피극 오행 비율이 이 값 이하일 때만 피극 채택 (None = 조건 없음)
+HEALTH_LACK_PCT = 5    # 부족: 최소 오행 비율이 이 값 이하
+
+_HEALTH_ORDER = ("木", "火", "土", "金", "水")   # 동률이면 이 순서의 앞쪽 우선
+_HEALTH_SYSTEM = {
+    "木": "간·담·근육·눈",
+    "火": "심혈관",
+    "土": "소화기",
+    "金": "호흡기·대장·피부",
+    "水": "신장·방광·비뇨기",
+}
+_HEALTH_GEUK = {"木": "土", "火": "金", "土": "水", "金": "木", "水": "火"}   # 극하는 오행(木克土 …)
+_HEALTH_UNSET = object()   # "인자를 안 줬다"와 "None(조건 없음)을 줬다"를 구분하는 표지
+
+
+def get_health_focus(ilgan, pils, *, over_pct=_HEALTH_UNSET, weak_pct=_HEALTH_UNSET, lack_pct=_HEALTH_UNSET):
+    """건강 관리 포인트 오행을 계산해 돌려준다 (최대 3개, 순서 = 과다 → 피극 → 부족).
+
+    반환: list[dict] — 각 dict는 {"오행", "역할"("과다"/"피극"/"부족"), "계통", "비율"(float)}.
+    해당 없으면 빈 list(None을 돌려주지 않는다). 문장은 만들지 않는다.
+
+    - 과다: 최대 오행 비율 >= over_pct 일 때 그 오행
+    - 피극: 과다가 있을 때만, 과다 오행이 극하는 오행(木→土, 火→金, 土→水, 金→木, 水→火).
+            weak_pct가 None이 아니면 그 오행 비율 <= weak_pct 일 때만 채택(None이면 조건 없음)
+    - 부족: 최소 오행 비율 <= lack_pct 이고 앞에서 이미 들어간 오행과 다를 때만(최소 1개만)
+    동률은 木火土金水 순서의 앞쪽 오행이 우선한다.
+
+    over_pct·weak_pct·lack_pct는 측정용 덮어쓰기 인자다. 주지 않으면 모듈 상수
+    (HEALTH_OVER_PCT·HEALTH_WEAK_PCT·HEALTH_LACK_PCT)를 호출 시점에 읽는다.
+    weak_pct=None을 직접 주면 "조건 없음"이 된다(인자를 아예 안 준 것과 구분).
+    """
+    over = HEALTH_OVER_PCT if over_pct is _HEALTH_UNSET else over_pct
+    weak = HEALTH_WEAK_PCT if weak_pct is _HEALTH_UNSET else weak_pct
+    lack = HEALTH_LACK_PCT if lack_pct is _HEALTH_UNSET else lack_pct
+    if not ilgan or not pils:
+        return []
+    strength = calc_ohaeng_strength(ilgan, pils) or {}
+    if not strength:
+        return []
+    ratio = {oh: float(strength.get(oh, 0.0)) for oh in _HEALTH_ORDER}
+
+    def _row(oh, role):
+        return {"오행": oh, "역할": role, "계통": _HEALTH_SYSTEM[oh], "비율": ratio[oh]}
+
+    focus = []
+    used = set()
+    top_oh = max(_HEALTH_ORDER, key=lambda oh: ratio[oh])   # max는 동률 시 먼저 나온 것을 고른다
+    if ratio[top_oh] >= over:
+        focus.append(_row(top_oh, "과다"))
+        used.add(top_oh)
+        victim_oh = _HEALTH_GEUK[top_oh]
+        if weak is None or ratio[victim_oh] <= weak:
+            focus.append(_row(victim_oh, "피극"))
+            used.add(victim_oh)
+    low_oh = min(_HEALTH_ORDER, key=lambda oh: ratio[oh])   # min도 동률 시 먼저 나온 것
+    if ratio[low_oh] <= lack and low_oh not in used:
+        focus.append(_row(low_oh, "부족"))
+    return focus
+
+
 def get_yongshin_multilayer(pils, birth_year, gender, bm, bd, bh, bmi, target_year=None):
     """다층 용신 분석 (1순위~3순위 + 희신 + 기신 + 대운별 용신)
 
