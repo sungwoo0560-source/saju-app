@@ -2483,8 +2483,8 @@ def _local_saju_engine(pils, name, birth_year, gender, query):
                 if _yangin_data and _yangin_data.get("존재"):
                     _ya_jj = _yangin_data.get("양인_지지", "")
                     _ya_locs = ", ".join(_yangin_data.get("위치", []))
-                    out.append(f"\n⚔️ **양인살(羊刃殺) 발동 — 사고·수술 핵심 신호**")
-                    out.append(f"원국 양인살({_ya_jj}, {_ya_locs})이 있습니다. 충 운 해에 사고·수술수가 발동하기 쉬운 구조입니다.")
+                    out.append(f"\n⚔️ **양인살(羊刃殺) — 안전 수칙 포인트**")
+                    out.append(f"원국 양인살({_ya_jj}, {_ya_locs})이 있습니다. 몸을 쓰는 일, 운전, 날카로운 도구를 다룰 때 안전 수칙을 지키면 좋은 기운입니다.")
 
                     # 양인 + 세운 충 교차 (가장 위험)
                     if chung_h:
@@ -5794,7 +5794,7 @@ def build_saju_core_diagnosis(pils, name, birth_year, gender, current_year=None,
                 # 위험 분류
                 _parts = []
                 if _yangin_hit:
-                    _parts.append("양인 직격 — 교통사고·낙상·수술수·이성 갈등")
+                    _parts.append("양인 직격 — 몸을 쓰는 일, 운전, 날카로운 도구를 다룰 때 안전 수칙을 지키면 좋은 기운입니다. 이성 갈등도 유의")
                 if _chung_hit_idx:
                     _chung_desc = " / ".join(_pos_drama.get(i, "") for i in _chung_hit_idx)
                     _parts.append(f"{_chung_desc}")
@@ -8084,12 +8084,12 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
                             if _cs_risks:
                                 y = _sec("🚨 7. 위험 신호 진단", y)
                                 _RISK_LBL = {"바람기":"바람기·외도","사고수":"사고수","횡재수":"횡재수",
-                                             "이혼·이별":"이혼위험","큰병":"큰병","결혼인연":"결혼인연","사업운":"사업운"}
+                                             "이혼·이별":"이혼위험","큰병":"건강 관리 포인트","결혼인연":"결혼인연","사업운":"사업운"}
                                 for _rk, _rv in _cs_risks.items():
                                     _rs = _rv.get("점수",0)
                                     _rl = _rv.get("등급","")
                                     _rm = _re.sub(r'\n',' ', _rv.get("메시지",""))[:120]
-                                    y = _write(f"{_RISK_LBL.get(_rk,_rk)}: {_rs}/100  [{_rl}]", y, size=10)
+                                    y = _write(f"{_RISK_LBL.get(_rk,_rk)}: " + ("" if _rk == "큰병" else f"{_rs}/100  ") + f"[{_rl}]", y, size=10)
                                     if _rm:
                                         y = _write(f"  → {_rm}", y, size=8, color=(0.5,0.1,0.1))
                                 y -= 2*mm
@@ -8357,14 +8357,14 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
                             _jf_risks = _jf_drs(pils, gender=gender, marriage_status=st.session_state.get("in_marriage","미혼"))
                             _RISK_PDF = {
                                 "바람기":"바람기·외도","사고수":"사고수·수술","횡재수":"횡재수·재물",
-                                "이혼·이별":"이혼·이별","큰병":"큰병·중병","결혼인연":"결혼·인연","사업운":"사업운",
+                                "이혼·이별":"이혼·이별","큰병":"건강 관리 포인트","결혼인연":"결혼·인연","사업운":"사업운",
                             }
                             for _rk, _rv in _jf_risks.items():
                                 _rs = _rv.get("점수",0)
                                 _rl = _rv.get("등급","")
                                 _rm = _rv.get("메시지","")
                                 _rm_clean = _re.sub(r'\n', ' ', _rm)[:100]
-                                y = _write(f"{_RISK_PDF.get(_rk,_rk)}: {_rs}/100 {_rl}", y, size=10)
+                                y = _write(f"{_RISK_PDF.get(_rk,_rk)}: " + ("" if _rk == "큰병" else f"{_rs}/100 ") + f"{_rl}", y, size=10)
                                 y = _write(f"  → {_rm_clean}", y, size=8, color=(0.4,0.2,0.1))
                         except Exception:
                             y = _write("운명 코드 분석 불가 — saju_zhengtong 필요", y, size=9)
@@ -13469,7 +13469,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
             "외부에서 오는 압박이나 경쟁이 너무 벅차게 느껴지지는 않으신가요?",
             f"편관 운은 주변 환경이 나를 강하게 압박하고 시험에 들게 하는 시기입니다. "
             f"직장에서의 갑작스러운 변화, 경쟁자의 등장, 법적·행정적 문제, "
-            f"또는 건강상의 위기 신호가 동시에 몰려오는 느낌을 받을 수 있습니다. "
+            f"또는 몸과 마음의 피로 신호가 동시에 몰려오는 느낌을 받을 수 있습니다. "
             f"몸이 먼저 반응하는 경우도 많습니다. 이유 없이 피로하거나, 잘 자도 지쳐 있는 상태가 계속되거나, "
             f"소화가 안 되고 긴장이 풀리지 않는 증상이 반복된다면 편관 운의 신체 신호일 수 있습니다. "
             f"편관 운에서 가장 위험한 것은 '혼자 모든 것을 감당하려는 태도'입니다. "
@@ -15532,7 +15532,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                 _danger_signals.append((
                     "⚔️ 올해 양인살 발동 — 극도의 주의",
                     f"올해 세운지지({_세운_jj_s})가 양인살({_yangin_jj})에 해당합니다. "
-                    f"양인살이 발동하면 사고·수술·법적 분쟁이 실제로 일어날 수 있습니다. "
+                    f"몸을 쓰는 일, 운전, 날카로운 도구를 다룰 때 안전 수칙을 지키면 좋은 기운입니다. "
                     f"무기·날카로운 도구·격렬한 운동은 올해 자제하십시오. "
                     f"큰 성공을 거두는 사람도 있지만 큰 사고를 당하는 사람도 있습니다. 방심하지 마십시오.",
                     "위험"
@@ -16101,6 +16101,12 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
         "</style>",
         unsafe_allow_html=True,
     )
+    # 건강 관련 첫 블록 하단에 표준 안내문을 1회만 붙인다(건강 관련 문구가 있는 경우에 한해)
+    _HEALTH_TOK = ("건강상", "건강이", "건강을", "건강 관리", "건강관리", "신체 신호", "몸이 먼저", "질환", "병원", "검진", "수술", "피로")
+    for _hi, _hl in enumerate(lines):
+        if isinstance(_hl, str) and any(_t in _hl for _t in _HEALTH_TOK):
+            lines.insert(_hi + 1, '<div style="margin:6px 0 14px;font-size:12px;color:#8d7b68;line-height:1.8;">' + HEALTH_NOTICE + '</div>')
+            break
     st.markdown("\n".join(lines), unsafe_allow_html=True)
 
     render_pdf_download_btn("current_situation", pils, name, birth_year, gender)
@@ -23579,17 +23585,22 @@ def menu13_career(pils, name, birth_year, gender):
 
 
 def menu14_health(pils, name, birth_year, gender):
-    """1️⃣4️⃣ 건강운 -- 오행(五行) 균형 및 질병 직격 경고"""
+    """1️⃣4️⃣ 건강운 -- 오행(五行) 균형 및 건강 관리 포인트"""
 
     st.markdown(
         f"""<div style="background:linear-gradient(135deg,#fff5f5,#ffe8e8);padding:20px;
         border-radius:16px;border-left:5px solid #c0392b;margin-bottom:20px;
         box-shadow:0 4px 15px rgba(0,0,0,0.06)">
         <div style="color:#c0392b;font-size:22px;font-weight:900;letter-spacing:2px">
-        💊 {name}님의 건강 직격 경고</div>
+        💊 {name}님의 건강 관리 포인트</div>
         <div style="color:#555;font-size:13px;margin-top:4px;font-weight:600">
-        오행 과다·부족 + 대운·세운 교차 분석으로 지금 당신에게 올 수 있는 질병을 직격으로 알려드립니다</div>
+        오행 과다·부족 + 대운·세운 교차 분석 — 타고난 기운으로 보는 건강 관리 포인트</div>
         </div>""",
+        unsafe_allow_html=True,
+    )
+    # 건강 탭 첫 블록(헤더 카드) 하단 — 표준 안내문 1회
+    st.markdown(
+        '<div style="margin:-8px 0 16px;font-size:12px;color:#8d7b68;line-height:1.8;">' + HEALTH_NOTICE + '</div>',
         unsafe_allow_html=True,
     )
 
@@ -23759,7 +23770,7 @@ def menu14_health(pils, name, birth_year, gender):
 
         # ── 세운·대운 십성별 건강 충격 ──────────────────────────────
         _SS_HEALTH = {
-            "偏官": ("🔴 편관 — 사고·수술·급성 질환 경보",
+            "偏官": ("🔴 편관 — 사고·수술·갑작스러운 무리 주의",
                      "압박이 강한 편관 기운이 올 때 신체 사고, 응급 질환, 수술이 집중됩니다. 무리한 야간 활동과 격렬한 운동을 자제하고 정기검진을 앞당기십시오."),
             "劫財": ("⚠️ 겁재 — 혈액·외상·수술 주의",
                      "겁재 운에서는 외상, 출혈, 수술 이슈가 생기기 쉽습니다. 예방적 건강 검진과 안전사고 예방이 최우선입니다."),
@@ -23909,14 +23920,14 @@ def menu14_health(pils, name, birth_year, gender):
                 _msg = "양인 직격 + 충 발동 — 사고·수술·큰 결정 절대 금물. 정기검진 즉시 예약."
             elif _is_yangin_hit2:
                 _lvl, _color = "🔴 매우 위험", "#c0392b"
-                _msg = "양인 직격 — 신체 부상·수술 위험 최고조. 극도로 조심하십시오."
+                _msg = "양인 직격 — 몸을 쓰는 일, 운전, 날카로운 도구를 다룰 때 안전 수칙을 지키면 좋은 기운입니다."
             elif _is_chung2:
                 _lvl, _color = "⚠️ 주의", "#e67e22"
                 _msg = f"충 발동({_y_jj2}) — 환경·신체 변동 주의. 안전사고 예방 필수."
             elif _ss_y in ("偏官(편관)", "劫財(겁재)", "傷官(상관)"):
                 _lvl   = "🔴 고위험" if _ss_y == "偏官(편관)" else "⚠️ 주의"
                 _color = "#c0392b" if _ss_y == "偏官(편관)" else "#e67e22"
-                _msg   = {"偏官(편관)": "사고·수술·급성 질환 위험 구간. 정기검진 필수.",
+                _msg   = {"偏官(편관)": "사고·수술 유의, 갑작스러운 무리를 피하는 것이 좋은 구간. 정기검진 필수.",
                           "劫財(겁재)": "외상·혈액 관련 이슈 주의. 안전사고 예방 최우선.",
                           "傷官(상관)": "신경계 과부하·만성 과로 주의. 수면 확보가 핵심."}.get(_ss_y, "")
             else:
