@@ -1908,6 +1908,7 @@ class LocalSajuNarrator:
                 억부_용신=ys_data.get("억부_용신", []),
                 월지=ys_data.get("월지", ""),
                 용신_출처=ys_data.get("용신_출처", {}),
+                health_focus=get_health_focus(ilgan, pils),
             )
 
         except Exception as e:
