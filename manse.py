@@ -23946,13 +23946,7 @@ def menu14_health(pils, name, birth_year, gender):
         # ── 오행별 건강 취약점 & 예방법 ──────────────────────────
         st.markdown('<div class="gold-section">🔬 오행별 건강 취약점 & 예방법</div>',
                     unsafe_allow_html=True)
-        _CG_OH_H = _OH_CG
-        _JJ_OH_H = _OH_JJ
-        _oh_cnt_h = {"木":0,"火":0,"土":0,"金":0,"水":0}
-        for _ph in pils:
-            _o1h = _CG_OH_H.get(_ph.get("cg",""),""); _o2h = _JJ_OH_H.get(_ph.get("jj",""),"")
-            if _o1h: _oh_cnt_h[_o1h] += 1
-            if _o2h: _oh_cnt_h[_o2h] += 1
+        _focus_h = get_health_focus(ilgan, pils)   # 과다·피극·부족 (R1-b-3a: 8글자 개수 기준에서 교체)
         _OH_HD = {
             "木":{"장기":"간·담낭·근육·눈·신경계",
                   "과다":"간 수치 이상, 담석, 근육 경련, 눈 피로, 분노 조절 장애",
@@ -23980,24 +23974,30 @@ def menu14_health(pils, name, birth_year, gender):
                   "예방":"짠맛 절제, 충분한 수분 섭취, 신장·방광 초음파 정기검사",
                   "운동":"수영, 반신욕, 따뜻한 온천"},
         }
-        _과다_h = [oh for oh, cnt in _oh_cnt_h.items() if cnt >= 3]
-        _부족_h = [oh for oh, cnt in _oh_cnt_h.items() if cnt == 0]
+        _과다_h = [f for f in _focus_h if f["역할"] == "과다"]
+        _부족_h = [f for f in _focus_h if f["역할"] != "과다"]   # 피극·부족
+        _극_h = next((f["오행"] for f in _과다_h), "")   # 피극 문구의 {극하는오행}
         if _과다_h:
-            st.error(f"⚠️ **과다 오행: {' · '.join(_과다_h)}** — 아래 질환에 취약합니다")
-            for _oh_h in _과다_h:
+            st.error(f"⚠️ **과다 오행: {' · '.join(f['오행'] for f in _과다_h)}** — 아래 쪽을 챙기면 좋습니다")
+            for _f_h in _과다_h:
+                _oh_h = _f_h["오행"]
                 if _oh_h in _OH_HD:
                     _d_h = _OH_HD[_oh_h]
-                    with st.expander(f"🔴 {_oh_h}(과다) — {_d_h['장기']}"):
-                        st.write(f"**주요 증상:** {_d_h['과다']}")
+                    with st.expander(f"🔴 {_oh_h}(과다) — {_f_h['계통']}"):
+                        st.write(HEALTH_ROLE_TEXT[_f_h["역할"]].format(**_f_h, 극하는오행=_극_h))
+                        st.write(f"**나타날 수 있는 신호:** {_d_h['과다']}")
                         st.write(f"**예방법:** {_d_h['예방']}")
                         st.write(f"**추천 운동:** {_d_h['운동']}")
         if _부족_h:
-            st.warning(f"💛 **부족 오행: {' · '.join(_부족_h)}** — 아래 기능이 취약합니다")
-            for _oh_h in _부족_h:
+            _lbl_h = "부족·피극" if any(f["역할"] == "피극" for f in _부족_h) else "부족"
+            st.warning(f"💛 **{_lbl_h} 오행: {' · '.join(f['오행'] if f['역할'] == '부족' else f['오행'] + '(피극)' for f in _부족_h)}** — 아래 쪽을 챙기면 좋습니다")
+            for _f_h in _부족_h:
+                _oh_h = _f_h["오행"]
                 if _oh_h in _OH_HD:
                     _d_h = _OH_HD[_oh_h]
-                    with st.expander(f"🟡 {_oh_h}(부족) — {_d_h['장기']}"):
-                        st.write(f"**나타나는 증상:** {_d_h['부족']}")
+                    with st.expander(f"🟡 {_oh_h}({_f_h['역할']}) — {_f_h['계통']}"):
+                        st.write(HEALTH_ROLE_TEXT[_f_h["역할"]].format(**_f_h, 극하는오행=_극_h))
+                        st.write(f"**나타날 수 있는 신호:** {_d_h['부족']}")
                         st.write(f"**보강 방법:** {_d_h['예방']}")
                         st.write(f"**추천 운동:** {_d_h['운동']}")
         if not _과다_h and not _부족_h:

@@ -174,11 +174,73 @@ def test_constants():
     _check("같은 입력을 두 번 호출해도 결과 동일(부작용 없음)", a == b)
 
 
+def test_role_text_and_jeokjung():
+    """R1-b-3a: HEALTH_ROLE_TEXT(틀 3개) 정합 + get_jeokjung_health가 focus·신살을 따르는지."""
+    T = I.HEALTH_ROLE_TEXT
+    OHS = "木火土金水"
+    _check("HEALTH_ROLE_TEXT 원문(틀 3개)", T == {
+        "과다": "{오행} 기운이 강한 편이라 {계통} 쪽을 평소에 살펴주면 좋습니다.",
+        "피극": "{극하는오행} 기운에 눌려 {오행} 기운이 약해지기 쉬워, {계통} 쪽 관리가 필요합니다.",
+        "부족": "{오행} 기운이 적은 편이라 {계통} 쪽을 꾸준히 챙겨주면 좋습니다.",
+    })
+    geuk_by = {v: k for k, v in I._HEALTH_GEUK.items()}   # 피극 오행 → 극하는 오행
+    bad, texts = [], []
+    for r in T:
+        for o in OHS:
+            row = _row(o, r, I._HEALTH_SYSTEM[o], 12.3)
+            try:
+                t = T[r].format(**row, 극하는오행=geuk_by[o])
+            except Exception as e:
+                bad.append((r, o, repr(e))); continue
+            texts.append(t)
+            if I._HEALTH_SYSTEM[o] not in t or "{" in t or "}" in t or (r == "피극" and not t.startswith("%s 기운에 눌려 %s 기운이" % (geuk_by[o], o))):
+                bad.append((r, o, t))
+    _check("format(**focus행, 극하는오행=): 계통·오행 치환, 잔여 중괄호 없음, 피극 극하는오행 = _HEALTH_GEUK 역방향", not bad, str(bad[:2]))
+    _check("문구에 % 와 숫자 미노출(비율은 넣지 않는다)", all("%" not in t and not any(c.isdigit() for c in t) for t in texts) and "%" not in "".join(T.values()))
+    words = ("반드시", "무조건", "위험", "집착", "터집니다", "질환", "병", "수술", "사고", "급성", "절대", "100%")
+    hit = [(r, w) for r in T for w in words if w in T[r]]
+    _check("문구 틀에 금지어 없음", not hit, str(hit[:3]))
+
+    def box(name, sinsal=()):
+        p = _pils(*_case_from_fixture(name))
+        return _run(p), I.get_jeokjung_health({}, p, list(sinsal))
+    def fmt(f, over):
+        return T[f["역할"]].format(**f, 극하는오행=over)
+    f, b = box("박성우")
+    _check("get_jeokjung_health: focus [] → 기존 균형 분기(신살 없음이면 line3도 기존 문구)", f == [] and "고른 편" in b["line1"] and "피로 누적" in b["title"] and b["line3"] == "피로 누적·번아웃 쪽을 관리 포인트로 봅니다.", str(b))
+    _, b = box("박성우", ["양인살"])
+    _check("균형 분기에도 양인 줄이 붙는다", b["line3"].startswith("⚠️ 양인까지") and "고른 편" in b["line1"], b["line3"])
+    _, b = box("박성우", ["백호살"])
+    _check("균형 분기에도 백호 줄이 붙는다", b["line3"].startswith("⚠️ 백호살까지 겹쳐 있어"), b["line3"])
+    _check("백호 줄 문구 고정(균형 분기, 원문 전체 일치)", b["line3"] == "⚠️ 백호살까지 겹쳐 있어 — 다치거나 수술할 일이 없도록 조심하는 게 좋습니다. 검진도 미루지 않는 게 좋습니다.", b["line3"])
+    f, b = box("박후규")
+    over = f[0]["오행"]
+    ok = len(f) == 2 and f[0]["계통"] in b["title"] and b["line1"] == fmt(f[0], over) and b["line2"] == fmt(f[1], over)
+    _check("get_jeokjung_health: 박후규 main·sub가 focus 문구", ok, str(b))
+    _, b = box("박후규", ["백호살"])
+    _check("get_jeokjung_health: 백호 줄 순화 문구 고정(원문 전체 일치)", b["line3"] == "⚠️ 백호살까지 겹쳐 있어 — 다치거나 수술할 일이 없도록 조심하는 게 좋습니다. 검진도 미루지 않는 게 좋습니다.", b["line3"])
+    _, b = box("박후규", ["양인살"])
+    _check("get_jeokjung_health: 양인 줄(신살) 그대로", b["line3"].startswith("⚠️ 양인까지"), b["line3"])
+    _, b = box("박후규")
+    _check("get_jeokjung_health: 신살 없으면 순화된 검진 줄", b["line3"] == "검진 한 번 받아보시길 권합니다. 미루지 않는 게 좋습니다.", b["line3"])
+    # 피극 행이 있는 명식(T3: 土과다·水피극)에서 극하는오행 = 과다 오행
+    p = _pils(1971, 10, 9, 18, 59, "여")
+    f = _run(p); bx = I.get_jeokjung_health({}, p, [])
+    _check("피극 문구: 극하는오행이 같은 focus의 과다 오행", [x["역할"] for x in f][:2] == ["과다", "피극"] and bx["line2"] == "土 기운에 눌려 水 기운이 약해지기 쉬워, 신장·방광·비뇨기 쪽 관리가 필요합니다.", bx["line2"])
+    # 박스 4줄 어디에도 % / 숫자 / 금지어가 없다(5명식 × 신살 3종)
+    allbox = []
+    for nm in ("박성우", "박후규"):
+        for sn in ([], ["백호살"], ["양인살"]):
+            _, bx2 = box(nm, sn); allbox += [bx2["title"], bx2["line1"], bx2["line2"]]
+    _check("① 박스 title·line1·line2에 % 미노출·금지어 없음", all("%" not in t and "터집니다" not in t and "반드시" not in t and "위험" not in t and "집착" not in t for t in allbox))
+
+
 def main():
     print("=== tests/health_focus_check.py ===")
     test_fixed()
     test_synthetic()
     test_constants()
+    test_role_text_and_jeokjung()
     print()
     if _FAILS:
         print("[FAIL] 실패 %d건: %s" % (len(_FAILS), _FAILS))

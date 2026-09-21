@@ -9165,6 +9165,15 @@ _HEALTH_SYSTEM = {
 _HEALTH_GEUK = {"木": "土", "火": "金", "土": "水", "金": "木", "水": "火"}   # 극하는 오행(木克土 …)
 _HEALTH_UNSET = object()   # "인자를 안 줬다"와 "None(조건 없음)을 줬다"를 구분하는 표지
 
+# 역할별 문구 틀 3개(과다/피극/부족). get_health_focus 반환 행의 값만 끼워 넣는다(문구 창작 없음, % 미노출):
+#   HEALTH_ROLE_TEXT[row["역할"]].format(**row, 극하는오행=과다 오행)   ({오행}·{계통}은 row의 값)
+# {극하는오행}은 피극 문구에서만 쓰며, 같은 focus 안의 "과다" 행의 오행이다(피극은 과다가 있을 때만 생긴다).
+HEALTH_ROLE_TEXT = {
+    "과다": "{오행} 기운이 강한 편이라 {계통} 쪽을 평소에 살펴주면 좋습니다.",
+    "피극": "{극하는오행} 기운에 눌려 {오행} 기운이 약해지기 쉬워, {계통} 쪽 관리가 필요합니다.",
+    "부족": "{오행} 기운이 적은 편이라 {계통} 쪽을 꾸준히 챙겨주면 좋습니다.",
+}
+
 
 def get_health_focus(ilgan, pils, *, over_pct=_HEALTH_UNSET, weak_pct=_HEALTH_UNSET, lack_pct=_HEALTH_UNSET):
     """건강 관리 포인트 오행을 계산해 돌려준다 (최대 3개, 순서 = 과다 → 피극 → 부족).
@@ -14319,62 +14328,42 @@ def get_jeokjung_job(yukjin_list, ilgan_strength, pils):
 
 # 톤 라운드 M-T1-d(2026-08-30) — 예측 단정 제거, 구조 서술 전환
 def get_jeokjung_health(oh_cnt, pils, sinsal_list):
-    """오행 부족/과다 + 충형 + 백호/양인으로 신체 부위 적중 박스 반환.
+    """건강 관리 포인트(get_health_focus: 과다·피극·부족) + 백호/양인으로 신체 부위 적중 박스 반환.
     반환: dict {title, line1, line2, line3}
+    oh_cnt(8글자 오행 개수)는 호출부 호환을 위해 인자로만 남겼고 판정에는 쓰지 않는다.
     """
     try:
-        m_ = int(oh_cnt.get("목",0) + oh_cnt.get("木",0))
-        h_ = int(oh_cnt.get("화",0) + oh_cnt.get("火",0))
-        t_ = int(oh_cnt.get("토",0) + oh_cnt.get("土",0))
-        g_ = int(oh_cnt.get("금",0) + oh_cnt.get("金",0))
-        s_ = int(oh_cnt.get("수",0) + oh_cnt.get("水",0))
+        focus = get_health_focus(pils[1]["cg"], pils)
     except Exception:
-        m_ = h_ = t_ = g_ = s_ = 1
-
-    # 값 비교 없이 코드 작성 순서(木→火→土→金→水)로만 뽑던 것을, 실제 값
-    # 오름차순으로 정렬해 진짜 최약 오행이 main이 되도록 교정. <=1 필터는
-    # 그대로 유지(임계값 불변) — sorted()는 안정 정렬이라 동점 시 기존
-    # 木→火→土→金→水 순서가 tiebreak로 자동 유지된다.
-    _jk_vals = {"木": m_, "火": h_, "土": t_, "金": g_, "水": s_}
-    weak = sorted(
-        [oh for oh in ["木", "火", "土", "金", "水"] if _jk_vals[oh] <= 1],
-        key=lambda oh: _jk_vals[oh],
-    )
+        focus = []
 
     sinsal_str = " ".join(str(x) for x in sinsal_list) if sinsal_list else ""
     has_baekho = "백호" in sinsal_str
     has_yangin = "양인" in sinsal_str or "羊刃" in sinsal_str
 
-    parts_map = {
-        "木": "간·담·신경·근육·어깨",
-        "火": "심혈관·눈·소장",
-        "土": "위장·비장·소화·복부",
-        "金": "폐·대장·피부·기관지·뼈",
-        "水": "신장·방광·허리·생식기·귀",
-    }
+    # 신살 줄(백호·양인)은 focus 유무와 무관하게 기존과 같은 조건으로 붙는다.
+    if has_baekho:
+        sinsal_line = "⚠️ 백호살까지 겹쳐 있어 — 다치거나 수술할 일이 없도록 조심하는 게 좋습니다. 검진도 미루지 않는 게 좋습니다."
+    elif has_yangin:
+        sinsal_line = "⚠️ 양인까지 박혀있어 — 칼·쇠·날 조심. 운전·작업 주의."
+    else:
+        sinsal_line = ""
 
-    if not weak:
+    if not focus:
         title = "🏥 당신은 지금 — 피로 누적이 관리 포인트입니다"
         line1 = "오행 분포가 고른 편입니다. 결정적 약점은 없습니다."
         line2 = "다만 — 잠을 푹 자도 피곤한 그 느낌, 익숙하죠?"
-        line3 = "피로 누적·번아웃 쪽을 관리 포인트로 봅니다."
+        line3 = sinsal_line or "피로 누적·번아웃 쪽을 관리 포인트로 봅니다."
     else:
-        main = weak[0]
-        sub = weak[1] if len(weak) >= 2 else None
-        parts = parts_map.get(main, "전신")
-        title = f"🏥 당신은 지금 — {parts.split('·')[0]} 쪽이 약합니다"
-        line1 = f"{main}기운이 약합니다. → {parts} 쪽을 관리 포인트로 봅니다."
-        if sub:
-            sub_parts = parts_map.get(sub, "")
-            line2 = f"여기에 {sub} 부족까지 겹쳐 — {sub_parts.split('·')[0]} 쪽도 같이 무리됩니다."
+        over_oh = next((f["오행"] for f in focus if f["역할"] == "과다"), "")   # 피극 문구의 {극하는오행}
+        main = focus[0]
+        title = f"🏥 당신은 지금 — {main['계통']} 쪽이 관리 포인트입니다"
+        line1 = HEALTH_ROLE_TEXT[main["역할"]].format(**main, 극하는오행=over_oh)
+        if len(focus) >= 2:
+            line2 = " ".join(HEALTH_ROLE_TEXT[f["역할"]].format(**f, 극하는오행=over_oh) for f in focus[1:])
         else:
             line2 = "몸이 보내는 신호는 계속 옵니다."
-        if has_baekho:
-            line3 = "⚠️ 백호살까지 박혀있어 — 수술수·사고수 옵니다. 검진 미루지 마세요."
-        elif has_yangin:
-            line3 = "⚠️ 양인까지 박혀있어 — 칼·쇠·날 조심. 운전·작업 주의."
-        else:
-            line3 = "검진 한 번 받으세요. 미루면 터집니다."
+        line3 = sinsal_line or "검진 한 번 받아보시길 권합니다. 미루지 않는 게 좋습니다."
 
     return {"title": title, "line1": line1, "line2": line2, "line3": line3}
 
