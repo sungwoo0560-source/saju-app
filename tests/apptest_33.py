@@ -67,10 +67,13 @@ from saju_sinsal import get_gongmang  # noqa: E402
 # report_narr는 R1-c-0''(2026-09-23)에서 추가 — build_rich_narrative(section="report")
 # 반환 문자열을 직접 캡처(menu7_ai UI 경로는 안 탐, 아래 _call_menu 주석 참고).
 # 이것도 기존 12메뉴 골든은 건드리지 않고 baseline에 신규 조합으로만 붙는다.
+# ohaeng_deep(menu16_ohaeng_deep)은 R2-2(2026-09-23)에서 추가 — R2 진단에서
+# 백호대살 로컬 리터럴(manse.py:31113)이 이 메뉴에만 있고 apptest 밖이라 사각지대였음.
+# 이것도 기존 13메뉴 골든은 건드리지 않고 baseline에 신규 조합으로만 붙는다.
 MENU_ORDER = [
     "menu1_report", "current_situation", "lifeline", "past", "future3",
     "money", "relations", "daily", "monthly", "yearly", "tojeong", "health",
-    "report_narr",
+    "report_narr", "ohaeng_deep",
 ]
 
 # 텍스트 출력 계열 st.* 함수 — 캡처 대상(런타임 monkeypatch, 소스 수정 아님)
@@ -205,6 +208,8 @@ def _call_menu(menu_key, pils, case_name, birth_year, gender):
         # 하네스가 따로 필요해 무거우므로, 함수를 직접 호출해 반환 문자열을 캡처하는
         # 이 경로로 _nar_ch8_flow(5대 지표/건강점수 포함) 로직만 정밀 감시한다.
         return manse.build_rich_narrative(pils, birth_year, gender, case_name, section="report")
+    elif menu_key == "ohaeng_deep":
+        manse.menu16_ohaeng_deep(pils, case_name, birth_year, gender)
     else:
         raise ValueError(f"알 수 없는 menu_key: {menu_key}")
     return None
