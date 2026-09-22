@@ -2603,24 +2603,16 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str="", dram
                 except Exception as _me:
                     y = write(c, f"  (재물분석 오류: {str(_me)[:50]})", y, size=9)
 
-            # ══ 건강 분석 ══
+            # ══ 건강 분석 ══ (R1-b-3d: max/min 2줄 → get_health_focus 행으로 교체, [] → 줄 생략)
             if include_health:
                 try:
                     y = section_title(c, "🏥 건강 분석", y)
-                    _OH_HEALTH = {
-                        "木":"간·담·눈·근육·힘줄 — 스트레스성 질환, 과로 주의",
-                        "火":"심장·소장·혈관·혀 — 혈압·심장·정신건강 주의",
-                        "土":"비장·위·췌장·근육 — 소화기·당뇨·과식 주의",
-                        "金":"폐·대장·피부·코 — 호흡기·피부·알레르기 주의",
-                        "水":"신장·방광·생식기·귀 — 신장·부종·생식기 주의",
-                    }
-                    _oh_str_h = calc_ohaeng_strength(pils[1]["cg"], pils) if pils else {}
-                    _oh_sorted_h = sorted(_oh_str_h.items(), key=lambda x:-x[1])
-                    _oh_max_h = _oh_sorted_h[0][0] if _oh_sorted_h else ""
-                    _oh_min_h = _oh_sorted_h[-1][0] if _oh_sorted_h else ""
-                    y = write(c, f"  강한 오행({_oh_max_h}) 취약 장기: {_OH_HEALTH.get(_oh_max_h,'')}", y, size=9)
-                    y = write(c, f"  약한 오행({_oh_min_h}) 보강 필요: {_OH_HEALTH.get(_oh_min_h,'')}", y, size=9)
-                    y = write(c, "  정기 건강검진을 반드시 받으시고 취약 장기를 중점 관리하십시오.", y, size=9)
+                    _ilgan_h = pils[1]["cg"] if pils and len(pils) > 1 else ""
+                    _focus_h = get_health_focus(_ilgan_h, pils) if pils else []
+                    _over_h = next((f["오행"] for f in _focus_h if f["역할"] == "과다"), "")
+                    for _f_h in _focus_h:
+                        y = write(c, f"  {_f_h['오행']}({_f_h['역할']}): " + HEALTH_ROLE_TEXT[_f_h["역할"]].format(**_f_h, 극하는오행=_over_h), y, size=9)
+                    y = write(c, "  정기 건강검진을 받아보시길 권합니다. 취약 장기가 있다면 중점적으로 관리하십시오.", y, size=9)
                     y -= 3*mm
                 except Exception as _he:
                     y = write(c, f"  (건강분석 오류: {str(_he)[:50]})", y, size=9)
