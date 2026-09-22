@@ -242,7 +242,7 @@ def test_diag_weak_health_sentence_guard():
     건강 줄이 그대로 남거나 사라지는 모습이 안 보이는 회귀가 생길 수 있다 — 그걸 여기서 잡는다."""
     S = I._DIAG_WEAK_HEALTH_SENTENCE
     D = I._DIAG_WEAK_DETAIL
-    _check("_DIAG_WEAK_HEALTH_SENTENCE 대상 오행 = 火土金水(木 제외)", set(S) == {"火", "土", "金", "水"})
+    _check("_DIAG_WEAK_HEALTH_SENTENCE 대상 오행 = 木火土金水 5종(R1-b-3c-2)", set(S) == {"木", "火", "土", "金", "水"})
     for oh, sentence in S.items():
         _check(
             "_DIAG_WEAK_HEALTH_SENTENCE[%s]가 _DIAG_WEAK_DETAIL[%s] 원문에 정확히 1회 존재" % (oh, oh),
