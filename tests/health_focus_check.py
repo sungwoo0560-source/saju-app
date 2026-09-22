@@ -235,12 +235,29 @@ def test_role_text_and_jeokjung():
     _check("① 박스 title·line1·line2에 % 미노출·금지어 없음", all("%" not in t and "터집니다" not in t and "반드시" not in t and "위험" not in t and "집착" not in t for t in allbox))
 
 
+def test_diag_weak_health_sentence_guard():
+    """R1-b-3c-1 가드: _DIAG_WEAK_HEALTH_SENTENCE의 발췌 문장이 _DIAG_WEAK_DETAIL[같은 오행]
+    원문에 정확히 1회 부분문자열로 들어있는지 확인한다. full_report가 str.replace로 이 문장을
+    찾아 교체·삭제하므로, 원문 문구가 나중에 손질되면 replace가 무음으로 실패(0회 치환)해
+    건강 줄이 그대로 남거나 사라지는 모습이 안 보이는 회귀가 생길 수 있다 — 그걸 여기서 잡는다."""
+    S = I._DIAG_WEAK_HEALTH_SENTENCE
+    D = I._DIAG_WEAK_DETAIL
+    _check("_DIAG_WEAK_HEALTH_SENTENCE 대상 오행 = 火土金水(木 제외)", set(S) == {"火", "土", "金", "水"})
+    for oh, sentence in S.items():
+        _check(
+            "_DIAG_WEAK_HEALTH_SENTENCE[%s]가 _DIAG_WEAK_DETAIL[%s] 원문에 정확히 1회 존재" % (oh, oh),
+            oh in D and D[oh].count(sentence) == 1,
+            "count=%d" % (D.get(oh, "").count(sentence) if oh in D else -1),
+        )
+
+
 def main():
     print("=== tests/health_focus_check.py ===")
     test_fixed()
     test_synthetic()
     test_constants()
     test_role_text_and_jeokjung()
+    test_diag_weak_health_sentence_guard()
     print()
     if _FAILS:
         print("[FAIL] 실패 %d건: %s" % (len(_FAILS), _FAILS))
