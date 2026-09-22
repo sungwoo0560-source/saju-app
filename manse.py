@@ -8037,8 +8037,13 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
                             for _s in _cs_ext + _cs_s12 + _cs_sex:
                                 if not isinstance(_s, dict): continue
                                 _sn2 = _s.get("이름") or _s.get("name") or ""
-                                if _sn2 and _sn2 not in _cs_seen_s:
-                                    _cs_seen_s.add(_sn2)
+                                # R2-1: Y-28(15697행 부근)과 동일한 prefix dedup으로 통일 —
+                                # 완전일치 비교는 "백호대살(白虎大煞)"/"(白虎大殺)"/"(白虎)"처럼
+                                # 세 함수가 한자 표기만 다르게 쓰는 같은 신살을 별개로 오인해
+                                # 최대 3중 리스팅됐다(R2 진단 확인).
+                                _sn2_key = _sn2.split("(")[0]
+                                if _sn2_key and _sn2_key not in _cs_seen_s:
+                                    _cs_seen_s.add(_sn2_key)
                                     _cs_all_s.append(_s)
                             y = _write(f"원국 발동 신살 {len(_cs_all_s)}개:", y, size=10)
                             for _s2 in _cs_all_s:
