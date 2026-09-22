@@ -64,9 +64,13 @@ from saju_sinsal import get_gongmang  # noqa: E402
 # 11메뉴 — 그동안 33조합 검증에 쓰던 목록 그대로
 # health(menu14_health)는 R1-b-3b-0(2026-09-22)에서 추가 — 기존 11메뉴 골든은 불변,
 # health만 baseline에 신규 조합으로 붙는다.
+# report_narr는 R1-c-0''(2026-09-23)에서 추가 — build_rich_narrative(section="report")
+# 반환 문자열을 직접 캡처(menu7_ai UI 경로는 안 탐, 아래 _call_menu 주석 참고).
+# 이것도 기존 12메뉴 골든은 건드리지 않고 baseline에 신규 조합으로만 붙는다.
 MENU_ORDER = [
     "menu1_report", "current_situation", "lifeline", "past", "future3",
     "money", "relations", "daily", "monthly", "yearly", "tojeong", "health",
+    "report_narr",
 ]
 
 # 텍스트 출력 계열 st.* 함수 — 캡처 대상(런타임 monkeypatch, 소스 수정 아님)
@@ -194,8 +198,16 @@ def _call_menu(menu_key, pils, case_name, birth_year, gender):
         manse.menu_tojeong(pils, case_name, birth_year, gender)
     elif menu_key == "health":
         manse.menu14_health(pils, case_name, birth_year, gender)
+    elif menu_key == "report_narr":
+        # menu7_ai는 build_rich_narrative(section="report") 호출부(manse.py:23374)가
+        # `if False:` 죽은 코드 안에 있어 UI 경로로는 절대 도달 못 함(R1-c-0' 실측).
+        # PDF(menu_pdf, saju_report.py:2131)가 유일한 실사용 경로인데 버튼 트리거
+        # 하네스가 따로 필요해 무거우므로, 함수를 직접 호출해 반환 문자열을 캡처하는
+        # 이 경로로 _nar_ch8_flow(5대 지표/건강점수 포함) 로직만 정밀 감시한다.
+        return manse.build_rich_narrative(pils, birth_year, gender, case_name, section="report")
     else:
         raise ValueError(f"알 수 없는 menu_key: {menu_key}")
+    return None
 
 
 def _run_combo(menu_key, pils, case_name, birth_year, m, d, h, mi, gender):
@@ -211,7 +223,11 @@ def _run_combo(menu_key, pils, case_name, birth_year, m, d, h, mi, gender):
     cap = _Capturer()
     with cap:
         try:
-            _call_menu(menu_key, pils, case_name, birth_year, gender)
+            _ret = _call_menu(menu_key, pils, case_name, birth_year, gender)
+            if _ret:
+                # 기존 12메뉴는 _call_menu가 항상 None을 반환하므로 이 분기는
+                # report_narr에서만 타고, 나머지 메뉴의 캡처 내용·순서는 무변경.
+                cap.buf.append(f"return|{_ret!r}")
         except Exception as e:
             exc_msg = f"{type(e).__name__}: {e}"
     return cap.buf, exc_msg
