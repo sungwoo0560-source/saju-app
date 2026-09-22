@@ -62,9 +62,11 @@ from saju_sinsal import get_gongmang  # noqa: E402
 
 
 # 11메뉴 — 그동안 33조합 검증에 쓰던 목록 그대로
+# health(menu14_health)는 R1-b-3b-0(2026-09-22)에서 추가 — 기존 11메뉴 골든은 불변,
+# health만 baseline에 신규 조합으로 붙는다.
 MENU_ORDER = [
     "menu1_report", "current_situation", "lifeline", "past", "future3",
-    "money", "relations", "daily", "monthly", "yearly", "tojeong",
+    "money", "relations", "daily", "monthly", "yearly", "tojeong", "health",
 ]
 
 # 텍스트 출력 계열 st.* 함수 — 캡처 대상(런타임 monkeypatch, 소스 수정 아님)
@@ -190,6 +192,8 @@ def _call_menu(menu_key, pils, case_name, birth_year, gender):
         manse.menu_yearly(pils, case_name, birth_year, gender)
     elif menu_key == "tojeong":
         manse.menu_tojeong(pils, case_name, birth_year, gender)
+    elif menu_key == "health":
+        manse.menu14_health(pils, case_name, birth_year, gender)
     else:
         raise ValueError(f"알 수 없는 menu_key: {menu_key}")
 
