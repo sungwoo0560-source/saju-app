@@ -13757,11 +13757,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
         for _ch in [_p.get("cg",""), _p.get("jj","")]:
             _o = _OH_KEY8.get(_ch,"")
             if _o: _oh_count[_o] += 1
-    _oh_zero  = [k for k,v in _oh_count.items() if v == 0]
-    _oh_over  = [k for k,v in _oh_count.items() if v >= 3]
     _oh_bar   = " ".join(f"{k}{'■'*v}({v})" for k,v in _oh_count.items())
-    _oh_weak_msg  = ("  \n🔴 <b>없는 오행: " + "·".join(_oh_zero) + "</b> — 이 기운이 아예 없으면 해당 영역(건강·성격·직업)이 구조적으로 취약합니다.") if _oh_zero else ""
-    _oh_over_msg  = ("  \n🟡 <b>과다 오행: " + "·".join(_oh_over) + "</b> — 이 기운이 3개 이상이면 해당 질환·성격 집착이 반드시 나타납니다.") if _oh_over else ""
 
     # ── 일간별 올해 특성 (10가지 완전 개인화) ────────────────────
     _ILGAN_NOW = {
