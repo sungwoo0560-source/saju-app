@@ -10535,10 +10535,14 @@ def _nar_ch8_flow(ctx):
     if "劫財" in cur_dw_ss: _score_job = max(1, _score_job - 2)
     _score_job = max(1, _score_job)
 
-    # 건강 (base 7, 높을수록 좋음)
-    _score_health = 7
-    _gisin_cnt_sc = sum(1 for _p_sc in pils if _p_sc.get("오행","") in gisin_ohs)
-    if _gisin_cnt_sc >= 3: _score_health = max(1, _score_health - 2)
+    # 건강 (base 10, 높을수록 좋음 — R1-c-1: base 7에서 상향. 기신카운트 무력화
+    # 해소 후 5대 지표 쏠림 재실측 결과 base 7은 적신호 과다(79.7%)라 10으로 보정,
+    # 임계선(<=4/<=6)·has_chung/-baekho 감산폭·clamp는 무수정)
+    _score_health = 10
+    # pils.get("오행") 오사용으로 영구 무력화됐던 기신카운트 줄 제거.
+    # get_health_focus(과다/피극/부족) 재사용, 안A(항목 1개당 -1) 채택.
+    _health_focus_sc = get_health_focus(ilgan, pils)
+    if _health_focus_sc: _score_health = max(1, _score_health - len(_health_focus_sc))
     if has_chung:          _score_health = max(1, _score_health - 2)
     if _sc_has_baekho:     _score_health = max(1, _score_health - 3)
     _score_health = min(10, _score_health)
@@ -11313,33 +11317,32 @@ def _nar_ch8_flow(ctx):
     else:
         _job_desc_by_age = f"60대 이상인 {display_name}님께 지금 가장 중요한 것은 '건강과 현금흐름'입니다. 몸이 최고의 자산이며, 안정적 수입 구조 유지가 우선입니다."
 
-    # 건강 직격 분석
-    _HEALTH_OH_ORGAN = {
-        "木": "간·담낭·눈·근육·인대", "火": "심장·혈관·소장·혈압",
-        "土": "위장·비장·소화기·면역", "金": "폐·대장·피부·호흡기",
-        "水": "신장·방광·생식기·뼈·관절"
-    }
-    _gisin_organs = [_HEALTH_OH_ORGAN.get(oh, "") for oh in gisin_ohs if oh in _HEALTH_OH_ORGAN]
-    _ilgan_organ  = _HEALTH_OH_ORGAN.get(ilgan_oh, "")
+    # 건강 직격 분석 — R1-c-1: gisin_ohs·ilgan_oh 기반 장부 언급을 _health_focus_sc
+    # 기반으로 교체(점수 근거 오행과 노출 문구 오행 불일치 20/45건 해소). get_jeokjung_health
+    # (14355행 부근)와 동일하게 HEALTH_ROLE_TEXT[역할].format(**focus행, 극하는오행=over_oh)
+    # 재사용 — 새 문구 창작·새 데이터 계산 없음. focus가 []면 조건절이 그대로 빠져
+    # 기존 표현(장부 언급 없는 문장)이 유지된다.
+    _over_oh = next((f["오행"] for f in _health_focus_sc if f["역할"] == "과다"), "")
+    _focus_phrases = [HEALTH_ROLE_TEXT[f["역할"]].format(**f, 극하는오행=_over_oh) for f in _health_focus_sc]
     if _score_health <= 4:
         _health_level = "🔴 건강 적신호"
         _health_desc  = (
             "올해 건강에 각별히 주의해야 할 시기입니다. "
-            + (f"기신 오행({'/'.join(gisin_ohs)})이 관장하는 {', '.join(_gisin_organs[:2])} 부위에 특히 조심하십시오. " if _gisin_organs else "")
+            + (" ".join(_focus_phrases[:2]) + " " if _focus_phrases else "")
             + "무리한 일정을 줄이고 반드시 정기 검진을 받으십시오."
         )
     elif _score_health <= 6:
         _health_level = "🟡 건강 주의"
         _health_desc  = (
             "올해 건강 기운이 평소보다 약해지는 시기입니다. "
-            + (f"선천적으로 취약한 {_ilgan_organ} 부위를 중심으로 관리하십시오. " if _ilgan_organ else "")
+            + (_focus_phrases[0] + " " if _focus_phrases else "")
             + "충분한 수면과 과음·과식을 삼가는 것이 최선의 예방입니다."
         )
     else:
         _health_level = "🟢 건강 양호"
         _health_desc  = (
             "올해 건강 기운은 비교적 안정적입니다. "
-            + (f"다만 {_ilgan_organ} 부위는 꾸준히 관리하십시오. " if _ilgan_organ else "")
+            + (_focus_phrases[0] + " " if _focus_phrases else "")
             + "지금의 건강 관리 습관을 유지하면 큰 문제 없이 지납니다."
         )
 
