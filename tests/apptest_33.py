@@ -54,6 +54,12 @@ sys.path.insert(0, _THIS_DIR)  # pils_fixtures
 
 import streamlit as st  # noqa: E402
 import manse  # noqa: E402  (import만 함 — main()은 __main__ 가드 안이라 실행되지 않음)
+# R3-4: menu7_ai 편입 준비 — UsageTracker가 프로젝트 루트 usage_stats.json(로컬
+# 실사용 카운터, git 비추적)에 실제로 읽고/쓰는 걸 런타임 몽키패치로 완전히
+# 차단한다(manse.py 소스 무수정). 이게 없으면 menu7_ai가 세션당 최초 1회
+# chat_history를 채울 때 UsageTracker.increment()가 그 실파일을 덮어쓴다.
+manse.UsageTracker.check_limit = staticmethod(lambda: True)
+manse.UsageTracker.increment = staticmethod(lambda: None)
 import saju_interpreter  # noqa: E402  (freeze 대상 — .datetime 이름 교체용, 모듈 자체 참조 필요)
 from pils_fixtures import CASES, get_pils  # noqa: E402  (값 재사용, 복제 금지)
 from saju_engine import calc_sipsung, SajuCoreEngine  # noqa: E402
@@ -75,19 +81,21 @@ from saju_sinsal import get_gongmang  # noqa: E402
 # 다른 12메뉴와 동일 시그니처(pils, name, birth_year, gender)라 직접호출 가능,
 # 2케이스 사전 probe로 케이스 간 오염·예외 없음 확인 후 추가. 기존 15메뉴
 # 골든은 건드리지 않고 baseline에 신규 조합으로만 붙는다.
-# menu7_ai는 R3-2에서 같이 검토했으나 tab_ai_chat의 st.session_state.chat_history가
-# 케이스별로 격리되지 않는 전역 키라 — apptest_33처럼 한 프로세스에서 여러 "가상
+# menu7_ai(ai)는 R3-2에서 검토 중 tab_ai_chat의 st.session_state.chat_history가
+# 케이스별로 격리되지 않는 전역 키라 apptest_33처럼 한 프로세스에서 여러 "가상
 # 세션"(케이스)을 순서대로 도는 하네스에서는 두 번째 케이스부터 첫 케이스의 stale
-# 채팅 인트로를 그대로 재노출한다(R3-2 진단 2케이스 실측 확인 — 골든이 실제로는
-# 다른 사람 이름·사주를 박제하게 됨). 게다가 그 인트로 생성 시 UsageTracker.
-# increment()가 프로젝트 루트의 usage_stats.json(로컬 실사용 카운터, git 비추적)에
-# 실제로 쓴다 — 리셋 없이 반복 실행하면 LIMIT=100 도달 시점부터 골든이 출력
-# 자체가 바뀌는 방식으로 깨질 위험도 있다. 둘 다 해결 없이는 추가 보류
-# (PLANNER 보고·판단 대기).
+# 채팅 인트로를 그대로 재노출하는 문제(R3-2 진단 확인)와, 그 인트로 생성 시
+# UsageTracker.increment()가 프로젝트 루트 usage_stats.json(로컬 실사용 카운터,
+# git 비추적)에 실제로 쓰는 문제(R3-3 진단 확인)가 있어 보류됐다. R3-4에서
+# manse.py 무수정으로 해결: (1) _run_combo가 매 콤보 전에 chat_history를
+# 비워 케이스 간 오염 차단, (2) import manse 직후 UsageTracker.check_limit/
+# increment를 몽키패치해 실파일 접근 자체를 차단. 이 2줄만 넣은 상태로
+# --compare 차이 0건 확인 후 menu7_ai를 추가(R3-4 결정론 검증: 박성우→박후규
+# 순서와 박후규 단독 실행의 menu7_ai 캡처가 바이트 동일 — 오염 해소 확인).
 MENU_ORDER = [
     "menu1_report", "current_situation", "lifeline", "past", "future3",
     "money", "relations", "daily", "monthly", "yearly", "tojeong", "health",
-    "report_narr", "ohaeng_deep", "bihang", "gaewoon",
+    "report_narr", "ohaeng_deep", "bihang", "gaewoon", "ai",
 ]
 
 # 텍스트 출력 계열 st.* 함수 — 캡처 대상(런타임 monkeypatch, 소스 수정 아님)
@@ -228,6 +236,8 @@ def _call_menu(menu_key, pils, case_name, birth_year, gender):
         manse.menu8_bihang(pils, case_name, birth_year, gender)
     elif menu_key == "gaewoon":
         manse.menu_gaewoon(pils, case_name, birth_year, gender)
+    elif menu_key == "ai":
+        manse.menu7_ai(pils, case_name, birth_year, gender)
     else:
         raise ValueError(f"알 수 없는 menu_key: {menu_key}")
     return None
@@ -241,6 +251,10 @@ def _run_combo(menu_key, pils, case_name, birth_year, m, d, h, mi, gender):
     st.session_state["marriage_status"] = "미혼"
     st.session_state["in_marriage"] = "미혼"
     st.session_state["partner_pils"] = None
+    # R3-4: menu7_ai(tab_ai_chat)의 chat_history가 케이스별로 격리되지 않는
+    # 전역 세션 키라 — 매 콤보 시작 전에 비워서 이전 케이스의 stale 인트로가
+    # 다음 케이스로 새는 걸 막는다(R3-3 진단에서 오염 실측 확인).
+    st.session_state["chat_history"] = []
 
     exc_msg = None
     cap = _Capturer()
