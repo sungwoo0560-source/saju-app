@@ -18,6 +18,13 @@ dedup으로 교정한 뒤 재확인하는 회귀 고정용 테스트.
 이 블록 자체가 나중에 바뀌면(예: 병합 순서가 바뀌거나 dedup 키가 다시 바뀌면)
 이 테스트도 같이 반응한다.
 
+R3-1 확장: jonghap_full 분기("🗡️ 6. 발동 신살 전체")의 get_12sinsal+
+get_extra_sinsal 병합도 같은 방식(소스 추출·실행)으로 검사한다. 이 분기는
+calc_all_sinsal_extended가 안 들어가고 dedup 자체가 없어서(완전일치 비교조차
+없었음) 백호대살·귀문관살이 항상 2중 리스팅됐다(R3 진단 4픽스처 전부 재현 —
+대조군 박성우도 귀문관살 2중이라 이 분기엔 "0건 기대" 대조군이 없음). 위와
+동일한 prefix dedup 추가 후 4픽스처 모두 중복 0건 회귀 고정.
+
 사용법:
     python tests/baekho_dedup_check.py     (리포 루트에서)
 종료코드: 실패가 하나라도 있으면 1, 모두 통과하면 0.
@@ -100,6 +107,65 @@ for case_name, expect_n in CASES_EXPECT.items():
             _entry.get("등급") == "강력발동" and _entry.get("아이콘") == "🐅",
             f"실제 등급={_entry.get('등급')!r} 아이콘={_entry.get('아이콘')!r}",
         )
+
+print()
+
+# ══════════════════════════════════════════════════════════════════════
+# R3-1: jonghap_full 분기("🗡️ 6. 발동 신살 전체", manse.py:8309 부근)의
+# get_12sinsal+get_extra_sinsal 병합 — 이 분기는 calc_all_sinsal_extended가
+# 안 들어가고 dedup 자체가 없어서(완전일치 비교조차 없음) 백호대살·귀문관살이
+# 항상 2중 리스팅됐다(R3 진단 4픽스처 전부 재현, 대조군 박성우 포함 —
+# 박성우는 귀문관살 2중). R3-1에서 위와 동일한 prefix dedup을 추가.
+# ══════════════════════════════════════════════════════════════════════
+
+_JF_SRC = inspect.getsource(manse.render_pdf_download_btn)
+_JF_START = "_jf_ss12 = get_12sinsal(pils) or []"
+_JF_END = "_all_sinsal.append((_n, _d))"
+_jf_start_idx = _JF_SRC.rfind("\n", 0, _JF_SRC.index(_JF_START)) + 1
+_jf_end_idx = _JF_SRC.index(_JF_END, _jf_start_idx) + len(_JF_END)
+_JF_BLOCK_DEDENTED = textwrap.dedent(_JF_SRC[_jf_start_idx:_jf_end_idx])
+
+
+def run_merge_jf(pils):
+    """render_pdf_download_btn의 jonghap_full 분기 병합+dedup 블록을 그대로
+    실행해 _all_sinsal((이름, desc) 튜플 리스트)을 돌려준다."""
+    ns = {
+        "pils": pils,
+        "get_12sinsal": get_12sinsal,
+        "get_extra_sinsal": get_extra_sinsal,
+    }
+    exec(compile(_JF_BLOCK_DEDENTED, "<jonghap_full merge block>", "exec"), ns)
+    return ns["_all_sinsal"]
+
+
+# ── R3 진단에서 2중 리스팅을 실측으로 재현했던 4케이스(대조군 박성우 포함 —
+# 이 분기는 박성우도 귀문관살 2중이라 "0건 기대" 대조군이 따로 없다) ──
+CASES_EXPECT_JF = {
+    "균시차경계_1031": 13,
+    "도화_년지만_19700403": 13,
+    "지지순서_자형2종_19951109": 11,
+    "박성우": 14,
+}
+
+for case_name, expect_total in CASES_EXPECT_JF.items():
+    if case_name not in CASES:
+        _check(f"[jonghap_full/{case_name}] CASES에 존재", False, "픽스처 목록에서 사라짐 — 테스트 갱신 필요")
+        continue
+    pils = get_pils(case_name)
+    merged_jf = run_merge_jf(pils)
+    names_jf = [n for n, _d in merged_jf]
+    keys_jf = [n.split("(")[0] for n in names_jf]
+    dup_jf = {k: keys_jf.count(k) for k in set(keys_jf) if keys_jf.count(k) > 1}
+    _check(
+        f"[jonghap_full/{case_name}] prefix 기준 중복 0건",
+        len(dup_jf) == 0,
+        f"중복: {dup_jf}" if dup_jf else "",
+    )
+    _check(
+        f"[jonghap_full/{case_name}] 발동 신살 개수 == {expect_total}",
+        len(merged_jf) == expect_total,
+        f"실제 {len(merged_jf)}건: {names_jf}",
+    )
 
 print()
 if _FAILS:

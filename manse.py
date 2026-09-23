@@ -8313,10 +8313,19 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
                             _jf_ss12 = get_12sinsal(pils) or []
                             _jf_ssex = get_extra_sinsal(pils) or []
                             _all_sinsal = []
+                            _jf_seen = set()
                             for _s in _jf_ss12 + _jf_ssex:
                                 _n = _s.get("name") or _s.get("이름","") if isinstance(_s, dict) else str(_s)
                                 _d = _s.get("desc") or _s.get("설명","") if isinstance(_s, dict) else ""
-                                if _n: _all_sinsal.append((_n, _d))
+                                # R3-1: a08c887(R2-1)·Y-28과 동일한 prefix dedup —
+                                # get_12sinsal·get_extra_sinsal가 백호대살·귀문관살을
+                                # "(白虎大殺)"/"(白虎)", "(鬼門關殺)"/"(鬼門)"처럼 한자
+                                # 표기만 다르게 반환해 완전일치 비교가 아예 없던 이
+                                # 병합이 2중 리스팅됐다(R3 진단 4픽스처 실측 확인).
+                                _n_key = _n.split("(")[0] if _n else _n
+                                if _n and _n_key not in _jf_seen:
+                                    _jf_seen.add(_n_key)
+                                    _all_sinsal.append((_n, _d))
                             if _all_sinsal:
                                 y = _write(f"발동 신살 {len(_all_sinsal)}개 확인:", y, size=9)
                                 for _sn, _sd in _all_sinsal[:10]:
