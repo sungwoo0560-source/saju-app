@@ -70,10 +70,24 @@ from saju_sinsal import get_gongmang  # noqa: E402
 # ohaeng_deep(menu16_ohaeng_deep)은 R2-2(2026-09-23)에서 추가 — R2 진단에서
 # 백호대살 로컬 리터럴(manse.py:31113)이 이 메뉴에만 있고 apptest 밖이라 사각지대였음.
 # 이것도 기존 13메뉴 골든은 건드리지 않고 baseline에 신규 조합으로만 붙는다.
+# bihang(menu8_bihang)·gaewoon(menu_gaewoon)은 R3-2(2026-09-23)에서 추가 — main()
+# 탭 dispatch에 실제로 연결돼 있는데 apptest_33 밖이라 사각지대였음(R3 진단).
+# 다른 12메뉴와 동일 시그니처(pils, name, birth_year, gender)라 직접호출 가능,
+# 2케이스 사전 probe로 케이스 간 오염·예외 없음 확인 후 추가. 기존 15메뉴
+# 골든은 건드리지 않고 baseline에 신규 조합으로만 붙는다.
+# menu7_ai는 R3-2에서 같이 검토했으나 tab_ai_chat의 st.session_state.chat_history가
+# 케이스별로 격리되지 않는 전역 키라 — apptest_33처럼 한 프로세스에서 여러 "가상
+# 세션"(케이스)을 순서대로 도는 하네스에서는 두 번째 케이스부터 첫 케이스의 stale
+# 채팅 인트로를 그대로 재노출한다(R3-2 진단 2케이스 실측 확인 — 골든이 실제로는
+# 다른 사람 이름·사주를 박제하게 됨). 게다가 그 인트로 생성 시 UsageTracker.
+# increment()가 프로젝트 루트의 usage_stats.json(로컬 실사용 카운터, git 비추적)에
+# 실제로 쓴다 — 리셋 없이 반복 실행하면 LIMIT=100 도달 시점부터 골든이 출력
+# 자체가 바뀌는 방식으로 깨질 위험도 있다. 둘 다 해결 없이는 추가 보류
+# (PLANNER 보고·판단 대기).
 MENU_ORDER = [
     "menu1_report", "current_situation", "lifeline", "past", "future3",
     "money", "relations", "daily", "monthly", "yearly", "tojeong", "health",
-    "report_narr", "ohaeng_deep",
+    "report_narr", "ohaeng_deep", "bihang", "gaewoon",
 ]
 
 # 텍스트 출력 계열 st.* 함수 — 캡처 대상(런타임 monkeypatch, 소스 수정 아님)
@@ -210,6 +224,10 @@ def _call_menu(menu_key, pils, case_name, birth_year, gender):
         return manse.build_rich_narrative(pils, birth_year, gender, case_name, section="report")
     elif menu_key == "ohaeng_deep":
         manse.menu16_ohaeng_deep(pils, case_name, birth_year, gender)
+    elif menu_key == "bihang":
+        manse.menu8_bihang(pils, case_name, birth_year, gender)
+    elif menu_key == "gaewoon":
+        manse.menu_gaewoon(pils, case_name, birth_year, gender)
     else:
         raise ValueError(f"알 수 없는 menu_key: {menu_key}")
     return None
