@@ -107,7 +107,20 @@ def resolve_birth_hour(*candidates, default=12):
     0은 유효한 값으로 취급한다(과거 `X or 12` 폴백이 0시를 정오로 잘못
     바꾸던 문제 수정용) — 후보가 전부 없으면 default(기본 12)를 반환.
     "시간 모름"(in_unknown_time) 체크 시에는 후보 값과 무관하게 항상 12를
-    반환한다 — 명식(연주·월주)과 대운 계산의 가정 시각을 정오로 통일한다."""
+    반환한다 — 명식(연주·월주)과 대운 계산의 가정 시각을 정오로 통일한다.
+
+    R6-6b: "_submitted_hour"가 세션에 있으면(제출·즐겨찾기 로드 시점에 확정된
+    스냅샷) 그 값을 최우선으로 반환한다 — in_unknown_time·birth_hour 등을
+    라이브로 다시 읽지 않는다. 체크박스·시(時) 드롭다운을 제출 없이 만지면
+    saju_pils(제출 시점에만 갱신)와 대운 계산(매 재실행 라이브 재조회)의
+    기준 시각이 어긋나던 문제(R6-6 진단 확인)를 이 한 곳에서 막는다.
+    스냅샷이 없으면(구형 세션, 아직 한 번도 제출 안 한 상태 등) 기존 로직
+    그대로 폴백 — 이 함수를 부르는 기존 26개 호출부는 무수정."""
+    try:
+        if "_submitted_hour" in st.session_state:
+            return st.session_state["_submitted_hour"]
+    except Exception:
+        pass
     try:
         if st.session_state.get("in_unknown_time"):
             return 12
@@ -10273,6 +10286,10 @@ def save_to_favorites(label: str):
         # R6-5-2: 시간모름 명식의 정오 추정 간지(render_manse_grid "(?)" 표시용) —
         # 없으면 불러온 뒤 "시간 미상"으로 강등되는 결함(R6-5 진단 확인)을 막는다.
         "_est_hour_pillar": _ss.get("_est_hour_pillar"),
+        # R6-6b: 이 명식을 만들 때 실제로 쓰인 확정 시각(resolve_birth_hour
+        # 스냅샷) — 없으면 로드 후 재계산(아래 load_from_favorite 참고).
+        "_submitted_hour": _ss.get("_submitted_hour"),
+        "_submitted_minute": _ss.get("_submitted_minute"),
         "in_marriage": _ss.get("in_marriage", "미혼"),
         "in_occupation": _ss.get("in_occupation", "선택 안 함"),
         "in_premium_correction": _ss.get("in_premium_correction", True),
@@ -10335,6 +10352,8 @@ def load_from_favorite(idx: int):
         "in_birth_minute",
         "in_unknown_time",
         "_est_hour_pillar",
+        "_submitted_hour",
+        "_submitted_minute",
         "in_marriage",
         "in_occupation",
         "in_premium_correction",
@@ -10356,6 +10375,22 @@ def load_from_favorite(idx: int):
     for key in simple_keys:
         if key in data:
             _ss[key] = data[key]
+
+    # R6-6b: 구형 즐겨찾기(_submitted_hour 미저장) 호환 — 방금 복원된
+    # in_birth_hour/birth_hour/in_unknown_time으로 제출 시점(28687~28698행)과
+    # 동일하게 재계산해 채운다. 재계산 직전에 먼저 지워야 resolve_birth_hour가
+    # 이 로드 이전 세션에 남아있던 스냅샷을 잘못 최우선 반환하지 않는다.
+    if "_submitted_hour" not in data:
+        _ss.pop("_submitted_hour", None)
+        _ss.pop("_submitted_minute", None)
+        _ss["_submitted_hour"] = resolve_birth_hour(_ss.get("in_birth_hour"), _ss.get("birth_hour"))
+        _ss["_submitted_minute"] = 0 if _ss.get("in_unknown_time") else _ss.get("in_birth_minute", _ss.get("birth_minute", 0))
+        # R6-6 보완: frozen birth_hour/birth_minute도 R6-6a와 같은 규칙으로
+        # 정렬한다 — 구형 즐겨찾기의 simple_keys 복원값(data["birth_hour"] 등,
+        # R6-6a 이전에 저장돼 시간모름 보정이 안 된 원시값)이 위에서 새로
+        # 확정한 _submitted_hour/_submitted_minute과 갈라져 있을 수 있어서다.
+        _ss["birth_hour"] = _ss["_submitted_hour"]
+        _ss["birth_minute"] = _ss["_submitted_minute"]
 
     # 출생지 유효성 검증 — 손상/구버전 값이면 서울로 안전 대체 + 경고 플래그
     # (콜백 안이라 st.warning 직접 호출은 렌더되지 않음 → main() 렌더 경로에서 플래그로 표시)
@@ -28673,8 +28708,19 @@ def main():
 
             # 시간 모름이면 명식·대운 모두 정오(12:00) 기준으로 통일한다(가정 시각 불일치 방지).
             # resolve_birth_hour가 in_unknown_time을 최우선으로 확인해 12를 반환한다.
+            #
+            # R6-6b: 이번 제출은 반드시 지금의 라이브 위젯 값을 기준으로 새로
+            # 계산해야 한다 — 이전 제출(또는 즐겨찾기 로드)이 남겨둔 스냅샷이
+            # 있으면 resolve_birth_hour가 그걸 최우선으로 돌려줘 이번 제출을
+            # 무시해버리므로, 계산 직전에 먼저 지운다.
+            _ss.pop("_submitted_hour", None)
+            _ss.pop("_submitted_minute", None)
             _pils_hour = resolve_birth_hour(_ss.get("in_birth_hour"), _ss.get("birth_hour"))
             _pils_minute = 0 if _ss.get("in_unknown_time") else _ss.get("in_birth_minute", _ss.get("birth_minute", 0))
+            # 이번 제출을 스냅샷으로 확정 — 이후 재실행에서 체크박스·드롭다운이
+            # 바뀌어도 이번 명식의 대운 계산 기준 시각은 이 값으로 고정된다.
+            _ss["_submitted_hour"] = _pils_hour
+            _ss["_submitted_minute"] = _pils_minute
 
             try:
                 if _ss.get("in_premium_correction", True):
