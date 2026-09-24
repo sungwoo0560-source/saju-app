@@ -24777,9 +24777,13 @@ def render_manse_grid(pils, birth_year, birth_month, birth_day, birth_hour, birt
         # pils 순서: [시주, 일주, 월주, 년주]
         pil_labels = ["시주", "일주", "월주", "년주"]
         pcols = st.columns(4)
-        _unk_time = st.session_state.get("in_unknown_time", False)
         for ci, (lb, p, ss) in enumerate(zip(pil_labels, pils, ss_list)):
-            if _unk_time and lb == "시주":
+            # R6-1: in_unknown_time 세션 플래그 의존 제거 — pils[0](시주) 자체의
+            # cg/jj가 비어있는지로 직접 판단한다(saju_zhengtong.render_four_pillars_card:
+            # 6405행과 동일 패턴). 플래그는 계산 시점과 렌더 시점 사이 재실행을 거치며
+            # pils[0]의 실제 상태와 어긋날 수 있어(R6 진단 확인) 완전 공백을 만들었다 —
+            # pils[0] 자체를 보면 그 어긋남이 구조적으로 불가능하다.
+            if lb == "시주" and not (p.get("cg") and p.get("jj")):
                 # est_hour_pillar(정오 12시 기준 추정치)가 있으면 회색+"(?)"로 표시,
                 # 판정 무반영 안내 병기 — saju_zhengtong.render_four_pillars_card와
                 # 동일 형식. 값이 없으면 기존처럼 "시간 미상"만 표시.
