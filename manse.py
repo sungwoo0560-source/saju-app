@@ -28771,9 +28771,15 @@ def main():
 
             st.session_state["occupation"] = _ss["in_occupation"]
 
-            st.session_state["birth_hour"] = _ss.get("in_birth_hour", _ss.get("birth_hour", 12))
+            # R6-6a: 원시 드롭다운값을 그대로 복사하지 않고, 위 28676~28677에서
+            # 이미 계산해 둔(시간모름→12/0 보정 적용된) _pils_hour/_pils_minute를
+            # 그대로 저장한다 — saju_pils를 실제로 만드는 데 쓰인 값과 frozen
+            # birth_hour/birth_minute이 제출 시점부터 어긋나던 결함 수정(R6-6
+            # 확인 1·3 참고 — 정규화(_normalize_local_clock)는 여기 포함 안 됨,
+            # get_pillars/get_daewoon 내부에서만 각자 적용되므로 이중 적용 없음).
+            st.session_state["birth_hour"] = _pils_hour
 
-            st.session_state["birth_minute"] = _ss.get("in_birth_minute", _ss.get("birth_minute", 0))
+            st.session_state["birth_minute"] = _pils_minute
 
             st.session_state["cal_type"] = _ss["in_cal_type"]
 
