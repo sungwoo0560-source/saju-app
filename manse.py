@@ -29062,46 +29062,28 @@ def main():
 
             occ_short = _ss.get("in_occupation", "") if _ss.get("in_occupation", "") != "선택 안 함" else ""
 
-            # 생년월일 표시: 입력값 그대로 보존
+            # 생년월일 표시: 제출 시점에 확정된 frozen 값 사용(R6-9b)
 
-            # Note: lunar_info and cal_type_saved are not directly available from _ss in this scope.
+            # R6-9b: 라이브 in_cal_type/in_lunar_*/in_solar_date 대신, 이미
+            # 제출 시점(28833~28838행)에 확정해 둔 같은 스코프의 cal_type_saved/
+            # lunar_info(28919~28921행)를 쓴다 — R6-7c가 시각 배지에서 고친 것과
+            # 동일 원칙. 라이브 위젯을 다시 읽으면 제출 없이 달력구분·날짜만
+            # 바꿔도 이 배지가 실제 명식과 다른 날짜를 보여줄 수 있었다(R6-9
+            # 진단 확인). lunar_info는 윤달 표기까지 포함해 이미 완성된
+            # 문자열(28838행)이라 재조합 불필요. 양력 환산도 lunar_to_solar를
+            # 다시 부르지 않고, 제출 시점에 이미 변환된 frozen birth_year/
+            # birth_month/birth_day(28877·28923·28925행)를 그대로 쓴다.
 
-            # Assuming birth_date_solar is available from the submitted block or derived.
-
-            # For display, we can use the original input values.
-
-            if _ss["in_cal_type"] == "음력":
-                lunar_info_str = f"{_ss['in_lunar_year']}년 {_ss['in_lunar_month']}월 {_ss['in_lunar_day']}일"
-
-                if _ss["in_is_leap"]:
-                    lunar_info_str += " (윤달)"
-
-                # Need to convert lunar to solar for the (양력 ...) part if not already done
-
-                try:
-                    birth_date_solar_for_display = lunar_to_solar(
-                        _ss["in_lunar_year"],
-                        _ss["in_lunar_month"],
-                        _ss["in_lunar_day"],
-                        _ss["in_is_leap"],
-                    )
-
-                    solar_display_str = f"(양력 {birth_date_solar_for_display.year}.{birth_date_solar_for_display.month:02d}.{birth_date_solar_for_display.day:02d})"
-
-                except Exception:
-                    solar_display_str = "(양력 변환 오류)"
-
+            if cal_type_saved == "음력":
                 date_badge = (
                     f"<span style='font-size:12px;background:#ede4ff;padding:3px 10px;border-radius:12px;margin-left:6px'>"
-                    f"음력 {lunar_info_str}</span>"
+                    f"음력 {lunar_info}</span>"
                     f"<span style='font-size:11px;color:#000000;margin-left:6px'>"
-                    f"{solar_display_str}</span>"
+                    f"(양력 {birth_year}.{birth_month:02d}.{birth_day:02d})</span>"
                 )
 
             else:
-                _solar = _ss.get("in_solar_date") or date(1990, 1, 1)
-
-                date_badge = f"<span style='font-size:12px;background:#e8f5e8;padding:3px 10px;border-radius:12px;margin-left:6px'>양력 {_solar.year}.{_solar.month:02d}.{_solar.day:02d}</span>"
+                date_badge = f"<span style='font-size:12px;background:#e8f5e8;padding:3px 10px;border-radius:12px;margin-left:6px'>양력 {birth_year}.{birth_month:02d}.{birth_day:02d}</span>"
 
 
             # R6-7c: 시주 유무 판단은 saju_pils[0] cg/jj 직접검사(R6-1/R6-5-1과
