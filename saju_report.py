@@ -881,7 +881,9 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str="", dram
             # 캡션(manse.py in_birth_region 캡션)과 동일한 기존 공식 재사용, 새 계산
             # 아님. write()는 자동 줄바꿈+페이지네이션(599행 정의)이라 표지 좁은
             # 여백에 직접 좌표로 그리지 않고 body 흐름 첫 문단으로 안전하게 얹는다.
-            _tc_region_pdf = st.session_state.get("in_birth_region", "서울")
+            # R6-9c: frozen birth_region 우선(manse.py와 동일 규칙) — 없으면
+            # 라이브 in_birth_region 폴백.
+            _tc_region_pdf = st.session_state.get("birth_region", st.session_state.get("in_birth_region", "서울"))
             _tc_lon_pdf = getattr(TimeCorrection, "REGION_LONGITUDE", {}).get(_tc_region_pdf, 126.98)
             _tc_offset_pdf = round((_tc_lon_pdf - 135.0) * 4)
             y = write(

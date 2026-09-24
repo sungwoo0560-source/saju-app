@@ -11,6 +11,7 @@ manse.py를 통째로 import하면 Streamlit 앱 실행 부작용이 커서, saj
 apptest_33/개별 하네스 관례를 그대로 따른다(이 파일 안에서 manse 함수를
 직접 호출하는 별도 섹션으로 분리).
 """
+import ast
 import os
 import sys
 import textwrap
@@ -21,7 +22,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import streamlit as st  # noqa: E402
 from saju_interpreter import LocalSajuNarrator  # noqa: E402
-from saju_engine import SajuPrecisionEngine  # noqa: E402
+from saju_engine import SajuPrecisionEngine, SajuCoreEngine, TimeCorrection  # noqa: E402
 from saju_data import JJ_12b  # noqa: E402
 from pils_fixtures import CASES  # noqa: E402
 
@@ -38,7 +39,9 @@ def _extract_hour_display_block():
     src = open(_MANSE_PATH, encoding="utf-8-sig").read()
     # 앵커는 이번 수정과 무관한(달라지지 않는) 바로 위 줄로 잡는다 — 그래야
     # git apply -R로 R6-7c만 되돌린 "수정 전" 소스에서도 추출이 안 깨진다.
-    anchor = "양력 {_solar.year}.{_solar.month:02d}.{_solar.day:02d}</span>\""
+    # R6-9b: date_badge 블록이 frozen birth_year/birth_month/birth_day 기반으로
+    # 바뀌면서 이 앵커도 함께 갱신(원래 텍스트는 _solar.year 등 라이브 변수 참조였음).
+    anchor = "양력 {birth_year}.{birth_month:02d}.{birth_day:02d}</span>\""
     end = 'hour_badge = f"<span'
     i = src.index(anchor)
     block_start = src.index("\n", i) + 1
@@ -382,6 +385,316 @@ def check_pdf_internal_birth_hour_scenario_a():
     return ok
 
 
+def _load_resolve_birth_hour_src():
+    """R6-9a: resolve_birth_hour 함수 정의 자체를 manse.py에서 AST로 추출
+    (부작용 없는 순수 함수). render_manse_grid 호출부가 인자 계산에 이 함수를
+    직접 쓰므로, 호출부 블록만 exec하려면 이 정의도 같은 네임스페이스에
+    있어야 한다."""
+    src = open(_MANSE_PATH, encoding="utf-8-sig").read()
+    tree = ast.parse(src)
+    for node in tree.body:
+        if isinstance(node, ast.FunctionDef) and node.name == "resolve_birth_hour":
+            return ast.get_source_segment(src, node)
+    raise AssertionError("resolve_birth_hour 함수를 manse.py에서 찾지 못함")
+
+
+_RESOLVE_BIRTH_HOUR_SRC = _load_resolve_birth_hour_src()
+
+
+def _extract_render_grid_call_block():
+    """R6-9a: manse.py render_manse_grid 호출부(3단 만세력 그리드, 대운 계산에
+    쓰이는 birth_hour/birth_minute 인자) 추출. 앵커는 이번 수정과 무관한
+    상단 주석 시작줄(안정적)."""
+    src = open(_MANSE_PATH, encoding="utf-8-sig").read()
+    anchor = "            # 3단 만세력 그리드 (입력 완료 직후)\n"
+    end = "            )\n"
+    i = src.index(anchor)
+    j = src.index(end, i) + len(end)
+    return textwrap.dedent(src[i:j])
+
+
+_RENDER_GRID_CALL_SRC = _extract_render_grid_call_block()
+
+
+def _compute_render_grid_args(pils, birth_year, birth_month, birth_day, gender):
+    """render_manse_grid 호출부를 exec해 실제로 넘어가는 birth_hour/birth_minute
+    인자를 캡처한다. _ss는 st.session_state 그 자체(manse.py 본문과 동일 별칭
+    관계) — resolve_birth_hour 내부가 st.session_state를 직접 읽으므로 두
+    참조가 같은 객체여야 한다."""
+    captured = {}
+
+    def fake_render_manse_grid(pils, birth_year, birth_month, birth_day, birth_hour, birth_minute, gender):
+        captured["birth_hour"] = birth_hour
+        captured["birth_minute"] = birth_minute
+
+    ns = {
+        "st": st, "_ss": st.session_state, "pils": pils,
+        "birth_year": birth_year, "birth_month": birth_month, "birth_day": birth_day,
+        "gender": gender, "render_manse_grid": fake_render_manse_grid,
+    }
+    exec(_RESOLVE_BIRTH_HOUR_SRC, ns)
+    exec(_RENDER_GRID_CALL_SRC, ns)
+    return captured
+
+
+def check_render_grid_birth_minute_scenario_a():
+    """R6-9a: 경계사례(1967-2-7 18시 여 — 분(分) 0/59에서 대운 시작나이가
+    9/8로 실제로 갈리는 표본, R6-9 진단에서 300개 무작위 표본 중 발견) —
+    분 제출 후 드롭다운만 바꿔도(미제출) 만세력 그리드의 대운 시작나이가
+    흔들리면 안 된다(수정 전엔 흔들렸음 — R6-9 진단 실측)."""
+    y, m, d, h, gender = 1967, 2, 7, 18, "여"
+    pils = SajuPrecisionEngine.get_pillars(y, m, d, h, 0, gender, use_yaja_time=True, longitude=126.98)
+
+    st.session_state.clear()
+    st.session_state["in_birth_hour"] = h
+    st.session_state["birth_hour"] = h
+    st.session_state["_submitted_hour"] = h
+    st.session_state["in_birth_minute"] = 0
+    st.session_state["birth_minute"] = 0  # 제출 시점 확정(manse.py 28831행 상당)
+    args_submit = _compute_render_grid_args(pils, y, m, d, gender)
+    dw_submit = SajuCoreEngine.get_daewoon(pils, y, m, d, args_submit["birth_hour"], args_submit["birth_minute"], gender)
+    sa_submit = dw_submit[0]["시작나이"] if dw_submit else None
+
+    st.session_state["in_birth_minute"] = 59  # 드롭다운만 조작, 미제출 — frozen birth_minute=0 그대로
+    args_after = _compute_render_grid_args(pils, y, m, d, gender)
+    dw_after = SajuCoreEngine.get_daewoon(pils, y, m, d, args_after["birth_hour"], args_after["birth_minute"], gender)
+    sa_after = dw_after[0]["시작나이"] if dw_after else None
+
+    ok = (args_submit["birth_minute"] == 0 and args_after["birth_minute"] == 0
+          and sa_submit == sa_after == 9)
+    print(f"[{'PASS' if ok else 'FAIL'}] render_manse_grid 호출부 분(分) 시나리오(a): "
+          f"제출시 넘긴 분={args_submit['birth_minute']}, 시작나이={sa_submit} / "
+          f"드롭다운만 59로 조작 후(미제출) 넘긴 분={args_after['birth_minute']}, 시작나이={sa_after} "
+          f"(기대: 분 둘 다 0, 시작나이 둘 다 9)")
+    return ok
+
+
+def check_render_grid_birth_minute_no_frozen_key_fallback():
+    """R6-9a 대조군: frozen birth_minute 키 자체가 없으면(구형 세션 등)
+    in_birth_minute로 정상 폴백해야 한다(과잉 수정으로 폴백 경로 자체를
+    깨지 않았는지 확인)."""
+    y, m, d, h, gender = 1967, 2, 7, 18, "여"
+    pils = SajuPrecisionEngine.get_pillars(y, m, d, h, 0, gender, use_yaja_time=True, longitude=126.98)
+    st.session_state.clear()
+    st.session_state["in_birth_hour"] = h
+    st.session_state["_submitted_hour"] = h
+    st.session_state["in_birth_minute"] = 59
+    args = _compute_render_grid_args(pils, y, m, d, gender)
+    ok = args["birth_minute"] == 59
+    print(f"[{'PASS' if ok else 'FAIL'}] render_manse_grid 호출부 분(分) 폴백: birth_minute 키 없음 -> "
+          f"in_birth_minute(59) 사용 -> {args['birth_minute']} (기대 59)")
+    return ok
+
+
+def _extract_date_badge_block():
+    """R6-9b: manse.py date_badge(생년월일 표시 배지) 계산 블록 추출.
+    앵커는 이번 수정으로 새로 생긴 if문 시작줄(이 라운드 검증 대상 자체라
+    안정적 — 되돌려지면 이 앵커부터 못 찾아 테스트가 즉시 실패하도록 의도)."""
+    src = open(_MANSE_PATH, encoding="utf-8-sig").read()
+    anchor = '            if cal_type_saved == "음력":\n'
+    end = ('            else:\n'
+           '                date_badge = f"<span style=\'font-size:12px;background:#e8f5e8;'
+           'padding:3px 10px;border-radius:12px;margin-left:6px\'>양력 '
+           '{birth_year}.{birth_month:02d}.{birth_day:02d}</span>"\n')
+    i = src.index(anchor)
+    j = src.index(end, i) + len(end)
+    return textwrap.dedent(src[i:j])
+
+
+_DATE_BADGE_SRC = _extract_date_badge_block()
+
+
+def _compute_date_badge(cal_type_saved, lunar_info, birth_year, birth_month, birth_day):
+    ns = {
+        "cal_type_saved": cal_type_saved, "lunar_info": lunar_info,
+        "birth_year": birth_year, "birth_month": birth_month, "birth_day": birth_day,
+    }
+    exec(_DATE_BADGE_SRC, ns)
+    return ns["date_badge"]
+
+
+def check_date_badge_no_live_session_dependency():
+    """R6-9b: date_badge 블록이 더 이상 _ss(st.session_state)의 라이브
+    in_cal_type/in_lunar_*/in_solar_date를 참조하지 않고 frozen 인자
+    (cal_type_saved/lunar_info/birth_year/birth_month/birth_day)만으로
+    계산되는지 검증 — exec 네임스페이스에 _ss/st를 아예 안 넣는다. 수정
+    전 소스(라이브 _ss["in_cal_type"] 등 참조)라면 여기서 NameError로
+    즉시 실패해 회귀를 잡는다."""
+    # 음력 1990-01-01(윤달 아님) 제출 — 양력 환산은 1990-01-27(frozen birth_year 등에
+    # 이미 반영돼 있다고 가정, lunar_to_solar 재호출 없이 그대로 씀)
+    badge = _compute_date_badge("음력", "1990년 1월 1일", 1990, 1, 27)
+    ok = ("음력 1990년 1월 1일" in badge) and ("(양력 1990.01.27)" in badge)
+    print(f"[{'PASS' if ok else 'FAIL'}] date_badge 라이브 세션 미의존 확인(음력): '{badge}' "
+          f"(기대: '음력 1990년 1월 1일'·'(양력 1990.01.27)' 둘 다 포함, _ss/st 없이도 NameError 없음)")
+    return ok
+
+
+def check_date_badge_solar_known():
+    """R6-9b 대조군: 양력 제출은 그대로 '양력 YYYY.MM.DD' 형식이어야 한다."""
+    badge = _compute_date_badge("양력", "", 1985, 5, 20)
+    ok = badge == "<span style='font-size:12px;background:#e8f5e8;padding:3px 10px;border-radius:12px;margin-left:6px'>양력 1985.05.20</span>"
+    print(f"[{'PASS' if ok else 'FAIL'}] date_badge 양력 대조군: '{badge}' (기대 '양력 1985.05.20' 포함 형식)")
+    return ok
+
+
+def _extract_line(path, anchor_line):
+    """단일 대입문 한 줄을 그대로 추출(줄 전체가 앵커 — 존재하지 않으면
+    즉시 ValueError로 실패해 회귀를 잡는다)."""
+    src = open(path, encoding="utf-8-sig").read()
+    i = src.index(anchor_line)
+    return src[i:i + len(anchor_line)]
+
+
+_REGION_DISP_LINE = ('            _tc_region_disp = _ss.get("birth_region", '
+                      '_ss.get("in_birth_region", "서울"))')
+_REGION_DISP_SRC = textwrap.dedent(_extract_line(_MANSE_PATH, _REGION_DISP_LINE))
+
+_REGION_PDF_LINE = ('            _tc_region_pdf = st.session_state.get("birth_region", '
+                     'st.session_state.get("in_birth_region", "서울"))')
+_REGION_PDF_SRC = textwrap.dedent(_extract_line(_SAJU_REPORT_PATH, _REGION_PDF_LINE))
+
+_PARTNER_YAJA_LINE = ('            _p_use_yaja = st.session_state.get("use_yaja", '
+                       'st.session_state.get("in_use_yaja", True))')
+_PARTNER_YAJA_SRC = textwrap.dedent(_extract_line(_MANSE_PATH, _PARTNER_YAJA_LINE))
+
+
+def check_region_caption_frozen_priority():
+    """R6-9c: manse.py 결과화면 진태양시 캡션(_tc_region_disp) — frozen
+    birth_region이 있으면 라이브 in_birth_region 변경(미제출)에 안 흔들려야
+    한다."""
+    st.session_state.clear()
+    st.session_state["birth_region"] = "부산"  # 제출 시점 확정(R6-9c)
+    st.session_state["in_birth_region"] = "서울"  # 제출 없이 드롭다운만 바꾼 상태
+    ns = {"_ss": st.session_state}
+    exec(_REGION_DISP_SRC, ns)
+    ok = ns["_tc_region_disp"] == "부산"
+    print(f"[{'PASS' if ok else 'FAIL'}] manse.py 진태양시 캡션 frozen 우선: "
+          f"birth_region=부산(frozen)+in_birth_region=서울(라이브,미제출) -> '{ns['_tc_region_disp']}' (기대 '부산')")
+    return ok
+
+
+def check_region_caption_legacy_fallback():
+    """R6-9c 대조군: frozen birth_region 키 자체가 없으면(구형 세션) 라이브
+    in_birth_region으로 정상 폴백해야 한다."""
+    st.session_state.clear()
+    st.session_state["in_birth_region"] = "대구"
+    ns = {"_ss": st.session_state}
+    exec(_REGION_DISP_SRC, ns)
+    ok = ns["_tc_region_disp"] == "대구"
+    print(f"[{'PASS' if ok else 'FAIL'}] manse.py 진태양시 캡션 폴백: birth_region 키 없음 -> "
+          f"in_birth_region(대구) 사용 -> '{ns['_tc_region_disp']}' (기대 '대구')")
+    return ok
+
+
+def check_pdf_region_caption_frozen_priority():
+    """R6-9c: saju_report.py PDF 표지 캡션(_tc_region_pdf) — manse.py와 동일
+    규칙."""
+    st.session_state.clear()
+    st.session_state["birth_region"] = "제주"
+    st.session_state["in_birth_region"] = "서울"
+    ns = {"st": st}
+    exec(_REGION_PDF_SRC, ns)
+    ok = ns["_tc_region_pdf"] == "제주"
+    print(f"[{'PASS' if ok else 'FAIL'}] saju_report.py PDF 캡션 frozen 우선: "
+          f"birth_region=제주(frozen)+in_birth_region=서울(라이브,미제출) -> '{ns['_tc_region_pdf']}' (기대 '제주')")
+    return ok
+
+
+def check_partner_yaja_frozen_priority():
+    """R6-9c: manse.py menu6_relations 상대방 궁합 계산의 야자시(_p_use_yaja) —
+    본인 명식 계산에 실제로 쓰인 frozen use_yaja를 우선해야 한다(제출 없이
+    고급설정 야자시 체크박스만 만져도 상대방 계산 기준이 어긋나면 안 됨)."""
+    st.session_state.clear()
+    st.session_state["use_yaja"] = False  # 제출 시점 확정(R6-9c)
+    st.session_state["in_use_yaja"] = True  # 제출 없이 체크박스만 바꾼 상태
+    ns = {"st": st}
+    exec(_PARTNER_YAJA_SRC, ns)
+    ok = ns["_p_use_yaja"] is False
+    print(f"[{'PASS' if ok else 'FAIL'}] 상대방 궁합 야자시 frozen 우선: "
+          f"use_yaja=False(frozen)+in_use_yaja=True(라이브,미제출) -> {ns['_p_use_yaja']} (기대 False)")
+    return ok
+
+
+def check_partner_yaja_legacy_fallback():
+    """R6-9c 대조군: frozen use_yaja 키 자체가 없으면 라이브 in_use_yaja로
+    정상 폴백해야 한다."""
+    st.session_state.clear()
+    st.session_state["in_use_yaja"] = False
+    ns = {"st": st}
+    exec(_PARTNER_YAJA_SRC, ns)
+    ok = ns["_p_use_yaja"] is False
+    print(f"[{'PASS' if ok else 'FAIL'}] 상대방 궁합 야자시 폴백: use_yaja 키 없음 -> "
+          f"in_use_yaja(False) 사용 -> {ns['_p_use_yaja']} (기대 False)")
+    return ok
+
+
+def _load_manse_func_src(func_name):
+    """R6-9c: save_to_favorites/load_from_favorite — 순수 session_state 조작
+    함수라 AST로 정의 전체를 추출해도 부작용이 없다(resolve_birth_hour와
+    동일 기법)."""
+    src = open(_MANSE_PATH, encoding="utf-8-sig").read()
+    tree = ast.parse(src)
+    for node in tree.body:
+        if isinstance(node, ast.FunctionDef) and node.name == func_name:
+            return ast.get_source_segment(src, node)
+    raise AssertionError(f"{func_name} 함수를 manse.py에서 찾지 못함")
+
+
+_FAV_NS = {"st": st, "date": __import__("datetime").date, "datetime": __import__("datetime").datetime,
+           "TimeCorrection": TimeCorrection}
+exec(_RESOLVE_BIRTH_HOUR_SRC, _FAV_NS)
+exec(_load_manse_func_src("save_to_favorites"), _FAV_NS)
+exec(_load_manse_func_src("load_from_favorite"), _FAV_NS)
+save_to_favorites = _FAV_NS["save_to_favorites"]
+load_from_favorite = _FAV_NS["load_from_favorite"]
+
+
+def check_favorites_region_yaja_roundtrip():
+    """R6-9c: 즐겨찾기 저장→다른 값으로 오염→로드 시나리오. birth_region/
+    use_yaja가 simple_keys에 포함돼 저장 당시 frozen 값으로 정확히
+    되돌아와야 한다(빠져 있으면 로드 후에도 오염된 이전 값이 남는다)."""
+    st.session_state.clear()
+    st.session_state["in_name"] = "테스트"
+    st.session_state["in_birth_region"] = "부산"
+    st.session_state["birth_region"] = "부산"
+    st.session_state["in_use_yaja"] = False
+    st.session_state["use_yaja"] = False
+    save_to_favorites("R69C_테스트")
+
+    # 다른 명식(오염 시나리오) — 이전 프로필의 frozen 값이 남아있다고 가정
+    st.session_state["birth_region"] = "제주"
+    st.session_state["use_yaja"] = True
+
+    load_from_favorite(0)
+    ok = (st.session_state.get("birth_region") == "부산") and (st.session_state.get("use_yaja") is False)
+    print(f"[{'PASS' if ok else 'FAIL'}] 즐겨찾기 round-trip: 저장(부산/False) -> 오염(제주/True) -> 로드 후 "
+          f"birth_region={st.session_state.get('birth_region')}, use_yaja={st.session_state.get('use_yaja')} "
+          f"(기대 부산/False)")
+    return ok
+
+
+def check_favorites_legacy_no_stale_leak():
+    """R6-9c 대조군: birth_region/use_yaja가 없는 구형 즐겨찾기를 로드해도,
+    로드 직전 세션에 남아있던 다른 명식의 frozen 값이 새지 않고 방금
+    복원한 in_birth_region/in_use_yaja(구형 simple_keys) 기준으로 재확정돼야
+    한다."""
+    st.session_state.clear()
+    st.session_state["favorites"] = [{
+        "label": "구형즐겨찾기", "in_name": "구형",
+        "in_birth_region": "대전", "in_gender": "남",
+        # birth_region/use_yaja 키 자체가 없음(R6-9c 이전 저장분)
+    }]
+    st.session_state["birth_region"] = "제주"  # 오염(직전 세션 잔재)
+    st.session_state["use_yaja"] = False        # 오염(직전 세션 잔재)
+
+    load_from_favorite(0)
+    ok = (st.session_state.get("birth_region") == "대전") and (st.session_state.get("use_yaja") is True)
+    print(f"[{'PASS' if ok else 'FAIL'}] 구형 즐겨찾기 로드(오염 방지): 로드 후 "
+          f"birth_region={st.session_state.get('birth_region')}(기대 대전), "
+          f"use_yaja={st.session_state.get('use_yaja')}(기대 True — in_use_yaja 기본값)")
+    return ok
+
+
 def run():
     results = [
         check_2414_scenario_a(),
@@ -397,6 +710,17 @@ def run():
         check_pdf_unknown_time_shows_미입력(),
         check_pdf_known_time_shows_number(),
         check_pdf_internal_birth_hour_scenario_a(),
+        check_render_grid_birth_minute_scenario_a(),
+        check_render_grid_birth_minute_no_frozen_key_fallback(),
+        check_date_badge_no_live_session_dependency(),
+        check_date_badge_solar_known(),
+        check_region_caption_frozen_priority(),
+        check_region_caption_legacy_fallback(),
+        check_pdf_region_caption_frozen_priority(),
+        check_partner_yaja_frozen_priority(),
+        check_partner_yaja_legacy_fallback(),
+        check_favorites_region_yaja_roundtrip(),
+        check_favorites_legacy_no_stale_leak(),
     ]
     fail = results.count(False)
     total = len(results)

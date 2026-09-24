@@ -10294,6 +10294,10 @@ def save_to_favorites(label: str):
         "in_occupation": _ss.get("in_occupation", "선택 안 함"),
         "in_premium_correction": _ss.get("in_premium_correction", True),
         "in_birth_region": _ss.get("in_birth_region") or "서울",
+        # R6-9c: 제출 시점에 확정된 frozen 출생지·야자시(28711~28716행 상당) —
+        # 없으면(구형 즐겨찾기 등) load_from_favorite 쪽에서 in_* 값으로 재계산.
+        "birth_region": _ss.get("birth_region"),
+        "use_yaja": _ss.get("use_yaja"),
         "saju_pils": _ss.get("saju_pils"),
         "birth_year": _ss.get("birth_year"),
         "birth_month": _ss.get("birth_month"),
@@ -10358,6 +10362,8 @@ def load_from_favorite(idx: int):
         "in_occupation",
         "in_premium_correction",
         "in_birth_region",
+        "birth_region",
+        "use_yaja",
         "saju_pils",
         "birth_year",
         "birth_month",
@@ -10400,6 +10406,15 @@ def load_from_favorite(idx: int):
         _ss["_region_fallback_warn"] = _loaded_region
     else:
         _ss.pop("_region_fallback_warn", None)
+
+    # R6-9c: 구형 즐겨찾기(birth_region/use_yaja 미저장) 호환 — 이전 세션에
+    # 남아있던 다른 명식의 frozen 값이 이번에 로드한 명식에 새어들지 않도록,
+    # 저장된 값이 없으면 방금 복원한 in_birth_region 기준으로 다시 확정한다
+    # (_submitted_hour의 구형 호환 로직과 동일 원칙).
+    if "birth_region" not in data:
+        _ss["birth_region"] = _ss.get("in_birth_region", "서울")
+    if "use_yaja" not in data:
+        _ss["use_yaja"] = _ss.get("in_use_yaja", True)
 
     if "in_solar_date" in data:
         try:
@@ -19289,6 +19304,10 @@ def menu6_relations(pils, name, birth_year, gender, marriage_status="미혼"):
             # GMT+8:30·서머타임)을 UTC+9로 정규화해 절입과 같은 기준으로 비교한다.
             # 상대방은 출생지를 받지 않으므로 경도는 본 화면의 기본값(서울)을 쓴다.
             _p_lon = getattr(TimeCorrection, "REGION_LONGITUDE", {}).get("서울", 126.98)
+            # R6-9c: frozen use_yaja 우선(본인 명식 계산에 실제로 쓰인 값) — 없으면
+            # 라이브 in_use_yaja 폴백. 본인은 제출 시점 설정으로 고정인데 상대방만
+            # 그 뒤 만진 라이브 야자시 설정을 쓰면 두 사주의 계산 기준이 어긋난다.
+            _p_use_yaja = st.session_state.get("use_yaja", st.session_state.get("in_use_yaja", True))
             _p_pils = SajuPrecisionEngine.get_pillars(
                 year=_p_year,
                 month=_p_month,
@@ -19296,7 +19315,7 @@ def menu6_relations(pils, name, birth_year, gender, marriage_status="미혼"):
                 hour=_p_hour,
                 minute=0,
                 gender=_p_gender,
-                use_yaja_time=st.session_state.get("in_use_yaja", True),
+                use_yaja_time=_p_use_yaja,
                 longitude=_p_lon,
             )
             st.session_state["partner_pils"]   = _p_pils
@@ -28708,6 +28727,12 @@ def main():
             _region_lon = getattr(TimeCorrection, "REGION_LONGITUDE", {}).get(
                 _ss.get("in_birth_region", "서울"), 126.98
             )
+            # R6-9c: 이번 제출에 쓰인 출생지·야자시 설정을 frozen으로 확정한다
+            # (R6-6b가 hour에 한 것과 동일 원칙) — 제출 후 고급설정(출생지·야자시)만
+            # 만지고 재제출 안 해도 진태양시 캡션·상대방 궁합 계산이 흔들리지
+            # 않게 하기 위함(R6-9 진단에서 라이브 읽기로 확인된 지점).
+            st.session_state["birth_region"] = _ss.get("in_birth_region", "서울")
+            st.session_state["use_yaja"] = _ss.get("in_use_yaja", True)
 
             # 시간 모름이면 명식·대운 모두 정오(12:00) 기준으로 통일한다(가정 시각 불일치 방지).
             # resolve_birth_hour가 in_unknown_time을 최우선으로 확인해 12를 반환한다.
@@ -29134,7 +29159,10 @@ def main():
 
             # 관법 명시 — 진태양시 기준임을 화면에 표기. region·offset은 고급설정
             # 캡션(30294~30296행)과 동일한 기존 공식 재사용, 새 계산 아님.
-            _tc_region_disp = _ss.get("in_birth_region", "서울")
+            # R6-9c: frozen birth_region 우선(제출 시점 확정값) — 없으면(구형
+            # 세션 등) 라이브 in_birth_region으로 폴백. 제출 없이 출생지만
+            # 바꿔도 이 캡션이 실제 명식과 다른 지역을 보여주던 결함 수정.
+            _tc_region_disp = _ss.get("birth_region", _ss.get("in_birth_region", "서울"))
             _tc_lon_disp = getattr(TimeCorrection, "REGION_LONGITUDE", {}).get(_tc_region_disp, 126.98)
             _tc_offset_disp = round((_tc_lon_disp - 135.0) * 4)
             st.caption(
