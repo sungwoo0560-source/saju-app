@@ -39,14 +39,30 @@ tests/apptest_33.py — N케이스 × 11메뉴 검증 하네스 (예외 0건 / �
    차이를 보고하는 게 정상이며, 그 경우 내용을 확인한 뒤 --dump로 베이스라인을
    의식적으로 갱신한다.
 4) "박후규_시간모름_grid"(R6-2, 2026-09-24 추가) 케이스의 manse_grid 골든에는
-   당시 알려진 결함 2건이 "정답"으로 그대로 구워져 있다 — (a) STRENGTH_DESC
-   (saju_data.py)에 "극신강(極身强)"/"극신약(極身弱)" 키가 없어 신강신약이 극단
-   판정일 때 성격 설명 줄이 빈 <div></div>로 렌더되는 결함, (b) render_manse_grid
-   자체 대운 계산(manse.py:24740)이 호출부(29093)에서 resolve_birth_hour를
-   거치지 않은 raw birth_hour를 받는 결함(eb878f8의 17곳 정리에서 누락, R6-3에서
-   원인 추적). 이 둘을 나중에 고치면 이 케이스의 manse_grid 골든값이 바뀌는 게
-   정상이다 — 그때 --compare 차이는 "설명되지 않는 변경"이 아니라 "의도된 갱신"
-   이니 baseline 갱신 규칙(CLAUDE.md)대로 diff를 확인하고 의식적으로 --dump한다.
+   당시 알려진 결함 2건이 "정답"으로 그대로 구워져 있었다:
+   (a) STRENGTH_DESC(saju_data.py)에 "극신강(極身强)"/"극신약(極身弱)" 키가 없어
+       신강신약이 극단 판정일 때 성격 설명 줄이 빈 <div></div>로 렌더되는 결함
+       — **미해결**. 고치면 이 케이스의 manse_grid 골든값이 바뀌는 게 정상이다.
+   (b) render_manse_grid 자체 대운 계산(manse.py:24740)이 호출부(29093)에서
+       resolve_birth_hour를 거치지 않은 raw birth_hour를 받던 결함(eb878f8의
+       17곳 정리에서 누락, R6-3에서 원인 추적) — **R6-4(2026-09-24)에서 해소**.
+       29093 호출부에 resolve_birth_hour(in_birth_hour, birth_hour)를 적용했고,
+       이 케이스(박후규, birth_hour=12 고정)는 이미 12시라 골든값 변화 없음
+       (실제 변화는 birth_hour가 0 등 다른 값일 때만 나타남 — R6-4 보고의
+       Before/After 실측 참고). apptest 픽스처만으로는 이 수정을 증명할 수
+       없다(--compare가 항상 0을 보고함, 아래 참고) — 실질 검증은 R6-4 보고의
+       별도 하네스(resolve_birth_hour 경유 여부를 in_unknown_time=True +
+       raw birth_hour=0 조합으로 직접 실측)로 수행했다.
+   (a)를 나중에 고칠 때 --compare 차이는 "설명되지 않는 변경"이 아니라 "의도된
+   갱신"이니 baseline 갱신 규칙(CLAUDE.md)대로 diff를 확인하고 의식적으로
+   --dump한다.
+5) manse.py의 raw birth_hour 관련 수정(R6-4 등)은 apptest_33으로 회귀를 증명할
+   수 없다 — _run_combo(246행)가 매 콤보 전에 session_state["birth_hour"]를
+   그 케이스의 실제(이미 확정된) 시각으로 세팅하므로, resolve_birth_hour를
+   거치든 안 거치든 결과가 항상 같다(시간확정 케이스에서 resolve_birth_hour는
+   항등함수처럼 동작 — 25b5694·R6-4 공통 설계). 이런 종류의 수정은 apptest
+   --compare 차이 0건이 "정상"이며, 실제 검증은 in_unknown_time=True + raw
+   birth_hour=0을 직접 세션에 주입하는 별도 스크립트로 해야 한다.
 """
 import sys
 import os
@@ -273,15 +289,15 @@ def _call_menu(menu_key, pils, case_name, birth_year, gender):
         # 원본 pils는 복사본이라 무변경 — 다른 17개 분기(이 케이스도 시간확정
         # 처럼 그대로 도는 나머지 메뉴)에 영향 없음.
         #
-        # ★알려진 결함 2건이 이 케이스의 골든에 그대로 구워짐(R6-2 진단 확인,
-        # R6-3에서 원인 추적 중 — 고칠 때 이 케이스 골든도 의도적으로 갱신할 것):
+        # ★알려진 결함(R6-2 진단 확인) — 고칠 때 이 케이스 골든도 의도적으로 갱신할 것:
         #  1) STRENGTH_DESC(saju_data.py)에 "극신강(極身强)"/"극신약(極身弱)" 키가
         #     없어, 이 케이스처럼 시주가 빠지며 신강신약이 극단으로 밀리면 24933행
         #     성격 설명 줄이 빈 <div></div>로 렌더됨(값이 틀리진 않음, 정상 침묵이나
-        #     불완전).
+        #     불완전) — 미해결.
         #  2) render_manse_grid 자체 대운 계산(24740행)이 호출부(29093행)에서
-        #     resolve_birth_hour를 거치지 않은 raw birth_hour를 받는다 — eb878f8의
-        #     17곳 정리에서 빠진 지점.
+        #     resolve_birth_hour를 거치지 않은 raw birth_hour를 받던 결함(eb878f8의
+        #     17곳 정리에서 빠진 지점, R6-3 원인 추적) — R6-4(2026-09-24)에서 해소.
+        #     이 케이스는 birth_hour=12 고정이라 골든값 변화는 없었다(무영향 케이스).
         if CASES[case_name].get("unknown_time"):
             _pils_ut = [dict(p) for p in pils]
             st.session_state["_est_hour_pillar"] = {

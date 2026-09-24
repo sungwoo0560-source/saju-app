@@ -12781,7 +12781,7 @@ def build_gangsa_block(pils, name, birth_year, gender, marriage_status=None):
                     pils, birth_year,
                     st.session_state.get("birth_month", 1),
                     st.session_state.get("birth_day", 1),
-                    st.session_state.get("birth_hour", 12),
+                    resolve_birth_hour(st.session_state.get("birth_hour")),
                     st.session_state.get("birth_minute", 0),
                     gender=gender,
                 )
@@ -14518,7 +14518,7 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                 pils, birth_year,
                 st.session_state.get("birth_month", 1),
                 st.session_state.get("birth_day", 1),
-                st.session_state.get("birth_hour", 12),
+                resolve_birth_hour(st.session_state.get("birth_hour")),
                 st.session_state.get("birth_minute", 0),
                 gender=gender
             )
@@ -16620,7 +16620,7 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
             pils, birth_year,
             st.session_state.get("birth_month", 1),
             st.session_state.get("birth_day", 1),
-            st.session_state.get("birth_hour", 12),
+            resolve_birth_hour(st.session_state.get("birth_hour")),
             st.session_state.get("birth_minute", 0),
             gender=gender
         )
@@ -17550,7 +17550,7 @@ def menu2_lifeline(pils, birth_year, gender, name="내담자"):
     current_year = get_saju_year()
     birth_month  = st.session_state.get("birth_month", 1)
     birth_day    = st.session_state.get("birth_day",   1)
-    birth_hour   = st.session_state.get("birth_hour",  12)
+    birth_hour   = resolve_birth_hour(st.session_state.get("birth_hour"))
     birth_minute = max(0, min(59, int(st.session_state.get("birth_minute") or 0)))
 
     daewoon = SajuCoreEngine.get_daewoon(
@@ -17981,7 +17981,7 @@ def menu3_past(pils, birth_year, gender, name=""):
             pils, birth_year,
             st.session_state.get("birth_month", 1),
             st.session_state.get("birth_day", 1),
-            st.session_state.get("birth_hour", 12),
+            resolve_birth_hour(st.session_state.get("birth_hour")),
             st.session_state.get("birth_minute", 0),
             gender=gender,
         )
@@ -18481,7 +18481,7 @@ def menu5_money(pils, birth_year, gender, name="내담자"):
         pils, birth_year,
         st.session_state.get("birth_month", 1),
         st.session_state.get("birth_day", 1),
-        st.session_state.get("birth_hour", 12),
+        resolve_birth_hour(st.session_state.get("birth_hour")),
         st.session_state.get("birth_minute", 0),
         gender=gender,
     )
@@ -23628,7 +23628,7 @@ def menu14_health(pils, name, birth_year, gender):
 
         bm  = st.session_state.get("birth_month", 1)
         bd  = st.session_state.get("birth_day",   1)
-        bh  = st.session_state.get("birth_hour",  12)
+        bh  = resolve_birth_hour(st.session_state.get("birth_hour"))
         bmn = st.session_state.get("birth_minute", 0)
 
         try:
@@ -28946,7 +28946,7 @@ def main():
                     birth_year,
                     birth_month,
                     birth_day,
-                    _ss.get("birth_hour", _ss.get("in_birth_hour", 12)),
+                    resolve_birth_hour(_ss.get("birth_hour"), _ss.get("in_birth_hour")),
                     _ss.get("birth_minute", _ss.get("in_birth_minute", 0)),
                     gender,
                 )
@@ -29092,9 +29092,13 @@ def main():
             )
 
             # 3단 만세력 그리드 (입력 완료 직후)
+            # R6-4: render_manse_grid는 birth_hour를 파라미터로만 받는 구조라(goosebump_engine과
+            # 동일 관례) resolve는 여기 호출부에서 1회만 적용한다 — 함수 내부(24740행,
+            # get_daewoon 호출)에서 다시 resolve하면 이중 적용이라 여기서만 건다.
             render_manse_grid(
                 pils, birth_year, birth_month, birth_day,
-                _ss.get("in_birth_hour", 12), _ss.get("in_birth_minute", 0), gender,
+                resolve_birth_hour(_ss.get("in_birth_hour"), _ss.get("birth_hour")),
+                _ss.get("in_birth_minute", 0), gender,
             )
 
             # ── 🚨 신살 경고 배너 (백호·양인·귀문·원진 자동 감지) ──
