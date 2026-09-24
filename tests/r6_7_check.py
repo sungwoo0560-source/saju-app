@@ -285,6 +285,103 @@ def check_bmn3_no_frozen_key_fallback():
     return ok
 
 
+_SAJU_REPORT_PATH = os.path.join(_ROOT, "saju_report.py")
+
+
+def _extract_pdf_internal_birth_hour_block():
+    """R6-8a: saju_report.py menu_pdf 내부 분석용 birth_hour 계산 블록 추출.
+    앵커는 이번 수정과 무관한 바로 위 birth_day 줄(안정적)."""
+    src = open(_SAJU_REPORT_PATH, encoding="utf-8-sig").read()
+    anchor = 'birth_day    = max(1, min(31, int(st.session_state.get("birth_day")   or 1)))'
+    end = "birth_minute = max(0, min(59,"
+    i = src.index(anchor)
+    block_start = src.index("\n", i) + 1
+    j = src.index(end, block_start)
+    return textwrap.dedent(src[block_start:j])
+
+
+_PDF_INTERNAL_BH_SRC = _extract_pdf_internal_birth_hour_block()
+
+
+def _compute_pdf_internal_birth_hour(ss_dict):
+    # 이 블록은 "_ss" 별칭이 아니라 st.session_state를 직접 참조하므로
+    # (saju_report.py 원본 그대로), exec 전에 실제 세션을 이 값으로 채운다.
+    st.session_state.clear()
+    for k, v in ss_dict.items():
+        st.session_state[k] = v
+    ns = {"st": st}
+    exec(_PDF_INTERNAL_BH_SRC, ns)
+    return ns["birth_hour"]
+
+
+def _extract_pdf_call_site_block():
+    """R6-8b: manse.py menu_pdf 호출부(시주 유무 판단 + birth_hour_str 구성) 추출.
+    앵커는 이번 수정과 무관한 바로 위 except 블록(안정적)."""
+    src = open(_MANSE_PATH, encoding="utf-8-sig").read()
+    anchor = '                except Exception:\n                    _dramatic_text = ""\n'
+    end = "elif _cur_tab == 16:"
+    i = src.index(anchor)
+    block_start = i + len(anchor)
+    j = src.index(end, block_start)
+    return textwrap.dedent(src[block_start:j])
+
+
+_PDF_CALL_SITE_SRC = _extract_pdf_call_site_block()
+
+
+def _compute_pdf_bh_str(pils, ss_dict):
+    captured = {}
+
+    def _fake_menu_pdf(pils, birth_year, gender, name, bh_str, dramatic_text=None):
+        captured["bh_str"] = bh_str
+
+    ns = {
+        "pils": pils, "_ss": ss_dict, "menu_pdf": _fake_menu_pdf,
+        "birth_year": 1990, "gender": "남", "name": "테스트", "_dramatic_text": "",
+    }
+    exec(_PDF_CALL_SITE_SRC, ns)
+    return captured["bh_str"]
+
+
+def check_pdf_unknown_time_shows_미입력():
+    """R6-8: 시간모름 제출(pils[0] 블랭크) -> PDF 호출부가 빈 문자열을 넘겨
+    saju_report.menu_pdf의 기존 '미입력' 폴백이 작동해야 한다."""
+    pils, y, gender = _make_pils("박성우", 12, 0, blank_siju=True)
+    ss = {"birth_hour": 12, "in_birth_hour": 0}
+    bh_str = _compute_pdf_bh_str(pils, ss)
+    pdf_line = f"출생시: {bh_str or '미입력'}"
+    ok = (bh_str == "") and (pdf_line == "출생시: 미입력")
+    print(f"[{'PASS' if ok else 'FAIL'}] PDF 시간모름: bh_str={bh_str!r} -> \"{pdf_line}\" (기대 \"출생시: 미입력\")")
+    return ok
+
+
+def check_pdf_known_time_shows_number():
+    """R6-8 대조군: 시간확정(7시) 제출은 그대로 "출생시: 7"이어야 한다."""
+    pils, y, gender = _make_pils("박성우", 7, 30, blank_siju=False)
+    ss = {"birth_hour": 7, "in_birth_hour": 7}
+    bh_str = _compute_pdf_bh_str(pils, ss)
+    pdf_line = f"출생시: {bh_str or '미입력'}"
+    ok = pdf_line == "출생시: 7"
+    print(f"[{'PASS' if ok else 'FAIL'}] PDF 시간확정: bh_str={bh_str!r} -> \"{pdf_line}\" (기대 \"출생시: 7\")")
+    return ok
+
+
+def check_pdf_internal_birth_hour_scenario_a():
+    """R6-8a 시나리오(a): 시간모름 제출(스냅샷=12 확정) -> 체크만 해제(미제출).
+    PDF 분석용 birth_hour는 스냅샷을 유지해 12로 남아야 한다."""
+    ss_submit = {"in_unknown_time": True, "birth_hour": 0, "_submitted_hour": 12}
+    bh_submit = _compute_pdf_internal_birth_hour(ss_submit)
+
+    ss_after = dict(ss_submit)
+    ss_after["in_unknown_time"] = False  # 체크만 해제, 미제출 — 스냅샷은 그대로
+    bh_after = _compute_pdf_internal_birth_hour(ss_after)
+
+    ok = (bh_submit == 12) and (bh_after == 12)
+    print(f"[{'PASS' if ok else 'FAIL'}] PDF 분석용 birth_hour 시나리오(a): 제출시={bh_submit}, "
+          f"체크해제후(미제출)={bh_after} (기대 둘 다 12 — 스냅샷 유지)")
+    return ok
+
+
 def run():
     results = [
         check_2414_scenario_a(),
@@ -297,6 +394,9 @@ def run():
         check_bmi_no_frozen_key_fallback(),
         check_bmn3_falsy_zero(),
         check_bmn3_no_frozen_key_fallback(),
+        check_pdf_unknown_time_shows_미입력(),
+        check_pdf_known_time_shows_number(),
+        check_pdf_internal_birth_hour_scenario_a(),
     ]
     fail = results.count(False)
     total = len(results)

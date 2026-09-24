@@ -932,14 +932,21 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str="", dram
 
             birth_day    = max(1, min(31, int(st.session_state.get("birth_day")   or 1)))
 
-            # 0시 출생이 "or" 폴백에 걸려 정오로 바뀌지 않도록 후보를 None/빈 문자열 기준으로만
-            # 판별한다(0은 유효값) — manse.resolve_birth_hour와 동일 규칙, 이 파일에서 manse를
-            # import하지 않으므로 saju_interpreter.py _get_base와 같은 방식으로 인라인 재현.
-            # 시간 모름이면 명식·대운 가정 시각을 정오로 통일한다.
-            _bh_raw = 12 if st.session_state.get("in_unknown_time") else st.session_state.get("birth_hour")
-            if not st.session_state.get("in_unknown_time") and (_bh_raw is None or _bh_raw == ""):
-                _bh_raw = st.session_state.get("in_birth_hour")
-            birth_hour   = max(0, min(23, int(_bh_raw))) if _bh_raw not in (None, "") else 12
+            # R6-8a: manse.resolve_birth_hour(R6-6b)·saju_interpreter._get_base(R6-7b)와
+            # 동일한 규칙 — "_submitted_hour" 세션 스냅샷(제출·즐겨찾기 로드 시점에
+            # 확정)이 있으면 최우선으로 쓴다. 체크박스·시(時) 드롭다운을 제출 없이
+            # 만져도 PDF 분석 내용의 기준 시각은 안 흔들린다.
+            if "_submitted_hour" in st.session_state:
+                birth_hour = st.session_state["_submitted_hour"]
+            else:
+                # 0시 출생이 "or" 폴백에 걸려 정오로 바뀌지 않도록 후보를 None/빈 문자열 기준으로만
+                # 판별한다(0은 유효값) — manse.resolve_birth_hour와 동일 규칙, 이 파일에서 manse를
+                # import하지 않으므로 saju_interpreter.py _get_base와 같은 방식으로 인라인 재현.
+                # 시간 모름이면 명식·대운 가정 시각을 정오로 통일한다.
+                _bh_raw = 12 if st.session_state.get("in_unknown_time") else st.session_state.get("birth_hour")
+                if not st.session_state.get("in_unknown_time") and (_bh_raw is None or _bh_raw == ""):
+                    _bh_raw = st.session_state.get("in_birth_hour")
+                birth_hour   = max(0, min(23, int(_bh_raw))) if _bh_raw not in (None, "") else 12
 
             birth_minute = max(0, min(59, int(st.session_state.get("birth_minute") or 0)))
 
