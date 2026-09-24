@@ -29101,10 +29101,16 @@ def main():
                 date_badge = f"<span style='font-size:12px;background:#e8f5e8;padding:3px 10px;border-radius:12px;margin-left:6px'>양력 {_solar.year}.{_solar.month:02d}.{_solar.day:02d}</span>"
 
 
-            hour_display = f"{_ss['in_birth_hour']:02d}시"
+            # R6-7c: 시주 유무 판단은 saju_pils[0] cg/jj 직접검사(R6-1/R6-5-1과
+            # 동일 원칙) — 라이브 in_unknown_time 대신. 시각 숫자는 frozen
+            # birth_hour(R6-6a로 제출 시점 실제 계산값과 정렬됨) 사용 — 라이브
+            # in_birth_hour 직접 참조 금지(체크만 해제하고 미제출 시 배지만
+            # "확정 시각"처럼 바뀌던 결함, R6-7 진단 확인).
+            _hd_hour = _ss.get("birth_hour", 12)
+            hour_display = f"{_hd_hour:02d}시"
 
-            if not _ss["in_unknown_time"]:
-                hour_display += f"({JJ_12b[_ss['in_birth_hour']]}시)"
+            if pils and pils[0].get("cg") and pils[0].get("jj"):
+                hour_display += f"({JJ_12b[_hd_hour]}시)"
 
             else:
                 hour_display = "시간 모름"
