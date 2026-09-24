@@ -29165,10 +29165,14 @@ def main():
             # R6-4: render_manse_grid는 birth_hour를 파라미터로만 받는 구조라(goosebump_engine과
             # 동일 관례) resolve는 여기 호출부에서 1회만 적용한다 — 함수 내부(24740행,
             # get_daewoon 호출)에서 다시 resolve하면 이중 적용이라 여기서만 건다.
+            # R6-9a: birth_minute도 hour와 같은 frozen-first 규칙 — 29016행 자매
+            # 호출부(SajuMemory 흐름 갱신용 get_daewoon)와 동일 형태로 맞춘다.
+            # 라이브 in_birth_minute을 그대로 넘기면 제출 없이 분(分) 드롭다운만
+            # 바꿔도 대운 시작나이가 실제로 흔들렸다(R6-9 진단 실측 확인).
             render_manse_grid(
                 pils, birth_year, birth_month, birth_day,
                 resolve_birth_hour(_ss.get("in_birth_hour"), _ss.get("birth_hour")),
-                _ss.get("in_birth_minute", 0), gender,
+                _ss.get("birth_minute", _ss.get("in_birth_minute", 0)), gender,
             )
 
             # ── 🚨 신살 경고 배너 (백호·양인·귀문·원진 자동 감지) ──
