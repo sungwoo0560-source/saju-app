@@ -21751,7 +21751,10 @@ def menu8_bihang(pils, name, birth_year, gender):
         _bm2  = max(1, min(12, int(_ss2.get("birth_month")  or _ss2.get("in_birth_month",  1)  or 1)))
         _bd3  = max(1, min(31, int(_ss2.get("birth_day")    or _ss2.get("in_birth_day",    1)  or 1)))
         _bh3  = resolve_birth_hour(_ss2.get("birth_hour"), _ss2.get("in_birth_hour"))
-        _bmn3 = max(0, min(59, int(_ss2.get("birth_minute") or _ss2.get("in_birth_minute", 0)  or 0)))
+        # R6-7d: "birth_minute or in_birth_minute" — 0분이 falsy라 라이브
+        # in_birth_minute으로 새던 결함. 키 존재 여부로만 판별(0 보존).
+        _bmn3_raw = _ss2.get("birth_minute") if "birth_minute" in _ss2 else _ss2.get("in_birth_minute", 0)
+        _bmn3 = max(0, min(59, int(_bmn3_raw))) if _bmn3_raw not in (None, "") else 0
         _dw_list3 = SajuCoreEngine.get_daewoon(pils, birth_year, _bm2, _bd3, _bh3, _bmn3, gender) or []
         _cur_dw3 = next((d for d in _dw_list3 if d.get("시작연도",0) <= current_year <= d.get("종료연도",9999)), None)
         # 현재 대운 못 찾으면 가장 가까운 대운 선택

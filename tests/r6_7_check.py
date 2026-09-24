@@ -55,6 +55,51 @@ def _compute_hour_display(pils, ss_dict):
     return ns["hour_display"]
 
 
+_SAJU_INTERP_PATH = os.path.join(_ROOT, "saju_interpreter.py")
+
+
+def _extract_bmi_block():
+    """R6-7d: saju_interpreter.py _get_base의 bmi(분) 계산 블록 추출.
+    앵커는 R6-7b가 만든 bh 계산의 마지막 줄(이번 수정과 무관해 안정적)."""
+    src = open(_SAJU_INTERP_PATH, encoding="utf-8-sig").read()
+    anchor = 'bh = max(0, min(23, int(_bh_raw))) if _bh_raw not in (None, "") else 12   # 키 통일'
+    end = "\n\n            # 3-A:"
+    i = src.index(anchor)
+    block_start = src.index("\n", i) + 1
+    j = src.index(end, block_start)
+    return textwrap.dedent(src[block_start:j])
+
+
+_BMI_SRC = _extract_bmi_block()
+
+
+def _compute_bmi(ss_dict):
+    ns = {"_ss": ss_dict}
+    exec(_BMI_SRC, ns)
+    return ns["bmi"]
+
+
+def _extract_bmn3_block():
+    """R6-7d: manse.py menu8_bihang의 _bmn3(분) 계산 블록 추출.
+    앵커는 바로 위 _bh3 계산 줄(이번 수정과 무관해 안정적)."""
+    src = open(_MANSE_PATH, encoding="utf-8-sig").read()
+    anchor = '_bh3  = resolve_birth_hour(_ss2.get("birth_hour"), _ss2.get("in_birth_hour"))'
+    end = "_dw_list3 = SajuCoreEngine.get_daewoon"
+    i = src.index(anchor)
+    block_start = src.index("\n", i) + 1
+    j = src.index(end, block_start)
+    return textwrap.dedent(src[block_start:j])
+
+
+_BMN3_SRC = _extract_bmn3_block()
+
+
+def _compute_bmn3(ss_dict):
+    ns = {"_ss2": ss_dict}
+    exec(_BMN3_SRC, ns)
+    return ns["_bmn3"]
+
+
 def _make_pils(case_name, hour, minute, blank_siju):
     case = CASES[case_name]
     y, m, d, _h, _mi = case["birth"]
@@ -194,6 +239,52 @@ def check_hour_display_known_time():
     return ok
 
 
+def check_bmi_falsy_zero():
+    """R6-7d: saju_interpreter.py _get_base의 bmi — 시간모름 제출(frozen
+    birth_minute=0 확정) 후 드롭다운(in_birth_minute)만 27분으로 바뀌어도
+    (미제출) 계산 분은 0을 유지해야 한다. 수정 전엔 "0 or 27"이 27로 샜다."""
+    ss = {"birth_minute": 0, "in_birth_minute": 27}
+    bmi = _compute_bmi(ss)
+    ok = bmi == 0
+    print(f"[{'PASS' if ok else 'FAIL'}] _get_base bmi falsy-0: birth_minute=0(확정)+in_birth_minute=27(라이브) "
+          f"-> bmi={bmi} (기대 0)")
+    return ok
+
+
+def check_bmi_no_frozen_key_fallback():
+    """R6-7d 대조군: birth_minute 키 자체가 없으면(구형 세션 등) in_birth_minute로
+    정상 폴백해야 한다(과잉 수정으로 폴백 경로 자체를 깨지 않았는지 확인)."""
+    ss = {"in_birth_minute": 27}
+    bmi = _compute_bmi(ss)
+    ok = bmi == 27
+    print(f"[{'PASS' if ok else 'FAIL'}] _get_base bmi 폴백: birth_minute 키 없음 -> in_birth_minute(27) "
+          f"사용 -> bmi={bmi} (기대 27)")
+    return ok
+
+
+def check_bmn3_falsy_zero():
+    """R6-7d: manse.py menu8_bihang의 _bmn3 — 시간확정 07:00 제출(frozen
+    birth_minute=0) 후 드롭다운(in_birth_minute)만 바뀌어도(미제출) 계산
+    분은 0을 유지해야 한다."""
+    ss = {"birth_minute": 0, "in_birth_minute": 41}
+    bmn3 = _compute_bmn3(ss)
+    ok = bmn3 == 0
+    print(f"[{'PASS' if ok else 'FAIL'}] menu8_bihang _bmn3 falsy-0: birth_minute=0(확정)+in_birth_minute=41(라이브) "
+          f"-> _bmn3={bmn3} (기대 0)")
+    return ok
+
+
+def check_bmn3_no_frozen_key_fallback():
+    """R6-7d 대조군: _bmn3도 birth_minute 키 자체가 없을 때만 in_birth_minute
+    폴백(기본값 0 포함)을 타야 한다."""
+    ss = {"in_birth_minute": 33}
+    bmn3 = _compute_bmn3(ss)
+    ok = bmn3 == 33
+    print(f"[{'PASS' if ok else 'FAIL'}] menu8_bihang _bmn3 폴백: birth_minute 키 없음 -> in_birth_minute(33) "
+          f"사용 -> _bmn3={bmn3} (기대 33)")
+    return ok
+
+
 def run():
     results = [
         check_2414_scenario_a(),
@@ -202,6 +293,10 @@ def run():
         check_get_base_scenario_a(),
         check_hour_display_scenario_a(),
         check_hour_display_known_time(),
+        check_bmi_falsy_zero(),
+        check_bmi_no_frozen_key_fallback(),
+        check_bmn3_falsy_zero(),
+        check_bmn3_no_frozen_key_fallback(),
     ]
     fail = results.count(False)
     total = len(results)

@@ -1902,7 +1902,11 @@ class LocalSajuNarrator:
                 if not _ss.get("in_unknown_time") and (_bh_raw is None or _bh_raw == ""):
                     _bh_raw = _ss.get("in_birth_hour")
                 bh = max(0, min(23, int(_bh_raw))) if _bh_raw not in (None, "") else 12   # 키 통일
-            bmi = max(0, min(59, int(_ss.get("birth_minute") or _ss.get("in_birth_minute") or 0))) # 키 통일
+            # R6-7d: "birth_minute or in_birth_minute" — 0분(정당한 값)이 falsy라
+            # 라이브 in_birth_minute으로 새던 결함(eb878f8가 hour에서 고친 것과
+            # 같은 클래스). 키 존재 여부로만 판별(0 보존).
+            _bmi_raw = _ss.get("birth_minute") if "birth_minute" in _ss else _ss.get("in_birth_minute")
+            bmi = max(0, min(59, int(_bmi_raw))) if _bmi_raw not in (None, "") else 0   # 키 통일
 
             # 3-A: 입춘 기준 세운 연도 (manse.get_saju_year 지연 import — 순환참조 회피, 실패 시 폴백)
             try:
