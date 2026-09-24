@@ -24783,37 +24783,42 @@ def render_manse_grid(pils, birth_year, birth_month, birth_day, birth_hour, birt
             # 6405행과 동일 패턴). 플래그는 계산 시점과 렌더 시점 사이 재실행을 거치며
             # pils[0]의 실제 상태와 어긋날 수 있어(R6 진단 확인) 완전 공백을 만들었다 —
             # pils[0] 자체를 보면 그 어긋남이 구조적으로 불가능하다.
-            if lb == "시주" and not (p.get("cg") and p.get("jj")):
-                # est_hour_pillar(정오 12시 기준 추정치)가 있으면 회색+"(?)"로 표시,
-                # 판정 무반영 안내 병기 — saju_zhengtong.render_four_pillars_card와
-                # 동일 형식. 값이 없으면 기존처럼 "시간 미상"만 표시.
+            #
+            # R6-3(2차): 시주 칸을 별도 분기로 따로 그리던 방식(회색 고정색 전용
+            # 마크업)을 버리고, est_hour_pillar 값을 p/ss에 대입해 아래 공통 렌더
+            # 코드 1벌을 시간확정 칸과 완전히 동일하게 태운다 — 스타일이 두 곳으로
+            # 갈라져 나중에 따로 관리되는 걸 막기 위함. 판정 무반영 원칙은 유지:
+            # 십성(cg_ss/jj_ss)·운성만 "-"로 강제하고, 안내문(추정치·판정 미반영)을
+            # 카드 하단에 별도 행으로 덧붙인다. 지장간은 시지 글자에서 기계적으로만
+            # 파생되는 상수표 조회값이라(판단이 아님) 시간확정 칸과 동일하게 채운다.
+            _is_unk_siju = (lb == "시주" and not (p.get("cg") and p.get("jj")))
+            _siju_note_html = ""
+            if _is_unk_siju:
                 _est = st.session_state.get("_est_hour_pillar") or {}
                 _est_cg, _est_jj = _est.get("cg", ""), _est.get("jj", "")
                 _est_note = _est.get("note", "정오 기준")
                 if _est_cg and _est_jj:
-                    _est_html = (
-                        f'<div style="font-size:15px;color:#999;padding:6px 0 2px">{_est_cg}{_est_jj}(?)</div>'
-                        f'<div style="font-size:10px;color:#999;padding:0 4px 8px">시간 미입력 — {_est_note} 추정치, 판정 미반영</div>'
+                    # est 값을 p에 태워 아래 공통 코드가 시간확정 칸과 동일하게
+                    # get_ohang_color·JIJANGGAN을 그대로 조회하게 한다.
+                    p = {"cg": _est_cg, "jj": _est_jj, "str": _est_cg + _est_jj}
+                    _siju_note_html = (
+                        f'<div style="font-size:9px;color:#999;margin-top:3px">'
+                        f'시간 미입력(?) — {_est_note} 추정치, 판정 미반영</div>'
                     )
                 else:
-                    _est_html = '<div style="font-size:13px;color:#999;padding:14px 0">시간 미상</div>'
-                with pcols[ci]:
-                    st.markdown(
-                        f"""<div style="text-align:center;background:#fafaf5;border:1px solid #ddd;border-radius:8px;padding:6px 2px">
-<div style="font-size:10px;color:#888;margin-bottom:2px">시주</div>
-{_est_html}
-</div>""",
-                        unsafe_allow_html=True,
-                    )
-                continue
+                    # 추정치조차 없으면 pils[0]이 빈 값 그대로라 공통 코드가 빈
+                    # 박스(get_ohang_color("")의 회색 폴백)를 그리지만, 하단
+                    # 안내문으로 "시간 미상"임을 알린다.
+                    _siju_note_html = '<div style="font-size:9px;color:#999;margin-top:3px">시간 미상</div>'
+
             cg = p.get("cg", "?")
             jj = p.get("jj", "?")
             bg_cg, fg_cg = get_ohang_color(cg)
             bg_jj, fg_jj = get_ohang_color(jj)
             jijang_chars = "/".join(JIJANGGAN.get(jj, ["-"]))
-            cg_ss = ss.get("cg_ss", "-")
-            jj_ss = ss.get("jj_ss", "-")
-            unsung = UNSUNG_TABLE.get(ilgan, {}).get(jj, "")
+            cg_ss = "-" if _is_unk_siju else ss.get("cg_ss", "-")
+            jj_ss = "-" if _is_unk_siju else ss.get("jj_ss", "-")
+            unsung = "-" if _is_unk_siju else UNSUNG_TABLE.get(ilgan, {}).get(jj, "")
             is_ilgan = (lb == "일주")
             border = "border:2px solid #d4af37;" if is_ilgan else "border:1px solid #ddd;"
             with pcols[ci]:
@@ -24825,7 +24830,7 @@ def render_manse_grid(pils, birth_year, birth_month, birth_day, birth_hour, birt
 <div style="font-size:22px;font-weight:900;background:{bg_jj};color:{fg_jj};border-radius:5px;padding:1px 0;margin-top:2px">{jj}</div>
 <div style="font-size:9px;color:#777;margin-top:2px">{jijang_chars}</div>
 <div style="font-size:10px;color:#555">{jj_ss}</div>
-<div style="font-size:9px;color:#888;margin-top:1px">{unsung}</div>
+<div style="font-size:9px;color:#888;margin-top:1px">{unsung}</div>{_siju_note_html}
 </div>""",
                     unsafe_allow_html=True,
                 )
