@@ -10270,6 +10270,9 @@ def save_to_favorites(label: str):
         "in_birth_hour": _ss.get("in_birth_hour", 12),
         "in_birth_minute": _ss.get("in_birth_minute", 0),
         "in_unknown_time": _ss.get("in_unknown_time", False),
+        # R6-5-2: 시간모름 명식의 정오 추정 간지(render_manse_grid "(?)" 표시용) —
+        # 없으면 불러온 뒤 "시간 미상"으로 강등되는 결함(R6-5 진단 확인)을 막는다.
+        "_est_hour_pillar": _ss.get("_est_hour_pillar"),
         "in_marriage": _ss.get("in_marriage", "미혼"),
         "in_occupation": _ss.get("in_occupation", "선택 안 함"),
         "in_premium_correction": _ss.get("in_premium_correction", True),
@@ -10331,6 +10334,7 @@ def load_from_favorite(idx: int):
         "in_birth_hour",
         "in_birth_minute",
         "in_unknown_time",
+        "_est_hour_pillar",
         "in_marriage",
         "in_occupation",
         "in_premium_correction",
