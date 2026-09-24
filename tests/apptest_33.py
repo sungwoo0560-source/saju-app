@@ -38,6 +38,15 @@ tests/apptest_33.py — N케이스 × 11메뉴 검증 하네스 (예외 0건 / �
    출력을 바꾸는지 이 스냅샷으로 드러나야 하기 때문. 이 값들이 바뀌면 --compare가
    차이를 보고하는 게 정상이며, 그 경우 내용을 확인한 뒤 --dump로 베이스라인을
    의식적으로 갱신한다.
+4) "박후규_시간모름_grid"(R6-2, 2026-09-24 추가) 케이스의 manse_grid 골든에는
+   당시 알려진 결함 2건이 "정답"으로 그대로 구워져 있다 — (a) STRENGTH_DESC
+   (saju_data.py)에 "극신강(極身强)"/"극신약(極身弱)" 키가 없어 신강신약이 극단
+   판정일 때 성격 설명 줄이 빈 <div></div>로 렌더되는 결함, (b) render_manse_grid
+   자체 대운 계산(manse.py:24740)이 호출부(29093)에서 resolve_birth_hour를
+   거치지 않은 raw birth_hour를 받는 결함(eb878f8의 17곳 정리에서 누락, R6-3에서
+   원인 추적). 이 둘을 나중에 고치면 이 케이스의 manse_grid 골든값이 바뀌는 게
+   정상이다 — 그때 --compare 차이는 "설명되지 않는 변경"이 아니라 "의도된 갱신"
+   이니 baseline 갱신 규칙(CLAUDE.md)대로 diff를 확인하고 의식적으로 --dump한다.
 """
 import sys
 import os
@@ -254,12 +263,44 @@ def _call_menu(menu_key, pils, case_name, birth_year, gender):
         # 이미 그 콤보 값으로 세팅해 두므로(위 _run_combo 정의 참고) 여기서 그대로
         # 꺼내 쓴다 — main()의 "in_birth_hour"/"in_birth_minute" 세션 키 경로는
         # 재현하지 않는다(R5 진단: 접두사가 달라 apptest 세션과 안 맞음).
-        manse.render_manse_grid(
-            pils, birth_year,
-            st.session_state.get("birth_month"), st.session_state.get("birth_day"),
-            st.session_state.get("birth_hour"), st.session_state.get("birth_minute"),
-            gender,
-        )
+        #
+        # R6-2: CASES[case_name]["unknown_time"]이 참이면 시간모름 화면을
+        # 재현한다 — pils_fixtures.py의 check_yangin_unknown_time과 동일한
+        # 관용구(get_pils 결과를 복사해 pils[0]만 블랭크)로 pils[0]을 비우고,
+        # 그 직전 값을 _est_hour_pillar에 담아 main():28699와 동일하게
+        # 세션에 넣는다(R6-1 이후 render_manse_grid는 이 세션키+pils[0] 상태만
+        # 보고 판단하므로 in_unknown_time 플래그는 여기서도 세팅하지 않는다).
+        # 원본 pils는 복사본이라 무변경 — 다른 17개 분기(이 케이스도 시간확정
+        # 처럼 그대로 도는 나머지 메뉴)에 영향 없음.
+        #
+        # ★알려진 결함 2건이 이 케이스의 골든에 그대로 구워짐(R6-2 진단 확인,
+        # R6-3에서 원인 추적 중 — 고칠 때 이 케이스 골든도 의도적으로 갱신할 것):
+        #  1) STRENGTH_DESC(saju_data.py)에 "극신강(極身强)"/"극신약(極身弱)" 키가
+        #     없어, 이 케이스처럼 시주가 빠지며 신강신약이 극단으로 밀리면 24933행
+        #     성격 설명 줄이 빈 <div></div>로 렌더됨(값이 틀리진 않음, 정상 침묵이나
+        #     불완전).
+        #  2) render_manse_grid 자체 대운 계산(24740행)이 호출부(29093행)에서
+        #     resolve_birth_hour를 거치지 않은 raw birth_hour를 받는다 — eb878f8의
+        #     17곳 정리에서 빠진 지점.
+        if CASES[case_name].get("unknown_time"):
+            _pils_ut = [dict(p) for p in pils]
+            st.session_state["_est_hour_pillar"] = {
+                "cg": _pils_ut[0].get("cg", ""), "jj": _pils_ut[0].get("jj", ""),
+            }
+            _pils_ut[0] = {"cg": "", "jj": "", "str": ""}
+            manse.render_manse_grid(
+                _pils_ut, birth_year,
+                st.session_state.get("birth_month"), st.session_state.get("birth_day"),
+                st.session_state.get("birth_hour"), st.session_state.get("birth_minute"),
+                gender,
+            )
+        else:
+            manse.render_manse_grid(
+                pils, birth_year,
+                st.session_state.get("birth_month"), st.session_state.get("birth_day"),
+                st.session_state.get("birth_hour"), st.session_state.get("birth_minute"),
+                gender,
+            )
     else:
         raise ValueError(f"알 수 없는 menu_key: {menu_key}")
     return None
