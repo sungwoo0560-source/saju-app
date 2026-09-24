@@ -29449,7 +29449,15 @@ def main():
                     _dramatic_text = build_dramatic_narrative(pils, name, gender, _pdf_ms, _pdf_ctx)
                 except Exception:
                     _dramatic_text = ""
-                menu_pdf(pils, birth_year, gender, name, str(_ss.get("in_birth_hour", "")), dramatic_text=_dramatic_text)
+                # R6-8b: 시주 유무는 saju_pils[0] 직접검사(R6-1/R6-7c와 동일 원칙),
+                # 시각 숫자는 frozen birth_hour(R6-6a로 제출 시점 실제 계산값과
+                # 정렬됨) — 라이브 in_birth_hour 금지. 시주가 없으면 빈 문자열을
+                # 넘겨 saju_report.menu_pdf의 기존 "미입력" 폴백이 작동하게 한다.
+                if pils and pils[0].get("cg") and pils[0].get("jj"):
+                    _pdf_bh_str = str(_ss.get("birth_hour", 12))
+                else:
+                    _pdf_bh_str = ""
+                menu_pdf(pils, birth_year, gender, name, _pdf_bh_str, dramatic_text=_dramatic_text)
             elif _cur_tab == 16:
                 menu_gaewoon(pils, name, birth_year, gender)
             elif _cur_tab == 17:
