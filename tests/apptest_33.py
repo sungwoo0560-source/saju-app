@@ -92,10 +92,19 @@ from saju_sinsal import get_gongmang  # noqa: E402
 # increment를 몽키패치해 실파일 접근 자체를 차단. 이 2줄만 넣은 상태로
 # --compare 차이 0건 확인 후 menu7_ai를 추가(R3-4 결정론 검증: 박성우→박후규
 # 순서와 박후규 단독 실행의 menu7_ai 캡처가 바이트 동일 — 오염 해소 확인).
+# manse_grid(render_manse_grid)는 R5-2(2026-09-24)에서 추가 — R5 진단에서 이 함수가
+# main() 안 입력완료 직후 1회만 렌더되는 독립 경로라 17메뉴 dispatch 어디에도 안 걸려
+# 사각지대였음이 확인됨(get_special_stars를 부르는 다른 두 호출부와 달리 top-5/top-3
+# 슬라이싱 + 신강신약·오행분포·용신기신·세운·대운·월운을 한 화면에 조합하는 로직은
+# 이 함수에만 있음 — 중복 캡처 아님). main()의 session_state 읽기 경로(_ss.get("in_
+# birth_hour", ...) 등, 세션 키 접두사가 다름)를 그대로 재현하지 않고, 다른 17메뉴와
+# 동일하게 함수를 직접 호출한다 — birth_month/day/hour/minute은 _run_combo가 매 콤보
+# 전에 이미 st.session_state에 세팅해 두므로 _call_menu에서 그대로 꺼내 쓴다(아래 참고).
+# 이것도 기존 17메뉴 골든은 건드리지 않고 baseline에 신규 조합으로만 붙는다.
 MENU_ORDER = [
     "menu1_report", "current_situation", "lifeline", "past", "future3",
     "money", "relations", "daily", "monthly", "yearly", "tojeong", "health",
-    "report_narr", "ohaeng_deep", "bihang", "gaewoon", "ai",
+    "report_narr", "ohaeng_deep", "bihang", "gaewoon", "ai", "manse_grid",
 ]
 
 # 텍스트 출력 계열 st.* 함수 — 캡처 대상(런타임 monkeypatch, 소스 수정 아님)
@@ -238,6 +247,19 @@ def _call_menu(menu_key, pils, case_name, birth_year, gender):
         manse.menu_gaewoon(pils, case_name, birth_year, gender)
     elif menu_key == "ai":
         manse.menu7_ai(pils, case_name, birth_year, gender)
+    elif menu_key == "manse_grid":
+        # render_manse_grid는 다른 12메뉴와 달리 birth_month/day/hour/minute을
+        # 직접 인자로 받는다(name 인자는 없음). _run_combo가 매 콤보 전에
+        # st.session_state["birth_month"/"birth_day"/"birth_hour"/"birth_minute"]을
+        # 이미 그 콤보 값으로 세팅해 두므로(위 _run_combo 정의 참고) 여기서 그대로
+        # 꺼내 쓴다 — main()의 "in_birth_hour"/"in_birth_minute" 세션 키 경로는
+        # 재현하지 않는다(R5 진단: 접두사가 달라 apptest 세션과 안 맞음).
+        manse.render_manse_grid(
+            pils, birth_year,
+            st.session_state.get("birth_month"), st.session_state.get("birth_day"),
+            st.session_state.get("birth_hour"), st.session_state.get("birth_minute"),
+            gender,
+        )
     else:
         raise ValueError(f"알 수 없는 menu_key: {menu_key}")
     return None
