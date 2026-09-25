@@ -15618,10 +15618,9 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
             if _일주_str_s in _GORAN:
                 if gender == "여":
                     # X-6-K [4]: 혼인 상태 분기
-                    try:
-                        _ms_k4 = st.session_state.get("marriage_status","미혼")
-                    except Exception:
-                        _ms_k4 = "미혼"
+                    # R6-10b: 세션 재조회 대신 함수 파라미터(marriage_status) 사용 —
+                    # 호출부와 다른 값을 받는 경우에도 파라미터가 우선하도록.
+                    _ms_k4 = marriage_status
                     if _ms_k4 in ("기혼","재혼"):
                         _고란_advice = "배우자와 소통하고 적당한 거리를 조율하면 관계가 안정됩니다."
                     elif _ms_k4 in ("이혼","이혼/사별","사별"):
@@ -19718,7 +19717,8 @@ def menu6_relations(pils, name, birth_year, gender, marriage_status="미혼"):
 
     # ── 로컬 엔진 항상 먼저 출력 ─────────────
     try:
-        _marriage_v2 = st.session_state.get("in_marriage", "미혼")
+        # R6-10b: 세션 라이브 in_marriage 대신 함수 파라미터(marriage_status) 사용.
+        _marriage_v2 = marriage_status
         _local_out = LocalSajuNarrator.relations(pils, name, birth_year, gender, _marriage_v2)
         if _local_out:
             st.markdown(_local_out, unsafe_allow_html=True)
@@ -29414,7 +29414,7 @@ def main():
             # ── 콘텐츠 렌더링 ──────────────────────────────────────────
             _cur_tab = _ss.get("active_tab", 0)
             if   _cur_tab == 0:
-                menu_current_situation(pils, name, birth_year, gender, _ss.get("in_marriage","미혼"))
+                menu_current_situation(pils, name, birth_year, gender, _ss.get("marriage_status", _ss.get("in_marriage","미혼")))
             elif _cur_tab == 1:
                 menu1_report(pils, name, birth_year, gender, _ss.get("in_occupation", ""))
             elif _cur_tab == 2:
@@ -29426,7 +29426,7 @@ def main():
             elif _cur_tab == 5:
                 menu5_money(pils, birth_year, gender, name)
             elif _cur_tab == 6:
-                menu6_relations(pils, name, birth_year, gender, _ss.get("in_marriage", "미혼"))
+                menu6_relations(pils, name, birth_year, gender, _ss.get("marriage_status", _ss.get("in_marriage", "미혼")))
             elif _cur_tab == 7:
                 menu14_health(pils, name, birth_year, gender)
             elif _cur_tab == 8:
