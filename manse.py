@@ -28034,9 +28034,6 @@ def main():
 
         # 재물/건강/관계 아이콘 판정 (개인 사주 있으면 월운 연동, 없으면 일진 오행 기준)
         _pils_b = _ss.get("saju_pils")
-        _birth_year_b = _ss.get("in_solar_date", date(1990,1,1))
-        _birth_year_b = _birth_year_b.year if hasattr(_birth_year_b, "year") else 1990
-        _gender_b = _ss.get("in_gender", "남")
 
         if _pils_b:
             _ml_b = get_monthly_luck(_pils_b, _today_b.year, _today_b.month) or {}
