@@ -27903,6 +27903,7 @@ def main():
     if "in_cal_type" not in _ss:
         _ss["in_cal_type"] = "양력"
 
+    # [INPUT-PREFILL-START] 입력폼 렌더 전 위젯 기본값 채움 — in_* 읽기 허용 구역
     # 조건부 위젯 키는 Streamlit이 비렌더링 시 session_state에서 자동 삭제함.
 
     # 섀도우 키(_sv_*)에서 복원하여 양력/음력 전환 시에도 값이 유지되도록 함.
@@ -27939,6 +27940,8 @@ def main():
                 _ss["in_is_leap"] = _ilp
             except Exception as _e:
                 st.warning(f"⚠️ 오류: {str(_e)[:80]}")
+
+    # [INPUT-PREFILL-END]
 
     if "in_birth_hour" not in _ss:
         _ss["in_birth_hour"] = 12

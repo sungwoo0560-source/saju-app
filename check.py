@@ -196,24 +196,48 @@ def check_imports(filepath, text):
 IN_STAR_PREFIXES = [
     "in_birth", "in_unknown_time", "in_cal_type", "in_solar",
     "in_lunar", "in_is_leap", "in_birth_region", "in_use_yaja",
+    "in_gender",
 ]
+# session_state 별칭 — manse.py·saju_report.py·saju_interpreter.py 전수 grep으로
+# 확인한 "X = st.session_state" 형태의 실제 별칭만 등재(R6-10c 보완). 새 별칭이
+# 추가되면 이 목록도 같이 갱신해야 한다.
+SESSION_STATE_RECEIVERS = ["st\\.session_state", "_ss2", "_ss", "_s"]
 IN_STAR_PATTERN = re.compile(
-    r"""\.get\(\s*["'](%s)""" % "|".join(re.escape(p) for p in IN_STAR_PREFIXES)
+    r"""(?<![A-Za-z0-9_])(?:%s)\.get\(\s*["'](%s)"""
+    % ("|".join(SESSION_STATE_RECEIVERS), "|".join(re.escape(p) for p in IN_STAR_PREFIXES))
 )
 
-# 정당한 폴백 패턴 — 함수명이 아니라 '같은 줄의 텍스트 형태'로 판정한다.
-# 1) frozen 키 get()이 in_* get()보다 그 줄에서 먼저 나오는 폴백 형태
-#    예: _ss.get("birth_region", _ss.get("in_birth_region", "서울"))
-# 2) resolve_birth_hour( 호출의 인자로 넘기는 in_* 읽기 — 그 헬퍼 내부가
-#    _submitted_hour를 항상 최우선으로 보므로 안전하다.
-# 그 외(함수명과 무관하게) 이 두 형태에 안 걸리면 전부 WARN 대상이다.
+# 허용 판정 3가지를 OR로 결합한다 (R6-10c):
+# (1) 패턴 — 같은 줄에서 frozen 키 get()이 in_* get()보다 먼저 나오는 폴백
+#     형태(예: _ss.get("birth_region", _ss.get("in_birth_region", "서울"))),
+#     또는 resolve_birth_hour( 호출의 인자 내부 읽기(그 헬퍼가 _submitted_hour를
+#     항상 최우선으로 보므로 안전).
+# (2) 함수 허용목록 — in_*를 주 소스로 읽는 게 원래 정상인 함수들
+#     (직렬화·on_change 동기화·R6 공용 헬퍼 본문). main()은 넣지 않는다 —
+#     main()은 결과 화면 호출도 같이 하는 거대 함수라 통째로 허용하면
+#     이 검사의 의미가 없어진다.
+# (3) 블록 범위 — 입력폼 expander 블록 + main() 안의 "제출·동결" 블록
+#     (`if submitted or _auto_submit:` 이하) + "[INPUT-PREFILL-START]"~
+#     "[INPUT-PREFILL-END]" 마커 구간(입력폼 렌더 전 위젯 기본값 채움)만
+#     예외. main()의 나머지 부분(예: 오늘의 운세 위젯 등)은 예외가 아니다.
 FROZEN_GET_BEFORE_RE = re.compile(r"""\.get\(\s*["'](?!in_)[A-Za-z_]""")
 
+IN_STAR_FUNC_ALLOWLIST = {
+    "save_to_favorites",     # 즐겨찾기 저장 — 원본 입력값을 그대로 저장해야 함
+    "load_from_favorite",    # 즐겨찾기 불러오기 — in_* 기본값 재설정(입력폼 채우기)
+    "_sv_lunar",              # 음력 입력 on_change 동기화 콜백
+    "_sv_solar",              # 양력 입력 on_change 동기화 콜백
+    "_on_cal_type_change",   # 달력구분 on_change 콜백 — 입력폼 자체 동기화
+    "_sync_marriage_status",  # 결혼상태 on_change 콜백 — frozen 즉시 동기화
+    "_sync_occupation",       # 직업분야 on_change 콜백 — frozen 즉시 동기화
+    "resolve_birth_hour",     # R6 공용 헬퍼 본문 — _submitted_hour 우선 폴백 구현부
+}
 
-def _find_input_form_block(text):
-    """'st.expander(...사주 정보 입력...)' with 블록의 (시작줄, 끝줄)을
-    tokenize INDENT/DEDENT로 동적 계산한다(줄번호 하드코딩 금지 — 파일이
-    바뀌어도 다시 계산됨). 못 찾으면 None."""
+
+def _find_block_by_header(text, header_predicate):
+    """header_predicate(stripped_line)가 True인 첫 'with'/'if' 문의 블록
+    (시작줄, 끝줄)을 tokenize INDENT/DEDENT로 동적 계산한다(줄번호 하드코딩
+    금지 — 파일이 바뀌어도 다시 계산됨). 못 찾으면 None."""
     try:
         tokens = list(tokenize.generate_tokens(io.StringIO(text).readline))
     except Exception:
@@ -221,9 +245,8 @@ def _find_input_form_block(text):
 
     start_idx = None
     for idx, tok in enumerate(tokens):
-        if tok.type == tokenize.NAME and tok.string == "with":
-            line = tok.line
-            if "st.expander(" in line and "사주 정보 입력" in line:
+        if tok.type == tokenize.NAME and tok.string in ("with", "if"):
+            if header_predicate(tok.line.strip()):
                 start_idx = idx
                 break
     if start_idx is None:
@@ -246,6 +269,39 @@ def _find_input_form_block(text):
     if end_line is None:
         return None
     return start_line, end_line - 1
+
+
+def _find_input_form_block(text):
+    """'st.expander(...사주 정보 입력...)' with 블록의 (시작줄, 끝줄)."""
+    return _find_block_by_header(
+        text, lambda line: "st.expander(" in line and "사주 정보 입력" in line
+    )
+
+
+def _find_input_prefill_block(text):
+    """'# [INPUT-PREFILL-START]' ~ '# [INPUT-PREFILL-END]' 마커 사이의
+    (시작줄, 끝줄). 입력폼 렌더 전 위젯 기본값 채움 구역이라 in_* 직접
+    읽기가 구조적으로 정상이다. 마커가 없으면 None."""
+    lines = text.splitlines()
+    start_line = end_line = None
+    for i, line in enumerate(lines, start=1):
+        if "[INPUT-PREFILL-START]" in line:
+            start_line = i
+        elif "[INPUT-PREFILL-END]" in line:
+            end_line = i
+            break
+    if start_line is None or end_line is None:
+        return None
+    return start_line, end_line
+
+
+def _find_submit_freeze_block(text):
+    """main() 안의 제출·동결 블록('if submitted or _auto_submit:' 이하)의
+    (시작줄, 끝줄). 이 줄은 제출/자동제출 시 라이브 in_*을 읽어 pils·frozen
+    키를 새로 만드는 지점이라, in_* 직접 읽기가 구조적으로 정상이다."""
+    return _find_block_by_header(
+        text, lambda line: line.startswith("if submitted or _auto_submit:")
+    )
 
 
 def _build_func_ranges(text):
@@ -271,38 +327,48 @@ def _enclosing_func(ranges, lineno):
 
 
 def check_in_star_direct_read(filepath, text):
-    """입력폼 블록(st.expander 사주 정보 입력) 밖에서 in_* 위젯 키를 .get()으로
-    직접 읽는 지점을 WARN. 함수명이 아니라 같은 줄의 텍스트 패턴으로 판정한다:
-    frozen 키 get()이 in_* get()보다 먼저 나오는 폴백 형태, 또는
-    resolve_birth_hour( 호출의 인자 내부는 정당한 폴백으로 보고 제외."""
+    """in_* 위젯 키를 .get()으로 직접 읽는 지점 중 (1) 같은 줄 패턴,
+    (2) 함수 허용목록, (3) 입력폼·제출동결 블록 범위 — 이 3가지 중
+    어느 것에도 해당하지 않는 지점을 WARN. main() 전체는 허용하지 않는다."""
     basename = os.path.basename(filepath)
     if basename != "manse.py":
         return True, ["(manse.py 전용 검사 — 대상 아님)"]
 
-    block = _find_input_form_block(text)
-    if block is None:
+    form_block = _find_input_form_block(text)
+    if form_block is None:
         return True, ["(입력폼 블록(st.expander 사주 정보 입력)을 찾지 못함 — 검사 생략)"]
-    block_start, block_end = block
+    submit_block = _find_submit_freeze_block(text)
+    if submit_block is None:
+        return True, ["(제출·동결 블록(if submitted or _auto_submit:)을 찾지 못함 — 검사 생략)"]
+    prefill_block = _find_input_prefill_block(text)  # 없어도 검사 생략하지 않음(선택적 마커)
 
-    func_ranges = _build_func_ranges(text)  # WARN 메시지에 함수명 표시용(필터링에는 미사용)
+    def _in_block(lineno, block):
+        return block is not None and block[0] <= lineno <= block[1]
+
+    func_ranges = _build_func_ranges(text)
     lines = text.splitlines()
 
     warnings = []
     for i, line in enumerate(lines, start=1):
-        if block_start <= i <= block_end:
-            continue
+        if _in_block(i, form_block) or _in_block(i, submit_block) or _in_block(i, prefill_block):
+            continue  # (3) 블록 범위
         m = IN_STAR_PATTERN.search(line)
         if not m:
             continue
+        fn = _enclosing_func(func_ranges, i)
+        if fn in IN_STAR_FUNC_ALLOWLIST:
+            continue  # (2) 함수 허용목록
         prefix = line[: m.start()]
         if FROZEN_GET_BEFORE_RE.search(prefix):
-            continue  # 같은 줄에서 frozen 키 get()이 먼저 나오는 폴백 형태
+            continue  # (1) 같은 줄에서 frozen 키 get()이 먼저 나오는 폴백 형태
         if "resolve_birth_hour(" in prefix:
-            continue  # resolve_birth_hour( 인자 내부 읽기
-        fn = _enclosing_func(func_ranges, i)
+            continue  # (1) resolve_birth_hour( 인자 내부 읽기
         warnings.append(f"line {i} [{fn or '모듈 최상위'}]: {line.strip()[:100]}")
 
-    msg = [f"입력폼 블록: line {block_start}-{block_end}"]
+    msg = [
+        f"입력폼 블록: line {form_block[0]}-{form_block[1]}",
+        f"제출·동결 블록: line {submit_block[0]}-{submit_block[1]}",
+    ]
     if warnings:
         msg.append(f"WARN {len(warnings)}건 (결과 화면·계산 경로 in_* 직접 읽기 의심)")
         msg.extend(warnings)
