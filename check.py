@@ -15,6 +15,7 @@ check.py - 사주 프로젝트 정적 검사 스크립트
       텍스트 읽기 + tokenize + ast.parse 만 사용하고, py_compile은 서브프로세스로 실행한다.
 """
 import ast
+import io
 import os
 import re
 import sys
@@ -188,6 +189,128 @@ def check_imports(filepath, text):
     return ok, msgs
 
 
+# --- R6 재발 방지: 입력폼 블록 밖 in_* 위젯 키 직접 읽기 WARN ---
+# (근거: CLAUDE.md 작업 규칙 — 결과 화면·계산 경로에서 in_* 위젯 키 직접
+#  읽기 금지, 명식 입력값은 frozen 키·_submitted_hour·pils[0] 사용)
+
+IN_STAR_PREFIXES = [
+    "in_birth", "in_unknown_time", "in_cal_type", "in_solar",
+    "in_lunar", "in_is_leap", "in_birth_region", "in_use_yaja",
+]
+IN_STAR_PATTERN = re.compile(
+    r"""\.get\(\s*["'](%s)""" % "|".join(re.escape(p) for p in IN_STAR_PREFIXES)
+)
+
+# 정당한 폴백 패턴 — 함수명이 아니라 '같은 줄의 텍스트 형태'로 판정한다.
+# 1) frozen 키 get()이 in_* get()보다 그 줄에서 먼저 나오는 폴백 형태
+#    예: _ss.get("birth_region", _ss.get("in_birth_region", "서울"))
+# 2) resolve_birth_hour( 호출의 인자로 넘기는 in_* 읽기 — 그 헬퍼 내부가
+#    _submitted_hour를 항상 최우선으로 보므로 안전하다.
+# 그 외(함수명과 무관하게) 이 두 형태에 안 걸리면 전부 WARN 대상이다.
+FROZEN_GET_BEFORE_RE = re.compile(r"""\.get\(\s*["'](?!in_)[A-Za-z_]""")
+
+
+def _find_input_form_block(text):
+    """'st.expander(...사주 정보 입력...)' with 블록의 (시작줄, 끝줄)을
+    tokenize INDENT/DEDENT로 동적 계산한다(줄번호 하드코딩 금지 — 파일이
+    바뀌어도 다시 계산됨). 못 찾으면 None."""
+    try:
+        tokens = list(tokenize.generate_tokens(io.StringIO(text).readline))
+    except Exception:
+        return None
+
+    start_idx = None
+    for idx, tok in enumerate(tokens):
+        if tok.type == tokenize.NAME and tok.string == "with":
+            line = tok.line
+            if "st.expander(" in line and "사주 정보 입력" in line:
+                start_idx = idx
+                break
+    if start_idx is None:
+        return None
+
+    start_line = tokens[start_idx].start[0]
+    depth = 0
+    entered = False
+    end_line = None
+    for tok in tokens[start_idx:]:
+        if tok.type == tokenize.INDENT:
+            depth += 1
+            entered = True
+        elif tok.type == tokenize.DEDENT:
+            if entered:
+                depth -= 1
+                if depth == 0:
+                    end_line = tok.start[0]
+                    break
+    if end_line is None:
+        return None
+    return start_line, end_line - 1
+
+
+def _build_func_ranges(text):
+    try:
+        tree = ast.parse(text)
+    except SyntaxError:
+        return []
+    ranges = []
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            end = getattr(node, "end_lineno", node.lineno)
+            ranges.append((node.name, node.lineno, end))
+    return ranges
+
+
+def _enclosing_func(ranges, lineno):
+    best = None
+    for name, s, e in ranges:
+        if s <= lineno <= e:
+            if best is None or (e - s) < (best[2] - best[1]):
+                best = (name, s, e)
+    return best[0] if best else None
+
+
+def check_in_star_direct_read(filepath, text):
+    """입력폼 블록(st.expander 사주 정보 입력) 밖에서 in_* 위젯 키를 .get()으로
+    직접 읽는 지점을 WARN. 함수명이 아니라 같은 줄의 텍스트 패턴으로 판정한다:
+    frozen 키 get()이 in_* get()보다 먼저 나오는 폴백 형태, 또는
+    resolve_birth_hour( 호출의 인자 내부는 정당한 폴백으로 보고 제외."""
+    basename = os.path.basename(filepath)
+    if basename != "manse.py":
+        return True, ["(manse.py 전용 검사 — 대상 아님)"]
+
+    block = _find_input_form_block(text)
+    if block is None:
+        return True, ["(입력폼 블록(st.expander 사주 정보 입력)을 찾지 못함 — 검사 생략)"]
+    block_start, block_end = block
+
+    func_ranges = _build_func_ranges(text)  # WARN 메시지에 함수명 표시용(필터링에는 미사용)
+    lines = text.splitlines()
+
+    warnings = []
+    for i, line in enumerate(lines, start=1):
+        if block_start <= i <= block_end:
+            continue
+        m = IN_STAR_PATTERN.search(line)
+        if not m:
+            continue
+        prefix = line[: m.start()]
+        if FROZEN_GET_BEFORE_RE.search(prefix):
+            continue  # 같은 줄에서 frozen 키 get()이 먼저 나오는 폴백 형태
+        if "resolve_birth_hour(" in prefix:
+            continue  # resolve_birth_hour( 인자 내부 읽기
+        fn = _enclosing_func(func_ranges, i)
+        warnings.append(f"line {i} [{fn or '모듈 최상위'}]: {line.strip()[:100]}")
+
+    msg = [f"입력폼 블록: line {block_start}-{block_end}"]
+    if warnings:
+        msg.append(f"WARN {len(warnings)}건 (결과 화면·계산 경로 in_* 직접 읽기 의심)")
+        msg.extend(warnings)
+    else:
+        msg.append("WARN 없음")
+    return True, msg  # 경고성 — 전체 결과 FAIL 유발하지 않음
+
+
 def run_check(filepath):
     print(f"=== check.py : {filepath} ===")
     overall_ok = True
@@ -223,6 +346,11 @@ def run_check(filepath):
     imp_ok, imp_msgs = check_imports(filepath, text)
     print(f"[INFO] import 검사(참고용):")
     for m in imp_msgs:
+        print(f"    {m}")
+
+    warn_ok, warn_msgs = check_in_star_direct_read(filepath, text)
+    print(f"[INFO] in_* 위젯 키 직접 읽기(R6 재발방지, 참고용):")
+    for m in warn_msgs:
         print(f"    {m}")
 
     print(f"=== 결과: [{'OK' if overall_ok else 'FAIL'}] {filepath} ===")
