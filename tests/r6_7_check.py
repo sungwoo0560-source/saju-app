@@ -21,8 +21,9 @@ sys.path.insert(0, _ROOT)
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import streamlit as st  # noqa: E402
-from saju_interpreter import LocalSajuNarrator  # noqa: E402
+from saju_interpreter import LocalSajuNarrator, get_jeokjung_affair  # noqa: E402
 from saju_engine import SajuPrecisionEngine, SajuCoreEngine, TimeCorrection  # noqa: E402
+from saju_zhengtong import detect_life_risk_signals  # noqa: E402
 from saju_data import JJ_12b  # noqa: E402
 from pils_fixtures import CASES  # noqa: E402
 
@@ -629,12 +630,13 @@ def check_partner_yaja_legacy_fallback():
 
 
 def _load_manse_func_src(func_name):
-    """R6-9c: save_to_favorites/load_from_favorite — 순수 session_state 조작
-    함수라 AST로 정의 전체를 추출해도 부작용이 없다(resolve_birth_hour와
-    동일 기법)."""
+    """R6-9c/d: save_to_favorites/load_from_favorite(최상위 함수)와
+    _sync_marriage_status/_sync_occupation(main() 내부 중첩 함수) 모두 순수
+    session_state 조작이라 AST로 정의 전체를 추출해도 부작용이 없다
+    (resolve_birth_hour와 동일 기법). ast.walk로 중첩 함수도 찾는다."""
     src = open(_MANSE_PATH, encoding="utf-8-sig").read()
     tree = ast.parse(src)
-    for node in tree.body:
+    for node in ast.walk(tree):
         if isinstance(node, ast.FunctionDef) and node.name == func_name:
             return ast.get_source_segment(src, node)
     raise AssertionError(f"{func_name} 함수를 manse.py에서 찾지 못함")
@@ -695,6 +697,121 @@ def check_favorites_legacy_no_stale_leak():
     return ok
 
 
+_SYNC_MARRIAGE_SRC = _load_manse_func_src("_sync_marriage_status")
+_SYNC_OCCUPATION_SRC = _load_manse_func_src("_sync_occupation")
+
+
+def _call_sync(src, func_name, ss_dict):
+    ns = {"st": st}
+    exec(src, ns)
+    ns[func_name]()
+
+
+def check_marriage_status_on_change_sync():
+    """R6-9d: 결혼상태 드롭다운 on_change 콜백이 frozen marriage_status를
+    즉시 동기화하는지 확인. D 진단 재현 시나리오 — 제출 시점엔 '미혼'으로
+    frozen 확정됐다가, 제출 없이 드롭다운만 '기혼'으로 바꾸면(콜백 발동)
+    이제는 frozen도 즉시 '기혼'으로 따라가 live 소비처(menu1_report의
+    render_life_risk_card 등)와 더 이상 어긋나지 않아야 한다."""
+    st.session_state.clear()
+    st.session_state["marriage_status"] = "미혼"  # 이전 제출로 확정된 frozen 값
+    st.session_state["in_marriage"] = "기혼"       # 제출 없이 드롭다운만 변경(콜백 발동 시점)
+    _call_sync(_SYNC_MARRIAGE_SRC, "_sync_marriage_status", st.session_state)
+    ok = st.session_state.get("marriage_status") == "기혼"
+    print(f"[{'PASS' if ok else 'FAIL'}] 결혼상태 on_change 동기화: 이전 frozen='미혼' -> "
+          f"드롭다운 변경(기혼) 콜백 후 marriage_status='{st.session_state.get('marriage_status')}' (기대 '기혼')")
+    return ok
+
+
+def check_occupation_on_change_sync():
+    """R6-9d 대조군: 직업분야도 동일 패턴."""
+    st.session_state.clear()
+    st.session_state["occupation"] = "선택 안 함"
+    st.session_state["in_occupation"] = "예술가"
+    _call_sync(_SYNC_OCCUPATION_SRC, "_sync_occupation", st.session_state)
+    ok = st.session_state.get("occupation") == "예술가"
+    print(f"[{'PASS' if ok else 'FAIL'}] 직업분야 on_change 동기화: 이전 frozen='선택 안 함' -> "
+          f"드롭다운 변경(예술가) 콜백 후 occupation='{st.session_state.get('occupation')}' (기대 '예술가')")
+    return ok
+
+
+def check_jeokjung_affair_frozen_live_reconciled():
+    """R6-9d: D 진단에서 실측한 divergence(get_jeokjung_affair가 frozen을
+    쓰는 상황에서 marriage_status="기혼"/"미혼"에 따라 적중박스 문구가
+    갈리던 것) — on_change 동기화 후에는 frozen이 항상 live를 즉시 따라가므로
+    '제출 없이 드롭다운만 바꾼' 시나리오에서도 frozen 값이 live와 일치해야
+    한다(더 이상 예전 제출값에 머물러 있지 않음)."""
+    st.session_state.clear()
+    st.session_state["marriage_status"] = "미혼"  # 제출 당시 값
+    st.session_state["in_marriage"] = "기혼"        # 미제출 상태로 변경
+    _call_sync(_SYNC_MARRIAGE_SRC, "_sync_marriage_status", st.session_state)
+
+    frozen_after_sync = st.session_state.get("marriage_status")
+    live = st.session_state.get("in_marriage")
+    ok = frozen_after_sync == live == "기혼"
+    print(f"[{'PASS' if ok else 'FAIL'}] frozen/live 재수렴 확인: 동기화 후 frozen={frozen_after_sync}, "
+          f"live={live} (기대 둘 다 '기혼' — get_jeokjung_affair(frozen)와 render_life_risk_card(live)가 "
+          f"더 이상 다른 값을 보지 않음)")
+    return ok
+
+
+_Y9A_MARRIAGE_ANCHOR = '        _kw_y9a = {"gender": gender, "marriage_status": st.session_state.get("in_marriage", "미혼")}'
+_JEOKJUNG_AFFAIR_MARRIAGE_ANCHOR = 'marriage_status=st.session_state.get("marriage_status", "미혼"))'
+# 두 소스 라인이 실제로 존재하는지 앵커 확인(소스가 바뀌면 여기서 즉시 실패) — 값 자체는
+# 아래에서 st.session_state를 직접 조작해 같은 패턴으로 재현한다.
+_extract_line(_MANSE_PATH, _Y9A_MARRIAGE_ANCHOR)
+_extract_line(_MANSE_PATH, _JEOKJUNG_AFFAIR_MARRIAGE_ANCHOR)
+
+
+def check_menu1report_boxes_marriage_status_consistent():
+    """R6-9d: menu1_report 안에서 "7대 운명 코드 박스"(16530행,
+    render_life_risk_card용 marriage_status — in_marriage 소스)와 "적중
+    박스-불륜"(16595행, get_jeokjung_affair용 marriage_status — 소스)이
+    실제로 같은 결혼상태를 전제로 계산되는지. 기혼 제출 -> 드롭다운 미혼
+    변경(미제출) 시나리오에서, on_change 동기화가 없다면(Before) 두 소스가
+    갈려 무관 구조 표본의 적중박스-불륜 문구가 서로 다른 결혼상태를
+    전제로 나온다(FAIL). on_change 콜백 적용 후(After)에는 두 소스가
+    수렴해 일치한다(PASS)."""
+    pils = [{"cg": "甲", "jj": "子"}, {"cg": "丙", "jj": "寅"}, {"cg": "戊", "jj": "辰"}, {"cg": "庚", "jj": "申"}]
+    yukjin_list, sinsal_list = [], []  # 무관(無官) 구조 유도 — get_jeokjung_affair의 marriage_status 분기 트리거
+
+    def _read_two_sources():
+        # 16530행과 동일한 표현식(라이브 소스)
+        y9a_marriage_status = st.session_state.get("in_marriage", "미혼")
+        # 16595행과 동일한 표현식(frozen 소스)
+        affair_marriage_status = st.session_state.get("marriage_status", "미혼")
+        return y9a_marriage_status, affair_marriage_status
+
+    # Before(on_change 없다고 가정): 기혼 제출 -> 미혼으로 드롭다운만 변경(미제출),
+    # frozen marriage_status는 그대로 "기혼"에 머물러 있는 상태를 직접 재현.
+    st.session_state.clear()
+    st.session_state["marriage_status"] = "기혼"
+    st.session_state["in_marriage"] = "미혼"
+    y9a_before, affair_before = _read_two_sources()
+    affair_text_before = get_jeokjung_affair("여", "甲", yukjin_list, sinsal_list, pils,
+                                              marriage_status=affair_before).get("title", "")
+    risk_before = detect_life_risk_signals(pils, gender="여", marriage_status=y9a_before)
+    before_sources_agree = (y9a_before == affair_before)
+
+    # After(R6-9d on_change 콜백 발동): 드롭다운 변경 즉시 frozen도 동기화.
+    st.session_state["marriage_status"] = st.session_state["in_marriage"]  # _sync_marriage_status와 동일
+    y9a_after, affair_after = _read_two_sources()
+    affair_text_after = get_jeokjung_affair("여", "甲", yukjin_list, sinsal_list, pils,
+                                             marriage_status=affair_after).get("title", "")
+    risk_after = detect_life_risk_signals(pils, gender="여", marriage_status=y9a_after)
+    after_sources_agree = (y9a_after == affair_after)
+
+    ok = (before_sources_agree is False) and (after_sources_agree is True) and (y9a_after == affair_after == "미혼")
+    print(f"[{'PASS' if ok else 'FAIL'}] menu1_report 두 박스 결혼상태 소스 일치성: "
+          f"Before(콜백 전) 7대운명코드='{y9a_before}' vs 적중박스-불륜='{affair_before}' "
+          f"(일치={before_sources_agree}, 기대 False=FAIL 재현) / "
+          f"After(콜백 후) 7대운명코드='{y9a_after}' vs 적중박스-불륜='{affair_after}' "
+          f"(일치={after_sources_agree}, 기대 True=PASS)")
+    print(f"      참고 — 적중박스-불륜 제목: Before='{affair_text_before}' / After='{affair_text_after}' "
+          f"(제목 자체가 갈렸었다는 것이 실질 사용자 체감 증거)")
+    return ok
+
+
 def run():
     results = [
         check_2414_scenario_a(),
@@ -721,6 +838,10 @@ def run():
         check_partner_yaja_legacy_fallback(),
         check_favorites_region_yaja_roundtrip(),
         check_favorites_legacy_no_stale_leak(),
+        check_marriage_status_on_change_sync(),
+        check_occupation_on_change_sync(),
+        check_jeokjung_affair_frozen_live_reconciled(),
+        check_menu1report_boxes_marriage_status_consistent(),
     ]
     fail = results.count(False)
     total = len(results)

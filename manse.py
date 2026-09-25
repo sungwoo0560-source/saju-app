@@ -28392,6 +28392,27 @@ def main():
                     _saju_log.debug("음력→양력 전환: %s", _e)
                     pass  # 변환 실패 시 기존 기본값 유지
 
+    # R6-9d: 결혼상태·직업분야 frozen 키를 위젯 변경 즉시 동기화하는 콜백.
+    # D 진단에서 frozen marriage_status/occupation(28844/28846행 제출 시점
+    # 확정)을 읽는 소비처(menu1_report 등)와 라이브 in_marriage/in_occupation을
+    # 읽는 소비처(같은 함수 안에도 섞여 있음, 예: menu1_report의
+    # render_life_risk_card)가 공존해 제출 없이 드롭다운만 바꾸면 같은 화면
+    # 안에서 서로 다른 값을 전제로 한 문구가 동시에 뜨던 문제(D 실측 확인)를
+    # 여기서 근본적으로 막는다. hour/minute/region/야자시(R6-9a~c)와 달리
+    # 결혼상태·직업분야는 명식(연주·월주·대운 등) 계산에 전혀 쓰이지 않는
+    # 순수 서술용 메타데이터라 "제출 시점 고정" 대신 "위젯과 항상 동기화"가
+    # 맞는 설계 — 28844/28846행의 제출 시점 대입은 최초 제출(콜백이 한 번도
+    # 안 불렸을 때) 안전망으로 그대로 둔다.
+    def _sync_marriage_status():
+        """결혼상태 드롭다운 변경 즉시 frozen marriage_status에 반영."""
+
+        st.session_state["marriage_status"] = st.session_state["in_marriage"]
+
+    def _sync_occupation():
+        """직업분야 드롭다운 변경 즉시 frozen occupation에 반영."""
+
+        st.session_state["occupation"] = st.session_state["in_occupation"]
+
     # -- 입력 창 (세션 바인딩 방식) --------------------
 
     with st.expander("📝 사주 정보 입력 (여기를 눌러 정보 입력/수정)", expanded=_ss["form_expanded"]):
@@ -28618,6 +28639,7 @@ def main():
                 "결혼 상태 (선택안하셔도 됩니다)",
                 ["선택안함", "미혼 (싱글)", "기혼", "이혼/사별"],
                 key="in_marriage",
+                on_change=_sync_marriage_status,
             )
         with info_col2:
             st.selectbox(
@@ -28632,6 +28654,7 @@ def main():
                     "기타",
                 ],
                 key="in_occupation",
+                on_change=_sync_occupation,
             )
 
         with st.expander("⚙️ 고급 설정 (야자시 · 지방시)", expanded=False):
