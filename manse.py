@@ -25110,6 +25110,12 @@ def menu_gaewoon(pils, name, birth_year, gender):
         # _gis_gw(구코드, "기신" 서술문 우연매칭)는 _bad_ilgans_gw(궁합, 별도판단)와
         # _hsm_grade(등급판정, 커밋B)에서 그대로 참조하므로 여기서 바꾸지 않는다.
         _gisin_ohs_gw = _ys_gw.get("종합_기신", []) if isinstance(_ys_gw.get("종합_기신",[]), list) else []
+        # R9-1b(2026-09-27): 종합_기신이 억부(신강/신약)에서 왔는지 조후(극한월
+        # 순수중화, R9-1a)에서 왔는지 구분 — 조후 기신은 "억부가 약해서/강해서
+        # 눌러야 할 기운"이 아니라 "계절이 이미 그쪽으로 기울어 굳이 더
+        # 보탤 필요 없는 기운"이라 원인이 다르다. get_yongshin()이 이미
+        # 반환하는 "기신_출처"를 그대로 조회만 한다(새 판정 없음).
+        _gisin_from_johu_gw = _ys_gw.get("기신_출처", "") == "조후"
         _sw_gw       = get_yearly_luck(pils, get_saju_year())
         _sw_ss_gw    = _sw_gw.get("십성_천간", "")
         _sinsal_gw   = get_12sinsal(pils)
@@ -25280,7 +25286,10 @@ def menu_gaewoon(pils, name, birth_year, gender):
     if _sinsal_gw:
         _TOP5_GW.append(f"{_sinsal_gw[0].get('이름','신살')} 발동 중 -- 해당 비방을 즉시 실행하십시오")
     if _gisin_ohs_gw:
-        _TOP5_GW.append(f"기신 {'/'.join(_gisin_ohs_gw)} 오행 강화 차단 -- 기신 색상·음식·방위 즉각 제거")
+        if _gisin_from_johu_gw:
+            _TOP5_GW.append(f"계절 기운 {'/'.join(_gisin_ohs_gw)} 오행 -- 굳이 더 보태지 않는 편이 좋음")
+        else:
+            _TOP5_GW.append(f"기신 {'/'.join(_gisin_ohs_gw)} 오행 강화 차단 -- 기신 색상·음식·방위 즉각 제거")
     _TOP5_GW.append(f"용신 {'/'.join(_yong_gw) if _yong_gw else '미산출'} 오행 보강 -- 색상·음식·소품 생활 침투")
     _TOP5_GW.append("재물 기운 누수 차단 -- 지갑 정리·불필요한 지출 즉각 중단")
     _TOP5_GW.append("귀인 기운 활성화 -- 사람을 만나고 새로운 모임에 참여하라")
@@ -25612,6 +25621,48 @@ def menu_gaewoon(pils, name, birth_year, gender):
         },
     }
 
+    # R9-1b(2026-09-27): 조후 기신(극한월 순수중화, R9-1a) 전용 처방 — 억부
+    # 기신(_GIS_RX)의 "즉시 제거·금지" 톤 대신 "계절이 이미 그쪽으로 기울어
+    # 굳이 더 보탤 필요 없다"는 권유형 톤. YONGSHIN_JOKHU의 극한월(亥子丑·
+    # 巳午未) avoid 필드를 오행으로 변환하면 火·土·水 세 오행만 실제로
+    # 등장한다(巳·午→火, 午·未→土, 亥·子·丑→水 — saju_data.py 실측 확인,
+    # 木·金은 등장하지 않음) — 그래서 이 두 오행은 키 자체를 생략한다.
+    # 소비처(_GIS_RX와 같은 8개 키 구조 유지, 카드 제목·라벨 전환은 각
+    # 소비처에서 별도 처리)는 반드시 _gisin_from_johu_gw로 이 딕셔너리와
+    # _GIS_RX를 분기해서 골라 쓴다 — 임의로 병합하지 않는다.
+    _GIS_RX_JOHU = {
+        "火": {
+            "차단방위":   "남쪽·동남쪽 — 이 방향을 특별히 더 강화하지는 않는 편이 무난합니다",
+            "피할색상":   "빨강·주황·핫핑크 — 지갑·옷을 이 색으로 도배하지 않아도 괜찮습니다",
+            "피할음식":   "쓴맛·고추·계피·홍차를 매일 챙겨 먹을 필요는 없습니다",
+            "피할소품":   "남쪽 촛불·강한 조명·붉은 계열 소품을 집중적으로 늘리지는 마십시오",
+            "차단비방":   "계절 기운이 한쪽으로 치우친 사주라, 火 기운을 굳이 더 보태지 않는 편이 좋습니다",
+            "대체처방":   "일간의 힘은 이미 균형을 이루고 있으니, 치우친 계절 기운만 조금 덜어내는 방향이면 충분합니다.",
+            "21일차단":   "따로 21일 의식을 치르기보다, 평소 하던 대로 꾸준함을 유지하십시오",
+            "주의사항":   "이 기운이 나쁜 게 아니라, 계절상 이미 충분해서 더할 필요가 없다는 뜻입니다",
+        },
+        "土": {
+            "차단방위":   "중앙·남서쪽·동북쪽 — 이 방향을 특별히 더 강화하지는 않는 편이 무난합니다",
+            "피할색상":   "황색·갈색·베이지 — 지갑·옷을 이 색으로 도배하지 않아도 괜찮습니다",
+            "피할음식":   "단맛·고구마·감자·꿀을 매일 챙겨 먹을 필요는 없습니다",
+            "피할소품":   "집 중앙 도자기·황토 소품을 집중적으로 늘리지는 마십시오",
+            "차단비방":   "계절 기운이 한쪽으로 치우친 사주라, 土 기운을 굳이 더 보태지 않는 편이 좋습니다",
+            "대체처방":   "일간의 힘은 이미 균형을 이루고 있으니, 치우친 계절 기운만 조금 덜어내는 방향이면 충분합니다.",
+            "21일차단":   "따로 21일 의식을 치르기보다, 평소 하던 대로 꾸준함을 유지하십시오",
+            "주의사항":   "이 기운이 나쁜 게 아니라, 계절상 이미 충분해서 더할 필요가 없다는 뜻입니다",
+        },
+        "水": {
+            "차단방위":   "북쪽·북동쪽 — 이 방향을 특별히 더 강화하지는 않는 편이 무난합니다",
+            "피할색상":   "검정·짙은 네이비·딥블루 — 지갑·옷을 이 색으로 도배하지 않아도 괜찮습니다",
+            "피할음식":   "짠맛·해산물·미역·검은콩을 매일 챙겨 먹을 필요는 없습니다",
+            "피할소품":   "북쪽 어항·분수·물 소품을 집중적으로 늘리지는 마십시오",
+            "차단비방":   "계절 기운이 한쪽으로 치우친 사주라, 水 기운을 굳이 더 보태지 않는 편이 좋습니다",
+            "대체처방":   "일간의 힘은 이미 균형을 이루고 있으니, 치우친 계절 기운만 조금 덜어내는 방향이면 충분합니다.",
+            "21일차단":   "따로 21일 의식을 치르기보다, 평소 하던 대로 꾸준함을 유지하십시오",
+            "주의사항":   "이 기운이 나쁜 게 아니라, 계절상 이미 충분해서 더할 필요가 없다는 뜻입니다",
+        },
+    }
+
     # ─────────────────────────────────────────────────────────────
     # 화면: 요약 카드
     # ─────────────────────────────────────────────────────────────
@@ -25701,26 +25752,45 @@ def menu_gaewoon(pils, name, birth_year, gender):
         if _gisin_ohs_gw:
             _OH_KR_NAME = {"木":"木(나무)","火":"火(불)","土":"土(흙)","金":"金(쇠)","水":"水(물)"}
             _GI_HEX     = {"木":"#1e8449","火":"#c0392b","土":"#d4a017","金":"#7f8c8d","水":"#2980b9"}
+            # R9-1b: 조후 기신(_gisin_from_johu_gw)이면 _GIS_RX_JOHU + 순한
+            # 라벨, 억부 기신이면 기존 _GIS_RX + 기존 라벨을 그대로 쓴다.
+            _GIS_SRC_S1 = _GIS_RX_JOHU if _gisin_from_johu_gw else _GIS_RX
             for _goh_s1 in _gisin_ohs_gw:
-                if _goh_s1 not in _GIS_RX:
+                if _goh_s1 not in _GIS_SRC_S1:
                     continue
-                _grx_s1  = _GIS_RX[_goh_s1]
+                _grx_s1  = _GIS_SRC_S1[_goh_s1]
                 _ghex_s1 = _GI_HEX.get(_goh_s1, "#c0392b")
                 _nm_s1   = _OH_KR_NAME.get(_goh_s1, _goh_s1)
-                _gi_body = (
-                    f'<div style="background:#fff0f0;border-left:4px solid {_ghex_s1};'
-                    f'border-radius:8px;padding:10px 14px;margin-bottom:8px;">'
-                    f'<b style="color:{_ghex_s1};font-size:14px;">⛔ {_nm_s1} 기신 차단 처방</b><br>'
-                    + _row("차단 방위", _grx_s1.get("차단방위",""), False)
-                    + _row("피할 색상", _grx_s1.get("피할색상",""), False)
-                    + _row("피할 음식", _grx_s1.get("피할음식",""), False)
-                    + _row("제거 소품", _grx_s1.get("피할소품",""), False)
-                    + _row("차단 비방", _grx_s1.get("차단비방",""))
-                    + _row("대체 처방", _grx_s1.get("대체처방",""), True)
-                    + _row("21일 차단", _grx_s1.get("21일차단",""), True)
-                    + _row("핵심 주의", _grx_s1.get("주의사항",""))
-                    + "</div>"
-                )
+                if _gisin_from_johu_gw:
+                    _gi_body = (
+                        f'<div style="background:#fff8f0;border-left:4px solid {_ghex_s1};'
+                        f'border-radius:8px;padding:10px 14px;margin-bottom:8px;">'
+                        f'<b style="color:{_ghex_s1};font-size:14px;">⚖️ {_nm_s1} 계절 균형 조언</b><br>'
+                        + _row("참고 방위", _grx_s1.get("차단방위",""))
+                        + _row("참고 색상", _grx_s1.get("피할색상",""))
+                        + _row("참고 음식", _grx_s1.get("피할음식",""))
+                        + _row("참고 소품", _grx_s1.get("피할소품",""))
+                        + _row("계절 조언", _grx_s1.get("차단비방",""))
+                        + _row("균형 처방", _grx_s1.get("대체처방",""), True)
+                        + _row("꾸준한 실천", _grx_s1.get("21일차단",""), True)
+                        + _row("참고 사항", _grx_s1.get("주의사항",""))
+                        + "</div>"
+                    )
+                else:
+                    _gi_body = (
+                        f'<div style="background:#fff0f0;border-left:4px solid {_ghex_s1};'
+                        f'border-radius:8px;padding:10px 14px;margin-bottom:8px;">'
+                        f'<b style="color:{_ghex_s1};font-size:14px;">⛔ {_nm_s1} 기신 차단 처방</b><br>'
+                        + _row("차단 방위", _grx_s1.get("차단방위",""), False)
+                        + _row("피할 색상", _grx_s1.get("피할색상",""), False)
+                        + _row("피할 음식", _grx_s1.get("피할음식",""), False)
+                        + _row("제거 소품", _grx_s1.get("피할소품",""), False)
+                        + _row("차단 비방", _grx_s1.get("차단비방",""))
+                        + _row("대체 처방", _grx_s1.get("대체처방",""), True)
+                        + _row("21일 차단", _grx_s1.get("21일차단",""), True)
+                        + _row("핵심 주의", _grx_s1.get("주의사항",""))
+                        + "</div>"
+                    )
                 st.markdown(_gi_body, unsafe_allow_html=True)
 
     # ── 섹션2: 올해 타이밍 처방 ───────────────────────────────────
@@ -25835,8 +25905,12 @@ def menu_gaewoon(pils, name, birth_year, gender):
             _gis_strokes_s6 = []
             for _goh_s6 in _gisin_ohs_gw:
                 _gis_strokes_s6.extend(_OH_STROKE_GW.get(_goh_s6,[])[:4])
-            _card("개명 시 피해야 할 획수 (기신)",
-                  _row("피할 획수", ', '.join(str(s) for s in _gis_strokes_s6[:10]) + "획", False))
+            if _gisin_from_johu_gw:
+                _card("개명 시 참고할 획수 (계절 균형)",
+                      _row("참고 획수", ', '.join(str(s) for s in _gis_strokes_s6[:10]) + "획"))
+            else:
+                _card("개명 시 피해야 할 획수 (기신)",
+                      _row("피할 획수", ', '.join(str(s) for s in _gis_strokes_s6[:10]) + "획", False))
 
     # ── 섹션7: 배우자 오행 매칭 ───────────────────────────────────
     with st.expander("💑 제7장 — 배우자·인연 오행 매칭", expanded=True):
@@ -25917,16 +25991,27 @@ def menu_gaewoon(pils, name, birth_year, gender):
                     st.success(f"✅ 현재 직업 [{_occ_s9}] — 용신과 잘 맞습니다! 지금 하는 일이 천명과 일치합니다.")
                 else:
                     st.warning(f"⚠️ 현재 직업 [{_occ_s9}] — 용신 직종으로 전환하거나 부업으로 병행하면 운이 올라갑니다.")
-            # 피해야 할 직종 (기신 오행)
+            # 피해야 할 직종 (기신 오행) / R9-1b: 조후 기신은 "계절 참고" 톤
             if _gisin_ohs_gw:
-                _bad_job_html = "<b style='color:#c0392b;'>⚠ 피해야 할 직종 (기신 오행)</b><br>"
-                for _goh_s9 in _gisin_ohs_gw:
-                    if _goh_s9 in _BAD_JOB_GW:
-                        _bad_job_html += (
-                            f'<div style="padding:3px 0 3px 10px;color:#c0392b;">'
-                            f'❌ <b>{_goh_s9} 기신</b>: {_BAD_JOB_GW[_goh_s9]} 분야 — 기운 역류로 소진됩니다</div>'
-                        )
-                _card("피해야 할 직종", _bad_job_html)
+                if _gisin_from_johu_gw:
+                    _bad_job_html = "<b style='color:#b7791f;'>⚖️ 직종 선택 시 계절 참고</b><br>"
+                    for _goh_s9 in _gisin_ohs_gw:
+                        if _goh_s9 in _BAD_JOB_GW:
+                            _bad_job_html += (
+                                f'<div style="padding:3px 0 3px 10px;color:#7d5a00;">'
+                                f'🍂 <b>{_goh_s9}(계절 기운)</b>: {_BAD_JOB_GW[_goh_s9]} 분야 — '
+                                f'무리해서 확장하기보다 신중히 접근하면 좋습니다</div>'
+                            )
+                    _card("직종 선택 시 참고", _bad_job_html)
+                else:
+                    _bad_job_html = "<b style='color:#c0392b;'>⚠ 피해야 할 직종 (기신 오행)</b><br>"
+                    for _goh_s9 in _gisin_ohs_gw:
+                        if _goh_s9 in _BAD_JOB_GW:
+                            _bad_job_html += (
+                                f'<div style="padding:3px 0 3px 10px;color:#c0392b;">'
+                                f'❌ <b>{_goh_s9} 기신</b>: {_BAD_JOB_GW[_goh_s9]} 분야 — 기운 역류로 소진됩니다</div>'
+                            )
+                    _card("피해야 할 직종", _bad_job_html)
 
     # ── 섹션10: 총체적 처방 TOP5 ─────────────────────────────────
     with st.expander("📋 제10장 — 종합 처방전 TOP5", expanded=True):
@@ -26032,21 +26117,35 @@ def menu_gaewoon(pils, name, birth_year, gender):
         )
         _card("홍수맥 여는 처방", _rx12_html)
 
-        # ── 기신 차단 요약 ────────────────────────────────────────
+        # ── 기신 차단 요약 / R9-1b: 조후 기신은 "계절 균형 조언" 톤 ──────
         if _gisin_ohs_gw:
-            _gi12_html = f"<b style='color:#c0392b;'>⛔ 기신 {' / '.join(_gisin_ohs_gw)} 차단 핵심</b><br>"
+            _GIS_SRC_12 = _GIS_RX_JOHU if _gisin_from_johu_gw else _GIS_RX
+            if _gisin_from_johu_gw:
+                _gi12_html = f"<b style='color:#b7791f;'>⚖️ {' / '.join(_gisin_ohs_gw)} 계절 균형 조언</b><br>"
+            else:
+                _gi12_html = f"<b style='color:#c0392b;'>⛔ 기신 {' / '.join(_gisin_ohs_gw)} 차단 핵심</b><br>"
             for _goh12 in _gisin_ohs_gw:
-                if _goh12 in _GIS_RX:
-                    _g12 = _GIS_RX[_goh12]
-                    _gi12_html += (
-                        f'<div style="padding:4px 0 4px 10px;color:#c0392b;">'
-                        f'<b>{_goh12} 기신</b> — '
-                        f'피할색: {_g12.get("피할색상","").split("—")[0].strip()} | '
-                        f'대체: {_g12.get("대체처방","").split("—")[0].strip()}</div>'
-                        f'<div style="padding:2px 0 2px 20px;color:#7b241c;font-size:12px;">'
-                        f'주의: {_g12.get("주의사항","")}</div>'
-                    )
-            _card("기신 차단 요약", _gi12_html)
+                if _goh12 in _GIS_SRC_12:
+                    _g12 = _GIS_SRC_12[_goh12]
+                    if _gisin_from_johu_gw:
+                        _gi12_html += (
+                            f'<div style="padding:4px 0 4px 10px;color:#7d5a00;">'
+                            f'<b>{_goh12}(계절 기운)</b> — '
+                            f'참고색: {_g12.get("피할색상","").split("—")[0].strip()} | '
+                            f'균형: {_g12.get("대체처방","").split("—")[0].strip()}</div>'
+                            f'<div style="padding:2px 0 2px 20px;color:#8a6d3b;font-size:12px;">'
+                            f'참고: {_g12.get("주의사항","")}</div>'
+                        )
+                    else:
+                        _gi12_html += (
+                            f'<div style="padding:4px 0 4px 10px;color:#c0392b;">'
+                            f'<b>{_goh12} 기신</b> — '
+                            f'피할색: {_g12.get("피할색상","").split("—")[0].strip()} | '
+                            f'대체: {_g12.get("대체처방","").split("—")[0].strip()}</div>'
+                            f'<div style="padding:2px 0 2px 20px;color:#7b241c;font-size:12px;">'
+                            f'주의: {_g12.get("주의사항","")}</div>'
+                        )
+            _card("계절 균형 조언 요약" if _gisin_from_johu_gw else "기신 차단 요약", _gi12_html)
 
         # ── 신호 체크리스트 ───────────────────────────────────────
         _sig_html = (
@@ -26275,13 +26374,22 @@ def menu_gaewoon(pils, name, birth_year, gender):
                     story.append(Paragraph(_safe(f"  {_k}: {_rx.get(_k,'')}"), _sI))
                 story.append(_sp(3))
         if _gisin_ohs_gw:
-            story.append(Paragraph(_safe("[ 기신 오행 차단 처방 ]"), _sB))
-            for _goh in _gisin_ohs_gw:
-                _grx_pdf = _GIS_RX.get(_goh)
-                if _grx_pdf:
-                    story.append(Paragraph(_safe(f"  ▶ {_goh} 기신 차단"), _sWn))
-                    for _gk in ["차단방위","피할색상","피할음식","피할소품","차단비방","대체처방","21일차단","주의사항"]:
-                        story.append(Paragraph(_safe(f"    - {_gk}: {_grx_pdf.get(_gk,'')}"), _sI))
+            if _gisin_from_johu_gw:
+                story.append(Paragraph(_safe("[ 계절 균형 조언 ]"), _sB))
+                for _goh in _gisin_ohs_gw:
+                    _grx_pdf = _GIS_RX_JOHU.get(_goh)
+                    if _grx_pdf:
+                        story.append(Paragraph(_safe(f"  ▶ {_goh} 계절 조언"), _sWn))
+                        for _gk in ["차단방위","피할색상","피할음식","피할소품","차단비방","대체처방","21일차단","주의사항"]:
+                            story.append(Paragraph(_safe(f"    - {_gk}: {_grx_pdf.get(_gk,'')}"), _sI))
+            else:
+                story.append(Paragraph(_safe("[ 기신 오행 차단 처방 ]"), _sB))
+                for _goh in _gisin_ohs_gw:
+                    _grx_pdf = _GIS_RX.get(_goh)
+                    if _grx_pdf:
+                        story.append(Paragraph(_safe(f"  ▶ {_goh} 기신 차단"), _sWn))
+                        for _gk in ["차단방위","피할색상","피할음식","피할소품","차단비방","대체처방","21일차단","주의사항"]:
+                            story.append(Paragraph(_safe(f"    - {_gk}: {_grx_pdf.get(_gk,'')}"), _sI))
         story.append(PageBreak())
 
         # ── 제2장: 올해 타이밍 처방 ───────────────────────────────
@@ -26409,8 +26517,12 @@ def menu_gaewoon(pils, name, birth_year, gender):
             _gis_strokes_p = []
             for _goh in _gisin_ohs_gw:
                 _gis_strokes_p.extend(_OH_STROKE_GW.get(_goh,[])[:4])
-            story.append(Paragraph(_safe("[ 개명 시 피해야 할 획수 - 기신 오행 ]"), _sB))
-            story.append(Paragraph(_safe(f"  피할 획수: {', '.join(str(s) for s in _gis_strokes_p[:8])}획"), _sWn))
+            if _gisin_from_johu_gw:
+                story.append(Paragraph(_safe("[ 개명 시 참고할 획수 - 계절 균형 ]"), _sB))
+                story.append(Paragraph(_safe(f"  참고 획수: {', '.join(str(s) for s in _gis_strokes_p[:8])}획"), _sI))
+            else:
+                story.append(Paragraph(_safe("[ 개명 시 피해야 할 획수 - 기신 오행 ]"), _sB))
+                story.append(Paragraph(_safe(f"  피할 획수: {', '.join(str(s) for s in _gis_strokes_p[:8])}획"), _sWn))
         story.append(Paragraph(_safe("작명가 상담 시 반드시 사주 원국 용신을 먼저 확인하고 진행하십시오."), _sI))
         story.append(PageBreak())
 
