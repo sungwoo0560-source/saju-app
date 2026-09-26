@@ -7048,10 +7048,19 @@ _GK_KEY_MAP_GLOBAL = {
     "편인格":"偏印(편인)格(편인격)", "정인格":"正印(정인)格(정인격)",
 }
 
+_GYEOK_KR_NOPAREN = {"建祿格": "건록격", "月劫格": "월겁격", "羊刃格": "양인격"}
+
 def _gyeok_kr_name(gname):
-    """'偏官(편관)格' → '편관격', '從强格(종강격)' → '종강격' (특수격 중복접미사 방지). 매칭 실패 시 원본 반환."""
+    """'偏官(편관)格' → '편관격', '從强格(종강격)' → '종강격' (특수격 중복접미사 방지). 매칭 실패 시 원본 반환.
+    R8-2b(2026-09-26): 建祿格/月劫格/羊刃格은 애초에 괄호(한글독음)가 없는
+    이름이라 아래 정규식이 매치를 못 해 원본 한자 그대로 반환됐다 — 그 결과
+    menu5_money의 순한글 키(_GYEOK_MONEY/_GYEOK_JOB_DETAIL)와 절대 일치하지
+    않아 建祿格 사용자조차 전용 항목이 있어도 못 받고 폴백을 받고 있었다.
+    정규식 이전에 이 3격만 예외 매핑으로 먼저 처리한다."""
     if not gname:
         return gname or ""
+    if gname in _GYEOK_KR_NOPAREN:
+        return _GYEOK_KR_NOPAREN[gname]
     m = re.search(r"\(([가-힣]+)\)", gname)
     if not m:
         return gname
