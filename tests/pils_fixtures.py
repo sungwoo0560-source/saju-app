@@ -1062,16 +1062,20 @@ def assert_daewoon(name):
 
 def check_baseline(name):
     """get_yongshin/get_ilgan_strength/get_gyeokguk/get_gongmang을 호출해 baseline과 대조.
-    불일치는 [FAIL]이 아니라 [WARN]으로만 출력하고 종료코드에는 영향을 주지 않는다
-    (판정 로직이 정당하게 개선될 수 있으므로)."""
+    ★R7-2b(2026-09-26): 불일치를 [WARN](종료코드 무영향)에서 [FAIL](종료코드 1)로
+    전환했다 — 판정 로직이 정당하게 개선될 수 있다는 원래 설계의도는 유지하되,
+    그 개선이 있을 때 이 파일의 baseline 갱신을 '같은 커밋'에서 강제하기 위함
+    (2b9879d·839acac 두 사례 모두 baseline.json은 갱신되고 이 파일만 몇 주간
+    누락됐던 drift 재발 방지 — apptest_33의 baseline 갱신 규칙과 대칭)."""
     case = CASES[name]
     baseline = case.get("baseline", {})
     if not baseline:
         print(f"[INFO] {name}: baseline 없음, 건너뜀")
-        return
+        return True
 
     pils = get_pils(name)
     ilgan = pils[1].get("cg", "")
+    ok = True
 
     if "신강신약" in baseline:
         strength = get_ilgan_strength(ilgan, pils) or {}
@@ -1080,7 +1084,8 @@ def check_baseline(name):
         if expected in actual:
             print(f"[OK] {name} 신강신약: {actual}")
         else:
-            print(f"[WARN] {name} 신강신약 불일치 — 기대:{expected} 실제:{actual}")
+            print(f"[FAIL] {name} 신강신약 불일치 — 기대:{expected} 실제:{actual}")
+            ok = False
 
     if "격국명" in baseline:
         gyeok = get_gyeokguk(pils) or {}
@@ -1089,7 +1094,8 @@ def check_baseline(name):
         if expected == actual:
             print(f"[OK] {name} 격국: {actual}")
         else:
-            print(f"[WARN] {name} 격국 불일치 — 기대:{expected} 실제:{actual}")
+            print(f"[FAIL] {name} 격국 불일치 — 기대:{expected} 실제:{actual}")
+            ok = False
 
     if "종합_용신" in baseline:
         ys = get_yongshin(pils) or {}
@@ -1098,7 +1104,8 @@ def check_baseline(name):
         if actual == expected:
             print(f"[OK] {name} 용신: {actual}")
         else:
-            print(f"[WARN] {name} 용신 불일치 — 기대:{expected} 실제:{actual}")
+            print(f"[FAIL] {name} 용신 불일치 — 기대:{expected} 실제:{actual}")
+            ok = False
 
     if "종합_기신" in baseline:
         ys = get_yongshin(pils) or {}
@@ -1107,7 +1114,8 @@ def check_baseline(name):
         if actual == expected:
             print(f"[OK] {name} 기신: {actual}")
         else:
-            print(f"[WARN] {name} 기신 불일치 — 기대:{expected} 실제:{actual}")
+            print(f"[FAIL] {name} 기신 불일치 — 기대:{expected} 실제:{actual}")
+            ok = False
 
     if "공망" in baseline:
         gm = get_gongmang(pils) or {}
@@ -1117,7 +1125,10 @@ def check_baseline(name):
         if actual == expected:
             print(f"[OK] {name} 공망: {actual}")
         else:
-            print(f"[WARN] {name} 공망 불일치 — 기대:{expected} 실제:{actual}")
+            print(f"[FAIL] {name} 공망 불일치 — 기대:{expected} 실제:{actual}")
+            ok = False
+
+    return ok
 
 
 def check_yangin_unknown_time(name):
@@ -1326,7 +1337,8 @@ def main():
         all_pillars_ok = all_pillars_ok and ok
         ok = assert_daewoon(name)
         all_pillars_ok = all_pillars_ok and ok
-        check_baseline(name)
+        ok = check_baseline(name)
+        all_pillars_ok = all_pillars_ok and ok
         print()
 
     print("=== 양인 sentinel 충돌 회귀(시간미상) ===")
@@ -1373,10 +1385,10 @@ def main():
     all_pillars_ok = all_pillars_ok and all_order_ok
 
     if all_pillars_ok:
-        print("[OK] 결과 요약: 전체 픽스처 8글자 일치")
+        print("[OK] 결과 요약: 전체 픽스처 8글자·판정값 일치")
         sys.exit(0)
     else:
-        print("[FAIL] 결과 요약: 8글자 불일치 픽스처 있음")
+        print("[FAIL] 결과 요약: 8글자·판정값 불일치 픽스처 있음")
         sys.exit(1)
 
 
