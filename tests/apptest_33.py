@@ -129,7 +129,8 @@ from saju_sinsal import get_gongmang  # noqa: E402
 MENU_ORDER = [
     "menu1_report", "current_situation", "lifeline", "past", "future3",
     "money", "relations", "daily", "monthly", "yearly", "tojeong", "health",
-    "report_narr", "ohaeng_deep", "bihang", "gaewoon", "ai", "manse_grid",
+    "report_narr", "money_narr", "relations_narr", "future_narr", "lifeline_narr", "past_narr",
+    "ohaeng_deep", "bihang", "gaewoon", "ai", "manse_grid",
 ]
 
 # 텍스트 출력 계열 st.* 함수 — 캡처 대상(런타임 monkeypatch, 소스 수정 아님)
@@ -264,6 +265,29 @@ def _call_menu(menu_key, pils, case_name, birth_year, gender):
         # 하네스가 따로 필요해 무거우므로, 함수를 직접 호출해 반환 문자열을 캡처하는
         # 이 경로로 _nar_ch8_flow(5대 지표/건강점수 포함) 로직만 정밀 감시한다.
         return manse.build_rich_narrative(pils, birth_year, gender, case_name, section="report")
+    elif menu_key == "money_narr":
+        # R8-5: build_rich_narrative(section="money") — 실사용 경로는
+        # render_ai_deep_analysis()의 "💰 재물/사업운 심층 리포트 보기" 버튼
+        # (여러 탭 하단, 클릭 트리거 하네스 없이는 apptest가 못 탐). report_narr와
+        # 동일하게 함수 직접 호출로 _nar_wealth(GYEOKGUK_DETAIL 재물/직업/주의/
+        # 처방 포함) 로직을 감시한다.
+        return manse.build_rich_narrative(pils, birth_year, gender, case_name, section="money")
+    elif menu_key == "relations_narr":
+        # R8-5: build_rich_narrative(section="relations") — 실사용 경로는
+        # render_ai_deep_analysis()의 "💑 인연/인간관계 심층 리포트 보기" 버튼.
+        return manse.build_rich_narrative(pils, birth_year, gender, case_name, section="relations")
+    elif menu_key == "future_narr":
+        # R8-5: build_rich_narrative(section="future") — 실사용 경로는
+        # render_ai_deep_analysis()의 "🔮 미래 3년 집중 예언 보기" 버튼.
+        return manse.build_rich_narrative(pils, birth_year, gender, case_name, section="future")
+    elif menu_key == "lifeline_narr":
+        # R8-5: build_rich_narrative(section="lifeline") — 실사용 경로는
+        # render_ai_deep_analysis()의 "🌊 대운 100년 정밀 풀이 보기" 버튼.
+        return manse.build_rich_narrative(pils, birth_year, gender, case_name, section="lifeline")
+    elif menu_key == "past_narr":
+        # R8-5: build_rich_narrative(section="past") — 실사용 경로는
+        # render_ai_deep_analysis()의 "🎯 과거 사건 복기 풀이 보기" 버튼.
+        return manse.build_rich_narrative(pils, birth_year, gender, case_name, section="past")
     elif menu_key == "ohaeng_deep":
         manse.menu16_ohaeng_deep(pils, case_name, birth_year, gender)
     elif menu_key == "bihang":
