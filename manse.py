@@ -17662,7 +17662,7 @@ def menu2_lifeline(pils, birth_year, gender, name="내담자"):
             <div style='font-size:14px;color:#fff;font-weight:800;
             margin-bottom:8px'>{_verdict}</div>
             <div style='font-size:12px;color:#aaa;'>
-            {cur_dw["시작연도"]}~{cur_dw["종료연도"]}년 (만 {_age}세) ·
+            {cur_dw["시작연도"]}~{cur_dw["종료연도"]}년 ({_age}세) ·
             <b style='color:{_gc}'>{"올해가 마지막 해" if _remain == 0 else f"{_remain}년 남음"}</b></div>
             </div>""",
             unsafe_allow_html=True,
@@ -18390,7 +18390,7 @@ def menu4_future3(
                     f"""<div style='background:#fff5f5;border-left:5px solid {_wcolor};
                     border-radius:10px;padding:14px 18px;margin:8px 0;'>
                     <div style='font-size:14px;font-weight:900;color:{_wcolor};margin-bottom:6px'>
-                    {_yr}년(만 {_age}세) {_wtitle}</div>
+                    {_yr}년({_age}세) {_wtitle}</div>
                     <div style='font-size:13px;color:#333;line-height:1.9'>{_wdesc}</div>
                     </div>""",
                     unsafe_allow_html=True,
@@ -24006,7 +24006,7 @@ def menu14_health(pils, name, birth_year, gender):
             st.markdown(
                 f"""<div style='border-left:4px solid {_color};padding:8px 14px;
                 margin:4px 0;background:#fff5f5;border-radius:0 8px 8px 0;font-size:13px;'>
-                <b style='color:{_color}'>{_yr}년 (만 {_age_y}세) {_lvl} [{_ss_y}]</b>
+                <b style='color:{_color}'>{_yr}년 ({_age_y}세) {_lvl} [{_ss_y}]</b>
                 &nbsp;— {_msg}</div>""",
                 unsafe_allow_html=True,
             )
