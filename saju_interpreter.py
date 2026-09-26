@@ -12917,13 +12917,19 @@ def _nar_wealth(ctx):
             )
         )
 
+        # R8-6: key는 frozenset(비결정 순회) — 표준 십성 순서로 정렬해 join한다.
+        # 내용은 무변경, 표시 순서만 실행마다(해시 랜덤화) 흔들리던 것을 고정.
+        _SS_ORDER_MONEY = ["比肩(비견)", "劫財(겁재)", "食神(식신)", "傷官(상관)",
+                           "偏財(편재)", "正財(정재)", "偏官(편관)", "正官(정관)",
+                           "偏印(편인)", "正印(정인)"]
         for key, combo in combos[:3]:
+            _key_sorted = sorted(key, key=lambda x: _SS_ORDER_MONEY.index(x) if x in _SS_ORDER_MONEY else 99)
             result.append(
                 "\n".join(
                     [
                         f"",
                         f"",
-                        f"* [{' x '.join(key)}] 재물 조합",
+                        f"* [{' x '.join(_key_sorted)}] 재물 조합",
                         f"",
                         f"{combo.get('요약', '')}",
                         f"",

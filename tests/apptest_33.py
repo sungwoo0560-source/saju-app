@@ -70,6 +70,9 @@ import re
 import json
 import argparse
 import difflib
+import subprocess
+import random
+import tempfile
 from datetime import date, datetime
 
 _THIS_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -493,6 +496,87 @@ def compare(path, freeze_date=None):
     return diff_count, exc_count
 
 
+def _diff_two_dump_files(path_a, path_b, label_a, label_b):
+    """이미 저장된 dump 파일 2개를 (재실행 없이) 그대로 비교한다.
+    compare()의 정규화·diff 출력 로직을 파일 대 파일 비교용으로 재사용."""
+    with open(path_a, "r", encoding="utf-8") as f:
+        da = json.load(f)
+    with open(path_b, "r", encoding="utf-8") as f:
+        db = json.load(f)
+    ra, rb = da.get("results", {}), db.get("results", {})
+    diff_count = 0
+    for case_name in sorted(set(ra) | set(rb)):
+        ma, mb = ra.get(case_name, {}), rb.get(case_name, {})
+        for menu_key in sorted(set(ma) | set(mb)):
+            a, b = ma.get(menu_key), mb.get(menu_key)
+            if a is None or b is None:
+                print(f"[DIFF] {case_name}/{menu_key} — 한쪽에만 존재({label_a if a is None else label_b}에 없음)")
+                diff_count += 1
+                continue
+            if bool(a.get("exception")) != bool(b.get("exception")):
+                print(f"[DIFF] {case_name}/{menu_key} — 예외 상태가 시드마다 다름: "
+                      f"{label_a}={a.get('exception')!r} / {label_b}={b.get('exception')!r}")
+                diff_count += 1
+                continue
+            an = [_normalize(x) for x in a.get("output", [])]
+            bn = [_normalize(x) for x in b.get("output", [])]
+            if an != bn:
+                diff_count += 1
+                print(f"[DIFF] {case_name}/{menu_key} — {label_a} vs {label_b} 비결정 출력 발견")
+                udiff = list(difflib.unified_diff(an, bn, lineterm="", n=0,
+                                                   fromfile=label_a, tofile=label_b))
+                for line in udiff[:10]:
+                    print("    " + line)
+                if len(udiff) > 10:
+                    print(f"    ... ({len(udiff) - 10}줄 더 있음)")
+    return diff_count
+
+
+def determinism_check(freeze_date):
+    """PYTHONHASHSEED는 프로세스 시작 시에만 고정 가능하므로, 서로 다른 두 값으로
+    이 스크립트를 서브프로세스로 두 번 --dump 실행해 결과를 비교한다. 시드는
+    매번 무작위로 고른다(특정 시드 하나에 고정해 그 시드에서만 우연히 통과하는
+    걸 피하기 위함 — R8-6). --freeze-date는 필수(시각 드리프트와 해시 순서
+    드리프트를 분리해서 봐야 하므로)."""
+    if not freeze_date:
+        print("[FAIL] --determinism에는 --freeze-date가 필요합니다(시각 드리프트와 "
+              "해시 순서 문제를 분리하기 위함).")
+        return 1
+
+    seed_a = random.randint(1, 2**31 - 1)
+    seed_b = random.randint(1, 2**31 - 1)
+    while seed_b == seed_a:
+        seed_b = random.randint(1, 2**31 - 1)
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        path_a = os.path.join(tmpdir, "seed_a.json")
+        path_b = os.path.join(tmpdir, "seed_b.json")
+        for seed, path in ((seed_a, path_a), (seed_b, path_b)):
+            env = dict(os.environ)
+            env["PYTHONHASHSEED"] = str(seed)
+            env["PYTHONIOENCODING"] = "utf-8"
+            proc = subprocess.run(
+                [sys.executable, os.path.abspath(__file__),
+                 "--dump", path, "--freeze-date", freeze_date],
+                env=env, capture_output=True, text=True, encoding="utf-8",
+            )
+            if proc.returncode != 0 or not os.path.exists(path):
+                print(f"[FAIL] PYTHONHASHSEED={seed} 실행 실패(returncode={proc.returncode})")
+                print(proc.stdout[-2000:])
+                print(proc.stderr[-2000:])
+                return 1
+
+        print(f"[DETERMINISM] PYTHONHASHSEED={seed_a} vs {seed_b} (freeze_date={freeze_date}) 비교")
+        diff_count = _diff_two_dump_files(path_a, path_b, f"seed{seed_a}", f"seed{seed_b}")
+
+    if diff_count == 0:
+        print(f"[OK] 비결정 지점 0건 (시드 {seed_a}/{seed_b})")
+        return 0
+    else:
+        print(f"[FAIL] 비결정 출력 {diff_count}건 발견 (시드 {seed_a}/{seed_b})")
+        return 1
+
+
 def _classify_line2(pils, ilgan, cur_year):
     """get_jeokjung_guiin의 line2를 live(內藏)/sealed(공망 봉인)/external로 3분기."""
     yukjin_raw = calc_sipsung(ilgan, pils)
@@ -578,13 +662,22 @@ def main():
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--dump", metavar="PATH")
     group.add_argument("--compare", metavar="PATH")
+    group.add_argument(
+        "--determinism", action="store_true",
+        help="서로 다른 두 PYTHONHASHSEED(매번 무작위 선택)로 --dump를 두 번 서브프로세스 "
+             "실행해 결과를 비교한다(R8-6). set/frozenset 순회 비결정성 재발 감시용 — "
+             "특정 시드 하나에 고정하지 않는다. --freeze-date 필수.",
+    )
     parser.add_argument(
         "--freeze-date", metavar="YYYY-MM-DD", default=None,
         help="현재 시각을 이 날짜로 고정하고 실행(daily/monthly/money/④대운시제 노이즈 제거용). "
              "미지정 시 실제 현재 시각 사용(현행 동작과 동일, 하위호환). --compare에서 미지정 시 "
-             "baseline meta의 freeze_date를 자동으로 읽어 재현한다.",
+             "baseline meta의 freeze_date를 자동으로 읽어 재현한다. --determinism에는 필수.",
     )
     args = parser.parse_args()
+
+    if args.determinism:
+        sys.exit(determinism_check(args.freeze_date))
 
     exit_code = 0
 

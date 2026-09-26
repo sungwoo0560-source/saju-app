@@ -34,6 +34,11 @@
 ## baseline 갱신 규칙
 콘텐츠(문구·판정·수치) 출력이 바뀌는 커밋에는 `tests/apptest_33.py --dump`로 baseline.json 재생성을 포함한다. 재생성 전 diff를 확인해 그 커밋이 만든 변경만 담겼는지 검증하고, 설명되지 않는 변경이 있으면 커밋하지 말고 보고한다. 순수 리팩터(동작·판정 무변경)와 육효 전용 커밋은 재생성 대상이 아니다. 육효 메뉴는 apptest_33 MENU_ORDER에 없어 baseline diff에 잡히지 않는다(별도 커버리지 필요 시 별도 논의).
 
+### apptest 검증 절차(R8-5·R8-6)
+- **검증 순서는 항상 ①→②→③**: ① 변경 전 `--compare`로 기존 baseline 대비 diff를 먼저 뽑아 "의도한 줄에만 있는지" 확인·보고 → ② `--dump`로 갱신 → ③ 갱신 직후 `--compare` 0건 확인. **②→③만 하고(①을 건너뛰고) "0건"이라고 보고하는 것은 검증이 아니다** — dump는 방금 만든 걸 자기 자신과 비교하는 것이라 항상 0건이 나온다(R8-5에서 실제로 이 실수를 함).
+- **--dump/--compare는 항상 동일한 `--freeze-date`로 실행한다.** `freeze_date` 없는(= None) baseline은 커밋 금지 — daily/monthly/money 등 "오늘·지금 이 시간"을 참조하는 서술이 실행 시각마다 달라져 무관한 diff가 섞인다(R8-5에서 실측: freeze_date 없는 baseline과 비교 시 daily 60건 전부 시각차로 DIFF).
+- **baseline 재생성 전 `--determinism` 통과를 함께 확인한다**(같은 `--freeze-date`로): `python tests/apptest_33.py --determinism --freeze-date YYYY-MM-DD`. 서로 다른 두 PYTHONHASHSEED(매번 무작위)로 두 번 dump해 비교 — set/frozenset을 순서 없이 join·f-string 조립하는 지점이 있으면 실행마다 표시 순서가 바뀌는데, 단일 프로세스 실행으로는 절대 안 잡히고 이 옵션으로만 드러난다(R8-6, saju_interpreter.py "재물 조합" frozenset join 버그 사례). FAIL 시 sorted()로 표준 순서(십성: 비견·겁재·식신·상관·편재·정재·편관·정관·편인·정인 / 오행: 木火土金水 / 지지: 子~亥)를 적용해 고친다 — 특정 시드 하나로 고정해서 우회하지 않는다.
+
 ## 계산 엔진 보호 규칙 (결정론적 계층)
 - `saju_engine.py`, `kasi_24terms.json`, `tools/gen_solar_terms_ephem.py`는
   절기·8글자를 만드는 결정론적 계산 계층이다. 이 세 파일은 형의 명시적
