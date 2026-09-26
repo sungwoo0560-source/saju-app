@@ -8169,6 +8169,27 @@ def get_yongshin(pils):
 
     jokhu = YONGSHIN_JOKHU.get(wol_jj, {})
 
+    # R9-1a(2026-09-27): 순수중화(억부_용신 빈 명식, N=339/2000=16.95%)는
+    # 종합_기신이 항상 []였다 — N2-a가 신강/신약 분기에서만 kihwa_ohs를
+    # 채우도록 설계했기 때문(중화는 "특정 억부 기신 없음"이 원 취지). 극한월
+    # (亥子丑·巳午未)에 한해 YONGSHIN_JOKHU의 "avoid"(조후 기신 천간 — 12개
+    # 월지 전부 이미 존재하는 값, 새 판정표 아님)를 오행으로 변환해 채운다.
+    # 춘추월(寅卯辰·申酉戌) 중화는 그대로 빈 리스트 유지(대체 문구는 화면
+    # 소비처에서 처리).
+    # ★대상교체 0 보장: 이 블록은 `not eokbu_yong`일 때만 진입한다. 신강
+    # 분기(eokbu_yong=[관,재], 2원소)·신약 분기(eokbu_yong=[인,비겁], 2원소)는
+    # eokbu_yong이 구조적으로 비어있을 수 없으므로 이 조건에 물리적으로
+    # 도달 불가 — 신강/신약의 종합_기신·기신_단서는 무변경.
+    _GEUKHAN_JJ = {"亥", "子", "丑", "巳", "午", "未"}
+    _johu_gisin_ohs = []
+    if not eokbu_yong and wol_jj in _GEUKHAN_JJ:
+        _johu_gisin_ohs = list(dict.fromkeys(
+            OH.get(c, "") for c in jokhu.get("avoid", []) if OH.get(c, "")
+        ))
+        if _johu_gisin_ohs:
+            kihwa_ohs = _johu_gisin_ohs
+            kihwa = "계절 기운이 한쪽으로 치우쳐 조후상 피해야 할 오행이 있음"
+
     # 통관용신
 
     oh_list = sorted(oh_strength.items(), key=lambda x: -x[1])
@@ -8282,6 +8303,28 @@ def get_yongshin(pils):
             gisin_clue[_oh] = f"{_oh} — {_label} 필요하나 과하면 해로움"
         elif _oh == huisin:
             gisin_clue[_oh] = f"{_oh} — 희신(용신을 돕는 오행)과 겹침, 과하면 해로움"
+        elif _oh in _johu_gisin_ohs and _oh == ilgan_oh:
+            # R9-1a: 극한월 조후기신이 일간 자신의 오행과 겹치는 사례(N=2000
+            # 시뮬 기준 극한월 순수중화의 25.4%) — 억부(신강/신약)와 무관한
+            # 별개 원리(조후)라는 걸 밝힌다. _johu_gisin_ohs로 스코프를 좁혀
+            # 신강/신약·춘추월 중화 표본은 이 분기에 도달하지 않는다.
+            gisin_clue[_oh] = (
+                f"{_oh} — 일간과 같은 기운이지만 계절이 이미 {_oh} 기운으로 "
+                f"기울어 있어, 힘이 아니라 계절 균형 차원에서 더 보태지 않는 편이 좋음"
+            )
+
+    # R9-1a: 종합_기신의 출처 표시 — menu_gaewoon 등 소비처가 억부 기신(기존
+    # "즉시 제거·금지" 톤)과 조후 기신(R9-1b, "계절 균형 조언" 순한 톤)을
+    # 구분해 처방 문구를 고를 수 있게 한다. 신강/신약은 eokbu_yong이 항상
+    # 채워져 있으므로 "억부"로만 나가고(기존 동작과 동일), 조후 기신이
+    # 채워진 극한월 순수중화만 "조후"가 된다. 춘추월 중화(둘 다 빈 채로
+    # 유지)는 빈 문자열.
+    if eokbu_yong:
+        gisin_source = "억부"
+    elif _johu_gisin_ohs:
+        gisin_source = "조후"
+    else:
+        gisin_source = ""
 
     return {
         "억부_base": eokbu_base,
@@ -8299,6 +8342,7 @@ def get_yongshin(pils):
         "희신": huisin,
         "종합_용신": all_yong,
         "종합_기신": kihwa_ohs,
+        "기신_출처": gisin_source,
         "용신_출처": yong_source,
         "기신_단서": gisin_clue,
         "월지": wol_jj,
