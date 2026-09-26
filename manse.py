@@ -25116,6 +25116,17 @@ def menu_gaewoon(pils, name, birth_year, gender):
         # 보탤 필요 없는 기운"이라 원인이 다르다. get_yongshin()이 이미
         # 반환하는 "기신_출처"를 그대로 조회만 한다(새 판정 없음).
         _gisin_from_johu_gw = _ys_gw.get("기신_출처", "") == "조후"
+        # R9-1c(2026-09-27): 춘추월(寅卯辰·申酉戌) 순수중화는 R9-1a 이후에도
+        # 종합_기신이 그대로 []다(억부·조후 둘 다 채울 근거가 없음, 설계
+        # 의도). _gisin_ohs_gw가 비면 반드시 중화(신강/신약은 kihwa_ohs가
+        # 항상 2원소 이상)이고, R9-1a로 극한월 중화는 이미 채워지므로
+        # 이 시점에 비어 있다면 춘추월 중화뿐이다 — 대체 문구용 상수.
+        _JUNGHWA_CHUNCHU_SHORT_GW = "일간의 힘이 알맞게 균형 잡혀 있어 특별히 피해야 할 기운이 뚜렷하지 않습니다."
+        _JUNGHWA_CHUNCHU_LONG_GW = (
+            "이 사주는 일간의 힘이 알맞게 균형 잡힌 중화(中和) 명식이라, 계절상으로도 "
+            "특별히 피해야 할 기운이 뚜렷하게 잡히지 않습니다. 무언가를 피하기보다 "
+            "지금의 균형 자체를 지키는 것이 이 시기의 가장 좋은 개운법입니다."
+        )
         _sw_gw       = get_yearly_luck(pils, get_saju_year())
         _sw_ss_gw    = _sw_gw.get("십성_천간", "")
         _sinsal_gw   = get_12sinsal(pils)
@@ -25290,6 +25301,9 @@ def menu_gaewoon(pils, name, birth_year, gender):
             _TOP5_GW.append(f"계절 기운 {'/'.join(_gisin_ohs_gw)} 오행 -- 굳이 더 보태지 않는 편이 좋음")
         else:
             _TOP5_GW.append(f"기신 {'/'.join(_gisin_ohs_gw)} 오행 강화 차단 -- 기신 색상·음식·방위 즉각 제거")
+    else:
+        # R9-1c: 춘추월 순수중화 — 피할 기운이 뚜렷하지 않은 것 자체가 강점
+        _TOP5_GW.append("강약 균형 양호 -- 특별히 피해야 할 기운 없음, 지금의 균형 유지가 최선")
     _TOP5_GW.append(f"용신 {'/'.join(_yong_gw) if _yong_gw else '미산출'} 오행 보강 -- 색상·음식·소품 생활 침투")
     _TOP5_GW.append("재물 기운 누수 차단 -- 지갑 정리·불필요한 지출 즉각 중단")
     _TOP5_GW.append("귀인 기운 활성화 -- 사람을 만나고 새로운 모임에 참여하라")
@@ -25792,6 +25806,12 @@ def menu_gaewoon(pils, name, birth_year, gender):
                         + "</div>"
                     )
                 st.markdown(_gi_body, unsafe_allow_html=True)
+        else:
+            # R9-1c: 춘추월 순수중화 — 기신 카드 자체가 사라지는 대신 균형 안내
+            _card(
+                "⚖️ 균형 유지 안내",
+                f'<div style="padding:3px 0;color:#444;">{_JUNGHWA_CHUNCHU_LONG_GW}</div>',
+            )
 
     # ── 섹션2: 올해 타이밍 처방 ───────────────────────────────────
     with st.expander(f"📅 제2장 — {_cur_yr_gw}년 월별 타이밍 처방", expanded=True):
@@ -25911,6 +25931,9 @@ def menu_gaewoon(pils, name, birth_year, gender):
             else:
                 _card("개명 시 피해야 할 획수 (기신)",
                       _row("피할 획수", ', '.join(str(s) for s in _gis_strokes_s6[:10]) + "획", False))
+        else:
+            # R9-1c: 춘추월 순수중화 — 피할 획수 자체가 뚜렷하지 않음
+            _card("개명 시 참고", _row("계절 균형", _JUNGHWA_CHUNCHU_SHORT_GW))
 
     # ── 섹션7: 배우자 오행 매칭 ───────────────────────────────────
     with st.expander("💑 제7장 — 배우자·인연 오행 매칭", expanded=True):
@@ -26012,6 +26035,9 @@ def menu_gaewoon(pils, name, birth_year, gender):
                                 f'❌ <b>{_goh_s9} 기신</b>: {_BAD_JOB_GW[_goh_s9]} 분야 — 기운 역류로 소진됩니다</div>'
                             )
                     _card("피해야 할 직종", _bad_job_html)
+            else:
+                # R9-1c: 춘추월 순수중화 — 피해야 할 직종이 뚜렷하지 않음
+                _card("직종 선택 시 참고", _row("계절 균형", _JUNGHWA_CHUNCHU_SHORT_GW))
 
     # ── 섹션10: 총체적 처방 TOP5 ─────────────────────────────────
     with st.expander("📋 제10장 — 종합 처방전 TOP5", expanded=True):
@@ -26146,6 +26172,10 @@ def menu_gaewoon(pils, name, birth_year, gender):
                             f'주의: {_g12.get("주의사항","")}</div>'
                         )
             _card("계절 균형 조언 요약" if _gisin_from_johu_gw else "기신 차단 요약", _gi12_html)
+        else:
+            # R9-1c: 춘추월 순수중화 — 차단할 기신 자체가 뚜렷하지 않음
+            _card("⚖️ 균형 유지 안내",
+                  f'<div style="padding:3px 0;color:#444;">{_JUNGHWA_CHUNCHU_LONG_GW}</div>')
 
         # ── 신호 체크리스트 ───────────────────────────────────────
         _sig_html = (
@@ -26350,7 +26380,10 @@ def menu_gaewoon(pils, name, birth_year, gender):
         story.append(_sp(2))
         _OHN_PD = {"木":"목(木)","火":"화(火)","土":"토(土)","金":"금(金)","水":"수(水)"}
         story.append(Paragraph(_safe(f"용신(用神): {'·'.join([_OHN_PD.get(o,o) for o in _yong_gw]) if _yong_gw else '미산출'}"), _sSb))
-        story.append(Paragraph(_safe(f"기신(忌神): {'·'.join(_gisin_ohs_gw) if _gisin_ohs_gw else '없음'}"), _sSb))
+        story.append(Paragraph(_safe(
+            f"기신(忌神): {'·'.join(_gisin_ohs_gw)}" if _gisin_ohs_gw
+            else f"계절 균형: {_JUNGHWA_CHUNCHU_SHORT_GW}"
+        ), _sSb))
         story.append(Paragraph(_safe(f"격국(格局): {_gkn_gw}"), _sSb))
         story.append(Paragraph(_safe(f"홍수맥 등급: {_hsm_grade} - {_hsm_text}"), _sSb))
         story.append(HRFlowable(width="100%", thickness=2.0, color=GOLD, spaceAfter=4*mm))
@@ -26390,6 +26423,10 @@ def menu_gaewoon(pils, name, birth_year, gender):
                         story.append(Paragraph(_safe(f"  ▶ {_goh} 기신 차단"), _sWn))
                         for _gk in ["차단방위","피할색상","피할음식","피할소품","차단비방","대체처방","21일차단","주의사항"]:
                             story.append(Paragraph(_safe(f"    - {_gk}: {_grx_pdf.get(_gk,'')}"), _sI))
+        else:
+            # R9-1c: 춘추월 순수중화 — 차단 처방 대신 균형 안내
+            story.append(Paragraph(_safe("[ 균형 유지 안내 ]"), _sB))
+            story.append(Paragraph(_safe(f"  {_JUNGHWA_CHUNCHU_LONG_GW}"), _sI))
         story.append(PageBreak())
 
         # ── 제2장: 올해 타이밍 처방 ───────────────────────────────
@@ -26523,6 +26560,9 @@ def menu_gaewoon(pils, name, birth_year, gender):
             else:
                 story.append(Paragraph(_safe("[ 개명 시 피해야 할 획수 - 기신 오행 ]"), _sB))
                 story.append(Paragraph(_safe(f"  피할 획수: {', '.join(str(s) for s in _gis_strokes_p[:8])}획"), _sWn))
+        else:
+            # R9-1c: 춘추월 순수중화 — 피할 획수 자체가 뚜렷하지 않음
+            story.append(Paragraph(_safe(f"[ 개명 시 참고 ] {_JUNGHWA_CHUNCHU_SHORT_GW}"), _sI))
         story.append(Paragraph(_safe("작명가 상담 시 반드시 사주 원국 용신을 먼저 확인하고 진행하십시오."), _sI))
         story.append(PageBreak())
 
