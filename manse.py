@@ -17641,7 +17641,7 @@ def menu2_lifeline(pils, birth_year, gender, name="내담자"):
         _dd      = DAEWOON_DIRECT.get(_cdw_ss, {})
         _verdict = _dd.get("verdict", f"{_cdw_ss} 대운이 진행 중입니다.")
         _remain  = cur_dw["종료연도"] - current_year
-        _age     = current_year - birth_year
+        _age     = current_year - birth_year + 1  # R7-1a: 세는나이 SSOT(+1 누락 교정)
 
         st.markdown(
             f"""<div style='background:{_gbg};border-radius:16px;padding:20px 24px;
