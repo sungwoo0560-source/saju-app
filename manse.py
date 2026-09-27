@@ -6648,28 +6648,23 @@ def tab_monthly(pils, birth_year, gender):
         "흉흉": "#b71c1c",
     }
 
-    LEVEL_EMOJI = {
-        "대길": "🌟",
-        "길": "✅",
-        "평길": "🟡",
-        "평": "⬜",
-        "흉": "⚠️",
-        "흉흉": "🔴",
-    }
+    # R10-2b(2026-09-26, R-월운1): raw get_monthly_luck 십성표 대신
+    # build_monthly_grades(=_month_grade 단일 판정 SSOT)를 참조한다.
+    months_data = build_monthly_grades(pils, sel_year)
 
-    months_data = [get_monthly_luck(pils, sel_year, m) for m in range(1, 13)]
+    for _mg in months_data:
+        ml = _mg["ml"]
 
-    for ml in months_data:
-        m = ml["월"]
+        m = _mg["월"]
 
         is_now = m == today.month
 
-        lcolor = LEVEL_COLOR.get(ml["길흉"], "#777")
+        lcolor = LEVEL_COLOR.get(_mg["등급"], "#777")
 
-        lemoji = LEVEL_EMOJI.get(ml["길흉"], "")
+        lemoji = _mg["이모지"]
 
         with st.expander(
-            f"{'-> ' if is_now else ''}{m}월 | {ml['월운']} | {lemoji} {ml['길흉']}",
+            f"{'-> ' if is_now else ''}{m}월 | {ml['월운']} | {lemoji} {_mg['등급']}",
             expanded=is_now,
         ):
             st.markdown(
