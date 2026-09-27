@@ -238,6 +238,10 @@ from saju_interpreter import *
 # 언더스코어로 시작하는 이름은 `import *`로 재수출되지 않으므로 명시적으로 가져온다
 # (8631653에서 saju_interpreter.py로 이동한 상수 중 manse.py가 여전히 참조하는 2개)
 from saju_interpreter import _JIJI_CHUNG, _TG_HAP_PAIRS
+# R10-2a(2026-09-27): _month_grade를 saju_interpreter.py로 이동(이름 무변경) —
+# 같은 이유로 명시적 import 필요. build_monthly_grades는 밑줄 없는 공개명이라
+# 위 `import *`로 이미 들어온다.
+from saju_interpreter import _month_grade
 from saju_report import *
 
 # ==========================================================
@@ -16179,65 +16183,9 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
     render_pdf_download_btn("current_situation", pils, name, birth_year, gender)
 
 
-_LEVEL_EMOJI = {
-    "대길": "🌟",
-    "길": "✅",
-    "평길": "🟡",
-    "평": "⬜",
-    "흉": "⚠️",
-    "흉흉": "🔴",
-}
-
-
-def _month_grade(ml, yong_list, orig_jjs, gi_list=None, gm_list=None):
-    base = ml["길흉"]; 간오행 = _OH_CG.get(ml["간"], "")
-    is_yong = 간오행 in yong_list
-    is_chung = _JJCHUNG.get(ml["지"], "") in orig_jjs
-    RANK = {"대길": 5, "길": 4, "평길": 3, "평": 2, "흉": 1, "흉흉": 0}
-    RANK_REV = {5: "대길", 4: "길", 3: "평길", 2: "평", 1: "흉", 0: "흉흉"}
-
-    if is_yong:
-        if is_chung:
-            등급 = "평길"; 시그널 = "용신月이나 충(冲) — 변동 주의"
-        elif base in ("대길", "길"):
-            등급 = "대길"; 시그널 = "용신+길십성 — 적극"
-        else:
-            등급 = "길"; 시그널 = "용신月 — 양호"
-    else:
-        if is_chung and base in ("흉", "흉흉"):
-            등급 = "흉"; 시그널 = "충+흉 — 큰 결정 보류"
-        elif is_chung:
-            등급 = "평"; 시그널 = "충(冲) — 변동 주의"
-        else:
-            등급 = ("길" if base == "대길" else base); 시그널 = ""
-
-    # 2-2: 월지 오행 보정 — 월운의 주체는 월지 (기존 등급 확정 직후 적용)
-    월지오행 = _OH_JJ.get(ml.get("지", ""), "")
-    _rank = RANK.get(등급, 2)
-    if 월지오행 and 월지오행 in yong_list:
-        if _rank < 5:
-            _rank += 1
-            등급 = RANK_REV.get(_rank, 등급)
-            시그널 = (시그널 + " · " if 시그널 else "") + "월지도 용신 - 힘 실림"
-    elif gi_list and 월지오행 and 월지오행 in gi_list:
-        if _rank > 0:
-            _rank -= 1
-            등급 = RANK_REV.get(_rank, 등급)
-            시그널 = (시그널 + " · " if 시그널 else "") + "월지 기신 - 실속 주의"
-
-    # 2-2b: 공망 보정 — 길신 공망은 길이 반감, 흉신 공망은 흉이 반감 (양방향 중립화)
-    if gm_list and ml.get("지", "") in gm_list:
-        if _rank >= 4:
-            _rank -= 1
-            등급 = RANK_REV.get(_rank, 등급)
-            시그널 = (시그널 + " · " if 시그널 else "") + "공망月 - 성과 남기 어려움"
-        elif _rank <= 1:
-            _rank += 1
-            등급 = RANK_REV.get(_rank, 등급)
-            시그널 = (시그널 + " · " if 시그널 else "") + "공망月 - 흉도 비워짐"
-
-    이모지 = _LEVEL_EMOJI.get(등급, "")
-    return (등급, 이모지, 시그널)
+# R10-2a(2026-09-27) 1단계: _month_grade·build_monthly_grades를 saju_interpreter.py로
+# 이동(판정 로직 무수정, 사전 --compare diff 0 확인). 이 자리에 다시 정의하지 않는다 —
+# manse.py는 `from saju_interpreter import *`로 두 이름을 그대로 가져다 쓴다.
 
 
 def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
@@ -16447,30 +16395,19 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
         if "marriage_status" in _sig_pyong.parameters:
             _kw_pyong["marriage_status"] = st.session_state.get("marriage_status", "미혼")
 
-        # 2-1: 실계산 길월/흉월 (계절 하드코딩 대체 — _month_grade 재사용, 판정 로직 자체는 무수정)
-        _yl_pyong = (
-            _yong_pyong.get("종합_용신") if isinstance(_yong_pyong, dict)
-            else _yong_pyong if isinstance(_yong_pyong, list)
-            else []
-        )
-        if not isinstance(_yl_pyong, list):
-            _yl_pyong = []
+        # R10-2a(2026-09-27) 1단계: 아래 12개월 순회(옛 2-1·2-3-③)를
+        # build_monthly_grades(saju_interpreter.py)로 추출 — yong_list/gi_list/
+        # orig_jjs를 함수 내부에서 재조립하므로 이 자리에서 따로 준비하지 않는다
+        # (판정 로직 자체는 무수정, 사전 --compare diff 0으로 확인).
         _cy_pyong = get_saju_year()
-        _orig_jjs_pyong = {p.get("jj", "") for p in pils}
-        # 2-2b: 공망 지지 2글자 (saju_sinsal.get_gongmang, 읽기 전용 호출)
+        # 공망 지지 2글자 — 이 함수 뒤쪽(귀인 타이밍)에서 별도로 또 쓰이므로 유지
         try:
             _gongmang_pyong = get_gongmang(pils).get("공망_지지") or ()
         except Exception:
             _gongmang_pyong = ()
         # 2-3-③: 12개월 순회 SSOT — 원본 ml + 등급/이모지/시그널을 함께 보관해
         # 아래 3곳(월별캘린더·귀인타이밍·길흉월분석)이 재순회 없이 재사용한다.
-        _mg12 = []
-        for _m_pyong in range(1, 13):
-            _ml_pyong = get_monthly_luck(pils, _cy_pyong, _m_pyong) or {}
-            _gr_pyong, _ge_pyong, _gs_pyong = _month_grade(_ml_pyong, _yl_pyong, _orig_jjs_pyong, gi_list=_gisin_pyong, gm_list=_gongmang_pyong)
-            # 월 라벨 (A안): 1월(丑월)만 세운연도+1을 병기 — 입춘 기준 세운 순서상 실제로는 다음 해 1월
-            _label_pyong = f"{_m_pyong}월({_cy_pyong + 1})" if _m_pyong == 1 else f"{_m_pyong}월"
-            _mg12.append({"월": _m_pyong, "라벨": _label_pyong, "등급": _gr_pyong, "이모지": _ge_pyong, "시그널": _gs_pyong, "ml": _ml_pyong})
+        _mg12 = build_monthly_grades(pils, _cy_pyong)
         # 월 라벨 각주 — 연도·간지는 계산값 (하드코딩 금지)
         try:
             _prev_year_luck_pyong = get_yearly_luck(pils, _cy_pyong - 1) or {}

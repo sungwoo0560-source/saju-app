@@ -8374,6 +8374,111 @@ def yongshin_sewoon_grade(sw_oh, yong_ohs, gi_ohs, sn):
     return None
 
 
+def _month_grade(ml, yong_list, orig_jjs, gi_list=None, gm_list=None):
+    """월운(月運) 길흉 등급 판정 — R-월운1(2026-07-20 형 승인) 정책: "월운 길흉은
+    이 함수 하나로만 판정하고, 표시처는 결과만 참조한다".
+
+    R10-2a(2026-09-27) 1단계: manse.py의 _month_grade(16192)를 이름 그대로 옮긴
+    것뿐 — 판정 로직·반환값 무수정(사전 --compare diff 0으로 확인). 밑줄로 시작해
+    `from saju_interpreter import *`(manse.py)로는 안 잡히므로, manse.py는
+    `from saju_interpreter import _month_grade`를 명시적으로 추가해 쓴다.
+
+    십성 고정표(base) → 용신 멤버십 → 원국 충 → 월지 오행 SSOT 보정(±1랭크)
+    → 공망 보정(양방향 중립화) 4단 혼합. 새 로직 추가 없음.
+    """
+    _JJCHUNG_MG = {"子": "午", "午": "子", "丑": "未", "未": "丑", "寅": "申", "申": "寅",
+                   "卯": "酉", "酉": "卯", "辰": "戌", "戌": "辰", "巳": "亥", "亥": "巳"}
+    _LEVEL_EMOJI_MG = {"대길": "🌟", "길": "✅", "평길": "🟡", "평": "⬜", "흉": "⚠️", "흉흉": "🔴"}
+
+    base = ml["길흉"]; 간오행 = _OH_CG.get(ml["간"], "")
+    is_yong = 간오행 in yong_list
+    is_chung = _JJCHUNG_MG.get(ml["지"], "") in orig_jjs
+    RANK = {"대길": 5, "길": 4, "평길": 3, "평": 2, "흉": 1, "흉흉": 0}
+    RANK_REV = {5: "대길", 4: "길", 3: "평길", 2: "평", 1: "흉", 0: "흉흉"}
+
+    if is_yong:
+        if is_chung:
+            등급 = "평길"; 시그널 = "용신月이나 충(冲) — 변동 주의"
+        elif base in ("대길", "길"):
+            등급 = "대길"; 시그널 = "용신+길십성 — 적극"
+        else:
+            등급 = "길"; 시그널 = "용신月 — 양호"
+    else:
+        if is_chung and base in ("흉", "흉흉"):
+            등급 = "흉"; 시그널 = "충+흉 — 큰 결정 보류"
+        elif is_chung:
+            등급 = "평"; 시그널 = "충(冲) — 변동 주의"
+        else:
+            등급 = ("길" if base == "대길" else base); 시그널 = ""
+
+    # 2-2: 월지 오행 보정 — 월운의 주체는 월지 (기존 등급 확정 직후 적용)
+    월지오행 = _OH_JJ.get(ml.get("지", ""), "")
+    _rank = RANK.get(등급, 2)
+    if 월지오행 and 월지오행 in yong_list:
+        if _rank < 5:
+            _rank += 1
+            등급 = RANK_REV.get(_rank, 등급)
+            시그널 = (시그널 + " · " if 시그널 else "") + "월지도 용신 - 힘 실림"
+    elif gi_list and 월지오행 and 월지오행 in gi_list:
+        if _rank > 0:
+            _rank -= 1
+            등급 = RANK_REV.get(_rank, 등급)
+            시그널 = (시그널 + " · " if 시그널 else "") + "월지 기신 - 실속 주의"
+
+    # 2-2b: 공망 보정 — 길신 공망은 길이 반감, 흉신 공망은 흉이 반감 (양방향 중립화)
+    if gm_list and ml.get("지", "") in gm_list:
+        if _rank >= 4:
+            _rank -= 1
+            등급 = RANK_REV.get(_rank, 등급)
+            시그널 = (시그널 + " · " if 시그널 else "") + "공망月 - 성과 남기 어려움"
+        elif _rank <= 1:
+            _rank += 1
+            등급 = RANK_REV.get(_rank, 등급)
+            시그널 = (시그널 + " · " if 시그널 else "") + "공망月 - 흉도 비워짐"
+
+    이모지 = _LEVEL_EMOJI_MG.get(등급, "")
+    return (등급, 이모지, 시그널)
+
+
+def build_monthly_grades(pils, year):
+    """12개월 등급 산출 헬퍼 — pils·세운연도만 받아 종합_용신/종합_기신/원국
+    지지/공망을 내부에서 조립하고, 1~12월 각각에 _month_grade()를 적용한 결과
+    리스트를 반환한다. 반환 원소: {"월","라벨","등급","이모지","시그널","ml"}.
+
+    R10-2a(2026-09-27) 1단계: manse.py menu1_report(16451-16473)의 _mg12 조립부를
+    그대로 옮긴 것 — 새 판정 로직 없음. "라벨"의 1월(다음해 병기) 특례도 원본과
+    동일하게 유지한다(입춘 기준 세운 순서상 1월은 다음 해 소속).
+
+    R-월운1 정책(2026-07-20 형 승인)에 따라 위반 지점(R10-2 진단, tab_monthly·
+    render_pdf_download_btn·menu8_bihang·menu_gaewoon·오늘의 운세·saju_interpreter
+    서술·saju_zhengtong 폴백)을 이 헬퍼 호출로 전환하는 것이 R10-2a 2단계 목표다.
+    단일 월("오늘·이달")만 필요한 소비처는 이 결과 리스트에서 해당 월 1개만
+    꺼내 쓰면 된다(별도 단일-월 API를 새로 만들지 않는다 — 헬퍼는 하나만 둔다).
+    """
+    ys = get_yongshin(pils) or {}
+    yong_list = ys.get("종합_용신", [])
+    if not isinstance(yong_list, list):
+        yong_list = []
+    gi_raw = ys.get("종합_기신", [])
+    gi_list = gi_raw if isinstance(gi_raw, list) and gi_raw else None
+    orig_jjs = {p.get("jj", "") for p in pils}
+    try:
+        gm_list = get_gongmang(pils).get("공망_지지") or ()
+    except Exception:
+        gm_list = ()
+
+    result = []
+    for m in range(1, 13):
+        ml = get_monthly_luck(pils, year, m) or {}
+        if not ml:
+            continue
+        grade, emoji, signal = _month_grade(ml, yong_list, orig_jjs, gi_list=gi_list, gm_list=gm_list)
+        # 1월(丑월)만 세운연도+1을 병기 — 입춘 기준 세운 순서상 실제로는 다음 해 1월
+        label = f"{m}월({year + 1})" if m == 1 else f"{m}월"
+        result.append({"월": m, "라벨": label, "등급": grade, "이모지": emoji, "시그널": signal, "ml": ml})
+    return result
+
+
 def format_yong_with_source(yong_list, yong_source):
     """종합_용신 리스트를 출처 라벨과 함께 문자열로 포맷(M-T3 라운드, B(가)).
     새 판정 없음 — get_yongshin()이 이미 계산한 "용신_출처"를 그대로 조회만 한다.

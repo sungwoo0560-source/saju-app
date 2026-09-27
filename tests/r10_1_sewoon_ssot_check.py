@@ -17,9 +17,10 @@ R10-1b: saju_report.py 1816~1838(올해 길흉 판단)도 같은 헬퍼로 전�
 전 vs 후 모두 "현재상황/미래3년" 기준(= yongshin_sewoon_grade 자체)과 비교해
 불일치율이 46.5%/26.1% -> 0%/0%로 떨어지는지 확인한다.
 
-추가 측정(수정 없음, R10-1 지시 항목): 월운 — menu_current_situation의 _month_grade
-(십성표 base + 월지 SSOT 보정 + 충 + 공망 4단 혼합) vs menu10_monthly "이 달" 배지
-(종합_용신/종합_기신 순수 멤버십, 십성표 미참조) 2026년 12개월 불일치율.
+추가 측정(수정 없음, R10-1 지시 항목): 월운 — menu_current_situation이 쓰던 _month_grade
+(당시 manse.py 소속, R10-2a에서 saju_interpreter.py로 이동·이름 무변경, 판정 로직도
+무변경 — 십성표 base + 월지 SSOT 보정 + 충 + 공망 4단 혼합) vs menu10_monthly "이 달"
+배지(종합_용신/종합_기신 순수 멤버십, 십성표 미참조) 2026년 12개월 불일치율.
 
 실행: PYTHONIOENCODING=utf-8 python tests/r10_1_sewoon_ssot_check.py
 """
@@ -121,7 +122,8 @@ _RANK_M = {"대길": 5, "길": 4, "평길": 3, "평": 2, "흉": 1, "흉흉": 0}
 
 
 def _month_grade_replica(ml, yong_list, orig_jjs, gi_list, gm_list, JJCHUNG):
-    """manse.py _month_grade(16197)의 재구현 — 새 판정 아님, 기존 공식 그대로 복제."""
+    """saju_interpreter._month_grade(R10-2a 이동, 원래 manse.py:16197)의 재구현
+    — 새 판정 아님, 기존 공식 그대로 복제."""
     base = ml["길흉"]
     oh_cg = ml["_오행_천간"]
     is_yong = oh_cg in yong_list
