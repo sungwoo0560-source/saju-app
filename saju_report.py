@@ -1718,6 +1718,12 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str="", dram
 
                     _yohs = _ys_c.get("종합_용신", [])
 
+                    # R10-1b: "올해 길흉 판단"(아래) SSOT 보정용 — 종합_기신·신강신약
+                    _gohs = _ys_c.get("종합_기신", [])
+                    if not isinstance(_gohs, list):
+                        _gohs = []
+                    _sn_c = (get_ilgan_strength(ilgan, pils) or {}).get("신강신약", "")
+
                     _ioh = OH.get(ilgan, "")
 
                     _cdw_ss = TEN_GODS_MATRIX.get(ilgan, {}).get(_cdw["cg"], "-") if _cdw else "-"
@@ -1813,9 +1819,22 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str="", dram
 
                     y = write(c, _sw_detail, y, size=12, line_h=7.5)
 
-                    # 올해 길흉 판단
+                    # 올해 길흉 판단(R10-1b: yongshin_sewoon_grade 공용 헬퍼로 SSOT
+                    # 보정 적용 — 이전엔 get_yearly_luck의 raw 십성 고정표 값만 보고
+                    # 판단해 화면(현재상황·미래3년)과 어긋났다(실측: 불일치 46.5%,
+                    # 완전반대 26.1%). menu_current_situation(13479)·menu4_future3
+                    # (18223)와 동일한 헬퍼를 쓰므로 동일 판정이 보장된다.
+                    _sw_c_corr = yongshin_sewoon_grade(_sw_c.get("오행_천간", ""), _yohs, _gohs, _sn_c)
+                    if _sw_c_corr:
+                        _sw_c_bucket = _sw_c_corr
+                    elif "길" in _sw_c.get("길흉", ""):
+                        _sw_c_bucket = "길"
+                    elif "흉" in _sw_c.get("길흉", ""):
+                        _sw_c_bucket = "흉"
+                    else:
+                        _sw_c_bucket = "평"
 
-                    if "길" in _sw_c.get("길흉", ""):
+                    if _sw_c_bucket == "길":
                         y = write(
                             c,
                             "허허, 올해는 전반적으로 길한 기운이 흐르는구먼. 이 기운을 최대한 활용하게!",
@@ -1825,13 +1844,25 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str="", dram
                             line_h=7.5,
                         )
 
-                    elif "흉" in _sw_c.get("길흉", ""):
+                    elif _sw_c_bucket == "흉":
                         y = write(
                             c,
                             "허어, 올해는 흉한 기운이 있으니 조심해야 하느니라. 무리한 결정은 삼가게.",
                             y,
                             size=12,
                             color=(0.5, 0.1, 0.1),
+                            line_h=7.5,
+                        )
+
+                    else:
+                        # R10-1b 신설: 이전엔 "평" 판단문 자체가 없어 침묵했다
+                        # (raw 길흉이 "평(平)"이면 두 분기 다 미매치 → 무출력).
+                        y = write(
+                            c,
+                            "올해는 특별히 좋지도 나쁘지도 않은 평탄한 해로구먼. 무리하지 않고 하던 대로 차분히 나아가면 되느니라.",
+                            y,
+                            size=12,
+                            color=(0.3, 0.3, 0.3),
                             line_h=7.5,
                         )
 
