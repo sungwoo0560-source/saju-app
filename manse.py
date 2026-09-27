@@ -8376,9 +8376,13 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
                                     elif isinstance(_jf_gi, list) and _oh3 in _jf_gi: _gh3 = "흉(凶)"
                                 _age3 = _yr3 - birth_year + 1
                                 y = _write(f"[{_yr3}년 {_age3}세] {_ss3} [{_gh3}]", y, size=10)
-                                _mons3 = get_monthly_luck(pils, _yr3) or []
-                                _gm3 = [str(m.get("월","")) for m in _mons3 if m.get("길흉","") == "길"]
-                                _bm3 = [str(m.get("월","")) for m in _mons3 if m.get("길흉","") == "흉"]
+                                # R10-2c(R-월운1): get_monthly_luck(pils, _yr3)를
+                                # month 인자 없이 부르던 버그(항상 TypeError -> 이
+                                # try/except로 조용히 폴백)를 build_monthly_grades
+                                # 전환과 함께 해소 — 등급도 이제 SSOT 단일 판정 참조.
+                                _mg3 = build_monthly_grades(pils, _yr3)
+                                _gm3 = [str(x["월"]) for x in _mg3 if x["등급"] in ("대길", "길")]
+                                _bm3 = [str(x["월"]) for x in _mg3 if x["등급"] in ("흉", "흉흉")]
                                 if _gm3: y = _write(f"  길월 {','.join(_gm3[:4])}월 — 계약·결정·시작 집중", y, size=9)
                                 if _bm3: y = _write(f"  흉월 {','.join(_bm3[:4])}월 — 큰 결정 절대 X", y, size=9)
                         except Exception:
@@ -8461,13 +8465,20 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
                     # 월별 길흉
                     y = _sec(f"📆 {_cur_yr}년 월별 길흉 분석", y)
                     try:
-                        _yr_mons = get_monthly_luck(pils, _cur_yr) or []
-                        for _ym in _yr_mons:
-                            _ym_mon = _ym.get("월", "")
-                            _ym_ss  = _ym.get("십성_천간", "")
-                            _ym_gh  = _ym.get("길흉", "평")
-                            _ym_col = (0.1,0.4,0.1) if _ym_gh=="길" else ((0.6,0.1,0.1) if _ym_gh=="흉" else (0.1,0.1,0.1))
-                            _ym_tag = "▲ 길월 — 계약·결정·시작 집중" if _ym_gh=="길" else ("▼ 흉월 — 큰 결정 절대 X" if _ym_gh=="흉" else "― 평월 — 현상 유지")
+                        # R10-2c(R-월운1): get_monthly_luck(pils, _cur_yr)를 month
+                        # 인자 없이 부르던 버그(항상 TypeError -> except 폴백) +
+                        # 존재하지 않는 "십성_천간" 키(항상 "") 버그를 build_monthly_grades
+                        # 전환과 함께 해소. 등급 분류도 대길·길=좋은 달/흉·흉흉=나쁜
+                        # 달/평길·평=중립으로 통일(기존은 "길"/"흉" 완전일치만 봐서
+                        # 대길·흉흉을 못 잡았다).
+                        _mg_yr = build_monthly_grades(pils, _cur_yr)
+                        for _x_y in _mg_yr:
+                            _ym_mon = _x_y["월"]
+                            _ym_ss  = _x_y["ml"].get("십성", "")
+                            _ym_good = _x_y["등급"] in ("대길", "길")
+                            _ym_bad  = _x_y["등급"] in ("흉", "흉흉")
+                            _ym_col = (0.1,0.4,0.1) if _ym_good else ((0.6,0.1,0.1) if _ym_bad else (0.1,0.1,0.1))
+                            _ym_tag = "▲ 길월 — 계약·결정·시작 집중" if _ym_good else ("▼ 흉월 — 큰 결정 절대 X" if _ym_bad else "― 평월 — 현상 유지")
                             y = _write(f"{_ym_mon:>2}월 [{_ym_ss}] {_ym_tag}", y, size=9, color=_ym_col)
                     except Exception:
                         y = _write(f"{_cur_yr}년 월별 분석 불가 — 앱에서 확인하세요", y, size=9)
