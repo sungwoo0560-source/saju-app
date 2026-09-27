@@ -13928,7 +13928,6 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
     _danger_signals = []
     _직설_판정 = []
     try:
-        from saju_interpreter import get_12sinsal, get_yearly_luck
         _sinsal_list = get_12sinsal(pils)
         _yl = get_yearly_luck(pils, cur_year)
         _jj_cur = _yl.get("jj", "")
