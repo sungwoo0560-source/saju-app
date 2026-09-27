@@ -7669,6 +7669,10 @@ class LocalSajuNarrator:
             cur_tag   = " ← 이번 달" if is_cur else ""
 
             # ── 길흉일 계산 (일진 기준) ─────────────────────────────
+            # R12-2: 충은 대상 글자 용신/기신에 따라 양면(충=오행약화 A안) —
+            # 일진과 충 관계인 원국 지지가 용신이면 -1(용신이 충으로 약화되어 감점),
+            # 기신이면 +0.5(기신이 충으로 약화되어 소폭 가점). 지지 오행은 기존
+            # _OH_JJ(15649행) 재사용 — 새 매핑 만들지 않음.
             import calendar as _cal
             _days_in_m = _cal.monthrange(yr, m)[1]
             _CHUNG_D = {"子":"午","午":"子","丑":"未","未":"丑","寅":"申","申":"寅",
@@ -7678,13 +7682,29 @@ class LocalSajuNarrator:
             _hyung_days = []
             for _d in range(1, _days_in_m + 1):
                 try:
-                    _iljin = AstroEngine.get_iljin(yr, m, _d)
+                    _iljin = ManseCalendarEngine.get_iljin(yr, m, _d)
                     _ij_oh = _iljin.get("oh", "")
                     _ij_jj = _iljin.get("jj", "")
-                    _is_chung_d = any(_CHUNG_D.get(_ij_jj,"") == _oj for _oj in _orig_jjs_m)
-                    if not _is_chung_d and _ij_oh in yongshin:
+                    _ij_jj_oh = _OH_JJ.get(_ij_jj, "")
+                    _d_score = 0.0
+                    if _ij_oh in yongshin:
+                        _d_score += 1
+                    elif _ij_oh in gisin:
+                        _d_score -= 1
+                    if _ij_jj_oh in yongshin:
+                        _d_score += 1
+                    elif _ij_jj_oh in gisin:
+                        _d_score -= 1
+                    for _oj in _orig_jjs_m:
+                        if _CHUNG_D.get(_ij_jj, "") == _oj:
+                            _oj_oh = _OH_JJ.get(_oj, "")
+                            if _oj_oh in yongshin:
+                                _d_score -= 1
+                            elif _oj_oh in gisin:
+                                _d_score += 0.5
+                    if _d_score >= 2:
                         _gil_days.append(_d)
-                    elif _is_chung_d or _ij_oh in gisin:
+                    elif _d_score <= -2:
                         _hyung_days.append(_d)
                 except Exception:
                     pass
@@ -7708,7 +7728,7 @@ class LocalSajuNarrator:
                 )
                 lines.append(
                     f"⭐ {_JJ_ACTION.get(m_jj, '유연하게 대처하십시오.')}  |  "
-                    f"📅 길일 {len(_gil_days)}일 / ⛔ 흉일 {len(_hyung_days)}일"
+                    f"📅 길일 {len(_gil_days)}일 / ⛔ 주의일 {len(_hyung_days)}일"
                 )
                 if is_ys:
                     lines.append(f"\n> 🌟 용신 오행({OHN.get(m_oh, m_oh)})의 달 — 중요한 결정·계약·새 시작을 이 달에 집중하십시오.")
