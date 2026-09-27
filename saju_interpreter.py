@@ -12893,19 +12893,18 @@ def _nar_future(ctx):
         try:
             month_data = []
 
-            for m in range(1, 13):
-                ml = get_monthly_luck(pils, current_year, m) if "get_monthly_luck" in dir() else None
+            # R10-2g(R-월운1): _get_yongshin_match(용신만) + 하드코딩 "편관·겁재=흉"
+            # 십성 목록 대신 build_monthly_grades(=_month_grade 단일 판정)를 참조한다.
+            for _x_m in build_monthly_grades(pils, current_year):
+                ml = _x_m["ml"]
 
-                if ml:
-                    m_ss = ml.get("십성", "")
+                m_ss = ml.get("십성", "")
 
-                    m_str = ml.get("월주", "")
+                m_str = ml.get("월주", "")
 
-                    is_m_yong = _get_yongshin_match(m_ss, yongshin_ohs, ilgan_oh) == "yong"
+                mark = "*" if _x_m["등급"] in ("대길", "길") else "!" if _x_m["등급"] in ("흉", "흉흉") else "o"
 
-                    mark = "*" if is_m_yong else "!" if m_ss in ["편관", "겁재"] else "o"
-
-                    month_data.append(f"  {m:2d}월 {m_str:6s} ({m_ss:4s}) {mark}")
+                month_data.append(f"  {_x_m['월']:2d}월 {m_str:6s} ({m_ss:4s}) {mark}")
 
             if month_data:
                 result.append("\n".join(month_data))

@@ -8006,12 +8006,19 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
         "金": "4월·5월 <span style='color:#888;font-size:12px;'>(火가 金을 극함)</span>",
         "水": "3월·6월·9월 <span style='color:#888;font-size:12px;'>(土가 水를 극함)</span>",
     }
+    # R10-2g(R-월운1): gilwol_list/hyungwol_list가 None(호출부가 아예 안 넘김,
+    # 하위호환)인지 []( _month_grade가 실제로 계산했는데 대길·길/흉·흉흉 월이
+    # 진짜 0건)인지 구분한다 — 후자를 오행 계절 고정표로 지어내지 않는다.
     if gilwol_list:
         _gilwol_str = "·".join(f"{m}월" for m in gilwol_list)
+    elif gilwol_list is not None:
+        _gilwol_str = "특별히 두드러진 길월은 없는 해입니다"
     else:
         _gilwol_str = _GILWOL_MAP.get(_YONG_OH1, "용신 기운이 강한 달")
     if hyungwol_list:
         _흉wol_str = "·".join(f"{m}월" for m in hyungwol_list)
+    elif hyungwol_list is not None:
+        _흉wol_str = "특별히 조심할 흉월은 없는 해입니다"
     else:
         _흉wol_str  = _흉WOL_MAP.get(_GI_OH1,   "기신 기운이 강한 달")
 
