@@ -21773,17 +21773,15 @@ def menu8_bihang(pils, name, birth_year, gender):
     st.markdown(f"""<div style="background:#fff0f8;border:2px solid #e91e8c;border-radius:14px;padding:20px;margin:16px 0">
 <div style="font-size:16px;font-weight:900;color:#880e4f;margin-bottom:14px">📅 {_cm3}월 길일·흉일 & 행동지침</div>""", unsafe_allow_html=True)
     try:
-        _ys3 = get_yongshin(pils)
-        _yong3 = _ys3.get("종합_용신",[]) if isinstance(_ys3.get("종합_용신",[]),list) else []
-        _gi3 = _ys3.get("종합_기신", []) if isinstance(_ys3.get("종합_기신",[]), list) else []
-        _OH3 = _OH_CG
+        # R10-2d(R-월운1): raw SSOT 멤버십(십성·충 미반영) 대신
+        # build_monthly_grades(=_month_grade 단일 판정)를 참조한다. 좋은/나쁜 달
+        # 분류도 대길·길=좋은 달/흉·흉흉=나쁜 달/평길·평=중립으로 통일.
+        _mg3 = build_monthly_grades(pils, _cy3)
         _good_m, _bad_m = [], []
-        for _m3 in range(1,13):
-            _ml3 = get_monthly_luck(pils, _cy3, _m3) or {}
-            _ml_oh3 = _OH3.get(_ml3.get("간","")[:1],"")
-            _ml_ss3 = _ml3.get("십성","")
-            if _ml_oh3 in _yong3: _good_m.append(f"{_m3}월({_ml_ss3})")
-            elif _ml_oh3 in _gi3:  _bad_m.append(f"{_m3}월({_ml_ss3})")
+        for _x3 in _mg3:
+            _ml_ss3 = _x3["ml"].get("십성","")
+            if _x3["등급"] in ("대길","길"): _good_m.append(f"{_x3['월']}월({_ml_ss3})")
+            elif _x3["등급"] in ("흉","흉흉"): _bad_m.append(f"{_x3['월']}월({_ml_ss3})")
         _MONTH_ACTION = {
             "편재":"💰 적극 움직이면 돈이 되는 달. 미뤄둔 투자·영업 지금 실행.",
             "정재":"💰 꾸준함이 재물을 부르는 달. 저축·정산·계약 마무리 집중.",
@@ -21793,11 +21791,12 @@ def menu8_bihang(pils, name, birth_year, gender):
             "정관":"✅ 조직과 원칙 안에서 움직이면 인정받는 달.",
             "겁재":"🔴 지출·투자·보증 최대한 줄여라. 돈이 나가는 달.",
         }
-        _cur_ml3 = get_monthly_luck(pils, _cy3, _cm3) or {}
+        _cur_x3 = next((x for x in _mg3 if x["월"] == _cm3), {})  # 단일 월: 12개월 결과에서 추출
+        _cur_ml3 = _cur_x3.get("ml", {})
         _cur_ml_ss3 = _cur_ml3.get("십성","")
         _ml_action3 = _MONTH_ACTION.get(_cur_ml_ss3, f"[{_cur_ml_ss3}] — 흐름을 잘 읽고 신중하게 움직이게.")
-        _cur_ml_oh3 = _OH3.get(_cur_ml3.get("간","")[:1],"")
-        _m_color = "#27ae60" if _cur_ml_oh3 in _yong3 else "#e74c3c" if _cur_ml_oh3 in _gi3 else "#2980b9"
+        _cur_grade3 = _cur_x3.get("등급","평")
+        _m_color = "#27ae60" if _cur_grade3 in ("대길","길") else "#e74c3c" if _cur_grade3 in ("흉","흉흉") else "#2980b9"
         st.markdown(f"""<div style="background:#fff;border:2px solid {_m_color};border-radius:10px;padding:14px;margin-bottom:10px">
 <div style="font-size:14px;font-weight:900;color:{_m_color};margin-bottom:6px">{_cm3}월 — {_cur_ml3.get('간','')}{_cur_ml3.get('지','')}</div>
 <div style="font-size:13px;color:#333;line-height:1.8">{_ml_action3}</div>
