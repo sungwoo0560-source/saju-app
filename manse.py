@@ -25153,16 +25153,22 @@ def menu_gaewoon(pils, name, birth_year, gender):
         "偏印":"공부·자격증·내면 탐구","正印":"인맥 활용·학업·상사 지원 받기",
         "比肩":"독립 행보·경쟁 도전·체력 강화","劫財":"동업 주의·현금 보관·지출 절제",
     }
+    # R10-2e(R-월운1): raw get_monthly_luck 십성표 대신 build_monthly_grades
+    # (=_month_grade 단일 판정)를 참조한다. 하위 13곳이 이 5-tuple(월,한글월,
+    # "(한자)" 부기 길흉문자열,랭크,십성)을 그대로 unpack해 쓰므로, 등급을 기존과
+    # 같은 "(한자)" 부기 형식으로 어댑터 변환해 튜플 형식 자체는 무변경 유지한다.
+    _GH_HANJA_MAP_GW = {"대길":"대길(大吉)","길":"길(吉)","평길":"평길(平吉)",
+                        "평":"평(平)","흉":"흉(凶)","흉흉":"흉흉(凶凶)"}
     _cur_yr_gw   = get_saju_year()
+    _mg_gw = build_monthly_grades(pils, _cur_yr_gw)
     _mon_data_gw = []
-    for _m_g in range(1, 13):
-        try:
-            _ml_g = get_monthly_luck(pils, _cur_yr_gw, _m_g) or {}
-        except Exception:
-            _ml_g = {}
-        _gh_g   = _ml_g.get("길흉","평(平)")
-        _ss_m_g = _ml_g.get("십성","")
-        _mon_data_gw.append((_m_g, _MON_KR_GW[_m_g-1], _gh_g, _GH_RANK_GW.get(_gh_g,2), _ss_m_g))
+    for _x_g in _mg_gw:
+        # 랭크는 반드시 bare 등급(_x_g["등급"])으로 조회한다 — _GH_RANK_GW는
+        # R10-2e-0 수정으로 bare 키를 쓰므로, 여기서 다시 한자 부기(_gh_g)를
+        # 키로 넣으면 R10-2e-0 이전의 "항상 기본값 2" 버그가 재발한다.
+        _gh_g   = _GH_HANJA_MAP_GW.get(_x_g["등급"], "평(平)")
+        _ss_m_g = _x_g["ml"].get("십성","")
+        _mon_data_gw.append((_x_g["월"], _MON_KR_GW[_x_g["월"]-1], _gh_g, _GH_RANK_GW.get(_x_g["등급"],2), _ss_m_g))
     _sorted_gw = sorted(_mon_data_gw, key=lambda x: -x[3])
     _top3_gw   = _sorted_gw[:3]
     _bot2_gw   = _sorted_gw[-2:]
