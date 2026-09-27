@@ -28157,15 +28157,26 @@ def main():
         _pils_b = _ss.get("saju_pils")
 
         if _pils_b:
-            _ml_b = get_monthly_luck(_pils_b, _today_b.year, _today_b.month) or {}
-            _gil_b = _ml_b.get("길흉", "평(平)")
+            # R10-2f(R-월운1): raw get_monthly_luck 십성표 대신 build_monthly_grades
+            # (=_month_grade 단일 판정)를 참조한다. 등급 분류도 대길·길=좋은 달/
+            # 흉·흉흉=나쁜 달/평길·평=중립으로 통일(기존 부분일치 "길" in/"흉" in
+            # 은 "평길"도 "길"에 걸리는 등 부정확했다).
+            _GH_HANJA_MAP_B = {"대길":"대길(大吉)","길":"길(吉)","평길":"평길(平吉)",
+                               "평":"평(平)","흉":"흉(凶)","흉흉":"흉흉(凶凶)"}
+            _mg_b = build_monthly_grades(_pils_b, _today_b.year)
+            _cur_x_b = next((x for x in _mg_b if x["월"] == _today_b.month), {})  # 단일 월 추출
+            _ml_b = _cur_x_b.get("ml", {})
+            _grade_b = _cur_x_b.get("등급", "평")
+            _gil_b = _GH_HANJA_MAP_B.get(_grade_b, "평(平)")
             _ss_mon_b = _ml_b.get("십성", "")
+            _good_b = _grade_b in ("대길", "길")
+            _bad_b  = _grade_b in ("흉", "흉흉")
             # 재물
-            _money_icon_b  = "💰 좋음" if "재" in _ss_mon_b or "길" in _gil_b else ("⚠️ 주의" if "흉" in _gil_b else "➖ 보통")
+            _money_icon_b  = "💰 좋음" if "재" in _ss_mon_b or _good_b else ("⚠️ 주의" if _bad_b else "➖ 보통")
             # 건강
-            _health_icon_b = "💪 양호" if "인" in _ss_mon_b or "대길" in _gil_b else ("🤒 주의" if "흉흉" in _gil_b else "➖ 보통")
+            _health_icon_b = "💪 양호" if "인" in _ss_mon_b or _grade_b == "대길" else ("🤒 주의" if _grade_b == "흉흉" else "➖ 보통")
             # 관계
-            _rel_icon_b    = "❤️ 원만" if "관" in _ss_mon_b or "식" in _ss_mon_b else ("⚡ 마찰" if "흉" in _gil_b else "➖ 평온")
+            _rel_icon_b    = "❤️ 원만" if "관" in _ss_mon_b or "식" in _ss_mon_b else ("⚡ 마찰" if _bad_b else "➖ 평온")
             _briefing_b    = (
                 f"이달은 <b>{_gil_b}</b> 운입니다. "
                 f"오늘 일진 <b>{_day_cg_b}{_day_jj_b}</b>({_OHKR_B.get(_cg_oh_b,'')})의 기운이 흐르는 날, "
