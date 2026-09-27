@@ -5689,27 +5689,19 @@ def build_ilju_core_line(pils):
         try:
             _gk_short = ""
             try:
+                _gyeok_r = get_gyeokguk(pils) or {}
+                gyeok_name = _gyeok_r.get("격국명", "")
                 for _k in _GK_DEPICT:
                     if _k in gyeok_name:
                         import re as _re
                         _gk_short = _re.sub(r"\([^)]*\)", "", gyeok_name)
                         break
-            except NameError:
-                pass
-            _grp_short = ""
-            try:
-                _grp_map = {"비겁":"혼자 서야", "식상":"재능으로 풀어야",
-                            "재성":"현실 감각으로", "관성":"조직에서 빛나야",
-                            "인성":"전문성으로 서야"}
-                _grp_short = _grp_map.get(_top_grp, "")
-            except NameError:
+            except Exception:
                 pass
             _bon_head = bonjil.split(",")[0] if bonjil else ""
             _head = f"🔮 한마디: {_bon_head} {ilgan}{ilji}"
             if _gk_short:
                 _head += f" — {_gk_short}"
-            if _grp_short:
-                _head += f", {_grp_short} 할 사람"
             _head += "."
             line = _head + "\n\n" + line
         except Exception:
