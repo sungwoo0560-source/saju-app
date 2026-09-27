@@ -13476,17 +13476,12 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
         ilgan = "甲"; iljj = "子"; sn = "중화"; yong_str = ""; gi_str = ""
         yong_ohs = []; gi_ohs = []
 
-    # 용신보정: 세운 오행이 용신이면 sw_gil='길', 기신이면 '흉'
-    # 신강/신약인데 용신·기신 어디에도 안 속하는 오행(주로 식상)은
-    # YEARLY_LUCK_NARRATIVE 고정표(예: 食神=大吉)를 그대로 두지 않고 '평'으로 중화
+    # 용신보정(R10-1a: yongshin_sewoon_grade 공용 헬퍼로 추출, 공식 무변경)
     try:
         _sw_oh_c = (get_yearly_luck(pils, cur_year) or {}).get("오행_천간", "")
-        if _sw_oh_c and _sw_oh_c in yong_ohs:
-            sw_gil = "길"
-        elif _sw_oh_c and _sw_oh_c in gi_ohs:
-            sw_gil = "흉"
-        elif _sw_oh_c and ("신강" in sn or "신약" in sn):
-            sw_gil = "평"
+        _sw_corr_c = yongshin_sewoon_grade(_sw_oh_c, yong_ohs, gi_ohs, sn)
+        if _sw_corr_c:
+            sw_gil = _sw_corr_c
     except Exception:
         pass
 
@@ -18220,13 +18215,11 @@ def menu4_future3(
 
         is_yong_sw = _get_yongshin_match(sw_ss, yongshin_ohs, ilgan_oh) == "yong"
 
+        # R10-1a: yongshin_sewoon_grade 공용 헬퍼로 추출, 공식 무변경(길/흉/평 한글
+        # 표기만 이 탭 고유의 "(吉)/(凶)/(平)" 부기 형식으로 감싼다)
         _m4_sw_oh = sw.get("오행_천간","")
-        _m4_gh = (
-            "길(吉)" if _m4_sw_oh and _m4_sw_oh in yongshin_ohs
-            else "흉(凶)" if _m4_sw_oh and _m4_sw_oh in gisin_ohs
-            else "평(平)" if _m4_sw_oh and ("신강" in _m4_sn or "신약" in _m4_sn)
-            else sw.get("길흉","평")
-        )
+        _m4_corr = yongshin_sewoon_grade(_m4_sw_oh, yongshin_ohs, gisin_ohs, _m4_sn)
+        _m4_gh = {"길": "길(吉)", "흉": "흉(凶)", "평": "평(平)"}.get(_m4_corr) or sw.get("길흉","평")
 
         years_data.append(
             {

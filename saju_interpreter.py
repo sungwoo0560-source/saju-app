@@ -8349,6 +8349,31 @@ def get_yongshin(pils):
     }
 
 
+def yongshin_sewoon_grade(sw_oh, yong_ohs, gi_ohs, sn):
+    """세운(연운) 오행의 SSOT 보정 길흉 판정 — '길'/'흉'/'평'/None(보정 대상 아님, raw 유지)
+    중 하나를 반환한다.
+
+    R10-1a(2026-09-27): manse.py의 menu_current_situation(13479)·menu4_future3(18223)에
+    각각 인라인으로 동일하게 있던 공식을 추출한 것뿐 — 새 판정 로직 아님. 두 탭·PDF(R10-1b,
+    saju_report.py)가 이 함수 하나를 공용으로 부른다.
+
+    - 세운 오행이 종합_용신에 속하면 "길"
+    - 종합_기신에 속하면 "흉"
+    - 신강/신약인데(중화 아님) 용신·기신 어디에도 안 속하면(주로 식상) "평"으로 중화
+      — YEARLY_LUCK_NARRATIVE 고정표(예: 食神=大吉)를 사람의 용신·기신과 무관하게
+      그대로 쓰지 않기 위함.
+    - 위 셋 다 아니면(예: 중화이면서 조후용신·조후기신 어디에도 안 속함) None을
+      반환해 호출부가 원래의 raw 십성표 길흉을 그대로 쓰게 한다.
+    """
+    if sw_oh and sw_oh in yong_ohs:
+        return "길"
+    elif sw_oh and sw_oh in gi_ohs:
+        return "흉"
+    elif sw_oh and ("신강" in sn or "신약" in sn):
+        return "평"
+    return None
+
+
 def format_yong_with_source(yong_list, yong_source):
     """종합_용신 리스트를 출처 라벨과 함께 문자열로 포맷(M-T3 라운드, B(가)).
     새 판정 없음 — get_yongshin()이 이미 계산한 "용신_출처"를 그대로 조회만 한다.
