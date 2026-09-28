@@ -19844,11 +19844,9 @@ def menu9_daily(pils, name, birth_year, gender):
 
     def get_day_pillar(dt):
 
-        base = date(1924, 1, 1)
+        r = ManseCalendarEngine.get_iljin(dt.year, dt.month, dt.day)
 
-        delta = (dt.date() - base).days if hasattr(dt, "date") else (dt - base).days
-
-        return CG[delta % 10], JJ[delta % 12]
+        return r["cg"], r["jj"]
 
     today_cg, today_jj = get_day_pillar(today)
     today_ss = TEN_GODS_MATRIX.get(ilgan, {}).get(today_cg, "-")
@@ -20323,11 +20321,9 @@ def menu10_monthly(pils, name, birth_year, gender):
 
     def get_day_pillar_local(dt):
 
-        base = date(1924, 1, 1)
+        r = ManseCalendarEngine.get_iljin(dt.year, dt.month, dt.day)
 
-        delta = (dt.date() - base).days if hasattr(dt, "date") else (dt - base).days
-
-        return CG[delta % 10], JJ[delta % 12]
+        return r["cg"], r["jj"]
 
     # 이달 전체 일진 분석
 

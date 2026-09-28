@@ -7138,10 +7138,9 @@ class LocalSajuNarrator:
         _OH = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
                "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
 
-        base = date(1924, 1, 1)
-        delta = (today - base).days
-        today_cg = _CG[delta % 10]
-        today_jj = _JJ[delta % 12]
+        _iljin_today = ManseCalendarEngine.get_iljin(today.year, today.month, today.day)
+        today_cg = _iljin_today["cg"]
+        today_jj = _iljin_today["jj"]
         today_ss = TEN_GODS_MATRIX.get(ilgan, {}).get(today_cg, "-")
         today_oh = _OH.get(today_cg, "")
         is_ys_day = bool(today_oh) and today_oh in yongshin
