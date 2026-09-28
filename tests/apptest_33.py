@@ -89,6 +89,9 @@ import manse  # noqa: E402  (import만 함 — main()은 __main__ 가드 안이�
 manse.UsageTracker.check_limit = staticmethod(lambda: True)
 manse.UsageTracker.increment = staticmethod(lambda: None)
 import saju_interpreter  # noqa: E402  (freeze 대상 — .datetime 이름 교체용, 모듈 자체 참조 필요)
+import saju_engine  # noqa: E402  (R13-6: freeze 대상 추가 — ManseCalendarEngine.get_today_iljin()이
+# saju_engine.datetime.now()를 쓰는데 이 이름만 안 패치돼 manse12(menu12_manse)의
+# "TODAY 일진"이 freeze()와 무관하게 실제 오늘 날짜로 새던 문제, R13-5 --compare에서 실측 확인)
 from pils_fixtures import CASES, get_pils  # noqa: E402  (값 재사용, 복제 금지)
 from saju_engine import calc_sipsung, SajuCoreEngine  # noqa: E402
 from saju_interpreter import get_jeokjung_guiin  # noqa: E402
@@ -193,7 +196,9 @@ class FrozenDate(_REAL_DATE):
 
 def freeze(freeze_date):
     """freeze_date: 'YYYY-MM-DD' 문자열. manse.datetime/date·saju_interpreter.
-    datetime/date를 FrozenDatetime/FrozenDate로 교체한다."""
+    datetime/date·saju_engine.datetime/date를 FrozenDatetime/FrozenDate로 교체한다.
+    R13-6: saju_engine 누락돼 있던 걸 추가 — ManseCalendarEngine.get_today_iljin()이
+    이 이름을 통해 datetime.now()를 호출한다(manse12 오늘 일진 비결정성 원인)."""
     y, m, d = (int(x) for x in freeze_date.split("-"))
     FrozenDatetime._frozen = _REAL_DATETIME(y, m, d, 12, 0, 0)
     FrozenDate._frozen = _REAL_DATE(y, m, d)
@@ -201,6 +206,8 @@ def freeze(freeze_date):
     manse.date = FrozenDate
     saju_interpreter.datetime = FrozenDatetime
     saju_interpreter.date = FrozenDate
+    saju_engine.datetime = FrozenDatetime
+    saju_engine.date = FrozenDate
 
 
 def unfreeze():
@@ -209,6 +216,8 @@ def unfreeze():
     manse.date = _REAL_DATE
     saju_interpreter.datetime = _REAL_DATETIME
     saju_interpreter.date = _REAL_DATE
+    saju_engine.datetime = _REAL_DATETIME
+    saju_engine.date = _REAL_DATE
 
 
 class _Capturer:
