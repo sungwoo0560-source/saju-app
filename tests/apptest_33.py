@@ -129,11 +129,15 @@ from saju_sinsal import get_gongmang  # noqa: E402
 # 동일하게 함수를 직접 호출한다 — birth_month/day/hour/minute은 _run_combo가 매 콤보
 # 전에 이미 st.session_state에 세팅해 두므로 _call_menu에서 그대로 꺼내 쓴다(아래 참고).
 # 이것도 기존 17메뉴 골든은 건드리지 않고 baseline에 신규 조합으로만 붙는다.
+# manse12(menu12_manse)는 R13-4에서 추가 — 시그니처가 (pils, birth_year, gender)뿐이고
+# st.session_state·위젯 key 의존이 전혀 없어(내부 st.selectbox 2개도 key 없이 index만
+# today 기준으로 결정) freeze()만 걸려 있으면 그대로 결정론적으로 재현된다(R13-3 진단
+# 확인). 이것도 기존 22메뉴 골든은 건드리지 않고 baseline에 신규 조합으로만 붙는다.
 MENU_ORDER = [
     "menu1_report", "current_situation", "lifeline", "past", "future3",
     "money", "relations", "daily", "monthly", "yearly", "tojeong", "health",
     "report_narr", "money_narr", "relations_narr", "future_narr", "lifeline_narr", "past_narr",
-    "ohaeng_deep", "bihang", "gaewoon", "ai", "manse_grid",
+    "ohaeng_deep", "bihang", "gaewoon", "ai", "manse_grid", "manse12",
 ]
 
 # 텍스트 출력 계열 st.* 함수 — 캡처 대상(런타임 monkeypatch, 소스 수정 아님)
@@ -344,6 +348,9 @@ def _call_menu(menu_key, pils, case_name, birth_year, gender):
                 st.session_state.get("birth_hour"), st.session_state.get("birth_minute"),
                 gender,
             )
+    elif menu_key == "manse12":
+        # R13-4: menu12_manse(pils, birth_year, gender) — name 인자 없음, 세션키 의존 없음.
+        manse.menu12_manse(pils, birth_year, gender)
     else:
         raise ValueError(f"알 수 없는 menu_key: {menu_key}")
     return None
