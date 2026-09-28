@@ -1762,6 +1762,42 @@ _DIAG_WEAK_HEALTH_SENTENCE = {
 }
 
 
+def get_day_grade(yongshin, gisin, orig_jjs, y, m, d):
+    """일별 길흉 등급 — 기준B(R12-2): 일진 간지 오행 각각 종합_용신 +1/종합_기신 -1,
+    일진 지지가 원국 지지를 충하면 그 원국 지지 오행이 용신이면 -1(용신 훼손)/기신이면
+    +0.5(기신 약화)로 합산(충 여러 개면 누적). 총점 >=2면 '길', <=-2면 '주의', 그 외 '보통'.
+    monthly()·menu10_monthly 일별 루프가 공용으로 쓴다(R13-5, 두 소비처의 판정을 하나로
+    통일 — 이전엔 각자 다른 산식/버그를 갖고 있었음).
+
+    반환: {"cg","jj","score","grade","chung"} — "chung"은 이 날 지지가 실제로 충한
+    원국 지지들의 리스트(충이 없으면 빈 리스트)."""
+    iljin = ManseCalendarEngine.get_iljin(y, m, d)
+    cg, jj, cg_oh = iljin["cg"], iljin["jj"], iljin["oh"]
+    jj_oh = _OH_JJ.get(jj, "")
+    _CHUNG_D = {"子":"午","午":"子","丑":"未","未":"丑","寅":"申","申":"寅",
+                "卯":"酉","酉":"卯","辰":"戌","戌":"辰","巳":"亥","亥":"巳"}
+    score = 0.0
+    if cg_oh in yongshin:
+        score += 1
+    elif cg_oh in gisin:
+        score -= 1
+    if jj_oh in yongshin:
+        score += 1
+    elif jj_oh in gisin:
+        score -= 1
+    chung = []
+    for oj in orig_jjs:
+        if _CHUNG_D.get(jj, "") == oj:
+            chung.append(oj)
+            oj_oh = _OH_JJ.get(oj, "")
+            if oj_oh in yongshin:
+                score -= 1
+            elif oj_oh in gisin:
+                score += 0.5
+    grade = "길" if score >= 2 else "주의" if score <= -2 else "보통"
+    return {"cg": cg, "jj": jj, "score": score, "grade": grade, "chung": chung}
+
+
 class LocalSajuNarrator:
     """만세력 계산 결과를 받아 사람의 언어로 풀어주는 완전 로컬 해석 엔진"""
 
@@ -7668,42 +7704,19 @@ class LocalSajuNarrator:
             cur_tag   = " ← 이번 달" if is_cur else ""
 
             # ── 길흉일 계산 (일진 기준) ─────────────────────────────
-            # R12-2: 충은 대상 글자 용신/기신에 따라 양면(충=오행약화 A안) —
-            # 일진과 충 관계인 원국 지지가 용신이면 -1(용신이 충으로 약화되어 감점),
-            # 기신이면 +0.5(기신이 충으로 약화되어 소폭 가점). 지지 오행은 기존
-            # _OH_JJ(15649행) 재사용 — 새 매핑 만들지 않음.
+            # R13-5: 판정 자체는 get_day_grade()(기준B, R12-2)로 추출 — menu10_monthly의
+            # 일별 루프와 공용.
             import calendar as _cal
             _days_in_m = _cal.monthrange(yr, m)[1]
-            _CHUNG_D = {"子":"午","午":"子","丑":"未","未":"丑","寅":"申","申":"寅",
-                        "卯":"酉","酉":"卯","辰":"戌","戌":"辰","巳":"亥","亥":"巳"}
             _orig_jjs_m = [p.get("jj","") for p in pils if p.get("jj","")]
             _gil_days = []
             _hyung_days = []
             for _d in range(1, _days_in_m + 1):
                 try:
-                    _iljin = ManseCalendarEngine.get_iljin(yr, m, _d)
-                    _ij_oh = _iljin.get("oh", "")
-                    _ij_jj = _iljin.get("jj", "")
-                    _ij_jj_oh = _OH_JJ.get(_ij_jj, "")
-                    _d_score = 0.0
-                    if _ij_oh in yongshin:
-                        _d_score += 1
-                    elif _ij_oh in gisin:
-                        _d_score -= 1
-                    if _ij_jj_oh in yongshin:
-                        _d_score += 1
-                    elif _ij_jj_oh in gisin:
-                        _d_score -= 1
-                    for _oj in _orig_jjs_m:
-                        if _CHUNG_D.get(_ij_jj, "") == _oj:
-                            _oj_oh = _OH_JJ.get(_oj, "")
-                            if _oj_oh in yongshin:
-                                _d_score -= 1
-                            elif _oj_oh in gisin:
-                                _d_score += 0.5
-                    if _d_score >= 2:
+                    _g = get_day_grade(yongshin, gisin, _orig_jjs_m, yr, m, _d)
+                    if _g["grade"] == "길":
                         _gil_days.append(_d)
-                    elif _d_score <= -2:
+                    elif _g["grade"] == "주의":
                         _hyung_days.append(_d)
                 except Exception:
                     pass
