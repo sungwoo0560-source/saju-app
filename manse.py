@@ -11847,10 +11847,9 @@ def menu_daily(pils, birth_year, gender):
     st.markdown(f"### ☀️ 오늘의 운세")
     st.caption(f"{today.strftime('%Y년 %m월 %d일')} 일진")
 
-    base = datetime(1970, 1, 1).date()
-    days = (today - base).days
-    day_cg = CG[days % 10]
-    day_jj = JJ[days % 12]
+    _iljin_md = ManseCalendarEngine.get_iljin(today.year, today.month, today.day)
+    day_cg = _iljin_md["cg"]
+    day_jj = _iljin_md["jj"]
     ilgan = pils[1]["cg"]
     sip = TEN_GODS_MATRIX.get(ilgan, {}).get(day_cg, "")
     sip_hj = sip.split("(")[0]
@@ -28099,13 +28098,10 @@ def main():
         _today_str_b = _today_b.strftime("%Y년 %m월 %d일")
         _weekday_kr_b = ["월", "화", "수", "목", "금", "토", "일"][_today_b.weekday()]
 
-        # 오늘 일진 계산 (사주 원국 기준 기간법)
-        _TG_B = ["甲","乙","丙","丁","戊","己","庚","辛","壬","癸"]
-        _JJ_B = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"]
-        _base_day_b = date(2024, 1, 1)   # 甲子일 기준점
-        _delta_b = (_today_b.date() - _base_day_b).days
-        _day_cg_b = _TG_B[_delta_b % 10]
-        _day_jj_b = _JJ_B[_delta_b % 12]
+        # 오늘 일진 계산 (R13-4: get_iljin 경유로 통일)
+        _iljin_b = ManseCalendarEngine.get_iljin(_today_b.year, _today_b.month, _today_b.day)
+        _day_cg_b = _iljin_b["cg"]
+        _day_jj_b = _iljin_b["jj"]
 
         # 오행 매핑
         _OH_B    = _OH_CG

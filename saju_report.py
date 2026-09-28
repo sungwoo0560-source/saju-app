@@ -2740,12 +2740,9 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str="", dram
                     y = section_title(c, f"☀️ 오늘의 운세 ({_dt.now().strftime('%Y.%m.%d')})", y)
                     from datetime import date as _date_d
                     _today_d = _date_d.today()
-                    _base_d = _date_d(1924,1,1)
-                    _delta_d = (_today_d - _base_d).days
-                    _CG_D = ["甲","乙","丙","丁","戊","己","庚","辛","壬","癸"]
-                    _JJ_D = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"]
-                    _cg_d = _CG_D[_delta_d % 10]
-                    _jj_d = _JJ_D[_delta_d % 12]
+                    _iljin_d = ManseCalendarEngine.get_iljin(_today_d.year, _today_d.month, _today_d.day)
+                    _cg_d = _iljin_d["cg"]
+                    _jj_d = _iljin_d["jj"]
                     from saju_engine import TEN_GODS_MATRIX as _TGM_D
                     _ilgan_d = pils[1]["cg"] if len(pils)>1 else ""
                     _ss_d = _TGM_D.get(_ilgan_d,{}).get(_cg_d,"-")
