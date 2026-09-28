@@ -20318,12 +20318,6 @@ def menu10_monthly(pils, name, birth_year, gender):
 
     _, last_day = calendar.monthrange(year, month)
 
-    def get_day_pillar_local(dt):
-
-        r = ManseCalendarEngine.get_iljin(dt.year, dt.month, dt.day)
-
-        return r["cg"], r["jj"]
-
     # 이달 전체 일진 분석
 
     all_days_data = []
@@ -20332,10 +20326,18 @@ def menu10_monthly(pils, name, birth_year, gender):
 
     good_days = []
 
+    # R13-5: get_day_grade(기준B) 공용 — monthly()와 판정 통일
+    _ys10 = get_yongshin(pils) or {}
+    _yongshin10 = _ys10.get("종합_용신", []) or []
+    _gisin10 = _ys10.get("종합_기신", []) or []
+    _orig_jjs10 = [p.get("jj", "") for p in pils if p.get("jj", "")]
+
     for d in range(1, last_day + 1):
         dt = datetime(year, month, d)
 
-        cg, jj = get_day_pillar_local(dt)
+        _g10 = get_day_grade(_yongshin10, _gisin10, _orig_jjs10, year, month, d)
+
+        cg, jj = _g10["cg"], _g10["jj"]
 
         ss = TEN_GODS_MATRIX.get(ilgan, {}).get(cg, "-")
 
@@ -20343,18 +20345,11 @@ def menu10_monthly(pils, name, birth_year, gender):
 
         all_days_data.append(day_info)
 
-        # 충 감지 추가
-        _CHUNG_M2 = _JJCHUNG
-        _orig_jjs_m2 = {p.get("jj","") for p in pils}
-        _chung_today = _CHUNG_M2.get(jj,"")
-        _has_chung_today = bool(_chung_today and _chung_today in _orig_jjs_m2)
-
-        _bad_ss = ss in ("겁재", "편관", "상관")
-        if _bad_ss or _has_chung_today:
-            day_info["chung"] = _has_chung_today
+        if _g10["grade"] == "주의":
+            day_info["chung"] = bool(_g10["chung"])
             bad_days.append(day_info)
 
-        if ss in ("식신", "정관", "정인", "정재"):
+        if _g10["grade"] == "길":
             good_days.append(day_info)
 
     # 월건(月建) 계산
