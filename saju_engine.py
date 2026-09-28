@@ -448,15 +448,13 @@ class ManseCalendarEngine:
 
         from datetime import date as _date
 
-        base = _date(2000, 1, 1)  # 甲(갑)子(자)일 기준점 (2000-01-01 = 甲(갑)辰(진)년 庚(경)戌(술)월 甲(갑)子(자)일)
+        base = _date(2000, 1, 1)  # 2000-01-01 = 戊午(54), _get_day_pillar와 동일 기준 (R13-1)
 
         target = _date(year, month, day)
 
         diff = (target - base).days
 
-        # 2000-01-01은 甲子일 - 60갑자 인덱스 0
-
-        idx = (diff + 0) % 60
+        idx = (54 + diff) % 60
 
         cg = CG[idx % 10]
 
