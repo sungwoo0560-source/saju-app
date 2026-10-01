@@ -8962,7 +8962,7 @@ def _get_hap_break_warning(pils, dw_jj, sw_jj):
     return warnings
 
 
-DAEWOON_PRESCRIPTION = {
+DAEWOON_PRESCRIPTION = HanjaSafeDict({
     "比肩": "독립 사업/협력 강화/새 파트너십 구축이 유리합니다.",
     "劫財": "투자/보증/동업 금지. 지출 절제, 현상 유지가 최선입니다.",
     "食神": "재능 발휘/창업/콘텐츠 창작을 적극 추진하십시오.",
@@ -8973,7 +8973,7 @@ DAEWOON_PRESCRIPTION = {
     "正官": "승진/자격증/공식 계약을 적극 추진하십시오. 명예의 시기.",
     "偏印": "학문/자격증/특수 분야 연구에 집중하기 좋은 시기입니다.",
     "正印": "시험/학업/귀인과의 만남. 배움에 투자하십시오.",
-}
+})
 
 # 대운 직격 처방 — 결론 먼저 3단 구조
 DAEWOON_VERDICT = {
@@ -9125,7 +9125,7 @@ DAEWOON_VERDICT = {
 }
 
 # ── 대운 직격 처방 ─────────────────────────────────────────────────
-DAEWOON_DIRECT = {
+DAEWOON_DIRECT = HanjaSafeDict({
     "比肩": {
         "verdict": "⚡ 독립과 경쟁의 시기 — 혼자 움직여야 기회가 옵니다",
         "do":    ["독립 창업 또는 1인 프로젝트 시작", "경쟁에서 이기는 전략 수립", "자기 브랜드·이름값 올리기", "혼자 처리할 수 있는 일에 집중"],
@@ -9203,7 +9203,7 @@ DAEWOON_DIRECT = {
         "money": "큰 기복 없이 현상 유지가 가능한 시기. 저축과 안전 자산 확보에 집중하십시오.",
         "caution": "특별한 위기는 없으나 방심이 위기를 만듭니다. 꾸준함을 잃지 마십시오.",
     },
-}
+})
 
 
 def get_year_detail(y, c2, ilgan, yongshin_ohs, birth_year):
@@ -18725,7 +18725,7 @@ def menu5_money(pils, birth_year, gender, name="내담자"):
             _job_detail5 = _jmap5.get(_sn_key5, _jmap5.get("중화",""))
             break
 
-    _DW_INDUSTRY = {
+    _DW_INDUSTRY = HanjaSafeDict({
         "比肩": "독립 사업·프리랜서·스포츠·1인 창업",
         "劫財": "경쟁업종·금융·영업·투자",
         "食神": "외식·창작·콘텐츠·교육·서비스",
@@ -18736,7 +18736,7 @@ def menu5_money(pils, birth_year, gender, name="내담자"):
         "正官": "공기업·관리직·행정·교육",
         "偏印": "역술·종교·예술·자유업·이동업종",
         "正印": "교육·연구·출판·의료·상담",
-    }
+    })
     _cur_industry = _DW_INDUSTRY.get(_cur_dw_ss_hanja, "현재 대운 기운에 맞는 업종 탐색 중")
     _oh_job5 = _OH_JOB.get(ilgan_oh, "")
 

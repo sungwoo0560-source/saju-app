@@ -2775,7 +2775,7 @@ class LocalSajuNarrator:
             lines.append(f"\n<b>현재 대운</b>: {dw_gan} [{dw_ss}] ({dw_start} ~ {dw_end}년 / {age_s} ~ {age_e}세)")
 
             # 대운 십성별 개인화 해석
-            _DW_SS_DETAIL = {
+            _DW_SS_DETAIL = HanjaSafeDict({
                 "比肩": f"현재 {name}님은 비견(比肩) 대운을 지나고 있습니다. 강한 자아와 독립심이 극대화되는 시기로, 창업·독립·자기 사업을 시작하기에 좋은 환경입니다. 단, 경쟁자가 많아지고 재물이 분산되기 쉬우니 동업과 보증은 가급적 피하는 편이 안전합니다.",
                 "劫財": f"현재 {name}님은 겁재(劫財) 대운입니다. 예상치 못한 지출과 재물 분산이 생기기 쉬운 시기입니다. 투자·보증·동업을 극도로 자제하고 현금을 지키는 데 집중하십시오. 반면 경쟁에서 강인한 면모를 보일 수 있습니다.",
                 "食神": f"현재 {name}님은 식신(食神) 대운입니다. 재능이 빛나고 하고 싶은 일이 잘 풀리는 황금기입니다. 창작·창업·새 프로젝트를 시작하기에 최적의 시기이며 건강운도 좋습니다. 이 시기의 노력은 결실을 맺기 쉽습니다.",
@@ -2786,7 +2786,7 @@ class LocalSajuNarrator:
                 "正官": f"현재 {name}님은 정관(正官) 대운입니다. 명예와 인정이 따르는 귀한 시기입니다. 공직·승진·자격 취득에 유리하며, 원칙과 성실함이 빛을 발합니다. 이 시기에 쌓은 신뢰와 명예는 평생의 자산이 됩니다.",
                 "偏印": f"현재 {name}님은 편인(偏印) 대운입니다. 공부·연구·자격 취득·정신적 성찰이 깊어지는 시기입니다. 새로운 기술이나 전문성을 쌓기에 최적이며, 종교·철학적 관심도 높아집니다. 단, 현실과 동떨어진 생각에 빠지지 않도록 주의하십시오.",
                 "正印": f"현재 {name}님은 정인(正印) 대운입니다. 귀인의 도움과 보호가 강한 시기입니다. 학업·자격·문서 관련 일이 순조롭고, 어머니나 은인의 역할을 하는 사람이 나타납니다. 배움에 투자하는 것이 이 시기 최고의 선택입니다.",
-            }
+            })
             _dw_detail_txt = _DW_SS_DETAIL.get(dw_ss, f"현재 대운의 흐름에 맞게 전진과 후퇴를 조율하십시오.")
             lines.append(f"  - {_dw_detail_txt}")
 
@@ -3052,7 +3052,7 @@ class LocalSajuNarrator:
             )
 
             # 현재 대운 직격 처방
-            _DW_ADVICE = {
+            _DW_ADVICE = HanjaSafeDict({
                 "偏財": (
                     "이 대운은 사업·투자·새로운 인연이 활발히 열리는 시기입니다. "
                     "적극적으로 움직이면 큰 기회가 오나, 과욕과 방만한 지출은 독이 됩니다. "
@@ -3106,7 +3106,7 @@ class LocalSajuNarrator:
                     "학업·시험·자격증·진학에 전력투구하면 최고의 결과가 옵니다. "
                     "어른과 윗사람을 공경하고 소개·추천의 기회가 오면 적극 응하십시오."
                 ),
-            }
+            })
             _advice = _DW_ADVICE.get(_cdw_ss, "꾸준한 내실로 다음 황금기를 준비하는 시기입니다.")
             lines.append(f"<b>처방:</b>\n{_advice}\n")
 
@@ -9839,6 +9839,12 @@ STRENGTH_NARRATIVE = make_hanja_safe(STRENGTH_NARRATIVE)
 CAREER_MATRIX = make_hanja_safe(CAREER_MATRIX)
 GYEOKGUK_DETAIL = make_hanja_safe(GYEOKGUK_DETAIL)
 
+# R14-2: saju_data.py 원본 정의라 정의부 직접 감싸기 불가(순환 임포트) — import 직후 재할당으로 적용
+narratives = make_hanja_safe(narratives)
+AGE_STAGE_FOCUS = make_hanja_safe(AGE_STAGE_FOCUS)
+SIPSONG_DETAIL = make_hanja_safe(SIPSONG_DETAIL)
+DW_DOMAIN_STAGE = make_hanja_safe(DW_DOMAIN_STAGE)
+
 
 # ----------------- HANJA SAFE INJECT END -----------------
 def _nar_ch1_ilgan(ctx):
@@ -11692,7 +11698,7 @@ def _nar_ch8_flow(ctx):
     ]
 
     # 대운 해석 서술형
-    _DW_NARR = {
+    _DW_NARR = HanjaSafeDict({
         "比肩":  f"지금 {dw_str} 대운은 독립과 자립의 10년입니다. 남의 밑에서보다 스스로의 힘으로 길을 개척할 때 기운이 열립니다. 경쟁이 심화되지만 실력으로 돌파할 수 있는 시기입니다.",
         "劫財":  f"지금 {dw_str} 대운은 변동과 도전의 10년입니다. 재물 기복이 있고 주변에 경쟁자가 많아지는 시기입니다. 충동적 결정을 자제하고 검증된 파트너와 협력하는 것이 핵심입니다.",
         "食神":  f"지금 {dw_str} 대운은 안정과 재능 발휘의 10년입니다. 꾸준히 노력하면 좋은 결실이 따라오는 시기로, 전문성을 쌓고 표현하는 활동에서 결실이 옵니다.",
@@ -11703,7 +11709,7 @@ def _nar_ch8_flow(ctx):
         "正官":  f"지금 {dw_str} 대운은 명예와 안정의 10년입니다. 사회적 인정과 승진 기회가 오는 시기로, 원칙을 지키며 정도를 걸으면 인정받기 쉽습니다.",
         "偏印":  f"지금 {dw_str} 대운은 학습과 준비의 10년입니다. 내실을 다지고 실력을 쌓는 시기로, 새로운 분야 탐구와 자격 취득에 투자하십시오. 지금의 준비가 다음 대운의 황금기를 만듭니다.",
         "正印":  f"지금 {dw_str} 대운은 귀인과 학문의 10년입니다. 스승이나 귀인의 도움을 받을 수 있고, 자격·학업·자기계발에 집중하면 보상이 따르기 쉽습니다.",
-    }
+    })
     dw_narr = _DW_NARR.get(cur_dw_ss, f"{dw_str} 대운의 기운에 맞게 흐름을 타십시오.")
     lines.append(f"  {dw_narr}")
     lines.append(f"")
