@@ -631,7 +631,8 @@ def _golden_checks():
         _add("[박성우] 대운 시작연도", dw_years == [1971, 1981, 1991],
              f"실제={dw_years} 기대=[1971, 1981, 1991]")
 
-        golden_luck = {2019: 95, 2023: 75, 2025: 85, 2026: 60, 2027: 95, 2030: 85}
+        # R15-1: calc_luck_score 세운 길흉을 yongshin_sewoon_grade(SSOT)로 통일한 결과 갱신
+        golden_luck = {2019: 60, 2023: 85, 2025: 85, 2026: 85, 2027: 95, 2030: 60}
         for ty, expect in golden_luck.items():
             actual = manse.calc_luck_score(pils, y, gender, bm=m, bd=d, bh=h, bmi=mi, target_year=ty)
             _add(f"[박성우] calc_luck_score({ty})", actual == expect, f"실제={actual} 기대={expect}")
