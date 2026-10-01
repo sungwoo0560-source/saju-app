@@ -15536,7 +15536,22 @@ def calc_luck_score(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0, target_y
 
     yl = get_yearly_luck(pils, target_year)
 
-    score += _LV.get(yl.get("길흉", "평(平)"), 0)
+    # R15-1: 세운 길흉 방향은 yongshin_sewoon_grade(SSOT), 크기는 방향 일치 시 raw 세분값 유지
+    _raw_v = _LV.get(yl.get("길흉", "평(平)"), 0)
+    gi_ohs = ys.get("종합_기신", []) if isinstance(ys.get("종합_기신"), list) else []
+    ilgan = pils[1]["cg"]
+    sn = get_ilgan_strength(ilgan, pils)
+    _corrected = yongshin_sewoon_grade(yl.get("오행_천간", ""), yong_ohs, gi_ohs, sn)
+    if _corrected is None:
+        score += _raw_v
+    elif _corrected == "길" and _raw_v > 0:
+        score += _raw_v
+    elif _corrected == "흉" and _raw_v < 0:
+        score += _raw_v
+    elif _corrected == "평" and _raw_v == 0:
+        score += 0
+    else:
+        score += {"길": 10, "평": 0, "흉": -15}.get(_corrected, 0)
 
     return max(0, min(100, score))
 
