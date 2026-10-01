@@ -9125,7 +9125,8 @@ DAEWOON_VERDICT = {
 }
 
 # ── 대운 직격 처방 ─────────────────────────────────────────────────
-DAEWOON_DIRECT = HanjaSafeDict({
+# R15-1: 양면화(SSOT 등급 기반 톤) 전까지 비활성 — R14 검수 문구 보존
+DAEWOON_DIRECT = {
     "比肩": {
         "verdict": "⚡ 독립과 경쟁의 시기 — 혼자 움직여야 기회가 옵니다",
         "do":    ["독립 창업 또는 1인 프로젝트 시작", "경쟁에서 이기는 전략 수립", "자기 브랜드·이름값 올리기", "혼자 처리할 수 있는 일에 집중"],
@@ -9203,7 +9204,7 @@ DAEWOON_DIRECT = HanjaSafeDict({
         "money": "큰 기복 없이 현상 유지가 가능한 시기. 저축과 안전 자산 확보에 집중하십시오.",
         "caution": "특별한 위기는 없으나 방심이 위기를 만듭니다. 꾸준함을 잃지 마십시오.",
     },
-})
+}
 
 
 def get_year_detail(y, c2, ilgan, yongshin_ohs, birth_year):
@@ -32406,13 +32407,14 @@ padding:14px;margin:6px 0;text-align:center">
         with st.expander("🏠 올해 이사 방위 판단", expanded=False):
             _sw_f2 = get_yearly_luck(pils, get_saju_year()) or {}
             _sw_ss_f2 = _sw_f2.get("십성_천간","")
-            _MOVE2 = HanjaSafeDict({
+            # R15-1: 양면화(SSOT 등급 기반 톤) 전까지 비활성 — R14 검수 문구 보존
+            _MOVE2 = {
                 "偏財": f"편재 세운 — 이사는 {_gm2.get('생기','길방')} 방향으로 하면 재물운 상승.",
                 "正財": f"정재 세운 — 안정적 이사. {_gm2.get('복위','복위방')} 방향 권장.",
                 "食神": f"식신 세운 — 이사하면 복이 따름. {_gm2.get('생기','길방')} 방향 최길.",
                 "偏官": f"편관 세운 — 이사는 신중히. 흉방({_gm2.get('흉방','')})은 가급적 피하십시오.",
                 "劫財": f"겁재 세운 — 이사 보류 권장. 불가피하면 {_gm2.get('천의','천의방')} 방향.",
-            })
+            }
             st.info(_MOVE2.get(_sw_ss_f2, f"이사는 {_gm2.get('생기','길방')} 방향을 우선 고려하십시오."))
 
     except Exception as e:
