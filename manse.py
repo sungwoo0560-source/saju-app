@@ -20156,14 +20156,10 @@ def menu10_monthly(pils, name, birth_year, gender):
         _ys_m   = get_yongshin(pils)
         _yong_m = _ys_m.get("종합_용신",[])
         _gisin_m= _ys_m.get("종합_기신",[]) if isinstance(_ys_m.get("종합_기신"),list) else []
-        _is_yong_m  = _ml_oh in _yong_m
-        _is_gisin_m = _ml_oh in _gisin_m
-
-        # 충 감지
-        _orig_jjs_m = {p.get("jj","") for p in pils}
-        _CHUNG_M = _JJCHUNG
-        _chung_m = _CHUNG_M.get(_ml_jj,"")
-        _has_chung_m = bool(_chung_m and _chung_m in _orig_jjs_m)
+        # R15-2: 이달의 기운 카드 = build_monthly_grades(SSOT), menu10과 동일 월 선택
+        _mg_cur = build_monthly_grades(pils, cur_year)
+        _cur_mg = next((x for x in _mg_cur if x["월"] == datetime.now().month), None)
+        _grade_m = _cur_mg["등급"] if _cur_mg else "평"
 
         _MON_SS_DESC = {
             "食神": "재능·창의·좋은 기운이 활성화되는 달. 새 프로젝트 시작에 필요합니다.",
@@ -20179,16 +20175,16 @@ def menu10_monthly(pils, name, birth_year, gender):
         }
 
         _mname = name if name else "내담자"
-        if _is_yong_m and not _has_chung_m:
+        if _grade_m in ("대길", "길"):
             _mbg = "#1a3d1a"; _mtc = "#7fff7f"
-            _msig = f"🟢 {_mname}님 — 이달은 용신 운! 적극 공세의 달"
-        elif _is_gisin_m or _has_chung_m:
+            _msig = f"🟢 {_mname}님 — 이달은 {_grade_m} 운! 적극 공세의 달"
+        elif _grade_m in ("흉", "흉흉"):
             _mbg = "#3d1a1a"; _mtc = "#ffaaaa"
-            _chung_msg_m = " 원국과 충(沖) 발생." if _has_chung_m else ""
-            _msig = f"🔴 {_mname}님 — 이달은 수비 전략의 달.{_chung_msg_m}"
+            _sig_m = f" {_cur_mg['시그널']}" if _cur_mg and _cur_mg.get("시그널") else ""
+            _msig = f"🔴 {_mname}님 — 이달은 수비 전략의 달.{_sig_m}"
         else:
             _mbg = "#1a1a3d"; _mtc = "#aaaaff"
-            _msig = f"🟡 {_mname}님 — 이달은 중립 운. 내실 다지기"
+            _msig = f"🟡 {_mname}님 — 이달은 {_grade_m} 운. 내실 다지기"
 
         _mdesc = _MON_SS_DESC.get(_ml_ss, f"{_ml_ss} 기운의 달입니다.")
         st.markdown(
