@@ -12702,7 +12702,7 @@ def _nar_future(ctx):
             "말": {
                 "건강": "건강 관리를 최우선으로 삼으십시오.",
                 "명예": "그간의 삶을 되돌아보고 마음을 정리하십시오.",
-                "안정": "가까운 사람들과의 따뜻한 시간을 소중히 하십시오.",
+                "자녀": "가까운 사람들과의 따뜻한 시간을 소중히 하십시오.",
             },
         }
 
@@ -12728,11 +12728,13 @@ def _nar_future(ctx):
             else:
                 d_stage, d_label = "말", "🍂 말년기"
 
-                d_keys = ["건강", "명예", "안정"]
+                d_keys = ["건강", "명예", "자녀"]
 
             stage_detail = DW_DOMAIN_STAGE.get(dw_ss, DEFAULT_DOMAIN).get(d_stage, DEFAULT_DOMAIN.get(d_stage, {}))
 
-            lines_out = [f"[{k}]: {stage_detail.get(k, '운기를 살피십시오.')}" for k in d_keys]
+            # R14-2: "자녀" 데이터 키는 유지(기혼·유자녀 전제 아님 — 다음 세대 의미), 화면 라벨만 "가족"으로 순화
+            _D_LABEL_MAP = {"자녀": "가족"}
+            lines_out = [f"[{_D_LABEL_MAP.get(k, k)}]: {stage_detail.get(k, '운기를 살피십시오.')}" for k in d_keys]
 
             result.append(
                 "\n".join(
