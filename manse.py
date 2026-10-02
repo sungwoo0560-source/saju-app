@@ -7359,7 +7359,14 @@ def get_cached_ai_interpretation(
                                       birth_hour=birth_hour, birth_minute=birth_minute)
 
 
-    _tp = calc_turning_point(pils, birth_year, gender, birth_month, birth_day, birth_hour, birth_minute, target_year=current_year) if "calc_turning_point" in dir() else {}
+    # R17-1: "calc_turning_point" in dir()는 함수 지역 스코프만 보기 때문에
+    # 전역 함수명을 검사하는 용도로는 항상 거짓 — calc_turning_point가 한 번도
+    # 호출되지 않고 매번 {}로 떨어져 있었다(AI 입력의 전환점 정보가 늘 "분석중"
+    # 고정값으로 나가던 원인). 직접 호출로 교체, 실패 대비 try만 유지.
+    try:
+        _tp = calc_turning_point(pils, birth_year, gender, birth_month, birth_day, birth_hour, birth_minute, target_year=current_year)
+    except Exception:
+        _tp = {}
 
     _yl = get_yearly_luck(pils, current_year)
 
