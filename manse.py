@@ -24033,6 +24033,30 @@ def menu12_manse(pils=None, birth_year=1990, gender="남"):
 
     today = datetime.now()
 
+    # R15-3: pils 있으면 일 단위 판정은 get_day_grade(SSOT) 하나로 통일.
+    # get_gil_hyung(전통 택일)은 삭제하지 않고 "날짜 상세"에 사주 무관 참고용 한 줄로만 남긴다.
+    _yong12, _gisin12, _orig_jjs12 = [], [], []
+    if pils:
+        _ys12 = get_yongshin(pils)
+        _yong12 = _ys12.get("종합_용신", []) if isinstance(_ys12.get("종합_용신"), list) else []
+        _gisin12 = _ys12.get("종합_기신", []) if isinstance(_ys12.get("종합_기신"), list) else []
+        _orig_jjs12 = [p.get("jj", "") for p in pils if p.get("jj", "")]
+
+    _GRADE_BADGE12 = {
+        "길": {"bg": "#e8f5e9", "color": "#2e7d32"},
+        "보통": {"bg": "#f5f5f5", "color": "#757575"},
+        "주의": {"bg": "#ffebee", "color": "#c62828"},
+    }
+
+    def _personal_reason12(dg):
+        if dg.get("chung"):
+            return f"원국 {'·'.join(dg['chung'])}지지와 충"
+        if dg["grade"] == "주의":
+            return "기신 기운이 강한 날"
+        if dg["grade"] == "길":
+            return "용신 기운이 강한 날"
+        return "무난한 날"
+
     st.markdown(
         """
 
@@ -24058,12 +24082,22 @@ def menu12_manse(pils=None, birth_year=1990, gender="남"):
 
     today_iljin = ManseCalendarEngine.get_today_iljin()
 
-    today_gil = ManseCalendarEngine.get_gil_hyung(today.year, today.month, today.day)
+    if pils:
+        _today_dg12 = get_day_grade(_yong12, _gisin12, _orig_jjs12, today.year, today.month, today.day)
+        today_badge_grade = _today_dg12["grade"]
+        today_badge_reason = _personal_reason12(_today_dg12)
+        _badge12 = _GRADE_BADGE12.get(today_badge_grade, _GRADE_BADGE12["보통"])
+        today_badge_bg, today_badge_color = _badge12["bg"], _badge12["color"]
+    else:
+        today_gil = ManseCalendarEngine.get_gil_hyung(today.year, today.month, today.day)
+        today_badge_grade = today_gil["grade"]
+        today_badge_reason = today_gil["reason"]
+        today_badge_bg, today_badge_color = today_gil["bg"], today_gil["color"]
 
     st.markdown(
         f"""
 
-<div style='background:{today_gil["bg"]};border:2px solid {today_gil["color"]}; border-radius:12px;padding:14px 20px;margin-bottom:14px; display:flex;justify-content:space-between;align-items:center'>
+<div style='background:{today_badge_bg};border:2px solid {today_badge_color}; border-radius:12px;padding:14px 20px;margin-bottom:14px; display:flex;justify-content:space-between;align-items:center'>
 
 <div>
 
@@ -24081,13 +24115,13 @@ def menu12_manse(pils=None, birth_year=1990, gender="남"):
 
 <div style='text-align:right'>
 
-<div style='font-size:18px;font-weight:800;color:{today_gil["color"]}'>
+<div style='font-size:18px;font-weight:800;color:{today_badge_color}'>
 
-            {today_gil["grade"]}
+            {today_badge_grade}
 
 </div>
 
-<div style='font-size:12px;color:#777'>{today_gil["reason"]}</div>
+<div style='font-size:12px;color:#777'>{today_badge_reason}</div>
 
 </div>
 
@@ -24156,17 +24190,22 @@ def menu12_manse(pils=None, birth_year=1990, gender="남"):
 
         ilj = entry["iljin"]
 
-        gil = entry["gil"]
-
         jeo = entry["jeolgi"]
 
         wd = (first_wd + d - 1) % 7
 
         day_color = "#cc0000" if wd == 6 else "#0033cc" if wd == 5 else "#000"
 
-        bg = gil["bg"]
-
-        border = f"2px solid {gil['color']}" if gil["grade"] != "보통" else "1px solid #ddd"
+        if pils:
+            entry["personal_grade"] = get_day_grade(_yong12, _gisin12, _orig_jjs12, sel_year, sel_month, d)
+            _pg = entry["personal_grade"]
+            _badge12 = _GRADE_BADGE12.get(_pg["grade"], _GRADE_BADGE12["보통"])
+            bg = _badge12["bg"]
+            border = f"2px solid {_badge12['color']}" if _pg["grade"] != "보통" else "1px solid #ddd"
+        else:
+            gil = entry["gil"]
+            bg = gil["bg"]
+            border = f"2px solid {gil['color']}" if gil["grade"] != "보통" else "1px solid #ddd"
 
         is_today = d == today.day and sel_month == today.month and sel_year == today.year
 
@@ -24198,9 +24237,12 @@ def menu12_manse(pils=None, birth_year=1990, gender="남"):
 
     # 길일/주의일 요약 바
 
-    gil_days = [e["day"] for e in cal_data if e["gil"]["grade"].startswith("길일")]
-
-    warn_days = [e["day"] for e in cal_data if e["gil"]["grade"] == "주의"]
+    if pils:
+        gil_days = [e["day"] for e in cal_data if e["personal_grade"]["grade"] == "길"]
+        warn_days = [e["day"] for e in cal_data if e["personal_grade"]["grade"] == "주의"]
+    else:
+        gil_days = [e["day"] for e in cal_data if e["gil"]["grade"].startswith("길일")]
+        warn_days = [e["day"] for e in cal_data if e["gil"]["grade"] == "주의"]
 
     st.markdown(
         f"""
@@ -24267,15 +24309,14 @@ def menu12_manse(pils=None, birth_year=1990, gender="남"):
             for entry in cal_data:
                 d_ss = TEN_GODS_MATRIX.get(ilgan_m, {}).get(entry["iljin"]["cg"], "-")
 
-                grade = entry["gil"]["grade"]
+                # R15-3: 날짜 선정 기준 = get_day_grade(SSOT) grade=="길"
+                grade = entry["personal_grade"]["grade"]
 
                 is_core = d_ss in lucky_ss
 
                 is_secondary = d_ss in lucky_ss_secondary
 
-                # 흉일만 제외, 주의날도 코어 길성이면 포함
-
-                if grade not in ["흉일", "이사화작일"] and (is_core or is_secondary):
+                if grade == "길" and (is_core or is_secondary):
                     saju_lucky.append(
                         {
                             "day": entry["day"],
@@ -24307,7 +24348,7 @@ def menu12_manse(pils=None, birth_year=1990, gender="남"):
                 for lk in saju_lucky[:8]:  # 최대 8일까지 표시
                     icon = SS_ICON.get(lk["ss"], "-")
 
-                    grade_color = "#4caf50" if "길일" in lk["grade"] else "#888"
+                    grade_color = "#4caf50" if lk["grade"] == "길" else "#888"
 
                     lucky_cards += f"""
 
@@ -24359,38 +24400,18 @@ def menu12_manse(pils=None, birth_year=1990, gender="남"):
         )
 
         try:
-            ilgan_w = pils[1]["cg"]
-
-            # 각 일간별 주의해야 할 십성 (흉신)
-
-            warn_ss_map = {
-                "甲": ["겁재", "편관", "상관"],
-                "乙": ["겁재", "편관", "상관"],
-                "丙": ["겁재", "편관", "편인"],
-                "丁": ["겁재", "편관", "편인"],
-                "戊": ["겁재", "편관", "상관"],
-                "己": ["겁재", "편관", "상관"],
-                "庚": ["겁재", "편관", "상관"],
-                "辛": ["겁재", "편관", "상관"],
-                "壬": ["겁재", "편관", "편인"],
-                "癸": ["겁재", "편관", "편인"],
-            }
-
-
-            warn_ss = warn_ss_map.get(ilgan_w, ["겁재", "편관", "상관"])
-
+            # R15-3: 조심일 판정 = get_day_grade(SSOT) grade=="주의" (십성 고정 매핑 폐기)
             saju_warn = []
 
             for entry in cal_data:
-                d_ss_w = TEN_GODS_MATRIX.get(ilgan_w, {}).get(entry["iljin"]["cg"], "-")
+                _pg = entry["personal_grade"]
 
-                if d_ss_w in warn_ss:
+                if _pg["grade"] == "주의":
                     saju_warn.append(
                         {
                             "day": entry["day"],
                             "iljin": entry["iljin"]["str"],
-                            "ss": d_ss_w,
-                            "grade": entry["gil"]["grade"],
+                            "reason": _personal_reason12(_pg),
                             "weekday": ["月", "火", "水", "木", "金", "土", "日"][(first_wd + entry["day"] - 1) % 7],
                         }
                     )
@@ -24399,51 +24420,21 @@ def menu12_manse(pils=None, birth_year=1990, gender="남"):
                 warn_cards = ""
 
                 for wk in saju_warn[:8]:
-                    wd = SS_WARN_DESC.get(
-                        wk["ss"],
-                        {"emoji": "⚠️", "color": "#e53935", "msg": "매사 조심"},
-                    )
-
-                    is_double = wk["grade"] == "주의"  # 달력 흉일 + 사주 흉성 겹침
-
-                    border_style = f"2px solid {wd['color']}"
-
-                    extra_badge = '<div style="font-size:9px;background:#e53935;color:#fff;border-radius:4px;padding:1px 4px;margin-top:2px">⚠️ 이중 주의</div>' if is_double else ""
-
                     warn_cards += f"""
 
-<div style="display:inline-block;background:rgba(255,235,235,0.95);backdrop-filter:blur(10px); border:{border_style};border-radius:14px;padding:12px 14px; margin:5px;text-align:center;min-width:90px;box-shadow:0 4px 15px rgba(229,57,53,0.1)">
+<div style="display:inline-block;background:rgba(255,235,235,0.95);backdrop-filter:blur(10px); border:2px solid #e53935;border-radius:14px;padding:12px 14px; margin:5px;text-align:center;min-width:90px;box-shadow:0 4px 15px rgba(229,57,53,0.1)">
 
-<div style="font-size:20px">{wd["emoji"]}</div>
+<div style="font-size:20px">⚠️</div>
 
-<div style="font-size:18px;font-weight:900;color:{wd["color"]}">{wk["day"]}일</div>
+<div style="font-size:18px;font-weight:900;color:#e53935">{wk["day"]}일</div>
 
 <div style="font-size:11px;color:#777">({wk["weekday"]})</div>
 
 <div style="font-size:11px;font-weight:700;color:#555">{wk["iljin"]}</div>
 
-<div style="font-size:10px;color:{wd["color"]};margin-top:2px;font-weight:700">{wk["ss"]}</div>
-
-                        {extra_badge}
+<div style="font-size:10px;color:#e53935;margin-top:2px;font-weight:700">{wk["reason"]}</div>
 
 </div>"""
-
-                # 조심일 요약 표
-
-                warn_table = ""
-
-                shown = set()
-
-                for wk in saju_warn:
-                    if wk["ss"] not in shown:
-                        shown.add(wk["ss"])
-
-                        wd2 = SS_WARN_DESC.get(
-                            wk["ss"],
-                            {"emoji": "⚠️", "color": "#e53935", "msg": "매사 조심"},
-                        )
-
-                        warn_table += f'<div style="margin:4px 0;font-size:13px"><span style="color:{wd2["color"]};font-weight:900">{wd2["emoji"]} {wk["ss"]}</span>: {wd2["msg"]}</div>'
 
                 st.markdown(
                     f"""
@@ -24452,19 +24443,11 @@ def menu12_manse(pils=None, birth_year=1990, gender="남"):
 
 <div style="font-size:13px;color:#cc0000;margin-bottom:8px;font-weight:700">
 
-                        ⚠️ {ilgan_w} 일간에게 불리한 십성({", ".join(warn_ss)}) 날 - 총 {len(saju_warn)}일
+                        ⚠️ 이번 달 조심일 - 총 {len(saju_warn)}일
 
 </div>
 
 <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px">{warn_cards}</div>
-
-<div style="background:rgba(229,57,53,0.05);border:1px solid #ffcdd2;border-radius:12px;padding:12px 16px">
-
-<div style="font-size:12px;font-weight:900;color:#b71c1c;margin-bottom:6px">📌 조심일 행동 지침</div>
-
-                        {warn_table}
-
-</div>
 
 </div>
 
@@ -24472,18 +24455,16 @@ def menu12_manse(pils=None, birth_year=1990, gender="남"):
                     unsafe_allow_html=True,
                 )
 
-                # 오늘이 조심일이면 경고 토스트
+                # 오늘이 조심일이면 경고 토스트 (cal_data의 personal_grade 재사용)
 
-                today_ss_warn = TEN_GODS_MATRIX.get(ilgan_w, {}).get(
-                    today_iljin["cg"] if "cg" in today_iljin else today_iljin["str"][0],
-                    "-",
-                )
+                if sel_month == today.month and sel_year == today.year:
+                    _today_entry12 = next((e for e in cal_data if e["day"] == today.day), None)
 
-                if today_ss_warn in warn_ss and sel_month == today.month and sel_year == today.year:
-                    st.error(f"🚨 **오늘({today.day}일)은 {today_ss_warn} 일입니다.** {SS_WARN_DESC.get(today_ss_warn, {}).get('msg', '매사 조심하십시오.')}")
+                    if _today_entry12 and _today_entry12["personal_grade"]["grade"] == "주의":
+                        st.error(f"🚨 **오늘({today.day}일)은 조심일입니다.** {_personal_reason12(_today_entry12['personal_grade'])}")
 
             else:
-                st.success("✅ 이번 달은 특별히 조심해야 할 사주 맞춤 흉일이 없습니다. 평온한 한 달이 예상됩니다.")
+                st.success("✅ 이번 달은 특별히 조심해야 할 날이 없습니다. 평온한 한 달이 예상됩니다.")
 
         except Exception as e:
             st.warning(f"조심일 계산 오류: {e}")
@@ -24508,7 +24489,7 @@ def menu12_manse(pils=None, birth_year=1990, gender="남"):
 
             advice = SS_ADVICE.get(today_ss_ad, SS_ADVICE["-"])
 
-            gil_color = today_gil.get("color", "#d4af37")
+            gil_color = today_badge_color
 
             st.markdown(
                 f"""
@@ -24562,7 +24543,20 @@ def menu12_manse(pils=None, birth_year=1990, gender="남"):
     if st.button("🔮 이 날짜의 일진 사주 분석", use_container_width=True):
         iljin_sel = ManseCalendarEngine.get_iljin(sel_year, sel_month, int(sel_day))
 
+        # R15-3: 전통 택일(사주 무관)은 날짜 상세에서만 참고용 한 줄로 남긴다
         gil_sel = ManseCalendarEngine.get_gil_hyung(sel_year, sel_month, int(sel_day))
+
+        if pils:
+            _dg_sel = get_day_grade(_yong12, _gisin12, _orig_jjs12, sel_year, sel_month, int(sel_day))
+            sel_badge_grade = _dg_sel["grade"]
+            sel_badge_color = _GRADE_BADGE12.get(_dg_sel["grade"], _GRADE_BADGE12["보통"])["color"]
+            sel_reason_line = f"<div style='font-size:12px;color:#777;margin-top:8px'>{_personal_reason12(_dg_sel)}</div>"
+            sel_trad_line = f"<div style='font-size:11px;color:#999;margin-top:4px'>전통 택일 참고(사주 무관): {gil_sel['grade']}</div>"
+        else:
+            sel_badge_grade = gil_sel["grade"]
+            sel_badge_color = gil_sel["color"]
+            sel_reason_line = f"<div style='font-size:12px;color:#777;margin-top:8px'>{gil_sel['reason']}</div>"
+            sel_trad_line = ""
 
         pils_day = SajuCoreEngine.get_pillars(sel_year, sel_month, int(sel_day), 12, 0, gender)
 
@@ -24580,7 +24574,7 @@ def menu12_manse(pils=None, birth_year=1990, gender="남"):
 
                 {sel_year}년 {sel_month}월 {int(sel_day)}일 - {iljin_sel["str"]}일
 
-                &nbsp;<span style='color:{gil_sel["color"]}'>{gil_sel["grade"]}</span>
+                &nbsp;<span style='color:{sel_badge_color}'>{sel_badge_grade}</span>
 
 </div>
 
@@ -24594,7 +24588,9 @@ def menu12_manse(pils=None, birth_year=1990, gender="남"):
 
 </div>
 
-<div style='font-size:12px;color:#777;margin-top:8px'>{gil_sel["reason"]}</div>
+{sel_reason_line}
+
+{sel_trad_line}
 
 </div>
 
