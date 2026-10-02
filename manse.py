@@ -21762,8 +21762,29 @@ def menu8_bihang(pils, name, birth_year, gender):
                 "劫財":("🔴 손재·경쟁의 대운","방어와 현상 유지가 전략이다.","투기·보증·동업 절대 금지."),
             }
             _rx3 = _DW_RX.get(_dw_ss3, (f"{_dw_ss3} 대운","흐름을 잘 읽고 신중하게 움직이게.","무리한 변화는 삼가게."))
+
+            # R17-2: 카드 상단에 대운 SSOT(get_daewoon_grade) 판정을 명시 —
+            # lifeline 탭(R15-5)과 동일한 판정·동일한 변동 문구를 쓴다. 기존
+            # 십성 고정표 톤(_rx3[0])은 "테마"로 표기만 바꾸고 do/dont 내용은
+            # 무변경 — 사용자 탓 except 문구(R17-1)로 가려졌던 콘텐츠를
+            # 되살리면서, lifeline과 톤이 어긋나 보이지 않게 등급을 병기한다.
+            _dw_grade_c = get_daewoon_grade(yongshin_ohs, gishin_ohs, pils, _cur_dw3["cg"], _cur_dw3["jj"])
+            _dw_vol_labels_c = []
+            if pils[2].get("jj", "") in _dw_grade_c["chung"]:
+                _dw_vol_labels_c.append("직업·사회 자리(월지)")
+            if pils[1].get("jj", "") in _dw_grade_c["chung"]:
+                _dw_vol_labels_c.append("생활·관계 기반(일지)")
+            _dw_vol_html_c = ""
+            if _dw_grade_c["volatile"] and _dw_vol_labels_c:
+                _dw_vol_html_c = (
+                    '<div style="font-size:12px;color:#ff6b00;margin-top:2px;margin-bottom:6px">'
+                    f'⚡ 이 대운은 원국 {" · ".join(_dw_vol_labels_c)}를 충합니다 — 일과 생활 기반의 변동이 큰 10년</div>'
+                )
+
             st.markdown(f"""<div style="background:#f0fff4;border:2px solid #27ae60;border-radius:10px;padding:16px">
-<div style="font-size:14px;font-weight:900;color:#1b5e20;margin-bottom:10px">{_rx3[0]} — {_cur_dw3['str']} ({_dw_ss3}) | {_cur_dw3['시작연도']}~{_cur_dw3['종료연도']}년</div>
+<div style="font-size:12px;font-weight:800;color:#555;margin-bottom:4px">대운 판정: {_dw_grade_c['grade']}</div>
+{_dw_vol_html_c}
+<div style="font-size:14px;font-weight:900;color:#1b5e20;margin-bottom:10px">이 대운의 테마: {_rx3[0]} — {_cur_dw3['str']} ({_dw_ss3}) | {_cur_dw3['시작연도']}~{_cur_dw3['종료연도']}년</div>
 <div style="background:#e8f5e9;border-left:4px solid #27ae60;border-radius:0 8px 8px 0;padding:12px 14px;margin-bottom:8px;font-size:13px;color:#1a1a1a;line-height:1.9;word-break:break-all">✅ <b>해야 할 것:</b> {_rx3[1]}</div>
 <div style="background:#ffebee;border-left:4px solid #e53935;border-radius:0 8px 8px 0;padding:12px 14px;font-size:13px;color:#1a1a1a;line-height:1.9;word-break:break-all">⛔ <b>하면 안 되는 것:</b> {_rx3[2]}</div>
 </div>""", unsafe_allow_html=True)
@@ -22012,7 +22033,11 @@ padding:12px 14px;margin-bottom:8px">
                      ("📜 자격 취득","시험·자격증에 투자하는 것이 최고의 재테크입니다.")],
         }
         # 일간으로 일주 십성 계산
-        from saju_engine import TEN_GODS_MATRIX, JIJANGGAN
+        # R17-1: 이 지역 import가 함수 전체에서 TEN_GODS_MATRIX를 지역변수로
+        # 만들어(파이썬 스코프 규칙) 21744행의 더 이른 사용이 매번
+        # UnboundLocalError로 죽고 있었다 — TEN_GODS_MATRIX·JIJANGGAN 모두
+        # manse.py 최상단(from saju_data import *, 14행)에서 이미 전역으로
+        # 들어와 있어 이 지역 import는 불필요했다. 제거.
         _ilgan_b = pils[1].get("cg","") if pils and len(pils)>1 else ""
         _ilji_b  = pils[1].get("jj","") if pils and len(pils)>1 else ""
         _main_ss_b = TEN_GODS_MATRIX.get(_ilgan_b,{}).get(_ilji_b,"")
