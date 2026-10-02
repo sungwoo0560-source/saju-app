@@ -1798,6 +1798,64 @@ def get_day_grade(yongshin, gisin, orig_jjs, y, m, d):
     return {"cg": cg, "jj": jj, "score": score, "grade": grade, "chung": chung}
 
 
+def get_daewoon_grade(yongshin, gisin, orig_pils, dw_cg, dw_jj):
+    """대운 길흉 등급 SSOT(R15-4) — 대운 천간 오행 종합_용신 +1/종합_기신 -1,
+    대운 지지 오행 종합_용신 +1.5/종합_기신 -1.5(천간보다 비중 큼), 대운 지지가
+    원국 지지를 충하면 그 원국 지지 오행이 용신이면 -1(용신 훼손)/기신이면
+    +0.5(기신 약화)로 합산(충 여러 개면 누적). 총점 >=2.5 '대길' / >=1.0 '길' /
+    >-1.0 '평' / >-2.5 '흉' / 그 외 '흉흉'. calc_luck_score의 대운 가산이 이
+    함수의 등급을 참조한다(R15-4, 인라인 +25/+12/-20/0 산식을 등급 기반으로 통일).
+
+    반환: {"cg","jj","score","grade","chung","volatile"} — "chung"은 대운 지지가
+    실제로 충한 원국 지지들의 리스트. "volatile"은 그 충 대상에 원국 월지 또는
+    일지가 포함되는지 여부(점수에는 미반영 — 표시 전용)."""
+    cg_oh = OH.get(dw_cg, "")
+    jj_oh = _OH_JJ.get(dw_jj, "")
+    _CHUNG_DW = {"子":"午","午":"子","丑":"未","未":"丑","寅":"申","申":"寅",
+                 "卯":"酉","酉":"卯","辰":"戌","戌":"辰","巳":"亥","亥":"巳"}
+    score = 0.0
+    if cg_oh in yongshin:
+        score += 1
+    elif cg_oh in gisin:
+        score -= 1
+    if jj_oh in yongshin:
+        score += 1.5
+    elif jj_oh in gisin:
+        score -= 1.5
+
+    orig_jjs = [p.get("jj", "") for p in orig_pils if p.get("jj", "")]
+    ilju_jj = orig_pils[1].get("jj", "") if len(orig_pils) > 1 else ""
+    wolju_jj = orig_pils[2].get("jj", "") if len(orig_pils) > 2 else ""
+
+    chung_target = _CHUNG_DW.get(dw_jj, "")
+    chung = []
+    volatile = False
+    if chung_target:
+        for oj in orig_jjs:
+            if oj == chung_target:
+                chung.append(oj)
+                oj_oh = _OH_JJ.get(oj, "")
+                if oj_oh in yongshin:
+                    score -= 1
+                elif oj_oh in gisin:
+                    score += 0.5
+                if oj == ilju_jj or oj == wolju_jj:
+                    volatile = True
+
+    if score >= 2.5:
+        grade = "대길"
+    elif score >= 1.0:
+        grade = "길"
+    elif score > -1.0:
+        grade = "평"
+    elif score > -2.5:
+        grade = "흉"
+    else:
+        grade = "흉흉"
+
+    return {"cg": dw_cg, "jj": dw_jj, "score": score, "grade": grade, "chung": chung, "volatile": volatile}
+
+
 class LocalSajuNarrator:
     """만세력 계산 결과를 받아 사람의 언어로 풀어주는 완전 로컬 해석 엔진"""
 
@@ -15506,6 +15564,7 @@ def calc_luck_score(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0, target_y
     ys = get_yongshin(pils)
 
     yong_ohs = ys.get("종합_용신", []) if isinstance(ys.get("종합_용신"), list) else []
+    gi_ohs = ys.get("종합_기신", []) if isinstance(ys.get("종합_기신"), list) else []
 
     dw_list = SajuCoreEngine.get_daewoon(pils, birth_year, bm, bd, bh, bmi, gender=gender)
 
@@ -15513,17 +15572,10 @@ def calc_luck_score(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0, target_y
 
     score = 50
 
+    # R15-4: 대운 SSOT. volatile은 점수 미반영, 표시 전용
     if cur_dw:
-        dw_oh = OH.get(cur_dw["cg"], "")
-
-        if dw_oh in yong_ohs:
-            score += 25
-
-        elif any(_BIRTH_F2.get(dw_oh) == y for y in yong_ohs):
-            score += 12
-
-        elif any(_CTRL2.get(dw_oh) == y or _CTRL2.get(y) == dw_oh for y in yong_ohs):
-            score -= 20
+        _dw_g = get_daewoon_grade(yong_ohs, gi_ohs, pils, cur_dw["cg"], cur_dw["jj"])
+        score += {"대길": 25, "길": 12, "평": 0, "흉": -12, "흉흉": -20}.get(_dw_g["grade"], 0)
 
     _LV = {
         "대길(大吉)": 20,
@@ -15538,7 +15590,6 @@ def calc_luck_score(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0, target_y
 
     # R15-1: 세운 길흉 방향은 yongshin_sewoon_grade(SSOT), 크기는 방향 일치 시 raw 세분값 유지
     _raw_v = _LV.get(yl.get("길흉", "평(平)"), 0)
-    gi_ohs = ys.get("종합_기신", []) if isinstance(ys.get("종합_기신"), list) else []
     ilgan = pils[1]["cg"]
     sn = get_ilgan_strength(ilgan, pils)
     _corrected = yongshin_sewoon_grade(yl.get("오행_천간", ""), yong_ohs, gi_ohs, sn)
