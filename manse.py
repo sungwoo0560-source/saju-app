@@ -9575,6 +9575,23 @@ def tab_daewoon(pils, birth_year, gender):
             ]
         )
 
+        # R15-5: get_daewoon_grade volatile 표시 — 점수·등급 무변경, 표시 전용.
+        # 월지를 충하면 "직업·사회 자리", 일지를 충하면 "생활·관계 기반"으로 안내.
+        _dw_g15_5 = get_daewoon_grade(yongshin_ohs, _dw_gisin_ohs, pils, dw["cg"], dw["jj"])
+        if _dw_g15_5["volatile"]:
+            _vol_labels = []
+            if pils[2].get("jj", "") in _dw_g15_5["chung"]:
+                _vol_labels.append("직업·사회 자리(월지)")
+            if pils[1].get("jj", "") in _dw_g15_5["chung"]:
+                _vol_labels.append("생활·관계 기반(일지)")
+            if _vol_labels:
+                alert_html += (
+                    '<div style="background:#fff3e0;border-left:3px solid #ff6b00;'
+                    'padding:8px 12px;border-radius:6px;margin-top:4px;font-size:12px;'
+                    'color:#8b4500">⚡ 이 대운은 원국 '
+                    f'{" · ".join(_vol_labels)}를 충합니다 — 일과 생활 기반의 변동이 큰 10년</div>'
+                )
+
         render_daewoon_card(dw, oh_cg, d_ss_cg, oh_jj, d_ss_jj, title, icon, narrative, prescription, alert_html, bdr, bg2, badge, OHE, birth_year=birth_year)
 
         # ── 직격 처방 블록 (결론 먼저 / 해야 할 것 / 하면 망하는 것) ──
