@@ -12896,7 +12896,11 @@ def build_gangsa_block(pils, name, birth_year, gender, marriage_status=None):
                             _tail = "의 기운이 함께했습니다"
                         else:
                             _tail = _conn4[_i] if _i < len(_conn4) - 1 else "의 흐름이 이어졌고"
-                        _seg4.append(f"{_a_s}세 무렵 {_str_d} 대운엔 {_mean}{_tail}")
+                        # R18-②(2026-10-03): 대운별 등급(get_daewoon_grade, SSOT)을 괄호로
+                        # 병기 — 이전엔 乙丑(평+월지충)·戊辰(흉흉)이 똑같은 중립 톤
+                        # "~기운이 함께했습니다"로만 서술돼 구분이 안 됐다.
+                        _dwg4 = get_daewoon_grade(_yong_ohs4, _gi_ohs4, pils, _cg_d, _jj_d)
+                        _seg4.append(f"{_a_s}세 무렵 {_str_d}({_dwg4['grade']}) 대운엔 {_mean}{_tail}")
                 if _seg4:
                     _life_body = ", ".join(_seg4)
                     # 마지막 조각이 마침표로 끝나지 않으면 붙여 문장 마무리 (대운 1~2개 케이스)
@@ -16666,7 +16670,11 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
         _has_baekho8  = any("백호" in s.get("이름","") for s in _sinsal if isinstance(s, dict))
 
         _is_yong_sw8 = any(_sw_now.get("오행_천간","") == oh for oh in _yong_ohs)
-        _is_yong_dw8 = bool(_cur_dw and any(OH.get(_cur_dw.get("cg",""),"") == oh for oh in _yong_ohs))
+        # R18-②(2026-10-03): 대운 용신 판정을 get_daewoon_grade(SSOT, R15-4)로 통일.
+        # 기존엔 대운 천간 오행이 용신에 속하는지만(이진) 봤는데, 지지 가중치(1.5)·
+        # 충·흉흉 단계가 전부 빠져 있었다. 판정 로직은 그대로, 조회 경로만 교체.
+        _dw_grade8 = get_daewoon_grade(_yong_ohs, _gisin_ohs, pils, _cur_dw["cg"], _cur_dw["jj"]) if _cur_dw else {"grade": "평"}
+        _is_yong_dw8 = _dw_grade8["grade"] in ("대길", "길")
         _is_sw_hung8 = _sw_now.get("길흉","") in ["흉","대흉"]
 
         # ── 5대 지표 점수 (saju_interpreter._nar_ch8_flow 와 동일 공식) ──
@@ -17026,9 +17034,13 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
             "庚":["丑","未"],"辛":["寅","午"],"壬":["卯","巳"],"癸":["卯","巳"],
         }
         _guiin_jjs = _GUIIN_MAP.get(_ilgan_g,[])
+        # R18-③(2026-10-03): 기존 값(子:11,丑:12,寅:1...)은 "인월=1월"(전통 월건)
+        # 체계였고, 같은 카드의 "용신 활성 달"/"주의 달"은 get_monthly_luck의
+        # jj_list(saju_engine.py, 丑=1월 캘린더력)를 쓴다 — 한 카드 안에서 "1월"의
+        # 뜻이 서로 달랐다. get_monthly_luck과 같은 체계로 통일(판정 로직 무변경).
         _JJ_MON_MAP = {
-            "子":11,"丑":12,"寅":1,"卯":2,"辰":3,"巳":4,
-            "午":5,"未":6,"申":7,"酉":8,"戌":9,"亥":10
+            "丑":1,"寅":2,"卯":3,"辰":4,"巳":5,"午":6,
+            "未":7,"申":8,"酉":9,"戌":10,"亥":11,"子":12,
         }
         _guiin_months = [f"{_JJ_MON_MAP.get(j,0)}월" for j in _guiin_jjs if j in _JJ_MON_MAP]
 
@@ -28172,17 +28184,29 @@ def main():
         _cg_oh_b = _OH_B.get(_day_cg_b, "木")
         _jj_oh_b = _JJOH_B.get(_day_jj_b, "木")
 
-        # 십성 기반 오늘 키워드
-        _TEN_STAR_B = {
-            "甲": ("비견","독립·경쟁·추진력"), "乙": ("겁재","협력·경쟁·사교"),
-            "丙": ("식신","표현·창의·여유"), "丁": ("상관","재능·반항·예술"),
-            "戊": ("편재","활동적재물·변화"), "己": ("정재","안정재물·실속"),
-            "庚": ("편관","권위·압박·변화"), "辛": ("정관","규율·명예·책임"),
-            "壬": ("편인","직관·학습·독창"), "癸": ("정인","보호·학문·내면"),
-        }
-        _ss_name_b, _ss_desc_b = _TEN_STAR_B.get(_day_cg_b, ("비견","균형·평상"))
+        # 재물/건강/관계 아이콘 판정 (개인 사주 있으면 월운 연동, 없으면 일진 오행 기준)
+        _pils_b = _ss.get("saju_pils")
 
-        # 행운색 (일진 천간 오행 기준)
+        # R18 (2026-10-03): 십성·행운색을 "일간=甲 고정" 대신 실제 일간(_pils_b[1]["cg"])
+        # 기준으로 계산. TEN_GODS_MATRIX(saju_data.py SSOT) 그대로 조회, 신규 판정 없음.
+        _SS_DESC_B = {
+            "비견":"독립·경쟁·추진력", "겁재":"협력·경쟁·사교",
+            "식신":"표현·창의·여유", "상관":"재능·반항·예술",
+            "편재":"활동적재물·변화", "정재":"안정재물·실속",
+            "편관":"권위·압박·변화", "정관":"규율·명예·책임",
+            "편인":"직관·학습·독창", "정인":"보호·학문·내면",
+        }
+        _ilgan_b = _pils_b[1]["cg"] if _pils_b and len(_pils_b) > 1 else _day_cg_b
+        _ss_full_b = TEN_GODS_MATRIX.get(_ilgan_b, {}).get(_day_cg_b, "比肩(비견)")
+        _ss_name_b = _ss_full_b.split("(")[-1].rstrip(")")
+        _ss_desc_b = _SS_DESC_B.get(_ss_name_b, "균형·평상")
+
+        # 용신/기신 (개인 사주 있을 때만 산출 — 행운색·오늘 등급에 공용)
+        _ys_b    = get_yongshin(_pils_b) if _pils_b else {}
+        _yong_b  = _ys_b.get("종합_용신", []) if isinstance(_ys_b.get("종합_용신"), list) else []
+        _gisin_b = _ys_b.get("종합_기신", []) if isinstance(_ys_b.get("종합_기신"), list) else []
+
+        # 행운색 — 일진 오행이 기신이면 용신[0] 색으로 대체, 아니면 기존처럼 일진 천간 오행 색
         _LUCK_COLOR_B = {
             "木": ("초록·청록", "#27ae60"),
             "火": ("빨강·오렌지", "#e74c3c"),
@@ -28190,10 +28214,8 @@ def main():
             "金": ("흰색·은색", "#95a5a6"),
             "水": ("검정·파랑", "#2980b9"),
         }
-        _lc_name_b, _lc_hex_b = _LUCK_COLOR_B.get(_cg_oh_b, ("흰색", "#bdc3c7"))
-
-        # 재물/건강/관계 아이콘 판정 (개인 사주 있으면 월운 연동, 없으면 일진 오행 기준)
-        _pils_b = _ss.get("saju_pils")
+        _lc_oh_b = _yong_b[0] if (_cg_oh_b in _gisin_b and _yong_b) else _cg_oh_b
+        _lc_name_b, _lc_hex_b = _LUCK_COLOR_B.get(_lc_oh_b, ("흰색", "#bdc3c7"))
 
         if _pils_b:
             # R10-2f(R-월운1): raw get_monthly_luck 십성표 대신 build_monthly_grades
@@ -28216,8 +28238,14 @@ def main():
             _health_icon_b = "💪 양호" if "인" in _ss_mon_b or _grade_b == "대길" else ("🤒 주의" if _grade_b == "흉흉" else "➖ 보통")
             # 관계
             _rel_icon_b    = "❤️ 원만" if "관" in _ss_mon_b or "식" in _ss_mon_b else ("⚡ 마찰" if _bad_b else "➖ 평온")
+
+            # 오늘 등급 (R15-3과 같은 SSOT — get_day_grade, 신규 판정 없음)
+            _orig_jjs_b = [p.get("jj", "") for p in _pils_b]
+            _dg_b = get_day_grade(_yong_b, _gisin_b, _orig_jjs_b, _today_b.year, _today_b.month, _today_b.day)
+            _day_grade_b = _dg_b.get("grade", "보통")
+
             _briefing_b    = (
-                f"이달은 <b>{_gil_b}</b> 운입니다. "
+                f"이달은 <b>{_gil_b}</b> 운이고, 오늘 흐름은 <b>{_day_grade_b}</b>입니다. "
                 f"오늘 일진 <b>{_day_cg_b}{_day_jj_b}</b>({_OHKR_B.get(_cg_oh_b,'')})의 기운이 흐르는 날, "
                 f"{_ss_name_b}({_ss_desc_b}) 에너지를 잘 활용하면 흐름이 열립니다."
             )

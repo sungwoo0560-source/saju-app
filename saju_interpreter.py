@@ -2833,7 +2833,15 @@ class LocalSajuNarrator:
 
             age_e = dw_end - birth_year + 1
 
-            lines.append(f"\n<b>현재 대운</b>: {dw_gan} [{dw_ss}] ({dw_start} ~ {dw_end}년 / {age_s} ~ {age_e}세)")
+            # R18-②(2026-10-03): "올해 세운"(위)과 대칭으로 대운도 get_daewoon_grade
+            # (SSOT, R15-4)로 길흉 등급을 매긴다 — 이전엔 세운만 용신/기신 보정이
+            # 있고 대운엔 등급 표시가 아예 없었다. 판정 로직 무변경, 조회만 추가.
+            _dw_grade_fr = (
+                get_daewoon_grade(_ys_fr, _gs_fr, pils, cur_dw.get("cg", ""), cur_dw.get("jj", ""))
+                if cur_dw.get("cg") and cur_dw.get("jj") else {"grade": "평"}
+            )
+
+            lines.append(f"\n<b>현재 대운</b>: {dw_gan} [{dw_ss}] — 길흉: <b>{_dw_grade_fr['grade']}</b> ({dw_start} ~ {dw_end}년 / {age_s} ~ {age_e}세)")
 
             # 대운 십성별 개인화 해석
             _DW_SS_DETAIL = HanjaSafeDict({
