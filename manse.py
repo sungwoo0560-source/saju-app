@@ -30422,7 +30422,11 @@ padding:22px 26px;margin-bottom:20px;text-align:center">
 
     # ── 형파해 서술형 요약 ──────────────────────────────────────
     try:
-        _hph_ch = get_chung_hyung(pils) if 'get_chung_hyung' in dir() else {}
+        # R17-1: 'get_chung_hyung' in dir()는 함수 지역 스코프만 보므로 전역
+        # 함수명 검사로는 항상 거짓 — get_chung_hyung이 한 번도 호출되지 않고
+        # 매번 {}로 떨어져 충·형이 실제로 있어도 "두드러지지 않습니다"로
+        # 나가고 있었다. 직접 호출로 교체(실패 대비 바깥 try가 이미 있음).
+        _hph_ch = get_chung_hyung(pils)
         _hph_chung = _hph_ch.get("충", [])
         _hph_hyung = _hph_ch.get("형", [])
 
@@ -30446,6 +30450,14 @@ padding:22px 26px;margin-bottom:20px;text-align:center">
                 f"각 기둥의 기운이 비교적 조화롭게 배치되어 있어 안정적인 인생 구조를 가졌습니다."
             )
         if _hph_sentences:
+            # R17-2: 위 "④ 형(刑)·파(破)·해(害)" 섹션은 형·파·해만 다루고 충은
+            # 보지 않는다 — 이 서술 요약은 충도 함께 다루므로 제목으로 범위를
+            # 명시해 두 섹션이 "없다/있다"로 엇갈려 보이는 혼란을 줄인다.
+            st.markdown(
+                '<div style="font-size:13px;font-weight:800;color:#8b6200;margin:10px 0 4px">'
+                '📝 형충파해 서술 요약 (충·형 중심)</div>',
+                unsafe_allow_html=True,
+            )
             st.markdown(f"""
 <div style="background:#fffdf5;border:1px solid #c9a84c;border-radius:12px;padding:16px 18px;word-break:keep-all;overflow-wrap:break-word;box-sizing:border-box;width:100%;margin:10px 0">
 <div style="font-size:13px;color:#4a2800;line-height:1.9;word-break:break-all;overflow-wrap:break-word;white-space:normal">{'<br>'.join(_hph_sentences)}</div>
