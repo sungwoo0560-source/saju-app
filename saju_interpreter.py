@@ -15572,7 +15572,7 @@ def calc_luck_score(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0, target_y
 
     score = 50
 
-    # R15-4: 대운 SSOT. volatile은 점수 미반영, 표시 전용
+    # R15-4: 대운 SSOT. 용신은 get_yongshin 현행 그대로 사용. volatile은 점수 미반영, 표시 전용
     if cur_dw:
         _dw_g = get_daewoon_grade(yong_ohs, gi_ohs, pils, cur_dw["cg"], cur_dw["jj"])
         score += {"대길": 25, "길": 12, "평": 0, "흉": -12, "흉흉": -20}.get(_dw_g["grade"], 0)
