@@ -21761,11 +21761,12 @@ def menu8_bihang(pils, name, birth_year, gender):
 <div style="background:#ffebee;border-left:4px solid #e53935;border-radius:0 8px 8px 0;padding:12px 14px;font-size:13px;color:#1a1a1a;line-height:1.9;word-break:break-all">⛔ <b>하면 안 되는 것:</b> {_rx3[2]}</div>
 </div>""", unsafe_allow_html=True)
     except Exception as _dw_e:
-        # 대운 계산 실패 시 기본 처방 출력
+        # R17-1: 이 except는 입력값 문제가 아니라 내부 계산 실패를 사용자 탓
+        # 문구로 가려왔다(원인은 이 카드와 별개 사안으로 진단·처리 중) — 중립
+        # 문구로 교체. 대운 계산 실패 시 기본 처방 출력.
         st.markdown("""<div style="background:#fff8e8;border:1px solid #c9a84c;border-radius:10px;padding:14px;margin:8px 0">
 <div style="font-size:13px;color:#5a3d00;line-height:1.9">
-대운 기간 계산을 위해 정확한 생년월일시가 필요합니다.<br>
-현재 대운의 기운을 파악하려면 <b>사주 입력 화면에서 생시(生時)를 다시 확인</b>해 주십시오.<br>
+⚠ 이 항목을 지금 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.<br>
 용신 오행을 강화하는 비방을 우선 실천하십시오.
 </div></div>""", unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)

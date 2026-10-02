@@ -2089,7 +2089,10 @@ class LocalSajuNarrator:
         b = LocalSajuNarrator._get_base(pils, name, birth_year, gender)
 
         if not b:
-            return "<h2>⚠️ 종합 분석을 불러오지 못했습니다. 생년월일시를 다시 확인해주세요.</h2>"
+            # R17-1: _get_base 실패는 내부 계산 오류지 입력 문제가 아님(_get_base
+            # 자신의 except가 이미 logging.warning으로 실제 원인을 남긴다) — 사용자
+            # 탓으로 보이는 문구를 중립 문구로 교체(판정 로직 무변경).
+            return "<h2>⚠ 이 항목을 지금 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.</h2>"
 
         age = b.get("cur_year", datetime.now().year) - birth_year + 1
 
