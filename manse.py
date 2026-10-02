@@ -24306,24 +24306,33 @@ def menu12_manse(pils=None, birth_year=1990, gender="남"):
 
             saju_lucky = []
 
-            for entry in cal_data:
-                d_ss = TEN_GODS_MATRIX.get(ilgan_m, {}).get(entry["iljin"]["cg"], "-")
+            # R15-3c: 추천 선정 = get_day_grade(SSOT), 십성은 테마·정렬 전용
+            _is_cur_month12 = (sel_month == today.month and sel_year == today.year)
 
-                # R15-3: 날짜 선정 기준 = get_day_grade(SSOT) grade=="길"
+            for entry in cal_data:
+                if _is_cur_month12 and entry["day"] < today.day:
+                    continue
+
+                _d_ss_hj = TEN_GODS_MATRIX.get(ilgan_m, {}).get(entry["iljin"]["cg"], "-")
+
+                _d_ss_pure = _d_ss_hj.split("(")[0] if "(" in _d_ss_hj else _d_ss_hj
+
+                d_ss = _HANJA_WORD_KR.get(_d_ss_pure, _d_ss_pure)
+
                 grade = entry["personal_grade"]["grade"]
 
                 is_core = d_ss in lucky_ss
 
                 is_secondary = d_ss in lucky_ss_secondary
 
-                if grade == "길" and (is_core or is_secondary):
+                if grade == "길":
                     saju_lucky.append(
                         {
                             "day": entry["day"],
                             "iljin": entry["iljin"]["str"],
                             "ss": d_ss,
                             "grade": grade,
-                            "priority": 0 if is_core else 1,
+                            "priority": 0 if is_core else (1 if is_secondary else 2),
                             "weekday": ["月", "火", "水", "木", "金", "土", "日"][(first_wd + entry["day"] - 1) % 7],
                         }
                     )
