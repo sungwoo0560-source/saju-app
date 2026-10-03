@@ -9489,7 +9489,11 @@ def tab_daewoon(pils, birth_year, gender):
     for dw in daewoon:
         d_ss = TEN_GODS_MATRIX.get(ilgan, {}).get(dw["cg"], "-")
 
-        is_yong = _get_yongshin_match(d_ss, yongshin_ohs, ilgan_oh) == "yong"
+        # R20-c(2026-10-03): _get_yongshin_match(cg 단독) 대신 get_daewoon_grade
+        # (SSOT, cg·jj 가중 반영)로 교체 — 함수 본문은 무수정, 호출부만 교체.
+        is_yong = DAEWOON_GRADE_BUCKET.get(
+            get_daewoon_grade(yongshin_ohs, _dw_gisin_ohs, pils, dw["cg"], dw["jj"])["grade"], ""
+        ) in ("황금기", "길한")
 
         is_cur = dw["시작연도"] <= current_year <= dw["종료연도"]
 
@@ -9526,17 +9530,13 @@ def tab_daewoon(pils, birth_year, gender):
 
         is_current = dw["시작연도"] <= current_year <= dw["종료연도"]
 
-        # 4단계 황금기 판별 (천간·지지 오행 모두 체크)
-        _dw_grade_oh_cg = oh_cg
-        _dw_grade_oh_jj = oh_jj
-        if _dw_grade_oh_cg in yongshin_ohs and _dw_grade_oh_jj in yongshin_ohs:
-            _dw_grade = "황금기"; is_yong = True
-        elif _dw_grade_oh_cg in yongshin_ohs or _dw_grade_oh_jj in yongshin_ohs:
-            _dw_grade = "길한"; is_yong = True
-        elif _dw_grade_oh_cg in _dw_gisin_ohs and _dw_grade_oh_jj in _dw_gisin_ohs:
-            _dw_grade = "주의"; is_yong = False
-        else:
-            _dw_grade = "중립"; is_yong = False
+        # R20-c(2026-10-03): 4단계 자체판별(cg·jj 단순 멤버십) 대신 get_daewoon_grade
+        # (SSOT)의 등급을 A안 버킷(DAEWOON_GRADE_BUCKET)으로 매핑한다. 판정 로직
+        # 신규 없음 — 아래 R15-5 volatile 표시가 이미 호출하던 것을 끌어올려
+        # 재사용(중복 호출 없음).
+        _dw_g15_5 = get_daewoon_grade(yongshin_ohs, _dw_gisin_ohs, pils, dw["cg"], dw["jj"])
+        _dw_grade = DAEWOON_GRADE_BUCKET.get(_dw_g15_5["grade"], "중립")
+        is_yong = _dw_grade in ("황금기", "길한")
 
         alerts = _get_dw_alert(ilgan, dw["cg"], dw["jj"], pils, sw_jj=_cur_sw_jj if is_current else "")
 
@@ -9563,6 +9563,11 @@ def tab_daewoon(pils, birth_year, gender):
             bg2 = "background:linear-gradient(135deg,#f5fff8,#eefff4);"
             badge = "<div style='font-size:11px;color:#1a6b2e;font-weight:700;margin-bottom:6px'>✨ 길한 대운 — 용신 기운이 절반 들어온 상승기</div>"
 
+        elif _dw_grade == "혼재":
+            bdr = "border:2px solid #d4af3755;"
+            bg2 = "background:linear-gradient(135deg,#fffdf0,#fff8e1);"
+            badge = "<div style='font-size:11px;color:#8b6200;font-weight:700;margin-bottom:6px'>🔶 혼재 대운 — 기신 기운이 절반 들어온 구간</div>"
+
         elif _dw_grade == "주의":
             bdr = "border:2px solid #c0392b55;"
             bg2 = "background:linear-gradient(135deg,#fff5f5,#ffeeee);"
@@ -9584,7 +9589,7 @@ def tab_daewoon(pils, birth_year, gender):
 
         # R15-5: get_daewoon_grade volatile 표시 — 점수·등급 무변경, 표시 전용.
         # 월지를 충하면 "직업·사회 자리", 일지를 충하면 "생활·관계 기반"으로 안내.
-        _dw_g15_5 = get_daewoon_grade(yongshin_ohs, _dw_gisin_ohs, pils, dw["cg"], dw["jj"])
+        # R20-c: _dw_g15_5는 위 badge 계산에서 이미 산출됨 — 재호출 없이 재사용.
         if _dw_g15_5["volatile"]:
             _vol_labels = []
             if pils[2].get("jj", "") in _dw_g15_5["chung"]:
@@ -11522,6 +11527,9 @@ def tab_cross_analysis(pils, birth_year, gender):
 
     ys = get_yongshin(pils)
     yongshin_ohs = ys.get("종합_용신", []) if ys else []
+    _gisin_ohs_c6 = ys.get("종합_기신", []) if ys else []
+    if not isinstance(_gisin_ohs_c6, list):
+        _gisin_ohs_c6 = []
 
     dw = cross["대운"]
     sw = cross["세운"]
@@ -11529,7 +11537,11 @@ def tab_cross_analysis(pils, birth_year, gender):
     dw_ss = cross["대운_천간십성"]
     sw_ss = cross["세운_천간십성"]
 
-    dw_is_yong = _get_yongshin_match(dw_ss, yongshin_ohs, ilgan_oh) == "yong"
+    # R20-c(2026-10-03): 대운 쪽만 get_daewoon_grade(SSOT)로 교체 — _get_yongshin_match
+    # 본문은 무수정, 세운 쪽(sw_is_yong)은 이번 라운드 범위 밖이라 그대로 유지.
+    dw_is_yong = DAEWOON_GRADE_BUCKET.get(
+        get_daewoon_grade(yongshin_ohs, _gisin_ohs_c6, pils, dw.get("cg",""), dw.get("jj",""))["grade"], ""
+    ) in ("황금기", "길한")
 
     sw_is_yong = _get_yongshin_match(sw_ss, yongshin_ohs, ilgan_oh) == "yong"
 

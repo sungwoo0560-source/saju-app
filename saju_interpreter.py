@@ -1856,6 +1856,14 @@ def get_daewoon_grade(yongshin, gisin, orig_pils, dw_cg, dw_jj):
     return {"cg": dw_cg, "jj": dw_jj, "score": score, "grade": grade, "chung": chung, "volatile": volatile}
 
 
+# R20-b(2026-10-03): get_daewoon_grade(SSOT)의 5등급 → A안 버킷명(R19 manse.py
+# _GRADE_LABEL_MAP2와 동일 어휘). LocalSajuNarrator.lifeline()/_dw_detail()이
+# 이 상수 하나만 참조한다(②③④ 복붙 금지 — 모듈 상수 1개 공유).
+DAEWOON_GRADE_BUCKET = {
+    "대길": "황금기", "길": "길한", "평": "중립", "흉": "혼재", "흉흉": "주의",
+}
+
+
 class LocalSajuNarrator:
     """만세력 계산 결과를 받아 사람의 언어로 풀어주는 완전 로컬 해석 엔진"""
 
@@ -3105,12 +3113,12 @@ class LocalSajuNarrator:
             _cdw_s   = cur_dw.get("시작연도", 0)
             _cdw_e   = cur_dw.get("종료연도", 9999)
             _remain  = _cdw_e - cur_year
-            _OH_CHK  = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
-                        "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
-            _cdw_oh  = _OH_CHK.get(_cdw_gan[:1], "")
-            _is_ys   = bool(_cdw_oh) and _cdw_oh in yongshin
-            _is_gs   = bool(_cdw_oh) and _cdw_oh in gisin
-            _grade   = "🌟 황금기 대운" if _is_ys else "⚠️ 수비 대운" if _is_gs else "〰️ 중립 대운"
+            # R20-b(2026-10-03): cg 단독 멤버십 대신 get_daewoon_grade(SSOT)로 통일.
+            # 판정 로직 신규 없음, DAEWOON_GRADE_BUCKET(공유 상수) 조회만 추가.
+            _dw_grade_b2 = get_daewoon_grade(yongshin, gisin, pils, cur_dw.get("cg",""), cur_dw.get("jj",""))
+            _bucket2 = DAEWOON_GRADE_BUCKET.get(_dw_grade_b2["grade"], "중립")
+            _GRADE_EMOJI2 = {"황금기":"🌟","길한":"✨","중립":"〰️","혼재":"🔶","주의":"⚠️"}
+            _grade   = f"{_GRADE_EMOJI2.get(_bucket2,'〰️')} {_bucket2} 대운"
 
             lines.append("---")
             lines.append(f"<h3>⭐ 지금 {name}님이 걷고 있는 대운</h3>")
@@ -3195,17 +3203,28 @@ class LocalSajuNarrator:
             ))
 
         # ── 전생애 요약 ─────────────────────────────────────────
+        # R20-a(2026-10-03): 루프의 마지막 _dw_detail() 결과와 "---" 사이에 빈 줄이
+        # 없으면 CommonMark가 직전 줄을 Setext 제목(<h2>)으로 오해석한다(R20-pre
+        # 진단: 마지막 대운 항목만 박스 밖 대형 굵은 글씨로 렌더되던 원인). 빈 줄
+        # 하나만 추가 — 판정 로직 변경 없음.
+        lines.append("")
         lines.append("---")
         lines.append(f"<h3>📌 {name}님의 인생 핵심 요약</h3>")
 
         _OH_CHK2 = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土",
                     "己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}
+        # R20-b(2026-10-03): 황금기 목록만 get_daewoon_grade(SSOT) 기준(grade ∈
+        # {대길,길}, DAEWOON_GRADE_BUCKET 공유 상수)으로 교체. 판정 로직 신규 없음.
+        # 수비 대운(danger) 목록은 이번 라운드 범위 밖 — cg 단독 기준 그대로 유지.
         golden = [d for d in dw_list
-                  if bool(_OH_CHK2.get(d.get("str","")[:1],""))
-                  and _OH_CHK2.get(d.get("str","")[:1],"") in yongshin]
+                  if DAEWOON_GRADE_BUCKET.get(
+                      get_daewoon_grade(yongshin, gisin, pils, d.get("cg",""), d.get("jj",""))["grade"], ""
+                  ) in ("황금기", "길한")]
+        # R20-d(2026-10-03): 황금기 목록(위)과 대칭으로 grade ∈ {흉,흉흉}로 교체.
         danger = [d for d in dw_list
-                  if bool(_OH_CHK2.get(d.get("str","")[:1],""))
-                  and _OH_CHK2.get(d.get("str","")[:1],"") in gisin]
+                  if DAEWOON_GRADE_BUCKET.get(
+                      get_daewoon_grade(yongshin, gisin, pils, d.get("cg",""), d.get("jj",""))["grade"], ""
+                  ) in ("혼재", "주의")]
 
         if golden:
             g_info = ", ".join(
@@ -4125,11 +4144,14 @@ class LocalSajuNarrator:
 
         oh = OH.get(dw_gan[:1], "")
 
-        # 🚨 버그 2 원인 수정: oh가 빈값("")일 때 무조건 True가 나오는 파이썬 버그 방어 (bool(oh) 추가)
-
-        is_ys = bool(oh) and any(oh == y for y in (yongshin or []))
-
-        is_gs = bool(oh) and any(oh == g for g in (gisin or []))
+        # R20-d(2026-10-03): is_ys/is_gs도 get_daewoon_grade(SSOT)로 통일 — R20-b가
+        # 남긴 "태그는 grade, 문단은 cg단독"의 자기모순 잔차를 해소. ys_mark와 같은
+        # grade/bucket을 재사용한다(중복 호출 없음). 대길·길→용신, 흉·흉흉→기신,
+        # 평→둘 다 False(아래 중립 분기).
+        _dw_grade_b3 = get_daewoon_grade(yongshin, gisin, pils, dw.get("cg",""), dw.get("jj",""))
+        _bucket3 = DAEWOON_GRADE_BUCKET.get(_dw_grade_b3["grade"], "중립")
+        is_ys = _bucket3 in ("황금기", "길한")
+        is_gs = _bucket3 in ("혼재", "주의")
 
         lines = []
 
@@ -4137,7 +4159,12 @@ class LocalSajuNarrator:
 
         cur_mark = " <b>[현재 대운]</b>" if is_cur else ""
 
-        ys_mark = " ✨【용신 대운 — 황금기】" if is_ys else (" ⚠️【기신 대운 — 조심】" if is_gs else "")
+        if _bucket3 in ("황금기", "길한"):
+            ys_mark = " ✨【용신 대운 — 황금기】"
+        elif _bucket3 in ("혼재", "주의"):
+            ys_mark = " ⚠️【기신 대운 — 조심】"
+        else:
+            ys_mark = " 〰️【중립 대운】"
 
         # 이제 대운 글자(간지)가 제대로 찍힙니다.
 
