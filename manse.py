@@ -14646,14 +14646,18 @@ def menu_current_situation(pils, name, birth_year, gender, marriage_status=None)
                     # 케이스에 맞지 않는다 — 놓치는 게 아니라 용신 대운이 오는 이
                     # 159명에게 반대 방향(주의) 태그를 붙이는 것이 되고, 이 커밋의
                     # 목적이 바로 그 반대 방향 태그를 없애는 것이기 때문이다.
-                    _next_oh2 = OH.get(_next_cg2, "")
-                    if _next_oh2 in yong_ohs:
+                    # R19-2(2026-10-03): 천간 단독 용신/기신 멤버십 대신 get_daewoon_grade
+                    # (SSOT)의 등급으로 분기한다(대길·길→용신 분기/평→중립 분기/흉·흉흉→
+                    # 기신 분기). 판정 로직 신규 없음, 문구는 그대로. R19-pre 진단: 기존
+                    # 방식은 "기신 전환" 경고의 10.06%가 실제로는 길한 전환이었다.
+                    _next_dw_grade2 = get_daewoon_grade(yong_ohs, gi_ohs, pils, _next_cg2, _next_jj2)
+                    if _next_dw_grade2["grade"] in ("대길", "길"):
                         _danger_signals.append((f"🔵 대운 교체 {_years_left2}년 전 — 유리한 흐름으로의 전환이 다가옵니다",
                             f"현재 대운이 {_years_left2}년 후면 바뀝니다. "
                             f"다음 {_next_cg2}{_next_jj2} 대운은 지금 이 사주에 필요한 기운과 맞아떨어지는 흐름입니다. "
                             f"교체 전후 1~2년은 새 흐름에 적응하는 시간이 필요하지만, 방향 자체는 나쁘지 않습니다. "
                             f"지금부터 다음 대운에 맞춰 준비해두면 전환 이후를 훨씬 수월하게 맞이할 수 있습니다.", "참고"))
-                    elif _next_oh2 in gi_ohs:
+                    elif _next_dw_grade2["grade"] in ("흉", "흉흉"):
                         _danger_signals.append((f"⚠️ 대운 교체 {_years_left2}년 전 — 지금이 가장 혼란스러운 시기입니다",
                             f"현재 대운이 {_years_left2}년 후면 바뀝니다. "
                             f"다음 대운은 {_next_cg2}{_next_jj2} 대운으로, 지금의 기운과는 결이 다른 흐름입니다. "
@@ -17604,17 +17608,20 @@ def menu2_lifeline(pils, birth_year, gender, name="내담자"):
         _gisin_ohs = ys.get("종합_기신", [])
         if not isinstance(_gisin_ohs, list):
             _gisin_ohs = []
-        # 4단계 황금기 판별 (천간+지지 오행 모두 체크)
-        if _cdw_oh in yongshin_ohs and _cdw_jj_oh in yongshin_ohs:
-            _grade = "🌟 황금기 대운"; _gbg = "#1a3d1a"; _gc = "#7fff7f"
-        elif _cdw_oh in yongshin_ohs or _cdw_jj_oh in yongshin_ohs:
-            _grade = "✨ 길한 대운"; _gbg = "#0d2d1a"; _gc = "#aaffcc"
-        elif _cdw_oh in _gisin_ohs and _cdw_jj_oh in _gisin_ohs:
-            _grade = "⚠️ 주의 대운"; _gbg = "#3d1a1a"; _gc = "#ffaaaa"
-        elif _cdw_oh in _gisin_ohs or _cdw_jj_oh in _gisin_ohs:
-            _grade = "🔶 혼재 대운"; _gbg = "#2d1f0f"; _gc = "#ffcc88"
-        else:
-            _grade = "〰️ 중립 대운"; _gbg = "#1a1a3d"; _gc = "#aaaaff"
+        # R19-1(2026-10-03): 5단계 자체판별(천간+지지 단순 멤버십) 대신
+        # get_daewoon_grade(SSOT, R15-4)의 등급을 라벨로 매핑한다(A안: 대길→
+        # 황금기/길→길한/평→중립/흉→혼재/흉흉→주의). 판정 로직 신규 없음 —
+        # 충·지지가중치(1.5배)가 이제 라벨에도 반영된다(R19-pre 진단: 기존
+        # "길한" 라벨 중 59%가 실제로는 "평" 등급이던 불일치 해소).
+        _dw_grade2 = get_daewoon_grade(yongshin_ohs, _gisin_ohs, pils, cur_dw["cg"], cur_dw.get("jj", ""))
+        _GRADE_LABEL_MAP2 = {
+            "대길": ("🌟 황금기 대운", "#1a3d1a", "#7fff7f"),
+            "길":   ("✨ 길한 대운",   "#0d2d1a", "#aaffcc"),
+            "평":   ("〰️ 중립 대운",  "#1a1a3d", "#aaaaff"),
+            "흉":   ("🔶 혼재 대운",   "#2d1f0f", "#ffcc88"),
+            "흉흉": ("⚠️ 주의 대운",   "#3d1a1a", "#ffaaaa"),
+        }
+        _grade, _gbg, _gc = _GRADE_LABEL_MAP2.get(_dw_grade2["grade"], ("〰️ 중립 대운", "#1a1a3d", "#aaaaff"))
         _dd      = DAEWOON_DIRECT.get(_cdw_ss, {})
         _verdict = _dd.get("verdict", f"{_cdw_ss} 대운이 진행 중입니다.")
         _remain  = cur_dw["종료연도"] - current_year
