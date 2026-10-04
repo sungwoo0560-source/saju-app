@@ -18549,8 +18549,12 @@ def menu5_money(pils, birth_year, gender, name="내담자"):
         _m5_yong  = yongshin_ohs[0] if yongshin_ohs else ilgan_oh
         _cur_dw_str5 = cur_dw.get("str","?") if cur_dw else "?"
         _cur_dw_ss5  = TEN_GODS_MATRIX.get(ilgan,{}).get(cur_dw.get("cg",""),"-") if cur_dw else "-"
-        _cur_dw_oh5  = OH.get(cur_dw.get("cg",""),"") if cur_dw else ""
-        _dw_is_yong5 = _cur_dw_oh5 in yongshin_ohs
+        # R21-b: 이진(cg 단독 멤버십) 대신 get_daewoon_grade(SSOT)의 5등급을 3분기로 사용.
+        try:
+            _gi_ohs5   = ys.get("종합_기신", []) if isinstance(ys.get("종합_기신"), list) else []
+            _dw_grade5 = get_daewoon_grade(yongshin_ohs, _gi_ohs5, pils, cur_dw.get("cg",""), cur_dw.get("jj",""))["grade"] if cur_dw else None
+        except Exception:
+            _dw_grade5 = None
         if _m5_hs >= 60 or _m5_bs >= 60:
             _m5_bg_color = "#0d2d0d"
             _m5_bd_color = "#27ae60"
@@ -18563,10 +18567,14 @@ def menu5_money(pils, birth_year, gender, name="내담자"):
             _m5_bg_color = "#2d1a1a"
             _m5_bd_color = "#e74c3c"
             _m5_verdict  = f"횡재수 {_m5_hs}/100 · 사업운 {_m5_bs}/100 — 큰돈보다 <b>안정 자산</b> 집중 시기."
+        if _dw_grade5 in ("대길", "길"):
+            _dw_branch5 = "용신 대운. <b>재물 기회가 집중됩니다.</b> 지금 바로 움직이세요."
+        elif _dw_grade5 in ("흉", "흉흉"):
+            _dw_branch5 = "기신 대운. <b>보증·동업·투기 절대 X.</b> 안정 모드로 내실을 다지세요."
+        else:
+            _dw_branch5 = "중립 대운. <b>큰 승부보다 기존 수입원 관리</b>가 유리한 시기입니다. 기회는 선별해서 잡으세요."
         _dw_msg5 = (
-            f"현재 <b>{_cur_dw_str5}({_cur_dw_ss5}) 대운</b> — "
-            + ("용신 대운. <b>재물 기회가 집중됩니다.</b> 지금 바로 움직이세요." if _dw_is_yong5 else
-               "기신 대운. <b>보증·동업·투기 절대 X.</b> 안정 모드로 내실을 다지세요.")
+            f"현재 <b>{_cur_dw_str5}({_cur_dw_ss5}) 대운</b> — " + _dw_branch5
         )
         st.markdown(
             f"<div style='background:linear-gradient(135deg,{_m5_bg_color},#000);"
