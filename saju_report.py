@@ -1365,11 +1365,12 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str="", dram
                             _seen_desc_j1.add(_d_j1)
                             _pevs_dedup_j1.append(_e_j1)
 
-                        # intensity "High" 전부(연도 오름차순) — High가 0건이면 "Mid" 전부로 대체
+                        # intensity "High" 전부 — High가 0건이면 "Mid" 전부로 대체
                         _high_j1 = [e for e in _pevs_dedup_j1 if e.get("intensity") == "High"]
                         _selected_j1 = _high_j1 if _high_j1 else [e for e in _pevs_dedup_j1 if e.get("intensity") == "Mid"]
 
-                        _pevs = sorted(_selected_j1, key=lambda e: e.get("year", 0))
+                        # J-2: 정렬은 score 내림차순, 동점은 연도 오름차순(이전엔 연도만 오름차순)
+                        _pevs = sorted(_selected_j1, key=lambda e: (-e.get("score", 0), e.get("year", 0)))
 
                         if _hl_err:
                             y = write(c, f"  (과거 사건 계산 불가: {_hl_err})", y, size=11)

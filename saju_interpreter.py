@@ -15828,6 +15828,29 @@ def compute_gi_ohs(pils):
         return []
 
 
+# J-2(2026-10-04): build_past_events()가 매기는 "명리 강도 점수"용 상수·헬퍼.
+# ①자리(월지·일지 +2 / 년지·시지 +1), ②충종류(왕지 子午卯酉 +2 / 생지 寅申巳亥 +1 / 고지 辰戌丑未 0).
+# pils 순서는 [시,일,월,년](프로젝트 공통 관례) — 인덱스 0=시지,1=일지,2=월지,3=년지.
+_PAST_EV_POS_WEIGHT = [1, 2, 2, 1]
+_JJ_CHUNG_TYPE_SCORE = {
+    "子": 2, "午": 2, "卯": 2, "酉": 2,   # 왕지
+    "寅": 1, "申": 1, "巳": 1, "亥": 1,   # 생지
+    "辰": 0, "戌": 0, "丑": 0, "未": 0,   # 고지
+}
+
+
+def _chung_hit_score(hit_jj, orig_jjs, yong_ohs):
+    """충 맞은 원국 지지(hit_jj) 하나의 ①자리+②충종류+③용신여부 점수.
+    같은 글자가 원국에 두 자리 있으면(예: 년지·시지 모두 子) 더 높은 자리 점수를 쓴다.
+    hit_jj가 없으면(원국을 때리는 충이 아닌 사건) (0,0,0)."""
+    if not hit_jj:
+        return 0, 0, 0
+    pos = max((_PAST_EV_POS_WEIGHT[i] for i, j in enumerate(orig_jjs) if j == hit_jj), default=0)
+    typ = _JJ_CHUNG_TYPE_SCORE.get(hit_jj, 0)
+    yon = 1 if OH.get(hit_jj, "") in yong_ohs else 0
+    return pos, typ, yon
+
+
 # @cache_data 제거 — session_state 내부 접근으로 캐시 불가
 def build_past_events(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0):
     """
@@ -15855,6 +15878,9 @@ def build_past_events(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0):
     current_year = get_saju_year()
 
     gi_ohs = compute_gi_ohs(pils)  # 거병(去病) 보정용 기신 오행 — 루프 밖에서 1회만 산출
+
+    # J-2: 명리 강도 점수(③ 용신여부)용 — get_yongshin() 1회만 호출해 재사용(루프 안에서 반복 호출 금지)
+    yong_ohs_j2 = set((get_yongshin(pils) or {}).get("종합_용신", []) or [])
 
     birth_month = max(1, min(12, int(bm)))
 
@@ -15973,6 +15999,12 @@ def build_past_events(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0):
                 _dw_intensity = "Mid"
                 _dw_gubyeong_note = " 다만 충을 맞은 자리가 원래 힘이 약한 기신 자리라, 겉보기보다 충격은 크지 않았을 가능성이 있습니다."
 
+            # J-2: 명리 강도 점수 — ①자리+②충종류+③용신(ojj 기준) ④대운동반(+3, 대운 자신이
+            # 충의 주체이므로 항상) ⑤천충지충(+2, 이 분기 진입조건이 dw_tg_chung이므로 항상)
+            # ⑥대운교체년(+1, 이 사건의 연도 자체가 대운 시작연도이므로 항상)
+            _pos_a, _typ_a, _yon_a = _chung_hit_score(ojj, orig_jjs, yong_ohs_j2)
+            _score_a = _pos_a + _typ_a + _yon_a + 3 + 2 + 1
+
             domain, cdd = CHUNG_DOMAIN_DESC.get(ck, (dw_domain, "큰 변화가 왔다"))
 
             adj_domain, adj_desc = _adjust_for_youth(domain, cdd, age_start)
@@ -15990,6 +16022,7 @@ def build_past_events(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0):
                             f" {adj_desc}. 이 시기 삶이 크게 뒤흔들렸을 가능성이 매우 높습니다." + _dw_gubyeong_note
                         ),
                         "intensity": _dw_intensity,
+                        "score": _score_a,
                     }
                 )
 
@@ -16008,6 +16041,7 @@ def build_past_events(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0):
                         "domain": adj_domain,
                         "desc": f"【{age_start_disp}세 대운 진입 · 지지충】{adj_desc}." + _dw_gubyeong_note,
                         "intensity": _dw_intensity,
+                        "score": _score_a,
                     }
                 )
 
@@ -16015,6 +16049,7 @@ def build_past_events(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0):
             adj_domain, _ = _adjust_for_youth(dw_domain, "", age_start)
 
             if adj_domain:
+                # J-2: 천간합은 지지충이 없는 사건 — ①②③④⑤는 0점, ⑥(대운교체년)만 +1
                 events.append(
                     {
                         "age": f"{age_start_disp}세",
@@ -16023,6 +16058,7 @@ def build_past_events(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0):
                         "domain": adj_domain,
                         "desc": f"【{age_start_disp}세 대운 진입 · 천간합】천간합(天干合) 성립 — {adj_domain} 영역에서 뜻밖의 인연이나 도움이 찾아온 시기입니다.",
                         "intensity": "Mid",
+                        "score": 1,
                     }
                 )
 
@@ -16094,6 +16130,21 @@ def build_past_events(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0):
 
                 _, adj_combo = _adjust_for_youth(domain, combo_desc, age)
 
+                # J-2-2: 거병(去病) 보정 누락 보완 — 우선순위2와 동일 규칙(맞은 원국 지지가
+                # 기신 오행이면 High→Mid). 기존엔 이 분기에만 보정이 없었다(J-2-pre 진단).
+                _intensity_p1 = "High"
+                _gubyeong_p1 = ""
+                if _OH_JJ.get(ojj, "") in gi_ohs:
+                    _intensity_p1 = "Mid"
+                    _gubyeong_p1 = " 다만 충을 맞은 자리가 원래 힘이 약한 기신 자리라, 겉보기보다 충격은 크지 않았을 가능성이 있습니다."
+
+                # J-2: 명리 강도 점수 — ①②③(ojj 기준) ④대운동반(대운도 같은 글자를 때리거나
+                # 대운-세운 지지가 서로 충) ⑤천충지충(+2, 이 분기 진입조건이 sw_tg_chung이므로 항상)
+                # ⑥대운교체년
+                _pos1, _typ1, _yon1 = _chung_hit_score(ojj, orig_jjs, yong_ohs_j2)
+                _dw_also1 = any(j == ojj for j, _ in dw_jj_chung) or dw_sw_jj_chung
+                _score1 = _pos1 + _typ1 + _yon1 + (3 if _dw_also1 else 0) + 2 + (1 if y == dw["시작연도"] else 0)
+
                 if adj_domain:
                     events.append(
                         {
@@ -16101,8 +16152,9 @@ def build_past_events(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0):
                             "year": y,
                             "type": f"{dw_ss}대운 x {sw_ss}세운 + 천간충+지지충",
                             "domain": adj_domain,
-                            "desc": (f"【{y}년 · {age}세 · 최고강도】천간({sw_cg})과 지지({sw['jj']})가 동시에 원국을 충격하는 해. {adj_cdd}. {adj_combo or ''}"),
-                            "intensity": "High",
+                            "desc": (f"【{y}년 · {age}세 · 최고강도】천간({sw_cg})과 지지({sw['jj']})가 동시에 원국을 충격하는 해. {adj_cdd}. {adj_combo or ''}" + _gubyeong_p1),
+                            "intensity": _intensity_p1,
+                            "score": _score1,
                         }
                     )
 
@@ -16125,6 +16177,12 @@ def build_past_events(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0):
 
                 _, adj_combo = _adjust_for_youth(domain, combo_hit[1] if combo_hit else "", age)
 
+                # J-2: 명리 강도 점수 — ①②③(ojj 기준) ④대운동반 ⑤천충지충(+0, 이 분기는
+                # elif 구조상 sw_tg_chung이 항상 False) ⑥대운교체년
+                _pos2, _typ2, _yon2 = _chung_hit_score(ojj, orig_jjs, yong_ohs_j2)
+                _dw_also2 = any(j == ojj for j, _ in dw_jj_chung) or dw_sw_jj_chung
+                _score2 = _pos2 + _typ2 + _yon2 + (3 if _dw_also2 else 0) + 0 + (1 if y == dw["시작연도"] else 0)
+
                 if adj_domain:
                     if combo_hit:
                         full_desc = f"【{y}년 · {age}세】{adj_cdd}. {adj_combo}" + _gubyeong_note
@@ -16140,6 +16198,7 @@ def build_past_events(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0):
                             "domain": adj_domain,
                             "desc": full_desc,
                             "intensity": intensity,
+                            "score": _score2,
                         }
                     )
 
@@ -16148,6 +16207,21 @@ def build_past_events(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0):
             elif dw_sw_jj_chung and combo_hit and combo_hit[0] == "High":
                 adj_domain, adj_combo = _adjust_for_youth(sw_domain, combo_hit[1], age)
 
+                # J-2-2: 거병(去病) 보정 누락 보완 — 이 분기는 원국 지지가 아니라 대운↔세운
+                # 지지가 직접 충돌하므로(원국 피격 자리가 없음), "맞은 자리"를 대운·세운 지지
+                # 자신으로 보고 그 오행이 기신이면 완화(동일 취지의 최소 확장 해석).
+                _intensity_p3 = "High"
+                _gubyeong_p3 = ""
+                if _OH_JJ.get(dw["jj"], "") in gi_ohs or _OH_JJ.get(sw.get("jj", ""), "") in gi_ohs:
+                    _intensity_p3 = "Mid"
+                    _gubyeong_p3 = " 다만 충을 맞은 자리가 원래 힘이 약한 기신 자리라, 겉보기보다 충격은 크지 않았을 가능성이 있습니다."
+
+                # J-2: 명리 강도 점수 — 원국 지지를 직접 때리는 사건이 아니라 ①②③은 0점.
+                # ④대운동반(+3, 이 분기 자체가 대운-세운 지지충이므로 항상)
+                # ⑤천충지충(+2, 대운 천간과 세운 천간도 같이 충하면) ⑥대운교체년
+                _tgtc3 = 2 if frozenset([dw["cg"], sw_cg]) in TG_CHUNG else 0
+                _score3 = 0 + 0 + 0 + 3 + _tgtc3 + (1 if y == dw["시작연도"] else 0)
+
                 if adj_domain:
                     events.append(
                         {
@@ -16155,8 +16229,9 @@ def build_past_events(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0):
                             "year": y,
                             "type": f"{dw_ss}대운 x {sw_ss}세운 (대운지지-세운지지 충)",
                             "domain": adj_domain,
-                            "desc": f"【{y}년 · {age}세】대운과 세운 지지가 서로 충돌하며 운의 방향이 급변. {adj_combo}",
-                            "intensity": "High",
+                            "desc": f"【{y}년 · {age}세】대운과 세운 지지가 서로 충돌하며 운의 방향이 급변. {adj_combo}" + _gubyeong_p3,
+                            "intensity": _intensity_p3,
+                            "score": _score3,
                         }
                     )
 
@@ -16164,6 +16239,11 @@ def build_past_events(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0):
 
             elif sam_hap_found:
                 adj_domain, _ = _adjust_for_youth(sw_domain, "", age)
+
+                # J-2: 지지충이 없는 사건(삼합) — ①②③은 0점. ④⑤는 우연히 대운-세운 지지가
+                # 서로 충(dw_sw_jj_chung)일 수도 있으므로(삼합과 충은 배타가 아님) 동일하게 반영.
+                _tgtc4 = 2 if (dw_sw_jj_chung and frozenset([dw["cg"], sw_cg]) in TG_CHUNG) else 0
+                _score4 = (3 if dw_sw_jj_chung else 0) + _tgtc4 + (1 if y == dw["시작연도"] else 0)
 
                 if adj_domain:
                     events.append(
@@ -16174,6 +16254,7 @@ def build_past_events(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0):
                             "domain": adj_domain,
                             "desc": f"【{y}년 · {age}세】대운·세운·원국 삼합({sam_hap_found[0]}) 성립 — {adj_domain} 영역에서 운의 집중 발복이 있었을 가능성이 높습니다.",
                             "intensity": "Mid",
+                            "score": _score4,
                         }
                     )
 
@@ -16185,6 +16266,10 @@ def build_past_events(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0):
                 if intensity in ("High", "Mid", "Low"):
                     adj_domain, adj_combo = _adjust_for_youth(sw_domain, combo_desc, age)
 
+                    # J-2: 지지충이 없는 사건(십성조합) — ①②③은 0점, ④⑤는 우연한 dw_sw_jj_chung 반영
+                    _tgtc5 = 2 if (dw_sw_jj_chung and frozenset([dw["cg"], sw_cg]) in TG_CHUNG) else 0
+                    _score5 = (3 if dw_sw_jj_chung else 0) + _tgtc5 + (1 if y == dw["시작연도"] else 0)
+
                     if adj_domain:
                         events.append(
                             {
@@ -16194,6 +16279,7 @@ def build_past_events(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0):
                                 "domain": adj_domain,
                                 "desc": f"【{y}년 · {age}세】{adj_combo}",
                                 "intensity": intensity,
+                                "score": _score5,
                             }
                         )
 
@@ -16201,6 +16287,10 @@ def build_past_events(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0):
 
             elif yuk_hap and dw_ss in {"正財", "食神", "正官", "正印"} and sw_ss in {"正財", "食神", "正官", "正印"}:
                 adj_domain, _ = _adjust_for_youth(sw_domain, "", age)
+
+                # J-2: 지지충이 없는 사건(육합) — ①②③④⑤는 0점(육합은 충이 아니라 dw_sw_jj_chung이
+                # 항상 False). ⑥(대운교체년)만 반영.
+                _score6 = 1 if y == dw["시작연도"] else 0
 
                 if adj_domain:
                     events.append(
@@ -16211,6 +16301,7 @@ def build_past_events(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0):
                             "domain": adj_domain,
                             "desc": f"【{y}년 · {age}세】대운·세운 지지가 육합(六合)을 이루며 기운이 모임. {adj_domain} 영역에서 좋은 결실이 있었을 가능성이 높습니다.",
                             "intensity": "Low",
+                            "score": _score6,
                         }
                     )
 
