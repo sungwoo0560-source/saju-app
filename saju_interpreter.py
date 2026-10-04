@@ -15851,6 +15851,37 @@ def _chung_hit_score(hit_jj, orig_jjs, yong_ohs):
     return pos, typ, yon
 
 
+def _wonkuk_ss_slots(ilgan, pils):
+    """원국 8슬롯(4주 × 천간/지지정기) 십성 집합 — (전체슬롯, 월주슬롯) 반환.
+    manse.get_jijanggan_analysis()와 같은 산출 방식(TEN_GODS_MATRIX + JIJANGGAN 정기)을
+    쓰지만, 그 함수는 manse.py 소속(여기서 가져오면 순환 import)이자 지장간 전체(여기·중기·
+    정기)를 반환해 세분화 단위가 달라 로컬로 재구현한다. 십성은 결합형("比肩(비견)")에서
+    한글 앞 한자 부분만 비교(예: "比肩")."""
+    all_ss, wol_ss = set(), set()
+    for i, p in enumerate(pils):
+        cg_ss = TEN_GODS_MATRIX.get(ilgan, {}).get(p["cg"], "-").split("(")[0]
+        jj_main = JIJANGGAN.get(p["jj"], ["-"])[-1]
+        jj_ss = TEN_GODS_MATRIX.get(ilgan, {}).get(jj_main, "-").split("(")[0]
+        all_ss.add(cg_ss)
+        all_ss.add(jj_ss)
+        if i == 2:  # pils 순서 [시,일,월,년] — 인덱스 2 = 월주
+            wol_ss.add(cg_ss)
+            wol_ss.add(jj_ss)
+    return all_ss, wol_ss
+
+
+def _combo_wolju_score(dw_ss, sw_ss, all_ss, wol_ss):
+    """①' 십성조합(dw_ss/sw_ss 둘 중 하나라도)이 원국 월간·월지에 있으면 +2,
+    원국 다른 자리에만 있으면 +1, 원국에 전혀 없으면 0."""
+    dw_k = dw_ss.split("(")[0] if "(" in dw_ss else dw_ss
+    sw_k = sw_ss.split("(")[0] if "(" in sw_ss else sw_ss
+    if dw_k in wol_ss or sw_k in wol_ss:
+        return 2
+    if dw_k in all_ss or sw_k in all_ss:
+        return 1
+    return 0
+
+
 # @cache_data 제거 — session_state 내부 접근으로 캐시 불가
 def build_past_events(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0):
     """
@@ -15881,6 +15912,9 @@ def build_past_events(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0):
 
     # J-2: 명리 강도 점수(③ 용신여부)용 — get_yongshin() 1회만 호출해 재사용(루프 안에서 반복 호출 금지)
     yong_ohs_j2 = set((get_yongshin(pils) or {}).get("종합_용신", []) or [])
+
+    # J-3: 십성조합 사건 점수(①')용 — 원국 8슬롯 십성 집합, 루프 밖에서 1회만 산출
+    _wonkuk_all_ss, _wonkuk_wol_ss = _wonkuk_ss_slots(ilgan, pils)
 
     birth_month = max(1, min(12, int(bm)))
 
@@ -16220,7 +16254,10 @@ def build_past_events(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0):
                 # ④대운동반(+3, 이 분기 자체가 대운-세운 지지충이므로 항상)
                 # ⑤천충지충(+2, 대운 천간과 세운 천간도 같이 충하면) ⑥대운교체년
                 _tgtc3 = 2 if frozenset([dw["cg"], sw_cg]) in TG_CHUNG else 0
-                _score3 = 0 + 0 + 0 + 3 + _tgtc3 + (1 if y == dw["시작연도"] else 0)
+                # J-3: 충과 십성조합이 동시에 걸린 사건 — 위 충 점수(④·⑤·⑥)에 ①'(조합 십성이
+                # 원국 월간·월지/기타자리/없음)만 추가. ④·⑥은 위에서 이미 반영했으니 중복 가산 금지.
+                _wolju1_p3 = _combo_wolju_score(dw_ss, sw_ss, _wonkuk_all_ss, _wonkuk_wol_ss)
+                _score3 = 0 + 0 + 0 + 3 + _tgtc3 + (1 if y == dw["시작연도"] else 0) + _wolju1_p3
 
                 if adj_domain:
                     events.append(
@@ -16266,9 +16303,16 @@ def build_past_events(pils, birth_year, gender, bm=1, bd=1, bh=12, bmi=0):
                 if intensity in ("High", "Mid", "Low"):
                     adj_domain, adj_combo = _adjust_for_youth(sw_domain, combo_desc, age)
 
-                    # J-2: 지지충이 없는 사건(십성조합) — ①②③은 0점, ④⑤는 우연한 dw_sw_jj_chung 반영
+                    # J-3-2: 십성조합 사건 — ④대운동반(+3, 조합 자체가 대운 천간 십성+세운
+                    # 천간 십성이므로 항상 해당, 1회만) + ①'(조합 십성이 원국 월간·월지 +2 /
+                    # 다른 자리만 +1 / 없음 0) + ⑥대운교체년. 이 사건이 우연히 대운-세운 지지도
+                    # 서로 충(dw_sw_jj_chung, 우선순위3과 같은 조건)이면 ⑤(+2, 천간도 동시충이면)
+                    # 를 branch 번호와 무관하게 동일 조건으로 추가 — 우선순위3·5가 서로 다른
+                    # 공식을 쓰다 생기던 점수 역전(J-3-pre 검증 2건)을 조건 통일로 해소.
+                    # ③'(공격받는 쪽 용신)은 미적용.
+                    _wolju1_p5 = _combo_wolju_score(dw_ss, sw_ss, _wonkuk_all_ss, _wonkuk_wol_ss)
                     _tgtc5 = 2 if (dw_sw_jj_chung and frozenset([dw["cg"], sw_cg]) in TG_CHUNG) else 0
-                    _score5 = (3 if dw_sw_jj_chung else 0) + _tgtc5 + (1 if y == dw["시작연도"] else 0)
+                    _score5 = 3 + _tgtc5 + _wolju1_p5 + (1 if y == dw["시작연도"] else 0)
 
                     if adj_domain:
                         events.append(
