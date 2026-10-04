@@ -1352,10 +1352,24 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str="", dram
                             _hl_loc = f"{os.path.basename(_hl_frames[-1].filename)}:{_hl_frames[-1].lineno}" if _hl_frames else "?"
                             _hl_err = f"{type(_hle).__name__} @ {_hl_loc}"
 
-                        _pevs = sorted(
-                            _hl.get("past_events", []),
-                            key=lambda e: {"🔴": 0, "🟡": 1, "🟢": 2}.get(e.get("intensity", "🟢"), 3),
-                        )
+                        # R-J1: intensity 실제 값("High"/"Mid"/"Low") 기준 필터·정렬로 교정
+                        # (이전엔 "🔴"/"🟡"/"🟢" 이모지 키로 조회해 항상 불일치 → 사실상 no-op 정렬이었음).
+
+                        # desc 완전 동일 항목 중복 제거(먼저 나온 것 유지)
+                        _seen_desc_j1 = set()
+                        _pevs_dedup_j1 = []
+                        for _e_j1 in _hl.get("past_events", []):
+                            _d_j1 = _e_j1.get("desc", "")
+                            if _d_j1 in _seen_desc_j1:
+                                continue
+                            _seen_desc_j1.add(_d_j1)
+                            _pevs_dedup_j1.append(_e_j1)
+
+                        # intensity "High" 전부(연도 오름차순) — High가 0건이면 "Mid" 전부로 대체
+                        _high_j1 = [e for e in _pevs_dedup_j1 if e.get("intensity") == "High"]
+                        _selected_j1 = _high_j1 if _high_j1 else [e for e in _pevs_dedup_j1 if e.get("intensity") == "Mid"]
+
+                        _pevs = sorted(_selected_j1, key=lambda e: e.get("year", 0))
 
                         if _hl_err:
                             y = write(c, f"  (과거 사건 계산 불가: {_hl_err})", y, size=11)
@@ -1396,8 +1410,8 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str="", dram
                             )
 
                         else:
-                            for _ev in _pevs:
-                                _itn = _ev.get("intensity", "🟢")
+                            for _rank_j1, _ev in enumerate(_pevs, 1):
+                                _itn = _ev.get("intensity", "")
 
                                 _yr = _ev.get("year", "")
 
@@ -1412,14 +1426,14 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str="", dram
                                 # 제목 줄
 
                                 _itn_label = {
-                                    "🔴": "[강도: 최고]",
-                                    "🟡": "[강도: 중]",
-                                    "🟢": "[강도: 보통]",
+                                    "High": "[강도: 최고]",
+                                    "Mid": "[강도: 중]",
+                                    "Low": "[강도: 보통]",
                                 }.get(_itn, "")
 
                                 y = write(
                                     c,
-                                    f"{_yr}년 ({_age})  {_itn_label}  [{_dom}]",
+                                    f"{_rank_j1}. {_yr}년 ({_age})  {_itn_label}  [{_dom}]",
                                     y,
                                     size=13,
                                     color=(0.1, 0.1, 0.4),
