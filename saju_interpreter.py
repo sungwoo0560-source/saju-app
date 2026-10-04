@@ -1567,7 +1567,10 @@ def _get_yongshin_match(dw_cg_ss, yongshin_ohs, ilgan_oh):
         "편인": BIRTH_R.get(ilgan_oh, ""), "偏印(편인)": BIRTH_R.get(ilgan_oh, ""),
         "정인": BIRTH_R.get(ilgan_oh, ""), "正印(정인)": BIRTH_R.get(ilgan_oh, ""),
     }
-    dw_oh = SS_TO_OH.get(dw_cg_ss, "")
+    # R21-a: manse.py:8910 사본과 동일한 정규화 — "偏官(편관)"처럼 결합형으로
+    # 들어오면 SS_TO_OH에 편관/정관 결합키가 없어 항상 "" 조회되던 버그 수정.
+    _ss_kr = dw_cg_ss.split("(")[1].rstrip(")") if "(" in dw_cg_ss else dw_cg_ss
+    dw_oh = SS_TO_OH.get(_ss_kr, "")
     return "yong" if dw_oh in yongshin_ohs else "normal"
 
 
