@@ -29720,6 +29720,19 @@ def main():
                     _pdf_bh_str = str(_ss.get("birth_hour", 12))
                 else:
                     _pdf_bh_str = ""
+                # F-1: 무료판 프리셋 — 사주 기본 정보 + 과거 적중만 포함, 나머지 전부 제외.
+                # 판정·문구 로직은 menu_pdf 본문 그대로(include_overrides로 섹션 on/off만 제어).
+                if st.button("🆓 무료판 PDF 생성 및 다운로드", use_container_width=True, key="pdf_free_gen_btn"):
+                    _FREE_PDF_INCLUDES = {
+                        "basic": True, "yongshin": False, "past": True, "dw": False,
+                        "current": False, "future": False, "money": False, "health": False,
+                        "ss": False, "sinsal": False, "yukjin": False, "fortune": False,
+                        "advice": False, "ohaeng": False, "relation": False, "future3": False,
+                        "daily": False, "monthly": False, "current2": False, "nature": False,
+                        "gaewoon": False, "tojeong": False,
+                    }
+                    menu_pdf(pils, birth_year, gender, name, _pdf_bh_str,
+                             dramatic_text=_dramatic_text, include_overrides=_FREE_PDF_INCLUDES)
                 menu_pdf(pils, birth_year, gender, name, _pdf_bh_str, dramatic_text=_dramatic_text)
             elif _cur_tab == 16:
                 menu_gaewoon(pils, name, birth_year, gender)

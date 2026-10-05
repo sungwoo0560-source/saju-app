@@ -262,13 +262,19 @@ def _pdf_cheongan_hap(pils, cur_year, yong_ohs, gi_ohs, c, y, _write, _sec_title
     return y
 
 
-def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str="", dramatic_text=None):
-    """📄 PDF 출력 - 사주 천명 리포트 다운로드"""
+def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str="", dramatic_text=None, include_overrides=None):
+    """📄 PDF 출력 - 사주 천명 리포트 다운로드
+
+    include_overrides: F-1 무료판 프리셋용. dict(접두 "include_" 뺀 키 → bool)를
+    주면 체크박스 UI·생성 버튼을 건너뛰고 그 값으로 즉시 생성한다(문구·판정 로직은
+    아래 본문 그대로, 어떤 섹션을 켤지만 바뀜). None이면 기존 체크박스+버튼 동작
+    그대로(무변경)."""
 
     from datetime import datetime as _dt
 
-    st.markdown(
-        """
+    if include_overrides is None:
+        st.markdown(
+            """
 
 <div style="background:linear-gradient(135deg,#1a1a1a,#333);border-radius:16px; padding:20px 24px;margin-bottom:20px;color:#f7e695;text-align:center">
 
@@ -277,39 +283,66 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str="", dram
 <div style="font-size:13px;color:#ccc;margin-top:6px">아래 설정 후 생성 버튼을 누르면 PDF를 다운로드합니다</div>
 
 </div>""",
-        unsafe_allow_html=True,
-    )
+            unsafe_allow_html=True,
+        )
 
-    # -- 출력 섹션 선택 --
+        # -- 출력 섹션 선택 --
 
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        include_basic    = st.checkbox("사주 기본 정보 (팔자/오행)",    value=True, key="pdf_basic")
-        include_yongshin = st.checkbox("용신/격국 상세 분석",           value=True, key="pdf_yong")
-        include_past     = st.checkbox("과거 적중 (상세 서술)",          value=True, key="pdf_past")
-        include_dw       = st.checkbox("대운 흐름 (10년 단위)",          value=True, key="pdf_dw")
-        include_current  = st.checkbox("현재 운세 분석 (올해/내년)",     value=True, key="pdf_current")
-        include_future   = st.checkbox("미래 5년 운세 흐름",             value=True, key="pdf_future")
-        include_money    = st.checkbox("💰 재물/직업 적성 분석",         value=True, key="pdf_money")
-        include_health   = st.checkbox("🏥 건강 분석",                   value=True, key="pdf_health")
-    with col2:
-        include_ss       = st.checkbox("십성 분포 분석",                 value=True, key="pdf_ss")
-        include_sinsal   = st.checkbox("신살 분석",                      value=True, key="pdf_sinsal")
-        include_yukjin   = st.checkbox("육친 분석",                      value=True, key="pdf_yukjin")
-        include_fortune  = st.checkbox("AI 종합운세 (전문 분석)",         value=True, key="pdf_fortune")
-        include_advice   = st.checkbox("처방/조언",                      value=True, key="pdf_advice")
-        include_ohaeng   = st.checkbox("☯️ 음양오행 심층 분석",          value=True, key="pdf_ohaeng")
-        include_relation = st.checkbox("💑 궁합/관계 분석",              value=True, key="pdf_relation")
-        include_future3  = st.checkbox("🔮 미래 3년 집중 분석",          value=True, key="pdf_future3")
-    with col3:
-        include_daily    = st.checkbox("☀️ 오늘의 운세",                value=True, key="pdf_daily")
-        include_monthly  = st.checkbox("📅 이달의 운세",                 value=True, key="pdf_monthly")
-        include_current2 = st.checkbox("🎯 현재 상황 진단",              value=True, key="pdf_current2")
-        include_nature   = st.checkbox("🧬 성격/기질 분석",              value=True, key="pdf_nature")
-        include_gaewoon  = st.checkbox("🌟 개운 처방",                   value=True, key="pdf_gaewoon")
-        include_tojeong  = st.checkbox("📜 토정비결",                    value=True, key="pdf_tojeong")
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            include_basic    = st.checkbox("사주 기본 정보 (팔자/오행)",    value=True, key="pdf_basic")
+            include_yongshin = st.checkbox("용신/격국 상세 분석",           value=True, key="pdf_yong")
+            include_past     = st.checkbox("과거 적중 (상세 서술)",          value=True, key="pdf_past")
+            include_dw       = st.checkbox("대운 흐름 (10년 단위)",          value=True, key="pdf_dw")
+            include_current  = st.checkbox("현재 운세 분석 (올해/내년)",     value=True, key="pdf_current")
+            include_future   = st.checkbox("미래 5년 운세 흐름",             value=True, key="pdf_future")
+            include_money    = st.checkbox("💰 재물/직업 적성 분석",         value=True, key="pdf_money")
+            include_health   = st.checkbox("🏥 건강 분석",                   value=True, key="pdf_health")
+        with col2:
+            include_ss       = st.checkbox("십성 분포 분석",                 value=True, key="pdf_ss")
+            include_sinsal   = st.checkbox("신살 분석",                      value=True, key="pdf_sinsal")
+            include_yukjin   = st.checkbox("육친 분석",                      value=True, key="pdf_yukjin")
+            include_fortune  = st.checkbox("AI 종합운세 (전문 분석)",         value=True, key="pdf_fortune")
+            include_advice   = st.checkbox("처방/조언",                      value=True, key="pdf_advice")
+            include_ohaeng   = st.checkbox("☯️ 음양오행 심층 분석",          value=True, key="pdf_ohaeng")
+            include_relation = st.checkbox("💑 궁합/관계 분석",              value=True, key="pdf_relation")
+            include_future3  = st.checkbox("🔮 미래 3년 집중 분석",          value=True, key="pdf_future3")
+        with col3:
+            include_daily    = st.checkbox("☀️ 오늘의 운세",                value=True, key="pdf_daily")
+            include_monthly  = st.checkbox("📅 이달의 운세",                 value=True, key="pdf_monthly")
+            include_current2 = st.checkbox("🎯 현재 상황 진단",              value=True, key="pdf_current2")
+            include_nature   = st.checkbox("🧬 성격/기질 분석",              value=True, key="pdf_nature")
+            include_gaewoon  = st.checkbox("🌟 개운 처방",                   value=True, key="pdf_gaewoon")
+            include_tojeong  = st.checkbox("📜 토정비결",                    value=True, key="pdf_tojeong")
 
-    if st.button("📥 PDF 생성 및 다운로드", use_container_width=True, key="pdf_gen_btn"):
+        _pdf_run = st.button("📥 PDF 생성 및 다운로드", use_container_width=True, key="pdf_gen_btn")
+    else:
+        # F-1: 무료판 프리셋 — 체크박스 UI 없이 즉시 아래 값으로 생성
+        include_basic    = include_overrides.get("basic", False)
+        include_yongshin = include_overrides.get("yongshin", False)
+        include_past     = include_overrides.get("past", False)
+        include_dw       = include_overrides.get("dw", False)
+        include_current  = include_overrides.get("current", False)
+        include_future   = include_overrides.get("future", False)
+        include_money    = include_overrides.get("money", False)
+        include_health   = include_overrides.get("health", False)
+        include_ss       = include_overrides.get("ss", False)
+        include_sinsal   = include_overrides.get("sinsal", False)
+        include_yukjin   = include_overrides.get("yukjin", False)
+        include_fortune  = include_overrides.get("fortune", False)
+        include_advice   = include_overrides.get("advice", False)
+        include_ohaeng   = include_overrides.get("ohaeng", False)
+        include_relation = include_overrides.get("relation", False)
+        include_future3  = include_overrides.get("future3", False)
+        include_daily    = include_overrides.get("daily", False)
+        include_monthly  = include_overrides.get("monthly", False)
+        include_current2 = include_overrides.get("current2", False)
+        include_nature   = include_overrides.get("nature", False)
+        include_gaewoon  = include_overrides.get("gaewoon", False)
+        include_tojeong  = include_overrides.get("tojeong", False)
+        _pdf_run = True
+
+    if _pdf_run:
         try:
             from reportlab.lib.pagesizes import A4
 
@@ -2945,7 +2978,11 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str="", dram
 
             buf.seek(0)
 
-            fname = f"사주_{name}_{_dt.now().strftime('%Y%m%d_%H%M')}.pdf"
+            if include_overrides is None:
+                fname = f"사주_{name}_{_dt.now().strftime('%Y%m%d_%H%M')}.pdf"
+            else:
+                # F-1: 무료판 파일명 구분
+                fname = f"{name}_무료사주.pdf"
 
             _pdf_bytes = buf.read()
 
@@ -2961,7 +2998,7 @@ def menu_pdf(pils, birth_year, gender, name="내담자", birth_hour_str="", dram
                 file_name=fname,
                 mime="application/pdf",
                 use_container_width=True,
-                key="pdf_download_btn",
+                key=("pdf_download_btn" if include_overrides is None else "pdf_download_btn_free"),
             )
             st.success(f"✅ {name}님의 사주 천명 리포트 PDF 생성 완료!")
             st.caption("💡 iOS(아이폰): 다운로드 버튼 → 공유 → 파일에 저장 | Android: 다운로드 폴더 자동 저장")
