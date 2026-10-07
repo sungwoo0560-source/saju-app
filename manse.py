@@ -16589,8 +16589,7 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
         st.markdown(
             "<div style='background:#fff5f5;border-left:6px solid #c0392b;"
             "padding:14px 16px;border-radius:6px;margin:14px 0;'>"
-            "<h3 style='margin:0 0 8px 0;color:#c0392b;'>🎯 도사 적중 — 지금 이 7가지, 맞죠?</h3>"
-            "<p style='margin:0;color:#555;font-size:14px;'>아래 7개 박스 — 끝까지 읽고 본인이 판단하세요.</p>"
+            "<h3 style='margin:0 0 8px 0;color:#c0392b;'>🎯 도사 적중 — 지금 이 7가지</h3>"
             "</div>",
             unsafe_allow_html=True,
         )
@@ -16608,7 +16607,7 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
                 unsafe_allow_html=True,
             )
             _pdf_buf.append(f"{_jk['title']}\n{_jk['line1']}\n{_jk['line2']}\n{_jk['line3']}")
-        _pdf_only("🎯 도사 적중 — 지금 이 7가지, 맞죠?\n" + "\n\n".join(_pdf_buf))
+        _pdf_only("🎯 도사 적중 — 지금 이 7가지\n" + "\n\n".join(_pdf_buf))
         st.markdown("---")
     except Exception as _e_jk:
         # 적중 박스 영역 폴백 (사용자에겐 조용히)
