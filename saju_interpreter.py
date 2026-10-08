@@ -4287,8 +4287,10 @@ class LocalSajuNarrator:
                     }
                     _sw_short = _sw_desc_map.get(sw_ss.split("(")[0], "흐름 유지의 해")
                     _cur_txt  = " ← <b>지금 이 해</b>" if yr == cur_year else ""
+                    # R24: 세는나이 SSOT(cur_age_counting, saju_engine.py) 재사용 —
+                    # 만나이식 yr-birth_year(+1 누락)이던 자리를 교정.
                     lines.append(
-                        f"  - <b>{yr}년</b> ({yr - birth_year}세): "
+                        f"  - <b>{yr}년</b> ({cur_age_counting(yr, birth_year)}세): "
                         f"{sw_gan} — {_sw_short} {gh_icon}{ys2}{_cur_txt}"
                     )
 
