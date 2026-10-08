@@ -5838,7 +5838,7 @@ def render_ilju_card(ilgan_cg: str, ilji_jj: str, name: str = "내담자") -> st
     <div style="font-size:11px;color:#c62828;line-height:1.6;">{juui}</div>
   </div>
   <div style="background:#e8eaf6;border-radius:8px;padding:10px;">
-    <div style="font-size:11px;font-weight:800;color:#283593;margin-bottom:4px;">🌟 개운법</div>
+    <div style="font-size:11px;font-weight:800;color:#283593;margin-bottom:4px;">🔖 글자 상징 (방위·색·계절)</div>
     <div style="font-size:11px;color:#303f9f;line-height:1.6;">{gaeun}</div>
   </div>
 
