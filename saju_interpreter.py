@@ -3073,7 +3073,8 @@ class LocalSajuNarrator:
             return "<h2>⚠️ 대운 분석을 불러오지 못했습니다.</h2>"
 
         cur_year  = b.get("cur_year", datetime.now().year)
-        age_now   = cur_year - birth_year
+        # R25: 세는나이 SSOT(cur_age_counting, saju_engine.py) 재사용 — R24와 동일 교정.
+        age_now   = cur_age_counting(cur_year, birth_year)
         ilgan     = b.get("ilgan", "甲")
         gyeok     = b.get("gyeok_name", "")
         sn        = b.get("sn", "")

@@ -7764,6 +7764,34 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
                     c.showPage()
                     return H - MARGIN
 
+                # R25: PDF 폰트(_BF)에 글리프 없는 문자(주로 이모지) 제거 — 화면 렌더링
+                # 코드는 그대로, PDF 출력(drawString) 직전 텍스트에만 적용한다. 우선
+                # pdfmetrics로 실제 등록된 폰트의 글리프 보유 여부를 확인해 정확히
+                # 판정하고(⚠·★·○·△·● 등은 NotoSansKR에 실존해 유지됨), 폰트 조회가
+                # 실패하는 경우에만 이모지 유니코드 범위 제거로 폴백한다(그 경우도
+                # 위 기호들은 예외로 보존).
+                try:
+                    _pdf_glyphs = pdfmetrics.getFont(_BF).face.charToGlyph
+                except Exception:
+                    _pdf_glyphs = None
+                _KEEP_SYMS = set("⚠★○△●☆▲▼◆◇■□※")
+
+                def _strip_unsupported_glyphs(s):
+                    if not s:
+                        return s
+                    if _pdf_glyphs is not None:
+                        s2 = "".join(
+                            ch for ch in s
+                            if ord(ch) < 0x2000 or ch in _KEEP_SYMS or ord(ch) in _pdf_glyphs
+                        )
+                    else:
+                        s2 = _re.sub(
+                            r'[\U0001F000-\U0001FAFF☀-➿️‍]',
+                            lambda m: m.group(0) if m.group(0) in _KEEP_SYMS else '',
+                            s,
+                        )
+                    return _re.sub(r'[ \t]{2,}', ' ', s2)
+
                 def _write(text, y, size=10, color=(0.1, 0.1, 0.1)):
                     import html as _html
                     if y < BOT + 10 * mm:
@@ -7783,6 +7811,7 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
                     # 공백 정리 (내용 삭제 없이 줄끝 공백/과다 개행만 정리)
                     text = _re.sub(r'[ \t]+(?=\n)', '', text)
                     text = _re.sub(r'\n{3,}', '\n\n', text)
+                    text = _strip_unsupported_glyphs(text)
                     for raw in text.split("\n"):
                         raw = raw.strip()
                         if not raw:
@@ -7820,7 +7849,7 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
                     c.rect(MARGIN - 3 * mm, y - 4 * mm, W - 2 * MARGIN + 6 * mm, 9 * mm, fill=1, stroke=0)
                     c.setFillColorRGB(0.97, 0.88, 0.38)
                     c.setFont(_BF, 13)
-                    c.drawString(MARGIN + 1 * mm, y - 0.5 * mm, text)
+                    c.drawString(MARGIN + 1 * mm, y - 0.5 * mm, _strip_unsupported_glyphs(text))
                     return y - 12 * mm
 
                 # 표지
