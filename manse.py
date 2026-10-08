@@ -16791,7 +16791,9 @@ def menu1_report(pils, name, birth_year, gender, occupation="선택 안 함"):
         )
         _job_1l = (
             "대운 용신 — 직업 기반이 단단해지는 시기입니다. 적극 도전하십시오." if _is_yong_dw8 and _sj >= 8
-            else "정관 인정기 — 원칙대로 하면 반드시 승진·보상이 따라옵니다." if "正官" in _sw_ss_cg
+            else "정관 인정기 — 원칙대로 하면 반드시 승진·보상이 따라옵니다." if "正官" in _sw_ss_cg and _is_yong_sw8
+            else "정관 규율기 — 조직의 요구가 버겁게 느껴질 수 있으니 원칙을 지키며 무리하지 마십시오." if "正官" in _sw_ss_cg
+            else "편관 도전기 — 압박이 오히려 실력을 증명할 기회입니다. 책임 있는 자리를 피하지 마십시오." if "偏官" in _sw_ss_cg and _is_yong_sw8
             else "편관 압박기 — 건강을 지키며 버티는 것 자체가 전략입니다." if "偏官" in _sw_ss_cg
             else "직업 기운 보통 — 현위치를 지키며 실력을 쌓는 시기입니다."
         )
