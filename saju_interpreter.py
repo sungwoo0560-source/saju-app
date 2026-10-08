@@ -8405,6 +8405,17 @@ def get_yongshin(pils):
     _BIRTH_R = {"木": "水", "火": "木", "土": "火", "金": "土", "水": "金"}
     huisin = _BIRTH_R.get(all_yong[0], "") if all_yong else ""
 
+    # R22-희신(2026-10-08, 형 승인 B안): 희신은 정의상 기신일 수 없다. 1순위 용신을
+    # 생하는 오행이 종합_기신(kihwa_ohs)에 들어 있으면(신강 조후 1순위 100%·신약
+    # 억부 82%, 3,000표본 전체 40.9%) 그 오행 대신 "용신을 극하는 오행을 다시
+    # 극해 용신을 보호하는 오행"(호신, 예: 신약 인성용신 → 재극인을 막는 비겁)을
+    # 희신으로 삼는다. 그것도 기신이면 희신 없음(""). 기존에 겹치지 않던 명식은
+    # 위 한 줄 결과 그대로 — 값이 바뀌는 건 기신 겹침 명식뿐이다.
+    if huisin and huisin in kihwa_ohs:
+        _y1_enemy = next((k for k, v in CONTROL_MAP.items() if v == all_yong[0]), "")
+        _y1_guard = next((k for k, v in CONTROL_MAP.items() if v == _y1_enemy), "")
+        huisin = _y1_guard if _y1_guard and _y1_guard not in kihwa_ohs else ""
+
     # 용신_출처(M-T3 라운드): all_yong 각 오행이 억부/조후/통관/병약 중 어디서
     # 처음 들어왔는지 표시용 라벨 — 새 판정 없이 위에서 이미 구한
     # eokbu_yong/jokhu_oh/tongkwan_yong/byeong_yong을 all_yong 조립 순서(억부→
@@ -9594,7 +9605,9 @@ def get_yongshin_multilayer(pils, birth_year, gender, bm, bd, bh, bmi, target_ye
     BIRTH = {"木": "水", "火": "木", "土": "火", "金": "土", "水": "金"}
     CTRL  = {"木": "土", "火": "金", "土": "水", "金": "木", "水": "火"}
     base_yong = yong_list[0] if yong_list else ""
-    hee_shin = BIRTH.get(base_yong, "")
+    # R22-희신: 희신은 get_yongshin()의 값(SSOT)을 그대로 쓴다 — 독자 공식(BIRTH)으로
+    # 다시 구하면 기신 겹침 교정이 이쪽에 반영되지 않는다. BIRTH 표는 아래 다른 용도 없음.
+    hee_shin = ys.get("희신", "")
     gi_shin_list = []
     for oh in ["木", "火", "土", "金", "水"]:
         if CTRL.get(oh) == base_yong or CTRL.get(base_yong) == oh:
