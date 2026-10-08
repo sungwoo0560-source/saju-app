@@ -676,7 +676,7 @@ def render_cheongan_card(ilgan_cg: str, name: str = "내담자", position: str =
       <div style="font-size:12px;color:#1b5e20;line-height:1.7;">{geongang}</div>
     </div>
     <div style="background:#fff8e1;border-radius:8px;padding:12px;">
-      <div style="font-size:12px;font-weight:800;color:#f57f17;margin-bottom:6px;">🌟 개운법</div>
+      <div style="font-size:12px;font-weight:800;color:#f57f17;margin-bottom:6px;">🔖 글자 상징 (방위·색·계절)</div>
       <div style="font-size:12px;color:#e65100;line-height:1.7;">{gaeun}</div>
     </div>
   </div>
@@ -1687,7 +1687,7 @@ def render_jiji_card(jiji_char: str, name: str = "내담자", position: str = "�
       <div style="font-size:12px;color:#1b5e20;line-height:1.7;">{geongang}</div>
     </div>
     <div style="background:#fff8e1;border-radius:8px;padding:12px;">
-      <div style="font-size:12px;font-weight:800;color:#f57f17;margin-bottom:6px;">🌟 개운법</div>
+      <div style="font-size:12px;font-weight:800;color:#f57f17;margin-bottom:6px;">🔖 글자 상징 (방위·색·계절)</div>
       <div style="font-size:12px;color:#e65100;line-height:1.7;">{gaeun}</div>
     </div>
   </div>
@@ -8438,7 +8438,6 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
       </div>
     </div>
     <div style="margin-top:12px;background:#faf5ee;padding:14px 16px;border-radius:10px;font-size:14px;color:#3e2723;line-height:1.9;">
-      {ilju_info.get("개운","용신 오행을 일상에서 꾸준히 활용하세요.")}
       {_causal11}
     </div>
   </div>

@@ -2497,7 +2497,11 @@ class LocalSajuNarrator:
             if _caut:
                 lines.append(f"\n{name}님이 가장 경계해야 할 점은 {_caut}")
             if _lucky:
-                lines.append(f"\n{name}님의 행운 정보: {_lucky}")
+                # R23: "행운 정보/운이 강해집니다" 같은 개운 처방 표현 제거 —
+                # 월지 고정표(WOLJU_DATA, 무변경) 값을 글자 상징 서술로만 표기.
+                _wol_jj_kr = JJ_KR[JJ.index(_wol_jj)] if _wol_jj in JJ else ""
+                _lucky_sym = re.sub(r"에\s*운이\s*강해집니다\.?\s*$", "", _lucky).strip()
+                lines.append(f"\n{_wol_jj_kr}월({_wol_jj}月)의 상징: {_lucky_sym}입니다.")
 
         # ── 년주·시주 천간/지지 개인화 해석 ─────────────────────
         _PILLAR_CG = {
