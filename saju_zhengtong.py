@@ -7408,8 +7408,23 @@ def detect_life_risk_signals(pils, saewoon_data=None, gender=None, marriage_stat
     _spouse_label_p  = "정재(아내 기운)" if _is_male else "정관(남편 기운)"
     _spouse_label_f  = "편재" if _is_male else "편관"
     if _spouse_primary == 0 and _spouse_fallback == 0:
-        gyeolhon_score -= 20
-        gyeolhon_reasons.append(f"{_spouse_label_p}·{_spouse_label_f} 원국 완전 부재 — 결혼이 늦거나 대운·세운에서 인연이 찾아오는 구조")
+        # R29-2b(형 승인): 완전부재로 깎기 전에 지장간(중기·여기 포함)도 확인한다
+        # — 기존 테이블(saju_data.JIJANGGAN) 재사용, 새 판정표 없음. 천간·지지
+        # 표면(본기)엔 없어도 암장되어 있으면 "완전부재"가 아니라 "약함"으로
+        # 완화한다(R29-2 실측: 과도 감점으로 0~19점 구간이 98→228건까지 늘었음).
+        from saju_data import JIJANGGAN as _jjg_292b
+        _target_ss_292b = {"정재", "편재"} if _is_male else {"정관", "편관"}
+        _hidden_spouse_star = any(
+            _TEN_GODS.get(ilgan, {}).get(_hg, "") in _target_ss_292b
+            for _p in pils
+            for _hg in _jjg_292b.get(_p.get("jj", ""), [])
+        )
+        if _hidden_spouse_star:
+            gyeolhon_score -= 10
+            gyeolhon_reasons.append(f"{_spouse_label_p}·{_spouse_label_f} 표면엔 없으나 지장간에 암장 — 인연 시기가 다소 늦어질 수 있는 구조")
+        else:
+            gyeolhon_score -= 20
+            gyeolhon_reasons.append(f"{_spouse_label_p}·{_spouse_label_f} 원국 완전 부재 — 결혼이 늦거나 대운·세운에서 인연이 찾아오는 구조")
     elif _spouse_primary == 0:
         gyeolhon_score -= 10
         gyeolhon_reasons.append(f"{_spouse_label_p}가 약함({_spouse_label_f}로만 대체) — 인연 시기가 다소 늦어질 수 있는 구조")
