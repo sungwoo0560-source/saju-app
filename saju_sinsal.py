@@ -1044,10 +1044,10 @@ def get_extra_sinsal(pils):
     _gosin_gwasuk = get_gosin_gwasuk(pils)
     if _gosin_gwasuk["고신_존재"]:
         stars.append({"name":"고신살(孤辰殺)",
-                      "desc":"혼자만의 시간과 공간이 필요한 기운 — 독립적 생활력이 강함. 곁을 오래 두는 노력이 관건"})
+                      "desc":"홀로 서는 독립의 기운(남성에게 더 강하게 작용) — 자립심은 강점. 배우자·가족과 정서적 거리가 벌어지지 않게 곁을 챙기는 노력이 관건"})
     if _gosin_gwasuk["과숙_존재"]:
         stars.append({"name":"과숙살(寡宿殺)",
-                      "desc":"혼자만의 시간과 공간이 필요한 기운 — 독립적 생활력이 강함. 곁을 오래 두는 노력이 관건"})
+                      "desc":"홀로 버티는 끈기의 기운(여성에게 더 강하게 작용) — 흔들리지 않는 것은 강점. 배우자와 떨어져 지내는 시간이 길어지지 않게 챙기는 노력이 관건"})
 
     # 양인살(羊刃煞) — 일간 기준 양인 지지 (추진력) — YANGIN_MAP 단일 소스, H1-c
     if YANGIN_MAP.get(ilgan) in all_jjs:
