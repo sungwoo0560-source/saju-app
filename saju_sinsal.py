@@ -841,6 +841,8 @@ def get_12sinsal(pils):
     }
     _gwanjae_targets = set(_GWANJAE_MAP.get(_nyon_jj, []))
     for _i, (_jj, _lbl) in enumerate(zip(_pil_jjs, _labels)):
+        if _i == 3:  # R28: 년주는 기준 지지 자신 — 자기매칭 시 자형(辰午酉亥) 년생 전원이 오발동
+            continue
         if _gwanjae_targets and _jj in _gwanjae_targets:
             result.append({
                 "이름": "관재수(官災數)",
