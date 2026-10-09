@@ -4295,6 +4295,11 @@ class LocalSajuNarrator:
                         f"{sw_gan} — {_sw_short} {gh_icon}{ys2}{_cur_txt}"
                     )
 
+                    # R29-3: 세운 공망 전실 — 등급은 위 is_ys2/is_gs2 그대로 참조(새 판정 없음)
+                    _gm_line2 = get_sewoon_gongmang_line(pils, yr, sw.get("jj", ""), is_ys2 or not is_gs2)
+                    if _gm_line2:
+                        lines.append(f"    {_gm_line2}")
+
                 except Exception as _e:
                     _saju_log.warning("[오류] %s", _e)
 
@@ -4517,6 +4522,11 @@ class LocalSajuNarrator:
                     f"꾸준히 나아가는 <b>중립의 해</b>입니다. "
                     f"기본기를 충실히 다지며 다가올 황금기를 준비하십시오.\n"
                 )
+
+            # R29-3: 세운 공망 전실 — 등급은 위 is_ys/is_gs 그대로 참조(새 판정 없음)
+            _gm_line = get_sewoon_gongmang_line(pils, yr, sw.get("jj", ""), is_ys or not is_gs)
+            if _gm_line:
+                lines.append(_gm_line + "\n")
 
             # ── 직격 처방 서술형 ─────────────────────────────
             _guides = _YEAR_GUIDES.get(sw_ss, (
@@ -8525,6 +8535,36 @@ def yongshin_sewoon_grade(sw_oh, yong_ohs, gi_ohs, sn):
     elif sw_oh and ("신강" in sn or "신약" in sn):
         return "평"
     return None
+
+
+_GONGMANG_AREA_MAP = {
+    "년주": "조상·윗사람·집안",
+    "월주": "부모·형제·직장·사회",
+    "일주": "배우자·본인",
+    "시주": "자녀·아랫사람·말년",
+}
+
+
+def get_sewoon_gongmang_line(pils, year, year_jj, is_gil):
+    """세운 지지가 원국 공망을 채우는 해(공망 전실)인지 보고 안내 1줄을 반환한다
+    (전실이 아니면 ""). R29-3(형 승인) — 공망 기둥 판정은 기존 get_gongmang(pils)
+    ["해당_기둥"]만 재사용하고, 길흉(is_gil)도 호출부가 이미 계산한 등급을 그대로
+    받는다 — yongshin_sewoon_grade·_month_grade·황금기 선정 로직은 무수정이며
+    새 길흉 판정을 추가하지 않는다."""
+    try:
+        gm = get_gongmang(pils)
+        hit = next((h for h in gm.get("해당_기둥", []) if h.get("지지") == year_jj), None)
+        if not hit:
+            return ""
+        area = _GONGMANG_AREA_MAP.get(hit.get("기둥"), "")
+        if not area:
+            return ""
+        tail = ("그동안 비어 있던 자리가 채워지는 기회로 삼으십시오" if is_gil
+                else "미뤄둔 문제가 드러날 수 있어 미리 점검이 필요합니다")
+        return (f"※ {year}년 {year_jj}는 원국 공망을 채우는 해(공망 전실)라, "
+                f"{area} 관련 일이 표면으로 드러나기 쉽습니다 — {tail}.")
+    except Exception:
+        return ""
 
 
 def _month_grade(ml, yong_list, orig_jjs, gi_list=None, gm_list=None):

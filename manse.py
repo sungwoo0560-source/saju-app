@@ -13413,9 +13413,13 @@ def build_gangsa_block(pils, name, birth_year, gender, marriage_status=None):
                 _cross_detail4 += f" 재물 면에서는 {_pd(_cross_fin4)}"
             if _cross_car4:
                 _cross_detail4 += f" 일·사회 면에서는 {_pd(_cross_car4)}"
+            # R29-3: 세운 공망 전실 — 등급은 위 sw_gil(이미 계산된 SSOT 보정값) 그대로 참조(새 판정 없음)
+            _sw_jj4 = (get_yearly_luck(pils, cur_year) or {}).get("jj", "")
+            _gm_line4 = get_sewoon_gongmang_line(pils, cur_year, _sw_jj4, sw_gil not in ("흉", "대흉"))
             _l3_4 = (
                 f"<b>【그래서 지금】</b> {cur_year}년 {cur_age}세, {_dw_label4}{_age_range4}에 {_now_txt4}"
                 f"{_cross_detail4}"
+                + (f" {_gm_line4}" if _gm_line4 else "")
             )
             _cheobang4_txt = (_cheobang4 or "용신 오행을 가까이하고 기신 오행의 기운을 줄이는 것이 실질적인 개운법입니다.").rstrip()
             if _cheobang4_txt and _cheobang4_txt[-1] not in ".!?":
