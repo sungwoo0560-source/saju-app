@@ -7395,6 +7395,27 @@ def detect_life_risk_signals(pils, saewoon_data=None, gender=None, marriage_stat
     # 6. 결혼 인연
     gyeolhon_score = 0
     gyeolhon_reasons = []
+    # R29-2(형 승인): 배우자성 강약 반영 — 【타고난 인연의 자리】(get_yukjin)와 같은
+    # "정재 1순위, 없으면 편재"(남)/"정관 1순위, 없으면 편관"(여) 존재 판정 방식을
+    # 그대로 재사용한다(새 강약 알고리즘 없음, 존재 여부 2단만 봄). 기존엔
+    # jaeseong/gwanseong(정편 합산)>=1 게이트라 정재는 없고 편재만 있어도 가산이
+    # 깎이지 않아 "정재 약함" 서술과 고득점이 모순됐다(박성우 실측: 90점인데
+    # 정재 0개). 1순위가 없고 2순위만 있으면 "약함"으로 소폭 감점, 둘 다 없으면
+    # "완전 부재"로 더 크게 감점한다. 일지(배우자궁) 충도 같은 이유로 감점.
+    # reasons 맨 앞에 두어 카드 표시(앞 3개만 노출)에서도 항상 보이게 한다.
+    _spouse_primary  = jeongjae if _is_male else jeonggwan
+    _spouse_fallback = pyeonjae if _is_male else pyeongwan
+    _spouse_label_p  = "정재(아내 기운)" if _is_male else "정관(남편 기운)"
+    _spouse_label_f  = "편재" if _is_male else "편관"
+    if _spouse_primary == 0 and _spouse_fallback == 0:
+        gyeolhon_score -= 20
+        gyeolhon_reasons.append(f"{_spouse_label_p}·{_spouse_label_f} 원국 완전 부재 — 결혼이 늦거나 대운·세운에서 인연이 찾아오는 구조")
+    elif _spouse_primary == 0:
+        gyeolhon_score -= 10
+        gyeolhon_reasons.append(f"{_spouse_label_p}가 약함({_spouse_label_f}로만 대체) — 인연 시기가 다소 늦어질 수 있는 구조")
+    if iljj_chung:
+        gyeolhon_score -= 15
+        gyeolhon_reasons.append("일지(배우자궁) 충 — 관계 안정성에 유의가 필요한 구조")
     if hap_count >= 1:
         gyeolhon_score += 30
         gyeolhon_reasons.append(f"지지합 {hap_count}개 — 인연 끌어들임")
@@ -7455,7 +7476,7 @@ def detect_life_risk_signals(pils, saewoon_data=None, gender=None, marriage_stat
             gyeolhon_level, gyeolhon_msg = "💡 보통", "평범한 인연. 자연스러운 흐름.\n→ 노력해야 옵니다. 가만히 있으면 안 옵니다."
         else:
             gyeolhon_level, gyeolhon_msg = "🔍 신중", "인연 약함. 자기 성장 우선.\n→ 자기 성장이 최고의 인연 전략입니다."
-    results["결혼인연"] = {"점수": min(gyeolhon_score,100), "등급": gyeolhon_level, "이유": gyeolhon_reasons, "메시지": gyeolhon_msg, "아이콘": "💕"}
+    results["결혼인연"] = {"점수": max(0, min(gyeolhon_score,100)), "등급": gyeolhon_level, "이유": gyeolhon_reasons, "메시지": gyeolhon_msg, "아이콘": "💕"}
 
     # 7. 사업운
     saup_score = 0
