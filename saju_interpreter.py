@@ -2930,16 +2930,36 @@ class LocalSajuNarrator:
         # ── 6.5. 신살·공망 (로컬 엔진 강화) ─
 
         try:
-            _sinsal_list = get_12sinsal(pils)
+            # R31(형 승인): 원국 신살 SSOT — 현재상황 PDF·종합【10.발동 신살】과
+            # 같은 3함수 합집합(이름 접두어 dedup, 캡 없음)으로 통일. get_12sinsal
+            # 단독+[:6] 하드캡이던 자리라 상문살·조객살이 잘리고 get_extra_sinsal·
+            # calc_all_sinsal_extended 쪽(천을귀인·고신살 등)이 통째로 빠져 있었다.
+            # 판정 로직(각 신살 정의 테이블)은 무수정 — 어느 함수를 합치느냐만 통일.
+            from saju_zhengtong import calc_all_sinsal_extended as _cas_fr
+            _s12_fr = get_12sinsal(pils) or []
+            _sex_fr = get_extra_sinsal(pils) or []
+            try:
+                _ext_fr = _cas_fr(pils) or []
+            except Exception:
+                _ext_fr = []
+            _sinsal_list, _seen_fr = [], set()
+            for _s in _ext_fr + _s12_fr + _sex_fr:
+                if not isinstance(_s, dict):
+                    continue
+                _nm_fr = _s.get("이름") or _s.get("name") or ""
+                _key_fr = _nm_fr.split("(")[0] if _nm_fr else _nm_fr
+                if _nm_fr and _key_fr not in _seen_fr:
+                    _seen_fr.add(_key_fr)
+                    _sinsal_list.append(_s)
             _gongmang = get_gongmang(pils)
             _has_sinsal = _sinsal_list and len(_sinsal_list) > 0
             _gm_cols = _gongmang.get("해당_기둥", []) if isinstance(_gongmang, dict) else []
             if _has_sinsal or _gm_cols:
                 lines.append("<h3>✨ 특별한 기운 (신살·공망)</h3>")
                 if _has_sinsal:
-                    _names = [s.get("이름") or s.get("name", "") for s in _sinsal_list[:6] if isinstance(s, dict)]
+                    _names = [s.get("이름") or s.get("name", "") for s in _sinsal_list if isinstance(s, dict)]
                     if _names:
-                        lines.append(f"- <b>발동 신살</b>: {', '.join(_names)}")
+                        lines.append(f"- <b>원국 신살</b>: {', '.join(_names)}")
                 if _gm_cols:
                     _gm_names = [g.get("기둥", "") for g in _gm_cols if isinstance(g, dict)]
                     if _gm_names:

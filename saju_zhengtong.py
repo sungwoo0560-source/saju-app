@@ -8448,7 +8448,7 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
 
   <!-- 10. 발동 신살 -->
   <div style="margin-bottom:28px;">
-    <div style="font-size:clamp(14px, 3.5vw, 17px);font-weight:900;color:#3e2723;border-left:5px solid #6b4423;padding-left:12px;margin-bottom:12px;">【10. 발동 신살(神煞)】</div>
+    <div style="font-size:clamp(14px, 3.5vw, 17px);font-weight:900;color:#3e2723;border-left:5px solid #6b4423;padding-left:12px;margin-bottom:12px;">【10. 원국 신살(神煞)】</div>
     <div style="background:#faf5ee;padding:18px 20px;border-radius:10px;line-height:2;font-size:clamp(13px, 3vw, 15px);color:#3e2723;">
       <b>{name}님 원국에 자리한 주요 신살:</b><br><br>
       {sinsal_rows}

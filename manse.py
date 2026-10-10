@@ -8097,7 +8097,7 @@ def render_pdf_download_btn(tab_name, pils, name, birth_year, gender):
                                 if _sn2_key and _sn2_key not in _cs_seen_s:
                                     _cs_seen_s.add(_sn2_key)
                                     _cs_all_s.append(_s)
-                            y = _write(f"원국 발동 신살 {len(_cs_all_s)}개:", y, size=10)
+                            y = _write(f"원국 신살 {len(_cs_all_s)}개:", y, size=10)
                             for _s2 in _cs_all_s:
                                 _sn2 = _s2.get("이름") or _s2.get("name") or ""
                                 _sp2 = _s2.get("위치","")
