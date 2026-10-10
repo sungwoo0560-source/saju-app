@@ -9655,11 +9655,11 @@ def get_yongshin_multilayer(pils, birth_year, gender, bm, bd, bh, bmi, target_ye
     # R22-희신: 희신은 get_yongshin()의 값(SSOT)을 그대로 쓴다 — 독자 공식(BIRTH)으로
     # 다시 구하면 기신 겹침 교정이 이쪽에 반영되지 않는다. BIRTH 표는 아래 다른 용도 없음.
     hee_shin = ys.get("희신", "")
-    gi_shin_list = []
-    for oh in ["木", "火", "土", "金", "水"]:
-        if CTRL.get(oh) == base_yong or CTRL.get(base_yong) == oh:
-            if oh != ilgan_oh and oh not in yong_list:
-                gi_shin_list.append(oh)
+    # R30(형 승인): 기신도 희신과 같은 이유로 get_yongshin()의 종합_기신(SSOT)을
+    # 그대로 쓴다 — base_yong 1개만 보는 독자 CTRL 공식은 신강/신약·억부·조후를
+    # 반영하는 종합_기신과 1000표본 실측 89.5% 불일치했다. 종합_기신은 항상
+    # 2개 이하(1000표본 실측, 길이>2 0건)라 아래 [:2] 슬라이스는 그대로 안전.
+    gi_shin_list = list(ys.get("종합_기신", []) or [])
     yong_2 = yong_list[1] if len(yong_list) > 1 else ""
     try:
         dw_list = SajuCoreEngine.get_daewoon(pils, birth_year, bm, bd, bh, bmi, gender=gender)
