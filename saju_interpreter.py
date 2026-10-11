@@ -2479,21 +2479,19 @@ class LocalSajuNarrator:
             )
             lines.append(_wolju.get("desc", ""))
             # bullet → 서술형 연결 문장
+            # R32-2: 연애(→일지·배우자성)·재물(→재성)은 다른 섹션이 근거를
+            # 담당하므로 월지 단일표에서는 money/relation 문장을 만들지
+            # 않는다(WOLJU_DATA 데이터 자체는 무변경, 다른 사용처 없음 확인).
             _career = _wolju.get('career','')
-            _money  = _wolju.get('money','')
-            _rel    = _wolju.get('relation','')
             _health = _wolju.get('health','')
             _caut   = _wolju.get('caution','')
             _lucky  = _wolju.get('lucky','')
-            if _career or _money:
-                lines.append(
-                    f"\n직업 적성을 살펴보면 {_career} 분야에서 능력을 발휘할 수 있습니다. "
-                    f"재물 특성으로는 {_money}"
-                )
-            if _rel:
-                lines.append(f"\n인간관계에 대한 조언으로는, {_rel}")
+            if _career:
+                _career_tail = "" if _career.rstrip().endswith((".", "!", "?")) else " 분야에서 능력을 발휘할 수 있습니다."
+                lines.append(f"\n직업 적성을 살펴보면 {_career}{_career_tail}")
             if _health:
-                lines.append(f"\n건강과 관련하여서는 {_health} 부분을 특히 주의하셔야 합니다.")
+                _health_tail = "" if _health.rstrip().endswith((".", "!", "?")) else " 부분을 특히 주의하셔야 합니다."
+                lines.append(f"\n건강과 관련하여서는 {_health}{_health_tail}")
             if _caut:
                 lines.append(f"\n{name}님이 가장 경계해야 할 점은 {_caut}")
             if _lucky:
