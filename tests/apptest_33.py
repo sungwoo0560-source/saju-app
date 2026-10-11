@@ -67,6 +67,7 @@ tests/apptest_33.py — N케이스 × 11메뉴 검증 하네스 (예외 0건 / �
 import sys
 import os
 import re
+import io
 import json
 import argparse
 import difflib
@@ -141,6 +142,26 @@ MENU_ORDER = [
     "money", "relations", "daily", "monthly", "yearly", "tojeong", "health",
     "report_narr", "money_narr", "relations_narr", "future_narr", "lifeline_narr", "past_narr",
     "ohaeng_deep", "bihang", "gaewoon", "ai", "manse_grid", "manse12",
+    # R33: ai_local — menu7_ai(tab_ai_chat)의 실사용 로컬 응답 엔진
+    # (_local_saju_engine, manse.py:820)은 Brain3.process_query를 거쳐 실제
+    # 채팅 응답을 만드는 경로인데, 기존 "ai" 메뉴는 st.chat_input 목이 항상
+    # None을 반환해 `if prompt:` 블록 자체가 안 돈다(R33 진단: get_yongshin_
+    # multilayer 호출 25곳이 재물·길일·개운·대운·건강·올해운 등 22개 키워드
+    # 분기 전체에서 전수 사각지대였음). report_narr 등과 동일하게 버튼·세션
+    # UI 래퍼 없이 엔진 함수를 직접 호출해 고정 질문 6개로 그 분기들을 감시한다.
+    "ai_local",
+    # R33: pdf_<tab> — render_pdf_download_btn(manse.py:7652)은 st.button
+    # 게이트 뒤에 있어 bare 모드에서는 항상 False라 기존 메뉴 캡처로 도달
+    # 못 한다(r10_2c_pdf_monthly_smoke.py와 동일하게 st.button만 호출 동안
+    # True로 임시 monkeypatch). 6개 탭(jonghap_full·current_situation·
+    # lifeline·future3·money·relations)의 PDF 바이트를 st.download_button
+    # 캡처로 가로채 pypdf로 텍스트만 추출해 캡처한다(R33 1(b) 진단: 이
+    # 경로의 생월일시는 _get_base/saju_interpreter.py:1919가 이미 frozen
+    # 키(_submitted_hour 우선)를 올바르게 읽고 있어 실버그 아님 — 단,
+    # _run_combo처럼 birth_month/day/hour/minute을 세션에 먼저 세팅해야
+    # 한다. 세팅을 안 하면 1/1·12:00 기본값으로 떨어져 대운이 틀어진다).
+    "pdf_jonghap_full", "pdf_current_situation", "pdf_lifeline",
+    "pdf_future3", "pdf_money", "pdf_relations",
 ]
 
 # 텍스트 출력 계열 st.* 함수 — 캡처 대상(런타임 monkeypatch, 소스 수정 아님)
@@ -247,6 +268,105 @@ class _Capturer:
         for fn_name, orig in self._originals.items():
             setattr(st, fn_name, orig)
         return False
+
+
+# ── R33: ai_local — menu7_ai 로컬 응답 엔진 고정 질문 세트 ──────────────────
+# 키워드 분기(manse.py:820 _local_saju_engine의 is_* 정규식)를 각 1개씩만
+# 때리도록 선정 — 더 앞 순서 elif(is_today/is_year/is_lotto/...)의 키워드와
+# 겹치지 않는지 직접 확인했다(진단 보고 참고). 분기별 1개 × 6개 = 최소 요건.
+_AI_LOCAL_QUESTIONS = [
+    ("재물", "재물운이 어떤가요?"),
+    ("길일", "길일이 언제인지 알려주세요"),
+    ("개운", "개운법을 알려주세요"),
+    ("대운", "대운 흐름을 알려주세요"),
+    ("건강", "건강이 어떤가요?"),
+    ("올해운", "올해 운세가 어떤가요?"),
+]
+
+
+def _call_ai_local(pils, case_name, birth_year, gender):
+    """R33: menu7_ai(tab_ai_chat)의 실사용 로컬 응답 엔진(_local_saju_engine,
+    manse.py:820)을 고정 질문 세트로 직접 호출해 캡처한다. 실사용 경로는
+    st.chat_input()으로 받은 질문을 Brain3.process_query가 그대로
+    _local_saju_engine에 넘기는 구조(tab_ai_chat, manse.py:22387/22407
+    부근)인데, 기존 "ai" 메뉴는 질문을 주입하지 않아(chat_input 목이 항상
+    None) 이 엔진의 is_* 키워드 분기 22개(그 안의 get_yongshin_multilayer
+    호출 25곳 포함)가 전부 사각지대였다(R33 1(a) 진단). report_narr 등과
+    동일하게 버튼·세션 UI 래퍼 없이 엔진 함수를 직접 호출한다 — 이 함수는
+    birth_month/day/hour/minute을 st.session_state에서 직접 읽으므로
+    (_run_combo가 매 콤보 전에 이미 세팅해 둔 값을 그대로 쓴다.
+    """
+    out = {}
+    for topic, q in _AI_LOCAL_QUESTIONS:
+        out[topic] = manse._local_saju_engine(pils, case_name, birth_year, gender, q)
+    return out
+
+
+# ── R33: pdf_<tab> — render_pdf_download_btn 탭별 즉시 PDF 캡처 ────────────
+_PDF_TABS = [
+    "jonghap_full", "current_situation", "lifeline", "future3", "money", "relations",
+]
+
+# PDF 표지/푸터의 "출력일"류 날짜 문구 — render_pdf_download_btn 내부가
+# `from datetime import datetime as _dt2`로 지역 임포트해 실제 datetime.
+# datetime을 그대로 참조한다(apptest freeze()는 manse.datetime 이름만
+# 바꿔치기하므로 이 지역 임포트는 freeze 대상 밖). 순수 표시용 생성시각
+# 문구만 비교 제외 — docstring 3)번 규칙과 동일하게 세운/연도 "내용"은
+# 그대로 둔다(그건 비교 대상에 남겨 실제 변경을 드러내야 하는 값).
+_PDF_VOLATILE_PATTERNS = [
+    (re.compile(r"출력일[:：]\s*\d{4}년\s*\d{1,2}월\s*\d{1,2}일"), "출력일: <DATE>"),
+    (re.compile(r"\d{4}\.\d{2}\.\d{2}\s*출력"), "<DATE> 출력"),
+]
+
+
+def _extract_pdf_text(pdf_bytes):
+    from pypdf import PdfReader
+    reader = PdfReader(io.BytesIO(pdf_bytes))
+    text = "\n".join(page.extract_text() or "" for page in reader.pages)
+    for pat, repl in _PDF_VOLATILE_PATTERNS:
+        text = pat.sub(repl, text)
+    return text
+
+
+def _call_pdf_tab(tab_name, pils, case_name, birth_year, gender):
+    """R33: render_pdf_download_btn(manse.py:7652)의 탭별 즉시 PDF 경로.
+    st.button 게이트 뒤에 있어 bare 모드에서는 항상 False라 기존 메뉴
+    캡처로는 도달 못 한다(tests/r10_2c_pdf_monthly_smoke.py와 동일하게
+    이 호출 동안만 st.button을 True로 임시 monkeypatch — 다른 메뉴의
+    st.button 동작에는 영향 없도록 try/finally로 호출 직후 즉시 원복).
+    PDF 바이트는 st.download_button(data=...)을 가로채 잡고, pypdf로
+    텍스트만 추출해 캡처한다(원본 바이트에는 reportlab 내부 메타 등
+    비결정 요소가 섞여 그대로 비교할 수 없다).
+
+    R33 1(b) 진단: 이 경로의 생월일시는 LocalSajuNarrator.*(saju_
+    interpreter.py)가 내부에서 호출하는 _get_base(saju_interpreter.py:
+    1919)가 담당하며, _get_base는 이미 frozen 키 규칙(_submitted_hour
+    우선, 없으면 birth_hour/in_birth_hour)을 올바르게 구현하고 있다 —
+    실버그 아님. 단, st.session_state에 birth_month/day/hour/minute이
+    "전혀" 없을 때만 1/1·12:00 기본값으로 떨어져 대운이 틀어진다(박성우
+    실측: 미세팅 시 丙寅 2017~2026, _run_combo와 동일하게 세팅하면 정답인
+    乙丑 2021~2030) — 그래서 이 함수도 _run_combo가 이미 세팅해 둔 세션
+    값을 그대로 쓴다(별도 세팅 불필요, _run_combo 세팅이 이미 충분함).
+    """
+    _orig_button = st.button
+    _orig_dl = st.download_button
+    _captured = {}
+
+    def _dl_capture(*a, **k):
+        _captured["data"] = k.get("data")
+        return False
+
+    st.button = lambda *a, **k: True
+    st.download_button = _dl_capture
+    try:
+        manse.render_pdf_download_btn(tab_name, pils, case_name, birth_year, gender)
+    finally:
+        st.button = _orig_button
+        st.download_button = _orig_dl
+
+    if _captured.get("data"):
+        return _extract_pdf_text(_captured["data"])
+    return "[PDF 생성 실패 — download_button 캡처 없음]"
 
 
 def _call_menu(menu_key, pils, case_name, birth_year, gender):
@@ -360,6 +480,10 @@ def _call_menu(menu_key, pils, case_name, birth_year, gender):
     elif menu_key == "manse12":
         # R13-4: menu12_manse(pils, birth_year, gender) — name 인자 없음, 세션키 의존 없음.
         manse.menu12_manse(pils, birth_year, gender)
+    elif menu_key == "ai_local":
+        return _call_ai_local(pils, case_name, birth_year, gender)
+    elif menu_key.startswith("pdf_"):
+        return _call_pdf_tab(menu_key[len("pdf_"):], pils, case_name, birth_year, gender)
     else:
         raise ValueError(f"알 수 없는 menu_key: {menu_key}")
     return None
