@@ -7278,7 +7278,7 @@ def detect_life_risk_signals(pils, saewoon_data=None, gender=None, marriage_stat
         sago_reasons.append("양인살 — 몸을 쓰는 일, 운전, 날카로운 도구를 다룰 때 안전 수칙을 지키면 좋은 기운입니다.")
     if has_baekho:
         sago_score += 30
-        sago_reasons.append("백호살 — 큰 사고·혈광 위험")
+        sago_reasons.append("백호살 — 큰 사고·부상 위험")
     if iljj_chung:
         sago_score += 25
         sago_reasons.append("일지 충 — 배우자궁 충돌, 사고 가능")
@@ -7375,7 +7375,7 @@ def detect_life_risk_signals(pils, saewoon_data=None, gender=None, marriage_stat
         byeong_reasons.append(f"오행 결핍: {','.join(zero_oh)} — 해당 계통을 관리 포인트로 봅니다")
     if has_yangin and has_baekho:
         byeong_score += 30
-        byeong_reasons.append("양인 + 백호 — 수술·중병 신호")
+        byeong_reasons.append("양인 + 백호 — 수술·부상 관리 포인트")
     if iljj_chung and pyeongwan >= 1:
         byeong_score += 20
         byeong_reasons.append("일지 충 + 편관 — 갑작스러운 무리를 피하는 것이 좋습니다")
@@ -7928,7 +7928,7 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
         "홍염살": ("타고난 이성 흡인력·매력 기운", "연예·방송·미용·서비스 분야에서 빛납니다.<br>→ 이성 구설 주의. 합 운에 인연 넘침 — <b>기혼자 절대 경계.</b>"),
         "괴강살": ("강인한 의지와 독보적 존재감 기운", "군·경·의료·법조·무역 — 강한 환경에서 오히려 빛납니다.<br>→ 자수성가형. <b>타협보다 원칙.</b> 이 사주는 약하게 살면 오히려 꺾입니다."),
         "곡각살": ("골절·관절 부상 취약 기운", "이동·등산·스포츠 시 <b>안전 최우선.</b><br>→ 골절 보험 필수. 계단·빙판·고속 이동 각별히 조심하세요."),
-        "음양차착": ("결혼·인연 시기 늦어지는 구조", "서두르면 반드시 실패합니다.<br>→ 충분히 알아가고 결정. <b>늦은 결혼이 더 행복한 구조입니다.</b>"),
+        "음양차착": ("결혼·인연 시기 늦어지는 구조", "서두르면 어려움이 생기기 쉽습니다.<br>→ 충분히 알아가고 결정. <b>늦은 결혼이 더 행복한 구조입니다.</b>"),
         "효신살": ("어머니·인성(印星)과 갈등 기운", "독립심 강하고 자수성가형 구조입니다.<br>→ 혼자 결정하고 실행하는 힘. <b>지나친 의존·주변 간섭을 차단하세요.</b>"),
         "복성귀인": ("복덕이 두터운 귀인 기운", "어려움 속에서도 끝내 복이 따릅니다.<br>→ 말년 운이 특히 좋은 구조. <b>포기하지 않는 것이 전략입니다.</b>"),
         "천덕귀인": ("하늘의 덕이 함께하는 기운", "위기 때마다 보이지 않는 도움이 반드시 옵니다.<br>→ 귀인이 결정적 순간에 나타나는 구조. <b>관계에 투자하세요.</b>"),
@@ -8161,7 +8161,7 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
         f"{name}님 총평 인과",
         f"{ilgan}({ilgan_kr}) 일간이라서 {_ip_bunjil_s} 이 본질이 삶의 모든 선택을 이끕니다.",
         f"{_shin_core} 사주이므로 {_shin_adv}.",
-        f"본성을 거스르는 선택은 반드시 후회로 돌아옵니다. 지금 하는 일이 본성과 맞는지 점검하세요."
+        f"본성을 거스르는 선택은 후회로 돌아오기 쉽습니다. 지금 하는 일이 본성과 맞는지 점검하세요."
     )
     _causal3 = _cb(
         f"{name}님 성격 인과",
@@ -8179,7 +8179,7 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
         f"{name}님 재물 인과",
         f"일간 {ilgan}({ilgan_kr})이라서 재물 형성 방식이 '{_ip_jaemul_s}' 패턴입니다.",
         f"용신 {yong_str} 기운이 강한 길월({_gilwol_plain_c5})에만 큰 투자·계약을 하세요. 이때 결정한 것이 자산이 됩니다.",
-        f"기신 {gisin_str} 강한 시기에 욕심 부리면 100% 후회합니다. 이 시기의 투자는 결코 돌아오지 않습니다."
+        f"기신 {gisin_str} 강한 시기에 욕심 부리면 후회하기 쉽습니다. 이 시기의 투자는 결코 돌아오지 않습니다."
     )
     _causal6 = _cb(
         f"{name}님 건강 인과",
@@ -8211,7 +8211,7 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
         f"{name}님 {cur_year}년 세운 인과",
         f"{ilgan}({ilgan_kr}) 일간이라서 {cur_year}년 세운의 영향을 '{_ip_jaemul_s}' 방향으로 받습니다.",
         f"길월({_gilwol_plain})에 중요 결정 집중 → 흉월에 수비. 이것만 지켜도 실패가 반으로 줍니다.",
-        f"흉월에 계약·투자·중요 결정을 내리면 반드시 문제가 생깁니다. 달력에 길월·흉월을 표시해 두세요."
+        f"흉월에 계약·투자·중요 결정을 내리면 어려움이 생기기 쉽습니다. 달력에 길월·흉월을 표시해 두세요."
     )
     _causal10 = _cb(
         f"{name}님 신살 인과",
@@ -8380,7 +8380,7 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
       → {_risk("사업운","메시지","신중한 자금 운영이 핵심입니다.")}<br><br>
       <b>🔴 재물 절대 원칙:</b><br>
       → 용신 <b>{yong_str}</b> 기운이 강한 시기(길월)에만 큰 투자·계약 결정하세요.<br>
-      → 기신 <b>{gisin_str}</b> 강한 시기 — <b>보증·동업·투기 절대 X.</b> 이 시기에 욕심 부리면 100% 후회합니다.<br>
+      → 기신 <b>{gisin_str}</b> 강한 시기 — <b>보증·동업·투기 절대 X.</b> 이 시기에 욕심 부리면 후회하기 쉽습니다.<br>
       → 큰돈 들어오면 즉시 안전 자산에 고정. 유동성으로 놔두면 반드시 새어나갑니다.
       {_causal5}
       {f'<div style="font-size:11px;color:#888;margin-top:8px;">{month_footnote}</div>' if month_footnote else ''}
@@ -8439,7 +8439,7 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
       {_gilwol_display}<br>
       → 용신 <b>{yong_str}</b> 기운이 가장 강한 달. <b>중요 결정·계약·시작을 이 달에 집중하세요.</b><br>
       {_hyungwol_display}<br>
-      → 기신 <b>{gisin_str}</b> 기운이 강해지는 달. <b>큰 결정·투자·계약 절대 X.</b> 이 달에 무리하면 반드시 후회합니다.<br><br>
+      → 기신 <b>{gisin_str}</b> 기운이 강해지는 달. <b>큰 결정·투자·계약 절대 X.</b> 이 달에 무리하면 후회하기 쉽습니다.<br><br>
       {cur_year}년 전략: 길월에 모든 에너지 집중 → 흉월에 수비 모드. 이것만 지켜도 실패 확률이 반으로 줍니다.
       {_causal9}
       {f'<div style="font-size:11px;color:#888;margin-top:8px;">{month_footnote}</div>' if month_footnote else ''}
@@ -8487,10 +8487,10 @@ def render_jonghap_pyongron(pils, name="내담자", birth_year=1969, gender="男
       <b>핵심 운명:</b><br>
       · <b>{ilgan_meta}</b> 기운 — {gyeok_explain}<br>
       · 활성 조합 {len(activated)}개 — {combo_text}<br><br>
-      <b>🔴 [지금 당장 해야 할 5가지 — 안 하면 반드시 후회합니다]</b><br>
+      <b>🔴 [지금 챙기면 좋은 5가지]</b><br>
       1. 🔴 용신 <b>{yong_str}</b> 매일 보강 — 색상·음식·방향 실천. 아는 것만으로는 절대 바뀌지 않습니다<br>
-      2. 🔴 기신 <b>{gisin_str}</b> 강한 시기 — 보증·동업·투기 절대 X. 이 시기 무리하면 100% 후회합니다<br>
-      3. 🔴 길월에 중요 결정 집중 — 흉월에 큰 결정 내리면 반드시 힘들어집니다. 이건 통계입니다<br>
+      2. 🔴 기신 <b>{gisin_str}</b> 강한 시기 — 보증·동업·투기 절대 X. 이 시기 무리하면 후회하기 쉽습니다<br>
+      3. 🔴 길월에 중요 결정 집중 — 흉월에 큰 결정 내리면 어려움이 생기기 쉽습니다. 이건 통계입니다<br>
       4. 🔴 용신 대운 황금기 10년 — 이 시기를 놓치면 다음 황금기까지 기다려야 합니다<br>
       5. 🔴 강점 <b>{ilju_info.get("강점","결단력·추진력").split(",")[0].strip()}</b> — 자기 분야에서 100% 발휘. <b>망설이면 묻힙니다.</b><br>
       &nbsp;&nbsp;&nbsp;→ 다른 사람 눈치 보지 마세요. 이 강점이 {name}님을 살립니다.<br><br>
